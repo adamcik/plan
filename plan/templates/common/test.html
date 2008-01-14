@@ -3,25 +3,23 @@
 {% block content %}
 <table border="1">
     <thead>
-        <tr>
-            <td>Week {% now "W" %}</td>
-            <td>Mandag</td>
-            <td>Tirsdag</td>
-            <td>Onsdag</td>
-            <td>Torsdag</td>
-            <td>Fredag</td>
-        </tr>
     </thead>
     <tbody>
     {% for row in table %}
         <tr>
-            <td></td>
         {% for cell in row %}
-            <td>{{ cell }}</td>
+            {% if cell.lectures %}
+            {% for lecture in cell.lectures %}
+                <td colspan="{{ cell.span }}">{{ lecture.course.all.0.name }}</td>
+            {% endfor %}
+            {% else %}
+                <td colspan="{{ cell.span }}">1</td>
+            {% endif %}
         {% endfor %}
         </tr>
     {% endfor %}
 
     </tbody>
 </table>
+{{ span }}
 {% endblock %}
