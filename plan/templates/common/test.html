@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<table border="1">
+    <thead>
+        <tr>
+            <td>Week {% now "W" %}</td>
+            <td>Mandag</td>
+            <td>Tirsdag</td>
+            <td>Onsdag</td>
+            <td>Torsdag</td>
+            <td>Fredag</td>
+        </tr>
+    </thead>
+    <tbody>
+    {% for row in table %}
+        <tr>
+            <td></td>
+        {% for cell in row %}
+            <td>{{ cell }}</td>
+        {% endfor %}
+        </tr>
+    {% endfor %}
+
+    </tbody>
+</table>
+{% endblock %}

@@ -49,8 +49,6 @@ class Lecture(models.Model):
         (2, 'Wensday'),
         (3, 'Thursday'),
         (4, 'Friday'),
-        (5, 'Saturday'),
-        (6, 'Sunday'),
     )
 
     type = models.ManyToManyField(Type)
