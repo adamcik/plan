@@ -57,12 +57,12 @@ class Lecture(models.Model):
     first_period = models.PositiveSmallIntegerField(choices=START)
     last_period  = models.PositiveSmallIntegerField(choices=END)
 
-    course = models.ManyToManyField(Course)
+    course = models.ForeignKey(Course)
 
     room = models.ForeignKey(Room)
 
     def __unicode__(self):
-        return u'%d: %s-%s on %s' % (self.id, self.get_first_period_display(), self.get_last_period_display(), self.get_day_display())
+        return u'%s: %s-%s on %s' % (self.course, self.get_first_period_display(), self.get_last_period_display(), self.get_day_display())
 
     class Admin:
         pass

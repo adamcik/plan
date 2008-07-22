@@ -1,24 +1,33 @@
 {% extends "base.html" %}
 
 {% block content %}
-<pre>
-{{ table|pprint }}
-{{ lectures|pprint }}
-</pre>
 
-<table border="1">
+<table class="schedule">
     <thead>
+        <th class="time"></th>
+        <th colspan="{{ colspan.0 }}">Mandag</th>
+        <th colspan="{{ colspan.1 }}">Tirsdag</th>
+        <th colspan="{{ colspan.2 }}">Onsdag</th>
+        <th colspan="{{ colspan.3 }}">Torsdag</th>
+        <th colspan="{{ colspan.4 }}">Fredeag</th>
     </thead>
     <tbody>
     {% for row in table %}
-        <tr>
-            <th>{{ forloop.counter }}</th>
+        <tr class="{% cycle odd,even %}">
             {% for cell in row %}
                 {% if cell %}
                     {% for lecture in cell %}
-                        <td>
-                            {{ lecture }}
-                        </td>
+                        {% if not lecture.remove %}
+                            <td colspan="{{ lecture.colspan|default:"1" }}" rowspan="{{ lecture.rowspan|default:"1" }}" class="{% if forloop.first %}first {% endif %}{{ lecture.class }}">
+                                {% if lecture.lecture %}
+                                    {{ lecture.lecture.course }}
+                                    <span class="room">{{ lecture.lecture.room }}</span>
+                                {% endif %}
+                                {% if lecture.time %}
+                                    {{ lecture.time }}
+                                {% endif %}
+                            </td>
+                        {% endif %}
                     {% endfor %}
                 {% else %}
                     <td>-</td>
