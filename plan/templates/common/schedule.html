@@ -38,5 +38,11 @@
 
     </tbody>
 </table>
-{{ max }}
+
+<p>
+    {% for course,class in legend %}
+        <span class="{{ class }} legend">{{ course }}</span>
+    {% endfor %}
+</p>
+
 {% endblock %}

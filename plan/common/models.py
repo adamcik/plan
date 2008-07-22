@@ -1,9 +1,14 @@
+from datetime import datetime
+
 from django.db import models
 
 class UserSet(models.Model):
     slug = models.SlugField()
-    courses = models.ForeignKey('Course')
-    parallels = models.ForeignKey('Parallel')
+    course = models.ForeignKey('Course')
+    parallel = models.ForeignKey('Parallel', blank=True, null=True)
+
+    class Meta:
+        unique_together = (('slug', 'course', 'parallel'),)
 
 class Type(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -19,20 +24,6 @@ class Parallel(models.Model):
     name = models.CharField(max_length=100, unique=True)
     def __unicode__(self):
         return self.name
-
-class Semester(models.Model):
-    SPRING = '1'
-    FALL = '2'
-
-    TYPES = (
-        (SPRING, 'spring'),
-        (FALL, 'fall'),
-    )
-    
-    year = models.PositiveSmallIntegerField()
-    type = models.PositiveSmallIntegerField(choices=TYPES)
-    def __unicode__(self):
-        return '%s %s' % (self.get_type_display(), self.year)
 
 class Course(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -51,16 +42,29 @@ class Lecture(models.Model):
         (4, 'Friday'),
     )
 
-    type = models.ManyToManyField(Type)
-    parallel = models.ManyToManyField(Parallel)
+    SPRING = 0
+    FALL = 1
+    SEMESTER = (
+        (SPRING, 'spring'),
+        (FALL, 'fall'),
+    )
+
+    WEEKS = [(x,x) for x in range(52)]
+
+    type = models.ManyToManyField(Type, blank=True, null=True)
+    parallel = models.ManyToManyField(Parallel, blank=True, null=True)
     course = models.ForeignKey(Course)
-    room = models.ForeignKey(Room)
-    semester = models.ForeignKey(Semester)
+    room = models.ForeignKey(Room, blank=True, null=True)
+    year = models.PositiveSmallIntegerField(choices=[(x,x) for x in range(datetime.now().year-1,datetime.now().year+2)])
+    semester = models.PositiveSmallIntegerField(choices=SEMESTER)
 
     day = models.PositiveSmallIntegerField(choices=DAYS)
-    first_period = models.PositiveSmallIntegerField(choices=START)
-    last_period  = models.PositiveSmallIntegerField(choices=END)
 
+    start_time = models.PositiveSmallIntegerField(choices=START)
+    end_time  = models.PositiveSmallIntegerField(choices=END)
+
+    start_week = models.PositiveSmallIntegerField(choices=WEEKS, blank=True, null=True)
+    end_week = models.PositiveSmallIntegerField(choices=WEEKS, blank=True, null=True)
 
     def __unicode__(self):
-        return u'%s: %s-%s on %s' % (self.course, self.get_first_period_display(), self.get_last_period_display(), self.get_day_display())
+        return u'%s: %s-%s on %s' % (self.course, self.get_start_time_display(), self.get_end_time_display(), self.get_day_display())

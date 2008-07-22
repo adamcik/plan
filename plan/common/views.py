@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template.context import RequestContext
 
@@ -5,16 +7,37 @@ from plan.common.models import *
 
 MAX_COLORS = 8
 
-def schedule(request, slug):
+def list(request):
+    pass
 
+def schedule(request, slug, year=None, semester=None):
+
+    # Data structure that stores what will become the html table
     table = [[[{}] for a in Lecture.DAYS] for b in Lecture.START]
+    # Extra info used to get the table right
     lectures = []
+
+    # Color mapping for the courses
     color_map = {}
     color_index = 0
 
-    for i,lecture in enumerate(Lecture.objects.filter(course__userset__slug=slug)):
-        start = lecture.first_period - Lecture.START[0][0]
-        end = lecture.last_period    - Lecture.END[0][0]
+    # Default to current year
+    if not year:
+        year = datetime.now().year
+
+    # Default to current semester
+    if not semester:
+        if datetime.now().month <= 6:
+            semester = Lecture.SPRING
+        else:
+            semester = Lecture.FALL
+    else:
+       semester = dict(map(lambda x: (x[1],x[0]), Lecture.SEMESTER))[semester.lower()]
+
+    # Get all lectures for userset during given period
+    for i,lecture in enumerate(Lecture.objects.filter(course__userset__slug=slug, year=year, semester=semester)):
+        start = lecture.start_time - Lecture.START[0][0]
+        end = lecture.end_time - Lecture.END[0][0]
         rowspan = end - start + 1
 
         first = start
@@ -40,23 +63,23 @@ def schedule(request, slug):
         start = first
         remove = False
 
+        # Set the css class for the color map
         if lecture.course_id not in color_map:
             color_index = (color_index + 1) % MAX_COLORS
             color_map[lecture.course_id] = 'lecture%d' % color_index
 
-        css = [color_map[lecture.course_id]]
-
-        if row == 0:
-            css.append('first')
-
         while start <= end:
+            # Replace the cell we found with a hase containing info about our
+            # lecture
             table[start][lecture.day][row] = {
                 'lecture': lecture,
                 'rowspan': rowspan,
                 'remove': remove,
-                'class': ' '.join(css),
+                'class': color_map[lecture.course_id],
             }
 
+            # Add lecture to our supplementary data structure and set the
+            # remove flag.
             if not remove:
                 remove = True
                 lectures.append({
@@ -70,6 +93,7 @@ def schedule(request, slug):
             start += 1
 
     for lecture in lectures:
+        # Loop over supplementary data structure
         i = lecture['i']
         j = lecture['j']
         m = lecture['m']
@@ -77,10 +101,10 @@ def schedule(request, slug):
 
         expand_by = 1
 
+        # Find safe expansion of colspan
         safe = True
         for l in xrange(m+1, len(table[i][j])):
             for k in xrange(i,i+height):
-                print 'i %d, j %d, m %d' % (k,j,l)
                 if table[k][j][l]:
                     safe = False
                     break
@@ -91,15 +115,26 @@ def schedule(request, slug):
 
         table[i][j][m]['colspan'] = expand_by
 
+        # Remove cells that will get replaced by colspan
         for l in xrange(m+1,m+expand_by):
             for k in xrange(i,i+height):
                 table[k][j][l]['remove'] = True
 
+    # Calculate the header colspan
     span = [1] * 5
     for i,cell in enumerate(table[0]):
         span[i] = len(cell)
 
+    # Insert extra cell containg times
     for t,start,end in map(lambda x,y: (x[0], x[1][1],y[1]), enumerate(Lecture.START), Lecture.END):
         table[t].insert(0, [{'time': '%s - %s' % (start, end), 'class': 'time'}])
 
-    return render_to_response('common/test.html', {'table': table, 'colspan': span}, RequestContext(request))
+    courses = []
+    for c in Course.objects.filter(userset__slug=slug, lecture__year__exact=year, lecture__semester__exact=semester):
+        courses.append((c, color_map[c.id]))
+
+    return render_to_response('common/schedule.html', {
+                            'table': table,
+                            'legend': courses,
+                            'colspan': span
+                        }, RequestContext(request))
