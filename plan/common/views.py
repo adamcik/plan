@@ -5,13 +5,14 @@ from plan.common.models import *
 
 MAX_COLORS = 8
 
-def test(request):
+def schedule(request, slug):
+
     table = [[[{}] for a in Lecture.DAYS] for b in Lecture.START]
     lectures = []
     color_map = {}
     color_index = 0
 
-    for i,lecture in enumerate(Lecture.objects.all()):
+    for i,lecture in enumerate(Lecture.objects.filter(course__userset__slug=slug)):
         start = lecture.first_period - Lecture.START[0][0]
         end = lecture.last_period    - Lecture.END[0][0]
         rowspan = end - start + 1
