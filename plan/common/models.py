@@ -62,7 +62,7 @@ class Lecture(models.Model):
     room = models.ForeignKey(Room)
 
     def __unicode__(self):
-        return u'%d: %s-%s on %s' % (self.id, self.get_first_period_display(), self.get_last_period_display(), self.day)
+        return u'%d: %s-%s on %s' % (self.id, self.get_first_period_display(), self.get_last_period_display(), self.get_day_display())
 
     class Admin:
         pass

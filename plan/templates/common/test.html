@@ -1,25 +1,33 @@
 {% extends "base.html" %}
 
 {% block content %}
+<pre>
+{{ table|pprint }}
+{{ lectures|pprint }}
+</pre>
+
 <table border="1">
     <thead>
     </thead>
     <tbody>
     {% for row in table %}
         <tr>
-        {% for cell in row %}
-            {% if cell.lectures %}
-            {% for lecture in cell.lectures %}
-                <td colspan="{{ cell.span }}">{{ lecture.course.all.0.name }}</td>
+            <th>{{ forloop.counter }}</th>
+            {% for cell in row %}
+                {% if cell %}
+                    {% for lecture in cell %}
+                        <td>
+                            {{ lecture }}
+                        </td>
+                    {% endfor %}
+                {% else %}
+                    <td>-</td>
+                {% endif %}
             {% endfor %}
-            {% else %}
-                <td colspan="{{ cell.span }}">1</td>
-            {% endif %}
-        {% endfor %}
         </tr>
     {% endfor %}
 
     </tbody>
 </table>
-{{ span }}
+{{ max }}
 {% endblock %}

@@ -4,27 +4,45 @@ from django.template.context import RequestContext
 from plan.common.models import *
 
 def test(request):
-    table = [[{'lectures': []} for a in Lecture.DAYS] for b in Lecture.START]
-    span = [1 for a in Lecture.DAYS]
+    table = [[[{}] for a in Lecture.DAYS] for b in Lecture.START]
 
-    for l in Lecture.objects.all():
-        start = l.first_period-Lecture.START[0][0]
-        end = l.last_period-Lecture.START[0][0]
+    lectures = Lecture.objects.all()
 
-        while start < end:
-            table[start][l.day]['lectures'].append(l)
+    for i,lecture in enumerate(lectures):
+        start = lecture.first_period - Lecture.START[0][0]
+        end = lecture.last_period    - Lecture.END[0][0]
+        rowspan = end - start
+
+        first = start
+
+        # Try to find leftmost row that can fit our lecture, if we run out of
+        # rows to test, ie IndexError, we append a fresh one to work with
+        try:
+            row = 0
+            while start <= end:
+                if table[start][lecture.day][row]:
+                    # One of our time slots is taken, bump the row number and
+                    # restart our search
+                    row += 1
+                    start = first
+                else:
+                    start += 1
+
+        except IndexError:
+            # We ran out of rows to check, simply append a new row
+            for j,time in enumerate(Lecture.START):
+                table[j][lecture.day].append({})
+
+        start = first
+        remove = False
+        while start <= end:
+            table[start][lecture.day][row] = {
+                'lecture': lecture,
+                'rowspan': rowspan,
+                'remove': remove,
+            }
+            remove = True
             start += 1
 
-    for x in range(len(Lecture.START)):
-        for y in range(len(Lecture.DAYS)):
-            if len(table[x][y]['lectures']) > span[y]:
-                span[y] = len(table[x][y]['lectures'])
 
-    for x in range(len(Lecture.START)):
-        for y in range(len(Lecture.DAYS)):
-            if len(table[x][y]['lectures']) > 1:
-                table[x][y]['span'] = span[y] - len(table[x][y]['lectures']) or 1
-            else:
-                table[x][y]['span'] = span[y]
-
-    return render_to_response('common/test.html', {'table': table, 'span': span}, RequestContext(request))
+    return render_to_response('common/test.html', {'table': table, 'lectures': lectures}, RequestContext(request))
