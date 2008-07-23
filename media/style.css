@@ -18,6 +18,13 @@ hr {
 select {
 	width: 10em;
 }
+input {
+	padding: 0.12em;
+	vertical-align: middle;
+}
+textarea[cols], input[size] {
+	width: auto;
+}
 .first {
 border-left: 0;
 margin-right: 0;
@@ -48,6 +55,15 @@ margin-right: 0;
 .schedule .room {
   float: right;
 	font-size: 77%;
+}
+.schedule .type {
+  float: left;
+	font-size: 77%;
+}
+.schedule .groups {
+  clear: both;
+	font-size: 77%;
+/*	display: none; */
 }
 .schedule .single {
 	font-size: 77%;

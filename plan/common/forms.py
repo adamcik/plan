@@ -10,9 +10,10 @@ class LectureForm(forms.models.ModelForm):
         model = Lecture
 
 class GroupForm(forms.Form):
-    groups = forms.models.ModelMultipleChoiceField(Group.objects.all())
+    groups = forms.models.ModelMultipleChoiceField(Group.objects.all(), required=False)
 
     def __init__(self, queryset, *args, **kwargs):
         super(GroupForm, self).__init__(*args, **kwargs)
 
         self.fields['groups'].queryset = queryset
+        self.fields['groups'].widget.attrs['size'] = 5

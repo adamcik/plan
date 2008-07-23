@@ -10,18 +10,25 @@ class UserSet(models.Model):
     class Meta:
         unique_together = (('slug', 'course'),)
 
+    def __unicode__(self):
+        return '%s - %s' % (self.slug, self.course)
+
 class Type(models.Model):
     name = models.CharField(max_length=100, unique=True)
+    optional = models.BooleanField()
+
     def __unicode__(self):
         return self.name
 
 class Room(models.Model):
     name = models.CharField(max_length=100, unique=True)
+
     def __unicode__(self):
         return self.name
 
 class Group(models.Model):
     name = models.CharField(max_length=100, unique=True)
+
     def __unicode__(self):
         return self.name
 
@@ -50,10 +57,13 @@ class Semester(models.Model):
         ordering = ('-year', '-type')
 
 class Week(models.Model):
-    number = models.PositiveSmallIntegerField(choices=[(x,x) for x in range(52)])
+    number = models.PositiveSmallIntegerField(choices=[(x,x) for x in range(1,53)], unique=True)
 
     def __unicode__(self):
         return 'week %s' % self.number
+
+    class Meta:
+        ordering = ('number',)
 
 class Lecture(models.Model):
     START = [(i, '%02d:15' % i) for i in range(8,21)]

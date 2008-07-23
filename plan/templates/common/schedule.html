@@ -4,52 +4,18 @@
     {{ block.super }} - {{ slug }} {{ semester }} {{ year }}
 {% endblock %}
 
-{% block extrahead %}
-    <script type="text/javascript">
-        $(function(){
-            $('.collapse').children(':first').click(function() { $(this).parent().children(':not(:first)').toggle() }).click()
-
-            $('.upgrade select[multiple]').each(function() {
-                var selected   = $(this);
-                var unselected = $('<select multiple="multiple"></select>');
-
-                selected.children().click(function() {
-                    if ($(this).parent().is('[name]')) {
-                        unselected.append($(this));
-                    } else {
-                        selected.append($(this));
-                    }
-                    $(this).removeAttr('selected');
-                });
-
-                unselected.append(selected.children(':not(:selected)'))
-                selected.children().removeAttr('selected');
-
-                unselected.css('height', '10em');
-                selected.css('height', '10em');
-
-                selected.prepend($('<optgroup label="Selected"></optgroup>'));
-                unselected.prepend($('<optgroup label="Unselected"></optgroup>'));
-
-                selected.before(unselected);
-                selected.parents('form').submit(function() {
-                    selected.children().attr('selected', 'selected');
-                })
-            });
-        });
-    </script>
-{% endblock %}
-
 {% block content %}
 <h1>{{ slug }} {{ semester }} {{ year }}</h1>
 <table class="schedule">
     <thead>
-        <th class="time"></th>
-        <th colspan="{{ colspan.0 }}">Mandag</th>
-        <th colspan="{{ colspan.1 }}">Tirsdag</th>
-        <th colspan="{{ colspan.2 }}">Onsdag</th>
-        <th colspan="{{ colspan.3 }}">Torsdag</th>
-        <th colspan="{{ colspan.4 }}">Fredeag</th>
+        <tr>
+            <th class="time"></th>
+            <th colspan="{{ colspan.0 }}">Mandag</th>
+            <th colspan="{{ colspan.1 }}">Tirsdag</th>
+            <th colspan="{{ colspan.2 }}">Onsdag</th>
+            <th colspan="{{ colspan.3 }}">Torsdag</th>
+            <th colspan="{{ colspan.4 }}">Fredeag</th>
+        </tr>
     </thead>
     <tbody>
     {% for row in table %}
@@ -58,10 +24,18 @@
                 {% if cells %}
                     {% for c in cells %}
                         {% if not c.remove %}
-                            <td colspan="{{ c.colspan|default:"1" }}" rowspan="{{ c.rowspan|default:"1" }}" class="{% if forloop.first %}first {% endif %}{{ c.class }}">
+                            <td colspan="{{ c.colspan|default:"1" }}" rowspan="{{ c.rowspan|default:"1" }}" {% if c.class or forloop.first %}class="{% if forloop.first %}first {% endif %}{{ c.class }}"{% endif %}>
                                 {% if c.lecture %}
-                                    <span class="course">{{ c.lecture.course }}</span>
-                                    <span class="room">{{ c.lecture.room }}</span>
+                                    <div class="course" title="{{ c.lecture.course.full_name }}">{{ c.lecture.course }}</div>
+                                    <div class="type">{{ c.lecture.type }}</div>
+                                    <div class="room">{{ c.lecture.room }}</div>
+                                    {% comment %}
+                                        <div class="groups">
+                                            {% for g in c.lecture.groups.all %}
+                                                {{ g }}{% if not forloop.last %},{% endif %}
+                                             {% endfor %}
+                                        </div>
+                                    {% endcomment %}
                                 {% endif %}
                                 {% if c.time %}
                                     {{ c.time }}
@@ -78,49 +52,48 @@
 
     </tbody>
 </table>
-<p>
-    {% for course,class in legend %}
-        <span class="{{ class }} legend">
-            {% if course.url %}
-                <a href="{{ course.url }}">{{ course }}</a>
-            {% else %}
-                {{ course }}
-            {% endif %}
-        </span>
-    {% endfor %}
-</p>
+<form action="{% url select_course slug %}" method="post">
+    <p>
+        {% for course in legend %}
+            <span class="{{ course.css_class }} legend" title="{{ course.full_name }}">
+                <input type="checkbox" name="course" value="{{ course.id }}" />
+                {% if course.url %}
+                    <a href="{{ course.url }}">{{ course }}</a>
+                {% else %}
+                    {{ course }}
+                {% endif %}
+            </span>
+        {% endfor %}
+        <input type="text" name="course" size="16"/>
+        <button name="submit_add">Add</button>
+        <button name="submit_remove">Remove selected</button>
+        {% if request.GET.groups %}
+            <a href=".">Hide group options</a>
+        {% else %}
+            <a href="?groups=1">Group options</a>
+        {% endif %}
+    </p>
+</form>
 
-<div class="yui-gb collapse">
-    <h2>Change...</h2>
-    <div class="yui-u first">
-        <h3>Select courses</h3>
-        <form action="." method="get" class="upgrade">
-            {{ course_form.courses.errors }}
-            <p>
-                {{ course_form.courses }} <br />
-                <button type="submit">Save</button>
-            </p>
-        </form>
-    </div>
-    <div class="yui-u">
-        <h3>Select groups</h3>
+{% if request.GET.groups %}
+    <form action="{% url select_groups slug %}" method="post">
         {% for course,groups in courses %}
             <p style="float: left; margin-right: 0.5em">
                 <b>{{ course }}</b>: <br />
                 {{ groups.groups }}
+                {% if forloop.last %}
+                    <button>Save groups</button>
+                {% endif %}
             </p>
         {% endfor %}
-        <p>
-            <button>Save groups</button>
-        </p>
-    </div>
-    <div class="yui-u">
-        <h3>Add course</h3>
-        <p>
-            <input type="text" />
-            <button>Add</button>
-        </p>
-    </div>
-</div>
+    </form>
+{% endif %}
+
+{% if debug %}
+<pre style="clear: both">
+{{ sql_queries|pprint }}
+{{ sql_queries|length }}
+</pre>
+{% endif %}
 
 {% endblock %}

@@ -5,13 +5,15 @@ from BeautifulSoup import BeautifulSoup, NavigableString
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template.context import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse
+from django.core.urlresolvers import reverse
+from django.db.models import Q
 
 from plan.common.models import *
 from plan.common.forms import *
 
 MAX_COLORS = 8
 
-def schedule(request, slug, year=None, semester=None):
+def schedule(request, slug=None, year=None, semester=None):
     # Data structure that stores what will become the html table
     table = [[[{}] for a in Lecture.DAYS] for b in Lecture.START]
     # Extra info used to get the table right
@@ -37,7 +39,17 @@ def schedule(request, slug, year=None, semester=None):
        semester = dict(map(lambda x: (x[1],x[0]), SEMESTER.TYPES))[semester.lower()]
 
     # Get all lectures for userset during given period
-    for i,lecture in enumerate(Lecture.objects.filter(course__userset__slug=slug, semester__year__exact=year, semester__type__exact=semester).order_by('course__id')):
+    initial_lectures = []
+    filter_kwargs = {
+        'semester__year__exact': year,
+        'semester__type__exact': semester,
+    }
+
+    for u in UserSet.objects.filter(slug=slug):
+        initial_lectures.extend(u.course.lecture_set.filter(groups__in=u.groups.all, **filter_kwargs).select_related())
+        initial_lectures.extend(u.course.lecture_set.filter(**filter_kwargs).exclude(groups__isnull=False).select_related())
+
+    for i,lecture in enumerate(initial_lectures):
         start = lecture.start_time - Lecture.START[0][0]
         end = lecture.end_time - Lecture.END[0][0]
         rowspan = end - start + 1
@@ -71,6 +83,9 @@ def schedule(request, slug, year=None, semester=None):
             color_map[lecture.course_id] = 'lecture%d' % color_index
 
         css = [color_map[lecture.course_id]]
+
+        if lecture.type.optional:
+            css.append('optional')
 
         if rowspan == 1:
             css.append('single')
@@ -137,17 +152,20 @@ def schedule(request, slug, year=None, semester=None):
         table[t].insert(0, [{'time': '%s - %s' % (start, end), 'class': 'time'}])
 
     courses = []
-    courses_intial = []
     legend = []
 
     for c in Course.objects.filter(userset__slug=slug, lecture__semester__year__exact=year, lecture__semester__type__exact=semester).distinct().order_by('id'):
-        legend.append((c, color_map[c.id]))
-        courses_intial.append(c.id)
-
-        intial = {'groups': Group.objects.filter(userset__slug=slug).distinct()}
-        group_form = GroupForm(Group.objects.filter(lecture__course=c).distinct(), initial=intial)
+        groups = c.userset_set.get(slug=slug).groups.values_list('id', flat=True)
+        group_form = GroupForm(Group.objects.filter(lecture__course=c).distinct(), initial={'groups': groups}, prefix=c.id)
 
         courses.append([c, group_form])
+
+        if c.id not in color_map:
+            color_index = (color_index + 1) % MAX_COLORS
+            color_map[c.id] = 'lecture%d' % color_index
+
+        c.css_class = color_map[c.id]
+        legend.append(c)
 
     return render_to_response('common/schedule.html', {
                             'table': table,
@@ -156,14 +174,43 @@ def schedule(request, slug, year=None, semester=None):
                             'colspan': span,
                             'slug': slug,
                             'year': year,
-                            'course_form': CourseForm(initial={'courses': courses_intial}),
                             'semester': semester_display,
                         }, RequestContext(request))
 
-def scrape(request, course):
-    url = 'http://www.ntnu.no/studieinformasjon/timeplan/h08/?emnekode=%s-1'
+def select_groups(request, slug):
+    if request.method == 'POST':
+        for c in Course.objects.filter(userset__slug=slug).distinct().order_by('id'):
+            group_form = GroupForm(Group.objects.filter(lecture__course=c).distinct(), request.POST, prefix=c.id)
 
-    html = ''.join(urlopen(url % course.upper()).readlines())
+            if group_form.is_valid():
+                set = UserSet.objects.get(course=c, slug=slug)
+                set.groups = group_form.cleaned_data['groups']
+
+    return HttpResponseRedirect(reverse('schedule', args=[slug])+'?groups=1')
+
+def select_course(request, slug):
+    if request.method == 'POST' and 'course' in request.POST:
+        if 'submit_add' in request.POST:
+            lookup = request.POST['course'].upper().strip().split()
+
+            for l in lookup:
+                try:
+                    course = Course.objects.get(name=l)
+                except Course.DoesNotExist:
+                    scrape(request, l)
+                    course = Course.objects.get(name=l)
+
+                UserSet.objects.get_or_create(slug=slug, course=course)
+        elif 'submit_remove' in request.POST:
+            sets = UserSet.objects.filter(slug__iexact=slug, course__id__in=request.POST.getlist('course'))
+            sets.delete()
+
+    return HttpResponseRedirect(reverse('schedule', args=[slug])+'?groups=1')
+
+def scrape(request, course):
+    url = 'http://www.ntnu.no/studieinformasjon/timeplan/h08/?emnekode=%s-1' % course.upper().strip()
+
+    html = ''.join(urlopen(url).readlines())
     soup = BeautifulSoup(html)
     main = soup.findAll('div', 'hovedramme')[0]
     table = main.findAll('table')[1]
@@ -216,8 +263,12 @@ def scrape(request, course):
             })
 
     semester = Semester.objects.all()[0]
+    course, created = Course.objects.get_or_create(name=course.upper())
+
     for r in results:
-        c, created = Course.objects.get_or_create(name=course.upper())
+        if not course.full_name:
+            course.full_name = r['title']
+            course.save()
         room, created = Room.objects.get_or_create(name=r['room'][0])
         type, created = Type.objects.get_or_create(name=r['type'][0])
 
@@ -235,7 +286,7 @@ def scrape(request, course):
         end = dict(map(lambda x: (x[1],x[0]), Lecture.END))[end]
 
         lecture, created = Lecture.objects.get_or_create(
-            course = c,
+            course = course,
             day = day,
             semester = semester,
             start_time = start,
@@ -250,4 +301,3 @@ def scrape(request, course):
         lecture.save()
 
     return HttpResponse(str('\n'.join([str(r) for r in results])), mimetype='text/plain')
-
