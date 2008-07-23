@@ -1,6 +1,20 @@
 a {
 	color: #3465A4;
 }
+img, input {
+	vertical-align: text-bottom;
+}
+button {
+	font-size: 100%;
+}
+hr {
+	color: #D3D7CF;
+	background: #D3D7CF;
+	height: 0;
+	margin: 1em -0.5em;
+	border: 0;
+	border-top: 1px solid #D3D7CF;
+}
 .first {
 border-left: 0;
 margin-right: 0;
@@ -10,9 +24,15 @@ margin-right: 0;
 }
 .legend {
 	padding: 0.2em 0.5em;
+	margin-right: 0.5em;
 }
-a.legend {
+.legend a {
 	color: #000;
+}
+.yui-gb {
+	background: #EEEEEC;
+	padding: 0 1em;
+	border: 1px solid #D3D7CF;
 }
 
 /* schedule styling */
