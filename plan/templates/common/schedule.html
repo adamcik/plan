@@ -9,7 +9,7 @@
         $(function(){
             $('.collapse').children(':first').click(function() { $(this).parent().children(':not(:first)').toggle() }).click()
 
-            $('select[multiple]').each(function() {
+            $('.upgrade select[multiple]').each(function() {
                 var selected   = $(this);
                 var unselected = $('<select multiple="multiple"></select>');
 
@@ -22,22 +22,16 @@
                     $(this).removeAttr('selected');
                 });
 
-                unselected.children().remove();
                 unselected.append(selected.children(':not(:selected)'))
-
                 selected.children().removeAttr('selected');
 
                 unselected.css('height', '10em');
                 selected.css('height', '10em');
 
-                unselected.css('width', '48%');
-                selected.css('width', '48%');
-
-                selected.before(unselected);
-
                 selected.prepend($('<optgroup label="Selected"></optgroup>'));
                 unselected.prepend($('<optgroup label="Unselected"></optgroup>'));
 
+                selected.before(unselected);
                 selected.parents('form').submit(function() {
                     selected.children().attr('selected', 'selected');
                 })
@@ -100,7 +94,7 @@
     <h2>Change...</h2>
     <div class="yui-u first">
         <h3>Select courses</h3>
-        <form action="." method="get">
+        <form action="." method="get" class="upgrade">
             {{ course_form.courses.errors }}
             <p>
                 {{ course_form.courses }} <br />
@@ -109,26 +103,23 @@
         </form>
     </div>
     <div class="yui-u">
+        <h3>Select groups</h3>
+        {% for course,groups in courses %}
+            <p style="float: left; margin-right: 0.5em">
+                <b>{{ course }}</b>: <br />
+                {{ groups.groups }}
+            </p>
+        {% endfor %}
+        <p>
+            <button>Save groups</button>
+        </p>
+    </div>
+    <div class="yui-u">
         <h3>Add course</h3>
         <p>
             <input type="text" />
             <button>Add</button>
         </p>
-    </div>
-    <div class="yui-u">
-        <h3>Select parallels</h3>
-        {% for course,parallels in courses %}
-            <p>
-                <b>{{ course }}</b>:
-                {% if parallels %}
-                    {% for p in parallels %}
-                        {{ p }}
-                    {% endfor %}
-                {% else %}
-                    None
-                {% endif %}
-            </p>
-        {% endfor %}
     </div>
 </div>
 

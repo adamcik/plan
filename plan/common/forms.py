@@ -8,3 +8,11 @@ class CourseForm(forms.Form):
 class LectureForm(forms.models.ModelForm):
     class Meta:
         model = Lecture
+
+class GroupForm(forms.Form):
+    groups = forms.models.ModelMultipleChoiceField(Group.objects.all())
+
+    def __init__(self, queryset, *args, **kwargs):
+        super(GroupForm, self).__init__(*args, **kwargs)
+
+        self.fields['groups'].queryset = queryset

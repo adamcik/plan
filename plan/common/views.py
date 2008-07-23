@@ -11,31 +11,7 @@ from plan.common.forms import *
 
 MAX_COLORS = 8
 
-def list(request):
-    pass
-
-def add_many(request, model=None, name=None, name_plural=None):
-    if not name:
-        name = model.__name__.lower()
-    if not name_plural:
-        name_plural = '%ss' % name
-
-    objects = model.objects.all().order_by('name')
-
-    if request.method == 'POST' and name_plural in request.POST:
-        for name in request.POST[name_plural].split('\n'):
-            if name.strip():
-                model.objects.get_or_create(name=name.strip())
-        return HttpResponseRedirect(request.path)
-
-    return render_to_response('common/add_many.html', {
-                            'name_plural': name_plural,
-                            'objects': objects,
-                            'name': name,
-                        }, RequestContext(request))
-
 def schedule(request, slug, year=None, semester=None):
-
     # Data structure that stores what will become the html table
     table = [[[{}] for a in Lecture.DAYS] for b in Lecture.START]
     # Extra info used to get the table right
@@ -52,16 +28,16 @@ def schedule(request, slug, year=None, semester=None):
     # Default to current semester
     if not semester:
         if datetime.now().month <= 6:
-            semester = Lecture.SPRING
+            semester = Semester.SPRING
         else:
-            semester = Lecture.FALL
-        semester_display = dict(Lecture.SEMESTER)[semester]
+            semester = Semester.FALL
+        semester_display = dict(Semester.TYPES)[semester]
     else:
        semester_display = semester
-       semester = dict(map(lambda x: (x[1],x[0]), Lecture.SEMESTER))[semester.lower()]
+       semester = dict(map(lambda x: (x[1],x[0]), SEMESTER.TYPES))[semester.lower()]
 
     # Get all lectures for userset during given period
-    for i,lecture in enumerate(Lecture.objects.filter(course__userset__slug=slug, year=year, semester=semester).order_by('course__id')):
+    for i,lecture in enumerate(Lecture.objects.filter(course__userset__slug=slug, semester__year__exact=year, semester__type__exact=semester).order_by('course__id')):
         start = lecture.start_time - Lecture.START[0][0]
         end = lecture.end_time - Lecture.END[0][0]
         rowspan = end - start + 1
@@ -98,9 +74,6 @@ def schedule(request, slug, year=None, semester=None):
 
         if rowspan == 1:
             css.append('single')
-
-        if lecture.optional:
-            css.append('optional')
 
         while start <= end:
             # Replace the cell we found with a hase containing info about our
@@ -167,10 +140,14 @@ def schedule(request, slug, year=None, semester=None):
     courses_intial = []
     legend = []
 
-    for c in Course.objects.filter(userset__slug=slug, lecture__year__exact=year, lecture__semester__exact=semester).distinct().order_by('id'):
+    for c in Course.objects.filter(userset__slug=slug, lecture__semester__year__exact=year, lecture__semester__type__exact=semester).distinct().order_by('id'):
         legend.append((c, color_map[c.id]))
         courses_intial.append(c.id)
-        courses.append([c, Parallel.objects.filter(lecture__course=c).distinct()])
+
+        intial = {'groups': Group.objects.filter(userset__slug=slug).distinct()}
+        group_form = GroupForm(Group.objects.filter(lecture__course=c).distinct(), initial=intial)
+
+        courses.append([c, group_form])
 
     return render_to_response('common/schedule.html', {
                             'table': table,
@@ -184,9 +161,9 @@ def schedule(request, slug, year=None, semester=None):
                         }, RequestContext(request))
 
 def scrape(request, course):
-    url = 'http://www.ntnu.no/studieinformasjon/timeplan/h08/?emnekode=%s'
+    url = 'http://www.ntnu.no/studieinformasjon/timeplan/h08/?emnekode=%s-1'
 
-    html = ''.join(urlopen(url % course).readlines())
+    html = ''.join(urlopen(url % course.upper()).readlines())
     soup = BeautifulSoup(html)
     main = soup.findAll('div', 'hovedramme')[0]
     table = main.findAll('table')[1]
@@ -195,16 +172,18 @@ def scrape(request, course):
 
     text_only = lambda text: isinstance(text, NavigableString)
 
+    title = table.findAll('h2')[0].contents[0].split('-')[2].strip()
+
     type = None
     for tr in table.findAll('tr')[2:-1]:
-        time, weeks, room, lecturer, parallels = [], [], [], [], []
-        found_type = False
+        time, weeks, room, lecturer, groups  = [], [], [], [], []
+        lecture = True
 
         for i,td in enumerate(tr.findAll('td')):
             if i == 0:
                 if td.get('colspan') == '4':
                     type = td.findAll(text=text_only)
-                    found_type = True
+                    lecture = False
                     break
                 else:
                     for t in td.findAll('b')[0].findAll(text=text_only):
@@ -223,16 +202,52 @@ def scrape(request, course):
             elif i == 2:
                 lecturer = [l.replace('&nbsp;', '') for l in td.findAll(text=text_only)]
             elif i == 3:
-                parallels = [p for p in td.findAll(text=text_only) if p.replace('&nbsp;','').strip()]
+                groups = [p for p in td.findAll(text=text_only) if p.replace('&nbsp;','').strip()]
 
-        if not found_type:
+        if lecture:
             results.append({
                 'type': type,
                 'time': time,
                 'week': weeks,
                 'room': room,
                 'lecturer': lecturer,
-                'parallels': parallels,
+                'groups': groups,
+                'title': title,
             })
+
+    semester = Semester.objects.all()[0]
+    for r in results:
+        c, created = Course.objects.get_or_create(name=course.upper())
+        room, created = Room.objects.get_or_create(name=r['room'][0])
+        type, created = Type.objects.get_or_create(name=r['type'][0])
+
+        day = ['Mandag', 'Onsdag', 'Tirsdag', 'Torsdag', 'Fredag'].index(r['time'][0][0])
+
+        start = r['time'][0][1]
+        end = r['time'][0][2]
+
+        if len(start) == 4:
+            start = '0%s' % start
+        if len(end) == 4:
+            end = '0%s' % end
+
+        start = dict(map(lambda x: (x[1],x[0]), Lecture.START))[start]
+        end = dict(map(lambda x: (x[1],x[0]), Lecture.END))[end]
+
+        lecture, created = Lecture.objects.get_or_create(
+            course = c,
+            day = day,
+            semester = semester,
+            start_time = start,
+            end_time = end,
+        )
+        for g in r['groups']:
+            group, created = Group.objects.get_or_create(name=g)
+            lecture.groups.add(group)
+
+        lecture.room = room
+        lecture.type = type
+        lecture.save()
+
     return HttpResponse(str('\n'.join([str(r) for r in results])), mimetype='text/plain')
 

@@ -15,6 +15,9 @@ hr {
 	border: 0;
 	border-top: 1px solid #D3D7CF;
 }
+select {
+	width: 10em;
+}
 .first {
 border-left: 0;
 margin-right: 0;
@@ -46,7 +49,7 @@ margin-right: 0;
   float: right;
 	font-size: 77%;
 }
-.schedule .singe {
+.schedule .single {
 	font-size: 77%;
 }
 .schedule table {
@@ -63,11 +66,11 @@ margin-right: 0;
   padding: 0.1em 0.2em;
   vertical-align: top;
 	text-align: left;
-  height: 1.5em;
 }
 .schedule td {
-    border-left: 0;
-    border-right: 0;
+  border-left: 0;
+  border-right: 0;
+  height: 2em;
 }
 .schedule td.first {
     border-left: 1px solid #666666;

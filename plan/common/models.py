@@ -5,7 +5,7 @@ from django.db import models
 class UserSet(models.Model):
     slug = models.SlugField()
     course = models.ForeignKey('Course')
-    parallel = models.ManyToManyField('Parallel', blank=True, null=True)
+    groups = models.ManyToManyField('Group', blank=True, null=True)
 
     class Meta:
         unique_together = (('slug', 'course'),)
@@ -20,7 +20,7 @@ class Room(models.Model):
     def __unicode__(self):
         return self.name
 
-class Parallel(models.Model):
+class Group(models.Model):
     name = models.CharField(max_length=100, unique=True)
     def __unicode__(self):
         return self.name
@@ -32,6 +32,28 @@ class Course(models.Model):
 
     def __unicode__(self):
         return self.name
+
+class Semester(models.Model):
+    SPRING = 0
+    FALL = 1
+    TYPES = (
+        (SPRING, 'spring'),
+        (FALL, 'fall'),
+    )
+    year = models.PositiveSmallIntegerField(choices=[(x,x) for x in range(datetime.now().year-1,datetime.now().year+2)])
+    type = models.PositiveSmallIntegerField(choices=TYPES)
+
+    def __unicode__(self):
+        return '%s %s' % (self.get_type_display(), self.year)
+
+    class Meta:
+        ordering = ('-year', '-type')
+
+class Week(models.Model):
+    number = models.PositiveSmallIntegerField(choices=[(x,x) for x in range(52)])
+
+    def __unicode__(self):
+        return 'week %s' % self.number
 
 class Lecture(models.Model):
     START = [(i, '%02d:15' % i) for i in range(8,21)]
@@ -45,31 +67,18 @@ class Lecture(models.Model):
         (4, 'Friday'),
     )
 
-    SPRING = 0
-    FALL = 1
-    SEMESTER = (
-        (SPRING, 'spring'),
-        (FALL, 'fall'),
-    )
-
-    WEEKS = [(x,x) for x in range(52)]
-
-    type = models.ManyToManyField(Type, blank=True, null=True)
-    parallel = models.ManyToManyField(Parallel, blank=True, null=True)
     course = models.ForeignKey(Course)
-    room = models.ForeignKey(Room, blank=True, null=True)
-    year = models.PositiveSmallIntegerField(choices=[(x,x) for x in range(datetime.now().year-1,datetime.now().year+2)])
-    semester = models.PositiveSmallIntegerField(choices=SEMESTER)
+    semester = models.ForeignKey(Semester)
 
     day = models.PositiveSmallIntegerField(choices=DAYS)
 
     start_time = models.PositiveSmallIntegerField(choices=START)
     end_time  = models.PositiveSmallIntegerField(choices=END)
 
-    start_week = models.PositiveSmallIntegerField(choices=WEEKS, blank=True, null=True)
-    end_week = models.PositiveSmallIntegerField(choices=WEEKS, blank=True, null=True)
-
-    optional = models.BooleanField(default=False)
+    room = models.ForeignKey(Room, blank=True, null=True)
+    type = models.ForeignKey(Type, blank=True, null=True)
+    weeks = models.ManyToManyField(Week, blank=True, null=True)
+    groups = models.ManyToManyField(Group, blank=True, null=True)
 
     def __unicode__(self):
         return u'%s: %s-%s on %s' % (self.course, self.get_start_time_display(), self.get_end_time_display(), self.get_day_display())
