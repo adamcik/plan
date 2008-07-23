@@ -1,10 +1,13 @@
 from datetime import datetime
+from urllib import urlopen
+from BeautifulSoup import BeautifulSoup, NavigableString
 
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template.context import RequestContext
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 
 from plan.common.models import *
+from plan.common.forms import *
 
 MAX_COLORS = 8
 
@@ -161,14 +164,75 @@ def schedule(request, slug, year=None, semester=None):
         table[t].insert(0, [{'time': '%s - %s' % (start, end), 'class': 'time'}])
 
     courses = []
+    courses_intial = []
+    legend = []
+
     for c in Course.objects.filter(userset__slug=slug, lecture__year__exact=year, lecture__semester__exact=semester).distinct().order_by('id'):
-        courses.append((c, color_map[c.id]))
+        legend.append((c, color_map[c.id]))
+        courses_intial.append(c.id)
+        courses.append([c, Parallel.objects.filter(lecture__course=c).distinct()])
 
     return render_to_response('common/schedule.html', {
                             'table': table,
-                            'legend': courses,
+                            'legend': legend,
+                            'courses': courses,
                             'colspan': span,
                             'slug': slug,
                             'year': year,
+                            'course_form': CourseForm(initial={'courses': courses_intial}),
                             'semester': semester_display,
                         }, RequestContext(request))
+
+def scrape(request, course):
+    url = 'http://www.ntnu.no/studieinformasjon/timeplan/h08/?emnekode=%s'
+
+    html = ''.join(urlopen(url % course).readlines())
+    soup = BeautifulSoup(html)
+    main = soup.findAll('div', 'hovedramme')[0]
+    table = main.findAll('table')[1]
+
+    results = []
+
+    text_only = lambda text: isinstance(text, NavigableString)
+
+    type = None
+    for tr in table.findAll('tr')[2:-1]:
+        time, weeks, room, lecturer, parallels = [], [], [], [], []
+        found_type = False
+
+        for i,td in enumerate(tr.findAll('td')):
+            if i == 0:
+                if td.get('colspan') == '4':
+                    type = td.findAll(text=text_only)
+                    found_type = True
+                    break
+                else:
+                    for t in td.findAll('b')[0].findAll(text=text_only):
+                        day, period = t.split(' ', 1)
+                        start, end = [x.strip() for x in period.split('-')]
+                        time.append([day,start,end])
+
+                    for week in td.findAll('span')[0].contents[0].split()[1:]:
+                        if '-' in week:
+                            x,y = week.split('-')
+                            weeks.extend(range(int(x),int(y)))
+                        else:
+                            weeks.append(int(week.replace(',', '')))
+            elif i == 1:
+                [room.extend(a.findAll(text=text_only)) for a in td.findAll('a')]
+            elif i == 2:
+                lecturer = [l.replace('&nbsp;', '') for l in td.findAll(text=text_only)]
+            elif i == 3:
+                parallels = [p for p in td.findAll(text=text_only) if p.replace('&nbsp;','').strip()]
+
+        if not found_type:
+            results.append({
+                'type': type,
+                'time': time,
+                'week': weeks,
+                'room': room,
+                'lecturer': lecturer,
+                'parallels': parallels,
+            })
+    return HttpResponse(str('\n'.join([str(r) for r in results])), mimetype='text/plain')
+

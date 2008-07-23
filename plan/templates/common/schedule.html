@@ -4,8 +4,50 @@
     {{ block.super }} - {{ slug }} {{ semester }} {{ year }}
 {% endblock %}
 
-{% block content %}
+{% block extrahead %}
+    <script type="text/javascript">
+        $(function(){
+            $('.collapse').children(':first').click(function() { $(this).parent().children(':not(:first)').toggle() }).click()
 
+            $('select[multiple]').each(function() {
+                var selected   = $(this);
+                var unselected = $('<select multiple="multiple"></select>');
+
+                selected.children().click(function() {
+                    if ($(this).parent().is('[name]')) {
+                        unselected.append($(this));
+                    } else {
+                        selected.append($(this));
+                    }
+                    $(this).removeAttr('selected');
+                });
+
+                unselected.children().remove();
+                unselected.append(selected.children(':not(:selected)'))
+
+                selected.children().removeAttr('selected');
+
+                unselected.css('height', '10em');
+                selected.css('height', '10em');
+
+                unselected.css('width', '48%');
+                selected.css('width', '48%');
+
+                selected.before(unselected);
+
+                selected.prepend($('<optgroup label="Selected"></optgroup>'));
+                unselected.prepend($('<optgroup label="Unselected"></optgroup>'));
+
+                selected.parents('form').submit(function() {
+                    selected.children().attr('selected', 'selected');
+                })
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+<h1>{{ slug }} {{ semester }} {{ year }}</h1>
 <table class="schedule">
     <thead>
         <th class="time"></th>
@@ -42,15 +84,52 @@
 
     </tbody>
 </table>
-
 <p>
     {% for course,class in legend %}
-        {% if course.url %}
-            <a href="{{ course.url }}" class="{{ class }} legend">{{ course }}</a>
-        {% else %}
-            <span class="{{ class }} legend">{{ course }}</span>
-        {% endif %}
+        <span class="{{ class }} legend">
+            {% if course.url %}
+                <a href="{{ course.url }}">{{ course }}</a>
+            {% else %}
+                {{ course }}
+            {% endif %}
+        </span>
     {% endfor %}
 </p>
+
+<div class="yui-gb collapse">
+    <h2>Change...</h2>
+    <div class="yui-u first">
+        <h3>Select courses</h3>
+        <form action="." method="get">
+            {{ course_form.courses.errors }}
+            <p>
+                {{ course_form.courses }} <br />
+                <button type="submit">Save</button>
+            </p>
+        </form>
+    </div>
+    <div class="yui-u">
+        <h3>Add course</h3>
+        <p>
+            <input type="text" />
+            <button>Add</button>
+        </p>
+    </div>
+    <div class="yui-u">
+        <h3>Select parallels</h3>
+        {% for course,parallels in courses %}
+            <p>
+                <b>{{ course }}</b>:
+                {% if parallels %}
+                    {% for p in parallels %}
+                        {{ p }}
+                    {% endfor %}
+                {% else %}
+                    None
+                {% endif %}
+            </p>
+        {% endfor %}
+    </div>
+</div>
 
 {% endblock %}

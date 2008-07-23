@@ -5,10 +5,10 @@ from django.db import models
 class UserSet(models.Model):
     slug = models.SlugField()
     course = models.ForeignKey('Course')
-    parallel = models.ForeignKey('Parallel', blank=True, null=True)
+    parallel = models.ManyToManyField('Parallel', blank=True, null=True)
 
     class Meta:
-        unique_together = (('slug', 'course', 'parallel'),)
+        unique_together = (('slug', 'course'),)
 
 class Type(models.Model):
     name = models.CharField(max_length=100, unique=True)

@@ -10,4 +10,6 @@ urlpatterns = patterns('plan.common.views',
 
     url(r'^r/$', 'add_many', {'model': Room}, name='add_rooms'),
     url(r'^c/$', 'add_many', {'model': Course}, name='add_courses'),
+
+    url(r'^l/(?P<course>[\w\d-]+)/$', 'scrape'),
 )
