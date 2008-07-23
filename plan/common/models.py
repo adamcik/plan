@@ -27,6 +27,9 @@ class Parallel(models.Model):
 
 class Course(models.Model):
     name = models.CharField(max_length=100, unique=True)
+    full_name = models.TextField(blank=True)
+    url = models.URLField(verify_exists=False, blank=True)
+
     def __unicode__(self):
         return self.name
 
@@ -65,6 +68,8 @@ class Lecture(models.Model):
 
     start_week = models.PositiveSmallIntegerField(choices=WEEKS, blank=True, null=True)
     end_week = models.PositiveSmallIntegerField(choices=WEEKS, blank=True, null=True)
+
+    optional = models.BooleanField(default=False)
 
     def __unicode__(self):
         return u'%s: %s-%s on %s' % (self.course, self.get_start_time_display(), self.get_end_time_display(), self.get_day_display())

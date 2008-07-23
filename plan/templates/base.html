@@ -3,26 +3,10 @@
 "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
   <head>
-    <title>plan...</title>
+    <title>{% block title %}plan{% endblock %}</title>
     <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.5.2/build/reset-fonts-grids/reset-fonts-grids.css" />
     <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.5.2/build/base/base-min.css">
-    <link rel="stylesheet" type="text/css" href="http://www.adamcik.no/css/clean.css">
-    <style type="text/css">
-        .schedule td {
-            border-left: 0;
-            border-right: 0;
-        }
-        .schedule td.first {
-            border-left: 1px solid #666666;
-        }
-        .lecture0, .lecture1, .lecture2, .lecture3, .lecture4, .lecture5,
-        .lecture6, .lecture7 {
-            border: 1px solid #666666 !important;
-        }
-        .legend {
-            padding: 0.2em 0.5em;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}style.css">
     {% block extrahead %}{% endblock %}
   </head>
   <body id="doc4">

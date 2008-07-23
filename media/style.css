@@ -1,0 +1,83 @@
+a {
+	color: #3465A4;
+}
+.first {
+border-left: 0;
+margin-right: 0;
+}
+.odd {
+  background: #fafafa;
+}
+.legend {
+	padding: 0.2em 0.5em;
+}
+a.legend {
+	color: #000;
+}
+
+/* schedule styling */
+.schedule .time {
+  text-align: center;
+  vertical-align: middle;
+	font-size: 77%;
+  width: 10%;
+}
+.schedule .room {
+  float: right;
+	font-size: 77%;
+}
+.schedule .singe {
+	font-size: 77%;
+}
+.schedule table {
+	margin: 0 auto 1em;
+}
+.schedule tbody {
+  border: 1px solid #666;
+}
+.schedule th, .schedule td {
+  border-left:   1px solid #666;
+  border-right:  1px solid #666;
+  border-top:    1px dashed #aaa;
+  border-bottom: 1px dashed #aaa;
+  padding: 0.1em 0.2em;
+  vertical-align: top;
+	text-align: left;
+  height: 1.5em;
+}
+.schedule td {
+    border-left: 0;
+    border-right: 0;
+}
+.schedule td.first {
+    border-left: 1px solid #666666;
+}
+.schedule th {
+  border: 0;
+  width: 18%;
+  font-variant: small-caps;
+	font-weight: normal;
+}
+
+.optional {
+  opacity: 0.7;
+  filter:alpha(opacity=70);
+}
+.optional:hover {
+  opacity: 1.0;
+  filter:alpha(opacity=100);
+}
+
+.lecture0  { background: #B3E2CD; }
+.lecture1  { background: #FDCDAC; }
+.lecture2  { background: #CBD5E8; }
+.lecture3  { background: #F4CAE4; }
+.lecture4  { background: #E6F5C9; }
+.lecture5  { background: #FFF2AE; }
+.lecture6  { background: #F1E2CC; }
+.lecture7  { background: #CCCCCC; }
+
+.lecture0, .lecture1, .lecture2, .lecture3, .lecture4, .lecture5,
+.lecture6, .lecture7 {
+    border: 1px solid #666666 !important;
+}

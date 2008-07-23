@@ -2,6 +2,7 @@ from datetime import datetime
 
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template.context import RequestContext
+from django.http import HttpResponseRedirect
 
 from plan.common.models import *
 
@@ -9,6 +10,26 @@ MAX_COLORS = 8
 
 def list(request):
     pass
+
+def add_many(request, model=None, name=None, name_plural=None):
+    if not name:
+        name = model.__name__.lower()
+    if not name_plural:
+        name_plural = '%ss' % name
+
+    objects = model.objects.all().order_by('name')
+
+    if request.method == 'POST' and name_plural in request.POST:
+        for name in request.POST[name_plural].split('\n'):
+            if name.strip():
+                model.objects.get_or_create(name=name.strip())
+        return HttpResponseRedirect(request.path)
+
+    return render_to_response('common/add_many.html', {
+                            'name_plural': name_plural,
+                            'objects': objects,
+                            'name': name,
+                        }, RequestContext(request))
 
 def schedule(request, slug, year=None, semester=None):
 
@@ -31,11 +52,13 @@ def schedule(request, slug, year=None, semester=None):
             semester = Lecture.SPRING
         else:
             semester = Lecture.FALL
+        semester_display = dict(Lecture.SEMESTER)[semester]
     else:
+       semester_display = semester
        semester = dict(map(lambda x: (x[1],x[0]), Lecture.SEMESTER))[semester.lower()]
 
     # Get all lectures for userset during given period
-    for i,lecture in enumerate(Lecture.objects.filter(course__userset__slug=slug, year=year, semester=semester)):
+    for i,lecture in enumerate(Lecture.objects.filter(course__userset__slug=slug, year=year, semester=semester).order_by('course__id')):
         start = lecture.start_time - Lecture.START[0][0]
         end = lecture.end_time - Lecture.END[0][0]
         rowspan = end - start + 1
@@ -68,6 +91,14 @@ def schedule(request, slug, year=None, semester=None):
             color_index = (color_index + 1) % MAX_COLORS
             color_map[lecture.course_id] = 'lecture%d' % color_index
 
+        css = [color_map[lecture.course_id]]
+
+        if rowspan == 1:
+            css.append('single')
+
+        if lecture.optional:
+            css.append('optional')
+
         while start <= end:
             # Replace the cell we found with a hase containing info about our
             # lecture
@@ -75,7 +106,7 @@ def schedule(request, slug, year=None, semester=None):
                 'lecture': lecture,
                 'rowspan': rowspan,
                 'remove': remove,
-                'class': color_map[lecture.course_id],
+                'class': ' '.join(css),
             }
 
             # Add lecture to our supplementary data structure and set the
@@ -130,11 +161,14 @@ def schedule(request, slug, year=None, semester=None):
         table[t].insert(0, [{'time': '%s - %s' % (start, end), 'class': 'time'}])
 
     courses = []
-    for c in Course.objects.filter(userset__slug=slug, lecture__year__exact=year, lecture__semester__exact=semester):
+    for c in Course.objects.filter(userset__slug=slug, lecture__year__exact=year, lecture__semester__exact=semester).distinct().order_by('id'):
         courses.append((c, color_map[c.id]))
 
     return render_to_response('common/schedule.html', {
                             'table': table,
                             'legend': courses,
-                            'colspan': span
+                            'colspan': span,
+                            'slug': slug,
+                            'year': year,
+                            'semester': semester_display,
                         }, RequestContext(request))

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ block.super }} - rooms
+{% endblock %}
+
+{% block content %}
+    <h1>Rooms:</h1>
+    {% if rooms %}
+        <p>
+            {% for room in rooms %}
+                {{ room }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        </p>
+    {% else %}
+        <p>No rooms in system</p>
+    {% endif %}
+
+    <h2>Admin:</h2>
+    <form action="." method="post">
+        <p>To add new rooms simply enter a newline seprated list of rooms</p>
+        <p>
+            <textarea rows="5" name="rooms"></textarea>
+        </p>
+        <p>
+            <button>Add rooms</button>
+        </p>
+    </form>
+{% endblock %}
