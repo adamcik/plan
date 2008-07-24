@@ -62,15 +62,16 @@ margin-right: 0;
 .schedule .room {
   float: right;
 	font-size: 77%;
+	padding-left: 0.5em;
 }
 .schedule .type {
   float: left;
 	font-size: 77%;
+	padding-right: 0.5em;
 }
 .schedule .groups {
   clear: both;
 	font-size: 77%;
-/*	display: none; */
 }
 .schedule .single {
 	font-size: 77%;
