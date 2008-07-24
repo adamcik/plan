@@ -89,11 +89,4 @@
     </form>
 {% endif %}
 
-{% if debug %}
-<pre style="clear: both">
-{{ sql_queries|pprint }}
-{{ sql_queries|length }}
-</pre>
-{% endif %}
-
 {% endblock %}

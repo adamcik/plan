@@ -68,6 +68,9 @@ margin-right: 0;
 .schedule .single {
 	font-size: 77%;
 }
+.schedule .single .type, .schedule .single .room {
+	font-size: 100%;
+}
 .schedule table {
 	margin: 0 auto 1em;
 }

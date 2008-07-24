@@ -2,6 +2,8 @@
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+LOGGING_OUTPUT_ENABLED = DEBUG
+LOGGING_LOG_SQL = DEBUG
 
 ADMINS = (
     # ('Your Name', 'your_email@domain.com'),
@@ -62,6 +64,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.doc.XViewMiddleware',
+    'djangologging.middleware.LoggingMiddleware',
 )
 
 ROOT_URLCONF = 'plan.urls'
