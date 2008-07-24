@@ -10,11 +10,11 @@
     <thead>
         <tr>
             <th class="time"></th>
-            <th colspan="{{ colspan.0 }}">Mandag</th>
-            <th colspan="{{ colspan.1 }}">Tirsdag</th>
-            <th colspan="{{ colspan.2 }}">Onsdag</th>
-            <th colspan="{{ colspan.3 }}">Torsdag</th>
-            <th colspan="{{ colspan.4 }}">Fredeag</th>
+            <th colspan="{{ colspan.0 }}">Monday</th>
+            <th colspan="{{ colspan.1 }}">Tuesday</th>
+            <th colspan="{{ colspan.2 }}">Wednesday</th>
+            <th colspan="{{ colspan.3 }}">Thursday</th>
+            <th colspan="{{ colspan.4 }}">Friday</th>
         </tr>
     </thead>
     <tbody>
@@ -64,6 +64,8 @@
                 {% endif %}
             </span>
         {% endfor %}
+    </p>
+    <p>
         <input type="text" name="course" size="16"/>
         <button name="submit_add">Add</button>
         <button name="submit_remove">Remove selected</button>
@@ -78,14 +80,15 @@
 {% if request.GET.groups %}
     <form action="{% url select_groups slug %}" method="post">
         {% for course,groups in courses %}
-            <p style="float: left; margin-right: 0.5em">
-                <b>{{ course }}</b>: <br />
+            <p class="{{ course.css_class }} legend left">
+                <b>{{ course }}</b> <br />
+                <span class="small">{{ course.full_name }}</span> <br />
                 {{ groups.groups }}
-                {% if forloop.last %}
-                    <button>Save groups</button>
-                {% endif %}
             </p>
         {% endfor %}
+        <p>
+            <button>Save groups</button>
+        </p>
     </form>
 {% endif %}
 
