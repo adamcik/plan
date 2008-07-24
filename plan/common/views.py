@@ -1,17 +1,31 @@
+# encoding: utf-8
+
+import re
 from datetime import datetime
-from urllib import urlopen
+from urllib import urlopen, quote as urlquote
 from BeautifulSoup import BeautifulSoup, NavigableString
 
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template.context import RequestContext
-from django.http import HttpResponseRedirect, HttpResponse
-from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.core.urlresolvers import reverse, NoReverseMatch
 from django.db.models import Q
+from django.template.defaultfilters import slugify
 
 from plan.common.models import *
 from plan.common.forms import *
 
 MAX_COLORS = 8
+
+def getting_started(request):
+    errors = []
+    # FIXME form
+    if request.method == 'POST' and 'slug' in request.POST:
+        try:
+            return HttpResponseRedirect(reverse('schedule', args=[slugify(request.POST['slug'])]))
+        except NoReverseMatch:
+            errors.append('err')
+    return render_to_response('common/start.html', {'errors': errors}, RequestContext(request))
 
 def schedule(request, slug=None, year=None, semester=None):
     # Data structure that stores what will become the html table
@@ -46,8 +60,8 @@ def schedule(request, slug=None, year=None, semester=None):
     }
 
     for u in UserSet.objects.filter(slug=slug):
-        initial_lectures.extend(u.course.lecture_set.filter(groups__in=u.groups.all, **filter_kwargs).select_related())
-        initial_lectures.extend(u.course.lecture_set.filter(**filter_kwargs).exclude(groups__isnull=False).select_related())
+        initial_lectures.extend(u.course.lecture_set.filter(groups__in=u.groups.all, **filter_kwargs).distinct().select_related())
+        initial_lectures.extend(u.course.lecture_set.filter(**filter_kwargs).exclude(groups__isnull=False).select_related().distinct())
 
     for i,lecture in enumerate(initial_lectures):
         start = lecture.start_time - Lecture.START[0][0]
@@ -154,7 +168,7 @@ def schedule(request, slug=None, year=None, semester=None):
     courses = []
     legend = []
 
-    for c in Course.objects.filter(userset__slug=slug, lecture__semester__year__exact=year, lecture__semester__type__exact=semester).distinct().order_by('id'):
+    for c in Course.objects.filter(userset__slug=slug, lecture__semester__year__exact=year, lecture__semester__type__exact=semester).distinct():
         groups = c.userset_set.get(slug=slug).groups.values_list('id', flat=True)
         group_form = GroupForm(Group.objects.filter(lecture__course=c).distinct(), initial={'groups': groups}, prefix=c.id)
 
@@ -196,18 +210,61 @@ def select_course(request, slug):
             for l in lookup:
                 try:
                     course = Course.objects.get(name=l)
+                    if not course.lecture_set.count():
+                        raise Course.DoesNotExist
                 except Course.DoesNotExist:
-                    scrape(request, l)
+                    scrape(request, l, no_auth=True)
                     course = Course.objects.get(name=l)
 
-                UserSet.objects.get_or_create(slug=slug, course=course)
+                userset, created = UserSet.objects.get_or_create(slug=slug, course=course)
+
+                for g in Group.objects.filter(lecture__course=course).distinct():
+                    userset.groups.add(g)
+
+            extra = '?groups=1'
+
         elif 'submit_remove' in request.POST:
-            sets = UserSet.objects.filter(slug__iexact=slug, course__id__in=request.POST.getlist('course'))
+            courses = [c.strip() for c in request.POST.getlist('course') if c.strip()]
+            sets = UserSet.objects.filter(slug__iexact=slug, course__id__in=courses)
             sets.delete()
+            
+            extra = ''
 
-    return HttpResponseRedirect(reverse('schedule', args=[slug])+'?groups=1')
+    return HttpResponseRedirect(reverse('schedule', args=[slug])+extra)
 
-def scrape(request, course):
+def scrape_list(request):
+    if not request.user.is_authenticated():
+        raise Http404
+
+    abc = u'ABCDEFGHIJKLMNOPQRSTUVWXYÆØÅ'
+    url = u'http://www.ntnu.no/studieinformasjon/timeplan/h08/?bokst=%s'
+
+    courses = {}
+    for letter in abc:
+        html = ''.join(urlopen(url % urlquote(letter.encode('utf-8'))).readlines())
+        soup = BeautifulSoup(html)
+
+        for a in soup.findAll('a', href=re.compile('emnekode=[\w\d]+-1')):
+            code = re.match('./\?emnekode=([\d\w]+)-1', a['href']).group(1)
+            name = a.contents[0]
+
+            if not name.startswith(code):
+                courses[code] = name
+
+    for name,full_name in sorted(courses.iteritems()):
+        course, created = Course.objects.get_or_create(name=name.strip().upper())
+
+        if not course.full_name:
+            course.full_name = full_name
+            course.save()
+
+    return HttpResponse(str('\n'.join([str(c) for c in courses.items()])), mimetype='text/plain')
+
+def scrape(request, course, no_auth=False):
+    if not request.user.is_authenticated() and not no_auth:
+        raise Http404
+
+    # FIXME based on semester
     url = 'http://www.ntnu.no/studieinformasjon/timeplan/h08/?emnekode=%s-1' % course.upper().strip()
 
     html = ''.join(urlopen(url).readlines())
