@@ -7,6 +7,8 @@ class UserSet(models.Model):
     course = models.ForeignKey('Course')
     groups = models.ManyToManyField('Group', blank=True, null=True)
 
+    exclude = models.ManyToManyField('Lecture', blank=True, null=True)
+
     class Meta:
         unique_together = (('slug', 'course'),)
 
