@@ -40,6 +40,9 @@ class Course(models.Model):
     def __unicode__(self):
         return self.name
 
+    class Meta:
+        ordering = ('name',)
+
 class Semester(models.Model):
     SPRING = 0
     FALL = 1
@@ -92,3 +95,6 @@ class Lecture(models.Model):
 
     def __unicode__(self):
         return u'%s: %s-%s on %s' % (self.course, self.get_start_time_display(), self.get_end_time_display(), self.get_day_display())
+
+    class Meta:
+        ordering = ('course', 'day', 'start_time')
