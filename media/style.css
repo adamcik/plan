@@ -35,14 +35,21 @@ margin-right: 0;
 .legend {
 	padding: 0.2em 0.5em;
 	margin-right: 0.5em;
+	max-width: 10em;
+	min-height: 10em;
 }
 .legend a {
 	color: #000;
 }
-.yui-gb {
-	background: #EEEEEC;
-	padding: 0 1em;
-	border: 1px solid #D3D7CF;
+.large {
+	font-size: 123.1%;
+}
+.small {
+	font-size: 77%;
+}
+.left {
+	float: left;
+	margin-right: 0.5em;
 }
 
 /* schedule styling */
