@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>timetable generator for NTNU</h1>
+    {% if errors %}
+        <ul>
+            {% for e in errors %}
+                <li>{{ e }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <form action="." method="post">
+        <p class="large">
+            Please enter a short string identifying your personal timetable, ie
+            username, etc.
+        </p>
+        <p>
+            <input type="text" name="slug" value="{{ request.COOKIES.last|default:"" }}" />
+            <button>Start</button>
+        </p>
+        <p>
+	    To retrieve a timetable simply enter the same identifier you used
+	    last time. If the identifier you choose is in use pick another one.
+        </p>
+    </form>
+{% endblock %}
