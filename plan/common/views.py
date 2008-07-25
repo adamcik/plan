@@ -20,7 +20,7 @@ MAX_COLORS = 8
 def getting_started(request):
     if request.method == 'POST' and 'slug' in request.POST:
         slug = slugify(request.POST['slug'])
-        response =  HttpResponseRedirect(reverse('schedule', args=[slug]))
+        response = HttpResponseRedirect(reverse('schedule', args=[slug]))
 
         # Store last timetable visited in a cookie so that we can populate
         # the field with a default value next time.
