@@ -328,7 +328,7 @@ def scrape(request, course, no_auth=False):
             results.append({
                 'type': type,
                 'time': time,
-                'week': weeks,
+                'weeks': weeks,
                 'room': room,
                 'lecturer': lecturer,
                 'groups': groups,
@@ -371,6 +371,10 @@ def scrape(request, course, no_auth=False):
                 lecture.groups.add(group)
         else:
             group, created = Group.objects.get_or_create(name='-')
+
+        for w in  r['weeks']:
+            week, created = Week.objects.get_or_create(number=w)
+            lecture.weeks.add(w)
 
         lecture.room = room
         lecture.type = type
