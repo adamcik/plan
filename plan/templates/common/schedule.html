@@ -120,6 +120,7 @@
                         <th>Room</th>
                         <th>Type</th>
                         <th>Groups</th>
+                        <th>Lecturers</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -129,9 +130,10 @@
                             <td>{{ l.course }}</td>
                             <td>{{ l.get_day_display }}</td>
                             <td>{{ l.get_start_time_display }}-{{ l.get_end_time_display }}</td>
-                            <td>{{ l.room }}</td>
-                            <td>{{ l.type }}</td>
-                            <td>{% for g in  l.groups.all %}{{ g }}{% if not forloop.last %},{% endif %} {% endfor %}</td>
+                            <td class="small">{{ l.room }}</td>
+                            <td class="small">{{ l.type }}</td>
+                            <td class="small">{% for g in  l.groups.all %}{{ g }}{% if not forloop.last %},{% endif %} {% endfor %}</td>
+                            <td>{% for p in  l.lecturers.all %}{{ p }}{% if not forloop.last %},{% endif %} {% endfor %}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
