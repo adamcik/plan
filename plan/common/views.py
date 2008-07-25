@@ -59,7 +59,7 @@ def schedule(request, slug=None, year=None, semester=None):
     where=['common_userset_groups.group_id = common_group.id', 'common_userset_groups.userset_id = common_userset.id', 'common_group.id = common_lecture_groups.group_id', 'common_lecture_groups.lecture_id = common_lecture.id']
     tables=['common_userset_groups', 'common_group', 'common_lecture_groups']
 
-    initial_lectures = Lecture.objects.filter(course__userset__slug=slug).distinct().select_related().extra(where=where, tables=tables)
+    initial_lectures = Lecture.objects.filter(course__userset__slug=slug).distinct().select_related().extra(where=where, tables=tables).order_by('course__name')
 
 #    initial_lectures = initial_lectures.extra(where=['common_lecture.id IN (SELECT i)'])
 
