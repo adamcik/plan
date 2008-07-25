@@ -37,6 +37,7 @@ def getting_started(request):
 def schedule(request, slug=None, year=None, semester=None):
     # Data structure that stores what will become the html table
     table = [[[{}] for a in Lecture.DAYS] for b in Lecture.START]
+
     # Extra info used to get the table right
     lectures = []
 
@@ -46,21 +47,6 @@ def schedule(request, slug=None, year=None, semester=None):
     # Color mapping for the courses
     color_map = {}
     color_index = 0
-
-    # Default to current year
-    if not year:
-        year = datetime.now().year
-
-    # Default to current semester
-    if not semester:
-        if datetime.now().month <= 6:
-            semester = Semester.SPRING
-        else:
-            semester = Semester.FALL
-        semester_display = dict(Semester.TYPES)[semester]
-    else:
-       semester_display = semester
-       semester = dict(map(lambda x: (x[1],x[0]), SEMESTER.TYPES))[semester.lower()]
 
     # Get all lectures for userset during given period. To do this we need to
     # pull in a bunch of extra tables and manualy join them in the where
@@ -79,6 +65,36 @@ def schedule(request, slug=None, year=None, semester=None):
     ]
 
     initial_lectures = Lecture.objects.filter(course__userset__slug=slug).distinct().select_related().extra(where=where, tables=tables).order_by('course__name')
+
+    # Array with courses to show
+    courses = []
+
+    # Default to current year
+    if not year:
+        year = datetime.now().year
+
+    # Default to current semester
+    if not semester:
+        if datetime.now().month <= 6:
+            semester = Semester.SPRING
+        else:
+            semester = Semester.FALL
+        semester_display = dict(Semester.TYPES)[semester]
+    else:
+       semester_display = semester
+       semester = dict(map(lambda x: (x[1],x[0]), SEMESTER.TYPES))[semester.lower()]
+
+    for c in Course.objects.filter(userset__slug=slug, lecture__semester__year__exact=year, lecture__semester__type__exact=semester).distinct():
+        groups = c.userset_set.get(slug=slug).groups.values_list('id', flat=True)
+        group_form = GroupForm(Group.objects.filter(lecture__course=c).distinct(), initial={'groups': groups}, prefix=c.id)
+
+        if c.id not in color_map:
+            color_index = (color_index + 1) % MAX_COLORS
+            color_map[c.id] = 'lecture%d' % color_index
+
+        c.css_class = color_map[c.id]
+
+        courses.append([c, group_form])
 
     for i,lecture in enumerate(initial_lectures.exclude(excluded_from__slug=slug)):
         start = lecture.start_time - Lecture.START[0][0]
@@ -184,34 +200,15 @@ def schedule(request, slug=None, year=None, semester=None):
     for t,start,end in map(lambda x,y: (x[0], x[1][1],y[1]), enumerate(Lecture.START), Lecture.END):
         table[t].insert(0, [{'time': '%s - %s' % (start, end), 'class': 'time'}])
 
+    # Add colors and exlude status
     for i,lecture in enumerate(initial_lectures):
-        if lecture.course_id not in color_map:
-            color_index = (color_index + 1) % MAX_COLORS
-            color_map[lecture.course_id] = 'lecture%d' % color_index
-
         initial_lectures[i].css_class =  color_map[lecture.course_id]
         initial_lectures[i].excluded  =  lecture.id not in included
 
 
-    courses = []
-    legend = []
-
-    for c in Course.objects.filter(userset__slug=slug, lecture__semester__year__exact=year, lecture__semester__type__exact=semester).distinct():
-        groups = c.userset_set.get(slug=slug).groups.values_list('id', flat=True)
-        group_form = GroupForm(Group.objects.filter(lecture__course=c).distinct(), initial={'groups': groups}, prefix=c.id)
-
-        courses.append([c, group_form])
-
-        if c.id not in color_map:
-            color_index = (color_index + 1) % MAX_COLORS
-            color_map[c.id] = 'lecture%d' % color_index
-
-        c.css_class = color_map[c.id]
-        legend.append(c)
-
     return render_to_response('common/schedule.html', {
                             'table': table,
-                            'legend': legend,
+                            'legend': map(lambda x: x[0], courses),
                             'courses': courses,
                             'colspan': span,
                             'slug': slug,
