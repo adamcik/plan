@@ -10,10 +10,14 @@ class UserSetAdmin(admin.ModelAdmin):
     search_fields = ('slug', 'course')
     list_filter = ['slug']
 
+    filter_horizontal = ('groups','exclude')
+
 class LectureAdmin(admin.ModelAdmin):
-    list_display = ('course', 'day', 'start_time', 'end_time', 'room')
+    list_display = ('course', 'day', 'start_time', 'end_time', 'room', 'type')
     search_fields = list_display
     list_filter = ['day', 'start_time', 'room']
+    filter_horizontal = ('weeks', 'groups')
+    select_related = True
 
 admin.site.register(UserSet, UserSetAdmin)
 admin.site.register(Type)
