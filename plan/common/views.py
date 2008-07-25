@@ -349,9 +349,12 @@ def scrape(request, course, no_auth=False):
             start_time = start,
             end_time = end,
         )
-        for g in r['groups']:
-            group, created = Group.objects.get_or_create(name=g)
-            lecture.groups.add(group)
+        if r['groups']:
+            for g in r['groups']:
+                group, created = Group.objects.get_or_create(name=g)
+                lecture.groups.add(group)
+        else:
+            group, created = Group.objects.get_or_create(name='-')
 
         lecture.room = room
         lecture.type = type
