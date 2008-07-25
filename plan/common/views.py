@@ -395,6 +395,11 @@ def scrape(request, course, no_auth=False):
             week, created = Week.objects.get_or_create(number=w)
             lecture.weeks.add(w)
 
+        for l in r['lecturer']:
+            if l.strip():
+                lecturer, created = Lecturer.objects.get_or_create(name=l)
+                lecture.lecturers.add(lecturer)
+
         lecture.room = room
         lecture.type = type
         lecture.save()

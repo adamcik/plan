@@ -89,8 +89,11 @@ class Week(models.Model):
     class Meta:
         ordering = ('number',)
 
-#class Lecturer(models.Model):
-#    name = models.CharField(max_length=200)
+class Lecturer(models.Model):
+    name = models.CharField(max_length=200)
+
+    def __unicode__(self):
+        return self.name
 
 class Lecture(models.Model):
     START = [(i, '%02d:15' % i) for i in range(8,21)]
@@ -116,8 +119,7 @@ class Lecture(models.Model):
     type = models.ForeignKey(Type, blank=True, null=True)
     weeks = models.ManyToManyField(Week, blank=True, null=True)
     groups = models.ManyToManyField(Group, blank=True, null=True)
-#    lectures = models.ManyToManyField(Lecturer, blank=True, null=True)
-
+    lecturers = models.ManyToManyField(Lecturer, blank=True, null=True)
 
     def __unicode__(self):
         return u'%s: %s-%s on %s' % (self.course, self.get_start_time_display(), self.get_end_time_display(), self.get_day_display())
