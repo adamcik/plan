@@ -33,7 +33,6 @@ tbody td {
   border: 1px solid #666;
 	border-left: 0;
 	border-right: 0;
-	vertical-align: top;
 }
 .excluded td {
 	text-decoration: line-through;
