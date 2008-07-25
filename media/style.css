@@ -30,8 +30,13 @@ thead th {
 	text-align: left;
 }
 tbody td {
+  border: 1px solid #666;
 	border-left: 0;
 	border-right: 0;
+	vertical-align: top;
+}
+.excluded td {
+	text-decoration: line-through;
 }
 .first {
 border-left: 0;
@@ -99,8 +104,6 @@ margin-right: 0;
   border: 1px solid #666;
 }
 .schedule th, .schedule td {
-  border-left:   1px solid #666;
-  border-right:  1px solid #666;
   border-top:    1px dashed #aaa;
   border-bottom: 1px dashed #aaa;
   padding: 0.1em 0.2em;
