@@ -22,7 +22,14 @@ def getting_started(request):
     # FIXME form
     if request.method == 'POST' and 'slug' in request.POST:
         try:
-            return HttpResponseRedirect(reverse('schedule', args=[slugify(request.POST['slug'])]))
+            slug = slugify(request.POST['slug'])
+            response =  HttpResponseRedirect(reverse('schedule', args=[slug]))
+
+            # Store last timetable visited in a cookie so that we can populate
+            # the field with a default value next time.
+            response.set_cookie('last', slug, 60*60*24*7*4)
+            return response
+
         except NoReverseMatch:
             errors.append('err')
     return render_to_response('common/start.html', {'errors': errors}, RequestContext(request))
@@ -56,12 +63,19 @@ def schedule(request, slug=None, year=None, semester=None):
     # pull in a bunch of extra tables and manualy join them in the where
     # cluase. The first element in the custom where is the important one that
     # limits our results, the rest are simply meant for joining.
-    where=['common_userset_groups.group_id = common_group.id', 'common_userset_groups.userset_id = common_userset.id', 'common_group.id = common_lecture_groups.group_id', 'common_lecture_groups.lecture_id = common_lecture.id']
-    tables=['common_userset_groups', 'common_group', 'common_lecture_groups']
+    where=[
+        'common_userset_groups.group_id = common_group.id',
+        'common_userset_groups.userset_id = common_userset.id',
+        'common_group.id = common_lecture_groups.group_id',
+        'common_lecture_groups.lecture_id = common_lecture.id'
+    ]
+    tables=[
+        'common_userset_groups',
+        'common_group',
+        'common_lecture_groups'
+    ]
 
     initial_lectures = Lecture.objects.filter(course__userset__slug=slug).distinct().select_related().extra(where=where, tables=tables).order_by('course__name')
-
-#    initial_lectures = initial_lectures.extra(where=['common_lecture.id IN (SELECT i)'])
 
     for i,lecture in enumerate(initial_lectures):
         start = lecture.start_time - Lecture.START[0][0]
@@ -97,6 +111,7 @@ def schedule(request, slug=None, year=None, semester=None):
             color_map[lecture.course_id] = 'lecture%d' % color_index
 
         css = [color_map[lecture.course_id]]
+        initial_lectures[i].css_class = css[0]
 
         if lecture.type.optional:
             css.append('optional')
@@ -201,7 +216,7 @@ def select_groups(request, slug):
                 set = UserSet.objects.get(course=c, slug=slug)
                 set.groups = group_form.cleaned_data['groups']
 
-    return HttpResponseRedirect(reverse('schedule', args=[slug])+'?groups=1')
+    return HttpResponseRedirect(reverse('schedule', args=[slug])+'?advanced=1')
 
 def select_course(request, slug):
     if request.method == 'POST' and 'course' in request.POST:
@@ -222,13 +237,13 @@ def select_course(request, slug):
                 for g in Group.objects.filter(lecture__course=course).distinct():
                     userset.groups.add(g)
 
-            extra = '?groups=1'
+            extra = '?advanced=1'
 
         elif 'submit_remove' in request.POST:
             courses = [c.strip() for c in request.POST.getlist('course') if c.strip()]
             sets = UserSet.objects.filter(slug__iexact=slug, course__id__in=courses)
             sets.delete()
-            
+
             extra = ''
 
     return HttpResponseRedirect(reverse('schedule', args=[slug])+extra)
