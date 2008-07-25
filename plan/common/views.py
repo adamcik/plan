@@ -234,7 +234,7 @@ def select_course(request, slug):
 
     if request.method == 'POST' and 'course' in request.POST:
         if 'submit_add' in request.POST:
-            lookup = request.POST['course'].upper().strip().split()
+            lookup = request.POST['course'].split()
 
             if datetime.now().month <= 6:
                 type = Semester.SPRING
@@ -245,15 +245,15 @@ def select_course(request, slug):
 
             for l in lookup:
                 try:
-                    course = Course.objects.get(name=l)
+                    course = Course.objects.get(name__iexact=l.strip())
 
                     if not course.lecture_set.count():
                         scrape(request, l, no_auth=True)
 
-                        userset, created = UserSet.objects.get_or_create(slug=slug, course=course, semester=semester)
+                    userset, created = UserSet.objects.get_or_create(slug=slug, course=course, semester=semester)
 
-                        for g in Group.objects.filter(lecture__course=course).distinct():
-                            userset.groups.add(g)
+                    for g in Group.objects.filter(lecture__course=course).distinct():
+                        userset.groups.add(g)
 
                 except Course.DoesNotExist:
                     pass
@@ -366,7 +366,7 @@ def scrape_exam(request, no_auth=False):
     return HttpResponse(str('\n'.join([str(r) for r in results])), mimetype='text/plain')
 
 def scrape(request, course, no_auth=False):
-    if not request.user.is_authenticated() and not no_auth:
+    if not no_auth and not request.user.is_authenticated():
         raise Http404
 
     # FIXME based on semester
