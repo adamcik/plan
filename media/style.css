@@ -25,6 +25,14 @@ input {
 textarea[cols], input[size] {
 	width: auto;
 }
+thead th {
+	border: 0;
+	text-align: left;
+}
+tbody td {
+	border-left: 0;
+	border-right: 0;
+}
 .first {
 border-left: 0;
 margin-right: 0;
@@ -35,6 +43,7 @@ margin-right: 0;
 .legend {
 	padding: 0.2em 0.5em;
 	margin-right: 0.5em;
+	min-width: 6em;
 	max-width: 10em;
 }
 .legend a {
