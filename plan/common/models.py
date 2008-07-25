@@ -66,9 +66,19 @@ class Semester(models.Model):
 #class Exam(models.Model):
 #    time = models.DateTimeField()
 #    duration = models.PositiveSmallIntegerField()
+#    comment = models.TextField(blank=True)
 #
 #    semester = models.ForeignKey(Semester)
 #    course = models.ForeignKey(Course)
+
+#class ExamType(models.Model):
+#    WRITTEN = 'S'
+#    ORAL = 'M'
+#    CODES = (
+#        (WRITTEN, 'written'),
+#        (ORAL, 'oral'),
+#    )
+#    code = models.CharField(max_length=1, choices
 
 class Week(models.Model):
     number = models.PositiveSmallIntegerField(choices=[(x,x) for x in range(1,53)], unique=True)
