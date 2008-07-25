@@ -11,4 +11,5 @@ urlpatterns = patterns('plan.common.views',
     url(r'^debug/(?P<course>[\w\d-]+)/$', 'scrape'),
     url(r'^s/(?P<slug>[a-zA-Z0-9-_]+)/alter/$', 'select_course', name='select_course'),
     url(r'^s/(?P<slug>[a-zA-Z0-9-_]+)/groups/$', 'select_groups', name='select_groups'),
+    url(r'^s/(?P<slug>[a-zA-Z0-9-_]+)/exclude/$', 'select_lectures', name='select_lectures'),
 )

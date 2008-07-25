@@ -40,6 +40,9 @@ def schedule(request, slug=None, year=None, semester=None):
     # Extra info used to get the table right
     lectures = []
 
+    # ids of included lectures
+    included = []
+
     # Color mapping for the courses
     color_map = {}
     color_index = 0
@@ -77,12 +80,14 @@ def schedule(request, slug=None, year=None, semester=None):
 
     initial_lectures = Lecture.objects.filter(course__userset__slug=slug).distinct().select_related().extra(where=where, tables=tables).order_by('course__name')
 
-    for i,lecture in enumerate(initial_lectures):
+    for i,lecture in enumerate(initial_lectures.exclude(excluded_from__slug=slug)):
         start = lecture.start_time - Lecture.START[0][0]
         end = lecture.end_time - Lecture.END[0][0]
         rowspan = end - start + 1
 
         first = start
+
+        included.append(lecture.id)
 
         # Try to find leftmost row that can fit our lecture, if we run out of
         # rows to test, ie IndexError, we append a fresh one to work with
@@ -111,7 +116,6 @@ def schedule(request, slug=None, year=None, semester=None):
             color_map[lecture.course_id] = 'lecture%d' % color_index
 
         css = [color_map[lecture.course_id]]
-        initial_lectures[i].css_class = css[0]
 
         if lecture.type.optional:
             css.append('optional')
@@ -180,6 +184,15 @@ def schedule(request, slug=None, year=None, semester=None):
     for t,start,end in map(lambda x,y: (x[0], x[1][1],y[1]), enumerate(Lecture.START), Lecture.END):
         table[t].insert(0, [{'time': '%s - %s' % (start, end), 'class': 'time'}])
 
+    for i,lecture in enumerate(initial_lectures):
+        if lecture.course_id not in color_map:
+            color_index = (color_index + 1) % MAX_COLORS
+            color_map[lecture.course_id] = 'lecture%d' % color_index
+
+        initial_lectures[i].css_class =  color_map[lecture.course_id]
+        initial_lectures[i].excluded  =  lecture.id not in included
+
+
     courses = []
     legend = []
 
@@ -247,6 +260,15 @@ def select_course(request, slug):
             extra = ''
 
     return HttpResponseRedirect(reverse('schedule', args=[slug])+extra)
+
+def select_lectures(request, slug):
+    if request.method == 'POST':
+        excludes = request.POST.getlist('exclude')
+
+        for userset in UserSet.objects.filter(slug=slug):
+            userset.exclude = userset.course.lecture_set.filter(id__in=excludes)
+
+    return HttpResponseRedirect(reverse('schedule', args=[slug])+'?advanced=1')
 
 def scrape_list(request):
     if not request.user.is_authenticated():
