@@ -50,6 +50,7 @@ class Course(models.Model):
 class Semester(models.Model):
     SPRING = 0
     FALL = 1
+
     TYPES = (
         (SPRING, 'spring'),
         (FALL, 'fall'),
@@ -72,15 +73,11 @@ class Exam(models.Model):
     )
 
     time = models.DateTimeField()
-    duration = models.PositiveSmallIntegerField()
+    duration = models.PositiveSmallIntegerField(blank=True, null=True)
     comment = models.TextField(blank=True)
 
     type = models.CharField(max_length=1, choices=TYPES)
-    semester = models.ForeignKey(Semester)
     course = models.ForeignKey(Course)
-
-    class Meta:
-        unique_together = (('course', 'semester',),)
 
 class Week(models.Model):
     number = models.PositiveSmallIntegerField(choices=[(x,x) for x in range(1,53)], unique=True)
