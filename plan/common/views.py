@@ -304,6 +304,67 @@ def scrape_list(request):
 
     return HttpResponse(str('\n'.join([str(c) for c in courses.items()])), mimetype='text/plain')
 
+def scrape_exam(request, no_auth=False):
+    if not request.user.is_authenticated() and not no_auth:
+        raise Http404
+
+    url = 'http://www.ntnu.no/eksamen/plan/08s/'
+
+    html = ''.join(urlopen(url).readlines())
+    soup = BeautifulSoup(html)
+
+    main = soup.findAll('div', 'hovedramme')[0]
+
+    results = []
+    for tr in main.findAll('tr')[4:]:
+        results.append({})
+
+        for i,td in enumerate(tr.findAll('td')):
+            if i == 0:
+                results[-1]['course'] = td.contents
+            elif i == 2:
+                results[-1]['type'] = td.contents
+            elif i == 3:
+                results[-1]['time'] = td.findAll(text=lambda text: isinstance(text, NavigableString))
+            elif i == 4:
+                results[-1]['duration'] = td.contents
+            elif i == 5:
+                results[-1]['comment'] = td.contents
+
+    for r in results:
+        course, created = Course.objects.get_or_create(name=r['course'][0])
+
+        try:
+
+            if r['duration']:
+                duration = r['duration'][0]
+            else:
+                duration = None
+
+            if r['comment']:
+                comment = r['comment'][0]
+            else:
+                comment = ''
+
+            if ':' in r['time'][0]:
+                date,time = r['time'][0].split()
+                date = date.split('.')
+                time = time.split(':')
+
+                time = datetime(int(date[2]), int(date[1]), int(date[0]), int(time[0]), int(time[1]))
+            else:
+                time = r['time'][0].split('.')
+                time = datetime(int(date[2]), int(date[1]), int(date[0]), int(time[0]))
+
+            # FIXME handle multiple exams
+            if r['type']:
+                exam = Exam(course=course, type=r['type'].pop(), time=time, comment=comment, duration=duration)
+                exam.save()
+        except:
+            pass
+
+    return HttpResponse(str('\n'.join([str(r) for r in results])), mimetype='text/plain')
+
 def scrape(request, course, no_auth=False):
     if not request.user.is_authenticated() and not no_auth:
         raise Http404
