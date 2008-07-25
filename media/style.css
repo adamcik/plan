@@ -45,6 +45,7 @@ margin-right: 0;
 	margin-right: 0.5em;
 	min-width: 6em;
 	max-width: 10em;
+	-moz-border-radius: 0.5em;
 }
 .legend a {
 	color: #000;
