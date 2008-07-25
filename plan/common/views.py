@@ -52,16 +52,16 @@ def schedule(request, slug=None, year=None, semester=None):
        semester_display = semester
        semester = dict(map(lambda x: (x[1],x[0]), SEMESTER.TYPES))[semester.lower()]
 
-    # Get all lectures for userset during given period
-    initial_lectures = []
-    filter_kwargs = {
-        'semester__year__exact': year,
-        'semester__type__exact': semester,
-    }
+    # Get all lectures for userset during given period. To do this we need to
+    # pull in a bunch of extra tables and manualy join them in the where
+    # cluase. The first element in the custom where is the important one that
+    # limits our results, the rest are simply meant for joining.
+    where=['common_userset_groups.group_id = common_group.id', 'common_userset_groups.userset_id = common_userset.id', 'common_group.id = common_lecture_groups.group_id', 'common_lecture_groups.lecture_id = common_lecture.id']
+    tables=['common_userset_groups', 'common_group', 'common_lecture_groups']
 
-    for u in UserSet.objects.filter(slug=slug):
-        initial_lectures.extend(u.course.lecture_set.filter(groups__in=u.groups.all, **filter_kwargs).distinct().select_related())
-        initial_lectures.extend(u.course.lecture_set.filter(**filter_kwargs).exclude(groups__isnull=False).select_related().distinct())
+    initial_lectures = Lecture.objects.filter(course__userset__slug=slug).distinct().select_related().extra(where=where, tables=tables)
+
+#    initial_lectures = initial_lectures.extra(where=['common_lecture.id IN (SELECT i)'])
 
     for i,lecture in enumerate(initial_lectures):
         start = lecture.start_time - Lecture.START[0][0]
@@ -188,6 +188,7 @@ def schedule(request, slug=None, year=None, semester=None):
                             'colspan': span,
                             'slug': slug,
                             'year': year,
+                            'lectures': initial_lectures,
                             'semester': semester_display,
                         }, RequestContext(request))
 
