@@ -5,6 +5,7 @@ from django.db import models
 class UserSet(models.Model):
     slug = models.SlugField()
     course = models.ForeignKey('Course')
+#    semester = models.ForeignKey('Semester')
     groups = models.ManyToManyField('Group', blank=True, null=True)
 
     exclude = models.ManyToManyField('Lecture', blank=True, null=True)
@@ -61,6 +62,13 @@ class Semester(models.Model):
 
     class Meta:
         ordering = ('-year', '-type')
+
+#class Exam(models.Model):
+#    time = models.DateTimeField()
+#    duration = models.PositiveSmallIntegerField()
+#
+#    semester = models.ForeignKey(Semester)
+#    course = models.ForeignKey(Course)
 
 class Week(models.Model):
     number = models.PositiveSmallIntegerField(choices=[(x,x) for x in range(1,53)], unique=True)
