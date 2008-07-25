@@ -11,6 +11,7 @@ class UserSet(models.Model):
 
     class Meta:
         unique_together = (('slug', 'course'),)
+        ordering = ('slug', 'course')
 
     def __unicode__(self):
         return '%s - %s' % (self.slug, self.course)
