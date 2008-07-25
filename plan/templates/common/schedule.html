@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
 {% block title %}
-    {{ block.super }} - {{ slug }} {{ semester }} {{ year }}
+    {{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %} {{ semester }} {{ year }} {{ block.super }}
 {% endblock %}
 
 {% block content %}
-<h1>{{ slug }} {{ semester }} {{ year }}</h1>
+<h1>{{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %}  {{ semester }} {{ year }} schedule</h1>
 <table class="schedule">
     <thead>
         <tr>
@@ -53,42 +53,46 @@
     </tbody>
 </table>
 <form action="{% url select_course slug %}" method="post">
-    <p>
+    <div class="yui-g">
         {% for course in legend %}
-            <span class="{{ course.css_class }} legend" title="{{ course.full_name }}">
-                <input type="checkbox" name="course" value="{{ course.id }}" />
-                {% if course.url %}
-                    <a href="{{ course.url }}">{{ course }}</a>
-                {% else %}
-                    {{ course }}
-                {% endif %}
-            </span>
+            <div class="{{ course.css_class }} legend left" title="{{ course.full_name }}">
+                <label>
+                    <input type="checkbox" name="course" value="{{ course.id }}" />
+                    {% if course.url %}
+                        <a href="{{ course.url }}">{{ course }}</a>
+                    {% else %}
+                        {{ course }}
+                    {% endif %}
+                </label>
+            </div>
         {% endfor %}
-    </p>
-    <p>
-        <input type="text" name="course" size="16"/>
-        <button name="submit_add">Add</button>
-        <button name="submit_remove">Remove selected</button>
-        {% if request.GET.groups %}
-            <a href=".">Hide group options</a>
-        {% else %}
-            <a href="?groups=1">Group options</a>
-        {% endif %}
-    </p>
+        <p class="left">
+            <input type="text" name="course" size="16"/>
+            <button name="submit_add">Add</button>
+            <button name="submit_remove">Remove selected</button>
+            {% if request.GET.groups %}
+                <a href=".">Hide group options</a>
+            {% else %}
+                <a href="?groups=1">Group options</a>
+            {% endif %}
+        </p>
+    </div>
 </form>
 
 {% if request.GET.groups %}
     <form action="{% url select_groups slug %}" method="post">
-        {% for course,groups in courses %}
-            <p class="{{ course.css_class }} legend left">
-                <b>{{ course }}</b> <br />
-                <span class="small">{{ course.full_name }}</span> <br />
-                {{ groups.groups }}
+        <div class="yui-g">
+            {% for course,groups in courses %}
+                <p class="{{ course.css_class }} legend left box">
+                    <b>{{ course }}</b> <br />
+                    <span class="small">{{ course.full_name }}</span> <br />
+                    {{ groups.groups }}
+                </p>
+            {% endfor %}
+            <p>
+                <button>Save groups</button>
             </p>
-        {% endfor %}
-        <p>
-            <button>Save groups</button>
-        </p>
+        </div>
     </form>
 {% endif %}
 
