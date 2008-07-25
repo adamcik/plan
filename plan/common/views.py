@@ -48,24 +48,6 @@ def schedule(request, slug=None, year=None, semester=None):
     color_map = {}
     color_index = 0
 
-    # Get all lectures for userset during given period. To do this we need to
-    # pull in a bunch of extra tables and manualy join them in the where
-    # cluase. The first element in the custom where is the important one that
-    # limits our results, the rest are simply meant for joining.
-    where=[
-        'common_userset_groups.group_id = common_group.id',
-        'common_userset_groups.userset_id = common_userset.id',
-        'common_group.id = common_lecture_groups.group_id',
-        'common_lecture_groups.lecture_id = common_lecture.id'
-    ]
-    tables=[
-        'common_userset_groups',
-        'common_group',
-        'common_lecture_groups'
-    ]
-
-    initial_lectures = Lecture.objects.filter(course__userset__slug=slug).distinct().select_related().extra(where=where, tables=tables).order_by('course__name', 'day', 'start_time', 'type')
-
     # Array with courses to show
     courses = []
 
@@ -84,7 +66,32 @@ def schedule(request, slug=None, year=None, semester=None):
        semester_display = semester
        semester = dict(map(lambda x: (x[1],x[0]), SEMESTER.TYPES))[semester.lower()]
 
-    for c in Course.objects.filter(userset__slug=slug, lecture__semester__year__exact=year, lecture__semester__type__exact=semester).distinct():
+    semester = Semester.objects.get(year=year, type=semester)
+
+    # Get all lectures for userset during given period. To do this we need to
+    # pull in a bunch of extra tables and manualy join them in the where
+    # cluase. The first element in the custom where is the important one that
+    # limits our results, the rest are simply meant for joining.
+    where=[
+        'common_userset_groups.group_id = common_group.id',
+        'common_userset_groups.userset_id = common_userset.id',
+        'common_group.id = common_lecture_groups.group_id',
+        'common_lecture_groups.lecture_id = common_lecture.id'
+    ]
+    tables=[
+        'common_userset_groups',
+        'common_group',
+        'common_lecture_groups'
+    ]
+
+    filter = {
+        'course__userset__slug': slug,
+        'course__userset__semester': semester,
+    }
+
+    initial_lectures = Lecture.objects.filter(**filter).distinct().select_related().extra(where=where, tables=tables).order_by('course__name', 'day', 'start_time', 'type')
+
+    for c in Course.objects.filter(userset__slug=slug, lecture__semester=semester).distinct():
         groups = c.userset_set.get(slug=slug).groups.values_list('id', flat=True)
         group_form = GroupForm(Group.objects.filter(lecture__course=c).distinct(), initial={'groups': groups}, prefix=c.id)
 
@@ -233,6 +240,13 @@ def select_course(request, slug):
         if 'submit_add' in request.POST:
             lookup = request.POST['course'].upper().strip().split()
 
+            if datetime.now().month <= 6:
+                type = Semester.SPRING
+            else:
+                type = Semester.FALL
+
+            semester = Semester.objects.get(year=datetime.now().year, type=type)
+
             for l in lookup:
                 try:
                     course = Course.objects.get(name=l)
@@ -242,7 +256,7 @@ def select_course(request, slug):
                     scrape(request, l, no_auth=True)
                     course = Course.objects.get(name=l)
 
-                userset, created = UserSet.objects.get_or_create(slug=slug, course=course)
+                userset, created = UserSet.objects.get_or_create(slug=slug, course=course, semester=semester)
 
                 for g in Group.objects.filter(lecture__course=course).distinct():
                     userset.groups.add(g)

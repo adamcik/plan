@@ -5,7 +5,7 @@ from django.db import models
 class UserSet(models.Model):
     slug = models.SlugField()
     course = models.ForeignKey('Course')
-#    semester = models.ForeignKey('Semester')
+    semester = models.ForeignKey('Semester')
     groups = models.ManyToManyField('Group', blank=True, null=True)
 
     exclude = models.ManyToManyField('Lecture', blank=True, null=True, related_name='excluded_from')
