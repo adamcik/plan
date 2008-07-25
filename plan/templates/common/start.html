@@ -2,13 +2,6 @@
 
 {% block content %}
     <h1>timetable generator for NTNU</h1>
-    {% if errors %}
-        <ul>
-            {% for e in errors %}
-                <li>{{ e }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
     <form action="." method="post">
         <p class="large">
             Please enter a short string identifying your personal timetable, ie

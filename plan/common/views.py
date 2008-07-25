@@ -18,21 +18,15 @@ from plan.common.forms import *
 MAX_COLORS = 8
 
 def getting_started(request):
-    errors = []
-    # FIXME form
     if request.method == 'POST' and 'slug' in request.POST:
-        try:
-            slug = slugify(request.POST['slug'])
-            response =  HttpResponseRedirect(reverse('schedule', args=[slug]))
+        slug = slugify(request.POST['slug'])
+        response =  HttpResponseRedirect(reverse('schedule', args=[slug]))
 
-            # Store last timetable visited in a cookie so that we can populate
-            # the field with a default value next time.
-            response.set_cookie('last', slug, 60*60*24*7*4)
-            return response
-
-        except NoReverseMatch:
-            errors.append('err')
-    return render_to_response('common/start.html', {'errors': errors}, RequestContext(request))
+        # Store last timetable visited in a cookie so that we can populate
+        # the field with a default value next time.
+        response.set_cookie('last', slug, 60*60*24*7*4)
+        return response
+    return render_to_response('common/start.html', {}, RequestContext(request))
 
 def schedule(request, slug=None, year=None, semester=None):
     # Data structure that stores what will become the html table
