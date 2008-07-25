@@ -64,7 +64,7 @@ def schedule(request, slug=None, year=None, semester=None):
         'common_lecture_groups'
     ]
 
-    initial_lectures = Lecture.objects.filter(course__userset__slug=slug).distinct().select_related().extra(where=where, tables=tables).order_by('course__name')
+    initial_lectures = Lecture.objects.filter(course__userset__slug=slug).distinct().select_related().extra(where=where, tables=tables).order_by('course__name', 'day', 'start_time', 'type')
 
     # Array with courses to show
     courses = []
@@ -140,7 +140,7 @@ def schedule(request, slug=None, year=None, semester=None):
             css.append('single')
 
         while start <= end:
-            # Replace the cell we found with a hase containing info about our
+            # Replace the cell we found with a base containing info about our
             # lecture
             table[start][lecture.day][row] = {
                 'lecture': lecture,
