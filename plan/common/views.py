@@ -230,6 +230,8 @@ def select_groups(request, slug):
     return HttpResponseRedirect(reverse('schedule', args=[slug])+'?advanced=1')
 
 def select_course(request, slug):
+    extra = ''
+
     if request.method == 'POST' and 'course' in request.POST:
         if 'submit_add' in request.POST:
             lookup = request.POST['course'].upper().strip().split()
@@ -244,16 +246,17 @@ def select_course(request, slug):
             for l in lookup:
                 try:
                     course = Course.objects.get(name=l)
+
                     if not course.lecture_set.count():
-                        raise Course.DoesNotExist
+                        scrape(request, l, no_auth=True)
+
+                        userset, created = UserSet.objects.get_or_create(slug=slug, course=course, semester=semester)
+
+                        for g in Group.objects.filter(lecture__course=course).distinct():
+                            userset.groups.add(g)
+
                 except Course.DoesNotExist:
-                    scrape(request, l, no_auth=True)
-                    course = Course.objects.get(name=l)
-
-                userset, created = UserSet.objects.get_or_create(slug=slug, course=course, semester=semester)
-
-                for g in Group.objects.filter(lecture__course=course).distinct():
-                    userset.groups.add(g)
+                    pass
 
             extra = '?advanced=1'
 
@@ -261,8 +264,6 @@ def select_course(request, slug):
             courses = [c.strip() for c in request.POST.getlist('course') if c.strip()]
             sets = UserSet.objects.filter(slug__iexact=slug, course__id__in=courses)
             sets.delete()
-
-            extra = ''
 
     return HttpResponseRedirect(reverse('schedule', args=[slug])+extra)
 
