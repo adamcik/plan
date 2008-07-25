@@ -24,9 +24,13 @@
                 {% if cells %}
                     {% for c in cells %}
                         {% if not c.remove %}
-                            <td colspan="{{ c.colspan|default:"1" }}" rowspan="{{ c.rowspan|default:"1" }}" {% if c.class or forloop.first %}class="{% if forloop.first %}first {% endif %}{{ c.class }}"{% endif %}>
+                            <td colspan="{{ c.colspan|default:"1" }}"
+                                rowspan="{{ c.rowspan|default:"1" }}"
+                                {% if c.class or forloop.first %}class="{% if forloop.first %}first {% endif %}{{ c.class }}"{% endif %}
+                                {% if c.lecture %}title="{{ c.lecture.course.full_name }}"{% endif %}>
+
                                 {% if c.lecture %}
-                                    <div class="course" title="{{ c.lecture.course.full_name }}">{{ c.lecture.course }}</div>
+                                    <div class="course">{{ c.lecture.course }}</div>
                                     <div class="type">{{ c.lecture.type }}</div>
                                     <div class="room">{{ c.lecture.room }}</div>
                                     {% comment %}
