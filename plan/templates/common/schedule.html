@@ -55,7 +55,7 @@
 <form action="{% url select_course slug %}" method="post">
     <div class="yui-g">
         {% for course in legend %}
-            <div class="{{ course.css_class }} legend left" title="{{ course.full_name }}">
+            <p class="{{ course.css_class }} legend left" title="{{ course.full_name }}">
                 <label>
                     <input type="checkbox" name="course" value="{{ course.id }}" />
                     {% if course.url %}
@@ -64,22 +64,31 @@
                         {{ course }}
                     {% endif %}
                 </label>
-            </div>
+            </p>
         {% endfor %}
-        <p class="left">
-            <input type="text" name="course" size="16"/>
-            <button name="submit_add">Add</button>
+    </div>
+    <div class="yui-g">
+        <p>
+            <input type="text" name="course" size="30"/>
+            <button name="submit_add">Add courses</button>
             <button name="submit_remove">Remove selected</button>
-            {% if request.GET.groups %}
-                <a href=".">Hide group options</a>
+            &bull;
+            {% if request.GET.advanced %}
+                <a href=".">Hide advanced options</a>
             {% else %}
-                <a href="?groups=1">Group options</a>
+                <a href="?advanced=1">Advanced options</a>
             {% endif %}
+            &bull;
+            <a href="{% url frontpage %}">Frontpage</a>
+            <br />
+            (Multiple courses can be added at once by seperating to course codes with spaces)
         </p>
     </div>
 </form>
 
-{% if request.GET.groups %}
+{% if request.GET.advanced %}
+    <h2>Advanced options</h2>
+    <h3>Change groups</h3>
     <form action="{% url select_groups slug %}" method="post">
         <div class="yui-g">
             {% for course,groups in courses %}
@@ -94,6 +103,38 @@
             </p>
         </div>
     </form>
+    {% if lectures and not lectures %}
+        <h3>Lecture list</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Course</th>
+                    <th>Day</th>
+                    <th>Time</th>
+                    <th>Room</th>
+                    <th>Type</th>
+                    <th>Groups</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for l in lectures %}
+                    <tr class="{{ l.css_class }}">
+                        <td><input type="checkbox" value="{{ l.id }}" /></td>
+                        <td>{{ l.course }}</td>
+                        <td>{{ l.get_day_display }}</td>
+                        <td>{{ l.get_start_time_display }}-{{ l.get_end_time_display }}</td>
+                        <td>{{ l.room }}</td>
+                        <td>{{ l.type }}</td>
+                        <td>{% for g in  l.groups.all %}{{ g }}{% if not forloop.last %},{% endif %} {% endfor %}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p>
+            <button>Hide selected lectures</button>
+        </p>
+    {% endif %}
 {% endif %}
 
 {% endblock %}
