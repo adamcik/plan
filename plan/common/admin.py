@@ -14,7 +14,7 @@ class UserSetAdmin(admin.ModelAdmin):
 
 class LectureAdmin(admin.ModelAdmin):
     list_display = ('course', 'day', 'start_time', 'end_time', 'room', 'type')
-    search_fields = list_display
+    search_fields = ('course__name', 'room__name', 'type__name')
     list_filter = ['day', 'start_time', 'room']
     filter_horizontal = ('weeks', 'groups')
     select_related = True
