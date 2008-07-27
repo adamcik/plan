@@ -31,6 +31,8 @@ class Room(models.Model):
         return self.name
 
 class Group(models.Model):
+    DEFAULT = 'Unknown'
+
     name = models.CharField(max_length=100, unique=True)
 
     def __unicode__(self):
