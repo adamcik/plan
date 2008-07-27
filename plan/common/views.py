@@ -58,7 +58,7 @@ def schedule(request, slug=None, year=None, semester=None):
         semester_display = dict(Semester.TYPES)[semester]
     else:
        semester_display = semester
-       semester = dict(map(lambda x: (x[1],x[0]), SEMESTER.TYPES))[semester.lower()]
+       semester = dict(map(lambda x: (x[1],x[0]), Semester.TYPES))[semester.lower()]
 
     semester = Semester.objects.get(year=year, type=semester)
 

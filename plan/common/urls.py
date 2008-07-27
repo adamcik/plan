@@ -5,7 +5,7 @@ from plan.common.models import Room, Course
 urlpatterns = patterns('plan.common.views',
     url(r'^$', 'getting_started', name="frontpage"),
     url(r'^s/(?P<slug>[a-zA-Z0-9-_]+)/$', 'schedule', name='schedule'),
-    url(r'^s/(?P<slug>[a-zA-Z0-9-_]+)/(?P<year>\d{4})/(?P<semester>\w+)/$', 'schedule'),
+    url(r'^(?P<year>\d{4})/(?P<semester>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/$', 'schedule'),
 
     url(r'^debug/$', 'scrape_list'),
     url(r'^debug/exam/$', 'scrape_exam'),
