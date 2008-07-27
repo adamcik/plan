@@ -20,7 +20,14 @@ MAX_COLORS = 8
 def getting_started(request):
     if request.method == 'POST' and 'slug' in request.POST:
         slug = slugify(request.POST['slug'])
-        response = HttpResponseRedirect(reverse('schedule', args=[slug]))
+
+        # Default to current semester
+        if datetime.now().month <= 6:
+            semester = Semester(type=Semester.SPRING).get_type_display()
+        else:
+            semester = Semester(type=Semester.FALL).get_type_display()
+
+        response = HttpResponseRedirect(reverse('schedule', args=[datetime.now().year, semester, slug]))
 
         # Store last timetable visited in a cookie so that we can populate
         # the field with a default value next time.
@@ -28,7 +35,7 @@ def getting_started(request):
         return response
     return render_to_response('common/start.html', {}, RequestContext(request))
 
-def schedule(request, slug=None, year=None, semester=None):
+def schedule(request, year, semester, slug, advanced=False):
     # Data structure that stores what will become the html table
     table = [[[{}] for a in Lecture.DAYS] for b in Lecture.START]
 
@@ -50,16 +57,7 @@ def schedule(request, slug=None, year=None, semester=None):
         year = datetime.now().year
 
     # Default to current semester
-    if not semester:
-        if datetime.now().month <= 6:
-            semester = Semester.SPRING
-        else:
-            semester = Semester.FALL
-        semester_display = dict(Semester.TYPES)[semester]
-    else:
-       semester_display = semester
-       semester = dict(map(lambda x: (x[1],x[0]), Semester.TYPES))[semester.lower()]
-
+    semester = dict(map(lambda x: (x[1],x[0]), Semester.TYPES))[semester.lower()]
     semester = Semester.objects.get(year=year, type=semester)
 
     # Get all lectures for userset during given period. To do this we need to
@@ -208,14 +206,14 @@ def schedule(request, slug=None, year=None, semester=None):
 
 
     return render_to_response('common/schedule.html', {
-                            'table': table,
-                            'legend': map(lambda x: x[0], courses),
-                            'courses': courses,
+                            'advanced': advanced,
                             'colspan': span,
-                            'slug': slug,
-                            'year': year,
+                            'courses': courses,
                             'lectures': initial_lectures,
-                            'semester': semester_display,
+                            'legend': map(lambda x: x[0], courses),
+                            'semester': semester,
+                            'slug': slug,
+                            'table': table,
                         }, RequestContext(request))
 
 def select_groups(request, slug):

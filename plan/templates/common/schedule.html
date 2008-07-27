@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
 {% block title %}
-    {{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %} {{ semester }} {{ year }} {{ block.super }}
+    {{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %} {{ semester.get_type_display }} {{ semester.year }} {{ block.super }}
 {% endblock %}
 
 {% block content %}
-<h1>{{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %}  {{ semester }} {{ year }} schedule</h1>
+<h1>{{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %}  {{ semester.get_type_display }} {{ semester.year }} schedule</h1>
 <table class="schedule">
     <thead>
         <tr>
@@ -77,10 +77,10 @@
             <button name="submit_add">Add courses</button>
             <button name="submit_remove">Remove selected</button>
             &bull;
-            {% if request.GET.advanced %}
-                <a href=".">Hide advanced options</a>
+            {% if advanced %}
+                <a href="{% url schedule semester.year,semester.get_type_display,slug %}">Hide advanced options</a>
             {% else %}
-                <a href="?advanced=1">Advanced options</a>
+                <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">Advanced options</a>
             {% endif %}
             &bull;
             <a href="{% url frontpage %}">Frontpage</a>
@@ -90,7 +90,7 @@
     </div>
 </form>
 
-{% if request.GET.advanced %}
+{% if advanced %}
     <h2>Advanced options</h2>
     <h3>Change groups</h3>
     <form action="{% url select_groups slug %}" method="post">
