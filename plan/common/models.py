@@ -1,4 +1,5 @@
 from datetime import datetime
+from urllib import quote as urlquote
 
 from django.db import models
 
@@ -57,6 +58,11 @@ class Semester(models.Model):
         (SPRING, 'spring'),
         (FALL, 'fall'),
     )
+    URL_MAP = (
+        (SPRING, 'v'),
+        (FALL, 'h'),
+    )
+
     year = models.PositiveSmallIntegerField(choices=[(x,x) for x in range(datetime.now().year-1,datetime.now().year+2)])
     type = models.PositiveSmallIntegerField(choices=TYPES)
 
@@ -65,6 +71,23 @@ class Semester(models.Model):
 
     class Meta:
         ordering = ('-year', '-type')
+
+    def get_exam_page(self):
+        url = 'http://www.ntnu.no/eksamen/plan/%s%s/'
+
+        return url % (str(self.year)[-2:], dict(self.URL_MAP)[self.type])
+
+    def get_lecture_page(self, course):
+        url = 'http://www.ntnu.no/studieinformasjon/timeplan/%s%s/?emnekode=%s-1'
+
+        return url % (str(self.year)[-2:], dict(self.URL_MAP)[self.type], course.upper().strip())
+
+    def get_course_page(self, letter):
+        url = u'http://www.ntnu.no/studieinformasjon/timeplan/%s%s/?bokst=%s'
+
+        return url % (str(self.year)[-2:], dict(self.URL_MAP)[self.type], urlquote(letter.encode('utf-8')))
+
+    
 
 class Exam(models.Model):
     WRITTEN = 'S'
