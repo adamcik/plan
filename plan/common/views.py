@@ -51,6 +51,9 @@ def schedule(request, year, semester, slug, advanced=False):
     color_map = {}
     color_index = 0
 
+    # Header colspans
+    span = [1] * 5
+
     # Array with courses to show
     courses = []
     group_forms = {}
@@ -103,28 +106,42 @@ def schedule(request, year, semester, slug, advanced=False):
 
     initial_lectures = Lecture.objects.filter(**filter).distinct().select_related(*related).extra(where=where, tables=tables).order_by(*order)
 
-    for u in UserSet.objects.filter(slug=slug, semester=semester):
-        initial_groups = u.groups.all()
-        groups = Group.objects.filter(lecture__course__id=u.course_id).distinct()
+    if advanced:
+        for u in UserSet.objects.filter(slug=slug, semester=semester):
+            # SQL: this causes extra queries (can be worked around, subquery?)
+            initial_groups = u.groups.values_list('id', flat=True)
 
-        group_forms[u.course_id] = GroupForm(groups, initial={'groups': initial_groups}, prefix=u.course_id)
+            # SQL: this causes extra queries (hard to work around, probably not
+            # worh it)
+            groups = Group.objects.filter(lecture__course__id=u.course_id).distinct()
+
+            # FIXME Force evaluation of queries so that we can trace them better in the logs, should be removed.
+            [len(groups), len(initial_groups)]
+
+            # SQL: For loop generates to quries per userset.
+            group_forms[u.course_id] = GroupForm(groups, initial={'groups': initial_groups}, prefix=u.course_id)
 
     for c in Course.objects.filter(userset__slug=slug, lecture__semester=semester).distinct():
+        # Create an array containing our courses and add the css class
         if c.id not in color_map:
             color_index = (color_index + 1) % MAX_COLORS
             color_map[c.id] = 'lecture%d' % color_index
 
         c.css_class = color_map[c.id]
 
-        courses.append([c, group_forms[c.id]])
+        courses.append([c, group_forms.get(c.id)])
 
     for i,lecture in enumerate(initial_lectures.exclude(excluded_from__slug=slug)):
+        # Our actual layout algorithm for handling collisions and displaying in
+        # tables:
+
         start = lecture.start_time - Lecture.START[0][0]
         end = lecture.end_time - Lecture.END[0][0]
         rowspan = end - start + 1
 
         first = start
 
+        # Keep track of which lectures are displayed
         included.append(lecture.id)
 
         # Try to find leftmost row that can fit our lecture, if we run out of
@@ -147,11 +164,6 @@ def schedule(request, year, semester, slug, advanced=False):
 
         start = first
         remove = False
-
-        # Set the css class for the color map
-        if lecture.course_id not in color_map:
-            color_index = (color_index + 1) % MAX_COLORS
-            color_map[lecture.course_id] = 'lecture%d' % color_index
 
         css = [color_map[lecture.course_id]]
 
@@ -189,7 +201,8 @@ def schedule(request, year, semester, slug, advanced=False):
             start += 1
 
     for lecture in lectures:
-        # Loop over supplementary data structure
+        # Loop over supplementary data structure using this to figure out which
+        # colspan expansions are safe
         i = lecture['i']
         j = lecture['j']
         m = lecture['m']
@@ -216,20 +229,22 @@ def schedule(request, year, semester, slug, advanced=False):
             for k in xrange(i,i+height):
                 table[k][j][l]['remove'] = True
 
+    # FIXME add second round of expansion equalising colspan
+
     # Calculate the header colspan
-    span = [1] * 5
     for i,cell in enumerate(table[0]):
+        # FIXME keep track of this during main excution of algorithm
         span[i] = len(cell)
 
     # Insert extra cell containg times
     for t,start,end in map(lambda x,y: (x[0], x[1][1],y[1]), enumerate(Lecture.START), Lecture.END):
         table[t].insert(0, [{'time': '%s - %s' % (start, end), 'class': 'time'}])
 
-    # Add colors and exlude status
-    for i,lecture in enumerate(initial_lectures):
-        initial_lectures[i].css_class =  color_map[lecture.course_id]
-        initial_lectures[i].excluded  =  lecture.id not in included
-
+    if advanced:
+        # Add colors and exlude status
+        for i,lecture in enumerate(initial_lectures):
+            initial_lectures[i].css_class =  color_map[lecture.course_id]
+            initial_lectures[i].excluded  =  lecture.id not in included
 
     return render_to_response('common/schedule.html', {
                             'advanced': advanced,
