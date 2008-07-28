@@ -53,6 +53,7 @@ def schedule(request, year, semester, slug, advanced=False):
 
     # Array with courses to show
     courses = []
+    group_forms = {}
 
     # Default to current year
     if not year:
@@ -61,6 +62,9 @@ def schedule(request, year, semester, slug, advanced=False):
     # Default to current semester
     semester = dict(map(lambda x: (x[1],x[0]), Semester.TYPES))[semester.lower()]
     semester = Semester.objects.get(year=year, type=semester)
+
+    # Courses to highlight
+    highlight = request.GET.get('highlight', '').split(',')
 
     # Get all lectures for userset during given period. To do this we need to
     # pull in a bunch of extra tables and manualy join them in the where
@@ -84,22 +88,35 @@ def schedule(request, year, semester, slug, advanced=False):
         'course__userset__semester': semester,
     }
 
-    # Courses to highlight
-    highlight = request.GET.get('highlight', '').split(',')
+    related = [
+        'type__name',
+        'room__name',
+        'course__name',
+    ]
 
-    initial_lectures = Lecture.objects.filter(**filter).distinct().select_related().extra(where=where, tables=tables).order_by('course__name', 'day', 'start_time', 'type')
+    order = [
+        'course__name',
+        'day',
+        'start_time',
+        'type__name',
+    ]
+
+    initial_lectures = Lecture.objects.filter(**filter).distinct().select_related(*related).extra(where=where, tables=tables).order_by(*order)
+
+    for u in UserSet.objects.filter(slug=slug, semester=semester):
+        initial_groups = u.groups.all()
+        groups = Group.objects.filter(lecture__course__id=u.course_id).distinct()
+
+        group_forms[u.course_id] = GroupForm(groups, initial={'groups': initial_groups}, prefix=u.course_id)
 
     for c in Course.objects.filter(userset__slug=slug, lecture__semester=semester).distinct():
-        groups = c.userset_set.get(slug=slug).groups.values_list('id', flat=True)
-        group_form = GroupForm(Group.objects.filter(lecture__course=c).distinct(), initial={'groups': groups}, prefix=c.id)
-
         if c.id not in color_map:
             color_index = (color_index + 1) % MAX_COLORS
             color_map[c.id] = 'lecture%d' % color_index
 
         c.css_class = color_map[c.id]
 
-        courses.append([c, group_form])
+        courses.append([c, group_forms[c.id]])
 
     for i,lecture in enumerate(initial_lectures.exclude(excluded_from__slug=slug)):
         start = lecture.start_time - Lecture.START[0][0]
@@ -326,7 +343,7 @@ def scrape_exam(request, no_auth=False):
     if not request.user.is_authenticated() and not no_auth:
         raise Http404
 
-    url = 'http://www.ntnu.no/eksamen/plan/08s/'
+    url = 'http://www.ntnu.no/eksamen/plan/08h/'
 
     html = ''.join(urlopen(url).readlines())
     soup = BeautifulSoup(html)
