@@ -190,6 +190,25 @@ def schedule(request, year, semester, slug, advanced=False):
             for k in xrange(i,i+height):
                 table[k][j][l]['remove'] = True
 
+#    for lecture in lectures:
+#        i = lecture['i']
+#        j = lecture['j']
+#        m = lecture['m']
+#        n = m + 1
+#
+#        # column has colspan larger than 1
+#        while n < len(table[i][j]):
+#            if 'remove' not in table[i][j][n]:
+#                while (table[i][j][m]['colspan'] - table[i][j][n]['colspan']) > 1:
+#                    table[i][j][m]['colspan'] += 1
+#                    table[i][j][n]['colspan'] -= 1
+#
+#                while (table[i][j][m]['colspan'] - table[i][j][n]['colspan']) < -1:
+#                    table[i][j][m]['colspan'] -= 1
+#                    table[i][j][n]['colspan'] += 1
+#
+#                n += 1
+
     # Calculate the header colspan
     span = [1] * 5
     for i,cell in enumerate(table[0]):
