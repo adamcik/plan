@@ -28,6 +28,7 @@ textarea[cols], input[size] {
 }
 thead th {
 	border: 0;
+  border-bottom: 1px solid #666 !important;
 	text-align: left;
 }
 tbody td {
@@ -57,6 +58,7 @@ margin-right: 0;
 	min-width: 6em;
 	max-width: 10em;
 /*	-moz-border-radius: 0.5em; */
+	border: 1px solid #666;
 }
 .legend a {
 	color: #000;
@@ -72,6 +74,7 @@ margin-right: 0;
 	margin-right: 0.5em;
 }
 .box {
+	border: 1px solid #666;
 	min-height: 10em;
 	*height: 10em;
 }
@@ -110,8 +113,8 @@ margin-right: 0;
   border: 1px solid #666;
 }
 .schedule th, .schedule td {
-  border-top:    1px dashed #aaa;
-  border-bottom: 1px dashed #aaa;
+  border-top:    1px solid #ccc;
+  border-bottom: 1px solid #ccc;
   padding: 0.1em 0.2em;
   vertical-align: top;
 	text-align: left;
@@ -123,6 +126,12 @@ margin-right: 0;
 }
 .schedule td.first {
     border-left: 1px solid #666666;
+}
+.schedule td.last {
+    border-right: 1px solid #666666;
+}
+.schedule tr.bottom td {
+    border-bottom: 1px solid #666666;
 }
 .schedule th {
   border: 0;
@@ -148,8 +157,3 @@ margin-right: 0;
 .lecture5  { background: #FFF2AE; }
 .lecture6  { background: #F1E2CC; }
 .lecture7  { background: #CCCCCC; }
-
-.lecture0, .lecture1, .lecture2, .lecture3, .lecture4, .lecture5,
-.lecture6, .lecture7 {
-    border: 1px solid #666666 !important;
-}

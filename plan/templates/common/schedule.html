@@ -19,14 +19,14 @@
     </thead>
     <tbody>
     {% for row in table %}
-        <tr class="{% cycle odd,even %}">
+        <tr class="{% cycle odd,even %}{% if forloop.last %} bottom{% endif %}">
             {% for cells in row %}
                 {% if cells %}
                     {% for c in cells %}
                         {% if not c.remove %}
                             <td colspan="{{ c.colspan|default:"1" }}"
                                 rowspan="{{ c.rowspan|default:"1" }}"
-                                {% if c.class or forloop.first %}class="{% if forloop.first %}first {% endif %}{{ c.class }}"{% endif %}
+                                {% if c.class or forloop.first or forloop.parentloop.last %}class="{% if forloop.first %}first {% endif %}{% if forloop.parentloop.last %}last {% endif %}{{ c.class }}"{% endif %}
                                 {% if c.lecture %}title="{{ c.lecture.course.full_name }}"{% endif %}>
 
                                 {% if c.lecture %}
