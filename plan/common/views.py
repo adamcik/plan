@@ -64,6 +64,7 @@ def schedule(request, year, semester, slug, advanced=False):
     # pull in a bunch of extra tables and manualy join them in the where
     # cluase. The first element in the custom where is the important one that
     # limits our results, the rest are simply meant for joining.
+    # FIXME convert the first where clause to a select boolean
     where=[
         'common_userset_groups.group_id = common_group.id',
         'common_userset_groups.userset_id = common_userset.id',
@@ -222,16 +223,19 @@ def schedule(request, year, semester, slug, advanced=False):
                             'table': table,
                         }, RequestContext(request))
 
-def select_groups(request, slug):
+def select_groups(request, year, type, slug):
+    type = dict(map(lambda x: (x[1],x[0]), Semester.TYPES))[type.lower()]
+    semester = Semester.objects.get(year=year, type=type)
+
     if request.method == 'POST':
         for c in Course.objects.filter(userset__slug=slug).distinct().order_by('id'):
             group_form = GroupForm(Group.objects.filter(lecture__course=c).distinct(), request.POST, prefix=c.id)
 
             if group_form.is_valid():
-                set = UserSet.objects.get(course=c, slug=slug)
+                set = UserSet.objects.get(course=c, slug=slug, semester=semester)
                 set.groups = group_form.cleaned_data['groups']
 
-    return HttpResponseRedirect(reverse('schedule', args=[slug])+'?advanced=1')
+    return HttpResponseRedirect(reverse('schedule-advanced', args=[semester.year,semester.get_type_display(),slug]))
 
 def select_course(request, year, type, slug):
     highlight = []

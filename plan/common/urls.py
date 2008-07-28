@@ -13,7 +13,7 @@ urlpatterns = patterns('plan.common.views',
     url(r'^s/(?P<slug>[a-zA-Z0-9-_]+)/groups/$', 'select_groups', name='select_groups'),
     url(r'^s/(?P<slug>[a-zA-Z0-9-_]+)/exclude/$', 'select_lectures', name='select_lectures'),
 
-    url(r'^(?P<year>\d{4})/(?P<type>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/change/$', 'select_course', name='change'),
-    url(r'^(?P<year>\d{4})/(?P<type>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/groups/$', 'select_groups'),
+    url(r'^(?P<year>\d{4})/(?P<type>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/change/$', 'select_course', name='change-course'),
+    url(r'^(?P<year>\d{4})/(?P<type>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/groups/$', 'select_groups', name='change-groups'),
     url(r'^(?P<year>\d{4})/(?P<type>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/exclude/$', 'select_lectures'),
 )
