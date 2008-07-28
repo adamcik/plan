@@ -293,11 +293,15 @@ def select_lectures(request, slug):
 
     return HttpResponseRedirect(reverse('schedule', args=[slug])+'?advanced=1')
 
+# FIXME take in semester object
 def scrape_list(request):
+    '''Scrape the NTNU website to retrive all available courses'''
     if not request.user.is_authenticated():
         raise Http404
 
     abc = u'ABCDEFGHIJKLMNOPQRSTUVWXYÆØÅ'
+
+    # FIMXE base on semester
     url = u'http://www.ntnu.no/studieinformasjon/timeplan/h08/?bokst=%s'
 
     courses = {}
@@ -322,6 +326,7 @@ def scrape_list(request):
     return HttpResponse(str('\n'.join([str(c) for c in courses.items()])), mimetype='text/plain')
 
 def scrape_exam(request, no_auth=False):
+    # FIXME get into working shape
     if not request.user.is_authenticated() and not no_auth:
         raise Http404
 
@@ -382,7 +387,9 @@ def scrape_exam(request, no_auth=False):
 
     return HttpResponse(str('\n'.join([str(r) for r in results])), mimetype='text/plain')
 
+# FIXME take semester as parameter
 def scrape(request, course, no_auth=False):
+    '''Retrive all lectures for a given course'''
     if not no_auth and not request.user.is_authenticated():
         raise Http404
 
@@ -406,6 +413,8 @@ def scrape(request, course, no_auth=False):
         lecture = True
 
         for i,td in enumerate(tr.findAll('td')):
+            # Loop over our td's basing our action on the td's index in the tr
+            # element.
             if i == 0:
                 if td.get('colspan') == '4':
                     type = td.findAll(text=text_only)
@@ -453,23 +462,20 @@ def scrape(request, course, no_auth=False):
 
         day = ['Mandag', 'Onsdag', 'Tirsdag', 'Torsdag', 'Fredag'].index(r['time'][0][0])
 
-        start = r['time'][0][1]
-        end = r['time'][0][2]
+        # We choose to be slightly naive and only care about which hour
+        # something starts.
+        start = int(r['time'][0][1].split(':')[0])
+        end = int(r['time'][0][2].split(':')[0])
 
-        if len(start) == 4:
-            start = '0%s' % start
-        if len(end) == 4:
-            end = '0%s' % end
-
-        start = dict(map(lambda x: (x[1],x[0]), Lecture.START))[start]
-        end = dict(map(lambda x: (x[1],x[0]), Lecture.END))[end]
+        start = dict(map(lambda x: (int(x[1].split(':')[0]),x[0]), Lecture.START))[start]
+        end = dict(map(lambda x: (int(x[1].split(':')[0]),x[0]), Lecture.END))[end]
 
         lecture, created = Lecture.objects.get_or_create(
-            course = course,
-            day = day,
-            semester = semester,
-            start_time = start,
-            end_time = end,
+            course=course,
+            day=day,
+            semester=semester,
+            start_time=start,
+            end_time=end,
         )
         if r['groups']:
             for g in r['groups']:
