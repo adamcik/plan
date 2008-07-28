@@ -5,18 +5,20 @@ from datetime import datetime
 from urllib import urlopen, quote as urlquote
 from BeautifulSoup import BeautifulSoup, NavigableString
 
-from django.shortcuts import get_object_or_404, render_to_response
-from django.template.context import RequestContext
-from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.db.models import Q
+from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.shortcuts import get_object_or_404, render_to_response
+from django.template.context import RequestContext
 from django.template.defaultfilters import slugify
+from django.views.decorators.cache import cache_page
 
 from plan.common.models import *
 from plan.common.forms import *
 
 MAX_COLORS = 8
 
+@cache_page(60*10)
 def getting_started(request):
     if request.method == 'POST' and 'slug' in request.POST:
         slug = slugify(request.POST['slug'])
