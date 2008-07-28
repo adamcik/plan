@@ -97,8 +97,8 @@ class Lecturer(models.Model):
         return self.name
 
 class Lecture(models.Model):
-    START = [(i, '%02d:15' % i) for i in range(8,21)]
-    END = [(i, '%02d:00' % i) for i in range(9,22)]
+    START = [(i, '%02d:15' % i) for i in range(8,20)]
+    END = [(i, '%02d:00' % i) for i in range(9,21)]
 
     DAYS = (
         (0, 'Monday'),
