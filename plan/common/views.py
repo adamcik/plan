@@ -81,6 +81,9 @@ def schedule(request, year, semester, slug, advanced=False):
         'course__userset__semester': semester,
     }
 
+    # Courses to highlight
+    highlight = request.GET.get('highlight', '').split(',')
+
     initial_lectures = Lecture.objects.filter(**filter).distinct().select_related().extra(where=where, tables=tables).order_by('course__name', 'day', 'start_time', 'type')
 
     for c in Course.objects.filter(userset__slug=slug, lecture__semester=semester).distinct():
@@ -137,6 +140,9 @@ def schedule(request, year, semester, slug, advanced=False):
 
         if rowspan == 1:
             css.append('single')
+
+        if str(lecture.course_id) in highlight:
+            css.append('highlight')
 
         while start <= end:
             # Replace the cell we found with a base containing info about our
@@ -227,23 +233,20 @@ def select_groups(request, slug):
 
     return HttpResponseRedirect(reverse('schedule', args=[slug])+'?advanced=1')
 
-def select_course(request, slug):
-    extra = ''
+def select_course(request, year, type, slug):
+    highlight = []
+    type = dict(map(lambda x: (x[1],x[0]), Semester.TYPES))[type.lower()]
+    semester = Semester.objects.get(year=year, type=type)
 
     if request.method == 'POST' and 'course' in request.POST:
         if 'submit_add' in request.POST:
             lookup = request.POST['course'].split()
 
-            if datetime.now().month <= 6:
-                type = Semester.SPRING
-            else:
-                type = Semester.FALL
-
-            semester = Semester.objects.get(year=datetime.now().year, type=type)
-
             for l in lookup:
                 try:
                     course = Course.objects.get(name__iexact=l.strip())
+
+                    highlight.append(str(course.id))
 
                     if not course.lecture_set.count():
                         scrape(request, l, no_auth=True)
@@ -254,16 +257,22 @@ def select_course(request, slug):
                         userset.groups.add(g)
 
                 except Course.DoesNotExist:
+                    # FIXME add user feedback
                     pass
 
-            extra = '?advanced=1'
+            # FIXME semester
+            url = reverse('schedule-advanced', args=[semester.year, semester.get_type_display(), slug])
+            extra = ','.join(highlight)
+
+            return HttpResponseRedirect('%s?highlight=%s' % (url, extra))
 
         elif 'submit_remove' in request.POST:
             courses = [c.strip() for c in request.POST.getlist('course') if c.strip()]
             sets = UserSet.objects.filter(slug__iexact=slug, course__id__in=courses)
             sets.delete()
 
-    return HttpResponseRedirect(reverse('schedule', args=[slug])+extra)
+    # FIXME semester
+    return HttpResponseRedirect(reverse('schedule', args=[semester.year, semester.get_type_display(), slug]))
 
 def select_lectures(request, slug):
     if request.method == 'POST':
