@@ -73,7 +73,9 @@ def schedule(request, year, semester, slug, advanced=False):
     # pull in a bunch of extra tables and manualy join them in the where
     # cluase. The first element in the custom where is the important one that
     # limits our results, the rest are simply meant for joining.
-    # FIXME convert the first where clause to a select boolean
+
+    # FIXME convert the first where clause to a select boolean, this would
+    # probably allow use to use the same initial_lectures query in both cases.
     where=[
         'common_userset_groups.group_id = common_group.id',
         'common_userset_groups.userset_id = common_userset.id',
@@ -162,6 +164,9 @@ def schedule(request, year, semester, slug, advanced=False):
             for j,time in enumerate(Lecture.START):
                 table[j][lecture.day].append({})
 
+            # Update the header colspan
+            span[lecture.day] += 1
+
         start = first
         remove = False
 
@@ -231,11 +236,6 @@ def schedule(request, year, semester, slug, advanced=False):
 
     # FIXME add second round of expansion equalising colspan
 
-    # Calculate the header colspan
-    for i,cell in enumerate(table[0]):
-        # FIXME keep track of this during main excution of algorithm
-        span[i] = len(cell)
-
     # Insert extra cell containg times
     for t,start,end in map(lambda x,y: (x[0], x[1][1],y[1]), enumerate(Lecture.START), Lecture.END):
         table[t].insert(0, [{'time': '%s - %s' % (start, end), 'class': 'time'}])
@@ -298,7 +298,6 @@ def select_course(request, year, type, slug):
                     # FIXME add user feedback
                     pass
 
-            # FIXME semester
             url = reverse('schedule-advanced', args=[semester.year, semester.get_type_display(), slug])
             extra = ','.join(highlight)
 
@@ -309,7 +308,6 @@ def select_course(request, year, type, slug):
             sets = UserSet.objects.filter(slug__iexact=slug, course__id__in=courses)
             sets.delete()
 
-    # FIXME semester
     return HttpResponseRedirect(reverse('schedule', args=[semester.year, semester.get_type_display(), slug]))
 
 def select_lectures(request, slug):
