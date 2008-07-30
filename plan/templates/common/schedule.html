@@ -109,7 +109,7 @@
     </form>
     {% if lectures %}
         <h3>Lecture list</h3>
-        <form action="{% url select_lectures slug %}" method="post">
+        <form action="{% url change-lectures semester.year,semester.get_type_display,slug %}" method="post">
             <table>
                 <thead>
                     <tr>

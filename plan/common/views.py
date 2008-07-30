@@ -310,14 +310,14 @@ def select_course(request, year, type, slug):
 
     return HttpResponseRedirect(reverse('schedule', args=[semester.year, semester.get_type_display(), slug]))
 
-def select_lectures(request, slug):
+def select_lectures(request, year,type,slug):
     if request.method == 'POST':
         excludes = request.POST.getlist('exclude')
 
         for userset in UserSet.objects.filter(slug=slug):
             userset.exclude = userset.course.lecture_set.filter(id__in=excludes)
 
-    return HttpResponseRedirect(reverse('schedule', args=[slug])+'?advanced=1')
+    return HttpResponseRedirect(reverse('schedule-advanced', args=[year,type,slug]))
 
 # FIXME take in semester object
 def scrape_list(request):
