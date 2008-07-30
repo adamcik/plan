@@ -6,6 +6,7 @@
 
 {% block content %}
 <h1>{{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %}  {{ semester.get_type_display }} {{ semester.year }} schedule</h1>
+
 <table class="schedule">
     <thead>
         <tr>
@@ -56,6 +57,7 @@
 
     </tbody>
 </table>
+
 <form action="{% url change-course semester.year,semester.get_type_display,slug %}" method="post">
     <div class="yui-g">
         {% for course in legend %}
