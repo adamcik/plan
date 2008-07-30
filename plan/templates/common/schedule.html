@@ -123,6 +123,7 @@
                         <th>Type</th>
                         <th>Groups</th>
                         <th>Lecturers</th>
+                        <th>Weeks</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -136,6 +137,7 @@
                             <td class="small">{{ l.type }}</td>
                             <td class="small">{% for g in  l.groups.all %}{{ g }}{% if not forloop.last %},{% endif %} {% endfor %}</td>
                             <td>{% for p in  l.lecturers.all %}{{ p }}{% if not forloop.last %},{% endif %} {% endfor %}</td>
+                            <td class="small">{% for w in  l.weeks.all %}{{ w.number }}{% if not forloop.last %},{% endif %} {% endfor %}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
