@@ -59,6 +59,7 @@ MIDDLEWARE_CLASSES = (
     'plan.common.middleware.InternalIpMiddleware',
     'django.middleware.doc.XViewMiddleware',
     'djangologging.middleware.LoggingMiddleware',
+    'plan.common.middleware.TimingMiddleware',
 )
 
 ROOT_URLCONF = 'plan.urls'

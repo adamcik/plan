@@ -15,6 +15,7 @@ from django.views.decorators.cache import cache_page
 
 from plan.common.models import *
 from plan.common.forms import *
+from plan.common.utils import *
 
 MAX_COLORS = 8
 
@@ -38,6 +39,8 @@ def getting_started(request):
     return render_to_response('common/start.html', {}, RequestContext(request))
 
 def schedule(request, year, semester, slug, advanced=False):
+    t = request.timer
+
     # Data structure that stores what will become the html table
     table = [[[{}] for a in Lecture.DAYS] for b in Lecture.START]
 
@@ -108,6 +111,8 @@ def schedule(request, year, semester, slug, advanced=False):
 
     initial_lectures = Lecture.objects.filter(**filter).distinct().select_related(*related).extra(where=where, tables=tables).order_by(*order)
 
+    t.tick('Done intializing')
+
     if advanced:
         for u in UserSet.objects.filter(slug=slug, semester=semester):
             # SQL: this causes extra queries (can be worked around, subquery?)
@@ -122,6 +127,7 @@ def schedule(request, year, semester, slug, advanced=False):
 
             # SQL: For loop generates to quries per userset.
             group_forms[u.course_id] = GroupForm(groups, initial={'groups': initial_groups}, prefix=u.course_id)
+        t.tick('Done creating groups forms')
 
     for c in Course.objects.filter(userset__slug=slug, lecture__semester=semester).distinct():
         # Create an array containing our courses and add the css class
@@ -132,6 +138,8 @@ def schedule(request, year, semester, slug, advanced=False):
         c.css_class = color_map[c.id]
 
         courses.append([c, group_forms.get(c.id)])
+    t.tick('Done building course array')
+    t.tick('Starting main lecture loop')
 
     for i,lecture in enumerate(initial_lectures.exclude(excluded_from__slug=slug)):
         # Our actual layout algorithm for handling collisions and displaying in
@@ -205,6 +213,7 @@ def schedule(request, year, semester, slug, advanced=False):
 
             start += 1
 
+    t.tick('Starting lecture expansion')
     for lecture in lectures:
         # Loop over supplementary data structure using this to figure out which
         # colspan expansions are safe
@@ -233,19 +242,23 @@ def schedule(request, year, semester, slug, advanced=False):
         for l in xrange(m+1,m+expand_by):
             for k in xrange(i,i+height):
                 table[k][j][l]['remove'] = True
+    t.tick('Done with lecture expansion')
 
     # FIXME add second round of expansion equalising colspan
 
     # Insert extra cell containg times
-    for t,start,end in map(lambda x,y: (x[0], x[1][1],y[1]), enumerate(Lecture.START), Lecture.END):
-        table[t].insert(0, [{'time': '%s - %s' % (start, end), 'class': 'time'}])
+    for i,start,end in map(lambda x,y: (x[0], x[1][1],y[1]), enumerate(Lecture.START), Lecture.END):
+        table[i].insert(0, [{'time': '%s - %s' % (start, end), 'class': 'time'}])
+    t.tick('Done adding times')
 
     if advanced:
         # Add colors and exlude status
         for i,lecture in enumerate(initial_lectures):
             initial_lectures[i].css_class =  color_map[lecture.course_id]
             initial_lectures[i].excluded  =  lecture.id not in included
+        t.tick('Done lecture css_clases and excluded status')
 
+    t.tick('Returing render to response')
     return render_to_response('common/schedule.html', {
                             'advanced': advanced,
                             'colspan': span,
