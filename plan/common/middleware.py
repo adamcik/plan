@@ -15,5 +15,6 @@ class TimingMiddleware:
         return None
 
     def process_response(self, request, response):
-        request.timer.tick('Done')
+        if hasattr(request, 'timer'):
+            request.timer.tick('Done')
         return response
