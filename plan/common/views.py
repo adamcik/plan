@@ -12,6 +12,7 @@ from django.shortcuts import get_object_or_404, render_to_response
 from django.template.context import RequestContext
 from django.template.defaultfilters import slugify
 from django.views.decorators.cache import cache_page
+from django.core.cache import cache
 
 from plan.common.models import *
 from plan.common.forms import *
@@ -40,6 +41,12 @@ def getting_started(request):
 
 def schedule(request, year, semester, slug, advanced=False):
     t = request.timer
+    cache_key = ':'.join(['schedule', year, semester, slug, str(advanced)])
+    response = cache.get(cache_key)
+
+    if response:
+        t.tick('Done, returning cache')
+        return response
 
     # Data structure that stores what will become the html table
     table = [[[{}] for a in Lecture.DAYS] for b in Lecture.START]
@@ -258,8 +265,8 @@ def schedule(request, year, semester, slug, advanced=False):
             initial_lectures[i].excluded  =  lecture.id not in included
         t.tick('Done lecture css_clases and excluded status')
 
-    t.tick('Returing render to response')
-    return render_to_response('common/schedule.html', {
+    t.tick('Starting render to response')
+    response = render_to_response('common/schedule.html', {
                             'advanced': advanced,
                             'colspan': span,
                             'courses': courses,
@@ -269,6 +276,12 @@ def schedule(request, year, semester, slug, advanced=False):
                             'slug': slug,
                             'table': table,
                         }, RequestContext(request))
+
+    t.tick('Saving to cache')
+    cache.set(cache_key, response)
+
+    t.tick('Returning repsonse')
+    return response
 
 def select_groups(request, year, type, slug):
     type = dict(map(lambda x: (x[1],x[0]), Semester.TYPES))[type.lower()]
@@ -281,6 +294,10 @@ def select_groups(request, year, type, slug):
             if group_form.is_valid():
                 set = UserSet.objects.get(course=c, slug=slug, semester=semester)
                 set.groups = group_form.cleaned_data['groups']
+
+        cache_key = ':'.join(['schedule', year, semester.get_type_display(), slug])
+        cache.delete(cache_key+':False')
+        cache.delete(cache_key+':True')
 
     return HttpResponseRedirect(reverse('schedule-advanced', args=[semester.year,semester.get_type_display(),slug]))
 
@@ -321,6 +338,10 @@ def select_course(request, year, type, slug):
             sets = UserSet.objects.filter(slug__iexact=slug, course__id__in=courses)
             sets.delete()
 
+        cache_key = ':'.join(['schedule', year, semester.get_type_display(), slug])
+        cache.delete(cache_key+':False')
+        cache.delete(cache_key+':True')
+
     return HttpResponseRedirect(reverse('schedule', args=[semester.year, semester.get_type_display(), slug]))
 
 def select_lectures(request, year,type,slug):
@@ -329,6 +350,10 @@ def select_lectures(request, year,type,slug):
 
         for userset in UserSet.objects.filter(slug=slug):
             userset.exclude = userset.course.lecture_set.filter(id__in=excludes)
+
+        cache_key = ':'.join(['schedule', year, type, slug])
+        cache.delete(cache_key+':False')
+        cache.delete(cache_key+':True')
 
     return HttpResponseRedirect(reverse('schedule-advanced', args=[year,type,slug]))
 
