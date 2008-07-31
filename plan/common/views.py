@@ -44,7 +44,7 @@ def schedule(request, year, semester, slug, advanced=False):
     cache_key = ':'.join(['schedule', year, semester, slug, str(advanced)])
     response = cache.get(cache_key)
 
-    if response:
+    if response and 'no-cache' not in request.GET:
         t.tick('Done, returning cache')
         return response
 
