@@ -97,8 +97,7 @@
 </form>
 
 {% if advanced %}
-    <h2>Advanced options</h2>
-    <h3>Change groups</h3>
+    <h2>Change groups</h2>
     <form action="{% url change-groups semester.year,semester.get_type_display,slug %}" method="post">
         <div class="yui-g">
             {% for course,groups in courses %}
@@ -114,7 +113,7 @@
         </p>
     </form>
     {% if lectures %}
-        <h3>Lecture list</h3>
+        <h2>Lecture list</h2>
         <form action="{% url change-lectures semester.year,semester.get_type_display,slug %}" method="post">
             <table>
                 <thead>
