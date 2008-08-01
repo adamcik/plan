@@ -4,8 +4,11 @@
     {{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %} {{ semester.get_type_display }} {{ semester.year }} {{ block.super }}
 {% endblock %}
 
-{% block content %}
-<h1>{{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %}  {{ semester.get_type_display }} {{ semester.year }} schedule</h1>
+{% block hd %}
+    <h1>{{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %}  {{ semester.get_type_display }} {{ semester.year }} schedule</h1>
+{% endblock %}
+
+{% block bd %}
 
 <table class="schedule">
     <thead>

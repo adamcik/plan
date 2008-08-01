@@ -1,7 +1,10 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block hd %}
     <h1>timetable generator for NTNU</h1>
+{% endblock %}
+
+{% block bd %}
     <form action="." method="post">
         <p class="large">
             Please enter a short string identifying your personal timetable, ie
@@ -9,7 +12,7 @@
         </p>
         <p>
             <input type="text" name="slug" value="{{ request.COOKIES.last|default:"" }}" />
-            <button type="submit">Start</button>
+            <button type="submit">Start <img alt="" src="{{ MEDIA_URL }}start.png" /></button>
         </p>
         <p>
 	    To retrieve a timetable simply enter the same identifier you used

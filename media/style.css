@@ -177,3 +177,23 @@ margin-right: 0;
 .highlight {
 	color: #A00;
 }
+
+#ft {
+  background: #fafafa;
+	padding: 0.5em 1em;
+	color: #555753;
+	margin-bottom: 1em;
+}
+#ft dt {
+	float: left;
+	display: block;
+	text-align: right;
+	width: 8em;
+	margin-right: 0.5em;
+}
+#ft dl {
+	margin: 0 0 1em;
+}
+#ft a {
+	color: #888A85;
+}
