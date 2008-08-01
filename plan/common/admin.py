@@ -2,7 +2,7 @@ from django.contrib import admin
 from plan.common.models import *
 
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ('name', 'full_name')
+    list_display = ('name', 'full_name', 'url')
     search_fields = ('name', 'full_name')
 
 class ExamAdmin(admin.ModelAdmin):
