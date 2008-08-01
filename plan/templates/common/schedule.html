@@ -37,13 +37,6 @@
                                     <div class="course">{{ c.lecture.course }}</div>
                                     <div class="type">{{ c.lecture.type }}</div>
                                     <div class="room">{{ c.lecture.room }}</div>
-                                    {% comment %}
-                                        <div class="groups">
-                                            {% for g in c.lecture.groups.all %}
-                                                {{ g }}{% if not forloop.last %},{% endif %}
-                                             {% endfor %}
-                                        </div>
-                                    {% endcomment %}
                                 {% endif %}
                                 {% if c.time %}
                                     {{ c.time }}
@@ -80,15 +73,17 @@
         <p>
             <input type="text" name="course" size="30"/>
             <button name="submit_add" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add courses</button>
-            <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/remove.png" /> Remove selected</button>
-            {% if advanced %}
-                <a href="{% url schedule semester.year,semester.get_type_display,slug %}">
-                    <img alt="" src="{{ MEDIA_URL }}gfx/advanced.png" />Hide advanced options
-                </a>
-            {% else %}
-                <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">
-                    <img alt="" src="{{ MEDIA_URL }}gfx/advanced.png" />Advanced options
-                </a>
+            {% if legend %}
+                <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/remove.png" /> Remove selected</button>
+                {% if advanced %}
+                    <a href="{% url schedule semester.year,semester.get_type_display,slug %}">
+                        <img alt="" src="{{ MEDIA_URL }}gfx/advanced.png" />Hide advanced options
+                    </a>
+                {% else %}
+                    <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">
+                        <img alt="" src="{{ MEDIA_URL }}gfx/advanced.png" />Advanced options
+                    </a>
+                {% endif %}
             {% endif %}
             <br />
             (Multiple courses can be added at once by seperating to course codes with spaces)
