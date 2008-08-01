@@ -200,12 +200,15 @@ margin-right: 0;
 	float: left;
 	display: block;
 	text-align: right;
-	width: 8em;
-	margin-right: 0.5em;
+	width: 9em;
+	margin-right: 0.3em;
 }
 #ft dl {
 	margin: 0 0 1em;
 }
 #ft a {
 	color: #2E3436;
+}
+#ft dl a {
+	text-decoration: none;
 }

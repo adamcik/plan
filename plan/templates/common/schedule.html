@@ -79,15 +79,15 @@
     <div class="yui-g">
         <p>
             <input type="text" name="course" size="30"/>
-            <button name="submit_add" type="submit"><img alt="" src="{{ MEDIA_URL }}add.png" /> Add courses</button>
-            <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}remove.png" /> Remove selected</button>
+            <button name="submit_add" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add courses</button>
+            <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/remove.png" /> Remove selected</button>
             {% if advanced %}
                 <a href="{% url schedule semester.year,semester.get_type_display,slug %}">
-                    <img alt="" src="{{ MEDIA_URL }}advanced.png" />Hide advanced options
+                    <img alt="" src="{{ MEDIA_URL }}gfx/advanced.png" />Hide advanced options
                 </a>
             {% else %}
                 <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">
-                    <img alt="" src="{{ MEDIA_URL }}advanced.png" />Advanced options
+                    <img alt="" src="{{ MEDIA_URL }}gfx/advanced.png" />Advanced options
                 </a>
             {% endif %}
             <br />
@@ -109,7 +109,7 @@
             {% endfor %}
         </div>
         <p>
-            <button type="submit"><img alt="" src="{{ MEDIA_URL }}save.png" /> Save groups</button>
+            <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/save.png" /> Save groups</button>
         </p>
     </form>
     {% if lectures %}
@@ -146,7 +146,7 @@
                 </tbody>
             </table>
             <p>
-                <button type="submit"><img alt="" src="{{ MEDIA_URL }}hide.png" /> Hide selected lectures</button>
+                <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/hide.png" /> Hide selected lectures</button>
             </p>
         </form>
     {% endif %}

@@ -4,8 +4,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
   <head>
     <title>{% block title %}schedule{% endblock %}</title>
-    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}style.css" />
-    <link rel="icon" type="image/png" href="{{ MEDIA_URL }}time.png" />
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/style.css" />
+    <link rel="icon" type="image/png" href="{{ MEDIA_URL }}gfx/time.png" />
     {% block extrahead %}{% endblock %}
   </head>
   <body id="doc3">
@@ -25,12 +25,24 @@
       </div>
       <div class="yui-u">
         <dl>
-          <dt>All courses A-Å:</dt>
+          <dt>Courses A-Å - </dt>
           <dd><a href="http://www.ntnu.no/studier/emner">http://www.ntnu.no/studier/emner</a></dd>
-          <dt>Exam dates:</dt>
+          <dt>Exam dates - </dt>
           <dd><a href="http://www.ntnu.no/eksamen/plan/">http://www.ntnu.no/eksamen/plan/</a></dd>
-          <dt>Lecture times:</dt>
+          <dt>Lecture times - </dt>
           <dd><a href="http://www.ntnu.no/studieinformasjon/timeplan">http://www.ntnu.no/studieinformasjon/timeplan</a></dd>
+          <dt>Map Dragvoll - </dt>
+          <dd>
+            <a href="http://www.ntnu.no/kart/auditorier_dragvoll.pdf" />http://www.ntnu.no/kart/auditorier_dragvoll.pdf</a>
+             - <a href="{{ MEDIA_URL }}map/auditorier_dragvoll.png">png</a>
+          </dd>
+          <dt>Map Gløshaugen - </dt>
+          <dd>
+             <a href="http://www.ntnu.no/kart/auditorier_gloshaugen.pdf"/>http://www.ntnu.no/kart/auditorier_gloshaugen.pdf</a>
+             - <a href="{{ MEDIA_URL }}map/auditorier_gloshaugen.png">png</a>
+          </dd>
+          <dt>Find rooms - </dt>
+          <dd><a href="http://www.ntnu.no/studieinformasjon/rom/">http://www.ntnu.no/studieinformasjon/rom/</a></dd>
         </dl>
       </div>
     </div>
