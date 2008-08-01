@@ -78,14 +78,11 @@
             <input type="text" name="course" size="30"/>
             <button name="submit_add" type="submit">Add courses</button>
             <button name="submit_remove" type="submit">Remove selected</button>
-            &bull;
             {% if advanced %}
                 <a href="{% url schedule semester.year,semester.get_type_display,slug %}">Hide advanced options</a>
             {% else %}
                 <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">Advanced options</a>
             {% endif %}
-            &bull;
-            <a href="{% url frontpage %}">Frontpage</a>
             <br />
             (Multiple courses can be added at once by seperating to course codes with spaces)
         </p>
@@ -135,9 +132,9 @@
                             <td>{{ l.get_start_time_display }}-{{ l.get_end_time_display }}</td>
                             <td class="small">{{ l.room }}</td>
                             <td class="small">{{ l.type }}</td>
-                            <td class="small">{% for g in  l.groups.all %}{{ g }}{% if not forloop.last %},{% endif %} {% endfor %}</td>
-                            <td>{% for p in  l.lecturers.all %}{{ p }}{% if not forloop.last %},{% endif %} {% endfor %}</td>
-                            <td class="small">{% for w in  l.weeks.all %}{{ w.number }}{% if not forloop.last %},{% endif %} {% endfor %}</td>
+                            <td class="small">{% for g in  l.sql_groups %}{{ g }}{% if not forloop.last %},{% endif %} {% endfor %}</td>
+                            <td>{% for p in  l.sql_lecturers %}{{ p }}{% if not forloop.last %},{% endif %} {% endfor %}</td>
+                            <td class="small">{% for w in  l.sql_weeks %}{{ w }}{% if not forloop.last %},{% endif %} {% endfor %}</td>
                         </tr>
                     {% endfor %}
                 </tbody>

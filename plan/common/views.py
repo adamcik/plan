@@ -13,6 +13,7 @@ from django.template.context import RequestContext
 from django.template.defaultfilters import slugify
 from django.views.decorators.cache import cache_page
 from django.core.cache import cache
+from django.db import connection
 
 from plan.common.models import *
 from plan.common.forms import *
@@ -48,6 +49,8 @@ def schedule(request, year, semester, slug, advanced=False):
         t.tick('Done, returning cache')
         return response
 
+    cursor = connection.cursor()
+
     # Data structure that stores what will become the html table
     table = [[[{}] for a in Lecture.DAYS] for b in Lecture.START]
 
@@ -67,6 +70,11 @@ def schedule(request, year, semester, slug, advanced=False):
     # Array with courses to show
     courses = []
     group_forms = {}
+
+    # Helper arrays to keep query count down
+    groups = {}
+    lecturers = {}
+    weeks = {}
 
     # Default to current year
     if not year:
@@ -127,14 +135,55 @@ def schedule(request, year, semester, slug, advanced=False):
 
             # SQL: this causes extra queries (hard to work around, probably not
             # worh it)
-            groups = Group.objects.filter(lecture__course__id=u.course_id).distinct()
+            course_groups = Group.objects.filter(lecture__course__id=u.course_id).distinct()
 
             # FIXME Force evaluation of queries so that we can trace them better in the logs, should be removed.
             [len(groups), len(initial_groups)]
 
             # SQL: For loop generates to quries per userset.
-            group_forms[u.course_id] = GroupForm(groups, initial={'groups': initial_groups}, prefix=u.course_id)
+            group_forms[u.course_id] = GroupForm(course_groups, initial={'groups': initial_groups}, prefix=u.course_id)
+
         t.tick('Done creating groups forms')
+
+        # Do three custom sql queries to prevent and explosion of sql queries
+        # due to ORM.
+        cursor.execute('''SELECT common_lecture_groups.lecture_id, common_group.name
+                            FROM common_lecture_groups
+                            INNER JOIN common_group
+                                ON (common_group.id = common_lecture_groups.group_id)''')
+
+        for lecture_id,name in cursor.fetchall():
+            if lecture_id not in groups:
+                groups[lecture_id] = []
+
+            groups[lecture_id].append(name)
+        t.tick('Done getting groups for lecture list')
+
+        cursor.execute('''SELECT common_lecture_lecturers.lecture_id, common_lecturer.name
+                            FROM common_lecture_lecturers
+                            INNER JOIN common_lecturer
+                                ON (common_lecturer.id = common_lecture_lecturers.lecturer_id)''')
+
+        for lecture_id,name in cursor.fetchall():
+            if lecture_id not in lecturers:
+                lecturers[lecture_id] = []
+
+            lecturers[lecture_id].append(name)
+
+        t.tick('Done getting lecturers for lecture list')
+
+        cursor.execute('''SELECT common_lecture_weeks.lecture_id, common_week.number
+                            FROM common_lecture_weeks
+                            INNER JOIN common_week
+                                ON (common_week.id = common_lecture_weeks.week_id)''')
+
+        for lecture_id,name in cursor.fetchall():
+            if lecture_id not in weeks:
+                weeks[lecture_id] = []
+
+            weeks[lecture_id].append(name)
+
+        t.tick('Done getting weeks for lecture list')
 
     for c in Course.objects.filter(userset__slug=slug, lecture__semester=semester).distinct():
         # Create an array containing our courses and add the css class
@@ -145,9 +194,10 @@ def schedule(request, year, semester, slug, advanced=False):
         c.css_class = color_map[c.id]
 
         courses.append([c, group_forms.get(c.id)])
-    t.tick('Done building course array')
-    t.tick('Starting main lecture loop')
 
+    t.tick('Done building course array')
+
+    t.tick('Starting main lecture loop')
     for i,lecture in enumerate(initial_lectures.exclude(excluded_from__slug=slug)):
         # Our actual layout algorithm for handling collisions and displaying in
         # tables:
@@ -263,6 +313,11 @@ def schedule(request, year, semester, slug, advanced=False):
         for i,lecture in enumerate(initial_lectures):
             initial_lectures[i].css_class =  color_map[lecture.course_id]
             initial_lectures[i].excluded  =  lecture.id not in included
+
+            initial_lectures[i].sql_weeks = weeks.get(lecture.id, [])
+            initial_lectures[i].sql_groups = groups.get(lecture.id, [])
+            initial_lectures[i].sql_lecturers = lecturers.get(lecture.id, [])
+
         t.tick('Done lecture css_clases and excluded status')
 
     t.tick('Starting render to response')
