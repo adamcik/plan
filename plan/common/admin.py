@@ -22,7 +22,7 @@ class LectureAdmin(admin.ModelAdmin):
     list_select_related = True
 
 class UserSetAdmin(admin.ModelAdmin):
-    list_display = ('slug', 'course')
+    list_display = ('slug', 'course', 'semester')
     search_fields = ('slug', 'course')
     list_filter = ['slug']
 
