@@ -18,14 +18,19 @@ h2 {
 	border-bottom: 1px dotted #555753;
 }
 a {
-	color: #3465A4;
+	color: #204A87;
 }
 img, input {
 	vertical-align: text-bottom;
 }
+p {
+	text-align: justify;
+}
 button {
 	font-size: 100%;
+	font-family: inherit;
 	vertical-align: middle;
+	padding: 0;
 }
 hr {
 	color: #D3D7CF;
@@ -205,10 +210,4 @@ margin-right: 0;
 }
 #ft dl {
 	margin: 0 0 1em;
-}
-#ft a {
-	color: #2E3436;
-}
-#ft dl a {
-	text-decoration: none;
 }

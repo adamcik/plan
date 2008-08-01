@@ -97,21 +97,23 @@
 </form>
 
 {% if advanced %}
-    <h2>Change groups</h2>
-    <form action="{% url change-groups semester.year,semester.get_type_display,slug %}" method="post">
-        <div class="yui-g">
-            {% for course,groups in courses %}
-                <p class="{{ course.css_class }} legend left box">
-                    <b>{{ course }}</b> <br />
-                    <span class="small">{{ course.full_name }}</span> <br />
-                    {{ groups.groups }}
-                </p>
-            {% endfor %}
-        </div>
-        <p>
-            <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/save.png" /> Save groups</button>
-        </p>
-    </form>
+    {% if courses %}
+        <h2>Change groups</h2>
+        <form action="{% url change-groups semester.year,semester.get_type_display,slug %}" method="post">
+            <div class="yui-g">
+                {% for course,groups in courses %}
+                    <p class="{{ course.css_class }} legend left box">
+                        <b>{{ course }}</b> <br />
+                        <span class="small">{{ course.full_name }}</span> <br />
+                        {{ groups.groups }}
+                    </p>
+                {% endfor %}
+            </div>
+            <p>
+                <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/save.png" /> Save groups</button>
+            </p>
+        </form>
+    {% endif %}
     {% if lectures %}
         <h2>Lecture list</h2>
         <form action="{% url change-lectures semester.year,semester.get_type_display,slug %}" method="post">
