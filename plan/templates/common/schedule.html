@@ -64,20 +64,19 @@
             <p class="{{ course.css_class }} legend left" title="{{ course.full_name }}">
                 <label>
                     <input type="checkbox" name="course" value="{{ course.id }}" />
-                    {% if course.url %}
-                        <a href="{{ course.url }}">{{ course }}</a>
-                    {% else %}
-                        {{ course }}
-                    {% endif %}
+                    {{ course }}
                 </label>
+                {% if course.url %}
+                    <a href="{{ course.url }}"><img alt="Link" src="{{ MEDIA_URL}}link.png" /></a>
+                {% endif %}
             </p>
         {% endfor %}
     </div>
     <div class="yui-g">
         <p>
             <input type="text" name="course" size="30"/>
-            <button name="submit_add" type="submit">Add courses</button>
-            <button name="submit_remove" type="submit">Remove selected</button>
+            <button name="submit_add" type="submit"><img alt="" src="{{ MEDIA_URL }}add.png" /> Add courses</button>
+            <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}remove.png" /> Remove selected</button>
             {% if advanced %}
                 <a href="{% url schedule semester.year,semester.get_type_display,slug %}">Hide advanced options</a>
             {% else %}
@@ -103,7 +102,7 @@
             {% endfor %}
         </div>
         <p>
-            <button type="submit">Save groups</button>
+            <button type="submit"><img alt="" src="{{ MEDIA_URL }}save.png" /> Save groups</button>
         </p>
     </form>
     {% if lectures %}
@@ -140,7 +139,7 @@
                 </tbody>
             </table>
             <p>
-                <button>Hide selected lectures</button>
+                <button type="submit"><img alt="" src="{{ MEDIA_URL }}hide.png" /> Hide selected lectures</button>
             </p>
         </form>
     {% endif %}
