@@ -32,6 +32,9 @@ button {
 	vertical-align: middle;
 	padding: 0;
 }
+button img {
+	vertical-align: middle;
+}
 hr {
 	color: #D3D7CF;
 	background: #D3D7CF;
@@ -186,6 +189,14 @@ margin-right: 0;
 	color: #A00;
 }
 
+.yui-u {
+	border-left: 1px solid #555753;
+	margin: 1em 0;
+}
+.first {
+	border-left: 0;
+}
+
 #bd {
 	padding-left: 1em;
 	margin-bottom: 1em;
@@ -195,7 +206,8 @@ margin-right: 0;
 	padding-left: 1em;
 }
 #ft {
-	padding: 1em 0.5em 0;
+	font-size: 85%;
+	padding: 0 0.5em;
 	color: #2E3436;
 	margin-bottom: 1em;
 	border-bottom: 1px solid #555753;
