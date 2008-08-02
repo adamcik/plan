@@ -86,6 +86,7 @@ margin-right: 0;
 	max-width: 10em;
 /*	-moz-border-radius: 0.5em; */
 	border: 1px solid #666;
+	text-align: left;
 }
 .legend a {
 	color: #000;
