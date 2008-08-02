@@ -595,7 +595,11 @@ def scrape(request, course, no_auth=False):
             semester=semester,
             start_time=start,
             end_time=end,
+            room = room,
+            type = type,
         )
+        r['id'] = lecture.id
+
         if r['groups']:
             for g in r['groups']:
                 group, created = Group.objects.get_or_create(name=g)
@@ -612,8 +616,6 @@ def scrape(request, course, no_auth=False):
                 lecturer, created = Lecturer.objects.get_or_create(name=l)
                 lecture.lecturers.add(lecturer)
 
-        lecture.room = room
-        lecture.type = type
         lecture.save()
 
     return HttpResponse(str('\n'.join([str(r) for r in results])), mimetype='text/plain')
