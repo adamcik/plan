@@ -40,7 +40,7 @@ def getting_started(request):
         return response
     return render_to_response('common/start.html', {}, RequestContext(request))
 
-def schedule(request, year, semester, slug, advanced=False):
+def schedule(request, year, semester, slug, advanced=False, week=None):
     t = request.timer
     cache_key = ':'.join(['schedule', year, semester, slug, str(advanced)])
     response = cache.get(cache_key)
