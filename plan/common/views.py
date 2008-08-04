@@ -84,9 +84,6 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
     semester = dict(map(lambda x: (x[1],x[0]), Semester.TYPES))[semester.lower()]
     semester = Semester.objects.get(year=year, type=semester)
 
-    # Courses to highlight
-    highlight = request.GET.get('highlight', '').split(',')
-
     # Get all lectures for userset during given period. To do this we need to
     # pull in a bunch of extra tables and manualy join them in the where
     # cluase. The first element in the custom where is the important one that
@@ -243,9 +240,6 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
         if rowspan == 1:
             css.append('single')
 
-        if str(lecture.course_id) in highlight:
-            css.append('highlight')
-
         while start <= end:
             # Replace the cell we found with a base containing info about our
             # lecture
@@ -357,7 +351,6 @@ def select_groups(request, year, type, slug):
     return HttpResponseRedirect(reverse('schedule-advanced', args=[semester.year,semester.get_type_display(),slug]))
 
 def select_course(request, year, type, slug):
-    highlight = []
     type = dict(map(lambda x: (x[1],x[0]), Semester.TYPES))[type.lower()]
     semester = Semester.objects.get(year=year, type=type)
 
@@ -368,8 +361,6 @@ def select_course(request, year, type, slug):
             for l in lookup:
                 try:
                     course = Course.objects.get(name__iexact=l.strip())
-
-                    highlight.append(str(course.id))
 
                     if not course.lecture_set.count():
                         scrape(request, l, no_auth=True)
@@ -384,9 +375,8 @@ def select_course(request, year, type, slug):
                     pass
 
             url = reverse('schedule-advanced', args=[semester.year, semester.get_type_display(), slug])
-            extra = ','.join(highlight)
 
-            return HttpResponseRedirect('%s?highlight=%s' % (url, extra))
+            return HttpResponseRedirect(url)
 
         elif 'submit_remove' in request.POST:
             courses = [c.strip() for c in request.POST.getlist('course') if c.strip()]
