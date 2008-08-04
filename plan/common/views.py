@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 import re
+import logging
 from datetime import datetime
 from urllib import urlopen, quote as urlquote
 from BeautifulSoup import BeautifulSoup, NavigableString
@@ -348,6 +349,8 @@ def select_groups(request, year, type, slug):
         cache.delete(cache_key+':False')
         cache.delete(cache_key+':True')
 
+        logging.debug('Deleted cache key: %s' % cache_key)
+
     return HttpResponseRedirect(reverse('schedule-advanced', args=[semester.year,semester.get_type_display(),slug]))
 
 def select_course(request, year, type, slug):
@@ -374,10 +377,6 @@ def select_course(request, year, type, slug):
                     # FIXME add user feedback
                     pass
 
-            url = reverse('schedule-advanced', args=[semester.year, semester.get_type_display(), slug])
-
-            return HttpResponseRedirect(url)
-
         elif 'submit_remove' in request.POST:
             courses = [c.strip() for c in request.POST.getlist('course') if c.strip()]
             sets = UserSet.objects.filter(slug__iexact=slug, course__id__in=courses)
@@ -387,7 +386,9 @@ def select_course(request, year, type, slug):
         cache.delete(cache_key+':False')
         cache.delete(cache_key+':True')
 
-    return HttpResponseRedirect(reverse('schedule', args=[semester.year, semester.get_type_display(), slug]))
+        logging.debug('Deleted cache key: %s' % cache_key)
+
+    return HttpResponseRedirect(reverse('schedule-advanced', args=[semester.year, semester.get_type_display(), slug]))
 
 def select_lectures(request, year,type,slug):
     if request.method == 'POST':
@@ -399,6 +400,8 @@ def select_lectures(request, year,type,slug):
         cache_key = ':'.join(['schedule', year, type, slug])
         cache.delete(cache_key+':False')
         cache.delete(cache_key+':True')
+
+        logging.debug('Deleted cache key: %s' % cache_key)
 
     return HttpResponseRedirect(reverse('schedule-advanced', args=[year,type,slug]))
 
