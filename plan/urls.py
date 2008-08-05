@@ -4,6 +4,8 @@ from django.conf import settings
 
 admin.autodiscover()
 
+handler500 = 'plan.common.utils.server_error'
+
 urlpatterns = patterns('',
     (r'^admin/(.*)', admin.site.root),
     (r'^', include('plan.common.urls')),

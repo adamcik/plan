@@ -1,5 +1,10 @@
 import time
 import logging
+
+from django.conf import settings
+from django.http import HttpResponseServerError
+from django.template import Context, loader
+
 class Timer(object):
     '''http://www.djangosnippets.org/snippets/783/ -- By Ed and Rudy Menendez'''
     def __init__(self):
@@ -11,3 +16,14 @@ class Timer(object):
         x = time.time()
         logging.info(u'%s: Since inception %.3f, since last call %.3f' % (msg, (x-self.bot)*1000, (x - self.last_time)*1000))
         self.last_time = x
+
+def server_error(request, template_name='500.html'):
+    """
+    500 error handler.
+
+    Templates: `500.html`
+    Context: None
+    """
+    t = loader.get_template(template_name) # You need to create a 500.html template.
+    return HttpResponseServerError(t.render(Context({'MEDIA_URL': settings.MEDIA_URL})))
+
