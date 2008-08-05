@@ -60,6 +60,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.doc.XViewMiddleware',
     'djangologging.middleware.LoggingMiddleware',
     'plan.common.middleware.TimingMiddleware',
+    'plan.common.middleware.UserBasedExceptionMiddleware',
 )
 
 ROOT_URLCONF = 'plan.urls'
