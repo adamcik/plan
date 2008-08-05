@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ block.super }} - Server error
+{% endblock %}
+
+{% block hd %}
+    <h1>Server error</h1>
+{% endblock %}
+
+{% block bd %}
+    <p>
+        <span class="large">
+            <img alt="" src="{{ MEDIA_URL}}gfx/error.png" />
+            An internal server error has occurred, sorry about the inconvenience.
+        </span>
+        <br />
+        The server admin has allready been notified of this error.
+    </p>
+{% endblock %}
