@@ -21,7 +21,7 @@ a {
 	color: #204A87;
 }
 img, input {
-	vertical-align: text-bottom;
+	vertical-align: text-top;
 }
 p {
 	text-align: justify;
@@ -92,7 +92,7 @@ margin-right: 0;
 	color: #000;
 }
 .large {
-	font-size: 123.1%;
+	font-size: 116%;
 }
 .small {
 	font-size: 77%;
