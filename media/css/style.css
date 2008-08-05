@@ -197,6 +197,7 @@ margin-right: 0;
 #bd {
 	padding-left: 1em;
 	margin-bottom: 1em;
+	min-height: 25em;
 }
 #hd h1 {
 	border-bottom: 1px solid #555753;
