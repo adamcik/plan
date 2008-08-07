@@ -14,8 +14,13 @@ h1{font-size:138.5%;}h2{font-size:123.1%;}h3{font-size:108%;}h1,h2,h3{margin:1em
 
 /* custom css for site, not a part of YUI and not released under the same
  * license. */
+h1 {
+	border-bottom: 1px solid #555753;
+	padding-left: 1em;
+}
 h2 {
 	border-bottom: 1px dotted #555753;
+	padding-left: 0.5em;
 }
 a {
 	color: #204A87;
@@ -167,6 +172,9 @@ margin-right: 0;
   font-variant: small-caps;
 	font-weight: normal;
 }
+.schedule .extra {
+	border-left: 1px dotted #666666;
+}
 
 .optional {
   opacity: 0.6;
@@ -198,10 +206,6 @@ margin-right: 0;
 	padding-left: 1em;
 	margin-bottom: 1em;
 	min-height: 25em;
-}
-#hd h1 {
-	border-bottom: 1px solid #555753;
-	padding-left: 1em;
 }
 #ft {
 	font-size: 85%;
