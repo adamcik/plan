@@ -108,7 +108,7 @@ class Week(models.Model):
     number = models.PositiveSmallIntegerField(choices=[(x,x) for x in range(1,53)], unique=True)
 
     def __unicode__(self):
-        return 'week %s' % self.number
+        return '%d' % self.number
 
     class Meta:
         ordering = ('number',)
