@@ -358,6 +358,13 @@ def select_course(request, year, type, slug):
     semester = Semester.objects.get(year=year, type=type)
 
     if request.method == 'POST' and 'course' in request.POST:
+
+        cache_key = ':'.join(['schedule', year, semester.get_type_display(), slug])
+        cache.delete(cache_key+':False')
+        cache.delete(cache_key+':True')
+
+        logging.debug('Deleted cache key: %s' % cache_key)
+
         if 'submit_add' in request.POST:
             lookup = request.POST['course'].split()
 
@@ -387,12 +394,6 @@ def select_course(request, year, type, slug):
             courses = [c.strip() for c in request.POST.getlist('course') if c.strip()]
             sets = UserSet.objects.filter(slug__iexact=slug, course__id__in=courses)
             sets.delete()
-
-        cache_key = ':'.join(['schedule', year, semester.get_type_display(), slug])
-        cache.delete(cache_key+':False')
-        cache.delete(cache_key+':True')
-
-        logging.debug('Deleted cache key: %s' % cache_key)
 
     return HttpResponseRedirect(reverse('schedule-advanced', args=[semester.year, semester.get_type_display(), slug]))
 
