@@ -517,7 +517,10 @@ def scrape(request, course, no_auth=False):
 
     text_only = lambda text: isinstance(text, NavigableString)
 
-    title = table.findAll('h2')[0].contents[0].split('-')[2].strip()
+    try:
+        title = table.findAll('h2')[0].contents[0].split('-')[2].strip()
+    except IndexError:
+        raise Exception('Course does not exsist')
 
     type = None
     for tr in table.findAll('tr')[2:-1]:
