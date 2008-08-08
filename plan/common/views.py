@@ -361,6 +361,8 @@ def select_course(request, year, type, slug):
         if 'submit_add' in request.POST:
             lookup = request.POST['course'].split()
 
+            errors = []
+
             for l in lookup:
                 try:
                     course = Course.objects.get(name__iexact=l.strip())
@@ -373,9 +375,13 @@ def select_course(request, year, type, slug):
                     for g in Group.objects.filter(lecture__course=course).distinct():
                         userset.groups.add(g)
 
-                except Course.DoesNotExist:
-                    # FIXME add user feedback
-                    pass
+                except:
+                    errors.append(l)
+
+            if errors:
+                return render_to_response('common/error.html',
+                            {'courses': errors, 'slug': slug, 'year': year, 'type': semester.get_type_display()},
+                            RequestContext(request))
 
         elif 'submit_remove' in request.POST:
             courses = [c.strip() for c in request.POST.getlist('course') if c.strip()]
