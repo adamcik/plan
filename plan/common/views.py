@@ -582,7 +582,7 @@ def scrape(request, course, no_auth=False):
         room, created = Room.objects.get_or_create(name=r['room'][0])
         type, created = Type.objects.get_or_create(name=r['type'][0])
 
-        day = ['Mandag', 'Onsdag', 'Tirsdag', 'Torsdag', 'Fredag'].index(r['time'][0][0])
+        day = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag'].index(r['time'][0][0])
 
         # We choose to be slightly naive and only care about which hour
         # something starts.
