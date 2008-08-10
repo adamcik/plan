@@ -2,7 +2,10 @@
 
 import re
 import logging
-from datetime import datetime
+import vobject
+
+from datetime import datetime, timedelta
+from dateutil.rrule import *
 from urllib import urlopen, quote as urlquote
 from BeautifulSoup import BeautifulSoup, NavigableString
 
@@ -81,7 +84,6 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
     if not year:
         year = datetime.now().year
 
-    # Default to current semester
     semester = dict(map(lambda x: (x[1],x[0]), Semester.TYPES))[semester.lower()]
     semester = Semester.objects.get(year=year, type=semester)
 
@@ -633,3 +635,36 @@ def scrape(request, course, no_auth=False):
         lecture.save()
 
     return HttpResponse(str('\n'.join([str(r) for r in results])), mimetype='text/plain')
+
+def ical(request, year, semester, slug):
+    semester = dict(map(lambda x: (x[1],x[0]), Semester.TYPES))[semester.lower()]
+    semester = Semester.objects.get(year=year, type=semester)
+
+    cal = vobject.iCalendar()
+    cal.add('method').value = 'PUBLISH'  # IE/Outlook needs this
+
+    for l in Lecture.objects.filter(course__userset__slug=slug):
+        weeks = l.weeks.values_list('number', flat=True)
+
+        for d in rrule(WEEKLY,byweekno=weeks,count=len(weeks),byweekday=l.day,dtstart=datetime(int(year),1,1)):
+            vevent = cal.add('vevent')
+            vevent.add('summary').value = l.course.name
+            vevent.add('location').value = l.room.name
+            vevent.add('categories').value = [l.type.name]
+
+            (hour, minute) = l.get_start_time_display().split(':')
+            vevent.add('dtstart').value = datetime(d.year, d.month, d.day, int(hour), int(minute))
+
+            (hour, minute) = l.get_end_time_display().split(':')
+            vevent.add('dtend').value = datetime(d.year, d.month, d.day, int(hour), int(minute))
+
+    icalstream = cal.serialize().encode('utf-8')
+    if 'plain' in request.GET:
+        response = HttpResponse(icalstream, mimetype='text/plain')
+    else:
+        response = HttpResponse(icalstream, mimetype='text/calendar')
+        response['Filename'] = 'filename.ics'  # IE needs this
+        response['Content-Disposition'] = 'attachment; filename=filename.ics'
+
+    return response
+

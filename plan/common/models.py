@@ -87,7 +87,18 @@ class Semester(models.Model):
 
         return url % (str(self.year)[-2:], dict(self.URL_MAP)[self.type], urlquote(letter.encode('utf-8')))
 
-    
+    def get_first_day(self):
+        if self.type == self.SPRING:
+            return datetime(self.year,1,1)
+        else:
+            return datetime(self.year,6,30)
+
+    def get_last_day(self):
+        if self.type == self.SPRING:
+            return datetime(self.year,6,30)
+        else:
+            return datetime(self.year,12,31)
+
 
 class Exam(models.Model):
     WRITTEN = 'S'
