@@ -513,21 +513,31 @@ def scrape(request, course, no_auth=False):
         raise Http404
 
     # FIXME based on semester
-    url = 'http://www.ntnu.no/studieinformasjon/timeplan/h08/?emnekode=%s-1' % course.upper().strip()
+    url  = 'http://www.ntnu.no/studieinformasjon/timeplan/h08/?emnekode=%s' % course.upper().strip()
 
-    html = ''.join(urlopen(url).readlines())
-    soup = BeautifulSoup(html)
-    main = soup.findAll('div', 'hovedramme')[0]
-    table = main.findAll('table')[1]
+    errors = []
 
-    results = []
+    for number in [1,2,3]:
+        html = ''.join(urlopen('%s-%d' % (url, number)).readlines())
+        soup = BeautifulSoup(html)
+        main = soup.findAll('div', 'hovedramme')[0]
+        table = main.findAll('table')[1]
 
-    text_only = lambda text: isinstance(text, NavigableString)
+        results = []
 
-    try:
-        title = table.findAll('h2')[0].contents[0].split('-')[2].strip()
-    except IndexError:
-        raise Exception('Course does not exsist')
+        text_only = lambda text: isinstance(text, NavigableString)
+
+        try:
+            title = table.findAll('h2')[0].contents[0].split('-')[2].strip()
+
+            errors = []
+            break
+
+        except IndexError:
+            errors.append(('Course does not exsist', '%s-%d' % (url, number)))
+
+    if errors:
+        raise Exception(errors)
 
     type = None
     for tr in table.findAll('tr')[2:-1]:
