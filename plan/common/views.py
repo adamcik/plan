@@ -609,6 +609,7 @@ def scrape(request, course, no_auth=False):
                 lecture.groups.add(group)
         else:
             group, created = Group.objects.get_or_create(name=Group.DEFAULT)
+            lecture.groups.add(group)
 
         for w in  r['weeks']:
             week, created = Week.objects.get_or_create(number=w)
