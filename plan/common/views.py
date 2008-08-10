@@ -665,7 +665,7 @@ def ical(request, year, semester, slug):
         response = HttpResponse(icalstream, mimetype='text/plain')
     else:
         response = HttpResponse(icalstream, mimetype='text/calendar')
-        response['Filename'] = 'filename.ics'  # IE needs this
+        response['Filename'] = '%s.ics' % slug  # IE needs this
         response['Content-Disposition'] = 'attachment; filename=filename.ics'
 
     return response

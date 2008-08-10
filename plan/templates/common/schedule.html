@@ -84,6 +84,10 @@
                         <img alt="" src="{{ MEDIA_URL }}gfx/advanced.png" />Advanced options
                     </a>
                 {% endif %}
+                -
+                <a href="{% url schedule-ical semester.year,semester.get_type_display,slug %}">
+                    <img alt="" src="{{ MEDIA_URL }}gfx/ical.png" />Calendar subscription
+                </a>
             {% endif %}
             <br />
             (Multiple courses can be added at once by seperating to course codes with spaces)
@@ -94,6 +98,7 @@
 {% if advanced %}
     {% if courses %}
         <h2>Change groups</h2>
+        <p>Each lecture is connected to one or more groups, please select which group's lectures you want to attend:</p>
         <form action="{% url change-groups semester.year,semester.get_type_display,slug %}" method="post">
             <div class="yui-g">
                 {% for course,groups in courses %}
