@@ -658,7 +658,9 @@ def ical(request, year, semester, slug):
             (hour, minute) = l.get_end_time_display().split(':')
             vevent.add('dtend').value = datetime(d.year, d.month, d.day, int(hour), int(minute))
 
-    icalstream = cal.serialize().encode('utf-8')
+            vevent.add('dtstamp').value = datetime.now()
+
+    icalstream = cal.serialize()
     if 'plain' in request.GET:
         response = HttpResponse(icalstream, mimetype='text/plain')
     else:
