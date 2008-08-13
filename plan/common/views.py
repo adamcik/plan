@@ -131,7 +131,10 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
 
     initial_lectures = Lecture.objects.filter(**filter).distinct().select_related(*related).extra(where=where, tables=tables).order_by(*order)
 
-    exam_list = Exam.objects.filter(course__userset__slug=slug).select_related('course__name', 'course__full_name')
+    first_day = semester.get_first_day()
+    last_day = semester.get_last_day()
+
+    exam_list = Exam.objects.filter(course__userset__slug=slug, exam_time__gt=first_day, exam_time__lt=last_day).select_related('course__name', 'course__full_name')
 
     t.tick('Done intializing')
 
