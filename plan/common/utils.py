@@ -27,3 +27,31 @@ def server_error(request, template_name='500.html'):
     t = loader.get_template(template_name) # You need to create a 500.html template.
     return HttpResponseServerError(t.render(Context({'MEDIA_URL': settings.MEDIA_URL})))
 
+def compact_sequence(sequence):
+    if not sequence:
+        return []
+
+    sequence.sort()
+
+    compact = []
+    first = sequence[0]
+    last = sequence[0] - 1
+
+    for i,week in enumerate(sequence):
+        if last == week - 1:
+            last = week
+        else:
+            if first != last:
+                compact.append('%d-%d' % (first, last))
+            else:
+                compact.append(first)
+
+            first = week
+            last = week
+
+    if first != last:
+        compact.append('%d-%d' % (first, last))
+    else:
+        compact.append(first)
+
+    return compact

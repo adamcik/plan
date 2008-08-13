@@ -321,7 +321,7 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
             initial_lectures[i].css_class =  color_map[lecture.course_id]
             initial_lectures[i].excluded  =  lecture.id not in included
 
-            initial_lectures[i].sql_weeks = weeks.get(lecture.id, [])
+            initial_lectures[i].sql_weeks = compact_sequence(weeks.get(lecture.id, []))
             initial_lectures[i].sql_groups = groups.get(lecture.id, [])
             initial_lectures[i].sql_lecturers = lecturers.get(lecture.id, [])
 
