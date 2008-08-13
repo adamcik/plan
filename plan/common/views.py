@@ -192,7 +192,7 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
 
         t.tick('Done getting weeks for lecture list')
 
-    for c in Course.objects.filter(userset__slug=slug, lecture__semester=semester).distinct():
+    for c in Course.objects.filter(userset__slug=slug, userset__semester=semester).distinct():
         # Create an array containing our courses and add the css class
         if c.id not in color_map:
             color_index = (color_index + 1) % MAX_COLORS
