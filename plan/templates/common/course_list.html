@@ -25,6 +25,19 @@
                             <td><input type="checkbox" name="course" value="{{ course.name }}" id="course_{{ course.id }}" /></td>
                             <th><label for="course_{{ course.id }}">{{ course.name }}</label></th>
                             <td>
+                                {% for exam in course.exam_set.all %}
+                                    {{ exam.type }}:
+                                    {% ifequal exam.exam_time.hour 0 %}
+                                        {{ exam.exam_time|date:"Y-m-d" }}
+                                    {% else %}
+                                        {{ exam.exam_time|date:"Y-m-d H:i" }}
+                                    {% endifequal %}
+                                    {% if not forloop.last %}
+                                        <br />
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
+                            <td>
                                 {{ course.full_name }}
                                 {% if course.url %}
                                    (<a href="{{ course.url }}">url</a>)
