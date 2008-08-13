@@ -1,7 +1,5 @@
 {% extends "base.html" %}
 
-{% load cache %}
-
 {% block title %}
     List of all courses - {{ block.super }}
 {% endblock %}
@@ -11,53 +9,50 @@
 {% endblock %}
 
 {% block bd %}
-    {% cache 600 course_list %}
-        <form action="." method="post">
-            <p>
-                The following list is an import of the courses listed at
-                <a href="http://www.ntnu.no/studier/emner">http://www.ntnu.no/studier/emner</a>.
-                Courses from all semesters are listed here.
-            </p>
-            <table>
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th>Course</th>
-                        <th>Exams</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for course in course_list %}
-                        <tr class="{% cycle even,odd %} {{ course.name }}"{% ifchanged course.name.0 %} id="{{ course.name.0 }}"{% endifchanged %}>
-                            <td><input type="checkbox" name="course" value="{{ course.name }}" id="course_{{ course.id }}" /></td>
-                            <th><label for="course_{{ course.id }}">{{ course.name }}</label></th>
-                            <td>
-                                {% for exam in course.exam_set.all %}
-                                    {{ exam.type }}:
-                                    {% ifequal exam.exam_time.hour 0 %}
-                                        {{ exam.exam_time|date:"Y-m-d" }}
-                                    {% else %}
-                                        {{ exam.exam_time|date:"Y-m-d H:i" }}
-                                    {% endifequal %}
-                                    {% if not forloop.last %}
-                                        <br />
-                                    {% endif %}
-                                {% endfor %}
-                            </td>
-                            <td>
-                                {{ course.full_name }}
-                                {% if course.url %}
-                                   (<a href="{{ course.url }}">url</a>)
+    <form action="." method="post">
+        <p>
+            The following list is an import of the courses listed at
+            <a href="http://www.ntnu.no/studier/emner">http://www.ntnu.no/studier/emner</a>.
+        </p>
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Course</th>
+                    <th>Exams</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course in course_list %}
+                    <tr class="{% cycle even,odd %} {{ course.name }}"{% ifchanged course.name.0 %} id="{{ course.name.0 }}"{% endifchanged %}>
+                        <td><input type="checkbox" name="course" value="{{ course.name }}" id="course_{{ course.id }}" /></td>
+                        <th><label for="course_{{ course.id }}">{{ course.name }}</label></th>
+                        <td>
+                            {% for exam in course.exam_set.all %}
+                                {{ exam.type }}:
+                                {% ifequal exam.exam_time.hour 0 %}
+                                    {{ exam.exam_time|date:"Y-m-d" }}
+                                {% else %}
+                                    {{ exam.exam_time|date:"Y-m-d H:i" }}
+                                {% endifequal %}
+                                {% if not forloop.last %}
+                                    <br />
                                 {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <p>
-                <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add coures to schedule</button>
-            </p>
-        </form>
-    {% endcache %}
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {{ course.full_name }}
+                            {% if course.url %}
+                               (<a href="{{ course.url }}">url</a>)
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p>
+            <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add coures to schedule</button>
+        </p>
+    </form>
 {% endblock %}
