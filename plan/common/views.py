@@ -668,30 +668,59 @@ def scrape(request, course, no_auth=False):
 
     return HttpResponse(str('\n'.join([str(r) for r in results])), mimetype='text/plain')
 
-def ical(request, year, semester, slug):
+def ical(request, year, semester, slug, lectures=True, exams=True):
     semester = get_semester(year, semester)
 
     cal = vobject.iCalendar()
     cal.add('method').value = 'PUBLISH'  # IE/Outlook needs this
 
-    for l in Lecture.objects.filter(course__userset__slug=slug):
-        weeks = l.weeks.values_list('number', flat=True)
+    if lectures:
+        for l in Lecture.objects.filter(course__userset__slug=slug):
+            weeks = l.weeks.values_list('number', flat=True)
 
-        for d in rrule(WEEKLY,byweekno=weeks,count=len(weeks),byweekday=l.day,dtstart=datetime(int(year),1,1)):
+            for d in rrule(WEEKLY,byweekno=weeks,count=len(weeks),byweekday=l.day,dtstart=datetime(int(year),1,1)):
+                vevent = cal.add('vevent')
+                vevent.add('summary').value = l.course.name
+                vevent.add('location').value = l.room.name
+                vevent.add('categories').value = [l.type.name]
+
+                (hour, minute) = l.get_start_time_display().split(':')
+                vevent.add('dtstart').value = datetime(d.year, d.month, d.day, int(hour), int(minute))
+
+                (hour, minute) = l.get_end_time_display().split(':')
+                vevent.add('dtend').value = datetime(d.year, d.month, d.day, int(hour), int(minute))
+
+                vevent.add('dtstamp').value = datetime.now()
+
+    if exams:
+        first_day = semester.get_first_day()
+        last_day = semester.get_last_day()
+        for e in Exam.objects.filter(course__userset__slug=slug, exam_time__gt=first_day, exam_time__lt=last_day).select_related('course__name'):
             vevent = cal.add('vevent')
-            vevent.add('summary').value = l.course.name
-            vevent.add('location').value = l.room.name
-            vevent.add('categories').value = [l.type.name]
 
-            (hour, minute) = l.get_start_time_display().split(':')
-            vevent.add('dtstart').value = datetime(d.year, d.month, d.day, int(hour), int(minute))
+            vevent.add('summary').value = 'Exam: %s (%s)' % (e.course.name, e.type)
+            vevent.add('categories').value = ['Exam']
 
-            (hour, minute) = l.get_end_time_display().split(':')
-            vevent.add('dtend').value = datetime(d.year, d.month, d.day, int(hour), int(minute))
+            vevent.add('dtstart').value = e.exam_time
 
+            if e.duration == 30:
+                duration = timedelta(minutes=30)
+            else:
+                duration = timedelta(hours=e.duration)
+
+            vevent.add('dtend').value = e.exam_time + duration
             vevent.add('dtstamp').value = datetime.now()
 
+            if e.handout_time:
+                vevent = cal.add('vevent')
+                vevent.add('summary').value = 'Exam handout: %s (%s)' % (e.course.name, e.type)
+                vevent.add('categories').value = ['Handout']
+                vevent.add('dtstart').value = e.handout_time
+                vevent.add('dtend')
+                vevent.add('dtstamp').value = datetime.now()
+
     icalstream = cal.serialize()
+
     if 'plain' in request.GET:
         response = HttpResponse(icalstream, mimetype='text/plain')
     else:

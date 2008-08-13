@@ -4,8 +4,11 @@ urlpatterns = patterns('plan.common.views',
     url(r'^$', 'getting_started', name='frontpage'),
     url(r'^(?P<year>\d{4})/(?P<semester>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/$', 'schedule', name='schedule'),
     url(r'^(?P<year>\d{4})/(?P<semester>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/\+$', 'schedule', {'advanced': True}, name='schedule-advanced'),
-    url(r'^(?P<year>\d{4})/(?P<semester>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/ical/$', 'ical', name='schedule-ical'),
     url(r'^(?P<year>\d{4})/(?P<semester>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/(?P<week>\d{1,2})/$', 'schedule', name='schedule-week'),
+
+    url(r'^(?P<year>\d{4})/(?P<semester>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/ical/$', 'ical', name='schedule-ical'),
+    url(r'^(?P<year>\d{4})/(?P<semester>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/ical/exams/$', 'ical', {'exams': True, 'lectures': False}, name='schedule-ical-exams'),
+    url(r'^(?P<year>\d{4})/(?P<semester>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/ical/lectures/$', 'ical', {'exams': False, 'lectures': True}, name='schedule-ical-lectures'),
 
     url(r'^(?P<year>\d{4})/(?P<semester>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/list/$', 'list_courses', name='course-list'),
 

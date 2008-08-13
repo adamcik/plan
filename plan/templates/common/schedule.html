@@ -81,22 +81,20 @@
         </p>
         <p>
                 <a href="{% url course-list semester.year,semester.get_type_display,slug %}">
-                    <img alt="" src="{{ MEDIA_URL }}gfx/list.png" />Course list
-                </a>
+                    <img alt="" src="{{ MEDIA_URL }}gfx/list.png" />Course list</a>
             {% if legend %}
                 {% if advanced %}
                     - <a href="{% url schedule semester.year,semester.get_type_display,slug %}">
-                        <img alt="" src="{{ MEDIA_URL }}gfx/advanced.png" />Hide advanced options
-                    </a>
+                        <img alt="" src="{{ MEDIA_URL }}gfx/advanced.png" />Hide advanced options</a>
                 {% else %}
                     - <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">
-                        <img alt="" src="{{ MEDIA_URL }}gfx/advanced.png" />Advanced options
-                    </a>
+                        <img alt="" src="{{ MEDIA_URL }}gfx/advanced.png" />Advanced options</a>
                 {% endif %}
                 -
                 <a href="{% url schedule-ical semester.year,semester.get_type_display,slug %}">
-                    <img alt="" src="{{ MEDIA_URL }}gfx/ical.png" />Calendar subscription
-                </a>
+                    <img alt="" src="{{ MEDIA_URL }}gfx/ical.png" />Calendar subscription</a>
+                (<a href="{% url schedule-ical-lectures semester.year,semester.get_type_display,slug %}">lectures</a>,
+                 <a href="{% url schedule-ical-exams semester.year,semester.get_type_display,slug %}">exams</a>)
             {% endif %}
         </p>
     </div>
