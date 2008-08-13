@@ -231,3 +231,12 @@ label {
 #ft dl {
 	margin: 0 0 1em;
 }
+
+@media print {
+	#ft, #bd>* {
+		display: none;
+	}
+	#bd>table, #bd>h2 {
+		display: block;
+	}
+}
