@@ -7,6 +7,8 @@ urlpatterns = patterns('plan.common.views',
     url(r'^(?P<year>\d{4})/(?P<semester>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/ical/$', 'ical', name='schedule-ical'),
     url(r'^(?P<year>\d{4})/(?P<semester>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/(?P<week>\d{1,2})/$', 'schedule', name='schedule-week'),
 
+    url(r'^(?P<year>\d{4})/(?P<semester>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/list/$', 'list_courses', name='course-list'),
+
     url(r'^debug/$', 'scrape_list'),
     url(r'^debug/exam/$', 'scrape_exam'),
     url(r'^debug/(?P<course>[\w\d-]+)/$', 'scrape'),

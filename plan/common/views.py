@@ -18,6 +18,7 @@ from django.template.defaultfilters import slugify
 from django.views.decorators.cache import cache_page
 from django.core.cache import cache
 from django.db import connection
+from django.views.generic.list_detail import object_list
 
 from plan.common.models import *
 from plan.common.forms import *
@@ -674,3 +675,5 @@ def ical(request, year, semester, slug):
 
     return response
 
+def list_courses(request, year, semester, slug):
+    return object_list(request, Course.objects.all(), template_object_name='course', template_name='common/course_list.html')

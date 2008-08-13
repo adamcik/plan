@@ -63,10 +63,13 @@ thead th {
   border-bottom: 1px solid #666 !important;
 	text-align: left;
 }
-tbody td {
+tbody td, tbody th {
   border: 1px solid #666;
 	border-left: 0;
 	border-right: 0;
+}
+tbody th {
+	text-align: right;
 }
 button, input {
 /*	-moz-border-radius: 0.5em; */
@@ -78,8 +81,8 @@ label {
 	text-decoration: line-through;
 }
 .first {
-border-left: 0;
-margin-right: 0;
+	border-left: 0;
+	margin-right: 0;
 }
 .odd {
   background: #fafafa;

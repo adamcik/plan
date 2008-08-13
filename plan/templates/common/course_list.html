@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}
+    List of all courses - {{ block.super }}
+{% endblock %}
+
+{% block hd %}
+    <h1>All courses</h1>
+{% endblock %}
+
+{% block bd %}
+    <table>
+        <tbody>
+            {% for course in course_list %}
+                <tr class="{% cycle even,odd %}"{% ifchanged course.name.0 %} id="{{ course.name.0 }}"{% endifchanged %}>
+                    <td><input type="checkbox" name="course" value="{{ course.name }}" id="course_{{ course.id }}" /></td>
+                    <th><label for="course_{{ course.id }}">{{ course.name }}</label></th>
+                    <td>
+                        {{ course.full_name }}
+                        {% if course.url %}
+                           (<a href="{{ course.url }}">url</a>)
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
