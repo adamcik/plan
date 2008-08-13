@@ -700,24 +700,20 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
 
             vevent.add('summary').value = 'Exam: %s (%s)' % (e.course.name, e.type)
             vevent.add('categories').value = ['Exam']
-
-            vevent.add('dtstart').value = e.exam_time
-
-            if e.duration == 30:
-                duration = timedelta(minutes=30)
-            else:
-                duration = timedelta(hours=e.duration)
-
-            vevent.add('dtend').value = e.exam_time + duration
             vevent.add('dtstamp').value = datetime.now()
 
             if e.handout_time:
-                vevent = cal.add('vevent')
-                vevent.add('summary').value = 'Exam handout: %s (%s)' % (e.course.name, e.type)
-                vevent.add('categories').value = ['Handout']
                 vevent.add('dtstart').value = e.handout_time
-                vevent.add('dtend')
-                vevent.add('dtstamp').value = datetime.now()
+                vevent.add('dtend').value = e.exam_time
+            else:
+                vevent.add('dtstart').value = e.exam_time
+
+                if e.duration == 30:
+                    duration = timedelta(minutes=30)
+                else:
+                    duration = timedelta(hours=e.duration)
+
+                vevent.add('dtend').value = e.exam_time + duration
 
     icalstream = cal.serialize()
 
