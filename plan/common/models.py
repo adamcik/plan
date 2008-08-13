@@ -101,19 +101,19 @@ class Semester(models.Model):
 
 
 class Exam(models.Model):
-    WRITTEN = 'S'
-    ORAL = 'M'
-    TYPES = (
-        (WRITTEN, 'written'),
-        (ORAL, 'oral'),
-    )
+    exam_time = models.DateTimeField()
+    handout_time = models.DateTimeField(blank=True, null=True)
 
-    time = models.DateTimeField()
     duration = models.PositiveSmallIntegerField(blank=True, null=True)
     comment = models.TextField(blank=True)
 
-    type = models.CharField(max_length=1, choices=TYPES)
+    type = models.CharField(max_length=1, blank=True)
     course = models.ForeignKey(Course)
+
+    def __unicode__(self):
+        if self.handout_time:
+            return '%s: handout: %s, delivery: %s' % (self.course, self.handout_time, self.exam_time)
+        return  '%s: %s' % (self.course, self.exam_time)
 
 class Week(models.Model):
     number = models.PositiveSmallIntegerField(choices=[(x,x) for x in range(1,53)], unique=True)

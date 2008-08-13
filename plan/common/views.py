@@ -6,6 +6,7 @@ import vobject
 
 from datetime import datetime, timedelta
 from dateutil.rrule import *
+from dateutil.parser import parse
 from urllib import urlopen, quote as urlquote, URLopener
 from BeautifulSoup import BeautifulSoup, NavigableString
 
@@ -19,6 +20,7 @@ from django.views.decorators.cache import cache_page
 from django.core.cache import cache
 from django.db import connection
 from django.views.generic.list_detail import object_list
+from django.db import transaction
 
 from plan.common.models import *
 from plan.common.forms import *
@@ -415,7 +417,7 @@ def select_lectures(request, year,type,slug):
 
     return HttpResponseRedirect(reverse('schedule-advanced', args=[year,type,slug]))
 
-# FIXME take in semester object
+@transaction.commit_on_success
 def scrape_list(request):
     '''Scrape the NTNU website to retrive all available courses'''
     if not request.user.is_authenticated():
@@ -451,11 +453,13 @@ def scrape_list(request):
 
     return HttpResponse(str('\n'.join([str(c) for c in courses])), mimetype='text/plain')
 
+@transaction.commit_on_success
 def scrape_exam(request, no_auth=False):
     # FIXME get into working shape
     if not request.user.is_authenticated() and not no_auth:
         raise Http404
 
+    # FIXME
     url = 'http://www.ntnu.no/eksamen/plan/08h/'
 
     html = ''.join(urlopen(url).readlines())
@@ -482,38 +486,45 @@ def scrape_exam(request, no_auth=False):
     for r in results:
         course, created = Course.objects.get_or_create(name=r['course'][0])
 
-        try:
+        if r['duration']:
+            duration = r['duration'][0]
+        else:
+            duration = None
 
-            if r['duration']:
-                duration = r['duration'][0]
+        if r['comment']:
+            comment = r['comment'][0]
+        else:
+            comment = ''
+
+        time = {}
+        for t in r['time']:
+            if t.startswith('Innl.:'):
+                time['exam'] = parse(t.split(':', 1)[1])
+
+            elif t.startswith('Ut:'):
+                time['handout'] = parse(t.split(':', 1)[1])
+
             else:
-                duration = None
+                time['exam'] = parse(t)
+        if r['type']:
+            exam_type = r['type'][0]
+        else:
+            exam_type = ''
 
-            if r['comment']:
-                comment = r['comment'][0]
-            else:
-                comment = ''
-
-            if ':' in r['time'][0]:
-                date,time = r['time'][0].split()
-                date = date.split('.')
-                time = time.split(':')
-
-                time = datetime(int(date[2]), int(date[1]), int(date[0]), int(time[0]), int(time[1]))
-            else:
-                time = r['time'][0].split('.')
-                time = datetime(int(date[2]), int(date[1]), int(date[0]), int(time[0]))
-
-            # FIXME handle multiple exams
-            if r['type']:
-                exam = Exam(course=course, type=r['type'].pop(), time=time, comment=comment, duration=duration)
-                exam.save()
-        except:
-            pass
+        exam = Exam(
+                course=course,
+                type=exam_type,
+                exam_time=time.get('exam'),
+                handout_time=time.get('handout', None),
+                comment=comment,
+                duration=duration
+               )
+        exam.save()
 
     return HttpResponse(str('\n'.join([str(r) for r in results])), mimetype='text/plain')
 
 # FIXME take semester as parameter
+@transaction.commit_on_success
 def scrape(request, course, no_auth=False):
     '''Retrive all lectures for a given course'''
     if not no_auth and not request.user.is_authenticated():

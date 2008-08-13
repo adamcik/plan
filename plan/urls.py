@@ -14,6 +14,7 @@ databrowse.site.register(Lecturer)
 databrowse.site.register(Room)
 databrowse.site.register(Semester)
 databrowse.site.register(Type)
+databrowse.site.register(Exam)
 
 handler500 = 'plan.common.utils.server_error'
 
