@@ -21,6 +21,7 @@ from django.core.cache import cache
 from django.db import connection
 from django.views.generic.list_detail import object_list
 from django.db import transaction
+from django.core import serializers
 
 from plan.common.models import *
 from plan.common.forms import *
@@ -729,6 +730,10 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
 def list_courses(request, year, semester, slug):
     if request.method == 'POST':
         return select_course(request, year, semester, slug, add=True)
+
+    if 'q' in request.GET:
+        data = serializers.serialize('json', Course.objects.filter(name__istartswith=request.GET['q']).order_by('name'))
+        return HttpResponse(data, mimetype='text/plain')
 
     response = cache.get('course_list')
 
