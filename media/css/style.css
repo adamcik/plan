@@ -114,6 +114,9 @@ label {
 	min-height: 10em;
 	*height: 10em;
 }
+.center {
+	text-align: center;
+}
 
 /* schedule styling */
 .schedule .time {

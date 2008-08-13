@@ -131,6 +131,8 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
 
     initial_lectures = Lecture.objects.filter(**filter).distinct().select_related(*related).extra(where=where, tables=tables).order_by(*order)
 
+    exam_list = Exam.objects.filter(course__userset__slug=slug).select_related('course__name', 'course__full_name')
+
     t.tick('Done intializing')
 
     if advanced:
@@ -321,12 +323,16 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
             initial_lectures[i].sql_lecturers = lecturers.get(lecture.id, [])
 
         t.tick('Done lecture css_clases and excluded status')
+    else:
+        for i,exam in enumerate(exam_list):
+            exam_list[i].css_class = color_map[exam.course_id]
 
     t.tick('Starting render to response')
     response = render_to_response('common/schedule.html', {
                             'advanced': advanced,
                             'colspan': span,
                             'courses': courses,
+                            'exams': exam_list,
                             'lectures': initial_lectures,
                             'legend': map(lambda x: x[0], courses),
                             'semester': semester,

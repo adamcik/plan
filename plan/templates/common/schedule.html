@@ -75,12 +75,21 @@
             <button name="submit_add" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add courses</button>
             {% if legend %}
                 <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/remove.png" /> Remove selected</button>
+            {% endif %}
+            <br />
+            (Multiple courses can be added at once by seperating to course codes with spaces)
+        </p>
+        <p>
+                <a href="{% url course-list semester.year,semester.get_type_display,slug %}">
+                    <img alt="" src="{{ MEDIA_URL }}gfx/list.png" />Course list
+                </a>
+            {% if legend %}
                 {% if advanced %}
-                    <a href="{% url schedule semester.year,semester.get_type_display,slug %}">
+                    - <a href="{% url schedule semester.year,semester.get_type_display,slug %}">
                         <img alt="" src="{{ MEDIA_URL }}gfx/advanced.png" />Hide advanced options
                     </a>
                 {% else %}
-                    <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">
+                    - <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">
                         <img alt="" src="{{ MEDIA_URL }}gfx/advanced.png" />Advanced options
                     </a>
                 {% endif %}
@@ -89,13 +98,51 @@
                     <img alt="" src="{{ MEDIA_URL }}gfx/ical.png" />Calendar subscription
                 </a>
             {% endif %}
-            <br />
-            (Multiple courses can be added at once by seperating to course codes with spaces)
         </p>
     </div>
 </form>
 
-{% if advanced %}
+{% if not advanced %}
+    {% if exams %}
+        <h2>Exams</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Dur.</th>
+                    <th>Type</th>
+                    <th>Course</th>
+                    <th>Comment</th>
+                    <th>Handout time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for exam in exams %}
+                    <tr class="{{ exam.css_class }}" title="{{ exam.course.full_name }}">
+                        <td>{{ exam.exam_time.date }}</td>
+                        <td>{{ exam.exam_time|date:"H:i" }}</td>
+                        <td class="center">{{ exam.duration|default:"-" }}</td>
+                        <td class="center">{{ exam.type }}</td>
+                        <td>{{ exam.course.name }}</td>
+                        <td>{{ exam.course.comment|default:"-" }}</td>
+                        <td>
+                            {% if not exam.handout_time %}
+                                -
+                            {% else %}
+                                {% ifequal exam.handout_time.time 0 %}
+                                    {{ exam.exam_time.date }}
+                                {% else %}
+                                    {{ exam.exam_time|date:"Y-m-d H:i" }}
+                                {% endifequal %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% else %}
     {% if courses %}
         <h2>Change groups</h2>
         <p>Each lecture is connected to one or more groups, please select which group's lectures you want to attend:</p>
