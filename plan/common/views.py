@@ -37,13 +37,13 @@ def get_semester(year, semester):
         raise Http404
 
 def get_lectures(slug, semester):
-    # Get all lectures for userset during given period. To do this we need to
-    # pull in a bunch of extra tables and manualy join them in the where
-    # cluase. The first element in the custom where is the important one that
-    # limits our results, the rest are simply meant for joining.
+    ''' Get all lectures for userset during given period.
 
-    # FIXME convert the first where clause to a select boolean, this would
-    # probably allow use to use the same initial_lectures query in both cases.
+    To do this we need to pull in a bunch of extra tables and manualy join them
+    in the where cluase. The first element in the custom where is the important
+    one that limits our results, the rest are simply meant for joining.
+    '''
+
     where=[
         'common_userset_groups.group_id = common_group.id',
         'common_userset_groups.userset_id = common_userset.id',
@@ -55,6 +55,10 @@ def get_lectures(slug, semester):
         'common_group',
         'common_lecture_groups'
     ]
+
+    # TODO add exclude sub query here so that we have all the information we
+    # need right away.
+    select = {}
 
     filter = {
         'course__userset__slug': slug,
@@ -74,7 +78,7 @@ def get_lectures(slug, semester):
         'type__name',
     ]
 
-    return  Lecture.objects.filter(**filter).distinct().select_related(*related).extra(where=where, tables=tables).order_by(*order)
+    return  Lecture.objects.filter(**filter).distinct().select_related(*related).extra(where=where, tables=tables, select=select).order_by(*order)
 
 
 def getting_started(request):
@@ -152,16 +156,13 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
             # worh it)
             course_groups = Group.objects.filter(lecture__course__id=u.course_id).distinct()
 
-            # FIXME Force evaluation of queries so that we can trace them better in the logs, should be removed.
-            [len(groups), len(initial_groups)]
-
             # SQL: For loop generates to quries per userset.
             group_forms[u.course_id] = GroupForm(course_groups, initial={'groups': initial_groups}, prefix=u.course_id)
 
         t.tick('Done creating groups forms')
 
         # Do three custom sql queries to prevent and explosion of sql queries
-        # due to ORM.
+        # due to ORM. FIXME do same queries using ORM
         cursor.execute('''SELECT common_lecture_groups.lecture_id, common_group.name
                             FROM common_lecture_groups
                             INNER JOIN common_group
@@ -313,7 +314,7 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
                 table[k][j][l]['remove'] = True
     t.tick('Done with lecture expansion')
 
-    # FIXME add second round of expansion equalising colspan
+    # TODO add second round of expansion equalising colspan
 
     # Insert extra cell containg times
     for i,start,end in map(lambda x,y: (x[0], x[1][1],y[1]), enumerate(Lecture.START), Lecture.END):
