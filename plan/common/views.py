@@ -505,13 +505,13 @@ def scrape_exam(request, no_auth=False):
         time = {}
         for t in r['time']:
             if t.startswith('Innl.:'):
-                time['exam'] = parse(t.split(':', 1)[1])
+                time['exam'] = parse(t.split(':', 1)[1], dayfirst=True)
 
             elif t.startswith('Ut:'):
-                time['handout'] = parse(t.split(':', 1)[1])
+                time['handout'] = parse(t.split(':', 1)[1], dayfirst=True)
 
             else:
-                time['exam'] = parse(t)
+                time['exam'] = parse(t, dayfirst=True)
         if r['type']:
             exam_type = r['type'][0]
         else:
