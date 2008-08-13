@@ -688,7 +688,7 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
                 vevent = cal.add('vevent')
                 vevent.add('summary').value = l.course.name
                 vevent.add('location').value = l.room.name
-                vevent.add('categories').value = [l.type.name]
+                vevent.add('description').value = '%s - %s' % (l.type.name, l.course.full_name)
 
                 (hour, minute) = l.get_start_time_display().split(':')
                 vevent.add('dtstart').value = datetime(d.year, d.month, d.day, int(hour), int(minute))
@@ -698,6 +698,7 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
 
                 vevent.add('dtstamp').value = datetime.now()
 
+
     if exams:
         first_day = semester.get_first_day()
         last_day = semester.get_last_day()
@@ -705,7 +706,7 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
             vevent = cal.add('vevent')
 
             vevent.add('summary').value = 'Exam: %s (%s)' % (e.course.name, e.type)
-            vevent.add('categories').value = ['Exam']
+            vevent.add('description').value = 'Exam (%s) - %s' % (e.type, e.course.full_name)
             vevent.add('dtstamp').value = datetime.now()
 
             if e.handout_time:
