@@ -36,6 +36,47 @@ def get_semester(year, semester):
     except (KeyError, Semester.DoesNotExist):
         raise Http404
 
+def get_lectures(slug, semester):
+    # Get all lectures for userset during given period. To do this we need to
+    # pull in a bunch of extra tables and manualy join them in the where
+    # cluase. The first element in the custom where is the important one that
+    # limits our results, the rest are simply meant for joining.
+
+    # FIXME convert the first where clause to a select boolean, this would
+    # probably allow use to use the same initial_lectures query in both cases.
+    where=[
+        'common_userset_groups.group_id = common_group.id',
+        'common_userset_groups.userset_id = common_userset.id',
+        'common_group.id = common_lecture_groups.group_id',
+        'common_lecture_groups.lecture_id = common_lecture.id'
+    ]
+    tables=[
+        'common_userset_groups',
+        'common_group',
+        'common_lecture_groups'
+    ]
+
+    filter = {
+        'course__userset__slug': slug,
+        'course__userset__semester': semester,
+    }
+
+    related = [
+        'type__name',
+        'room__name',
+        'course__name',
+    ]
+
+    order = [
+        'course__name',
+        'day',
+        'start_time',
+        'type__name',
+    ]
+
+    return  Lecture.objects.filter(**filter).distinct().select_related(*related).extra(where=where, tables=tables).order_by(*order)
+
+
 def getting_started(request):
     if request.method == 'POST' and 'slug' in request.POST:
         slug = slugify(request.POST['slug'])
@@ -93,44 +134,7 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
 
     semester = get_semester(year, semester)
 
-    # Get all lectures for userset during given period. To do this we need to
-    # pull in a bunch of extra tables and manualy join them in the where
-    # cluase. The first element in the custom where is the important one that
-    # limits our results, the rest are simply meant for joining.
-
-    # FIXME convert the first where clause to a select boolean, this would
-    # probably allow use to use the same initial_lectures query in both cases.
-    where=[
-        'common_userset_groups.group_id = common_group.id',
-        'common_userset_groups.userset_id = common_userset.id',
-        'common_group.id = common_lecture_groups.group_id',
-        'common_lecture_groups.lecture_id = common_lecture.id'
-    ]
-    tables=[
-        'common_userset_groups',
-        'common_group',
-        'common_lecture_groups'
-    ]
-
-    filter = {
-        'course__userset__slug': slug,
-        'course__userset__semester': semester,
-    }
-
-    related = [
-        'type__name',
-        'room__name',
-        'course__name',
-    ]
-
-    order = [
-        'course__name',
-        'day',
-        'start_time',
-        'type__name',
-    ]
-
-    initial_lectures = Lecture.objects.filter(**filter).distinct().select_related(*related).extra(where=where, tables=tables).order_by(*order)
+    initial_lectures = get_lectures(slug, semester)
 
     first_day = semester.get_first_day()
     last_day = semester.get_last_day()
@@ -676,7 +680,7 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
     cal.add('method').value = 'PUBLISH'  # IE/Outlook needs this
 
     if lectures:
-        for l in Lecture.objects.filter(course__userset__slug=slug):
+        for l in get_lectures(slug, semester).exclude(excluded_from__slug=slug):
             weeks = l.weeks.values_list('number', flat=True)
 
             for d in rrule(WEEKLY,byweekno=weeks,count=len(weeks),byweekday=l.day,dtstart=datetime(int(year),1,1)):
