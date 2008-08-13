@@ -19,6 +19,14 @@
                 Courses from all semesters are listed here.
             </p>
             <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Course</th>
+                        <th>Exams</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
                 <tbody>
                     {% for course in course_list %}
                         <tr class="{% cycle even,odd %} {{ course.name }}"{% ifchanged course.name.0 %} id="{{ course.name.0 }}"{% endifchanged %}>

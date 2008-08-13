@@ -115,6 +115,9 @@ class Exam(models.Model):
             return '%s: handout: %s, delivery: %s' % (self.course, self.handout_time, self.exam_time)
         return  '%s: %s' % (self.course, self.exam_time)
 
+    class Meta:
+        ordering = ('handout_time', 'exam_time')
+
 class Week(models.Model):
     number = models.PositiveSmallIntegerField(choices=[(x,x) for x in range(1,53)], unique=True)
 

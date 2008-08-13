@@ -460,7 +460,7 @@ def scrape_exam(request, no_auth=False):
         raise Http404
 
     # FIXME
-    url = 'http://www.ntnu.no/eksamen/plan/08h/'
+    url = 'http://www.ntnu.no/eksamen/plan/09v/'
 
     html = ''.join(urlopen(url).readlines())
     soup = BeautifulSoup(html)
