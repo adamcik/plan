@@ -26,6 +26,13 @@ from plan.common.utils import *
 
 MAX_COLORS = 8
 
+def get_semester(year, semester):
+    try:
+        semester = dict(map(lambda x: (x[1],x[0]), Semester.TYPES))[semester.lower()]
+        return Semester.objects.get(year=year, type=semester)
+    except (KeyError, Semester.DoesNotExist):
+        raise Http404
+
 def getting_started(request):
     if request.method == 'POST' and 'slug' in request.POST:
         slug = slugify(request.POST['slug'])
@@ -81,12 +88,7 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
     lecturers = {}
     weeks = {}
 
-    # Default to current year
-    if not year:
-        year = datetime.now().year
-
-    semester = dict(map(lambda x: (x[1],x[0]), Semester.TYPES))[semester.lower()]
-    semester = Semester.objects.get(year=year, type=semester)
+    semester = get_semester(year, semester)
 
     # Get all lectures for userset during given period. To do this we need to
     # pull in a bunch of extra tables and manualy join them in the where
@@ -337,8 +339,7 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
     return response
 
 def select_groups(request, year, type, slug):
-    type = dict(map(lambda x: (x[1],x[0]), Semester.TYPES))[type.lower()]
-    semester = Semester.objects.get(year=year, type=type)
+    semester = get_semester(year, type)
 
     if request.method == 'POST':
         for c in Course.objects.filter(userset__slug=slug).distinct().order_by('id'):
@@ -356,9 +357,8 @@ def select_groups(request, year, type, slug):
 
     return HttpResponseRedirect(reverse('schedule-advanced', args=[semester.year,semester.get_type_display(),slug]))
 
-def select_course(request, year, type, slug):
-    type = dict(map(lambda x: (x[1],x[0]), Semester.TYPES))[type.lower()]
-    semester = Semester.objects.get(year=year, type=type)
+def select_course(request, year, type, slug, add=False):
+    semester = get_semester(year, type)
 
     if request.method == 'POST' and 'course' in request.POST:
 
@@ -368,7 +368,7 @@ def select_course(request, year, type, slug):
 
         logging.debug('Deleted cache key: %s' % cache_key)
 
-        if 'submit_add' in request.POST:
+        if 'submit_add' in request.POST or add:
             lookup = request.POST['course'].split()
 
             errors = []
@@ -642,8 +642,7 @@ def scrape(request, course, no_auth=False):
     return HttpResponse(str('\n'.join([str(r) for r in results])), mimetype='text/plain')
 
 def ical(request, year, semester, slug):
-    semester = dict(map(lambda x: (x[1],x[0]), Semester.TYPES))[semester.lower()]
-    semester = Semester.objects.get(year=year, type=semester)
+    semester = get_semester(year, semester)
 
     cal = vobject.iCalendar()
     cal.add('method').value = 'PUBLISH'  # IE/Outlook needs this
@@ -676,4 +675,7 @@ def ical(request, year, semester, slug):
     return response
 
 def list_courses(request, year, semester, slug):
+    if request.method == 'POST':
+        return select_course(request, year, semester, slug, add=True)
+
     return object_list(request, Course.objects.all(), template_object_name='course', template_name='common/course_list.html')
