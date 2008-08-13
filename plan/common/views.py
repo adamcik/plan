@@ -6,7 +6,7 @@ import vobject
 
 from datetime import datetime, timedelta
 from dateutil.rrule import *
-from urllib import urlopen, quote as urlquote
+from urllib import urlopen, quote as urlquote, URLopener
 from BeautifulSoup import BeautifulSoup, NavigableString
 
 from django.core.urlresolvers import reverse, NoReverseMatch
@@ -25,23 +25,23 @@ from plan.common.utils import *
 
 MAX_COLORS = 8
 
-@cache_page(60*10)
 def getting_started(request):
     if request.method == 'POST' and 'slug' in request.POST:
         slug = slugify(request.POST['slug'])
 
-        # Default to current semester
-        if datetime.now().month <= 6:
-            semester = Semester(type=Semester.SPRING).get_type_display()
-        else:
-            semester = Semester(type=Semester.FALL).get_type_display()
+        if slug.strip():
+            # Default to current semester
+            if datetime.now().month <= 6:
+                semester = Semester(type=Semester.SPRING).get_type_display()
+            else:
+                semester = Semester(type=Semester.FALL).get_type_display()
 
-        response = HttpResponseRedirect(reverse('schedule', args=[datetime.now().year, semester, slug]))
+            response = HttpResponseRedirect(reverse('schedule', args=[datetime.now().year, semester, slug]))
 
-        # Store last timetable visited in a cookie so that we can populate
-        # the field with a default value next time.
-        response.set_cookie('last', slug, 60*60*24*7*4)
-        return response
+            # Store last timetable visited in a cookie so that we can populate
+            # the field with a default value next time.
+            response.set_cookie('last', slug, 60*60*24*7*4)
+            return response
     return render_to_response('common/start.html', {}, RequestContext(request))
 
 def schedule(request, year, semester, slug, advanced=False, week=None):
@@ -420,31 +420,35 @@ def scrape_list(request):
     if not request.user.is_authenticated():
         raise Http404
 
-    abc = u'ABCDEFGHIJKLMNOPQRSTUVWXYÆØÅ'
+    opener = URLopener()
+    opener.addheader('Accept', '*/*')
 
-    # FIMXE base on semester
-    url = u'http://www.ntnu.no/studieinformasjon/timeplan/h08/?bokst=%s'
+    html = ''.join(opener.open('http://www.ntnu.no/studier/emner').readlines())
+    soup = BeautifulSoup(html)
 
-    courses = {}
-    for letter in abc:
-        html = ''.join(urlopen(url % urlquote(letter.encode('utf-8'))).readlines())
-        soup = BeautifulSoup(html)
+    courses = []
+    course_ids = []
+    for a in soup.findAll('div', id="browseForm")[0].findAll('a'):
+        contents = a.contents[0].strip()
 
-        for a in soup.findAll('a', href=re.compile('emnekode=[\w\d]+-1')):
-            code = re.match('./\?emnekode=([\d\w]+)-1', a['href']).group(1)
-            name = a.contents[0]
+        if contents.endswith('(Nytt)'):
+            contents = contents[:-len('(Nytt)')]
 
-            if not name.startswith(code):
-                courses[code] = name
+        m = re.match(r'^\s*(.+)\((.+)\)\s*$', contents)
 
-    for name,full_name in sorted(courses.iteritems()):
+        if m:
+            courses.append(m.group(2,1))
+
+    for name,full_name in courses:
         course, created = Course.objects.get_or_create(name=name.strip().upper())
 
         if not course.full_name:
-            course.full_name = full_name
+            course.full_name = full_name.strip()
             course.save()
 
-    return HttpResponse(str('\n'.join([str(c) for c in courses.items()])), mimetype='text/plain')
+        course_ids.append(course.id)
+
+    return HttpResponse(str('\n'.join([str(c) for c in courses])), mimetype='text/plain')
 
 def scrape_exam(request, no_auth=False):
     # FIXME get into working shape
