@@ -695,4 +695,11 @@ def list_courses(request, year, semester, slug):
     if request.method == 'POST':
         return select_course(request, year, semester, slug, add=True)
 
-    return object_list(request, Course.objects.all(), template_object_name='course', template_name='common/course_list.html')
+    response = cache.get('course_list')
+
+    if not response:
+        response = object_list(request, Course.objects.all(), template_object_name='course', template_name='common/course_list.html')
+
+        cache.set('course_list', response)
+
+    return response
