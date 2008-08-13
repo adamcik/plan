@@ -452,11 +452,18 @@ def scrape_list(request):
             courses.append(m.group(2,1))
 
     for name,full_name in courses:
-        course, created = Course.objects.get_or_create(name=name.strip().upper())
+        try:
+            course = Course.objects.get(name=name.strip().upper())
+        except Course.DoesNotExist:
+            course = Course(name=name.strip().upper())
 
-        if not course.full_name:
+        if course.full_name != full_name.strip():
             course.full_name = full_name.strip()
-            course.save()
+
+        if not course.url:
+            course.url = 'http://www.ntnu.no/portal/page/portal/ntnuno/AlleEmner?emnekode=%s' % course.name
+
+        course.save()
 
         course_ids.append(course.id)
 
