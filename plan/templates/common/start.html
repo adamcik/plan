@@ -24,23 +24,23 @@
             <div class="yui-u">
                 {% if user.is_authenticated %}
                     <table class="right">
-                        <tr>
+                        <tr class="odd">
                             <th>schedules</th>
                             <td class="number">{{ slug_count }}</td>
                         </tr>
-                        <tr>
-                            <th>course subscriptions</th>
+                        <tr class="even">
+                            <th>subscriptions</th>
                             <td class="number">{{ subscription_count }}</td>
                         </tr>
-                        <tr>
-                            <th>lectures imported</th>
+                        <tr class="odd">
+                            <th>lectures</th>
                             <td class="number">{{ lecture_count }}</td>
                         </tr>
-                        <tr>
+                        <tr class="even">
                             <th>courses</th>
                             <td class="number">{{ course_count }}</td>
                         <tr>
-                        <tr>
+                        <tr class="odd">
                             <th>exams</th>
                             <td class="number">{{ exam_count }}</td>
                         <tr>
