@@ -99,7 +99,13 @@ def getting_started(request):
             # the field with a default value next time.
             response.set_cookie('last', slug, 60*60*24*7*4)
             return response
-    return render_to_response('common/start.html', {}, RequestContext(request))
+    return render_to_response('common/start.html', {
+                'slug_count': UserSet.objects.values('slug').distinct().count(),
+                'subscription_count': UserSet.objects.count(),
+                'lecture_count': Lecture.objects.count(),
+                'course_count': Course.objects.count(),
+                'exam_count': Exam.objects.count(),
+            }, RequestContext(request))
 
 def schedule(request, year, semester, slug, advanced=False, week=None):
     t = request.timer

@@ -6,17 +6,47 @@
 
 {% block bd %}
     <form action="." method="post">
-        <p class="large">
-            Please enter a short string identifying your personal timetable, ie
-            username, IRCname, etc.
-        </p>
-        <p>
-            <input type="text" name="slug" value="{{ request.COOKIES.last|default:"" }}" />
-            <button type="submit">Start <img alt="" src="{{ MEDIA_URL }}gfx/start.png" /></button>
-        </p>
-        <p>
-	    To retrieve a timetable simply enter the same identifier you used
-	    last time. If the identifier you choose is in use pick another one.
-        </p>
+        <div class="yui-ge">
+            <div class="yui-u first">
+                <p class="large">
+                    Please enter a short string identifying your personal timetable, ie
+                    username, IRCname, etc.
+                </p>
+                <p>
+                    <input type="text" name="slug" value="{{ request.COOKIES.last|default:"" }}" />
+                    <button type="submit">Start <img alt="" src="{{ MEDIA_URL }}gfx/start.png" /></button>
+                </p>
+                <p>
+                    To retrieve a timetable simply enter the same identifier you used
+                    last time. If the identifier you choose is in use pick another one.
+                </p>
+            </div>
+            <div class="yui-u">
+                {% if user.is_authenticated %}
+                    <table class="right">
+                        <tr>
+                            <th>schedules</th>
+                            <td class="number">{{ slug_count }}</td>
+                        </tr>
+                        <tr>
+                            <th>course subscriptions</th>
+                            <td class="number">{{ subscription_count }}</td>
+                        </tr>
+                        <tr>
+                            <th>lectures imported</th>
+                            <td class="number">{{ lecture_count }}</td>
+                        </tr>
+                        <tr>
+                            <th>courses</th>
+                            <td class="number">{{ course_count }}</td>
+                        <tr>
+                        <tr>
+                            <th>exams</th>
+                            <td class="number">{{ exam_count }}</td>
+                        <tr>
+                    </table>
+                {% endif %}
+            </div>
+        </div>
     </form>
 {% endblock %}

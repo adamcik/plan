@@ -109,6 +109,10 @@ label {
 	float: left;
 	margin-right: 0.5em;
 }
+.right {
+	float: right;
+	margin-left: 0.5em;
+}
 .box {
 	border: 1px solid #666;
 	min-height: 10em;
@@ -116,6 +120,9 @@ label {
 }
 .center {
 	text-align: center;
+}
+.number {
+	text-align: right;
 }
 
 /* schedule styling */
@@ -200,7 +207,7 @@ label {
 .lecture6  { background: #F1E2CC; }
 .lecture7  { background: #CCCCCC; }
 
-.yui-u {
+#ft .yui-u {
 	border-left: 1px solid #555753;
 	margin: 1em 0;
 }
