@@ -7,6 +7,7 @@ import vobject
 from datetime import datetime, timedelta
 from dateutil.rrule import *
 from dateutil.parser import parse
+from dateutil.tz import tzlocal
 from urllib import urlopen, quote as urlquote, URLopener
 from BeautifulSoup import BeautifulSoup, NavigableString
 
@@ -691,12 +692,12 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
                 vevent.add('description').value = '%s - %s' % (l.type.name, l.course.full_name)
 
                 (hour, minute) = l.get_start_time_display().split(':')
-                vevent.add('dtstart').value = datetime(d.year, d.month, d.day, int(hour), int(minute))
+                vevent.add('dtstart').value = d.replace(hour=int(hour), minute=int(minute), tzinfo=tzlocal())
 
                 (hour, minute) = l.get_end_time_display().split(':')
-                vevent.add('dtend').value = datetime(d.year, d.month, d.day, int(hour), int(minute))
+                vevent.add('dtend').value = d.replace(hour=int(hour), minute=int(minute), tzinfo=tzlocal())
 
-                vevent.add('dtstamp').value = datetime.now()
+                vevent.add('dtstamp').value = datetime.now(tzlocal())
 
 
     if exams:
@@ -707,20 +708,20 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
 
             vevent.add('summary').value = 'Exam: %s (%s)' % (e.course.name, e.type)
             vevent.add('description').value = 'Exam (%s) - %s' % (e.type, e.course.full_name)
-            vevent.add('dtstamp').value = datetime.now()
+            vevent.add('dtstamp').value = datetime.now(tzlocal())
 
             if e.handout_time:
-                vevent.add('dtstart').value = e.handout_time
-                vevent.add('dtend').value = e.exam_time
+                vevent.add('dtstart').value = e.handout_time.replace(tzinfo=tzlocal())
+                vevent.add('dtend').value = e.exam_time.replace(tzinfo=tzlocal())
             else:
-                vevent.add('dtstart').value = e.exam_time
+                vevent.add('dtstart').value = e.exam_time.replace(tzinfo=tzlocal())
 
                 if e.duration == 30:
                     duration = timedelta(minutes=30)
                 else:
                     duration = timedelta(hours=e.duration)
 
-                vevent.add('dtend').value = e.exam_time + duration
+                vevent.add('dtend').value = e.exam_time.replace(tzinfo=tzlocal()) + duration
 
     icalstream = cal.serialize()
 
