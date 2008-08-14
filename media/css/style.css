@@ -211,7 +211,7 @@ label {
 	border-left: 1px solid #555753;
 	margin: 1em 0;
 }
-.first {
+#ft .first {
 	border-left: 0;
 }
 
