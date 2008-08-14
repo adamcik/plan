@@ -6,7 +6,7 @@ class CourseAdmin(admin.ModelAdmin):
     search_fields = ('name', 'full_name')
 
 class ExamAdmin(admin.ModelAdmin):
-    list_display = ('course', 'type', 'time', 'duration', 'comment')
+    list_display = ('course', 'type', 'exam_time', 'duration', 'comment')
     search_fields = ('course__name', 'type')
     list_filter = ['type', 'duration']
 

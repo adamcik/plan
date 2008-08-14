@@ -35,8 +35,8 @@
 
                                 {% if c.lecture %}
                                     <div class="course">{{ c.lecture.course }}</div>
-                                    <div class="type">{{ c.lecture.type }}</div>
-                                    <div class="room">{{ c.lecture.room }}</div>
+                                    <div class="type">{% if c.lecture.type_id %}{{ c.lecture.type }}{% endif %}</div>
+                                    <div class="room">{% if c.lecture.room_id %}{{ c.lecture.room }}{% endif %}</div>
                                 {% endif %}
                                 {% if c.time %}
                                     {{ c.time }}
@@ -189,8 +189,8 @@
                             <td>{{ l.course }}</td>
                             <td>{{ l.get_day_display }}</td>
                             <td>{{ l.get_start_time_display }}-{{ l.get_end_time_display }}</td>
-                            <td class="small">{{ l.room }}</td>
-                            <td class="small">{{ l.type }}</td>
+                            <td class="small">{% if l.room_id %}{{ l.room }}{% endif %}</td>
+                            <td class="small">{% if l.type_id %}{{ l.type }}{% endif %}</td>
                             <td class="small">{% for g in  l.sql_groups %}{{ g }}{% if not forloop.last %},{% endif %} {% endfor %}</td>
                             <td>{% for p in  l.sql_lecturers %}{{ p }}{% if not forloop.last %},{% endif %} {% endfor %}</td>
                             <td class="small">{% for w in  l.sql_weeks %}{{ w }}{% if not forloop.last %},{% endif %} {% endfor %}</td>
