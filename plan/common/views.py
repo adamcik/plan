@@ -393,7 +393,10 @@ def select_course(request, year, type, slug, add=False):
         logging.debug('Deleted cache key: %s' % cache_key)
 
         if 'submit_add' in request.POST or add:
-            lookup = request.POST['course'].split()
+            lookup = []
+
+            for l in request.POST.getlist('course'):
+                lookup.extend(l.split())
 
             errors = []
 
