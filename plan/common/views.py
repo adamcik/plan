@@ -662,8 +662,16 @@ def scrape(request, course, no_auth=False):
         if not course.full_name:
             course.full_name = r['title']
             course.save()
-        room, created = Room.objects.get_or_create(name=r['room'][0])
-        type, created = Type.objects.get_or_create(name=r['type'][0])
+
+        if r['room']:
+            room, created = Room.objects.get_or_create(name=r['room'][0])
+        else:
+            room = None
+
+        if r['type']:
+            type, created = Type.objects.get_or_create(name=r['type'][0])
+        else:
+            type = None
 
         day = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag'].index(r['time'][0][0])
 
