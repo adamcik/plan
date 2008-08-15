@@ -9,7 +9,7 @@
         <div class="yui-ge">
             <div class="yui-u first">
                 <p class="large">
-                    Please enter a short string identifying your personal timetable, ie
+                    Please enter a short string identifying your personal timetable, ie.
                     username, IRCname, etc.
                 </p>
                 <p>
@@ -22,7 +22,7 @@
                 </p>
             </div>
             <div class="yui-u">
-                {% if user.is_authenticated %}
+                {% if user.is_authenticated or request.GET.stats %}
                     <table class="right">
                         <tr class="odd">
                             <th>schedules</th>
@@ -49,4 +49,8 @@
             </div>
         </div>
     </form>
+    {% if user.is_authenticated or request.GET.todo %}
+        <h2>TODO</h2>
+        <pre>{% include "todo.txt" %}</pre>
+    {% endif %}
 {% endblock %}
