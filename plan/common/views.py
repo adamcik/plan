@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from dateutil.rrule import *
 from dateutil.parser import parse
 from dateutil.tz import tzlocal
-from urllib import urlopen, quote as urlquote, URLopener
+from urllib import urlopen, URLopener
 from BeautifulSoup import BeautifulSoup, NavigableString
 
 from django.core.urlresolvers import reverse, NoReverseMatch
@@ -23,6 +23,7 @@ from django.db import connection
 from django.views.generic.list_detail import object_list
 from django.db import transaction
 from django.core import serializers
+from django.utils.http import urlquote
 
 from plan.common.models import *
 from plan.common.forms import *
@@ -413,6 +414,8 @@ def select_course(request, year, type, slug, add=False):
                         userset.groups.add(g)
 
                 except:
+                    if request.user.is_authenticated():
+                        raise
                     errors.append(l)
 
             if errors:
@@ -562,8 +565,10 @@ def scrape(request, course, no_auth=False):
     if not no_auth and not request.user.is_authenticated():
         raise Http404
 
+    course = course.upper().strip()
+
     # FIXME based on semester
-    url  = 'http://www.ntnu.no/studieinformasjon/timeplan/h08/?emnekode=%s' % course.upper().strip()
+    url  = 'http://www.ntnu.no/studieinformasjon/timeplan/h08/?emnekode=%s' % urlquote(course.encode('latin-1'))
 
     errors = []
 
