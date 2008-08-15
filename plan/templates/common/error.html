@@ -11,5 +11,12 @@
             <li>{{ c|upper }}</li>
         {% endfor %}
     </ul>
-    <p>Back to your <a href="{% url schedule-advanced year,type,slug %}">schedule</a>.</p>
+    <p>
+        Please check that the courses that failed can be found at
+        <a href="http://www.ntnu.no/studieinformasjon/timeplan">http://www.ntnu.no/studieinformasjon/timeplan</a>
+        for this semster.
+    </p>
+    <p>
+        Back to your <a href="{% url schedule-advanced year,type,slug %}">schedule</a>.
+    </p>
 {% endblock %}
