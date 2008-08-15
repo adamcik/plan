@@ -613,7 +613,7 @@ def scrape(request, course, no_auth=False):
                         start, end = [x.strip() for x in period.split('-')]
                         time.append([day,start,end])
 
-                    for week in td.findAll('span')[0].contents[0].split()[1:]:
+                    for week in td.findAll('span')[0].contents[0].split(',')[1:]:
                         if '-' in week:
                             x,y = week.split('-')
                             weeks.extend(range(int(x),int(y)))
