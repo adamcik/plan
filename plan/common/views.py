@@ -3,6 +3,8 @@
 import re
 import logging
 import vobject
+import traceback
+import sys
 
 from datetime import datetime, timedelta
 from dateutil.rrule import *
@@ -24,6 +26,8 @@ from django.views.generic.list_detail import object_list
 from django.db import transaction
 from django.core import serializers
 from django.utils.http import urlquote
+from django.core.mail import mail_admins
+from django.conf import settings
 
 from plan.common.models import *
 from plan.common.forms import *
@@ -413,9 +417,24 @@ def select_course(request, year, type, slug, add=False):
                     for g in Group.objects.filter(lecture__course=course).distinct():
                         userset.groups.add(g)
 
+                except Course.DoesNotExist:
+                    errors.append(l)
+
                 except:
                     if request.user.is_authenticated():
                         raise
+
+                    subject = 'Error (%s IP): %s' % ((request.META.get('REMOTE_ADDR') in settings.INTERNAL_IPS and 'internal' or 'EXTERNAL'), request.path)
+                    try:
+                        request_repr = repr(request)
+                    except:
+                        request_repr = "Request repr() unavailable"
+
+                    trace = ''.join(traceback.format_exception(sys.exc_type, sys.exc_value, sys.exc_traceback))
+
+                    message = "%s\n\n%s" % (trace, request_repr)
+                    mail_admins(subject, message, fail_silently=True)
+
                     errors.append(l)
 
             if errors:
