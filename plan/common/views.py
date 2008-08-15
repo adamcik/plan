@@ -740,6 +740,9 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
 
                 vevent.add('dtstamp').value = datetime.now(tzlocal())
 
+                if l.type.optional:
+                    vevent.add('transp').value = 'TRANSPARENT'
+
 
     if exams:
         first_day = semester.get_first_day()
