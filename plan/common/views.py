@@ -748,17 +748,17 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
             else:
                 vevent.add('dtstart').value = e.exam_time.replace(tzinfo=tzlocal())
 
-                if not e.duration:
+                if e.duration is None:
                     pass
                 elif e.duration == 30:
                     duration = timedelta(minutes=30)
                 else:
                     duration = timedelta(hours=e.duration)
 
-                if e.duration:
-                    vevent.add('dtend').value = e.exam_time.replace(tzinfo=tzlocal()) + duration
-                else:
+                if e.duration is None:
                     vevent.add('dtend').value = e.exam_time.replace(tzinfo=tzlocal())
+                else:
+                    vevent.add('dtend').value = e.exam_time.replace(tzinfo=tzlocal()) + duration
 
     icalstream = cal.serialize()
 
