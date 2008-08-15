@@ -419,12 +419,11 @@ def select_course(request, year, type, slug, add=False):
 
                 except Course.DoesNotExist:
                     errors.append(l)
-
                 except:
                     if request.user.is_authenticated():
                         raise
 
-                    subject = 'Error (%s IP): %s' % ((request.META.get('REMOTE_ADDR') in settings.INTERNAL_IPS and 'internal' or 'EXTERNAL'), request.path)
+                    subject = 'Error: %s' % (request.path)
                     try:
                         request_repr = repr(request)
                     except:
@@ -749,12 +748,17 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
             else:
                 vevent.add('dtstart').value = e.exam_time.replace(tzinfo=tzlocal())
 
-                if e.duration == 30:
+                if not e.duration:
+                    pass
+                elif e.duration == 30:
                     duration = timedelta(minutes=30)
                 else:
                     duration = timedelta(hours=e.duration)
 
-                vevent.add('dtend').value = e.exam_time.replace(tzinfo=tzlocal()) + duration
+                if e.duration:
+                    vevent.add('dtend').value = e.exam_time.replace(tzinfo=tzlocal()) + duration
+                else:
+                    vevent.add('dtend').value = e.exam_time.replace(tzinfo=tzlocal())
 
     icalstream = cal.serialize()
 
