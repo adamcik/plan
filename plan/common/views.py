@@ -404,6 +404,7 @@ def select_course(request, year, type, slug, add=False):
                 lookup.extend(l.split())
 
             errors = []
+            error_mail = []
 
             for l in lookup:
                 try:
@@ -423,20 +424,20 @@ def select_course(request, year, type, slug, add=False):
                     if request.user.is_authenticated():
                         raise
 
-                    subject = 'Error: %s' % (request.path)
-                    try:
-                        request_repr = repr(request)
-                    except:
-                        request_repr = "Request repr() unavailable"
-
                     trace = ''.join(traceback.format_exception(sys.exc_type, sys.exc_value, sys.exc_traceback))
-
-                    message = "%s\n\n%s" % (trace, request_repr)
-                    mail_admins(subject, message, fail_silently=True)
-
+                    error_mail.append(trace)
                     errors.append(l)
 
             if errors:
+                try:
+                    request_repr = repr(request)
+                except:
+                    request_repr = "Request repr() unavailable"
+
+                subject = 'Error: %s' % (request.path)
+                message = "%s\n\n%s" % ('\n\n'.join(error_mail), request_repr)
+                mail_admins(subject, message, fail_silently=True)
+
                 return render_to_response('common/error.html',
                             {'courses': errors, 'slug': slug, 'year': year, 'type': semester.get_type_display()},
                             RequestContext(request))
