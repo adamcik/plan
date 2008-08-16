@@ -8,6 +8,59 @@
     <h1>{{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %}  {{ semester.get_type_display }} {{ semester.year }} schedule</h1>
 {% endblock %}
 
+{% block extrahead %}
+    {% if request.user.is_authenticated %}
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.2.5.min.js"></script>
+        <script type="text/javascript">
+            $(function() {
+                var course = $('#course');
+                var suggestion = $('<div id="suggestion"></div>');
+
+                course.after(suggestion);
+                course.attr('autocomplete', 'off')
+                course.parent().css('position', 'relative');
+                course.keyup(function() {
+                    if (course.val().length == 0) {
+                        suggestion.hide().empty();
+                    } else {
+                        $.getJSON('./list/', {'q': course.val()}, function(data) {
+                            suggestion.empty();
+                            $.each(data, function(i,course) {
+                                var div = $('<div></div>');
+
+                                div.addClass(i % 2 ? 'even' : 'odd');
+                                div.append($('<b class="code"></b>').text(course.fields.name));
+                                div.append($('<span class="small"></span>').text(course.fields.full_name));
+                                suggestion.append(div);
+                            });
+                            if (data.length)
+                                suggestion.show();
+                        })
+                    }
+                });
+
+                suggestion.hide()
+                suggestion.click(function(event) {
+                    var text = '';
+                    var values = course.val().split(' ');
+                    var tmp = $(event.target).parent().children('b').text();
+
+                    values[values.length-1] = tmp;
+
+                    for (var i = 0;  i < values.length; i++) {
+                        if (values[i] != '')
+                            text += values[i] + ' '
+                    }
+
+                    course.val(text).focus();
+                    suggestion.hide().empty()
+                });
+            });
+        </script>
+    {% endif %}
+{% endblock %}
+
+
 {% block bd %}
 
 <table class="schedule">
@@ -71,7 +124,7 @@
     </div>
     <div class="yui-g">
         <p>
-            <input type="text" name="course" size="30"/>
+            <input id="course" type="text" name="course" size="30"/>
             <button name="submit_add" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add courses</button>
             {% if legend %}
                 <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/remove.png" /> Remove selected</button>

@@ -239,6 +239,21 @@ label {
 	margin: 0 0 1em;
 }
 
+#suggestion {
+	height: 10em;
+	width: 30em;
+	overflow: auto;
+	border: 1px solid #555753;
+	position: absolute;
+	background: #FFF;
+	display: none;
+	top: 1.8em;
+	text-align: left;
+}
+#suggestion b {
+	margin-right: 0.5em;
+}
+
 @media print {
 	#ft, #bd>* {
 		display: none;
