@@ -612,6 +612,11 @@ def scrape(request, course, no_auth=False):
         except IndexError:
             errors.append(('Course does not exsist', '%s-%d' % (url, number)))
 
+            del html
+            del soup
+            del main
+            del table
+
     if errors:
         raise Exception(errors)
 
