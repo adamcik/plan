@@ -6,6 +6,7 @@ import vobject
 import traceback
 import sys
 
+from socket import gethostname
 from datetime import datetime, timedelta
 from dateutil.rrule import *
 from dateutil.parser import parse
@@ -428,7 +429,7 @@ def select_course(request, year, type, slug, add=False):
                     error_mail.append(trace)
                     errors.append(l)
 
-            if errors:
+            if error_mail:
                 try:
                     request_repr = repr(request)
                 except:
@@ -438,6 +439,7 @@ def select_course(request, year, type, slug, add=False):
                 message = "%s\n\n%s" % ('\n\n'.join(error_mail), request_repr)
                 mail_admins(subject, message, fail_silently=True)
 
+            if errors:
                 return render_to_response('common/error.html',
                             {'courses': errors, 'slug': slug, 'year': year, 'type': semester.get_type_display()},
                             RequestContext(request))
@@ -740,6 +742,8 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
 
                 vevent.add('dtstamp').value = datetime.now(tzlocal())
 
+                vevent.add('uid').value = 'lecture-%d-%s@%s' % (l.id, d.strftime('%Y%m%d'), gethostname())
+
                 if l.type.optional:
                     vevent.add('transp').value = 'TRANSPARENT'
 
@@ -753,6 +757,8 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
             vevent.add('summary').value = 'Exam: %s (%s)' % (e.course.name, e.type)
             vevent.add('description').value = 'Exam (%s) - %s' % (e.type, e.course.full_name)
             vevent.add('dtstamp').value = datetime.now(tzlocal())
+
+            vevent.add('uid').value = 'exam-%d@%s' % (e.id, gethostname())
 
             if e.handout_time:
                 vevent.add('dtstart').value = e.handout_time.replace(tzinfo=tzlocal())
@@ -789,8 +795,16 @@ def list_courses(request, year, semester, slug):
 
     if 'q' in request.GET:
         query = request.GET['q'].split()[-1]
-        data = serializers.serialize('json', Course.objects.filter(name__istartswith=query).order_by('name'))
-        return HttpResponse(data, mimetype='text/plain')
+
+        response = cache.get('course_list:%s' % query.upper())
+
+        if not response:
+            data = serializers.serialize('json', Course.objects.filter(name__istartswith=query).order_by('name'))
+            response = HttpResponse(data, mimetype='text/plain')
+
+            cache.set('course_list:%s' % query.upper(), response)
+
+        return response
 
     response = cache.get('course_list')
 
