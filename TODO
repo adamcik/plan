@@ -1,0 +1,34 @@
+* Cache ical as it _will_ get hit often
+
+* course_list currently isn't cached...
+
+* RRULEs for ical?
+
+* Cleanup urls for my debug stuff.
+
+* Semester based import urls (has been started)
+
+* Handle refreshing of course data:
+  - Do this in a db transaction
+  - Add all lectures keeping track of the ones we add
+  - Delete all lectures for given course during this semester that have not
+    been readded.
+
+* AJAX helper for adding courses?
+
+* Allow setting of course urls? addtional urls?
+
+* Better user feedbacks when stuff can't be added (add
+  'message:<slug>:<remote_addr>' in cache. not sure about remote_addr)
+
+  Needs to work around curent cacheing, or cacheing needs to be moved to template level.
+
+* Use request.path as cache key?
+
+---
+
+* Support variable start stop times:
+  - Store actual times in db
+  - Map times to intervals that we want to show.
+
+* Add meta sets that are not linked to semesters years, MDTD-1 MTDT-2 etc
