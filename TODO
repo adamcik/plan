@@ -1,3 +1,5 @@
+* Use MySQL dump for all info and deactivate scraping :D
+
 * Cache ical as it _will_ get hit often
 
 * course_list currently isn't cached...
