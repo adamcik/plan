@@ -61,7 +61,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'plan.common.middleware.InternalIpMiddleware',
     'django.middleware.doc.XViewMiddleware',
-    'djangologging.middleware.LoggingMiddleware',
+    #'djangologging.middleware.LoggingMiddleware',
     'plan.common.middleware.TimingMiddleware',
     'plan.common.middleware.UserBasedExceptionMiddleware',
 )
