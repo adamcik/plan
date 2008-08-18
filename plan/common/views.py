@@ -595,9 +595,11 @@ def scrape(request, course, no_auth=False):
 
     for number in [1,2,3]:
         html = ''.join(urlopen('%s-%d' % (url, number)).readlines())
-        soup = BeautifulSoup(html)
-        main = soup.findAll('div', 'hovedramme')[0]
-        table = main.findAll('table')[1]
+        table = BeautifulSoup(html).findAll('div', 'hovedramme')[0].findAll('table')[1]
+
+        # Try and get rid of stuff we don't need.
+        table.extract()
+        del html
 
         results = []
 
@@ -611,10 +613,6 @@ def scrape(request, course, no_auth=False):
 
         except IndexError:
             errors.append(('Course does not exsist', '%s-%d' % (url, number)))
-
-            del html
-            del soup
-            del main
             del table
 
     if errors:
@@ -662,6 +660,8 @@ def scrape(request, course, no_auth=False):
                 'groups': groups,
                 'title': title,
             })
+
+    del table
 
     semester = Semester.objects.all()[0]
     course, created = Course.objects.get_or_create(name=course.upper())
@@ -721,10 +721,14 @@ def scrape(request, course, no_auth=False):
 
         lecture.save()
 
+    # FIXME force run of garbage handler
+
     return HttpResponse(str('\n'.join([str(r) for r in results])), mimetype='text/plain')
 
 def ical(request, year, semester, slug, lectures=True, exams=True):
     semester = get_semester(year, semester)
+
+    # FIXME cache the response! use request path..
 
     cal = vobject.iCalendar()
     cal.add('method').value = 'PUBLISH'  # IE/Outlook needs this
@@ -795,6 +799,9 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
     return response
 
 def list_courses(request, year, semester, slug):
+    # FIXME response is not being cached and exams should be retrived more
+    # effciently
+
     if request.method == 'POST':
         return select_course(request, year, semester, slug, add=True)
 
