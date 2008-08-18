@@ -22,8 +22,6 @@ from django.core.cache import cache
 from django.db import connection
 from django.views.generic.list_detail import object_list
 from django.core import serializers
-from django.core.mail import mail_admins
-from django.conf import settings
 
 from plan.common.models import *
 from plan.common.forms import *
@@ -144,6 +142,7 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
     groups = {}
     lecturers = {}
     weeks = {}
+    rooms = {}
 
     semester = get_semester(year, semester)
 
@@ -155,6 +154,20 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
     exam_list = Exam.objects.filter(course__userset__slug=slug, exam_time__gt=first_day, exam_time__lt=last_day).select_related('course__name', 'course__full_name')
 
     t.tick('Done intializing')
+
+    # FIXME all of these are way to naive, need a where clause
+    cursor.execute('''SELECT common_lecture_rooms.lecture_id, common_room.name
+                        FROM common_lecture_rooms
+                        INNER JOIN common_room
+                            ON (common_room.id = common_lecture_rooms.room_id)''')
+
+    for lecture_id,name in cursor.fetchall():
+        if lecture_id not in rooms:
+            rooms[lecture_id] = []
+
+        rooms[lecture_id].append(name)
+    print rooms[6788]
+    t.tick('Done getting rooms for lecture list')
 
     if advanced:
         for u in UserSet.objects.filter(slug=slug, semester=semester):
@@ -283,7 +296,6 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
             if not remove:
                 remove = True
                 lectures.append({
-                    'lecture': lecture,
                     'height': rowspan,
                     'i': start,
                     'j': lecture.day,
@@ -302,6 +314,9 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
         height = lecture['height']
 
         expand_by = 1
+
+        r = rooms.get(table[i][j][m]['lecture'].id, [])
+        table[i][j][m]['lecture'].sql_rooms = r
 
         # Find safe expansion of colspan
         safe = True
@@ -330,8 +345,8 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
         table[i].insert(0, [{'time': '%s - %s' % (start, end), 'class': 'time'}])
     t.tick('Done adding times')
 
+    # Add colors and exlude status
     if advanced:
-        # Add colors and exlude status
         for i,lecture in enumerate(initial_lectures):
             initial_lectures[i].css_class =  color_map[lecture.course_id]
             initial_lectures[i].excluded  =  lecture.id not in included
@@ -339,8 +354,11 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
             initial_lectures[i].sql_weeks = compact_sequence(weeks.get(lecture.id, []))
             initial_lectures[i].sql_groups = groups.get(lecture.id, [])
             initial_lectures[i].sql_lecturers = lecturers.get(lecture.id, [])
+            initial_lectures[i].sql_rooms = rooms.get(lecture.id, [])
+
 
         t.tick('Done lecture css_clases and excluded status')
+
     else:
         for i,exam in enumerate(exam_list):
             exam_list[i].css_class = color_map[exam.course_id]
@@ -386,7 +404,7 @@ def select_groups(request, year, type, slug):
 def select_course(request, year, type, slug, add=False):
     semester = get_semester(year, type)
 
-    if request.method == 'POST' and 'course' in request.POST:
+    if request.method == 'POST' and ('course_add' in request.POST or 'course_remove' in request.POST):
 
         cache_key = ':'.join(['schedule', year, semester.get_type_display(), slug])
         cache.delete(cache_key+':False')
@@ -397,7 +415,7 @@ def select_course(request, year, type, slug, add=False):
         if 'submit_add' in request.POST or add:
             lookup = []
 
-            for l in request.POST.getlist('course'):
+            for l in request.POST.getlist('course_add'):
                 lookup.extend(l.split())
 
             errors = []
@@ -406,10 +424,6 @@ def select_course(request, year, type, slug, add=False):
             for l in lookup:
                 try:
                     course = Course.objects.get(name__iexact=l.strip())
-
-                    if not course.lecture_set.count():
-                        scrape(request, l, no_auth=True)
-
                     userset, created = UserSet.objects.get_or_create(slug=slug, course=course, semester=semester)
 
                     for g in Group.objects.filter(lecture__course=course).distinct():
@@ -417,23 +431,6 @@ def select_course(request, year, type, slug, add=False):
 
                 except Course.DoesNotExist:
                     errors.append(l)
-                except:
-                    if request.user.is_authenticated():
-                        raise
-
-                    trace = ''.join(traceback.format_exception(sys.exc_type, sys.exc_value, sys.exc_traceback))
-                    error_mail.append(trace)
-                    errors.append(l)
-
-            if error_mail:
-                try:
-                    request_repr = repr(request)
-                except:
-                    request_repr = "Request repr() unavailable"
-
-                subject = 'Error: %s' % (request.path)
-                message = "%s\n\n%s" % ('\n\n'.join(error_mail), request_repr)
-                mail_admins(subject, message, fail_silently=True)
 
             if errors:
                 return render_to_response('common/error.html',
@@ -441,7 +438,7 @@ def select_course(request, year, type, slug, add=False):
                             RequestContext(request))
 
         elif 'submit_remove' in request.POST:
-            courses = [c.strip() for c in request.POST.getlist('course') if c.strip()]
+            courses = [c.strip() for c in request.POST.getlist('course_remove') if c.strip()]
             sets = UserSet.objects.filter(slug__iexact=slug, course__id__in=courses)
             sets.delete()
 
@@ -535,6 +532,7 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
 
     return response
 
+# FIXME no longer in use
 def list_courses(request, year, semester, slug):
     # FIXME response is not being cached and exams should be retrived more
     # effciently

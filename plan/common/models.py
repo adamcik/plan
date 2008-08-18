@@ -153,7 +153,7 @@ class Lecture(models.Model):
     start_time = models.PositiveSmallIntegerField(choices=START)
     end_time  = models.PositiveSmallIntegerField(choices=END)
 
-    room = models.ForeignKey(Room, blank=True, null=True)
+    rooms = models.ManyToManyField(Room, blank=True, null=True)
     type = models.ForeignKey(Type, blank=True, null=True)
     weeks = models.ManyToManyField(Week, blank=True, null=True)
     groups = models.ManyToManyField(Group, blank=True, null=True)

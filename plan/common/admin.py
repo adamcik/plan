@@ -11,14 +11,14 @@ class ExamAdmin(admin.ModelAdmin):
     list_filter = ['type', 'duration']
 
 class LectureAdmin(admin.ModelAdmin):
-    list_display = ('course', 'day', 'start_time', 'end_time', 'room', 'type')
+    list_display = ('course', 'day', 'start_time', 'end_time', 'type')
 
-    search_fields = ('course__name', 'room__name', 'type__name')
+    search_fields = ('course__name', 'type__name')
 
-    filter_horizontal = ('weeks', 'groups', 'lecturers')
+    filter_horizontal = ('weeks', 'groups', 'lecturers', 'rooms')
 
     list_per_page = 50
-    list_filter = ['day', 'start_time', 'room']
+    list_filter = ['day', 'start_time', 'rooms']
     list_select_related = True
 
 class UserSetAdmin(admin.ModelAdmin):

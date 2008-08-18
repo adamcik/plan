@@ -29,8 +29,4 @@
             <b>exams:</b>         {{ exam_count }}
         </p>
     {% endif %}
-    {% if user.is_authenticated or request.GET.todo %}
-        <h2>Todo</h2>
-        <pre>{% include "todo.txt" %}</pre>
-    {% endif %}
 {% endblock %}

@@ -99,7 +99,7 @@
                                 {% if c.lecture %}
                                     <div class="course">{{ c.lecture.course }}</div>
                                     <div class="type">{% if c.lecture.type_id %}{{ c.lecture.type }}{% endif %}</div>
-                                    <div class="room">{% if c.lecture.room_id %}{{ c.lecture.room }}{% endif %}</div>
+                                    <div class="room">{% for r in c.lecture.sql_rooms %}{{ r }}{% if not forloop.last %}, {% endif %}{% endfor %}</div>
                                 {% endif %}
                                 {% if c.time %}
                                     {{ c.time }}
@@ -121,7 +121,7 @@
     <div class="yui-g">
         {% for course in legend %}
             <p class="{{ course.css_class }} legend left" title="{{ course.full_name }}">
-                <input type="checkbox" name="course" value="{{ course.id }}" />
+                <input type="checkbox" name="course_remove" value="{{ course.id }}" />
                 {% if course.url %}
                     <a href="{{ course.url }}">
                         {{ course }}
@@ -134,7 +134,7 @@
     </div>
     <div class="yui-g">
         <p>
-            <input id="course" type="text" name="course" size="30"/>
+            <input id="course" type="text" name="course_add" size="30"/>
             <button name="submit_add" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add courses</button>
             {% if legend %}
                 <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/remove.png" /> Remove selected</button>
@@ -244,7 +244,7 @@
                         <th>Course</th>
                         <th>Day</th>
                         <th>Time</th>
-                        <th>Room</th>
+                        <th>Rooms</th>
                         <th>Type</th>
                         <th>Groups</th>
                         <th>Lecturers</th>
@@ -258,7 +258,7 @@
                             <td>{{ l.course }}</td>
                             <td>{{ l.get_day_display }}</td>
                             <td>{{ l.get_start_time_display }}-{{ l.get_end_time_display }}</td>
-                            <td class="small">{% if l.room_id %}{{ l.room }}{% endif %}</td>
+                            <td class="small">{% for r in l.sql_rooms %}{{ r }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
                             <td class="small">{% if l.type_id %}{{ l.type }}{% endif %}</td>
                             <td class="small">{% for g in  l.sql_groups %}{{ g }}{% if not forloop.last %},{% endif %} {% endfor %}</td>
                             <td>{% for p in  l.sql_lecturers %}{{ p }}{% if not forloop.last %},{% endif %} {% endfor %}</td>
