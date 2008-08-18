@@ -593,6 +593,8 @@ def scrape(request, course, no_auth=False):
 
     errors = []
 
+    text_only = lambda text: isinstance(text, NavigableString)
+
     for number in [1,2,3]:
         html = ''.join(urlopen('%s-%d' % (url, number)).readlines())
         table = BeautifulSoup(html).findAll('div', 'hovedramme')[0].findAll('table')[1]
@@ -602,8 +604,6 @@ def scrape(request, course, no_auth=False):
         del html
 
         results = []
-
-        text_only = lambda text: isinstance(text, NavigableString)
 
         try:
             title = table.findAll('h2')[0].contents[0].split('-')[2].strip()
@@ -630,25 +630,39 @@ def scrape(request, course, no_auth=False):
                 if td.get('colspan') == '4':
                     type = td.findAll(text=text_only)
                     lecture = False
+
+                    [t.extract() for t in type]
                     break
                 else:
                     for t in td.findAll('b')[0].findAll(text=text_only):
+                        t.extract()
+
                         day, period = t.split(' ', 1)
                         start, end = [x.strip() for x in period.split('-')]
                         time.append([day,start,end])
 
-                    for week in td.findAll(text=re.compile('^Uke:'))[0].replace('Uke:', '', 1).split(','):
-                        if '-' in week:
-                            x,y = week.split('-')
-                            weeks.extend(range(int(x),int(y)))
-                        else:
-                            weeks.append(int(week.replace(',', '')))
+                    for week in td.findAll(text=re.compile('^Uke:')):
+                        week.extract()
+                        for w in week.replace('Uke:', '', 1).split(','):
+                            if '-' in w:
+                                x,y = w.split('-')
+                                weeks.extend(range(int(x),int(y)))
+                            else:
+                                weeks.append(int(w.replace(',', '')))
             elif i == 1:
                 [room.extend(a.findAll(text=text_only)) for a in td.findAll('a')]
+                [r.extract() for r in room]
             elif i == 2:
-                lecturer = [l.replace('&nbsp;', '') for l in td.findAll(text=text_only)]
+                for l in td.findAll(text=text_only):
+                    l.extract()
+
+                    lecturer.append(l.replace('&nbsp;', ''))
             elif i == 3:
-                groups = [p for p in td.findAll(text=text_only) if p.replace('&nbsp;','').strip()]
+                for g in td.findAll(text=text_only):
+                    if g.replace('&nbsp;','').strip():
+                        g.extract()
+
+                        groups.append(g)
 
         if lecture:
             results.append({
