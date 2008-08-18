@@ -624,6 +624,10 @@ def scrape(request, course, no_auth=False):
         lecture = True
 
         for i,td in enumerate(tr.findAll('td')):
+            # Break td loose from rest of table so that any refrences we miss
+            # don't cause to big memory problems
+            td.extract()
+
             # Loop over our td's basing our action on the td's index in the tr
             # element.
             if i == 0:
