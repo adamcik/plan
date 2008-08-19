@@ -530,7 +530,7 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
     else:
         response = HttpResponse(icalstream, mimetype='text/calendar')
         response['Filename'] = '%s.ics' % slug  # IE needs this
-        response['Content-Disposition'] = 'attachment; filename=filename.ics'
+        response['Content-Disposition'] = 'attachment; filename=%s.ics' % slug
         cache.set(request.path, response)
 
     return response
