@@ -9,6 +9,7 @@ class UserSet(models.Model):
     semester = models.ForeignKey('Semester')
     groups = models.ManyToManyField('Group', blank=True, null=True)
 
+    added = models.DateTimeField(auto_now_add=True)
     exclude = models.ManyToManyField('Lecture', blank=True, null=True, related_name='excluded_from')
 
     class Meta:
@@ -43,6 +44,9 @@ class Course(models.Model):
     name = models.CharField(max_length=100, unique=True)
     full_name = models.TextField(blank=True)
     url = models.URLField(verify_exists=False, blank=True)
+    points = models.DecimalField(decimal_places=2, max_digits=5, null=True)
+
+    semester = models.ManyToManyField('Semester', blank=True, null=True)
 
     def __unicode__(self):
         return self.name
@@ -72,21 +76,6 @@ class Semester(models.Model):
     class Meta:
         ordering = ('-year', '-type')
 
-    def get_exam_page(self):
-        url = 'http://www.ntnu.no/eksamen/plan/%s%s/'
-
-        return url % (str(self.year)[-2:], dict(self.URL_MAP)[self.type])
-
-    def get_lecture_page(self, course):
-        url = 'http://www.ntnu.no/studieinformasjon/timeplan/%s%s/?emnekode=%s-1'
-
-        return url % (str(self.year)[-2:], dict(self.URL_MAP)[self.type], course.upper().strip())
-
-    def get_course_page(self, letter):
-        url = u'http://www.ntnu.no/studieinformasjon/timeplan/%s%s/?bokst=%s'
-
-        return url % (str(self.year)[-2:], dict(self.URL_MAP)[self.type], urlquote(letter.encode('utf-8')))
-
     def get_first_day(self):
         if self.type == self.SPRING:
             return datetime(self.year,1,1)
@@ -101,6 +90,7 @@ class Semester(models.Model):
 
 
 class Exam(models.Model):
+    # FIXME tweak to dato.XML
     exam_time = models.DateTimeField()
     handout_time = models.DateTimeField(blank=True, null=True)
 
@@ -132,6 +122,9 @@ class Lecturer(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    class Meta:
+        ordering = ('name',)
 
 class Lecture(models.Model):
     START = [(i, '%02d:15' % i) for i in range(8,20)]
