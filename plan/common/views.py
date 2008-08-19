@@ -556,7 +556,7 @@ def list_courses(request, year, semester, slug):
     response = cache.get('course_list')
 
     if not response:
-        response = object_list(request, Course.objects.filter(semesters__in=[semester]), template_object_name='course', template_name='common/course_list.html')
+        response = object_list(request, Course.objects.filter(semesters__in=[semester]), extra_context={'semester': semester}, template_object_name='course', template_name='common/course_list.html')
 
         cache.set('course_list', response)
 

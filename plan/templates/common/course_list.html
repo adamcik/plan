@@ -5,15 +5,11 @@
 {% endblock %}
 
 {% block hd %}
-    <h1>All courses</h1>
+    <h1>All courses during {{ semester.get_type_display }} {{ semester.year }} semester</h1>
 {% endblock %}
 
 {% block bd %}
     <form action="." method="post">
-        <p>
-            The following list is an import of the courses listed at
-            <a href="http://www.ntnu.no/studier/emner">http://www.ntnu.no/studier/emner</a>.
-        </p>
         <ul>
             {% for course in course_list %}
                 <li class="{% cycle even,odd %} {{ course.name }}"{% ifchanged course.name.0 %} id="{{ course.name.0 }}"{% endifchanged %}>
@@ -22,17 +18,6 @@
                     {{ course.full_name }}
                     {% if course.url %}
                        - <a href="{{ course.url }}">url</a>
-                    {% endif %}
-                    {% if course.exam_set.all %}
-                        -
-                        {% for exam in course.exam_set.all %}
-                            {{ exam.type }}:
-                            {% ifequal exam.exam_time.hour 0 %}
-                                {{ exam.exam_time|date:"Y-m-d" }}
-                            {% else %}
-                                {{ exam.exam_time|date:"Y-m-d H:i" }}
-                            {% endifequal %}
-                        {% endfor %}
                     {% endif %}
                 </li>
             {% endfor %}
