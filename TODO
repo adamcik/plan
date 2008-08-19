@@ -1,7 +1,5 @@
 Current:
 --------
-* Cache ical as it _will_ get hit often
-
 * RRULEs for ical?
 
 * Handle refreshing of course data:
