@@ -473,7 +473,7 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
             for d in rrule(WEEKLY,byweekno=weeks,count=len(weeks),byweekday=l.day,dtstart=datetime(int(year),1,1)):
                 vevent = cal.add('vevent')
                 vevent.add('summary').value = l.course.name
-                vevent.add('location').value = l.room.name
+                vevent.add('location').value = ', '.join(l.rooms.values_list('name', flat=True))
                 vevent.add('description').value = '%s - %s' % (l.type.name, l.course.full_name)
 
                 (hour, minute) = l.get_start_time_display().split(':')
