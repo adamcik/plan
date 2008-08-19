@@ -17,7 +17,6 @@ from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template.context import RequestContext
 from django.template.defaultfilters import slugify
-from django.views.decorators.cache import cache_page
 from django.core.cache import cache
 from django.db import connection
 from django.views.generic.list_detail import object_list
@@ -29,6 +28,13 @@ from plan.common.utils import *
 from plan.scrape.web import *
 
 MAX_COLORS = 8
+
+def clear_cache(*args):
+    cache.delete(reverse('schedule', args=args))
+    cache.delete(reverse('schedule-advanced', args=args))
+    cache.delete(reverse('schedule-ical', args=args))
+    cache.delete(reverse('schedule-ical-exams', args=args))
+    cache.delete(reverse('schedule-ical-lectures', args=args))
 
 def get_semester(year, semester):
     try:
@@ -109,8 +115,7 @@ def getting_started(request):
 
 def schedule(request, year, semester, slug, advanced=False, week=None):
     t = request.timer
-    cache_key = ':'.join(['schedule', year, semester, slug, str(advanced)])
-    response = cache.get(cache_key)
+    response = cache.get(request.path)
 
     if response and 'no-cache' not in request.GET:
         t.tick('Done, returning cache')
@@ -376,7 +381,7 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
                         }, RequestContext(request))
 
     t.tick('Saving to cache')
-    cache.set(cache_key, response)
+    cache.set(request.path, response)
 
     t.tick('Returning repsonse')
     return response
@@ -392,11 +397,9 @@ def select_groups(request, year, type, slug):
                 set = UserSet.objects.get(course=c, slug=slug, semester=semester)
                 set.groups = group_form.cleaned_data['groups']
 
-        cache_key = ':'.join(['schedule', year, semester.get_type_display(), slug])
-        cache.delete(cache_key+':False')
-        cache.delete(cache_key+':True')
+        clear_cache(year, semester.get_type_display(), slug)
 
-        logging.debug('Deleted cache key: %s' % cache_key)
+        logging.debug('Deleted cache')
 
     return HttpResponseRedirect(reverse('schedule-advanced', args=[semester.year,semester.get_type_display(),slug]))
 
@@ -405,11 +408,9 @@ def select_course(request, year, type, slug, add=False):
 
     if request.method == 'POST' and ('course_add' in request.POST or 'course_remove' in request.POST):
 
-        cache_key = ':'.join(['schedule', year, semester.get_type_display(), slug])
-        cache.delete(cache_key+':False')
-        cache.delete(cache_key+':True')
+        clear_cache(year, semester.get_type_display(), slug)
 
-        logging.debug('Deleted cache key: %s' % cache_key)
+        logging.debug('Deleted cache')
 
         if 'submit_add' in request.POST or add:
             lookup = []
@@ -450,11 +451,9 @@ def select_lectures(request, year,type,slug):
         for userset in UserSet.objects.filter(slug=slug):
             userset.exclude = userset.course.lecture_set.filter(id__in=excludes)
 
-        cache_key = ':'.join(['schedule', year, type, slug])
-        cache.delete(cache_key+':False')
-        cache.delete(cache_key+':True')
+        clear_cache(year, semester.get_type_display(), slug)
 
-        logging.debug('Deleted cache key: %s' % cache_key)
+        logging.debug('Deleted cache')
 
     return HttpResponseRedirect(reverse('schedule-advanced', args=[year,type,slug]))
 
@@ -462,6 +461,10 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
     semester = get_semester(year, semester)
 
     # FIXME cache the response! use request path..
+    response = cache.get(request.path)
+
+    if response and 'plain' not in request.GET:
+        return response
 
     cal = vobject.iCalendar()
     cal.add('method').value = 'PUBLISH'  # IE/Outlook needs this
@@ -528,6 +531,7 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
         response = HttpResponse(icalstream, mimetype='text/calendar')
         response['Filename'] = '%s.ics' % slug  # IE needs this
         response['Content-Disposition'] = 'attachment; filename=filename.ics'
+        cache.set(request.path, response)
 
     return response
 
