@@ -1,4 +1,5 @@
 * Use MySQL dump for all info and deactivate scraping :D
+  - Half way there, proper upgrade path missing.
 
 * Cache ical as it _will_ get hit often
 

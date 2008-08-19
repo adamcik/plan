@@ -104,18 +104,18 @@ def import_db(year, semester):
         if not type:
             del lecture_kwargs['type']
 
-#        lectures = Lecture.objects.filter(**lecture_kwargs)
-#
-#        for lecture in lectures:
-#            if lecture.groups.count() == lecture.groups.filter(name__in=map(lambda g: g.name, groups)).count():
-#                lecture.rooms = rooms
-#                lecture.weeks = weeks
-#                lecture.lectures = lectures
-#        if not lectures:
-        lecture = Lecture(**lecture_kwargs)
-        lecture.save()
+        lectures = Lecture.objects.filter(**lecture_kwargs)
 
-        lecture.groups = groups
-        lecture.rooms = rooms
-        lecture.weeks = weeks
-        lecture.lectures = lecturers
+        for lecture in lectures:
+            if lecture.groups.count() == lecture.groups.filter(name__in=map(lambda g: g.name, groups)).count():
+                lecture.rooms = rooms
+                lecture.weeks = weeks
+                lecture.lectures = lectures
+        if not lectures:
+            lecture = Lecture(**lecture_kwargs)
+            lecture.save()
+
+            lecture.groups = groups
+            lecture.rooms = rooms
+            lecture.weeks = weeks
+            lecture.lectures = lecturers

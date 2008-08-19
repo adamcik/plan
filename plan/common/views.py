@@ -166,7 +166,6 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
             rooms[lecture_id] = []
 
         rooms[lecture_id].append(name)
-    print rooms[6788]
     t.tick('Done getting rooms for lecture list')
 
     if advanced:
