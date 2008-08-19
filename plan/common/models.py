@@ -46,7 +46,7 @@ class Course(models.Model):
     url = models.URLField(verify_exists=False, blank=True)
     points = models.DecimalField(decimal_places=2, max_digits=5, null=True)
 
-    semester = models.ManyToManyField('Semester', blank=True, null=True)
+    semesters = models.ManyToManyField('Semester', blank=True, null=True)
 
     def __unicode__(self):
         return self.name

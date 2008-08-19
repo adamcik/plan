@@ -422,7 +422,7 @@ def select_course(request, year, type, slug, add=False):
 
             for l in lookup:
                 try:
-                    course = Course.objects.get(name__iexact=l.strip())
+                    course = Course.objects.get(name__iexact=l.strip(), semesters__in=[semester])
                     userset, created = UserSet.objects.get_or_create(slug=slug, course=course, semester=semester)
 
                     for g in Group.objects.filter(lecture__course=course).distinct():
@@ -535,9 +535,10 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
 def list_courses(request, year, semester, slug):
     # FIXME response is not being cached and exams should be retrived more
     # effciently
-
     if request.method == 'POST':
         return select_course(request, year, semester, slug, add=True)
+
+    semester = get_semester(year, semester)
 
     if 'q' in request.GET:
         query = request.GET['q'].split()[-1]
@@ -545,7 +546,7 @@ def list_courses(request, year, semester, slug):
         response = cache.get('course_list:%s' % query.upper())
 
         if not response:
-            data = serializers.serialize('json', Course.objects.filter(name__istartswith=query).order_by('name'))
+            data = serializers.serialize('json', Course.objects.filter(name__istartswith=query, semesters__in=[semester]).order_by('name'))
             response = HttpResponse(data, mimetype='text/plain')
 
             cache.set('course_list:%s' % query.upper(), response)
@@ -555,7 +556,7 @@ def list_courses(request, year, semester, slug):
     response = cache.get('course_list')
 
     if not response:
-        response = object_list(request, Course.objects.all(), template_object_name='course', template_name='common/course_list.html')
+        response = object_list(request, Course.objects.filter(semesters__in=[semester]), template_object_name='course', template_name='common/course_list.html')
 
         cache.set('course_list', response)
 

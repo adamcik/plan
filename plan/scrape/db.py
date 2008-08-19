@@ -35,6 +35,7 @@ def import_db(year, semester):
 
         # Get and or update course
         course, created = Course.objects.get_or_create(name=code)
+        course.semesters.add(semester)
 
         # Load or create type:
         if type:
