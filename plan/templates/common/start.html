@@ -19,14 +19,19 @@
             last time. If the identifier you choose is in use pick another one.
         </p>
     </form>
-    {% if user.is_authenticated or request.GET.stats %}
-        <h2>Stats</h2>
-        <p>
-            <b>schedules:</b>     {{ slug_count }},
-            <b>subscriptions:</b> {{ subscription_count }},
-            <b>lectures:</b>      {{ lecture_count }},
-            <b>courses:</b>       {{ course_count }},
-            <b>exams:</b>         {{ exam_count }}
-        </p>
-    {% endif %}
+    <h2>Stats</h2>
+    <p>
+        <b>schedules:</b>     {{ slug_count }},
+        <b>subscriptions:</b> {{ subscription_count }},
+        <b>lectures:</b>      {{ lecture_count }},
+        <b>courses:</b>       {{ course_count }},
+        <b>exams:</b>         {{ exam_count }}
+    </p>
+    <h2>Top {{ stats|length }}</h2>
+    {% for count,name,full_name,class in stats %}
+        <div title="{{ full_name }}" style="width: {% widthratio count stats.0.0 60 %}%" class="lecture{% cycle 0,1,2,3,4,5,6,7 %} bar">
+            <b class="right">{{ count }}</b>
+            <b>{{ name }}</b>
+        </div>
+    {% endfor %}
 {% endblock %}

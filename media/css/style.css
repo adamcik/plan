@@ -124,6 +124,10 @@ label {
 .number {
 	text-align: right;
 }
+.bar {
+	margin-bottom: 0.2em;
+	padding: 0.2em 0.5em;
+}
 
 /* schedule styling */
 .schedule .time {
