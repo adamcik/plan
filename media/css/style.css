@@ -142,6 +142,7 @@ dl {
 	margin-bottom: 1px;
 	padding: 0.2em 0.5em;
 	-moz-border-radius: 0 0.5em 0.5em 0;
+	-webkit-border-radius: 0 0.5em 0.5em 0;
 }
 
 /* schedule styling */
