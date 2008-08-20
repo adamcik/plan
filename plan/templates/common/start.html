@@ -19,7 +19,7 @@
             last time. If the identifier you choose is in use pick another one.
         </p>
     </form>
-    <h2>Top {{ stats|length }}</h2>
+    <h2>Top {{ stats|length }} courses</h2>
     {% for count,name,full_name,class in stats %}
         <div title="{{ full_name }}" style="width: {% widthratio count stats.0.0 60 %}%" class="lecture{% cycle 0,1,2,3,4,5,6,7 %} bar">
             <b class="right">{{ count }}</b>
