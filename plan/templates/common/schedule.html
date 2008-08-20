@@ -90,6 +90,7 @@
                     - <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">
                         <img alt="" src="{{ MEDIA_URL }}gfx/advanced.png" />Advanced options</a>
                 {% endif %}
+                -
                 <img alt="" src="{{ MEDIA_URL }}gfx/ical.png" />
                 Calendar export:
                 <a href="{% url schedule-ical-lectures semester.year,semester.get_type_display,slug %}">lectures</a>,
