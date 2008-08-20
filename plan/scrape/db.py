@@ -108,15 +108,22 @@ def import_db(year, semester):
             del lecture_kwargs['type']
 
         lectures = Lecture.objects.filter(**lecture_kwargs)
+        added = False
 
         for lecture in lectures:
-            if lecture.groups.count() == lecture.groups.filter(name__in=map(lambda g: g.name, groups)).count():
+            psql_set = set(lecture.groups.values_list('id', flat=True))
+            mysql_set = set(map(lambda g: g.id, groups))
+
+            if psql_set == mysql_set:
                 lecture.rooms = rooms
                 lecture.weeks = weeks
                 lecture.lectures = lectures
 
                 added_lectures.append(lecture.id)
-        if not lectures:
+                added = True
+                break
+
+        if not lectures or not added:
             lecture = Lecture(**lecture_kwargs)
             lecture.save()
 
