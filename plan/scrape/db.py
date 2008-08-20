@@ -26,6 +26,8 @@ def import_db(year, semester):
     c = db.cursor()
     c.execute("SELECT emnekode,typenavn,dag,start,slutt,uke,romnavn,larer,aktkode FROM h08_timeplan WHERE emnekode NOT LIKE '#%'")
 
+    added_lectures = []
+
     for code,type,day,start,end,week,room,lecturer,groupcode in c.fetchall():
         if not code.strip():
             continue
@@ -112,11 +114,17 @@ def import_db(year, semester):
                 lecture.rooms = rooms
                 lecture.weeks = weeks
                 lecture.lectures = lectures
+
+                added_lectures.append(lecture.id)
         if not lectures:
             lecture = Lecture(**lecture_kwargs)
             lecture.save()
+
+            added_lectures.append(lecture.id)
 
             lecture.groups = groups
             lecture.rooms = rooms
             lecture.weeks = weeks
             lecture.lectures = lecturers
+
+    print Lecture.objects.exclude(id__in=added_lectures, semester=semester).values_list('id', flat=True)
