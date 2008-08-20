@@ -127,6 +127,7 @@ label {
 .bar {
 	margin-bottom: 0.2em;
 	padding: 0.2em 0.5em;
+	-moz-border-radius: 0 0.5em 0.5em 0;
 }
 
 /* schedule styling */
