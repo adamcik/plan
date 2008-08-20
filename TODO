@@ -6,6 +6,8 @@ Current:
   - Delete all lectures for given course during this semester that have not
     been readded.
 
+* dato.XML import
+
 Long term:
 ----------
 * Support variable start stop times:
