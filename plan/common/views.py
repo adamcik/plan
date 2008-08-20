@@ -115,11 +115,6 @@ def getting_started(request):
         cache.set('stats', stats)
 
     return render_to_response('common/start.html', {
-                'slug_count': UserSet.objects.values('slug').distinct().count(),
-                'subscription_count': UserSet.objects.count(),
-                'lecture_count': Lecture.objects.count(),
-                'course_count': Course.objects.count(),
-                'exam_count': Exam.objects.count(),
                 'stats': stats,
             }, RequestContext(request))
 
