@@ -30,6 +30,7 @@ from plan.scrape.web import *
 MAX_COLORS = 8
 
 def clear_cache(*args):
+    cache.delete('stats')
     cache.delete(reverse('schedule', args=args))
     cache.delete(reverse('schedule-advanced', args=args))
     cache.delete(reverse('schedule-ical', args=args))
