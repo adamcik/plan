@@ -124,8 +124,12 @@ label {
 .number {
 	text-align: right;
 }
-.bar {
-	margin-bottom: 0.2em;
+#stats {
+	border-left: 0.2em solid #D3D7CF;
+	padding: 0.2em 0;
+}
+#stats div {
+	margin-bottom: 1px;
 	padding: 0.2em 0.5em;
 	-moz-border-radius: 0 0.5em 0.5em 0;
 }
