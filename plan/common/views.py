@@ -107,17 +107,24 @@ def getting_started(request):
             response.set_cookie('last', slug, 60*60*24*7*4)
             return response
 
-    stats = cache.get('stats')
+    context = cache.get('stats')
 
-    if not stats:
+    if not context:
         cursor = connection.cursor()
-        cursor.execute('SELECT COUNT(*) as num, c.name, c.full_name FROM common_userset u JOIN common_course c ON (c.id = u.course_id) GROUP BY c.name, c.full_name ORDER BY num DESC LIMIT 20')
-        stats = cursor.fetchall()
-        cache.set('stats', stats)
+        cursor.execute('SELECT COUNT(*) as num, c.name, c.full_name FROM common_userset u JOIN common_course c ON (c.id = u.course_id) GROUP BY c.name, c.full_name ORDER BY num DESC LIMIT 10')
 
-    return render_to_response('common/start.html', {
-                'stats': stats,
-            }, RequestContext(request))
+        context = {
+            'slug_count': UserSet.objects.values('slug').distinct().count(),
+            'subscription_count': UserSet.objects.count(),
+            'lecture_count': Lecture.objects.count(),
+            'course_count': Course.objects.count(),
+            'exam_count': Exam.objects.count(),
+            'stats': cursor.fetchall(),
+        }
+
+        cache.set('stats', context)
+
+    return render_to_response('common/start.html', context, RequestContext(request))
 
 def schedule(request, year, semester, slug, advanced=False, week=None):
     t = request.timer

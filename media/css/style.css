@@ -77,6 +77,16 @@ button, input {
 label {
 	cursor: pointer;
 }
+dt {
+	float: left;
+	display: block;
+	text-align: right;
+	width: 9em;
+	margin-right: 0.3em;
+}
+dl {
+	margin: 0 0 1em;
+}
 .excluded td {
 	text-decoration: line-through;
 }
@@ -236,16 +246,6 @@ label {
 	margin-bottom: 1em;
 	border-bottom: 1px solid #555753;
 	border-top: 1px solid #555753;
-}
-#ft dt {
-	float: left;
-	display: block;
-	text-align: right;
-	width: 9em;
-	margin-right: 0.3em;
-}
-#ft dl {
-	margin: 0 0 1em;
 }
 
 #suggestion {

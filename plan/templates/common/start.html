@@ -5,27 +5,48 @@
 {% endblock %}
 
 {% block bd %}
-    <form action="." method="post">
-        <p class="large">
-            Please enter a short string identifying your personal timetable, ie.
-            username, IRCname, etc.
-        </p>
-        <p>
-            <input type="text" name="slug" value="{{ request.COOKIES.last|default:"" }}" />
-            <button type="submit">Start <img alt="" src="{{ MEDIA_URL }}gfx/start.png" /></button>
-        </p>
-        <p>
-            To retrieve a timetable simply enter the same identifier you used
-            last time. If the identifier you choose is in use pick another one.
-        </p>
-    </form>
-    <h2>Top {{ stats|length }} courses</h2>
-    <div id="stats">
-        {% for count,name,full_name,class in stats %}
-            <div title="{{ full_name }}" style="width: {% widthratio count stats.0.0 60 %}%" class="lecture{% cycle 0,1,2,3,4,5,6,7 %}">
-                <b class="right">{{ count }}</b>
-                <b>{{ name }}</b>
+    <div id="yui-main">
+        <div class="yui-g yui-b">
+            <div class="yui-u first">
+                <h2>Getting started</h2>
+                <p class="large">
+                    Please enter a short string identifying your personal timetable, ie.
+                    username, IRCname, etc.
+                </p>
+                <form action="." method="post">
+                    <p>
+                        <input type="text" name="slug" value="{{ request.COOKIES.last|default:"" }}" />
+                        <button type="submit">Start <img alt="" src="{{ MEDIA_URL }}gfx/start.png" /></button>
+                    </p>
+                </form>
+                <p>
+                    To retrieve a timetable simply enter the same identifier you used
+                    last time. If the identifier you choose is in use pick another one.
+                </p>
             </div>
-        {% endfor %}
+            <div class="yui-u">
+                <h2>Top {{ stats|length }} courses</h2>
+                <div id="stats">
+                    {% for count,name,full_name,class in stats %}
+                        <div title="{{ full_name }}" style="width: {% widthratio count stats.0.0 90 %}%" class="lecture{% cycle 0,1,2,3,4,5,6,7 %}">
+                            <b class="right">{{ count }}</b>
+                            <b>{{ name }}</b>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="yui-b">
+        <h2>Stats</h2>
+        <dl>
+            <dt><b>schedules:</b></dt>     <dd>{{ slug_count }}</dd>
+            <dt><b>subscriptions:</b></dt> <dd>{{ subscription_count }}</dd>
+            <!--
+            <dt><b>lectures:</b></dt>      <dd>{{ lecture_count }}</dd>
+            <dt><b>courses:</b></dt>       <dd>{{ course_count }}</dd>
+            <dt><b>exams:</b></dt>         <dd>{{ exam_count }}</dd>
+            -->
+        </dl>
     </div>
 {% endblock %}
