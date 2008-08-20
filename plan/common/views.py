@@ -451,7 +451,7 @@ def select_lectures(request, year,type,slug):
         for userset in UserSet.objects.filter(slug=slug):
             userset.exclude = userset.course.lecture_set.filter(id__in=excludes)
 
-        clear_cache(year, semester.get_type_display(), slug)
+        clear_cache(year,type, slug)
 
         logging.debug('Deleted cache')
 
