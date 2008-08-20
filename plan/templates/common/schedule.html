@@ -8,69 +8,6 @@
     <h1>{{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %}  {{ semester.get_type_display }} {{ semester.year }} schedule</h1>
 {% endblock %}
 
-{% block extrahead %}
-    {% if request.user.is_authenticated or request.GET.ajax %}
-        <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.2.5.min.js"></script>
-        <script type="text/javascript">
-            $(function() {
-                var course = $('#course');
-                var suggestion = $('<div id="suggestion"></div>');
-                var json_request = null;
-
-                $('body').click(function() {
-                    suggestion.hide();
-                });
-
-                course.after(suggestion);
-                course.attr('autocomplete', 'off')
-                course.parent().css('position', 'relative');
-                course.keyup(function(event) {
-                    if (course.val().length == 0) {
-                        suggestion.hide().empty();
-                    } else {
-                        json_request = $.getJSON('./list/', {'q': course.val()}, function(data) {
-                            suggestion.empty();
-                            $.each(data, function(i,course) {
-                                var div = $('<div></div>');
-
-                                div.addClass(i % 2 ? 'even' : 'odd');
-                                div.append($('<b class="code"></b>').text(course.fields.name));
-                                div.append($('<span class="small"></span>').text(course.fields.full_name));
-                                suggestion.append(div);
-                            });
-                            if (data.length == 0)
-                                suggestion.text('No matches');
-                        })
-                    }
-                });
-
-                course.focus(function() {
-                    if (suggestion.children().length)
-                        suggestion.show();
-                });
-
-                suggestion.hide()
-                suggestion.click(function(event) {
-                    var text = '';
-                    var values = course.val().split(' ');
-                    var tmp = $(event.target).parent().children('b').text();
-
-                    values[values.length-1] = tmp;
-
-                    for (var i = 0;  i < values.length; i++) {
-                        if (values[i] != '')
-                            text += values[i] + ' '
-                    }
-
-                    course.val(text).focus();
-                    suggestion.hide().empty()
-                });
-            });
-        </script>
-    {% endif %}
-{% endblock %}
-
-
 {% block bd %}
 
 <table class="schedule">
