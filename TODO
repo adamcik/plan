@@ -1,10 +1,8 @@
 Current:
 --------
-* RRULEs for ical?
+* IE handling of buttons
 
-* Handle refreshing of course data:
-  - Delete all lectures for given course during this semester that have not
-    been readded.
+* RRULEs for ical?
 
 * dato.XML import
 
