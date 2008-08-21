@@ -28,6 +28,11 @@ def import_db(year, semester):
 
     added_lectures = []
 
+    for l in Lecture.objects.all():
+        l.rooms.clear()
+        l.weeks.clear()
+        l.lecturers.clear()
+
     for code,type,day,start,end,week,room,lecturer,groupcode in c.fetchall():
         if not code.strip():
             continue
@@ -117,13 +122,13 @@ def import_db(year, semester):
             if psql_set == mysql_set:
                 lecture.rooms = rooms
                 lecture.weeks = weeks
-                lecture.lectures = lectures
+                lecture.lecturers = lecturers
 
                 added_lectures.append(lecture.id)
                 added = True
                 break
 
-        if not lectures or not added:
+        if not added:
             lecture = Lecture(**lecture_kwargs)
             lecture.save()
 
@@ -132,6 +137,6 @@ def import_db(year, semester):
             lecture.groups = groups
             lecture.rooms = rooms
             lecture.weeks = weeks
-            lecture.lectures = lecturers
+            lecture.lecturers = lecturers
 
     print Lecture.objects.exclude(id__in=added_lectures, semester=semester).values_list('id', flat=True)
