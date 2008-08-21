@@ -120,9 +120,13 @@ def import_db(year, semester):
             mysql_set = set(map(lambda g: g.id, groups))
 
             if psql_set == mysql_set:
-                lecture.rooms = rooms
-                lecture.weeks = weeks
-                lecture.lecturers = lecturers
+                # Append data
+                for r in rooms:
+                    lecture.rooms.add(r)
+                for w in weeks:
+                    lecture.weeks.add(w)
+                for l in lecturers:
+                    lecture.lecturers.add(l)
 
                 added_lectures.append(lecture.id)
                 added = True
@@ -134,6 +138,7 @@ def import_db(year, semester):
 
             added_lectures.append(lecture.id)
 
+            # Simply set data since we are saving new lecture
             lecture.groups = groups
             lecture.rooms = rooms
             lecture.weeks = weeks
