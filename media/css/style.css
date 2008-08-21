@@ -271,4 +271,8 @@ dl {
 	#bd>table, #bd>h2 {
 		display: block;
 	}
+	.optional {
+	  opacity: 1.0;
+	  filter:alpha(opacity=100);
+	}
 }
