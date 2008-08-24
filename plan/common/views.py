@@ -422,17 +422,24 @@ def select_course(request, year, type, slug, add=False):
     if request.method == 'POST' and ('course_add' in request.POST or 'course_remove' in request.POST):
 
         clear_cache(year, semester.get_type_display(), slug)
-
         logging.debug('Deleted cache')
 
-        if 'submit_add' in request.POST or add:
+        post = request.POST.copy()
+
+        if 'submit_add' in post and 'submit_remove' in post:
+            # IE6 doesn't handle <button> correctly, it submits all buttons
+            if 'course_remove' in post:
+                # User has checked at least on course to remove, make a blind
+                # guess and remove submit_add button.
+                del post['submit_add']
+
+        if 'submit_add' in post or add:
             lookup = []
 
-            for l in request.POST.getlist('course_add'):
+            for l in post.getlist('course_add'):
                 lookup.extend(l.split())
 
             errors = []
-            error_mail = []
 
             for l in lookup:
                 try:
@@ -450,8 +457,8 @@ def select_course(request, year, type, slug, add=False):
                             {'courses': errors, 'slug': slug, 'year': year, 'type': semester.get_type_display()},
                             RequestContext(request))
 
-        elif 'submit_remove' in request.POST:
-            courses = [c.strip() for c in request.POST.getlist('course_remove') if c.strip()]
+        elif 'submit_remove' in post:
+            courses = [c.strip() for c in post.getlist('course_remove') if c.strip()]
             sets = UserSet.objects.filter(slug__iexact=slug, course__id__in=courses)
             sets.delete()
 
