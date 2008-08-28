@@ -14,7 +14,7 @@ from dateutil.tz import tzlocal
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponse, Http404
-from django.shortcuts import get_object_or_404, render_to_response
+from django.shortcuts import get_object_or_404, render_to_response, get_list_or_404
 from django.template.context import RequestContext
 from django.template.defaultfilters import slugify
 from django.core.cache import cache
@@ -88,6 +88,18 @@ def get_lectures(slug, semester):
 
     return  Lecture.objects.filter(**filter).distinct().select_related(*related).extra(where=where, tables=tables, select=select).order_by(*order)
 
+
+def shortcut(request, slug):
+    get_list_or_404(UserSet, slug=slug)
+
+    now = datetime.now()
+
+    if now.month < 7:
+        semester = Semester(type=Semester.SPRING)
+    else:
+        semester = Semester(type=Semester.FALL)
+
+    return HttpResponseRedirect(reverse('schedule', args=[now.year, semester.get_type_display(), slug]))
 
 def getting_started(request):
     if request.method == 'POST' and 'slug' in request.POST:
