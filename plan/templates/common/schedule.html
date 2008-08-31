@@ -60,7 +60,7 @@
             <p class="{{ course.css_class }} legend left" title="{{ course.full_name }}">
                 <input type="checkbox" name="course_remove" value="{{ course.id }}" />
                 {% if course.url %}
-                    <a href="{{ course.url }}">
+                    <a href="{{ course.get_url }}">
                         {{ course }}
                     </a>
                 {% else %}

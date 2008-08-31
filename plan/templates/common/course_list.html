@@ -17,7 +17,7 @@
                     <label for="course_{{ course.id }}"><b>{{ course.name }}</b></label>
                     {{ course.full_name }}
                     {% if course.url %}
-                       - <a href="{{ course.url }}">url</a>
+                       - <a href="{{ course.get_url }}">url</a>
                     {% endif %}
                 </li>
             {% endfor %}

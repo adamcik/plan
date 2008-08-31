@@ -48,6 +48,18 @@ class Course(models.Model):
 
     semesters = models.ManyToManyField('Semester', blank=True, null=True)
 
+    def get_url(self):
+        values = self.__dict__
+        for key in values.keys():
+            if type(values[key]) in [unicode, str]:
+                values['%s_lower' % key] = values.get(key, '').lower()
+                values['%s_upper' % key] = values.get(key, '').upper()
+            else:
+                values['%s_lower' % key] = values[key]
+                values['%s_upper' % key] = values[key]
+
+        return self.url % values
+
     def __unicode__(self):
         return self.name
 
