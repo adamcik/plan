@@ -122,8 +122,10 @@ def getting_started(request):
     context = cache.get('stats')
 
     if not context:
+        limit = 15
+
         cursor = connection.cursor()
-        cursor.execute('SELECT COUNT(*) as num, c.name, c.full_name FROM common_userset u JOIN common_course c ON (c.id = u.course_id) GROUP BY c.name, c.full_name ORDER BY num DESC LIMIT 10')
+        cursor.execute('SELECT COUNT(*) as num, c.name, c.full_name FROM common_userset u JOIN common_course c ON (c.id = u.course_id) GROUP BY c.name, c.full_name ORDER BY num DESC LIMIT %d' % limit)
 
         context = {
             'slug_count': UserSet.objects.values('slug').distinct().count(),
