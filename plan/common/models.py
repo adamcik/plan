@@ -102,11 +102,17 @@ class Semester(models.Model):
 
 
 class Exam(models.Model):
-    # FIXME tweak to dato.XML
-    exam_time = models.DateTimeField()
-    handout_time = models.DateTimeField(blank=True, null=True)
+    exam_date = models.DateField(blank=True, null=True)
+    exam_time = models.TimeField(blank=True, null=True)
+
+    handout_date = models.DateField(blank=True, null=True)
+    handout_time = models.TimeField(blank=True, null=True)
+
+    handin_date = models.DateField(blank=True, null=True)
+    handin_time = models.TimeField(blank=True, null=True)
 
     duration = models.PositiveSmallIntegerField(blank=True, null=True)
+
     comment = models.TextField(blank=True)
 
     type = models.CharField(max_length=1, blank=True)
@@ -114,8 +120,8 @@ class Exam(models.Model):
 
     def __unicode__(self):
         if self.handout_time:
-            return '%s: handout: %s, delivery: %s' % (self.course, self.handout_time, self.exam_time)
-        return  '%s: %s' % (self.course, self.exam_time)
+            return '%s: handout: %s %s, delivery: %s %s' % (self.course, self.handout_date, self.handout_time, self.handin_date, self.handin_time)
+        return  '%s: %s %s' % (self.course, self.exam_date, self.exam_time)
 
     class Meta:
         ordering = ('handout_time', 'exam_time')

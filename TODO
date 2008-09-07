@@ -12,6 +12,8 @@ Current:
 
 * Exam overview
 
+* Use "smarter" primary keys, ie course code for courses etc.
+
 Long term:
 ----------
 * Support variable start stop times:
