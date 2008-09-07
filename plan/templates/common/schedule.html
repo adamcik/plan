@@ -124,21 +124,17 @@
             <tbody>
                 {% for exam in exams %}
                     <tr class="{{ exam.css_class }}" title="{{ exam.course.full_name }}">
-                        <td>{{ exam.exam_time.date }}</td>
-                        <td>{{ exam.exam_time|date:"H:i" }}</td>
+                        <td>{{ exam.exam_date }}</td>
+                        <td>{{ exam.exam_time }}</td>
                         <td class="center">{{ exam.duration|default:"-" }}</td>
                         <td class="center">{{ exam.type }}</td>
                         <td>{{ exam.course.name }}</td>
                         <td>{{ exam.course.comment|default:"-" }}</td>
                         <td>
-                            {% if not exam.handout_time %}
+                            {% if not exam.handout_date %}
                                 -
                             {% else %}
-                                {% ifequal exam.handout_time.time 0 %}
-                                    {{ exam.exam_time.date }}
-                                {% else %}
-                                    {{ exam.exam_time|date:"Y-m-d H:i" }}
-                                {% endifequal %}
+                                {{ exam.handout_date }}
                             {% endif %}
                         </td>
                     </tr>

@@ -21,6 +21,7 @@ from django.core.cache import cache
 from django.db import connection
 from django.views.generic.list_detail import object_list
 from django.core import serializers
+from django.db.models import Q
 
 from plan.common.models import *
 from plan.common.forms import *
@@ -183,7 +184,8 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
     first_day = semester.get_first_day()
     last_day = semester.get_last_day()
 
-    exam_list = Exam.objects.filter(course__userset__slug=slug, exam_time__gt=first_day, exam_time__lt=last_day).select_related('course__name', 'course__full_name')
+    exam_date_limit = Q(exam_date__gt=first_day, exam_date__lt=last_day) |  Q(handin_date__gt=first_day, handin_date__lt=last_day)
+    exam_list = Exam.objects.filter(exam_date_limit, course__userset__slug=slug).select_related('course__name', 'course__full_name')
 
     t.tick('Done intializing')
 
@@ -530,7 +532,9 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
     if exams:
         first_day = semester.get_first_day()
         last_day = semester.get_last_day()
-        for e in Exam.objects.filter(course__userset__slug=slug, exam_time__gt=first_day, exam_time__lt=last_day).select_related('course__name'):
+        exam_date_limit = Q(exam_date__gt=first_day, exam_date__lt=last_day) |  Q(handin_date__gt=first_day, handin_date__lt=last_day)
+
+        for e in Exam.objects.filter(exam_date_limit, course__userset__slug=slug).select_related('course__name'):
             vevent = cal.add('vevent')
 
             vevent.add('summary').value = 'Exam: %s (%s)' % (e.course.name, e.type)
@@ -540,10 +544,11 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
             vevent.add('uid').value = 'exam-%d@%s' % (e.id, gethostname())
 
             if e.handout_time:
-                vevent.add('dtstart').value = e.handout_time.replace(tzinfo=tzlocal())
-                vevent.add('dtend').value = e.exam_time.replace(tzinfo=tzlocal())
+                vevent.add('dtstart').value = datetime.combine(e.handout_date, e.handout_time).replace(tzinfo=tzlocal())
+                vevent.add('dtend').value = datetime.combine(e.handin_date, e.handin_time).replace(tzinfo=tzlocal())
             else:
-                vevent.add('dtstart').value = e.exam_time.replace(tzinfo=tzlocal())
+                start = datetime.combine(e.exam_date, e.exam_time).replace(tzinfo=tzlocal())
+                vevent.add('dtstart').value = start
 
                 if e.duration is None:
                     pass
@@ -553,9 +558,9 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
                     duration = timedelta(hours=e.duration)
 
                 if e.duration is None:
-                    vevent.add('dtend').value = e.exam_time.replace(tzinfo=tzlocal())
+                    vevent.add('dtend').value = start
                 else:
-                    vevent.add('dtend').value = e.exam_time.replace(tzinfo=tzlocal()) + duration
+                    vevent.add('dtend').value = start + duration
 
     icalstream = cal.serialize()
 
