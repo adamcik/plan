@@ -106,68 +106,7 @@
     </div>
 </form>
 
-{% if not advanced %}
-    {% if exams %}
-        <h2>Exams</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Dur.</th>
-                    <th>Type</th>
-                    <th>Course</th>
-                    <th>Comment</th>
-                    <th>Handout time</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for exam in exams %}
-                    <tr class="{{ exam.css_class }}" title="{{ exam.course.full_name }}">
-                        <td>
-                            {% if exam.exam_date %}
-                                {{ exam.exam_date }}
-                            {% else %}
-                                {{ exam.handin_date }}
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if exam.exam_time %}
-                                {{ exam.exam_time }}
-                            {% else %}
-                                {% if exam.handin_time %}
-                                    {{ exam.handin_time }}
-                                {% endif %}
-                            {% endif %}
-                        </td>
-                        <td class="center">{{ exam.duration|default:"-" }}</td>
-                        <td class="center">{{ exam.type }}</td>
-                        <td>{{ exam.course.name }}</td>
-                        <td>{{ exam.course.comment|default:"-" }}</td>
-                        <td>
-                            {% if not exam.handout_date %}
-                                -
-                            {% else %}
-                                {{ exam.handout_date }}
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <ul>
-            <li>
-                Please check that exams are listed at
-                <a href="http://www.ntnu.no/eksamen/plan/">http://www.ntnu.no/eksamen/plan/</a>
-                before complaining about them missing from your overview.
-            </li>
-            <li>
-                Handout time usually only applies to home exams where some material
-                is given out some time before a delivery date.
-            </li>
-        </ul>
-    {% endif %}
-{% else %}
+{% if advanced %}
     {% if courses %}
         <h2>Change groups</h2>
         <p>Each lecture is connected to one or more groups, please select which group's lectures you want to attend:</p>
@@ -224,6 +163,67 @@
             </p>
         </form>
     {% endif %}
+{% endif %}
+
+{% if exams %}
+    <h2>Exams</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Dur.</th>
+                <th>Type</th>
+                <th>Course</th>
+                <th>Comment</th>
+                <th>Handout time</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for exam in exams %}
+                <tr class="{{ exam.css_class }}" title="{{ exam.course.full_name }}">
+                    <td>
+                        {% if exam.exam_date %}
+                            {{ exam.exam_date }}
+                        {% else %}
+                            {{ exam.handin_date }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if exam.exam_time %}
+                            {{ exam.exam_time }}
+                        {% else %}
+                            {% if exam.handin_time %}
+                                {{ exam.handin_time }}
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                    <td class="center">{{ exam.duration|default:"-" }}</td>
+                    <td class="center">{{ exam.type }}</td>
+                    <td>{{ exam.course.name }}</td>
+                    <td>{{ exam.course.comment|default:"-" }}</td>
+                    <td>
+                        {% if not exam.handout_date %}
+                            -
+                        {% else %}
+                            {{ exam.handout_date }}
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <ul>
+        <li>
+            Please check that exams are listed at
+            <a href="http://www.ntnu.no/eksamen/plan/">http://www.ntnu.no/eksamen/plan/</a>
+            before complaining about them missing from your overview.
+        </li>
+        <li>
+            Handout time usually only applies to home exams where some material
+            is given out some time before a delivery date.
+        </li>
+    </ul>
 {% endif %}
 
 {% endblock %}

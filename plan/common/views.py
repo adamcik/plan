@@ -392,9 +392,8 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
 
         t.tick('Done lecture css_clases and excluded status')
 
-    else:
-        for i,exam in enumerate(exam_list):
-            exam_list[i].css_class = color_map[exam.course_id]
+    for i,exam in enumerate(exam_list):
+        exam_list[i].css_class = color_map[exam.course_id]
 
     t.tick('Starting render to response')
     response = render_to_response('common/schedule.html', {
