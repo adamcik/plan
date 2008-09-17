@@ -51,20 +51,28 @@ def import_xml(url):
             exam_kwargs['handout_time'] = parse(handout_time.nodeValue).time()
 
         if handin_date:
-            exam_kwargs['handin_date'] = parse(handin_date.nodeValue).date()
+            exam_kwargs['exam_date'] = parse(handin_date.nodeValue).date()
         if handin_time:
-            exam_kwargs['handin_time'] = parse(handin_time.nodeValue).time()
-
-        if duration:
-            exam_kwargs['duration'] = duration.nodeValue
-
-        if comment:
-            exam_kwargs['comment'] = comment.nodeValue
+            exam_kwargs['exam_time'] = parse(handin_time.nodeValue).time()
 
         if typename:
             exam_kwargs['type'] = typename.nodeValue
+        else:
+            exam_kwargs['type'] = ''
 
-        exam, created = Exam.objects.get_or_create(**exam_kwargs)
+        try:
+            exam, created = Exam.objects.get_or_create(**exam_kwargs)
+        except Exam.MultipleObjectsReturned, e:
+            print Exam.objects.filter(**exam_kwargs).values()
+            raise e
+
+        if duration:
+            exam.duration = duration.nodeValue
+
+        if comment:
+            exam.comment = comment.nodeValue
+
+        exam.save()
 
         ids.append(exam.id)
 

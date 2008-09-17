@@ -108,9 +108,6 @@ class Exam(models.Model):
     handout_date = models.DateField(blank=True, null=True)
     handout_time = models.TimeField(blank=True, null=True)
 
-    handin_date = models.DateField(blank=True, null=True)
-    handin_time = models.TimeField(blank=True, null=True)
-
     duration = models.PositiveSmallIntegerField(blank=True, null=True)
 
     comment = models.TextField(blank=True)

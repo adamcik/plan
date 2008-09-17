@@ -192,19 +192,11 @@
             {% for exam in exams %}
                 <tr class="{{ exam.css_class }}" title="{{ exam.course.full_name }}">
                     <td>
-                        {% if exam.exam_date %}
-                            {{ exam.exam_date }}
-                        {% else %}
-                            {{ exam.handin_date }}
-                        {% endif %}
+                        {{ exam.exam_date }}
                     </td>
                     <td>
                         {% if exam.exam_time %}
                             {{ exam.exam_time }}
-                        {% else %}
-                            {% if exam.handin_time %}
-                                {{ exam.handin_time }}
-                            {% endif %}
                         {% endif %}
                     </td>
                     <td class="center">{{ exam.duration|default:"-" }}</td>

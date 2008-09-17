@@ -184,8 +184,7 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
     first_day = semester.get_first_day()
     last_day = semester.get_last_day()
 
-    exam_date_limit = Q(exam_date__gt=first_day, exam_date__lt=last_day) |  Q(handin_date__gt=first_day, handin_date__lt=last_day)
-    exam_list = Exam.objects.filter(exam_date_limit, course__userset__slug=slug).select_related('course__name', 'course__full_name')
+    exam_list = Exam.objects.filter(exam_date__gt=first_day, exam_date__lt=last_day, course__userset__slug=slug).select_related('course__name', 'course__full_name')
 
     t.tick('Done intializing')
 
@@ -531,9 +530,8 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
     if exams:
         first_day = semester.get_first_day()
         last_day = semester.get_last_day()
-        exam_date_limit = Q(exam_date__gt=first_day, exam_date__lt=last_day) |  Q(handin_date__gt=first_day, handin_date__lt=last_day)
 
-        for e in Exam.objects.filter(exam_date_limit, course__userset__slug=slug).select_related('course__name'):
+        for e in Exam.objects.filter(exam_date__gt=first_day, exam_date__lt=last_day, course__userset__slug=slug).select_related('course__name'):
             vevent = cal.add('vevent')
 
             vevent.add('summary').value = 'Exam: %s (%s)' % (e.course.name, e.type)
@@ -544,7 +542,7 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
 
             if e.handout_time:
                 vevent.add('dtstart').value = datetime.combine(e.handout_date, e.handout_time).replace(tzinfo=tzlocal())
-                vevent.add('dtend').value = datetime.combine(e.handin_date, e.handin_time).replace(tzinfo=tzlocal())
+                vevent.add('dtend').value = datetime.combine(e.exam_date, e.exam_time).replace(tzinfo=tzlocal())
             else:
                 start = datetime.combine(e.exam_date, e.exam_time).replace(tzinfo=tzlocal())
                 vevent.add('dtstart').value = start
