@@ -54,56 +54,65 @@
     </tbody>
 </table>
 
+<p>
+        <a href="{% url course-list semester.year,semester.get_type_display,slug %}">
+            <img alt="" src="{{ MEDIA_URL }}gfx/list.png" />Course list</a>
+    {% if legend %}
+        {% if advanced %}
+            - <a href="{% url schedule semester.year,semester.get_type_display,slug %}">
+                <img alt="" src="{{ MEDIA_URL }}gfx/advanced.png" />Hide advanced options</a>
+        {% else %}
+            - <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">
+                <img alt="" src="{{ MEDIA_URL }}gfx/advanced.png" />Advanced options</a>
+        {% endif %}
+        -
+        <img alt="" src="{{ MEDIA_URL }}gfx/ical.png" />
+        Calendar export:
+        <a href="{% url schedule-ical-lectures semester.year,semester.get_type_display,slug %}">lectures</a>,
+        <a href="{% url schedule-ical-exams semester.year,semester.get_type_display,slug %}">exams</a> or
+        <a href="{% url schedule-ical semester.year,semester.get_type_display,slug %}">both combined</a>.
+        <img alt="" src="{{ MEDIA_URL }}gfx/gcal.png" />
+        Google calendar:
+        <a target="_blank" href="http://www.google.com/calendar/render?cid=http://{{ request.META.HTTP_HOST }}{% url schedule-ical-lectures semester.year,semester.get_type_display,slug %}">lectures</a>,
+        <a target="_blank" href="http://www.google.com/calendar/render?cid=http://{{ request.META.HTTP_HOST }}{% url schedule-ical-exams semester.year,semester.get_type_display,slug %}">exams</a> or
+        <a target="_blank" href="http://www.google.com/calendar/render?cid=http://{{ request.META.HTTP_HOST }}{% url schedule-ical semester.year,semester.get_type_display,slug %}">both combined</a>.
+    {% endif %}
+</p>
+
 <form action="{% url change-course semester.year,semester.get_type_display,slug %}" method="post">
-    <div class="yui-g">
-        {% for course in legend %}
-            <p class="{{ course.css_class }} legend left" title="{{ course.full_name }}">
-                <input type="checkbox" name="course_remove" value="{{ course.id }}" />
-                {% if course.url %}
-                    <a href="{{ course.get_url }}">
-                        {{ course }}
-                    </a>
-                {% else %}
-                    {{ course }}
-                {% endif %}
-            </p>
-        {% endfor %}
-    </div>
-    <div class="yui-g">
-        <p>
-            <input id="course" type="text" name="course_add" size="30"/>
-            <button name="submit_add" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add courses</button>
-            {% if legend %}
-                <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/remove.png" /> Remove selected</button>
-            {% endif %}
-            <br />
-            (Multiple courses can be added at once by separating course codes with spaces)
-        </p>
-        <p>
-                <a href="{% url course-list semester.year,semester.get_type_display,slug %}">
-                    <img alt="" src="{{ MEDIA_URL }}gfx/list.png" />Course list</a>
-            {% if legend %}
-                {% if advanced %}
-                    - <a href="{% url schedule semester.year,semester.get_type_display,slug %}">
-                        <img alt="" src="{{ MEDIA_URL }}gfx/advanced.png" />Hide advanced options</a>
-                {% else %}
-                    - <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">
-                        <img alt="" src="{{ MEDIA_URL }}gfx/advanced.png" />Advanced options</a>
-                {% endif %}
-                -
-                <img alt="" src="{{ MEDIA_URL }}gfx/ical.png" />
-                Calendar export:
-                <a href="{% url schedule-ical-lectures semester.year,semester.get_type_display,slug %}">lectures</a>,
-                <a href="{% url schedule-ical-exams semester.year,semester.get_type_display,slug %}">exams</a> or
-                <a href="{% url schedule-ical semester.year,semester.get_type_display,slug %}">both combined</a>.
-                <img alt="" src="{{ MEDIA_URL }}gfx/gcal.png" />
-                Google calendar:
-                <a target="_blank" href="http://www.google.com/calendar/render?cid=http://{{ request.META.HTTP_HOST }}{% url schedule-ical-lectures semester.year,semester.get_type_display,slug %}">lectures</a>,
-                <a target="_blank" href="http://www.google.com/calendar/render?cid=http://{{ request.META.HTTP_HOST }}{% url schedule-ical-exams semester.year,semester.get_type_display,slug %}">exams</a> or
-                <a target="_blank" href="http://www.google.com/calendar/render?cid=http://{{ request.META.HTTP_HOST }}{% url schedule-ical semester.year,semester.get_type_display,slug %}">both combined</a>.
-            {% endif %}
-        </p>
-    </div>
+    <h2>Courses</h2>
+    {% if legend %}
+        <table>
+            {% for course in legend %}
+                <tr class="{{ course.css_class }}" title="{{ course.full_name }}">
+                    <td>
+                        <input type="checkbox" name="course_remove" value="{{ course.id }}" />
+                    </td>
+                    <td>
+                        {% if course.url %}
+                            <a href="{{ course.get_url }}">
+                                {{ course }}
+                            </a>
+                        {% else %}
+                            {{ course }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ course.full_name }}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+    <p>
+        <input id="course" type="text" name="course_add" size="30"/>
+        <button name="submit_add" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add courses</button>
+        {% if legend %}
+            <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/remove.png" /> Remove selected</button>
+        {% endif %}
+        <br />
+        (Multiple courses can be added at once by separating course codes with spaces)
+    </p>
 </form>
 
 {% if advanced %}

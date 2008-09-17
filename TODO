@@ -1,7 +1,5 @@
 Current:
 --------
-* IE handling of buttons
-
 * RRULEs for ical?
 
 * dato.XML import
@@ -13,6 +11,12 @@ Current:
 * Exam overview
 
 * Use "smarter" primary keys, ie course code for courses etc.
+
+* Add exam type to data model using "smart" primary key
+
+* Remove handin time
+
+* Show current week view
 
 Long term:
 ----------

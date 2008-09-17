@@ -71,6 +71,9 @@ tbody td, tbody th {
 tbody th {
 	text-align: right;
 }
+table a {
+	color: #000;
+}
 button, input {
 /*	-moz-border-radius: 0.5em; */
 }
@@ -105,9 +108,6 @@ dl {
 /*	-moz-border-radius: 0.5em; */
 	border: 1px solid #666;
 	text-align: left;
-}
-.legend a {
-	color: #000;
 }
 .large {
 	font-size: 116%;
