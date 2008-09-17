@@ -54,7 +54,7 @@
     </tbody>
 </table>
 
-<p>
+<p class="noprint">
         <a href="{% url course-list semester.year,semester.get_type_display,slug %}">
             <img alt="" src="{{ MEDIA_URL }}gfx/list.png" />Course list</a>
     {% if legend %}
@@ -86,7 +86,7 @@
             {% for course in legend %}
                 <tr class="{{ course.css_class }}" title="{{ course.full_name }}">
                     <td>
-                        <input type="checkbox" name="course_remove" value="{{ course.id }}" />
+                        <input type="checkbox" name="course_remove" value="{{ course.id }}" class="noprint" />
                     </td>
                     <td>
                         {% if course.url %}
@@ -104,7 +104,7 @@
             {% endfor %}
         </table>
     {% endif %}
-    <p>
+    <p class="noprint">
         <input id="course" type="text" name="course_add" size="30"/>
         <button name="submit_add" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add courses</button>
         {% if legend %}
@@ -117,10 +117,10 @@
 
 {% if advanced %}
     {% if courses %}
-        <h2>Change groups</h2>
-        <p>Each lecture is connected to one or more groups, please select which group's lectures you want to attend:</p>
+        <h2 class="noprint">Change groups</h2>
+        <p class="noprint">Each lecture is connected to one or more groups, please select which group's lectures you want to attend:</p>
         <form action="{% url change-groups semester.year,semester.get_type_display,slug %}" method="post">
-            <div class="yui-g">
+            <div class="yui-g noprint">
                 {% for course,groups in courses %}
                     <p class="{{ course.css_class }} legend left box">
                         <b>{{ course }}</b> <br />
@@ -129,7 +129,7 @@
                     </p>
                 {% endfor %}
             </div>
-            <p>
+            <p class="noprint">
                 <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/save.png" /> Save groups</button>
             </p>
         </form>
@@ -154,7 +154,7 @@
                 <tbody>
                     {% for l in lectures %}
                         <tr class="{{ l.css_class }}{% if l.excluded %} excluded{% endif %}">
-                            <td><input type="checkbox" name="exclude" value="{{ l.id }}"{% if l.excluded %} checked="checked"{% endif %} /></td>
+                            <td><input type="checkbox" name="exclude" value="{{ l.id }}"{% if l.excluded %} checked="checked"{% endif %} class="noprint" /></td>
                             <td>{{ l.course }}</td>
                             <td>{{ l.get_day_display }}</td>
                             <td>{{ l.get_start_time_display }}-{{ l.get_end_time_display }}</td>
@@ -167,7 +167,7 @@
                     {% endfor %}
                 </tbody>
             </table>
-            <p>
+            <p class="noprint">
                 <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/hide.png" /> Hide selected lectures</button>
             </p>
         </form>
@@ -222,7 +222,7 @@
             {% endfor %}
         </tbody>
     </table>
-    <ul>
+    <ul class="noprint">
         <li>
             Please check that exams are listed at
             <a href="http://www.ntnu.no/eksamen/plan/">http://www.ntnu.no/eksamen/plan/</a>

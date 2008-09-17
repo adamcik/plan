@@ -266,11 +266,8 @@ dl {
 }
 
 @media print {
-	#ft, #bd>* {
+	#ft, .noprint {
 		display: none;
-	}
-	#bd>table, #bd>h2 {
-		display: block;
 	}
 	.optional {
 	  opacity: 1.0;
