@@ -153,21 +153,26 @@ ul,ol {
 }
 
 /* schedule styling */
+.schedule {
+	min-width: 60em;
+}
 .schedule .time {
   text-align: center;
   vertical-align: middle;
 	font-size: 77%;
   width: 10%;
 }
+.schedule .course {
+	float: left;
+}
 .schedule .room {
-  float: right;
 	font-size: 77%;
-	padding-left: 0.5em;
+  float: right;
+	margin-left: 0.5em;
 }
 .schedule .type {
-  float: left;
+	clear: both;
 	font-size: 77%;
-	padding-right: 0.5em;
 }
 .schedule .groups {
   clear: both;
@@ -178,9 +183,6 @@ ul,ol {
 }
 .schedule .single .type, .schedule .single .room {
 	font-size: 100%;
-}
-.schedule table {
-	margin: 0 auto 1em;
 }
 .schedule tbody {
   border: 1px solid #666;

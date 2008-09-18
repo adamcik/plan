@@ -16,6 +16,8 @@ Current:
 
 * Show current week view
 
+* Imports of rooms forget to call .strip()
+
 Long term:
 ----------
 * Support variable start stop times:

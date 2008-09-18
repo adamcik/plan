@@ -35,8 +35,8 @@
 
                                 {% if c.lecture %}
                                     <div class="course">{{ c.lecture.course }}</div>
-                                    <div class="type">{% if c.lecture.type_id %}{{ c.lecture.type }}{% endif %}</div>
                                     <div class="room">{% for r in c.lecture.sql_rooms %}{{ r }}{% if not forloop.last %}, {% endif %}{% endfor %}</div>
+                                    <div class="type">{% if c.lecture.type_id %}{{ c.lecture.type }}{% endif %}</div>
                                 {% endif %}
                                 {% if c.time %}
                                     {{ c.time }}
