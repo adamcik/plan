@@ -16,8 +16,6 @@ Current:
 
 * Show current week view
 
-* Imports of rooms forget to call .strip()
-
 Long term:
 ----------
 * Support variable start stop times:
@@ -36,8 +34,6 @@ Won't fix:
   'message:<slug>:<remote_addr>' in cache. not sure about remote_addr)
 
   Needs to work around curent cacheing, or cacheing needs to be moved to template level.
-
-* Use request.path as cache key?
 
 * Cleanup urls for my debug stuff.
 
