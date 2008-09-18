@@ -12,7 +12,7 @@
     <form action="." method="post">
         <ul>
             {% for course in course_list %}
-                <li class="{% cycle even,odd %} {{ course.name }}"{% ifchanged course.name.0 %} id="{{ course.name.0 }}"{% endifchanged %}>
+                <li{% ifchanged course.name.0 %} id="{{ course.name.0 }}"{% endifchanged %}>
                     <input type="checkbox" name="course_add" value="{{ course.name }}" id="course_{{ course.id }}" />
                     <label for="course_{{ course.id }}"><b>{{ course.name }}</b></label>
                     {{ course.full_name }}

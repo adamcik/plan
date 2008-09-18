@@ -63,7 +63,7 @@ thead th {
   border-bottom: 1px solid #666 !important;
 	text-align: left;
 	padding: 0 0.5em;
-	font-size: 85%;
+	font-size: 93%;
 }
 tbody td, tbody th {
   border: 1px solid #666;
@@ -91,6 +91,10 @@ dt {
 }
 dl {
 	margin: 0 0 1em;
+}
+ul,ol {
+	margin-top: -0.5em;
+	margin-left: 1.5em;
 }
 .excluded td {
 	text-decoration: line-through;

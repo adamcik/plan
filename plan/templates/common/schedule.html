@@ -150,7 +150,7 @@
                             </td>
                             <td>
                                 {% if exam.exam_time %}
-                                    {{ exam.exam_time }}
+                                    {{ exam.exam_time|time:"H:i" }}
                                 {% endif %}
                             </td>
                             <td class="center">{{ exam.duration|default:"-" }}</td>
