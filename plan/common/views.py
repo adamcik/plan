@@ -451,7 +451,7 @@ def select_course(request, year, type, slug, add=False):
             lookup = []
 
             for l in post.getlist('course_add'):
-                lookup.extend(l.split())
+                lookup.extend(l.replace(',', '').split())
 
             errors = []
 
