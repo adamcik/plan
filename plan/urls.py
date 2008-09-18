@@ -23,6 +23,7 @@ urlpatterns = patterns('',
     (r'^data/(.*)', databrowse.site.root),
 
     (r'^', include('plan.common.urls')),
+    (r'^', include('plan.ical.urls')),
 
     url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}, name='media'),
 )
