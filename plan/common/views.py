@@ -486,10 +486,7 @@ def select_lectures(request, year,type,slug):
 
     return HttpResponseRedirect(reverse('schedule-advanced', args=[year,type,slug]))
 
-# FIXME no longer in use
 def list_courses(request, year, semester, slug):
-    # FIXME response is not being cached and exams should be retrived more
-    # effciently
     if request.method == 'POST':
         return select_course(request, year, semester, slug, add=True)
 
@@ -503,30 +500,3 @@ def list_courses(request, year, semester, slug):
         cache.set('course_list', response)
 
     return response
-
-def scrape_list(request):
-    '''Scrape the NTNU website to retrive all available courses'''
-    if not request.user.is_authenticated():
-        raise Http404
-
-    courses = scrape_courses()
-
-    return HttpResponse(str('\n'.join([str(c) for c in courses])), mimetype='text/plain')
-
-def scrape_exam(request, no_auth=False):
-    # FIXME get into working shape
-    if not request.user.is_authenticated() and not no_auth:
-        raise Http404
-
-    results = scrape_exams()
-
-    return HttpResponse(str('\n'.join([str(r) for r in results])), mimetype='text/plain')
-
-def scrape(request, course, no_auth=False):
-    '''Retrive all lectures for a given course'''
-    if not no_auth and not request.user.is_authenticated():
-        raise Http404
-
-    results = scrape_course(course)
-
-    return HttpResponse(str('\n'.join([str(r) for r in results])), mimetype='text/plain')

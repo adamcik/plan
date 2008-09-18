@@ -8,10 +8,6 @@ urlpatterns = patterns('plan.common.views',
 
     url(r'^(?P<year>\d{4})/(?P<semester>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/list/$', 'list_courses', name='course-list'),
 
-    url(r'^debug/$', 'scrape_list'),
-    url(r'^debug/exam/$', 'scrape_exam'),
-    url(r'^debug/(?P<course>[\w\d-]+)/$', 'scrape'),
-
     url(r'^(?P<year>\d{4})/(?P<type>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/change/$', 'select_course', name='change-course'),
     url(r'^(?P<year>\d{4})/(?P<type>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/groups/$', 'select_groups', name='change-groups'),
     url(r'^(?P<year>\d{4})/(?P<type>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/filter/$', 'select_lectures', name='change-lectures'),
