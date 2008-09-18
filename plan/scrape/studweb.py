@@ -76,4 +76,5 @@ def import_xml(url):
 
         ids.append(exam.id)
 
+    print Exam.objects.exclude(id__in=ids).values_list('name')
     Exam.objects.exclude(id__in=ids).delete()

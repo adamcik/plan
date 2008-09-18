@@ -79,41 +79,109 @@
     {% endif %}
 </p>
 
-<form action="{% url change-course semester.year,semester.get_type_display,slug %}" method="post">
-    <h2>Courses</h2>
-    {% if legend %}
-        <table>
-            {% for course in legend %}
-                <tr class="{{ course.css_class }}" title="{{ course.full_name }}">
-                    <td>
-                        <input type="checkbox" name="course_remove" value="{{ course.id }}" class="noprint" />
-                    </td>
-                    <td>
-                        {% if course.url %}
-                            <a href="{{ course.get_url }}">
-                                {{ course }}
-                            </a>
-                        {% else %}
-                            {{ course }}
-                        {% endif %}
-                    </td>
-                    <td>
-                        {{ course.full_name }}
-                    </td>
-                </tr>
-            {% endfor %}
-        </table>
-    {% endif %}
-    <p class="noprint">
-        <input id="course" type="text" name="course_add" size="30"/>
-        <button name="submit_add" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add courses</button>
-        {% if legend %}
-            <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/remove.png" /> Remove selected</button>
+<div class="yui-g">
+    <div class="yui-u first">
+        <form action="{% url change-course semester.year,semester.get_type_display,slug %}" method="post">
+            <h2>Courses</h2>
+            {% if legend %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Code</th>
+                            <th>Name</th>
+                        <tr>
+                    </thead>
+                    <tbody>
+                        {% for course in legend %}
+                            <tr class="{{ course.css_class }}" title="{{ course.full_name }}">
+                                <td>
+                                    <input type="checkbox" name="course_remove" value="{{ course.id }}" class="noprint" />
+                                </td>
+                                <td>
+                                    {% if course.url %}
+                                        <a href="{{ course.get_url }}">
+                                            {{ course }}
+                                        </a>
+                                    {% else %}
+                                        {{ course }}
+                                    {% endif %}
+                                </td>
+                                <td class="small">
+                                    {{ course.full_name }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+
+            <p class="noprint">
+                <input id="course" type="text" name="course_add" size="20"/>
+                <button name="submit_add" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add courses</button>
+                {% if legend %}
+                    <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/remove.png" /> Remove selected</button>
+                {% endif %}
+                <br />
+                (Multiple courses can be added at once by separating course codes with spaces)
+            </p>
+        </form>
+    </div>
+    <div class="yui-u">
+        {% if exams %}
+            <h2>Exams</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Dur.</th>
+                        <th>Type</th>
+                        <th>Course</th>
+                        <th>Comment</th>
+                        <th>Handout time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for exam in exams %}
+                        <tr class="{{ exam.css_class }}" title="{{ exam.course.full_name }}">
+                            <td>
+                                {{ exam.exam_date }}
+                            </td>
+                            <td>
+                                {% if exam.exam_time %}
+                                    {{ exam.exam_time }}
+                                {% endif %}
+                            </td>
+                            <td class="center">{{ exam.duration|default:"-" }}</td>
+                            <td class="center">{{ exam.type }}</td>
+                            <td>{{ exam.course.name }}</td>
+                            <td>{{ exam.course.comment|default:"-" }}</td>
+                            <td>
+                                {% if not exam.handout_date %}
+                                    -
+                                {% else %}
+                                    {{ exam.handout_date }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <ul class="noprint small">
+                <li>
+                    Please check that exams are listed at
+                    <a href="http://www.ntnu.no/eksamen/plan/">http://www.ntnu.no/eksamen/plan/</a>
+                    before complaining about them missing from your overview.
+                </li>
+                <li>
+                    Handout time usually only applies to home exams where some material
+                    is given out some time before a delivery date.
+                </li>
+            </ul>
         {% endif %}
-        <br />
-        (Multiple courses can be added at once by separating course codes with spaces)
-    </p>
-</form>
+    </div>
+</div>
 
 {% if advanced %}
     {% if courses %}
@@ -122,9 +190,9 @@
         <form action="{% url change-groups semester.year,semester.get_type_display,slug %}" method="post">
             <div class="yui-g noprint">
                 {% for course,groups in courses %}
-                    <p class="{{ course.css_class }} legend left box">
+                    <p class="{{ course.css_class }} legend left box" title="{{ course.full_name }}">
                         <b>{{ course }}</b> <br />
-                        <span class="small">{{ course.full_name }}</span> <br />
+                        <span class="small">{{ course.full_name|truncatewords:"3" }}</span> <br />
                         {{ groups.groups }}
                     </p>
                 {% endfor %}
@@ -172,59 +240,6 @@
             </p>
         </form>
     {% endif %}
-{% endif %}
-
-{% if exams %}
-    <h2>Exams</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Dur.</th>
-                <th>Type</th>
-                <th>Course</th>
-                <th>Comment</th>
-                <th>Handout time</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for exam in exams %}
-                <tr class="{{ exam.css_class }}" title="{{ exam.course.full_name }}">
-                    <td>
-                        {{ exam.exam_date }}
-                    </td>
-                    <td>
-                        {% if exam.exam_time %}
-                            {{ exam.exam_time }}
-                        {% endif %}
-                    </td>
-                    <td class="center">{{ exam.duration|default:"-" }}</td>
-                    <td class="center">{{ exam.type }}</td>
-                    <td>{{ exam.course.name }}</td>
-                    <td>{{ exam.course.comment|default:"-" }}</td>
-                    <td>
-                        {% if not exam.handout_date %}
-                            -
-                        {% else %}
-                            {{ exam.handout_date }}
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <ul class="noprint">
-        <li>
-            Please check that exams are listed at
-            <a href="http://www.ntnu.no/eksamen/plan/">http://www.ntnu.no/eksamen/plan/</a>
-            before complaining about them missing from your overview.
-        </li>
-        <li>
-            Handout time usually only applies to home exams where some material
-            is given out some time before a delivery date.
-        </li>
-    </ul>
 {% endif %}
 
 {% endblock %}

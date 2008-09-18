@@ -62,6 +62,8 @@ thead th {
 	border: 0;
   border-bottom: 1px solid #666 !important;
 	text-align: left;
+	padding: 0 0.5em;
+	font-size: 85%;
 }
 tbody td, tbody th {
   border: 1px solid #666;
@@ -113,7 +115,7 @@ dl {
 	font-size: 116%;
 }
 .small {
-	font-size: 77%;
+	font-size: 93%;
 }
 .left {
 	float: left;
@@ -272,5 +274,8 @@ dl {
 	.optional {
 	  opacity: 1.0;
 	  filter:alpha(opacity=100);
+	}
+	table a {
+		text-decoration: none;
 	}
 }
