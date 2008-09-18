@@ -186,7 +186,11 @@
 {% if advanced %}
     {% if courses %}
         <h2 class="noprint">Change groups</h2>
-        <p class="noprint">Each lecture is connected to one or more groups, please select which group's lectures you want to attend:</p>
+        <p class="noprint">
+            Each lecture is connected to one or more groups, please select
+            which group's lectures you want to attend. To select more than
+            one group press <code>CTRL</code> and the groups you want.
+        </p>
         <form action="{% url change-groups semester.year,semester.get_type_display,slug %}" method="post">
             <div class="yui-g noprint">
                 {% for course,groups in courses %}
@@ -204,6 +208,10 @@
     {% endif %}
     {% if lectures %}
         <h2>Lecture list</h2>
+        <p>
+            If your schedule contains lectures you don't want to attend please
+            select them here and choose «Hide selected lectures».
+        </p>
         <form action="{% url change-lectures semester.year,semester.get_type_display,slug %}" method="post">
             <table>
                 <thead>

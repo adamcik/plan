@@ -455,6 +455,8 @@ def select_course(request, year, type, slug, add=False):
 
             errors = []
 
+            # FIXME limit max courses to for instance 30
+
             for l in lookup:
                 try:
                     course = Course.objects.get(name__iexact=l.strip(), semesters__in=[semester])
