@@ -151,7 +151,10 @@ def import_db(year, semester):
     c.execute("SELECT emnekode,emnenavn,vekt FROM h08_fs_emne WHERE emnekode NOT LIKE '#%'")
 
     for code,name,points in c.fetchall():
-        course, created = Course.objects.get_or_create(name=''.join(code.split('-')[:-1]).upper())
+        if not code.strip():
+            continue
+
+        course, created = Course.objects.get_or_create(name=''.join(code.split('-')[:-1]).upper().strip())
 
         print points
         if points:
