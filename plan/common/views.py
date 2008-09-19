@@ -490,12 +490,20 @@ def list_courses(request, year, semester, slug):
     if request.method == 'POST':
         return select_course(request, year, semester, slug, add=True)
 
-    semester = get_semester(year, semester)
 
     response = cache.get('course_list')
 
     if not response:
-        response = object_list(request, Course.objects.filter(semesters__in=[semester]), extra_context={'semester': semester}, template_object_name='course', template_name='common/course_list.html')
+        semester = get_semester(year, semester)
+
+        first_day = semester.get_first_day()
+        last_day = semester.get_last_day()
+
+        response = object_list(request,
+            Exam.objects.filter(exam_date__gt=first_day, exam_date__lt=last_day, course__semesters__in=[semester]).select_related('course__name', 'course__full_name').order_by('course__name', 'handout_date', 'exam_date'),
+            extra_context={'semester': semester},
+            template_object_name='exam',
+            template_name='common/course_list.html')
 
         cache.set('course_list', response)
 
