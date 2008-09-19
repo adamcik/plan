@@ -63,13 +63,24 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
             vevent.add('uid').value = 'exam-%d@%s' % (e.id, gethostname())
 
             if e.handout_time:
-                vevent.add('dtstart').value = datetime.combine(e.handout_date, e.handout_time).replace(tzinfo=tzlocal())
-                vevent.add('dtend').value = datetime.combine(e.exam_date, e.exam_time).replace(tzinfo=tzlocal())
+                if e.handout_time:
+                    vevent.add('dtstart').value = datetime.combine(e.handout_date, e.handout_time).replace(tzinfo=tzlocal())
+                else:
+                    vevent.add('dtstart').value = e.handout_date
+
+                if e.exam_time:
+                    vevent.add('dtend').value = datetime.combine(e.exam_date, e.exam_time).replace(tzinfo=tzlocal())
+                else:
+                    vevent.add('dtend').value = e.exam_date
             else:
-                start = datetime.combine(e.exam_date, e.exam_time).replace(tzinfo=tzlocal())
+                if e.exam_time:
+                    start = datetime.combine(e.exam_date, e.exam_time).replace(tzinfo=tzlocal())
+                else:
+                    start = e.exam_date
+
                 vevent.add('dtstart').value = start
 
-                if e.duration is None:
+                if e.duration is None or not e.exam_time:
                     pass
                 elif e.duration == 30:
                     duration = timedelta(minutes=30)
