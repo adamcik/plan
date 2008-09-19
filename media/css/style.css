@@ -93,7 +93,7 @@ dl {
 	margin: 0 0 1em;
 }
 ul,ol {
-	margin-top: -0.5em;
+	margin-top: 0;
 	margin-left: 1.5em;
 }
 .excluded td {
