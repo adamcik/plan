@@ -113,12 +113,11 @@ class Exam(models.Model):
     comment = models.TextField(blank=True)
 
     type = models.CharField(max_length=1, blank=True)
+    type_name = models.CharField(max_length=100, blank=True, null=True)
     course = models.ForeignKey(Course)
 
     def __unicode__(self):
-        if self.handout_time:
-            return '%s: handout: %s %s, delivery: %s %s' % (self.course, self.handout_date, self.handout_time, self.handin_date, self.handin_time)
-        return  '%s: %s %s' % (self.course, self.exam_date, self.exam_time)
+        return  '%s (%s)' % (self.course, self.type)
 
     class Meta:
         ordering = ('handout_time', 'exam_time')
