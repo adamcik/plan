@@ -90,6 +90,7 @@
                             <th></th>
                             <th>Code</th>
                             <th>Name</th>
+                            <th>Credits</th>
                         <tr>
                     </thead>
                     <tbody>
@@ -109,6 +110,9 @@
                                 </td>
                                 <td>
                                     {{ course.full_name }}
+                                </td>
+                                <td class="number">
+                                    {{ course.points|default:""|floatformat:"1" }}
                                 </td>
                             </tr>
                         {% endfor %}
