@@ -12,5 +12,5 @@ urlpatterns = patterns('plan.common.views',
     url(r'^(?P<year>\d{4})/(?P<type>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/groups/$', 'select_groups', name='change-groups'),
     url(r'^(?P<year>\d{4})/(?P<type>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/filter/$', 'select_lectures', name='change-lectures'),
 
-    url(r'^(?P<slug>[a-zA-Z0-9-_]+)/$', 'shortcut'),
+    url(r'^(?P<slug>[a-zA-Z0-9-_]+)/$', 'shortcut', name='shortcut'),
 )
