@@ -84,6 +84,9 @@ def import_xml(urls):
             if comment:
                 exam.comment = comment.nodeValue
 
+            if long_typename:
+                exam.type_name = long_typename.nodeValue
+
             exam.save()
 
             n.unlink()

@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 import MySQLdb
+from decimal import Decimal
 
 from django.db import transaction
 from django.conf import settings
@@ -24,6 +25,7 @@ def import_db(year, semester):
     db = MySQLdb.connect(**mysql_setings)
 
     c = db.cursor()
+
     c.execute("SELECT emnekode,typenavn,dag,start,slutt,uke,romnavn,larer,aktkode FROM h08_timeplan WHERE emnekode NOT LIKE '#%'")
 
     added_lectures = []
@@ -145,3 +147,19 @@ def import_db(year, semester):
             lecture.lecturers = lecturers
 
     print Lecture.objects.exclude(id__in=added_lectures, semester=semester).values_list('id', flat=True)
+
+    c.execute("SELECT emnekode,emnenavn,vekt FROM h08_fs_emne WHERE emnekode NOT LIKE '#%'")
+
+    for code,name,points in c.fetchall():
+        course, created = Course.objects.get_or_create(name=''.join(code.split('-')[:-1]).upper())
+
+        print points
+        if points:
+            course.points = Decimal(points.strip().replace(',', '.'))
+        course.full_name = name
+        course.save()
+
+        if created:
+            print "Added course %s" % course.name
+        else:
+            print "Updated course %s" % course.name
