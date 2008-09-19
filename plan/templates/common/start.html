@@ -5,51 +5,52 @@
 {% endblock %}
 
 {% block bd %}
-    <div id="yui-main">
-        <div class="yui-g yui-b">
-            <div class="yui-u first">
-                <h2>Getting started</h2>
-                <p class="large">
-                    Please enter a short string identifying your personal
-                    timetable, ie. username, IRCname, etc. If the identifier
-                    you select is in already taken, create another one.
-                </p>
-                <form action="." method="post">
-                    <p>
-                        <input type="text" name="slug" value="{{ request.COOKIES.last|default:"" }}" />
-                        <button type="submit">Start <img alt="" src="{{ MEDIA_URL }}gfx/start.png" /></button>
-                    </p>
-                </form>
+    <div class="yui-g">
+        <div class="yui-u first">
+            <h2>Getting started</h2>
+            <p class="large">
+                Please enter a short string identifying your personal
+                timetable, ie. username, IRCname, etc. If the identifier
+                you select is in already taken, create another one.
+            </p>
+            <form action="." method="post">
                 <p>
-                    To retrieve your timetable simply enter the same identifier
-                    you used last time.
+                    <input type="text" name="slug" value="{{ request.COOKIES.last|default:"" }}" />
+                    <button type="submit">Start <img alt="" src="{{ MEDIA_URL }}gfx/start.png" /></button>
                 </p>
-            </div>
-            <div class="yui-u">
-                <h2>Top {{ stats|length }} courses</h2>
-                <div id="stats">
-                    {% for count,name,full_name,class in stats %}
-                        <div title="{{ full_name }}" style="width: {% widthratio count stats.0.0 95 %}%" class="lecture{% cycle 0,1,2,3,4,5,6,7 %}">
-                            <b class="right">{{ count }}</b>
-                            <b>{{ name }}</b>
-                        </div>
-                    {% endfor %}
-                </div>
+            </form>
+            <p>
+                To retrieve your timetable simply enter the same identifier
+                you used last time.
+            </p>
+            <h2>Screenshot</h2>
+            <p>
+                <img alt="Screenshot" src="{{ MEDIA_URL }}screenshot.png" />
+            </p>
+            <h2>Statistics</h2>
+            <p>
+                Total number of unique timetables -
+                <a href="http://munin.1024.no/1024.no/1024.no-ntnu_1024_no_schedules.html">{{ slug_count }}</a>
+                <br />
+                Total number of courses added to timetables -
+                <a href="http://munin.1024.no/1024.no/1024.no-ntnu_1024_no_subscriptions.html">{{ subscription_count }}</a>
+                <!--
+                <dt><b>lectures:</b></dt>      <dd>{{ lecture_count }}</dd>
+                <dt><b>courses:</b></dt>       <dd>{{ course_count }}</dd>
+                <dt><b>exams:</b></dt>         <dd>{{ exam_count }}</dd>
+                -->
+            </p>
+        </div>
+        <div class="yui-u">
+            <h2>Top {{ stats|length }} courses</h2>
+            <div id="stats">
+                {% for count,name,full_name,class in stats %}
+                    <div title="{{ full_name }}" style="width: {% widthratio count stats.0.0 95 %}%" class="lecture{% cycle 0,1,2,3,4,5,6,7 %}">
+                        <b class="right">{{ count }}</b>
+                        <b>{{ name }}</b>
+                    </div>
+                {% endfor %}
             </div>
         </div>
-    </div>
-    <div class="yui-b">
-        <h2>Statistics</h2>
-        <dl>
-            <dt title="Total number of unique timetables"><b>schedules:</b></dt>
-            <dd><a href="http://munin.1024.no/1024.no/1024.no-ntnu_1024_no_schedules.html">{{ slug_count }}</a></dd>
-            <dt title="Total number of courses added to timetables"><b>subscriptions:</b></dt>
-            <dd><a href="http://munin.1024.no/1024.no/1024.no-ntnu_1024_no_subscriptions.html">{{ subscription_count }}</a></dd>
-            <!--
-            <dt><b>lectures:</b></dt>      <dd>{{ lecture_count }}</dd>
-            <dt><b>courses:</b></dt>       <dd>{{ course_count }}</dd>
-            <dt><b>exams:</b></dt>         <dd>{{ exam_count }}</dd>
-            -->
-        </dl>
     </div>
 {% endblock %}

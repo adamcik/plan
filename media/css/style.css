@@ -21,6 +21,7 @@ h1 {
 h2 {
 	border-bottom: 1px dotted #555753;
 	padding-left: 0.5em;
+	margin-left: -0.5em;
 }
 a {
 	color: #204A87;

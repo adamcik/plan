@@ -115,8 +115,6 @@
                 {% if legend %}
                     <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/remove.png" /> Remove selected</button>
                 {% endif %}
-                <br />
-                (Multiple courses can be added at once by separating course codes with spaces)
             </p>
         </form>
     </div>
@@ -208,8 +206,8 @@
     {% if lectures %}
         <h2>Lecture list</h2>
         <p>
-            If your schedule contains lectures you don't want to attend please
-            select them here and choose «Hide selected lectures».
+            If your schedule contains lectures you don't want to be shown
+            please select them here and choose «Hide selected lectures».
         </p>
         <form action="{% url change-lectures semester.year,semester.get_type_display,slug %}" method="post">
             <table>
@@ -252,18 +250,26 @@
 <h2 id="tips">Tips</h2>
 <div class="yui-g">
     <div class="yui-u first">
+        <p style="background: url({{ MEDIA_URL }}gfx/add.png) no-repeat top left; padding-left: 20px; min-height: 20px">
+            Multiple courses can be added at once by separating course codes with spaces.
+        </p>
         <p style="background: url({{ MEDIA_URL }}gfx/link.png) no-repeat top left; padding-left: 20px; min-height: 20px">
-             For quick acces to your schedule simply go to
+             For quick access to your schedule simply go to
             <a href="{% url shortcut slug %}">http://{{ request.META.HTTP_HOST }}{% url shortcut slug %}</a>
         </p>
         <p style="background: url({{ MEDIA_URL }}gfx/hide.png) no-repeat top left; padding-left: 20px; min-height: 20px">
-            Did you know that you can choose to hide lectures that you don't plan on attending under <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">adavanced options</a>.
+            Did you know that you can choose to hide lectures that you don't want to be shown under <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">adavanced options</a>.
         </p>
         <p style="background: url({{ MEDIA_URL }}gfx/save.png) no-repeat top left; padding-left: 20px; min-height: 20px">
-            Did you know that you can select which groups (paralleller) you want to attend, and that you can select more that one group.
+            Did you know that you can select which groups (paralleller) you want to attend, and than you can select more that one group.
         </p>
     </div>
     <div class="yui-u">
+        <p style="background: url({{ MEDIA_URL }}gfx/list.png) no-repeat top left; padding-left: 20px; min-height: 20px">
+            The <a href="{% url course-list semester.year,semester.get_type_display,slug %}">course list</a>
+            contains all courses for the current semester, including exam dates and
+            allows you to easily select courses to add to your schedule.
+        </p>
         <p style="background: url({{ MEDIA_URL }}gfx/ical.png) no-repeat top left; padding-left: 20px; min-height: 20px">
             Calendar export:
             <a href="{% url schedule-ical-lectures semester.year,semester.get_type_display,slug %}">lectures</a>,
