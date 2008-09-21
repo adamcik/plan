@@ -265,21 +265,22 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
     # Compute where clause that limits the size of the following queries
     lecture_id_where_clause = 'lecture_id IN (%s)' % ','.join([str(a) for a in included])
 
-    t.tick('Start getting rooms for lecture list')
-    cursor.execute('''SELECT common_lecture_rooms.lecture_id, common_room.name
-                        FROM common_lecture_rooms
-                        INNER JOIN common_room
-                            ON (common_room.id = common_lecture_rooms.room_id)
-                      WHERE %s''' % lecture_id_where_clause)
+    if courses:
+        t.tick('Start getting rooms for lecture list')
+        cursor.execute('''SELECT common_lecture_rooms.lecture_id, common_room.name
+                            FROM common_lecture_rooms
+                            INNER JOIN common_room
+                                ON (common_room.id = common_lecture_rooms.room_id)
+                          WHERE %s''' % lecture_id_where_clause)
 
-    for lecture_id,name in cursor.fetchall():
-        if lecture_id not in rooms:
-            rooms[lecture_id] = []
+        for lecture_id,name in cursor.fetchall():
+            if lecture_id not in rooms:
+                rooms[lecture_id] = []
 
-        rooms[lecture_id].append(name)
+            rooms[lecture_id].append(name)
     t.tick('Done getting rooms for lecture list')
 
-    if advanced:
+    if advanced and courses:
         for u in UserSet.objects.filter(slug=slug, semester=semester):
             # SQL: this causes extra queries (can be worked around, subquery?)
             initial_groups = u.groups.values_list('id', flat=True)
