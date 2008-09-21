@@ -25,7 +25,7 @@
                 <td class="center">{{ exam.duration|default:"-" }}</td>
                 <td>
                     {% if exam.type_name %}
-                        {{ exam.type_name }}
+                        {{ exam.type_name|lower|capfirst }}
                     {% else %}
                         {{ exam.type }}
                     {% endif %}

@@ -448,7 +448,7 @@ def select_groups(request, year, type, slug):
 
     return HttpResponseRedirect(reverse('schedule-advanced', args=[semester.year,semester.get_type_display(),slug]))
 
-def select_task(request, year, type, slug):
+def new_deadline(request, year, type, slug):
     semester = get_semester(year, type)
 
     if request.method == 'POST':
@@ -475,7 +475,47 @@ def select_task(request, year, type, slug):
         elif 'submit_remove' in post:
             Deadline.objects.filter(id__in=post.getlist('deadline_remove')).delete()
 
-    return HttpResponseRedirect(reverse('schedule-advanced', args=[semester.year,semester.get_type_display(),slug]))
+    return HttpResponseRedirect(reverse('schedule', args=[semester.year,semester.get_type_display(),slug]))
+
+def copy_deadlines(request, year, type, slug):
+    semester = get_semester(year, type)
+
+    if request.method == 'POST':
+        if 'slugs' in request.POST:
+            slugs = request.POST['slugs'].replace(',', ' ').split()
+
+            color_map = {}
+            color_index = 0
+
+            courses = Course.objects.filter(userset__slug=slug, userset__semester=semester).distinct()
+
+            for c in courses:
+                # Create an array containing our courses and add the css class
+                if c.id not in color_map:
+                    color_index = (color_index + 1) % MAX_COLORS
+                    color_map[c.id] = 'lecture%d' % color_index
+
+            deadlines = Deadline.objects.filter(userset__slug__in=slugs, userset__semester=semester, userset__course__in=courses)
+            deadlines = deadlines.select_related('userset__course__id')
+            deadlines = deadlines.exclude(userset__slug=slug)
+
+            for d in deadlines:
+                d.css_class = color_map[d.userset.course_id]
+
+            return render_to_response('select_deadlines.html', {
+                                    'deadlines': deadlines,
+                                    'semester': semester,
+                                    'slug': slug,
+                                }, RequestContext(request))
+
+        elif 'deadline_id' in request.POST:
+            deadlines = Deadline.objects.filter(id__in=request.POST.getlist('deadline_id'))
+
+            for d in deadlines:
+                userset = UserSet.objects.get(slug=slug, semester=semester, course=d.userset.course)
+                Deadline.objects.get_or_create(userset=userset, date=d.date, time=d.time, task=d.task) 
+
+    return HttpResponseRedirect(reverse('schedule', args=[semester.year,semester.get_type_display(),slug]))
 
 def select_course(request, year, type, slug, add=False):
     semester = get_semester(year, type)

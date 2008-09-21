@@ -1,5 +1,5 @@
 <h2 id="deadlines">Deadlines</h2>
-<form method="post" action="{% url change-tasks semester.year,semester.get_type_display,slug %}#deadlines">
+<form method="post" action="{% url new-deadline semester.year,semester.get_type_display,slug %}#deadlines">
     <table>
         <thead>
             <tr>
@@ -57,5 +57,11 @@
         {% if deadlines %}
             <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/remove.png" /> Remove selected</button>
         {% endif %}
+    </p>
+</form>
+<form method="post" action="{% url copy-deadlines semester.year,semester.get_type_display,slug %}">
+    <p>
+        Import deadlines from following timetable identifiers:<br />
+        <input type="text" name="slugs" /> <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/copy.png"> Copy deadlines</button>
     </p>
 </form>
