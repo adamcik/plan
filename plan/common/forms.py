@@ -17,3 +17,16 @@ class GroupForm(forms.Form):
 
         self.fields['groups'].queryset = queryset
         self.fields['groups'].widget.attrs['size'] = 5
+
+class DeadlineForm(forms.models.ModelForm):
+    class Meta:
+        model = Deadline
+
+    def __init__(self, queryset, *args, **kwargs):
+        super(DeadlineForm, self).__init__(*args, **kwargs)
+
+        self.fields['userset'].queryset = queryset
+        self.fields['userset'].widget.attrs['style'] = 'width: 7em'
+        self.fields['time'].widget.attrs['style'] = 'width: 3em'
+        self.fields['date'].widget.attrs['style'] = 'width: 6em'
+        self.fields['task'].widget.attrs['style'] = 'width: 100%'

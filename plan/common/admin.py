@@ -31,6 +31,9 @@ class UserSetAdmin(admin.ModelAdmin):
 class TypeAdmin(admin.ModelAdmin):
     list_display = ('name', 'optional')
 
+class DeadlineAdmin(admin.ModelAdmin):
+    raw_id_fields = ('userset',)
+
 admin.site.register(Course, CourseAdmin)
 admin.site.register(Exam, ExamAdmin)
 admin.site.register(Group)
@@ -39,4 +42,5 @@ admin.site.register(Lecturer)
 admin.site.register(Room)
 admin.site.register(Semester)
 admin.site.register(Type, TypeAdmin)
+admin.site.register(Deadline, DeadlineAdmin)
 admin.site.register(UserSet, UserSetAdmin)

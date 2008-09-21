@@ -117,8 +117,6 @@
                 {% endif %}
             </p>
         </form>
-    </div>
-    <div class="yui-u">
         {% if exams %}
             <h2>Exams</h2>
             <table>
@@ -177,6 +175,66 @@
                 </li>
             </ul>
         {% endif %}
+    </div>
+    <div class="yui-u">
+        <h2>Deadlines</h2>
+        <form method="post" action="{% url change-tasks semester.year,semester.get_type_display,slug %}">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Course</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Task</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in deadlines %}
+                        <tr class="{{ d.css_class }}">
+                            <td>{{ d.userset }}</td>
+                            <td>{{ d.date }}</td>
+                            <td>{{ d.time|time:"H:i" }}</td>
+                            <td>{{ d.task }}</td>
+                            <td><input type="checkbox" name="deadline_remove" value="{{ d.id }}" /></td>
+                        </tr>
+                    {% endfor %}
+                    {% if deadline_form.errors %}
+                        <tr>
+                            <td colspan="5">
+                                <dl class="error">
+                                    {% if deadline_form.errors.userset %}
+                                        <dt>Course:</dt> <dd>{{ deadline_form.errors.userset.as_text|slice:"1:" }}</dd>
+                                    {% endif %}
+                                    {% if deadline_form.errors.date %}
+                                        <dt>Date:</dt>  <dd>{{ deadline_form.errors.date.as_text|slice:"1:" }}</dd>
+                                    {% endif %}
+                                    {% if deadline_form.errors.time %}
+                                        <dt>Time:</dt> <dd>{{ deadline_form.errors.time.as_text|slice:"1:" }}</dd>
+                                    {% endif %}
+                                    {% if deadline_form.errors.task %}
+                                        <dt>Task:</dt> <dd>{{ deadline_form.errors.task.as_text|slice:"1:" }}</dd>
+                                    {% endif %}
+                                </dl>
+                            </td>
+                        </tr>
+                    {% endif %}
+                    <tr>
+                        <td>{{ deadline_form.userset }}</td>
+                        <td>{{ deadline_form.date }}</td>
+                        <td>{{ deadline_form.time }}</td>
+                        <td>{{ deadline_form.task }}</td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                <button name="submit_add" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add task</button>
+                {% if deadlines %}
+                    <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/remove.png" /> Remove selected</button>
+                {% endif %}
+            </p>
+        </form>
     </div>
 </div>
 

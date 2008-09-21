@@ -17,7 +17,7 @@ class UserSet(models.Model):
         ordering = ('slug', 'course')
 
     def __unicode__(self):
-        return '%s - %s' % (self.slug, self.course)
+        return '%s' % (self.course)
 
 class Type(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -171,3 +171,20 @@ class Lecture(models.Model):
 
     class Meta:
         ordering = ('course', 'day', 'start_time')
+
+class Deadline(models.Model):
+    userset = models.ForeignKey('UserSet')
+
+    date = models.DateField()
+    time = models.TimeField(null=True, blank=True)
+
+    task = models.CharField(max_length=255)
+
+    def __unicode__(self):
+        if self.time:
+            return '%s %s- %s %s' % (self.userset, self.userset.slug, self.date, self.time)
+        else:
+            return '%s %s- %s' % (self.userset, self.userset.slug, self.date)
+
+    class Meta:
+        ordering = ('date', 'time')

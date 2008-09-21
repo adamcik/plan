@@ -134,11 +134,11 @@ def getting_started(request):
 
     return render_to_response('common/start.html', context, RequestContext(request))
 
-def schedule(request, year, semester, slug, advanced=False, week=None):
+def schedule(request, year, semester, slug, advanced=False, week=None, deadline_form=None, cache_page=True):
     t = request.timer
     response = cache.get(request.path)
 
-    if response and 'no-cache' not in request.GET:
+    if response and 'no-cache' not in request.GET and cache_page:
         t.tick('Done, returning cache')
         return response
 
@@ -178,6 +178,11 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
     last_day = semester.get_last_day()
 
     exam_list = Exam.objects.filter(exam_date__gt=first_day, exam_date__lt=last_day, course__userset__slug=slug).select_related('course__name', 'course__full_name')
+
+    deadlines = Deadline.objects.filter(userset__slug=slug, userset__semester=semester).select_related('userset__course')
+
+    if not deadline_form:
+        deadline_form = DeadlineForm(UserSet.objects.filter(slug=slug, semester=semester))
 
     t.tick('Done intializing')
 
@@ -400,11 +405,16 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
     for i,exam in enumerate(exam_list):
         exam_list[i].css_class = color_map[exam.course_id]
 
+    for i,deadline in enumerate(deadlines):
+        deadlines[i].css_class = color_map[deadline.userset.course_id]
+
     t.tick('Starting render to response')
     response = render_to_response('common/schedule.html', {
                             'advanced': advanced,
                             'colspan': span,
                             'courses': courses,
+                            'deadlines': deadlines,
+                            'deadline_form': deadline_form,
                             'exams': exam_list,
                             'lectures': initial_lectures,
                             'legend': map(lambda x: x[0], courses),
@@ -413,8 +423,9 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
                             'table': table,
                         }, RequestContext(request))
 
-    t.tick('Saving to cache')
-    cache.set(request.path, response)
+    if cache_page:
+        t.tick('Saving to cache')
+        cache.set(request.path, response)
 
     t.tick('Returning repsonse')
     return response
@@ -433,6 +444,35 @@ def select_groups(request, year, type, slug):
         clear_cache(year, semester.get_type_display(), slug)
 
         logging.debug('Deleted cache')
+
+    return HttpResponseRedirect(reverse('schedule-advanced', args=[semester.year,semester.get_type_display(),slug]))
+
+def select_task(request, year, type, slug):
+    semester = get_semester(year, type)
+
+    if request.method == 'POST':
+        clear_cache(year, semester.get_type_display(), slug)
+        logging.debug('Deleted cache')
+
+        post = request.POST.copy()
+
+        if 'submit_add' in post and 'submit_remove' in post:
+            # IE6 doesn't handle <button> correctly, it submits all buttons
+            if 'deadline_remove' in post:
+                # User has checked at least on deadline to remove, make a blind
+                # guess and remove submit_add button.
+                del post['submit_add']
+
+        if 'submit_add' in post:
+            deadline_form = DeadlineForm(UserSet.objects.filter(slug=slug, semester=semester), post)
+
+            if deadline_form.is_valid():
+                deadline_form.save()
+            else:
+                return schedule(request, year, type, slug, deadline_form=deadline_form, cache_page=False)
+
+        elif 'submit_remove' in post:
+            Deadline.objects.filter(id__in=post.getlist('deadline_remove')).delete()
 
     return HttpResponseRedirect(reverse('schedule-advanced', args=[semester.year,semester.get_type_display(),slug]))
 

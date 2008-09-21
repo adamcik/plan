@@ -141,6 +141,17 @@ ul,ol {
 .number {
 	text-align: right;
 }
+.errorlist {
+	color: #A00000;
+	text-size: 85%;
+}
+.error {
+	margin: 0;
+}
+.error dt {
+	width: 4em;
+	color: #A00000;
+}
 #stats {
 	border-left: 0.2em solid #D3D7CF;
 	padding: 0.2em 0;
