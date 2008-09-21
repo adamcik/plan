@@ -182,21 +182,21 @@
             <table>
                 <thead>
                     <tr>
+                        <th></th>
                         <th>Course</th>
                         <th>Date</th>
                         <th>Time</th>
                         <th>Task</th>
-                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for d in deadlines %}
                         <tr class="{{ d.css_class }}">
-                            <td>{{ d.userset }}</td>
-                            <td>{{ d.date }}</td>
-                            <td>{{ d.time|time:"H:i" }}</td>
-                            <td>{{ d.task }}</td>
                             <td><input type="checkbox" name="deadline_remove" value="{{ d.id }}" /></td>
+                            <td>{{ d.userset }}</td>
+                            <td style="padding-left:1em">{{ d.date }}</td>
+                            <td style="padding-left:1em">{{ d.time|time:"H:i" }}</td>
+                            <td style="padding-left:1em">{{ d.task }}</td>
                         </tr>
                     {% endfor %}
                     {% if deadline_form.errors %}
@@ -220,11 +220,10 @@
                         </tr>
                     {% endif %}
                     <tr>
-                        <td>{{ deadline_form.userset }}</td>
+                        <td colspan="2">{{ deadline_form.userset }}</td>
                         <td>{{ deadline_form.date }}</td>
                         <td>{{ deadline_form.time }}</td>
                         <td>{{ deadline_form.task }}</td>
-                        <td></td>
                     </tr>
                 </tbody>
             </table>
