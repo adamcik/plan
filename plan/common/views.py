@@ -181,73 +181,6 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
 
     t.tick('Done intializing')
 
-    # FIXME all of these are way to naive, need a where clause
-    cursor.execute('''SELECT common_lecture_rooms.lecture_id, common_room.name
-                        FROM common_lecture_rooms
-                        INNER JOIN common_room
-                            ON (common_room.id = common_lecture_rooms.room_id)''')
-
-    for lecture_id,name in cursor.fetchall():
-        if lecture_id not in rooms:
-            rooms[lecture_id] = []
-
-        rooms[lecture_id].append(name)
-    t.tick('Done getting rooms for lecture list')
-
-    if advanced:
-        for u in UserSet.objects.filter(slug=slug, semester=semester):
-            # SQL: this causes extra queries (can be worked around, subquery?)
-            initial_groups = u.groups.values_list('id', flat=True)
-
-            # SQL: this causes extra queries (hard to work around, probably not
-            # worh it)
-            course_groups = Group.objects.filter(lecture__course__id=u.course_id).distinct()
-
-            # SQL: For loop generates to quries per userset.
-            group_forms[u.course_id] = GroupForm(course_groups, initial={'groups': initial_groups}, prefix=u.course_id)
-
-        t.tick('Done creating groups forms')
-
-        # Do three custom sql queries to prevent and explosion of sql queries
-        # due to ORM. FIXME do same queries using ORM
-        cursor.execute('''SELECT common_lecture_groups.lecture_id, common_group.name
-                            FROM common_lecture_groups
-                            INNER JOIN common_group
-                                ON (common_group.id = common_lecture_groups.group_id)''')
-
-        for lecture_id,name in cursor.fetchall():
-            if lecture_id not in groups:
-                groups[lecture_id] = []
-
-            groups[lecture_id].append(name)
-        t.tick('Done getting groups for lecture list')
-
-        cursor.execute('''SELECT common_lecture_lecturers.lecture_id, common_lecturer.name
-                            FROM common_lecture_lecturers
-                            INNER JOIN common_lecturer
-                                ON (common_lecturer.id = common_lecture_lecturers.lecturer_id)''')
-
-        for lecture_id,name in cursor.fetchall():
-            if lecture_id not in lecturers:
-                lecturers[lecture_id] = []
-
-            lecturers[lecture_id].append(name)
-
-        t.tick('Done getting lecturers for lecture list')
-
-        cursor.execute('''SELECT common_lecture_weeks.lecture_id, common_week.number
-                            FROM common_lecture_weeks
-                            INNER JOIN common_week
-                                ON (common_week.id = common_lecture_weeks.week_id)''')
-
-        for lecture_id,name in cursor.fetchall():
-            if lecture_id not in weeks:
-                weeks[lecture_id] = []
-
-            weeks[lecture_id].append(name)
-
-        t.tick('Done getting weeks for lecture list')
-
     for c in Course.objects.filter(userset__slug=slug, userset__semester=semester).distinct():
         # Create an array containing our courses and add the css class
         if c.id not in color_map:
@@ -328,6 +261,80 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
                 })
 
             start += 1
+
+    # Compute where clause that limits the size of the following queries
+    lecture_id_where_clause = 'lecture_id IN (%s)' % ','.join([str(a) for a in included])
+
+    t.tick('Start getting rooms for lecture list')
+    cursor.execute('''SELECT common_lecture_rooms.lecture_id, common_room.name
+                        FROM common_lecture_rooms
+                        INNER JOIN common_room
+                            ON (common_room.id = common_lecture_rooms.room_id)
+                      WHERE %s''' % lecture_id_where_clause)
+
+    for lecture_id,name in cursor.fetchall():
+        if lecture_id not in rooms:
+            rooms[lecture_id] = []
+
+        rooms[lecture_id].append(name)
+    t.tick('Done getting rooms for lecture list')
+
+    if advanced:
+        for u in UserSet.objects.filter(slug=slug, semester=semester):
+            # SQL: this causes extra queries (can be worked around, subquery?)
+            initial_groups = u.groups.values_list('id', flat=True)
+
+            # SQL: this causes extra queries (hard to work around, probably not
+            # worh it)
+            course_groups = Group.objects.filter(lecture__course__id=u.course_id).distinct()
+
+            # SQL: For loop generates to quries per userset.
+            group_forms[u.course_id] = GroupForm(course_groups, initial={'groups': initial_groups}, prefix=u.course_id)
+
+        t.tick('Done creating groups forms')
+
+        # Do three custom sql queries to prevent and explosion of sql queries
+        # due to ORM. FIXME do same queries using ORM
+        cursor.execute('''SELECT common_lecture_groups.lecture_id, common_group.name
+                            FROM common_lecture_groups
+                            INNER JOIN common_group
+                                ON (common_group.id = common_lecture_groups.group_id)
+                          WHERE %s''' % lecture_id_where_clause)
+
+        for lecture_id,name in cursor.fetchall():
+            if lecture_id not in groups:
+                groups[lecture_id] = []
+
+            groups[lecture_id].append(name)
+        t.tick('Done getting groups for lecture list')
+
+        cursor.execute('''SELECT common_lecture_lecturers.lecture_id, common_lecturer.name
+                            FROM common_lecture_lecturers
+                            INNER JOIN common_lecturer
+                                ON (common_lecturer.id = common_lecture_lecturers.lecturer_id)
+                          WHERE %s''' % lecture_id_where_clause)
+
+        for lecture_id,name in cursor.fetchall():
+            if lecture_id not in lecturers:
+                lecturers[lecture_id] = []
+
+            lecturers[lecture_id].append(name)
+
+        t.tick('Done getting lecturers for lecture list')
+
+        cursor.execute('''SELECT common_lecture_weeks.lecture_id, common_week.number
+                            FROM common_lecture_weeks
+                            INNER JOIN common_week
+                                ON (common_week.id = common_lecture_weeks.week_id)
+                          WHERE %s''' % lecture_id_where_clause)
+
+        for lecture_id,name in cursor.fetchall():
+            if lecture_id not in weeks:
+                weeks[lecture_id] = []
+
+            weeks[lecture_id].append(name)
+
+        t.tick('Done getting weeks for lecture list')
 
     t.tick('Starting lecture expansion')
     for lecture in lectures:
