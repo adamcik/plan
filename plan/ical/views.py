@@ -13,7 +13,7 @@ from django.core.cache import cache
 from plan.common.models import *
 from plan.common.views import get_semester, get_lectures
 
-def ical(request, year, semester, slug, lectures=True, exams=True):
+def ical(request, year, semester, slug, lectures=True, exams=True, deadlines=True):
     semester = get_semester(year, semester)
 
     # FIXME cache the response! use request path..
@@ -92,12 +92,27 @@ def ical(request, year, semester, slug, lectures=True, exams=True):
                 else:
                     vevent.add('dtend').value = start + duration
 
+    if deadlines:
+        for d in Deadline.objects.filter(userset__slug=slug, userset__semester=semester).select_related('userset__course__name'):
+            vevent = cal.add('vevent')
+
+            if d.time:
+                vevent.add('summary').value = '%s %02d:%02d: %s' % (d.userset.course.name, d.time.hour, d.time.minute, d.task)
+            else:
+                vevent.add('summary').value = '%s: %s' % (d.userset.course.name, d.task)
+            vevent.add('dtstamp').value = datetime.now(tzlocal())
+            vevent.add('uid').value = 'deadline-%d@%s' % (d.id, gethostname())
+            vevent.add('dtstart').value = d.date
+
+
     icalstream = cal.serialize()
 
     if 'plain' in request.GET:
-        response = HttpResponse(icalstream, mimetype='text/plain')
+        response = HttpResponse(icalstream)
+        response['Content-Type'] = 'text/plain; charset=utf-8'
     else:
         response = HttpResponse(icalstream, mimetype='text/calendar')
+        response['Content-Type'] = 'text/calendar; charset=utf-8'
         response['Filename'] = '%s.ics' % slug  # IE needs this
         response['Content-Disposition'] = 'attachment; filename=%s.ics' % slug
         cache.set(request.path, response)
