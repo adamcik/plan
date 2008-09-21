@@ -515,6 +515,8 @@ def copy_deadlines(request, year, type, slug):
                 userset = UserSet.objects.get(slug=slug, semester=semester, course=d.userset.course)
                 Deadline.objects.get_or_create(userset=userset, date=d.date, time=d.time, task=d.task) 
 
+            clear_cache(year, semester.get_type_display(), slug)
+
     return HttpResponseRedirect(reverse('schedule', args=[semester.year,semester.get_type_display(),slug]))
 
 def select_course(request, year, type, slug, add=False):
