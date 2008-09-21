@@ -189,7 +189,7 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
 
         c.css_class = color_map[c.id]
 
-        courses.append(c)
+        courses.append((c,None))
 
     t.tick('Done building course array')
 
@@ -390,7 +390,7 @@ def schedule(request, year, semester, slug, advanced=False, week=None):
 
         # FIX groups forms
         for i,c in enumerate(courses):
-            courses[i] = (c, group_forms.get(c.id, None))
+            courses[i] = (c[0], group_forms.get(c[0].id, None))
 
         t.tick('Done lecture css_clases and excluded status')
 
