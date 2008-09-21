@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %} {{ semester.get_type_display }} {{ semester.year }} {{ block.super }}
+{% endblock %}
+
+{% block hd %}
+    <h1>Copy deadlines to {{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %}  {{ semester.get_type_display }} {{ semester.year }} schedule</h1>
+{% endblock %}
+
+{% block bd %}
+    {% if deadlines %}
+        <form method="post" action="{% url copy-deadlines semester.year,semester.get_type_display,slug %}">
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Course</th>
+                        <th>Due date</th>
+                        <th>Time</th>
+                        <th>Task</th>
+                        <th>Source</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in deadlines %}
+                        <tr class="{{ d.css_class }} row">
+                            <td><input type="checkbox" name="deadline_id" value="{{ d.id }}" checked="checked" /></td>
+                            <td>{{ d.userset }}</td>
+                            <td>{{ d.date }}</td>
+                            <td>{{ d.time|time:"H:i" }}</td>
+                            <td>{{ d.task }}</td>
+                            <td>{{ d.userset.slug }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p>
+                <button><img alt="" src="{{ MEDIA_URL }}gfx/copy.png"> Copy deadlines</button>
+            </p>
+        </form>
+    {% else %}
+        <p>
+            No deadlines found. Return to your <a href="{% url schedule semester.year,semester.get_type_display,slug %}">schedule</a>.
+        </p>
+    {% endif %}
+{% endblock %}
