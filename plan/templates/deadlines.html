@@ -61,7 +61,7 @@
 </form>
 <form method="post" action="{% url copy-deadlines semester.year,semester.get_type_display,slug %}">
     <p>
-        Import deadlines from following timetable identifiers:<br />
+        Import deadlines from following timetables:<br />
         <input type="text" name="slugs" /> <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/copy.png"> Copy deadlines</button>
     </p>
 </form>
