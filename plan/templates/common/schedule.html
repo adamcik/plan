@@ -177,8 +177,8 @@
         {% endif %}
     </div>
     <div class="yui-u">
-        <h2>Deadlines</h2>
-        <form method="post" action="{% url change-tasks semester.year,semester.get_type_display,slug %}">
+        <h2 id="deadlines">Deadlines</h2>
+        <form method="post" action="{% url change-tasks semester.year,semester.get_type_display,slug %}#deadlines">
             <table>
                 <thead>
                     <tr>
@@ -228,7 +228,7 @@
                 </tbody>
             </table>
             <p>
-                <button name="submit_add" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add task</button>
+                <button name="submit_add" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add deadline</button>
                 {% if deadlines %}
                     <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/remove.png" /> Remove selected</button>
                 {% endif %}

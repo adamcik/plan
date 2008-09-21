@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from urllib import quote as urlquote
 
 from django.db import models
@@ -175,7 +175,7 @@ class Lecture(models.Model):
 class Deadline(models.Model):
     userset = models.ForeignKey('UserSet')
 
-    date = models.DateField()
+    date = models.DateField(default=datetime.now().date()+timedelta(days=7))
     time = models.TimeField(null=True, blank=True)
 
     task = models.CharField(max_length=255)
