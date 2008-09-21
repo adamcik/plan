@@ -66,10 +66,14 @@ thead th {
 	padding: 0 0.5em;
 	font-size: 93%;
 }
-tbody td, tbody th {
-  border: 1px solid #666;
-	border-left: 0;
-	border-right: 0;
+tbody tr td, tbody tr th {
+	border: 0;
+}
+tbody tr.row td, tbody tr.row th {
+  border-top: 1px solid #666;
+}
+tbody {
+  border-bottom: 1px solid #666;
 }
 tbody th {
 	text-align: right;

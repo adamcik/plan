@@ -35,7 +35,7 @@
             </thead>
             <tbody>
                 {% for exam in exam_list %}
-                    <tr{% ifchanged exam.course_id %}{% else %} style="border-top: 2px solid white;"{% endifchanged %}>
+                    <tr{% ifchanged exam.course_id %} class="row"{% endifchanged %}>
                         {% ifchanged exam.course_id %}
                             <td{% ifchanged exam.course.name.0 %} id="{{ exam.course.name.0 }}"{% endifchanged %}>
                                 <input type="checkbox" name="course_add" value="{{ exam.course.name }}" id="course_{{ exam.course_id }}" />

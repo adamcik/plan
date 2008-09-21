@@ -84,7 +84,7 @@
                     </thead>
                     <tbody>
                         {% for course in legend %}
-                            <tr class="{{ course.css_class }}" title="{{ course.full_name }}">
+                            <tr class="{{ course.css_class }} row" title="{{ course.full_name }}">
                                 <td>
                                     <input type="checkbox" name="course_remove" value="{{ course.id }}" class="noprint" />
                                 </td>
@@ -133,7 +133,7 @@
                 </thead>
                 <tbody>
                     {% for exam in exams %}
-                        <tr class="{{ exam.css_class }}" title="{{ exam.course.full_name }}">
+                        <tr class="{{ exam.css_class }} row" title="{{ exam.course.full_name }}">
                             <td>
                                 {{ exam.exam_date }}
                             </td>
@@ -184,24 +184,23 @@
                     <tr>
                         <th></th>
                         <th>Course</th>
-                        <th>Date</th>
+                        <th>Due date</th>
                         <th>Time</th>
                         <th>Task</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for d in deadlines %}
-                        <tr class="{{ d.css_class }}">
+                        <tr class="{{ d.css_class }} row">
                             <td><input type="checkbox" name="deadline_remove" value="{{ d.id }}" /></td>
                             <td>{{ d.userset }}</td>
-                            <td style="padding-left:1em">{{ d.date }}</td>
-                            <td style="padding-left:1em">{{ d.time|time:"H:i" }}</td>
-                            <td style="padding-left:1em">{{ d.task }}</td>
-                        </tr>
+                            <td>{{ d.date }}</td>
+                            <td>{{ d.time|time:"H:i" }}</td>
+                            <td>{{ d.task }}</td>
                     {% endfor %}
                     {% if deadline_form.errors %}
                         <tr>
-                            <td colspan="5">
+                            <td colspan="6">
                                 <dl class="error">
                                     {% if deadline_form.errors.userset %}
                                         <dt>Course:</dt> <dd>{{ deadline_form.errors.userset.as_text|slice:"1:" }}</dd>
@@ -219,11 +218,15 @@
                             </td>
                         </tr>
                     {% endif %}
-                    <tr>
-                        <td colspan="2">{{ deadline_form.userset }}</td>
-                        <td>{{ deadline_form.date }}</td>
-                        <td>{{ deadline_form.time }}</td>
-                        <td>{{ deadline_form.task }}</td>
+                    <tr class="row">
+                        <td colspan="4">
+                            {{ deadline_form.userset }}
+                            {{ deadline_form.date }}
+                            {{ deadline_form.time }}
+                        </td>
+                        <td>
+                            {{ deadline_form.task }}
+                        </td>
                     </tr>
                 </tbody>
             </table>

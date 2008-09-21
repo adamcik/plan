@@ -402,6 +402,7 @@ def schedule(request, year, semester, slug, advanced=False, week=None, deadline_
 
         t.tick('Done lecture css_clases and excluded status')
 
+
     for i,exam in enumerate(exam_list):
         exam_list[i].css_class = color_map[exam.course_id]
 
