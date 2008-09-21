@@ -1,0 +1,47 @@
+<form action="{% url change-course semester.year,semester.get_type_display,slug %}" method="post">
+    <h2>Courses</h2>
+    {% if legend %}
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Credits</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course in legend %}
+                    <tr class="{{ course.css_class }} row" title="{{ course.full_name }}">
+                        <td>
+                            <input type="checkbox" name="course_remove" value="{{ course.id }}" class="noprint" />
+                        </td>
+                        <td>
+                            {% if course.url %}
+                                <a href="{{ course.get_url }}">
+                                    {{ course }}
+                                </a>
+                            {% else %}
+                                {{ course }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ course.full_name }}
+                        </td>
+                        <td class="number">
+                            {{ course.points|default:""|floatformat:"1" }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    <p class="noprint">
+        <input id="course" type="text" name="course_add" size="20"/>
+        <button name="submit_add" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add courses</button>
+        {% if legend %}
+            <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/remove.png" /> Remove selected</button>
+        {% endif %}
+    </p>
+</form>

@@ -1,0 +1,61 @@
+<h2 id="deadlines">Deadlines</h2>
+<form method="post" action="{% url change-tasks semester.year,semester.get_type_display,slug %}#deadlines">
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                <th>Course</th>
+                <th>Due date</th>
+                <th>Time</th>
+                <th>Task</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for d in deadlines %}
+                <tr class="{{ d.css_class }} row">
+                    <td><input type="checkbox" name="deadline_remove" value="{{ d.id }}" /></td>
+                    <td>{{ d.userset }}</td>
+                    <td>{{ d.date }}</td>
+                    <td>{{ d.time|time:"H:i" }}</td>
+                    <td>{{ d.task }}</td>
+                </tr>
+            {% endfor %}
+            {% if deadline_form.errors %}
+                <tr>
+                    <td colspan="6">
+                        <dl class="error">
+                            {% if deadline_form.errors.userset %}
+                                <dt>Course:</dt> <dd>{{ deadline_form.errors.userset.as_text|slice:"1:" }}</dd>
+                            {% endif %}
+                            {% if deadline_form.errors.date %}
+                                <dt>Date:</dt>  <dd>{{ deadline_form.errors.date.as_text|slice:"1:" }}</dd>
+                            {% endif %}
+                            {% if deadline_form.errors.time %}
+                                <dt>Time:</dt> <dd>{{ deadline_form.errors.time.as_text|slice:"1:" }}</dd>
+                            {% endif %}
+                            {% if deadline_form.errors.task %}
+                                <dt>Task:</dt> <dd>{{ deadline_form.errors.task.as_text|slice:"1:" }}</dd>
+                            {% endif %}
+                        </dl>
+                    </td>
+                </tr>
+            {% endif %}
+            <tr class="row">
+                <td colspan="4">
+                    {{ deadline_form.userset }}
+                    {{ deadline_form.date }}
+                    {{ deadline_form.time }}
+                </td>
+                <td>
+                    {{ deadline_form.task }}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <p>
+        <button name="submit_add" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add deadline</button>
+        {% if deadlines %}
+            <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/remove.png" /> Remove selected</button>
+        {% endif %}
+    </p>
+</form>

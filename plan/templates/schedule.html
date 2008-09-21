@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %} {{ semester.get_type_display }} {{ semester.year }} {{ block.super }}
+{% endblock %}
+
+{% block hd %}
+    <h1>{{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %}  {{ semester.get_type_display }} {{ semester.year }} schedule</h1>
+{% endblock %}
+
+{% block bd %}
+    {% include "schedule_table.html" %}
+
+    <p class="noprint">
+        <a href="{% url course-list semester.year,semester.get_type_display,slug %}">
+            <img alt="" src="{{ MEDIA_URL }}gfx/list.png" />Course list</a>
+        {% if legend %}
+            {% if advanced %}
+                - <a href="{% url schedule semester.year,semester.get_type_display,slug %}">
+                    <img alt="" src="{{ MEDIA_URL }}gfx/advanced.png" />Hide advanced options</a>
+            {% else %}
+                - <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">
+                    <img alt="" src="{{ MEDIA_URL }}gfx/advanced.png" />Advanced options</a>
+            {% endif %}
+        {% endif %}
+        - <a href="#tips"><img alt="" src="{{ MEDIA_URL }}gfx/tips.png" />Tips</a>
+    </p>
+
+    <div class="yui-g">
+        <div class="yui-u first">
+            {% include "courses.html" %}
+            {% if exams %}
+                {% include "exams.html" %}
+            {% endif %}
+        </div>
+        <div class="yui-u">
+            {% include "deadlines.html" %}
+        </div>
+    </div>
+
+    {% if advanced %}
+        {% if courses %}
+            {% include "groups.html" %}
+        {% endif %}
+        {% if lectures %}
+            {% include "lectures.html" %}
+        {% endif %}
+    {% endif %}
+
+    {% include "tips.html" %}
+{% endblock %}

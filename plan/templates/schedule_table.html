@@ -1,0 +1,43 @@
+<table class="schedule">
+    <thead>
+        <tr>
+            <th class="time"></th>
+            <th colspan="{{ colspan.0 }}">Monday</th>
+            <th colspan="{{ colspan.1 }}">Tuesday</th>
+            <th colspan="{{ colspan.2 }}">Wednesday</th>
+            <th colspan="{{ colspan.3 }}">Thursday</th>
+            <th colspan="{{ colspan.4 }}">Friday</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for row in table %}
+        <tr class="{% cycle odd,even %}{% if forloop.last %} bottom{% endif %}">
+            {% for cells in row %}
+                {% if cells %}
+                    {% for c in cells %}
+                        {% if not c.remove %}
+                            <td colspan="{{ c.colspan|default:"1" }}"
+                                rowspan="{{ c.rowspan|default:"1" }}"
+                                {% if c.class or forloop.first %}class="{% if forloop.first %}first{% else %}extra{% endif %} {{ c.class }}"{% endif %}
+                                {% if c.lecture %}title="{{ c.lecture.course.full_name }}"{% endif %}>
+
+                                {% if c.lecture %}
+                                    <div class="course">{{ c.lecture.course }}</div>
+                                    <div class="room">{% for r in c.lecture.sql_rooms %}{{ r }}{% if not forloop.last %}, {% endif %}{% endfor %}</div>
+                                    <div class="type">{% if c.lecture.type_id %}{{ c.lecture.type }}{% endif %}</div>
+                                {% endif %}
+                                {% if c.time %}
+                                    {{ c.time }}
+                                {% endif %}
+                            </td>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <td></td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+    {% endfor %}
+
+    </tbody>
+</table>

@@ -132,7 +132,7 @@ def getting_started(request):
 
         cache.set('stats', context)
 
-    return render_to_response('common/start.html', context, RequestContext(request))
+    return render_to_response('start.html', context, RequestContext(request))
 
 def schedule(request, year, semester, slug, advanced=False, week=None, deadline_form=None, cache_page=True):
     t = request.timer
@@ -410,7 +410,7 @@ def schedule(request, year, semester, slug, advanced=False, week=None, deadline_
         deadlines[i].css_class = color_map[deadline.userset.course_id]
 
     t.tick('Starting render to response')
-    response = render_to_response('common/schedule.html', {
+    response = render_to_response('schedule.html', {
                             'advanced': advanced,
                             'colspan': span,
                             'courses': courses,
@@ -516,7 +516,7 @@ def select_course(request, year, type, slug, add=False):
                     errors.append(l)
 
             if errors:
-                return render_to_response('common/error.html',
+                return render_to_response('error.html',
                             {'courses': errors, 'slug': slug, 'year': year, 'type': semester.get_type_display()},
                             RequestContext(request))
 
@@ -557,7 +557,7 @@ def list_courses(request, year, semester, slug):
             Exam.objects.filter(exam_date__gt=first_day, exam_date__lt=last_day, course__semesters__in=[semester]).select_related('course__name', 'course__full_name').order_by('course__name', 'handout_date', 'exam_date'),
             extra_context={'semester': semester},
             template_object_name='exam',
-            template_name='common/course_list.html')
+            template_name='course_list.html')
 
         cache.set('course_list', response)
 

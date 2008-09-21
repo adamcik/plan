@@ -1,0 +1,40 @@
+<h2>Lecture list</h2>
+<p>
+    If your schedule contains lectures you don't want to be shown
+    please select them here and choose «Hide selected lectures».
+</p>
+<form action="{% url change-lectures semester.year,semester.get_type_display,slug %}" method="post">
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                <th>Course</th>
+                <th>Day</th>
+                <th>Time</th>
+                <th>Rooms</th>
+                <th>Type</th>
+                <th>Groups</th>
+                <th>Lecturers</th>
+                <th>Weeks</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for l in lectures %}
+                <tr class="{{ l.css_class }}{% if l.excluded %} excluded{% endif %} row">
+                    <td><input type="checkbox" name="exclude" value="{{ l.id }}"{% if l.excluded %} checked="checked"{% endif %} class="noprint" /></td>
+                    <td>{{ l.course }}</td>
+                    <td>{{ l.get_day_display }}</td>
+                    <td>{{ l.get_start_time_display }}-{{ l.get_end_time_display }}</td>
+                    <td class="small">{% for r in l.sql_rooms %}{{ r }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+                    <td class="small">{% if l.type_id %}{{ l.type }}{% endif %}</td>
+                    <td class="small">{% for g in  l.sql_groups %}{{ g }}{% if not forloop.last %},{% endif %} {% endfor %}</td>
+                    <td>{% for p in  l.sql_lecturers %}{{ p }}{% if not forloop.last %},{% endif %} {% endfor %}</td>
+                    <td class="small">{% for w in  l.sql_weeks %}{{ w }}{% if not forloop.last %},{% endif %} {% endfor %}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p class="noprint">
+        <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/hide.png" /> Hide selected lectures</button>
+    </p>
+</form>

@@ -1,0 +1,56 @@
+<h2>Exams</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Dur.</th>
+            <th>Type</th>
+            <th>Course</th>
+            <th>Comment</th>
+            <th>Handout time</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for exam in exams %}
+            <tr class="{{ exam.css_class }} row" title="{{ exam.course.full_name }}">
+                <td>
+                    {{ exam.exam_date }}
+                </td>
+                <td>
+                    {% if exam.exam_time %}
+                        {{ exam.exam_time|time:"H:i" }}
+                    {% endif %}
+                </td>
+                <td class="center">{{ exam.duration|default:"-" }}</td>
+                <td>
+                    {% if exam.type_name %}
+                        {{ exam.type_name }}
+                    {% else %}
+                        {{ exam.type }}
+                    {% endif %}
+                </td>
+                <td>{{ exam.course.name }}</td>
+                <td>{{ exam.course.comment|default:"-" }}</td>
+                <td>
+                    {% if not exam.handout_date %}
+                        -
+                    {% else %}
+                        {{ exam.handout_date }}
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<ul class="noprint small">
+    <li>
+        Please check that exams are listed at
+        <a href="http://www.ntnu.no/eksamen/plan/">http://www.ntnu.no/eksamen/plan/</a>
+        before complaining about them missing from your overview.
+    </li>
+    <li>
+        Handout time usually only applies to home exams where some material
+        is given out some time before a delivery date.
+    </li>
+</ul>
