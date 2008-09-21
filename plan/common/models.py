@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from urllib import quote as urlquote
 
 from django.db import models
@@ -179,6 +179,14 @@ class Deadline(models.Model):
     time = models.TimeField(null=True, blank=True)
 
     task = models.CharField(max_length=255)
+
+    def get_datetime(self):
+        if self.time:
+            return datetime.combine(self.date, self.time)
+        else:
+            return datetime.combine(self.date, time())
+
+    datetime = property(get_datetime)
 
     def __unicode__(self):
         if self.time:
