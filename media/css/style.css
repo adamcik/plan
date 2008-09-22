@@ -101,7 +101,7 @@ ul,ol {
 	margin-top: 0;
 	margin-left: 1.5em;
 }
-.excluded td {
+.excluded td, .expired td {
 	text-decoration: line-through;
 }
 .first {
