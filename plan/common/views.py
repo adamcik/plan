@@ -30,6 +30,7 @@ def clear_cache(*args):
     cache.delete(reverse('schedule-ical', args=args))
     cache.delete(reverse('schedule-ical-exams', args=args))
     cache.delete(reverse('schedule-ical-lectures', args=args))
+    cache.delete(reverse('schedule-ical-deadlines', args=args))
 
 def get_semester(year, semester):
     try:
@@ -122,11 +123,12 @@ def getting_started(request):
         cursor.execute('SELECT COUNT(*) as num, c.name, c.full_name FROM common_userset u JOIN common_course c ON (c.id = u.course_id) GROUP BY c.name, c.full_name ORDER BY num DESC LIMIT %d' % limit)
 
         context = {
-            'slug_count': UserSet.objects.values('slug').distinct().count(),
-            'subscription_count': UserSet.objects.count(),
-            'lecture_count': Lecture.objects.count(),
-            'course_count': Course.objects.count(),
-            'exam_count': Exam.objects.count(),
+            'slug_count': int(UserSet.objects.values('slug').distinct().count()),
+            'subscription_count': int(UserSet.objects.count()),
+            'deadline_count': int(Deadline.objects.count()),
+#            'lecture_count': Lecture.objects.count(),
+#            'course_count': Course.objects.count(),
+#            'exam_count': Exam.objects.count(),
             'stats': cursor.fetchall(),
         }
 

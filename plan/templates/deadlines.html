@@ -12,7 +12,7 @@
         </thead>
         <tbody>
             {% for d in deadlines %}
-                <tr class="{{ d.css_class }} row">
+                <tr class="{{ d.css_class }} row{% if d.expired %} expired{% endif %}">
                     <td><input type="checkbox" name="deadline_remove" value="{{ d.id }}" /></td>
                     <td>{{ d.userset }}</td>
                     <td>{{ d.date }}</td>

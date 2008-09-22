@@ -188,6 +188,13 @@ class Deadline(models.Model):
 
     datetime = property(get_datetime)
 
+    def is_expired(self):
+        if self.time:
+            return datetime.combine(self.date, self.time) < datetime.now()
+        else:
+            return self.date <= datetime.now().date()
+    expired = property(is_expired)
+
     def __unicode__(self):
         if self.time:
             return '%s %s- %s %s' % (self.userset, self.userset.slug, self.date, self.time)

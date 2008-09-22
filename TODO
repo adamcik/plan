@@ -14,6 +14,8 @@ Cpurrent:
 
 * Add exam type to data model using "smart" primary key
 
+* "Invalidate" expired deadlines
+
 Wishlist:
 ---------
 
