@@ -70,7 +70,6 @@ def get_lectures(slug, semester):
 
     related = [
         'type__name',
-        'room__name',
         'course__name',
     ]
 
@@ -184,11 +183,11 @@ def schedule(request, year, semester, slug, advanced=False, week=None, deadline_
     deadlines = Deadline.objects.filter(userset__slug=slug, userset__semester=semester).select_related('userset__course')
 
     if not deadline_form:
-        deadline_form = DeadlineForm(UserSet.objects.filter(slug=slug, semester=semester))
+        deadline_form = DeadlineForm(UserSet.objects.filter(slug=slug, semester=semester).select_related('course__name'))
 
     t.tick('Done intializing')
 
-    for c in Course.objects.filter(userset__slug=slug, userset__semester=semester).distinct().select_related('course__name'):
+    for c in Course.objects.filter(userset__slug=slug, userset__semester=semester).distinct():
         # Create an array containing our courses and add the css class
         if c.id not in color_map:
             color_index = (color_index + 1) % MAX_COLORS
