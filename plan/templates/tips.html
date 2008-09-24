@@ -9,10 +9,12 @@
             <a href="{% url shortcut slug %}">http://{{ request.META.HTTP_HOST }}{% url shortcut slug %}</a>
         </p>
         <p style="background: url({{ MEDIA_URL }}gfx/hide.png) no-repeat top left; padding-left: 20px; min-height: 20px">
-            Did you know that you can choose to hide lectures that you don't want to be shown under <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">adavanced options</a>.
+            Did you know that you can choose to hide lectures that you don't want to be shown under
+            <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">adavanced options</a>?
         </p>
         <p style="background: url({{ MEDIA_URL }}gfx/save.png) no-repeat top left; padding-left: 20px; min-height: 20px">
-            Did you know that you can select which groups (paralleller) you want to attend, and than you can select more that one group.
+            Did you know that you can select which groups (paralleller) you
+            want to attend, and than you can select more that one group?
         </p>
     </div>
     <div class="yui-u">
@@ -41,7 +43,7 @@
         </p>
         <p style="background: url({{ MEDIA_URL }}gfx/copy.png) no-repeat top left; padding-left: 20px; min-height: 20px">
             Enter a space separated list of your friends timetables to copy
-            the deadlines they have entered for any classes your'e both attending.
+            the deadlines they have entered for any classes you're both attending.
         </p>
     </div>
 </div>
