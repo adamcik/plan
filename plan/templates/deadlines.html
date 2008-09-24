@@ -13,7 +13,7 @@
         <tbody>
             {% for d in deadlines %}
                 <tr class="{{ d.css_class }} row{% if d.expired %} expired{% endif %}">
-                    <td><input type="checkbox" name="deadline_remove" value="{{ d.id }}" /></td>
+                    <td><input type="checkbox" name="deadline_remove" value="{{ d.id }}" class="noprint"/></td>
                     <td>{{ d.userset }}</td>
                     <td>{{ d.date }}</td>
                     <td>{{ d.time|time:"H:i" }}</td>
@@ -40,7 +40,7 @@
                     </td>
                 </tr>
             {% endif %}
-            <tr class="row">
+            <tr class="row noprint">
                 <td colspan="4">
                     {{ deadline_form.userset }}
                     {{ deadline_form.date }}
@@ -52,7 +52,7 @@
             </tr>
         </tbody>
     </table>
-    <p>
+    <p class="noprint">
         <button name="submit_add" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add deadline</button>
         {% if deadlines %}
             <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/remove.png" /> Remove selected</button>
@@ -60,7 +60,7 @@
     </p>
 </form>
 <form method="post" action="{% url copy-deadlines semester.year,semester.get_type_display,slug %}">
-    <p>
+    <p class="noprint">
         Import deadlines from following timetables:<br />
         <input type="text" name="slugs" /> <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/copy.png"> Copy deadlines</button>
     </p>

@@ -290,7 +290,7 @@ ul,ol {
 }
 
 @media print {
-	#ft, .noprint {
+	#ft, #django_log, .noprint {
 		display: none;
 	}
 	.optional {
@@ -299,5 +299,9 @@ ul,ol {
 	}
 	table a {
 		text-decoration: none;
+	}
+	.yui-u {
+		 float: none !important;
+		 width: auto !important;
 	}
 }
