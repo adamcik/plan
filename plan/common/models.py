@@ -66,6 +66,7 @@ class Course(models.Model):
     class Meta:
         ordering = ('name',)
 
+
 class Semester(models.Model):
     SPRING = 0
     FALL = 1
@@ -99,6 +100,17 @@ class Semester(models.Model):
             return datetime(self.year,6,30)
         else:
             return datetime(self.year,12,31)
+
+    @staticmethod
+    def current():
+        now = datetime.now()
+
+        # Default to current semester
+        if now.month <= 6:
+            return Semester(type=Semester.SPRING, year=now.year)
+        else:
+            return Semester(type=Semester.FALL, year=now.year)
+
 
 
 class Exam(models.Model):

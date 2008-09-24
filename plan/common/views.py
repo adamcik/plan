@@ -86,27 +86,18 @@ def get_lectures(slug, semester):
 def shortcut(request, slug):
     get_list_or_404(UserSet, slug=slug)
 
-    now = datetime.now()
+    semester = Semester.current()
 
-    if now.month < 7:
-        semester = Semester(type=Semester.SPRING)
-    else:
-        semester = Semester(type=Semester.FALL)
-
-    return HttpResponseRedirect(reverse('schedule', args=[now.year, semester.get_type_display(), slug]))
+    return HttpResponseRedirect(reverse('schedule', args=[semester.year, semester.get_type_display(), slug]))
 
 def getting_started(request):
+    semester = Semester.current()
+
     if request.method == 'POST' and 'slug' in request.POST:
         slug = slugify(request.POST['slug'])
 
         if slug.strip():
-            # Default to current semester
-            if datetime.now().month <= 6:
-                semester = Semester(type=Semester.SPRING).get_type_display()
-            else:
-                semester = Semester(type=Semester.FALL).get_type_display()
-
-            response = HttpResponseRedirect(reverse('schedule', args=[datetime.now().year, semester, slug]))
+            response = HttpResponseRedirect(reverse('schedule', args=[semester.year, semester.get_type_display(), slug]))
 
             # Store last timetable visited in a cookie so that we can populate
             # the field with a default value next time.
