@@ -44,7 +44,7 @@
                                 <label for="course_{{ exam.course_id }}"><b>{{ exam.course.name }}</b></label>
                             </td>
                             <td class="small">
-                                {{ exam.course.full_name }}
+                                <label for="course_{{ exam.course_id }}">{{ exam.course.full_name }}</label>
                             </td>
                             <td class="number">
                                 {{ exam.course.points|default:""|floatformat:"1" }}
