@@ -29,52 +29,79 @@ def ical(request, year, semester, slug, lectures=True, exams=True, deadlines=Tru
         for l in get_lectures(slug, semester).exclude(excluded_from__slug=slug):
             weeks = l.weeks.values_list('number', flat=True)
 
-            for d in rrule(WEEKLY,byweekno=weeks,count=len(weeks),byweekday=l.day,dtstart=datetime(int(year),1,1)):
+            rrule_kwargs = {
+                'byweekno': weeks,
+                'count': len(weeks),
+                'byweekday': l.day,
+                'dtstart': datetime(int(year),1,1)
+            }
+
+            rooms = ', '.join(l.rooms.values_list('name', flat=True))
+            desc = '%s - %s (%s)' % (l.type.name, l.course.full_name, l.course.name)
+
+            for d in rrule(WEEKLY, ** rrule_kwargs):
                 vevent = cal.add('vevent')
                 vevent.add('summary').value = l.course.name
-                vevent.add('location').value = ', '.join(l.rooms.values_list('name', flat=True))
-                vevent.add('description').value = '%s - %s' % (l.type.name, l.course.full_name)
+                vevent.add('location').value = rooms
+                vevent.add('description').value = desc
 
                 (hour, minute) = l.get_start_time_display().split(':')
-                vevent.add('dtstart').value = d.replace(hour=int(hour), minute=int(minute), tzinfo=tzlocal())
+                vevent.add('dtstart').value = d.replace(hour=int(hour),
+                        minute=int(minute), tzinfo=tzlocal())
 
                 (hour, minute) = l.get_end_time_display().split(':')
-                vevent.add('dtend').value = d.replace(hour=int(hour), minute=int(minute), tzinfo=tzlocal())
+                vevent.add('dtend').value = d.replace(hour=int(hour),
+                        minute=int(minute), tzinfo=tzlocal())
 
                 vevent.add('dtstamp').value = datetime.now(tzlocal())
 
-                vevent.add('uid').value = 'lecture-%d-%s@%s' % (l.id, d.strftime('%Y%m%d'), gethostname())
+                vevent.add('uid').value = 'lecture-%d-%s@%s' % \
+                        (l.id, d.strftime('%Y%m%d'), gethostname())
 
                 if l.type.optional:
                     vevent.add('transp').value = 'TRANSPARENT'
-
 
     if exams:
         first_day = semester.get_first_day()
         last_day = semester.get_last_day()
 
-        for e in Exam.objects.filter(exam_date__gt=first_day, exam_date__lt=last_day, course__userset__slug=slug).select_related('course__name'):
+        exam_filter = {
+            'exam_date__gt': first_day,
+            'exam_date__lt': last_day,
+            'course__userset__slug': slug,
+        }
+        exam_related = [
+            'course__name',
+        ]
+
+        for e in Exam.objects.filter(**exam_filter).select_related(*exam_related):
             vevent = cal.add('vevent')
 
-            vevent.add('summary').value = 'Exam: %s (%s)' % (e.course.name, e.type)
-            vevent.add('description').value = 'Exam (%s) - %s' % (e.type, e.course.full_name)
+            summary = 'Exam: %s (%s)' % (e.course.name, e.type)
+            desc = 'Exam (%s) - %s' % (e.type, e.course.full_name)
+
+            vevent.add('summary').value = summary
+            vevent.add('description').value = desc
             vevent.add('dtstamp').value = datetime.now(tzlocal())
 
             vevent.add('uid').value = 'exam-%d@%s' % (e.id, gethostname())
 
             if e.handout_time:
                 if e.handout_time:
-                    vevent.add('dtstart').value = datetime.combine(e.handout_date, e.handout_time).replace(tzinfo=tzlocal())
+                    vevent.add('dtstart').value = datetime.combine(e.handout_date,
+                            e.handout_time).replace(tzinfo=tzlocal())
                 else:
                     vevent.add('dtstart').value = e.handout_date
 
                 if e.exam_time:
-                    vevent.add('dtend').value = datetime.combine(e.exam_date, e.exam_time).replace(tzinfo=tzlocal())
+                    vevent.add('dtend').value = datetime.combine(e.exam_date,
+                            e.exam_time).replace(tzinfo=tzlocal())
                 else:
                     vevent.add('dtend').value = e.exam_date
             else:
                 if e.exam_time:
-                    start = datetime.combine(e.exam_date, e.exam_time).replace(tzinfo=tzlocal())
+                    start = datetime.combine(e.exam_date,
+                            e.exam_time).replace(tzinfo=tzlocal())
                 else:
                     start = e.exam_date
 
@@ -93,13 +120,26 @@ def ical(request, year, semester, slug, lectures=True, exams=True, deadlines=Tru
                     vevent.add('dtend').value = start + duration
 
     if deadlines:
-        for d in Deadline.objects.filter(userset__slug=slug, userset__semester=semester).select_related('userset__course__name'):
+        deadline_filter = {
+            'userset__slug': slug,
+            'userset__semester': semester,
+        }
+        deadline_related = [
+            'userset__course__name',
+        ]
+
+        for d in Deadline.objects.filter(**deadline_filter).\
+                select_related(*deadline_related):
+
             vevent = cal.add('vevent')
 
             if d.time:
-                vevent.add('summary').value = '%s %02d:%02d: %s' % (d.userset.course.name, d.time.hour, d.time.minute, d.task)
+                summary = '%s %02d:%02d: %s' % (d.userset.course.name,
+                        d.time.hour, d.time.minute, d.task)
             else:
-                vevent.add('summary').value = '%s: %s' % (d.userset.course.name, d.task)
+                summary = '%s: %s' % (d.userset.course.name, d.task)
+            vevent.add('summary').value = summary
+
             vevent.add('dtstamp').value = datetime.now(tzlocal())
             vevent.add('uid').value = 'deadline-%d@%s' % (d.id, gethostname())
             vevent.add('dtstart').value = d.date
