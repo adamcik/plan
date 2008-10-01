@@ -11,8 +11,8 @@ from django.core.cache import cache
 from django.db import connection
 from django.views.generic.list_detail import object_list
 
-from plan.common.models import Course, Deadline, Exam, Lecture, \
-        Semester, UserSet
+from plan.common.models import Course, Deadline, Exam, Group, \
+        Lecture, Semester, UserSet
 from plan.common.forms import DeadlineForm, GroupForm
 from plan.common.utils import compact_sequence
 
@@ -64,6 +64,10 @@ def get_lectures(slug, semester):
     # need right away.
     select = {
         'user_name': 'common_userset.name',
+        'exclude': """common_lecture.id IN
+            (SELECT common_userset_exclude.lecture_id
+             FROM common_userset_exclude WHERE
+             common_userset_exclude.userset_id = common_userset.id)""",
     }
 
     filter = {
@@ -235,8 +239,10 @@ def schedule(request, year, semester, slug, advanced=False, week=None,
     t.tick('Done building course array')
 
     t.tick('Starting main lecture loop')
-    exclude_filter = {'excluded_from__slug': slug}
-    for i, lecture in enumerate(initial_lectures.exclude(**exclude_filter)):
+    for i, lecture in enumerate(initial_lectures):
+        if lecture.exclude:
+            continue
+
         # Our actual layout algorithm for handling collisions and displaying in
         # tables:
 
