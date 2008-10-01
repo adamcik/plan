@@ -1,29 +1,26 @@
 # encoding: utf-8
 
 import logging
-import traceback
-import sys
 
-from datetime import datetime, timedelta
-
-from django.core.urlresolvers import reverse, NoReverseMatch
-from django.db.models import Q
-from django.http import HttpResponseRedirect, HttpResponse, Http404
-from django.shortcuts import get_object_or_404, render_to_response, get_list_or_404
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect, Http404
+from django.shortcuts import render_to_response, get_list_or_404
 from django.template.context import RequestContext
 from django.template.defaultfilters import slugify
 from django.core.cache import cache
 from django.db import connection
 from django.views.generic.list_detail import object_list
 
-from plan.common.models import *
-from plan.common.forms import *
-from plan.common.utils import *
-from plan.scrape.web import *
+from plan.common.models import Course, Deadline, Exam, Lecture, \
+        Semester, UserSet
+from plan.common.forms import DeadlineForm, GroupForm
+from plan.common.utils import compact_sequence
 
 MAX_COLORS = 8
 
 def clear_cache(*args):
+    """Clears a users cache based on reverse"""
+
     cache.delete('stats')
     cache.delete(reverse('schedule', args=args))
     cache.delete(reverse('schedule-advanced', args=args))
@@ -33,35 +30,41 @@ def clear_cache(*args):
     cache.delete(reverse('schedule-ical-deadlines', args=args))
 
 def get_semester(year, semester):
+    """Utility method to help retrive semesters"""
+
     try:
-        semester = dict(map(lambda x: (x[1],x[0]), Semester.TYPES))[semester.lower()]
+        semester_map = dict(map(lambda x: (x[1], x[0]), Semester.TYPES))
+        semester = semester_map[semester.lower()]
+
         return Semester.objects.get(year=year, type=semester)
     except (KeyError, Semester.DoesNotExist):
         raise Http404
 
 def get_lectures(slug, semester):
-    ''' Get all lectures for userset during given period.
+    """
+        Get all lectures for userset during given period.
 
-    To do this we need to pull in a bunch of extra tables and manualy join them
-    in the where cluase. The first element in the custom where is the important
-    one that limits our results, the rest are simply meant for joining.
-    '''
+        To do this we need to pull in a bunch of extra tables and manualy join them
+        in the where cluase. The first element in the custom where is the important
+        one that limits our results, the rest are simply meant for joining.
+    """
 
-    where=[
+    where = [
         'common_userset_groups.group_id = common_group.id',
         'common_userset_groups.userset_id = common_userset.id',
         'common_group.id = common_lecture_groups.group_id',
         'common_lecture_groups.lecture_id = common_lecture.id'
     ]
-    tables=[
+    tables = [
         'common_userset_groups',
         'common_group',
         'common_lecture_groups'
     ]
-
     # TODO add exclude sub query here so that we have all the information we
     # need right away.
-    select = {}
+    select = {
+        'user_name': 'common_userset.name',
+    }
 
     filter = {
         'course__userset__slug': slug,
@@ -80,15 +83,20 @@ def get_lectures(slug, semester):
         'type__name',
     ]
 
-    return  Lecture.objects.filter(**filter).distinct().select_related(*related).extra(where=where, tables=tables, select=select).order_by(*order)
-
+    return  Lecture.objects.filter(**filter).\
+                distinct().\
+                select_related(*related).\
+                extra(where=where, tables=tables, select=select).\
+                order_by(*order)
 
 def shortcut(request, slug):
     get_list_or_404(UserSet, slug=slug)
 
     semester = Semester.current()
 
-    return HttpResponseRedirect(reverse('schedule', args=[semester.year, semester.get_type_display(), slug]))
+
+    return HttpResponseRedirect(reverse('schedule',
+            args = [semester.year, semester.get_type_display(), slug]))
 
 def getting_started(request):
     semester = Semester.current()
@@ -97,7 +105,8 @@ def getting_started(request):
         slug = slugify(request.POST['slug'])
 
         if slug.strip():
-            response = HttpResponseRedirect(reverse('schedule', args=[semester.year, semester.get_type_display(), slug]))
+            response = HttpResponseRedirect(reverse('schedule',
+                    args = [semester.year, semester.get_type_display(), slug]))
 
             # Store last timetable visited in a cookie so that we can populate
             # the field with a default value next time.
@@ -117,21 +126,25 @@ def getting_started(request):
             ORDER BY num DESC
             LIMIT %d''' % limit)
 
+        slug_count = int(UserSet.objects.values('slug').distinct().count()),
+        subscription_count = int(UserSet.objects.count()),
+        deadline_count = int(Deadline.objects.count()),
+        stats = cursor.fetchall(),
+
         context = {
-            'slug_count': int(UserSet.objects.values('slug').distinct().count()),
-            'subscription_count': int(UserSet.objects.count()),
-            'deadline_count': int(Deadline.objects.count()),
-#            'lecture_count': Lecture.objects.count(),
-#            'course_count': Course.objects.count(),
-#            'exam_count': Exam.objects.count(),
-            'stats': cursor.fetchall(),
+            'slug_count': slug_count,
+            'subscription_count': subscription_count,
+            'deadline_count': deadline_count,
+            'stats': stats,
         }
 
         cache.set('stats', context)
 
     return render_to_response('start.html', context, RequestContext(request))
 
-def schedule(request, year, semester, slug, advanced=False, week=None, deadline_form=None, cache_page=True):
+def schedule(request, year, semester, slug, advanced=False, week=None,
+        deadline_form=None, cache_page=True):
+
     t = request.timer
     response = cache.get(request.path)
 
@@ -174,16 +187,40 @@ def schedule(request, year, semester, slug, advanced=False, week=None, deadline_
     first_day = semester.get_first_day()
     last_day = semester.get_last_day()
 
-    exam_list = Exam.objects.filter(exam_date__gt=first_day, exam_date__lt=last_day, course__userset__slug=slug).select_related('course__name', 'course__full_name')
+    exam_list = Exam.objects.filter(
+            exam_date__gt=first_day,
+            exam_date__lt=last_day,
+            course__userset__slug=slug,
+            course__userset__semester=semester,
+        ).select_related(
+            'course__name',
+            'course__full_name',
+        )
 
-    deadlines = Deadline.objects.filter(userset__slug=slug, userset__semester=semester).select_related('userset__course')
+    deadlines = Deadline.objects.filter(
+            userset__slug=slug,
+            userset__semester=semester,
+        ).select_related(
+            'userset__course',
+        )
 
     if not deadline_form:
-        deadline_form = DeadlineForm(UserSet.objects.filter(slug=slug, semester=semester).select_related('course__name'))
+        usersets = UserSet.objects.filter(
+                slug=slug,
+                semester=semester,
+            ).select_related(
+                'course__name',
+            )
+
+        deadline_form = DeadlineForm(usersets)
 
     t.tick('Done intializing')
 
-    for c in Course.objects.filter(userset__slug=slug, userset__semester=semester).distinct():
+    course_filter = {
+        'userset__slug': slug,
+        'userset__semester': semester,
+    }
+    for c in Course.objects.filter(**course_filter).distinct():
         # Create an array containing our courses and add the css class
         if c.id not in color_map:
             color_index = (color_index + 1) % MAX_COLORS
@@ -191,14 +228,15 @@ def schedule(request, year, semester, slug, advanced=False, week=None, deadline_
 
         c.css_class = color_map[c.id]
 
-        courses.append((c,None))
+        courses.append((c, None))
 
         t.tick('Added course %s' % c.name)
 
     t.tick('Done building course array')
 
     t.tick('Starting main lecture loop')
-    for i,lecture in enumerate(initial_lectures.exclude(excluded_from__slug=slug)):
+    exclude_filter = {'excluded_from__slug': slug}
+    for i, lecture in enumerate(initial_lectures.exclude(**exclude_filter)):
         # Our actual layout algorithm for handling collisions and displaying in
         # tables:
 
@@ -226,7 +264,7 @@ def schedule(request, year, semester, slug, advanced=False, week=None, deadline_
 
         except IndexError:
             # We ran out of rows to check, simply append a new row
-            for j,time in enumerate(Lecture.START):
+            for j, time in enumerate(Lecture.START):
                 table[j][lecture.day].append({})
 
             # Update the header colspan
@@ -261,23 +299,24 @@ def schedule(request, year, semester, slug, advanced=False, week=None, deadline_
                     'height': rowspan,
                     'i': start,
                     'j': lecture.day,
-                    'm': row,
+                    'k': row,
                 })
 
             start += 1
 
     # Compute where clause that limits the size of the following queries
-    lecture_id_where_clause = 'lecture_id IN (%s)' % ','.join([str(a) for a in included])
+    lecture_id_where_clause = 'lecture_id IN (%s)' % \
+            ','.join([str(a) for a in included])
 
     if courses:
         t.tick('Start getting rooms for lecture list')
-        cursor.execute('''SELECT common_lecture_rooms.lecture_id, common_room.name
-                            FROM common_lecture_rooms
-                            INNER JOIN common_room
-                                ON (common_room.id = common_lecture_rooms.room_id)
-                          WHERE %s''' % lecture_id_where_clause)
+        cursor.execute('''SELECT common_lecture_rooms.lecture_id,
+                common_room.name FROM common_lecture_rooms
+                INNER JOIN common_room
+                    ON (common_room.id = common_lecture_rooms.room_id)
+                WHERE %s''' % lecture_id_where_clause)
 
-        for lecture_id,name in cursor.fetchall():
+        for lecture_id, name in cursor.fetchall():
             if lecture_id not in rooms:
                 rooms[lecture_id] = []
 
@@ -291,35 +330,38 @@ def schedule(request, year, semester, slug, advanced=False, week=None, deadline_
 
             # SQL: this causes extra queries (hard to work around, probably not
             # worh it)
-            course_groups = Group.objects.filter(lecture__course__id=u.course_id).distinct()
+            course_groups = Group.objects.filter(
+                    lecture__course__id=u.course_id
+                ).distinct()
 
             # SQL: For loop generates to quries per userset.
-            group_forms[u.course_id] = GroupForm(course_groups, initial={'groups': initial_groups}, prefix=u.course_id)
+            group_forms[u.course_id] = GroupForm(course_groups,
+                    initial={'groups': initial_groups}, prefix=u.course_id)
 
         t.tick('Done creating groups forms')
 
         # Do three custom sql queries to prevent and explosion of sql queries
         # due to ORM. FIXME do same queries using ORM
-        cursor.execute('''SELECT common_lecture_groups.lecture_id, common_group.name
-                            FROM common_lecture_groups
-                            INNER JOIN common_group
-                                ON (common_group.id = common_lecture_groups.group_id)
-                          WHERE %s''' % lecture_id_where_clause)
+        cursor.execute('''SELECT common_lecture_groups.lecture_id,
+                common_group.name FROM common_lecture_groups
+                INNER JOIN common_group ON
+                    (common_group.id = common_lecture_groups.group_id)
+                WHERE %s''' % lecture_id_where_clause)
 
-        for lecture_id,name in cursor.fetchall():
+        for lecture_id, name in cursor.fetchall():
             if lecture_id not in groups:
                 groups[lecture_id] = []
 
             groups[lecture_id].append(name)
         t.tick('Done getting groups for lecture list')
 
-        cursor.execute('''SELECT common_lecture_lecturers.lecture_id, common_lecturer.name
-                            FROM common_lecture_lecturers
-                            INNER JOIN common_lecturer
-                                ON (common_lecturer.id = common_lecture_lecturers.lecturer_id)
-                          WHERE %s''' % lecture_id_where_clause)
+        cursor.execute('''SELECT common_lecture_lecturers.lecture_id,
+                common_lecturer.name FROM common_lecture_lecturers
+                INNER JOIN common_lecturer
+                    ON (common_lecturer.id = common_lecture_lecturers.lecturer_id)
+                WHERE %s''' % lecture_id_where_clause)
 
-        for lecture_id,name in cursor.fetchall():
+        for lecture_id, name in cursor.fetchall():
             if lecture_id not in lecturers:
                 lecturers[lecture_id] = []
 
@@ -327,13 +369,13 @@ def schedule(request, year, semester, slug, advanced=False, week=None, deadline_
 
         t.tick('Done getting lecturers for lecture list')
 
-        cursor.execute('''SELECT common_lecture_weeks.lecture_id, common_week.number
-                            FROM common_lecture_weeks
-                            INNER JOIN common_week
-                                ON (common_week.id = common_lecture_weeks.week_id)
-                          WHERE %s''' % lecture_id_where_clause)
+        cursor.execute('''SELECT common_lecture_weeks.lecture_id,
+                common_week.number FROM common_lecture_weeks
+                INNER JOIN common_week
+                    ON (common_week.id = common_lecture_weeks.week_id)
+                WHERE %s''' % lecture_id_where_clause)
 
-        for lecture_id,name in cursor.fetchall():
+        for lecture_id, name in cursor.fetchall():
             if lecture_id not in weeks:
                 weeks[lecture_id] = []
 
@@ -347,19 +389,20 @@ def schedule(request, year, semester, slug, advanced=False, week=None, deadline_
         # colspan expansions are safe
         i = lecture['i']
         j = lecture['j']
-        m = lecture['m']
+        k = lecture['k']
+
         height = lecture['height']
 
         expand_by = 1
 
-        r = rooms.get(table[i][j][m]['lecture'].id, [])
-        table[i][j][m]['lecture'].sql_rooms = r
+        r = rooms.get(table[i][j][k]['lecture'].id, [])
+        table[i][j][k]['lecture'].sql_rooms = r
 
         # Find safe expansion of colspan
         safe = True
-        for l in xrange(m+1, len(table[i][j])):
-            for k in xrange(i,i+height):
-                if table[k][j][l]:
+        for l in xrange(k+1, len(table[i][j])):
+            for m in xrange(i, i+height):
+                if table[m][j][l]:
                     safe = False
                     break
             if safe:
@@ -367,59 +410,64 @@ def schedule(request, year, semester, slug, advanced=False, week=None, deadline_
             else:
                 break
 
-        table[i][j][m]['colspan'] = expand_by
+        table[i][j][k]['colspan'] = expand_by
 
         # Remove cells that will get replaced by colspan
-        for l in xrange(m+1,m+expand_by):
-            for k in xrange(i,i+height):
-                table[k][j][l]['remove'] = True
+        for l in xrange(k+1, k+expand_by):
+            for m in xrange(i, i+height):
+                table[m][j][l]['remove'] = True
     t.tick('Done with lecture expansion')
 
     # TODO add second round of expansion equalising colspan
 
     # Insert extra cell containg times
-    for i,start,end in map(lambda x,y: (x[0], x[1][1],y[1]), enumerate(Lecture.START), Lecture.END):
-        table[i].insert(0, [{'time': '%s - %s' % (start, end), 'class': 'time'}])
+    times = zip(range(len(Lecture.START)), Lecture.START, Lecture.END)
+    for i, start, end in times:
+        table[i].insert(0, [{'time': '%s - %s' % \
+                (start[1], end[1]), 'class': 'time'}])
+
     t.tick('Done adding times')
 
     # Add colors and exlude status
     if advanced:
-        for i,lecture in enumerate(initial_lectures):
+        for i, lecture in enumerate(initial_lectures):
             initial_lectures[i].css_class =  color_map[lecture.course_id]
             initial_lectures[i].excluded  =  lecture.id not in included
 
-            initial_lectures[i].sql_weeks = compact_sequence(weeks.get(lecture.id, []))
+            compact_weeks = compact_sequence(weeks.get(lecture.id, []))
+
+            initial_lectures[i].sql_weeks = compact_weeks
             initial_lectures[i].sql_groups = groups.get(lecture.id, [])
             initial_lectures[i].sql_lecturers = lecturers.get(lecture.id, [])
             initial_lectures[i].sql_rooms = rooms.get(lecture.id, [])
 
         # FIX groups forms
-        for i,c in enumerate(courses):
+        for i, c in enumerate(courses):
             courses[i] = (c[0], group_forms.get(c[0].id, None))
 
         t.tick('Done lecture css_clases and excluded status')
 
 
-    for i,exam in enumerate(exam_list):
+    for i, exam in enumerate(exam_list):
         exam_list[i].css_class = color_map[exam.course_id]
 
-    for i,deadline in enumerate(deadlines):
+    for i, deadline in enumerate(deadlines):
         deadlines[i].css_class = color_map[deadline.userset.course_id]
 
     t.tick('Starting render to response')
     response = render_to_response('schedule.html', {
-                            'advanced': advanced,
-                            'colspan': span,
-                            'courses': courses,
-                            'deadlines': deadlines,
-                            'deadline_form': deadline_form,
-                            'exams': exam_list,
-                            'lectures': initial_lectures,
-                            'legend': map(lambda x: x[0], courses),
-                            'semester': semester,
-                            'slug': slug,
-                            'table': table,
-                        }, RequestContext(request))
+            'advanced': advanced,
+            'colspan': span,
+            'courses': courses,
+            'deadlines': deadlines,
+            'deadline_form': deadline_form,
+            'exams': exam_list,
+            'lectures': initial_lectures,
+            'legend': map(lambda x: x[0], courses),
+            'semester': semester,
+            'slug': slug,
+            'table': table,
+        }, RequestContext(request))
 
     if cache_page:
         t.tick('Saving to cache')
@@ -432,18 +480,28 @@ def select_groups(request, year, type, slug):
     semester = get_semester(year, type)
 
     if request.method == 'POST':
-        for c in Course.objects.filter(userset__slug=slug).distinct().order_by('id'):
-            group_form = GroupForm(Group.objects.filter(lecture__course=c).distinct(), request.POST, prefix=c.id)
+        course_filter = {'userset__slug': slug}
+        courses = Course.objects.filter(**course_filter).\
+                distinct().order_by('id')
+
+        for c in courses:
+            groups = Group.objects.filter(lecture__course=c).distinct()
+            group_form = GroupForm(groups, request.POST, prefix=c.id)
 
             if group_form.is_valid():
-                set = UserSet.objects.get(course=c, slug=slug, semester=semester)
+                set = UserSet.objects.get(
+                        course=c,
+                        slug=slug,
+                        semester=semester
+                    )
                 set.groups = group_form.cleaned_data['groups']
 
         clear_cache(year, semester.get_type_display(), slug)
 
         logging.debug('Deleted cache')
 
-    return HttpResponseRedirect(reverse('schedule-advanced', args=[semester.year,semester.get_type_display(),slug]))
+    return HttpResponseRedirect(reverse('schedule-advanced',
+            args=[semester.year,semester.get_type_display(),slug]))
 
 def new_deadline(request, year, type, slug):
     semester = get_semester(year, type)
@@ -462,17 +520,22 @@ def new_deadline(request, year, type, slug):
                 del post['submit_add']
 
         if 'submit_add' in post:
-            deadline_form = DeadlineForm(UserSet.objects.filter(slug=slug, semester=semester), post)
+            usersets = UserSet.objects.filter(slug=slug, semester=semester)
+            deadline_form = DeadlineForm(usersets, post)
 
             if deadline_form.is_valid():
                 deadline_form.save()
             else:
-                return schedule(request, year, type, slug, deadline_form=deadline_form, cache_page=False)
+                return schedule(request, year, type, slug,
+                        deadline_form=deadline_form, cache_page=False)
 
         elif 'submit_remove' in post:
-            Deadline.objects.filter(id__in=post.getlist('deadline_remove')).delete()
+            Deadline.objects.filter(
+                    id__in=post.getlist('deadline_remove')
+                ).delete()
 
-    return HttpResponseRedirect(reverse('schedule', args=[semester.year,semester.get_type_display(),slug]))
+    return HttpResponseRedirect(reverse('schedule',
+            args = [semester.year,semester.get_type_display(),slug]))
 
 def copy_deadlines(request, year, type, slug):
     semester = get_semester(year, type)
@@ -484,7 +547,10 @@ def copy_deadlines(request, year, type, slug):
             color_map = {}
             color_index = 0
 
-            courses = Course.objects.filter(userset__slug=slug, userset__semester=semester).distinct()
+            courses = Course.objects.filter(
+                    userset__slug=slug,
+                    userset__semester=semester,
+                ).distinct()
 
             for c in courses:
                 # Create an array containing our courses and add the css class
@@ -492,34 +558,49 @@ def copy_deadlines(request, year, type, slug):
                     color_index = (color_index + 1) % MAX_COLORS
                     color_map[c.id] = 'lecture%d' % color_index
 
-            deadlines = Deadline.objects.filter(userset__slug__in=slugs, userset__semester=semester, userset__course__in=courses)
-            deadlines = deadlines.select_related('userset__course__id')
-            deadlines = deadlines.exclude(userset__slug=slug)
+            deadlines = Deadline.objects.filter(
+                    userset__slug__in=slugs,
+                    userset__semester=semester,
+                    userset__course__in=courses,
+                ).select_related(
+                    'userset__course__id'
+                ).exclude(userset__slug=slug)
 
             for d in deadlines:
                 d.css_class = color_map[d.userset.course_id]
 
             return render_to_response('select_deadlines.html', {
-                                    'deadlines': deadlines,
-                                    'semester': semester,
-                                    'slug': slug,
-                                }, RequestContext(request))
+                    'deadlines': deadlines,
+                    'semester': semester,
+                    'slug': slug,
+                }, RequestContext(request))
 
         elif 'deadline_id' in request.POST:
-            deadlines = Deadline.objects.filter(id__in=request.POST.getlist('deadline_id'))
+            deadline_id = request.POST.getlist('deadline_id')
+            deadlines = Deadline.objects.filter(id__in=deadline_id)
 
             for d in deadlines:
-                userset = UserSet.objects.get(slug=slug, semester=semester, course=d.userset.course)
-                Deadline.objects.get_or_create(userset=userset, date=d.date, time=d.time, task=d.task) 
-
+                userset = UserSet.objects.get(
+                        slug=slug,
+                        semester=semester,
+                        course=d.userset.course
+                )
+                Deadline.objects.get_or_create(
+                        userset=userset,
+                        date=d.date,
+                        time=d.time,
+                        task=d.task
+                )
             clear_cache(year, semester.get_type_display(), slug)
 
-    return HttpResponseRedirect(reverse('schedule', args=[semester.year,semester.get_type_display(),slug]))
+    return HttpResponseRedirect(reverse('schedule',
+            args=[semester.year,semester.get_type_display(),slug]))
 
 def select_course(request, year, type, slug, add=False):
     semester = get_semester(year, type)
 
-    if request.method == 'POST' and ('course_add' in request.POST or 'course_remove' in request.POST):
+    if request.method == 'POST' and \
+            ('course_add' in request.POST or 'course_remove' in request.POST):
 
         clear_cache(year, semester.get_type_display(), slug)
         logging.debug('Deleted cache')
@@ -545,39 +626,61 @@ def select_course(request, year, type, slug, add=False):
 
             for l in lookup:
                 try:
-                    course = Course.objects.get(name__iexact=l.strip(), semesters__in=[semester])
-                    userset, created = UserSet.objects.get_or_create(slug=slug, course=course, semester=semester)
+                    course = Course.objects.get(
+                            name__iexact=l.strip(),
+                            semesters__in=[semester]
+                        )
+                    userset, created = UserSet.objects.get_or_create(
+                            slug=slug,
+                            course=course,
+                            semester=semester
+                        )
 
-                    for g in Group.objects.filter(lecture__course=course).distinct():
+                    groups = Group.objects.filter(
+                            lecture__course=course
+                        ).distinct()
+                    for g in groups:
                         userset.groups.add(g)
 
                 except Course.DoesNotExist:
                     errors.append(l)
 
             if errors:
-                return render_to_response('error.html',
-                            {'courses': errors, 'slug': slug, 'year': year, 'type': semester.get_type_display()},
-                            RequestContext(request))
+                return render_to_response('error.html', {
+                        'courses': errors,
+                        'slug': slug,
+                        'year': year,
+                        'type': semester.get_type_display()
+                    }, RequestContext(request))
 
         elif 'submit_remove' in post:
-            courses = [c.strip() for c in post.getlist('course_remove') if c.strip()]
-            sets = UserSet.objects.filter(slug__iexact=slug, course__id__in=courses)
+            courses = []
+            for c in post.getlist('course_remove'):
+                if c.strip():
+                    courses.append(c.strip())
+
+            sets = UserSet.objects.filter(
+                    slug__iexact=slug,
+                    course__id__in=courses
+                )
             sets.delete()
 
-    return HttpResponseRedirect(reverse('schedule-advanced', args=[semester.year, semester.get_type_display(), slug]))
+    return HttpResponseRedirect(reverse('schedule-advanced',
+            args=[semester.year, semester.get_type_display(), slug]))
 
-def select_lectures(request, year,type,slug):
+def select_lectures(request, year, type, slug):
     if request.method == 'POST':
         excludes = request.POST.getlist('exclude')
 
         for userset in UserSet.objects.filter(slug=slug):
             userset.exclude = userset.course.lecture_set.filter(id__in=excludes)
 
-        clear_cache(year,type, slug)
+        clear_cache(year, type, slug)
 
         logging.debug('Deleted cache')
 
-    return HttpResponseRedirect(reverse('schedule-advanced', args=[year,type,slug]))
+    return HttpResponseRedirect(reverse('schedule-advanced',
+            args=[year,type,slug]))
 
 def list_courses(request, year, semester, slug):
     if request.method == 'POST':
@@ -592,11 +695,24 @@ def list_courses(request, year, semester, slug):
         first_day = semester.get_first_day()
         last_day = semester.get_last_day()
 
+        exams = Exam.objects.filter(
+                exam_date__gt=first_day,
+                exam_date__lt=last_day,
+                course__semesters__in=[semester]
+            ).select_related(
+                'course__name',
+                'course__full_name'
+            ).order_by(
+                'course__name',
+                'handout_date',
+                'exam_date'
+            )
+
         response = object_list(request,
-            Exam.objects.filter(exam_date__gt=first_day, exam_date__lt=last_day, course__semesters__in=[semester]).select_related('course__name', 'course__full_name').order_by('course__name', 'handout_date', 'exam_date'),
-            extra_context={'semester': semester},
-            template_object_name='exam',
-            template_name='course_list.html')
+                exams,
+                extra_context={'semester': semester},
+                template_object_name='exam',
+                template_name='course_list.html')
 
         cache.set('course_list', response)
 
