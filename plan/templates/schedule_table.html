@@ -18,11 +18,13 @@
                         {% if not c.remove %}
                             <td colspan="{{ c.colspan|default:"1" }}"
                                 rowspan="{{ c.rowspan|default:"1" }}"
-                                {% if c.class or forloop.first %}class="{% if forloop.first %}first{% else %}extra{% endif %} {{ c.class }}"{% endif %}
+                                {% if c.class or forloop.first or forloop.parentloop.last  %}
+                                    class="{% if forloop.first %}first {% else %}extra {% endif %}{% if forloop.parentloop.last %}last {% endif %}{{ c.class }}"
+                                {% endif %}
                                 {% if c.lecture %}title="{{ c.lecture.course.full_name }}"{% endif %}>
 
                                 {% if c.lecture %}
-                                    <div class="course">{{ c.lecture.course }}</div>
+                                    <div class="course">{{ c.lecture.user_name|default:c.lecture.course }}</div>
                                     <div class="room">{% for r in c.lecture.sql_rooms %}{{ r }}{% if not forloop.last %}, {% endif %}{% endfor %}</div>
                                     <div class="type">{% if c.lecture.type_id %}{{ c.lecture.type }}{% endif %}</div>
                                 {% endif %}
