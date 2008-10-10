@@ -36,10 +36,13 @@ button {
 	font-size: 100%;
 	font-family: inherit;
 	vertical-align: middle;
+	width: auto;
 	padding: 0;
 }
 button img {
 	vertical-align: middle;
+	padding:0;
+	border:none;
 }
 hr {
 	color: #D3D7CF;
@@ -59,6 +62,9 @@ input {
 textarea[cols], input[size] {
 	width: auto;
 }
+table {
+  border-bottom: 1px solid #666;
+}
 thead th {
 	border: 0;
   border-bottom: 1px solid #666 !important;
@@ -66,14 +72,11 @@ thead th {
 	padding: 0 0.5em;
 	font-size: 93%;
 }
-tbody tr td, tbody tr th {
+tbody td, tbody th {
 	border: 0;
 }
 tbody tr.row td, tbody tr.row th {
   border-top: 1px solid #666;
-}
-tbody {
-  border-bottom: 1px solid #666;
 }
 tbody th {
 	text-align: right;
@@ -200,29 +203,25 @@ ul,ol {
 .schedule .single .type, .schedule .single .room {
 	font-size: 100%;
 }
-.schedule tbody {
-  border: 1px solid #666;
-}
 .schedule th, .schedule td {
-  border-top:    1px solid #ccc;
-  border-bottom: 1px solid #ccc;
   padding: 0.1em 0.2em;
   vertical-align: top;
 	text-align: left;
 }
 .schedule td {
-  border-left: 0;
-  border-right: 0;
+	border: 0;
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
   height: 2em;
 }
 .schedule td.first {
-    border-left: 1px solid #666666;
+	border-left: 1px solid #666666;
 }
 .schedule td.last {
-    border-right: 1px solid #666666;
+	border-right: 1px solid #666666;
 }
 .schedule tr.bottom td {
-    border-bottom: 1px solid #666666;
+	border-bottom: 1px solid #666666;
 }
 .schedule th {
   border: 0;
@@ -231,7 +230,7 @@ ul,ol {
 	font-weight: normal;
 }
 .schedule .extra {
-	border-left: 1px dotted #666666;
+	border-left: 1px solid #CCCCCC;
 }
 
 .optional {
@@ -272,21 +271,6 @@ ul,ol {
 	margin-bottom: 1em;
 	border-bottom: 1px solid #555753;
 	border-top: 1px solid #555753;
-}
-
-#suggestion {
-	height: 10em;
-	width: 30em;
-	overflow: auto;
-	border: 1px solid #555753;
-	position: absolute;
-	background: #FFF;
-	display: none;
-	top: 1.8em;
-	text-align: left;
-}
-#suggestion b {
-	margin-right: 0.5em;
 }
 
 @media print {
