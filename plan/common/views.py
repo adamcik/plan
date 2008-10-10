@@ -130,16 +130,16 @@ def getting_started(request):
             ORDER BY num DESC
             LIMIT %d''' % limit)
 
-        slug_count = int(UserSet.objects.values('slug').distinct().count()),
-        subscription_count = int(UserSet.objects.count()),
-        deadline_count = int(Deadline.objects.count()),
-        stats = cursor.fetchall(),
+        slug_count = int(UserSet.objects.values('slug').distinct().count())
+        subscription_count = int(UserSet.objects.count())
+        deadline_count = int(Deadline.objects.count())
 
         context = {
             'slug_count': slug_count,
             'subscription_count': subscription_count,
             'deadline_count': deadline_count,
-            'stats': stats,
+            'stats': cursor.fetchall(),
+
         }
 
         cache.set('stats', context)
