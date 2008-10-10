@@ -36,12 +36,13 @@ def ical(request, year, semester, slug, lectures=True, exams=True, deadlines=Tru
                 'dtstart': datetime(int(year),1,1)
             }
 
+            summary = l.user_name or l.course.name
             rooms = ', '.join(l.rooms.values_list('name', flat=True))
             desc = '%s - %s (%s)' % (l.type.name, l.course.full_name, l.course.name)
 
-            for d in rrule(WEEKLY, ** rrule_kwargs):
+            for d in rrule(WEEKLY, **rrule_kwargs):
                 vevent = cal.add('vevent')
-                vevent.add('summary').value = l.course.name
+                vevent.add('summary').value = summary
                 vevent.add('location').value = rooms
                 vevent.add('description').value = desc
 
@@ -72,13 +73,23 @@ def ical(request, year, semester, slug, lectures=True, exams=True, deadlines=Tru
         }
         exam_related = [
             'course__name',
+            'course__full_name',
         ]
+        exam_select = {
+            'user_name': 'common_userset.name',
+        }
 
-        for e in Exam.objects.filter(**exam_filter).select_related(*exam_related):
+        for e in Exam.objects.filter(**exam_filter).select_related(*exam_related).\
+                extra(select=exam_select):
+
             vevent = cal.add('vevent')
 
-            summary = 'Exam: %s (%s)' % (e.course.name, e.type)
-            desc = 'Exam (%s) - %s' % (e.type, e.course.full_name)
+            if e.type_name:
+                summary = '%s - %s' % (e.type_name, e.user_name or e.course.name)
+                desc = '%s (%s) - %s (%s)' % (e.type_name, e.type, e.course.full_name, e.course.name)
+            else:
+                summary = 'Exam (%s) - %s' % (e.type, e.user_name or e.course.name)
+                desc = 'Exam (%s) - %s (%s)' % (e.type, e.course.full_name, e.course.name)
 
             vevent.add('summary').value = summary
             vevent.add('description').value = desc
@@ -126,23 +137,30 @@ def ical(request, year, semester, slug, lectures=True, exams=True, deadlines=Tru
         }
         deadline_related = [
             'userset__course__name',
+            'userset__course__full_name',
         ]
+        deadline_select = {
+            'user_name': 'common_userset.name',
+        }
 
         for d in Deadline.objects.filter(**deadline_filter).\
-                select_related(*deadline_related):
+                select_related(*deadline_related).extra(select=deadline_select):
 
             vevent = cal.add('vevent')
 
+            start = d.date
             if d.time:
-                summary = '%s %02d:%02d: %s' % (d.userset.course.name,
-                        d.time.hour, d.time.minute, d.task)
-            else:
-                summary = '%s: %s' % (d.userset.course.name, d.task)
-            vevent.add('summary').value = summary
+                start = datetime.combine(d.date, d.time)
 
+            summary = '%s - %s' % (d.task, d.user_name or d.userset.course)
+            desc = '%s - %s (%s)' % (d.task, d.userset.course.full_name,
+                    d.userset.course.name)
+
+            vevent.add('summary').value = summary
+            vevent.add('description').value = desc
             vevent.add('dtstamp').value = datetime.now(tzlocal())
             vevent.add('uid').value = 'deadline-%d@%s' % (d.id, gethostname())
-            vevent.add('dtstart').value = d.date
+            vevent.add('dtstart').value = start
 
 
     icalstream = cal.serialize()

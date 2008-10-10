@@ -8,6 +8,7 @@ class UserSet(models.Model):
     course = models.ForeignKey('Course')
     semester = models.ForeignKey('Semester')
     groups = models.ManyToManyField('Group', blank=True, null=True)
+    name = models.CharField(max_length=50, blank=True)
 
     added = models.DateTimeField(auto_now_add=True)
     exclude = models.ManyToManyField('Lecture', blank=True, null=True, related_name='excluded_from')
