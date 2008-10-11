@@ -16,7 +16,6 @@ from plan.common.views import get_semester, get_lectures
 def ical(request, year, semester, slug, lectures=True, exams=True, deadlines=True):
     semester = get_semester(year, semester)
 
-    # FIXME cache the response! use request path..
     response = cache.get(request.path)
 
     if response and 'plain' not in request.GET:
@@ -29,10 +28,42 @@ def ical(request, year, semester, slug, lectures=True, exams=True, deadlines=Tru
         add_lectutures(get_lectures(slug, semester).exclude(excluded_from__slug=slug), semester, cal)
 
     if exams:
-        add_exams(slug, semester, cal)
+        first_day = semester.get_first_day()
+        last_day = semester.get_last_day()
 
-    if deadlines:
-        add_deadlines(slug, semester, cal)
+        exam_filter = {
+            'exam_date__gt': first_day,
+            'exam_date__lt': last_day,
+            'course__userset__slug': slug,
+        }
+        exam_related = [
+            'course__name',
+            'course__full_name',
+        ]
+        exam_select = {
+            'user_name': 'common_userset.name',
+        }
+
+        exams = Exam.objects.filter(**exam_filter).select_related(*exam_related).extra(select=exam_select)
+
+        add_exams(exams, semester, cal)
+
+    if deadlines and slug:
+        deadline_filter = {
+            'userset__slug': slug,
+            'userset__semester': semester,
+        }
+        deadline_related = [
+            'userset__course__name',
+            'userset__course__full_name',
+        ]
+        deadline_select = {
+            'user_name': 'common_userset.name',
+        }
+
+        deadlines = Deadline.objects.filter(**deadline_filter).select_related(*deadline_related).extra(select=deadline_select)
+
+        add_deadlines(deadlines, semester, cal)
 
     icalstream = cal.serialize()
 
@@ -44,6 +75,7 @@ def ical(request, year, semester, slug, lectures=True, exams=True, deadlines=Tru
         response['Content-Type'] = 'text/calendar; charset=utf-8'
         response['Filename'] = '%s.ics' % slug  # IE needs this
         response['Content-Disposition'] = 'attachment; filename=%s.ics' % slug
+
         cache.set(request.path, response)
 
     return response
@@ -87,25 +119,8 @@ def add_lectutures(lectures, semester, cal):
             if l.type.optional:
                 vevent.add('transp').value = 'TRANSPARENT'
 
-def add_exams(slug, semester, cal):
-    first_day = semester.get_first_day()
-    last_day = semester.get_last_day()
-
-    exam_filter = {
-        'exam_date__gt': first_day,
-        'exam_date__lt': last_day,
-        'course__userset__slug': slug,
-    }
-    exam_related = [
-        'course__name',
-        'course__full_name',
-    ]
-    exam_select = {
-        'user_name': 'common_userset.name',
-    }
-
-    for e in Exam.objects.filter(**exam_filter).select_related(*exam_related).\
-            extra(select=exam_select):
+def add_exams(exams, semester, cal):
+    for e in exams:
 
         vevent = cal.add('vevent')
 
@@ -155,21 +170,8 @@ def add_exams(slug, semester, cal):
             else:
                 vevent.add('dtend').value = start + duration
 
-def add_deadlines(slug, semester, cal):
-    deadline_filter = {
-        'userset__slug': slug,
-        'userset__semester': semester,
-    }
-    deadline_related = [
-        'userset__course__name',
-        'userset__course__full_name',
-    ]
-    deadline_select = {
-        'user_name': 'common_userset.name',
-    }
-
-    for d in Deadline.objects.filter(**deadline_filter).\
-            select_related(*deadline_related).extra(select=deadline_select):
+def add_deadlines(deadlines, semester, cal):
+    for d in deadlines:
 
         vevent = cal.add('vevent')
 
