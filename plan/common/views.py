@@ -48,6 +48,7 @@ def get_lectures(slug, semester):
         in the where cluase. The first element in the custom where is the important
         one that limits our results, the rest are simply meant for joining.
     """
+    # FIXME this should be part of a custom manger
 
     where = [
         'common_userset_groups.group_id = common_group.id',
@@ -60,8 +61,6 @@ def get_lectures(slug, semester):
         'common_group',
         'common_lecture_groups'
     ]
-    # TODO add exclude sub query here so that we have all the information we
-    # need right away.
     select = {
         'user_name': 'common_userset.name',
         'exclude': """common_lecture.id IN
@@ -96,8 +95,8 @@ def get_lectures(slug, semester):
 def shortcut(request, slug):
     get_list_or_404(UserSet, slug=slug)
 
+    # FIXME .current should be on a manager
     semester = Semester.current()
-
 
     return HttpResponseRedirect(reverse('schedule',
             args = [semester.year, semester.get_type_display(), slug]))
@@ -157,6 +156,8 @@ def schedule(request, year, semester, slug, advanced=False, week=None,
         return response
 
     cursor = connection.cursor()
+
+    # FIXME refactor alogrithm that generates time table to seperate function.
 
     # Data structure that stores what will become the html table
     table = [[[{}] for a in Lecture.DAYS] for b in Lecture.START]
