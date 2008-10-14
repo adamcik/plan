@@ -478,7 +478,13 @@ def schedule(request, year, semester, slug, advanced=False, week=None,
 
     if cache_page:
         t.tick('Saving to cache')
-        cache.set(request.path, response)
+
+        if deadlines:
+            cache_time = deadlines[0].get_seconds()
+        else:
+            cache_time = settings.CACHE_TIME
+
+        cache.set(request.path, response, cache_time)
 
     t.tick('Returning repsonse')
     return response

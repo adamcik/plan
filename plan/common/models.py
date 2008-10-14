@@ -199,6 +199,11 @@ class Deadline(models.Model):
         else:
             return datetime.combine(self.date, time())
 
+    def get_seconds(self):
+        td = self.get_datetime() - datetime.now()
+
+        return td.days * 3600 * 24 + td.seconds
+
     datetime = property(get_datetime)
 
     def is_expired(self):
