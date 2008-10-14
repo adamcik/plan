@@ -26,17 +26,15 @@ h2 {
 a {
 	color: #204A87;
 }
-img, input {
-	vertical-align: text-top;
-}
 p {
 	text-align: justify;
 }
 button {
-	font-size: 100%;
+	font-size: 93%;
 	font-family: inherit;
-	vertical-align: middle;
+	vertical-align: bottom;
 	width: auto;
+	overflow:visible;
 	padding: 0;
 }
 button img {
@@ -83,9 +81,6 @@ tbody th {
 }
 table a {
 	color: #000;
-}
-button, input {
-/*	-moz-border-radius: 0.5em; */
 }
 label {
 	cursor: pointer;
@@ -250,6 +245,10 @@ ul,ol {
 .lecture5  { background: #FFF2AE; }
 .lecture6  { background: #F1E2CC; }
 .lecture7  { background: #CCCCCC; }
+
+#toolbar {
+	font-size: 123.1%;
+}
 
 #ft .yui-u {
 	border-left: 1px solid #555753;

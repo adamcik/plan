@@ -26,6 +26,7 @@ class DeadlineForm(forms.models.ModelForm):
         super(DeadlineForm, self).__init__(*args, **kwargs)
 
         self.fields['userset'].queryset = queryset
-        self.fields['userset'].widget.attrs['style'] = 'width: 7em'
-        self.fields['time'].widget.attrs['style'] = 'width: 3em'
-        self.fields['date'].widget.attrs['style'] = 'width: 6em'
+        self.fields['userset'].widget.attrs['style'] = 'width: 6em'
+        self.fields['time'].widget.attrs['size'] = 2
+        self.fields['date'].widget.attrs['size'] = 7
+        self.fields['task'].widget.attrs['size'] = 10
