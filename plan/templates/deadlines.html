@@ -1,75 +1,92 @@
 <h2 id="deadlines">Deadlines</h2>
 {% if legend %}
-    <form method="post" action="{% url new-deadline semester.year,semester.get_type_display,slug %}#deadlines">
-        <table>
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>Course</th>
-                    <th>Due date</th>
-                    <th>Time</th>
-                    <th>Task</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for d in deadlines %}
-                    <tr class="{{ d.css_class }} row{% if d.expired %} expired{% endif %}">
-                        <td><input type="checkbox" name="deadline_remove" value="{{ d.id }}" /></td>
-                        <td>{{ d.userset }}</td>
-                        <td>{{ d.date }}</td>
-                        <td>{{ d.time|time:"H:i" }}</td>
-                        <td>{{ d.task }}</td>
-                    </tr>
-                {% endfor %}
-                {% if deadline_form.errors %}
+    {% if deadlines or advanced %}
+        <form method="post" action="{% url new-deadline semester.year,semester.get_type_display,slug %}#deadlines">
+            <table>
+                <thead>
                     <tr>
-                        <td colspan="6">
-                            <dl class="error">
-                                {% if deadline_form.errors.userset %}
-                                    <dt>Course:</dt> <dd>{{ deadline_form.errors.userset.as_text|slice:"1:" }}</dd>
-                                {% endif %}
-                                {% if deadline_form.errors.date %}
-                                    <dt>Date:</dt>  <dd>{{ deadline_form.errors.date.as_text|slice:"1:" }}</dd>
-                                {% endif %}
-                                {% if deadline_form.errors.time %}
-                                    <dt>Time:</dt> <dd>{{ deadline_form.errors.time.as_text|slice:"1:" }}</dd>
-                                {% endif %}
-                                {% if deadline_form.errors.task %}
-                                    <dt>Task:</dt> <dd>{{ deadline_form.errors.task.as_text|slice:"1:" }}</dd>
-                                {% endif %}
-                            </dl>
-                        </td>
+                        <th></th>
+                        <th>Course</th>
+                        <th>Due date</th>
+                        <th>Time</th>
+                        <th>Task</th>
                     </tr>
-                {% endif %}
-                <tr class="row">
-                    <td colspan="2">
-                        {{ deadline_form.userset }}
-                    </td>
-                    <td>
-                        {{ deadline_form.date }}
-                    </td>
-                    <td>
-                        {{ deadline_form.time }}
-                    </td>
-                    <td>
-                        {{ deadline_form.task }}
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <p>
-            <button name="submit_add" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add deadline</button>
-            {% if deadlines %}
-                <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/remove.png" /> Remove selected</button>
+                </thead>
+                <tbody>
+                    {% for d in deadlines %}
+                        <tr class="{{ d.css_class }} row{% if d.expired %} expired{% endif %}">
+                            <td><input type="checkbox" name="deadline_remove" value="{{ d.id }}" /></td>
+                            <td>{{ d.userset }}</td>
+                            <td>{{ d.date }}</td>
+                            <td>{{ d.time|time:"H:i" }}</td>
+                            <td>{{ d.task }}</td>
+                        </tr>
+                    {% endfor %}
+                    {% if advanced %}
+                        {% if deadline_form.errors %}
+                            <tr>
+                                <td colspan="6">
+                                    <dl class="error">
+                                        {% if deadline_form.errors.userset %}
+                                            <dt>Course:</dt> <dd>{{ deadline_form.errors.userset.as_text|slice:"1:" }}</dd>
+                                        {% endif %}
+                                        {% if deadline_form.errors.date %}
+                                            <dt>Date:</dt>  <dd>{{ deadline_form.errors.date.as_text|slice:"1:" }}</dd>
+                                        {% endif %}
+                                        {% if deadline_form.errors.time %}
+                                            <dt>Time:</dt> <dd>{{ deadline_form.errors.time.as_text|slice:"1:" }}</dd>
+                                        {% endif %}
+                                        {% if deadline_form.errors.task %}
+                                            <dt>Task:</dt> <dd>{{ deadline_form.errors.task.as_text|slice:"1:" }}</dd>
+                                        {% endif %}
+                                    </dl>
+                                </td>
+                            </tr>
+                        {% endif %}
+                        <tr class="row">
+                            <td colspan="2">
+                                {{ deadline_form.userset }}
+                            </td>
+                            <td>
+                                {{ deadline_form.date }}
+                            </td>
+                            <td>
+                                {{ deadline_form.time }}
+                            </td>
+                            <td>
+                                {{ deadline_form.task }}
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+            {% if advanced %}
+                <p>
+                    <button name="submit_add" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add deadline</button>
+                    {% if deadlines %}
+                        <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/remove.png" /> Remove selected</button>
+                    {% endif %}
+                </p>
+            {% else %}
+                <p>Go to <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">advanced options</a> to add deadlines</p>
             {% endif %}
-        </p>
-    </form>
-    <form method="post" action="{% url copy-deadlines semester.year,semester.get_type_display,slug %}">
-        <p>
-            Import deadlines from following timetables:<br />
-            <input type="text" name="slugs" /> <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/copy.png"> Copy deadlines</button>
-        </p>
-    </form>
+        </form>
+        {% if advanced %}
+            <form method="post" action="{% url copy-deadlines semester.year,semester.get_type_display,slug %}">
+                <p>
+                    Import deadlines from following timetables:<br />
+                    <input type="text" name="slugs" /> <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/copy.png"> Copy deadlines</button>
+                </p>
+                <p>
+                    If you enter the idenfiers for other timetables with the
+                    same course as your's, you will be given the option to
+                    import their deadlines.
+                </p>
+            </form>
+        {% endif %}
+    {% else %}
+        <p>Go to <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">advanced options</a> to add deadlines</p>
+    {% endif %}
 {% else %}
     <p>You need to add at least one course before adding any deadlines.</p>
 {% endif %}

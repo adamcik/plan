@@ -10,6 +10,7 @@ from django.template.defaultfilters import slugify
 from django.core.cache import cache
 from django.db import connection
 from django.views.generic.list_detail import object_list
+from django.conf import settings
 
 from plan.common.models import Course, Deadline, Exam, Group, \
         Lecture, Semester, UserSet
