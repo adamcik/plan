@@ -14,33 +14,19 @@ h1{font-size:138.5%;}h2{font-size:123.1%;}h3{font-size:108%;}h1,h2,h3{margin:1em
 
 /* custom css for site, not a part of YUI and not released under the same
  * license. */
+
+/* Basic block elements */
 h1 {
-	border-bottom: 1px solid #555753;
 	padding-left: 1em;
+	font-family: Georgia;
+	font-size: 167%;
+	margin-bottom: -0.3em;
 }
 h2 {
-	border-bottom: 1px dotted #555753;
+	font-family: Georgia;
+	border-bottom: 1px solid #D3D7CF;
 	padding-left: 0.5em;
 	margin-left: -0.5em;
-}
-a {
-	color: #204A87;
-}
-p {
-	text-align: justify;
-}
-button {
-	font-size: 93%;
-	font-family: inherit;
-	vertical-align: bottom;
-	width: auto;
-	overflow:visible;
-	padding: 0;
-}
-button img {
-	vertical-align: middle;
-	padding:0;
-	border:none;
 }
 hr {
 	color: #D3D7CF;
@@ -50,16 +36,8 @@ hr {
 	border: 0;
 	border-top: 1px solid #D3D7CF;
 }
-select {
-	width: 10em;
-}
-input {
-	padding: 0.12em;
-	vertical-align: middle;
-}
-textarea[cols], input[size] {
-	width: auto;
-}
+
+/* Tables */
 table {
   border-bottom: 1px solid #666;
 }
@@ -82,9 +60,8 @@ tbody th {
 table a {
 	color: #000;
 }
-label {
-	cursor: pointer;
-}
+
+/* Lists */
 dt {
 	float: left;
 	display: block;
@@ -99,6 +76,41 @@ ul,ol {
 	margin-top: 0;
 	margin-left: 1.5em;
 }
+
+/* Basic inline elements */
+a {
+	color: #204A87;
+}
+
+/* Form inline elements */
+button {
+	font-size: 93%;
+	font-family: inherit;
+	vertical-align: bottom;
+	width: auto;
+	overflow:visible;
+	padding: 0;
+}
+button img {
+	vertical-align: middle;
+	padding:0;
+	border:none;
+}
+select {
+	width: 10em;
+}
+input {
+	padding: 0.12em;
+	vertical-align: middle;
+}
+textarea[cols], input[size] {
+	width: auto;
+}
+label {
+	cursor: pointer;
+}
+
+/* Classes */
 .excluded td, .expired td {
 	text-decoration: line-through;
 }
@@ -114,7 +126,6 @@ ul,ol {
 	margin-right: 0.5em;
 	min-width: 6em;
 	max-width: 10em;
-/*	-moz-border-radius: 0.5em; */
 	border: 1px solid #666;
 	text-align: left;
 }
@@ -250,6 +261,10 @@ ul,ol {
 	font-size: 123.1%;
 }
 
+#hd {
+	border-bottom: 2px solid #D3D7CF;
+	margin-bottom: 1em;
+}
 #ft .yui-u {
 	border-left: 1px solid #555753;
 	margin: 1em 0;
