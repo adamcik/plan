@@ -201,6 +201,8 @@ def schedule(request, year, semester, slug, advanced=False, week=None,
         ).select_related(
             'course__name',
             'course__full_name',
+        ).extra(
+            select={'user_name': 'common_userset.name'}
         )
 
     deadlines = Deadline.objects.filter(
@@ -208,6 +210,7 @@ def schedule(request, year, semester, slug, advanced=False, week=None,
             userset__semester=semester,
         ).select_related(
             'userset__course',
+            'userset__name',
         )
 
     if not deadline_form:

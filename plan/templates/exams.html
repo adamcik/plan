@@ -31,7 +31,7 @@
                             {{ exam.type }}
                         {% endif %}
                     </td>
-                    <td>{{ exam.course.name }}</td>
+                    <td>{{ exam.user_name|default:exam.course.name }}</td>
                     <td>
                         {% if not exam.handout_date %}
                             -

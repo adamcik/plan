@@ -8,6 +8,7 @@
                         <th style="width:  5%"></th>
                     {% endif %}
                     <th style="width: 18%">Course</th>
+                    <th></th>
                     <th>Name</th>
                     <th style="width: 10%">Credits</th>
                 </tr>
@@ -21,16 +22,19 @@
                             </td>
                         {% endif %}
                         <td>
+                            {% if course.url %}
+                                <a href="{{ course.get_url }}">
+                                    {{ course }}
+                                </a>
+                            {% else %}
+                                {{ course }}
+                            {% endif %}
+                        </td>
+                        <td>
                             {% if course.name_form %}
                                 {{ course.name_form.name }}
                             {% else %}
-                                {% if course.url %}
-                                    <a href="{{ course.get_url }}">
-                                        {{ course }}
-                                    </a>
-                                {% else %}
-                                    {{ course }}
-                                {% endif %}
+                                {{ course.user_name }}
                             {% endif %}
                         </td>
                         <td>
