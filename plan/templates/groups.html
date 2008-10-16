@@ -3,7 +3,7 @@
     <div class="yui-g" id="groups">
         {% for course,groups in courses %}
             <p class="{{ course.css_class }} groupbox" title="{{ course.full_name }}">
-                <b>{{ course }}</b> <br />
+                <b>{{ course.user_name|default:course }}</b> <br />
                 <span class="small">{{ course.full_name|truncatewords:"3" }}</span> <br />
                 {{ groups.groups }}
             </p>

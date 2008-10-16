@@ -18,7 +18,7 @@
             {% for l in lectures %}
                 <tr class="{{ l.css_class }}{% if l.exclude %} excluded{% endif %}">
                     <td><input type="checkbox" name="exclude" value="{{ l.id }}"{% if l.exclude %} checked="checked"{% endif %} class="noprint" /></td>
-                    <td>{{ l.course }}</td>
+                    <td>{{ l.user_name|default:l.course }}</td>
                     <td>{{ l.get_day_display }}</td>
                     <td>{{ l.get_start_time_display }}-{{ l.get_end_time_display }}</td>
                     <td class="small">{{ l.sql_rooms|join:", " }}</td>
