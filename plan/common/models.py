@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, time
 from urllib import quote as urlquote
 
 from django.db import models
+from django.template.defaultfilters import slugify
 
 class UserSet(models.Model):
     slug = models.SlugField()
@@ -19,6 +20,10 @@ class UserSet(models.Model):
 
     def __unicode__(self):
         return '%s' % (self.course)
+
+    def save(self, *args, **kwargs):
+        self.name = slugify(self.name)
+        super(UserSet,self).save(*args, **kwargs)
 
 class Type(models.Model):
     name = models.CharField(max_length=100, unique=True)
