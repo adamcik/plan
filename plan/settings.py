@@ -33,6 +33,9 @@ SITE_ID = 1
 # to load the internationalization machinery.
 USE_I18N = False
 
+TIME_FORMAT = "H:i"
+DATE_FORMAT = "Y-m-d"
+
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
 MEDIA_ROOT = BASE_PATH + '/media'
