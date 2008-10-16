@@ -5,6 +5,9 @@ from plan.common.models import *
 class CourseForm(forms.Form):
     courses = forms.models.ModelMultipleChoiceField(Course.objects.all())
 
+class CourseNameForm(forms.Form):
+        name = forms.CharField(widget=forms.TextInput(attrs={'size':8}), required=False)
+
 class LectureForm(forms.models.ModelForm):
     class Meta:
         model = Lecture

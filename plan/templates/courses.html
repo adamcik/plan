@@ -4,7 +4,9 @@
         <table>
             <thead>
                 <tr>
-                    <th style="width:  5%"></th>
+                    {% if advanced %}
+                        <th style="width:  5%"></th>
+                    {% endif %}
                     <th style="width: 18%">Course</th>
                     <th>Name</th>
                     <th style="width: 10%">Credits</th>
@@ -13,16 +15,22 @@
             <tbody>
                 {% for course in legend %}
                     <tr class="{{ course.css_class }}" title="{{ course.full_name }}">
+                        {% if advanced %}
+                            <td>
+                                <input type="checkbox" name="course_remove" value="{{ course.id }}" class="noprint" />
+                            </td>
+                        {% endif %}
                         <td>
-                            <input type="checkbox" name="course_remove" value="{{ course.id }}" class="noprint" />
-                        </td>
-                        <td>
-                            {% if course.url %}
-                                <a href="{{ course.get_url }}">
-                                    {{ course }}
-                                </a>
+                            {% if course.name_form %}
+                                {{ course.name_form.name }}
                             {% else %}
-                                {{ course }}
+                                {% if course.url %}
+                                    <a href="{{ course.get_url }}">
+                                        {{ course }}
+                                    </a>
+                                {% else %}
+                                    {{ course }}
+                                {% endif %}
                             {% endif %}
                         </td>
                         <td>
@@ -39,20 +47,20 @@
 
 
     {% if not legend or advanced %}
+        {% if not legend %}
+            <p class="noprint">
+                Please enter the codes for the courses you want to attend to get
+                started.
+            </p>
+        {% endif %}
         <p class="noprint">
-            {% if not legend %}
-                <span class="large">
-                    Please enter the codes for the courses you want to attend to get
-                    started.
-                </span>
-                <span style="float: right">
-            {% endif %}
-            <input id="course" type="text" name="course_add" size="27"/>
-            <button name="submit_add" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add courses</button>
+            <input id="course" type="text" name="course_add" style="width: 98%"/> <br />
+        </p>
+        <p class="noprint">
+            <button name="submit_add" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add course</button>
             {% if legend %}
+                <button name="submit_name" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/name.png" /> Update names</button>
                 <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/remove.png" /> Remove selected</button>
-            {% else %}
-                </span>
             {% endif %}
         </p>
     {% else %}
