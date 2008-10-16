@@ -24,7 +24,7 @@
                 </thead>
                 <tbody>
                     {% for d in deadlines %}
-                        <tr class="{{ d.css_class }} row">
+                        <tr class="{{ d.css_class }}">
                             <td><input type="checkbox" name="deadline_id" value="{{ d.id }}" checked="checked" /></td>
                             <td>{{ d.userset }}</td>
                             <td>{{ d.date }}</td>

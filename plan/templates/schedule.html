@@ -11,7 +11,7 @@
 {% block bd %}
     {% include "schedule_table.html" %}
 
-    <p id="toolbar" class="noprint">
+    <p class="noprint large">
         <a href="{% url course-list semester.year,semester.get_type_display,slug %}">
             <img alt="" src="{{ MEDIA_URL }}gfx/list.png" />Course list</a>
         {% if legend %}

@@ -13,12 +13,9 @@
         <p>
             <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add coures to schedule</button>
 
-            &nbsp;&nbsp; &nbsp;&nbsp; Jump to:
+            &nbsp;&nbsp;&nbsp;&nbsp; Jump to:
             {% for l in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
                 <a href="#{{ l }}">{{ l }}</a>
-                {% if not forloop.last %}
-                    -
-                {% endif %}
             {% endfor %}
         </p>
         <table>
@@ -35,7 +32,7 @@
             </thead>
             <tbody>
                 {% for exam in exam_list %}
-                    <tr{% ifchanged exam.course_id %} class="row"{% endifchanged %}>
+                    <tr>
                         {% ifchanged exam.course_id %}
                             <td{% ifchanged exam.course.name.0 %} id="{{ exam.course.name.0 }}"{% endifchanged %}>
                                 <input type="checkbox" name="course_add" value="{{ exam.course.name }}" id="course_{{ exam.course_id }}" />
@@ -46,7 +43,7 @@
                             <td class="small">
                                 <label for="course_{{ exam.course_id }}">{{ exam.course.full_name }}</label>
                             </td>
-                            <td class="number">
+                            <td align="number">
                                 {{ exam.course.points|default:""|floatformat:"1" }}
                             </td>
                         {% else %}
@@ -88,12 +85,9 @@
         <p>
             <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add coures to schedule</button>
 
-            &nbsp;&nbsp; &nbsp;&nbsp; Jump to:
+            &nbsp;&nbsp;&nbsp;&nbsp; Jump to:
             {% for l in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
                 <a href="#{{ l }}">{{ l }}</a>
-                {% if not forloop.last %}
-                    -
-                {% endif %}
             {% endfor %}
         </p>
     </form>

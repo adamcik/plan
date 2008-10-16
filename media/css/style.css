@@ -16,65 +16,39 @@ h1{font-size:138.5%;}h2{font-size:123.1%;}h3{font-size:108%;}h1,h2,h3{margin:1em
  * license. */
 
 /* Basic block elements */
+h1,h2 {
+	font-family: Georgia;
+	clear: both;
+}
 h1 {
 	padding-left: 1em;
-	font-family: Georgia;
 	font-size: 167%;
 	margin-bottom: -0.3em;
 }
 h2 {
-	font-family: Georgia;
 	border-bottom: 1px solid #D3D7CF;
 	padding-left: 0.5em;
 	margin-left: -0.5em;
 }
-hr {
-	color: #D3D7CF;
-	background: #D3D7CF;
-	height: 0;
-	margin: 1em -0.5em;
-	border: 0;
-	border-top: 1px solid #D3D7CF;
-}
 
 /* Tables */
 table {
-  border-bottom: 1px solid #666;
-}
-thead th {
-	border: 0;
-  border-bottom: 1px solid #666 !important;
-	text-align: left;
-	padding: 0 0.5em;
-	font-size: 93%;
-}
-tbody td, tbody th {
-	border: 0;
-}
-tbody tr.row td, tbody tr.row th {
-  border-top: 1px solid #666;
-}
-tbody th {
-	text-align: right;
+	width: 100%;
 }
 table a {
 	color: #000;
 }
-
-/* Lists */
-dt {
-	float: left;
-	display: block;
-	text-align: right;
-	width: 9em;
-	margin-right: 0.3em;
+td, th {
+	border: 0;
 }
-dl {
-	margin: 0 0 1em;
+th {
+	text-align: left;
+	padding: 0 0.5em;
+	font-size: 93%;
 }
-ul,ol {
-	margin-top: 0;
-	margin-left: 1.5em;
+td {
+  border-top: 1px solid #666;
+  border-bottom: 1px solid #666;
 }
 
 /* Basic inline elements */
@@ -82,14 +56,15 @@ a {
 	color: #204A87;
 }
 
-/* Form inline elements */
+/* Form elements */
 button {
 	font-size: 93%;
 	font-family: inherit;
 	vertical-align: bottom;
+	padding: 0;
+	/* Magic to check buttons the correct size in IE6 */
 	width: auto;
 	overflow:visible;
-	padding: 0;
 }
 button img {
 	vertical-align: middle;
@@ -100,60 +75,28 @@ select {
 	width: 10em;
 }
 input {
-	padding: 0.12em;
-	vertical-align: middle;
+	padding: 0.15em;
 }
 textarea[cols], input[size] {
-	width: auto;
+	width: auto; /* Don't override sizes set in html */
 }
 label {
 	cursor: pointer;
 }
 
-/* Classes */
-.excluded td, .expired td {
-	text-decoration: line-through;
+/* Generic classes */
+.large {
+	font-size: 123.1%; /* 16px */
 }
-.first {
-	border-left: 0;
-	margin-right: 0;
+.small {
+	font-size: 93%; /* 12px */
 }
+
 .odd {
   background: #fafafa;
 }
-.legend {
-	padding: 0.2em 0.5em;
-	margin-right: 0.5em;
-	min-width: 6em;
-	max-width: 10em;
-	border: 1px solid #666;
-	text-align: left;
-}
-.large {
-	font-size: 116%;
-}
-.small {
-	font-size: 93%;
-}
-.left {
-	float: left;
-	margin-right: 0.5em;
-}
-.right {
-	float: right;
-	margin-left: 0.5em;
-}
-.box {
-	border: 1px solid #666;
-	min-height: 10em;
-	*height: 10em;
-}
-.center {
-	text-align: center;
-}
-.number {
-	text-align: right;
-}
+
+/* error classes */
 .errorlist {
 	color: #A00000;
 	text-size: 85%;
@@ -161,10 +104,59 @@ label {
 .error {
 	margin: 0;
 }
-.error dt {
-	width: 4em;
-	color: #A00000;
+td.error input, td.error select {
+	border: 1px solid #A00000;
+	background: #FEE;
 }
+
+/* Indicate that things have expired or are excluded */
+.excluded td, .expired td {
+	text-decoration: line-through;
+}
+
+/* Color scheme for lectures */
+.lecture0  { background: #B3E2CD; }
+.lecture1  { background: #FDCDAC; }
+.lecture2  { background: #CBD5E8; }
+.lecture3  { background: #F4CAE4; }
+.lecture4  { background: #E6F5C9; }
+.lecture5  { background: #FFF2AE; }
+.lecture6  { background: #F1E2CC; }
+.lecture7  { background: #CCCCCC; }
+
+/* header/body/footer */
+#hd {
+	border-bottom: 2px solid #D3D7CF;
+	margin-bottom: 1em;
+}
+
+#bd {
+	padding-left: 1em;
+	margin-bottom: 1em;
+	min-height: 25em;
+}
+#ft {
+	padding: 1em 0.5em 0;
+	color: #2E3436;
+	margin-bottom: 1em;
+	border-bottom: 1px solid #D3D7CF;
+	border-top: 1px solid #D3D7CF;
+}
+
+/* Specialcased elements */
+
+/* Box used for selecting which groups to use for a course */
+#groups p {
+	float: left;
+	padding: 0.2em 0.5em;
+	margin-right: 0.5em;
+	border: 1px solid #666;
+	width: 14%;
+	min-height: 10em;
+	*height: 10em;
+}
+
+/* Stats box on front page (needs special casing for graph) */
 #stats {
 	border-left: 0.2em solid #D3D7CF;
 	padding: 0.2em 0;
@@ -177,123 +169,83 @@ label {
 	-webkit-border-radius: 0 0.5em 0.5em 0;
 }
 
+/* Links on all pages nedd constant width b */
+#links b {
+	font-size: 93%;
+	width: 9em;
+	text-align: right;
+	display: block;
+	float: left;
+	margin-right: 0.5em;
+}
+
 /* schedule styling */
-.schedule {
-	min-width: 60em;
-}
-.schedule .time {
-  text-align: center;
-  vertical-align: middle;
-	font-size: 77%;
-  width: 10%;
-}
-.schedule .course {
+
+/* cell contents */
+#schedule .course {
 	float: left;
 }
-.schedule .room {
+#schedule .room {
 	font-size: 77%;
   float: right;
 	margin-left: 0.5em;
 }
-.schedule .type {
+#schedule .type {
 	clear: both;
 	font-size: 77%;
 }
-.schedule .groups {
-  clear: both;
+/* single cells need to be smaller */
+#schedule .single {
 	font-size: 77%;
 }
-.schedule .single {
-	font-size: 77%;
-}
-.schedule .single .type, .schedule .single .room {
+#schedule .single .type, #schedule .single .room {
 	font-size: 100%;
 }
-.schedule th, .schedule td {
+
+#schedule .optional {
+	color: #555753;
+}
+
+#schedule td {
+	border-color: #CCC;
   padding: 0.1em 0.2em;
   vertical-align: top;
-	text-align: left;
-}
-.schedule td {
-	border: 0;
-  border-top: 1px solid #ccc;
-  border-bottom: 1px solid #ccc;
   height: 2em;
 }
-.schedule td.first {
-	border-left: 1px solid #666666;
-}
-.schedule td.last {
-	border-right: 1px solid #666666;
-}
-.schedule tr.bottom td {
-	border-bottom: 1px solid #666666;
-}
-.schedule th {
-  border: 0;
-  width: 18%;
+#schedule th {
+  width: 18.6%;
   font-variant: small-caps;
 	font-weight: normal;
 }
-.schedule .extra {
-	border-left: 1px solid #CCCCCC;
+
+/* time col */
+#schedule .time {
+  text-align: center;
+  vertical-align: middle;
+	font-size: 77%;
+  width: 7%;
+	white-space: nowrap;
+}
+#schedule td.time {
+	border-left: 1px solid #666;
 }
 
-.optional {
-  opacity: 0.6;
-  filter:alpha(opacity=60);
+/* Proper :first-child  selectors would be nice, but
+ * classes from the templates should do the trick */
+#schedule td.last, #schedule td.lecture {
+	border-right: 1px solid #666;
 }
-.optional:hover {
-  opacity: 1.0;
-  filter:alpha(opacity=100);
+#schedule tr.first td {
+	border-top: 1px solid #666;
 }
-
-.lecture0  { background: #B3E2CD; }
-.lecture1  { background: #FDCDAC; }
-.lecture2  { background: #CBD5E8; }
-.lecture3  { background: #F4CAE4; }
-.lecture4  { background: #E6F5C9; }
-.lecture5  { background: #FFF2AE; }
-.lecture6  { background: #F1E2CC; }
-.lecture7  { background: #CCCCCC; }
-
-#toolbar {
-	font-size: 123.1%;
-}
-
-#hd {
-	border-bottom: 2px solid #D3D7CF;
-	margin-bottom: 1em;
-}
-#ft .yui-u {
-	border-left: 1px solid #555753;
-	margin: 1em 0;
-}
-#ft .first {
-	border-left: 0;
-}
-
-#bd {
-	padding-left: 1em;
-	margin-bottom: 1em;
-	min-height: 25em;
-}
-#ft {
-	font-size: 85%;
-	padding: 0 0.5em;
-	color: #2E3436;
-	margin-bottom: 1em;
-	border-bottom: 1px solid #555753;
-	border-top: 1px solid #555753;
+#schedule tr.last td {
+	border-bottom: 1px solid #666;
 }
 
 @media print {
+	/* FIXME dont like noprint :( */
 	#ft, #django_log, .noprint {
 		display: none;
-	}
-	.optional {
-	  opacity: 1.0;
-	  filter:alpha(opacity=100);
 	}
 	table a {
 		text-decoration: none;

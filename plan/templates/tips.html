@@ -6,7 +6,7 @@
         </p>
         <p style="background: url({{ MEDIA_URL }}gfx/link.png) no-repeat top left; padding-left: 20px; min-height: 20px">
              For quick access to your schedule simply go to
-            <a href="{% url shortcut slug %}">http://{{ request.META.HTTP_HOST }}{% url shortcut slug %}</a>
+            <a href="{% url shortcut slug %}">{{ request.META.HTTP_HOST }}{% url shortcut slug %}</a>
         </p>
         <p style="background: url({{ MEDIA_URL }}gfx/hide.png) no-repeat top left; padding-left: 20px; min-height: 20px">
             Did you know that you can choose to hide lectures that you don't want to be shown under

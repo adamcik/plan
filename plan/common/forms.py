@@ -29,4 +29,4 @@ class DeadlineForm(forms.models.ModelForm):
         self.fields['userset'].widget.attrs['style'] = 'width: 6em'
         self.fields['time'].widget.attrs['size'] = 2
         self.fields['date'].widget.attrs['size'] = 7
-        self.fields['task'].widget.attrs['size'] = 10
+        self.fields['task'].widget.attrs['size'] = 25

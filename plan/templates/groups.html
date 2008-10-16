@@ -1,20 +1,15 @@
-    <h2 class="noprint">Change groups</h2>
-    <p class="noprint">
-        Each lecture is connected to one or more groups, please select
-        which group's lectures you want to attend. To select more than
-        one group press <code>CTRL</code> and the groups you want.
+<form action="{% url change-groups semester.year,semester.get_type_display,slug %}" method="post" class="noprint">
+    <h2>Change groups</h2>
+    <div class="yui-g" id="groups">
+        {% for course,groups in courses %}
+            <p class="{{ course.css_class }} groupbox" title="{{ course.full_name }}">
+                <b>{{ course }}</b> <br />
+                <span class="small">{{ course.full_name|truncatewords:"3" }}</span> <br />
+                {{ groups.groups }}
+            </p>
+        {% endfor %}
+    </div>
+    <p>
+        <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/save.png" /> Save groups</button>
     </p>
-    <form action="{% url change-groups semester.year,semester.get_type_display,slug %}" method="post">
-        <div class="yui-g noprint">
-            {% for course,groups in courses %}
-                <p class="{{ course.css_class }} legend left box" title="{{ course.full_name }}">
-                    <b>{{ course }}</b> <br />
-                    <span class="small">{{ course.full_name|truncatewords:"3" }}</span> <br />
-                    {{ groups.groups }}
-                </p>
-            {% endfor %}
-        </div>
-        <p class="noprint">
-            <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/save.png" /> Save groups</button>
-        </p>
-    </form>
+</form>

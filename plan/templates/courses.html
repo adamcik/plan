@@ -12,7 +12,7 @@
             </thead>
             <tbody>
                 {% for course in legend %}
-                    <tr class="{{ course.css_class }} row" title="{{ course.full_name }}">
+                    <tr class="{{ course.css_class }}" title="{{ course.full_name }}">
                         <td>
                             <input type="checkbox" name="course_remove" value="{{ course.id }}" class="noprint" />
                         </td>
@@ -28,7 +28,7 @@
                         <td>
                             {{ course.full_name }}
                         </td>
-                        <td class="number">
+                        <td align="right">
                             {{ course.points|default:""|floatformat:"1" }}
                         </td>
                     </tr>
@@ -37,11 +37,28 @@
         </table>
     {% endif %}
 
-    <p class="noprint">
-        <input id="course" type="text" name="course_add" size="18"/>
-        <button name="submit_add" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add courses</button>
-        {% if legend %}
-            <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/remove.png" /> Remove selected</button>
-        {% endif %}
-    </p>
+
+    {% if not legend or advanced %}
+        <p class="noprint">
+            {% if not legend %}
+                <span class="large">
+                    Please enter the codes for the courses you want to attend to get
+                    started.
+                </span>
+                <span style="float: right">
+            {% endif %}
+            <input id="course" type="text" name="course_add" size="27"/>
+            <button name="submit_add" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add courses</button>
+            {% if legend %}
+                <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/remove.png" /> Remove selected</button>
+            {% else %}
+                </span>
+            {% endif %}
+        </p>
+    {% else %}
+        <p class="noprint">
+            Go to <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">advanced options</a>
+            to add and remove courses.
+        </p>
+    {% endif %}
 </form>

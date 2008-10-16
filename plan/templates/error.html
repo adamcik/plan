@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block bd %}
-    <p><img alt="" src="{{ MEDIA_URL }}gfx/error.png" /> Adding the following courses failed:</p>
+    <p class="large"><img alt="" src="{{ MEDIA_URL }}gfx/error.png" /> Adding the following courses failed:</p>
     <ul>
         {% for c in courses %}
             <li>{{ c|upper }}</li>
@@ -16,7 +16,7 @@
         <a href="http://www.ntnu.no/studieinformasjon/timeplan">http://www.ntnu.no/studieinformasjon/timeplan</a>
         for this semster.
     </p>
-    <p>
+    <p class="large">
         Back to your <a href="{% url schedule-advanced year,type,slug %}">schedule</a>.
     </p>
 {% endblock %}
