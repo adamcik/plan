@@ -281,7 +281,7 @@ def schedule(request, year, semester, slug, advanced=False, week=None,
         start = first
         remove = False
 
-        css = [color_map[lecture.course_id]]
+        css = [color_map[lecture.course_id], "lecture"]
 
         if lecture.type.optional:
             css.append('optional')
@@ -314,7 +314,7 @@ def schedule(request, year, semester, slug, advanced=False, week=None,
 
     # Compute where clause that limits the size of the following queries
     lecture_id_where_clause = 'lecture_id IN (%s)' % \
-            ','.join([str(a) for a in included])
+            ','.join([str(l.id) for l in initial_lectures])
 
     if courses:
         t.tick('Start getting rooms for lecture list')
@@ -431,7 +431,7 @@ def schedule(request, year, semester, slug, advanced=False, week=None,
     # Insert extra cell containg times
     times = zip(range(len(Lecture.START)), Lecture.START, Lecture.END)
     for i, start, end in times:
-        table[i].insert(0, [{'time': '%s - %s' % \
+        table[i].insert(0, [{'time': '%s&nbsp;-&nbsp;%s' % \
                 (start[1], end[1]), 'class': 'time'}])
 
     t.tick('Done adding times')
@@ -439,8 +439,7 @@ def schedule(request, year, semester, slug, advanced=False, week=None,
     # Add colors and exlude status
     if advanced:
         for i, lecture in enumerate(initial_lectures):
-            initial_lectures[i].css_class =  color_map[lecture.course_id]
-            initial_lectures[i].excluded  =  lecture.id not in included
+            initial_lectures[i].css_class = color_map[lecture.course_id]
 
             compact_weeks = compact_sequence(weeks.get(lecture.id, []))
 
@@ -449,12 +448,10 @@ def schedule(request, year, semester, slug, advanced=False, week=None,
             initial_lectures[i].sql_lecturers = lecturers.get(lecture.id, [])
             initial_lectures[i].sql_rooms = rooms.get(lecture.id, [])
 
-        # FIX groups forms
         for i, c in enumerate(courses):
             courses[i] = (c[0], group_forms.get(c[0].id, None))
 
         t.tick('Done lecture css_clases and excluded status')
-
 
     for i, exam in enumerate(exam_list):
         exam_list[i].css_class = color_map[exam.course_id]
@@ -540,7 +537,7 @@ def new_deadline(request, year, type, slug):
             if deadline_form.is_valid():
                 deadline_form.save()
             else:
-                return schedule(request, year, type, slug,
+                return schedule(request, year, type, slug, advanced=True,
                         deadline_form=deadline_form, cache_page=False)
 
         elif 'submit_remove' in post:
@@ -548,7 +545,7 @@ def new_deadline(request, year, type, slug):
                     id__in=post.getlist('deadline_remove')
                 ).delete()
 
-    return HttpResponseRedirect(reverse('schedule',
+    return HttpResponseRedirect(reverse('schedule-advanced',
             args = [semester.year,semester.get_type_display(),slug]))
 
 def copy_deadlines(request, year, type, slug):
