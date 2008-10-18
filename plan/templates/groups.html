@@ -1,6 +1,11 @@
 <form action="{% url change-groups semester.year,semester.get_type_display,slug %}" method="post" class="noprint">
-    <h2>Change groups</h2>
-    <div class="yui-g" id="groups">
+    <h2 id="groups">Change groups</h2>
+    <p>
+        Each lecture is connected to one or more groups, please select which
+        group's lectures you want to attend. To select more than one group
+        press <code>CTRL</code> and the groups you want.
+    </p>
+    <div id="change-groups">
         {% for course,groups in courses %}
             <p class="{{ course.css_class }} groupbox" title="{{ course.full_name }}">
                 <b>{{ course.user_name|default:course }}</b> <br />
@@ -9,7 +14,7 @@
             </p>
         {% endfor %}
     </div>
-    <p>
+    <p style="clear: both">
         <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/save.png" /> Save groups</button>
     </p>
 </form>

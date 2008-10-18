@@ -3,7 +3,9 @@
     <table>
         <thead>
             <tr>
-                <th></th>
+                {% if advanced %}
+                    <th></th>
+                {% endif %}
                 <th>Course</th>
                 <th>Day</th>
                 <th>Time</th>
@@ -17,7 +19,9 @@
         <tbody>
             {% for l in lectures %}
                 <tr class="{{ l.css_class }}{% if l.exclude %} excluded{% endif %}">
-                    <td><input type="checkbox" name="exclude" value="{{ l.id }}"{% if l.exclude %} checked="checked"{% endif %} class="noprint" /></td>
+                    {% if advanced %}
+                        <td><input type="checkbox" name="exclude" value="{{ l.id }}"{% if l.exclude %} checked="checked"{% endif %} class="noprint" /></td>
+                    {% endif %}
                     <td>{{ l.user_name|default:l.course }}</td>
                     <td>{{ l.get_day_display }}</td>
                     <td>{{ l.get_start_time_display }}-{{ l.get_end_time_display }}</td>
@@ -31,6 +35,10 @@
         </tbody>
     </table>
     <p class="noprint">
-        <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/hide.png" /> Hide selected lectures</button>
+        {% if advanced %}
+            <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/hide.png" /> Hide selected lectures</button>
+        {% else %}
+            Go to <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">advanced options</a> to hide lectures.
+        {% endif %}
     </p>
 </form>

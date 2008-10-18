@@ -186,6 +186,9 @@ def schedule(request, year, semester, slug, advanced=False, week=None,
     weeks = {}
     rooms = {}
 
+    # Keep track if all groups are selected for all courses
+    all_groups = True
+
     semester = get_semester(year, semester)
 
     initial_lectures = get_lectures(slug, semester)
@@ -337,7 +340,7 @@ def schedule(request, year, semester, slug, advanced=False, week=None,
             rooms[lecture_id].append(name)
     t.tick('Done getting rooms for lecture list')
 
-    if advanced and courses:
+    if courses:
         for u in UserSet.objects.filter(slug=slug, semester=semester):
             # SQL: this causes extra queries (can be worked around, subquery?)
             initial_groups = u.groups.values_list('id', flat=True)
@@ -347,6 +350,12 @@ def schedule(request, year, semester, slug, advanced=False, week=None,
             course_groups = Group.objects.filter(
                     lecture__course__id=u.course_id
                 ).distinct()
+
+            if all_groups:
+                course_groups_ids = course_groups.values_list('id', flat=True)
+
+                if len(course_groups_ids) > 1:
+                    all_groups = set(initial_groups) == set(course_groups_ids)
 
             # SQL: For loop generates to quries per userset.
             group_forms[u.course_id] = GroupForm(course_groups,
@@ -443,17 +452,17 @@ def schedule(request, year, semester, slug, advanced=False, week=None,
     t.tick('Done adding times')
 
     # Add colors and exlude status
+    for i, lecture in enumerate(initial_lectures):
+        initial_lectures[i].css_class = color_map[lecture.course_id]
+
+        compact_weeks = compact_sequence(weeks.get(lecture.id, []))
+
+        initial_lectures[i].sql_weeks = compact_weeks
+        initial_lectures[i].sql_groups = groups.get(lecture.id, [])
+        initial_lectures[i].sql_lecturers = lecturers.get(lecture.id, [])
+        initial_lectures[i].sql_rooms = rooms.get(lecture.id, [])
+
     if advanced:
-        for i, lecture in enumerate(initial_lectures):
-            initial_lectures[i].css_class = color_map[lecture.course_id]
-
-            compact_weeks = compact_sequence(weeks.get(lecture.id, []))
-
-            initial_lectures[i].sql_weeks = compact_weeks
-            initial_lectures[i].sql_groups = groups.get(lecture.id, [])
-            initial_lectures[i].sql_lecturers = lecturers.get(lecture.id, [])
-            initial_lectures[i].sql_rooms = rooms.get(lecture.id, [])
-
         for i, c in enumerate(courses):
             # FIXME cleanup use of tuple
             courses[i] = (c[0], group_forms.get(c[0].id, None))
@@ -475,9 +484,10 @@ def schedule(request, year, semester, slug, advanced=False, week=None,
             'advanced': advanced,
             'colspan': span,
             'courses': courses,
-            'deadlines': deadlines,
             'deadline_form': deadline_form,
+            'deadlines': deadlines,
             'exams': exam_list,
+            'group_help': all_groups,
             'lectures': initial_lectures,
             'legend': map(lambda x: x[0], courses),
             'semester': semester,

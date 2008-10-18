@@ -1,0 +1,48 @@
+{% if advanced %}
+    <form method="post" action="{% url copy-deadlines semester.year,semester.get_type_display,slug %}" class="noprint">
+        <h2>Import deadlines</h2>
+        <p>
+            If you enter the idenfiers for other timetables with the
+            same course as your's, you will be given the option to
+            import their deadlines.
+        </p>
+        <p>
+            <input type="text" name="slugs" size="42" />
+            <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/copy.png" /> Import deadlines</button>
+        </p>
+    </form>
+    {% if legend %}
+        <form method="post" action="{% url new-deadline semester.year,semester.get_type_display,slug %}#deadlines" class="noprint">
+            <h2>Add deadlines</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Task</th>
+                        <th>Course</th>
+                        <th>Due date</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody class="plain">
+                    <tr>
+                        <td{% if deadline_form.errors.task %} class="error"{% endif %}>
+                            {{ deadline_form.task }}
+                        </td>
+                        <td{% if deadline_form.errors.userset%} class="error"{% endif %}>
+                            {{ deadline_form.userset }}
+                        </td>
+                        <td{% if deadline_form.errors.date %} class="error"{% endif %}>
+                            {{ deadline_form.date }}
+                        </td>
+                        <td{% if deadline_form.errors.time %} class="error"{% endif %}>
+                            {{ deadline_form.time }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                <button name="submit_add" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add deadline</button>
+            </p>
+        </form>
+    {% endif %}
+{% endif %}

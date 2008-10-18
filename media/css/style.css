@@ -21,7 +21,7 @@ h1,h2 {
 	clear: both;
 }
 h1 {
-	padding-left: 1em;
+	padding-left: 0.6em;
 	font-size: 167%;
 	margin-bottom: -0.3em;
 }
@@ -29,6 +29,7 @@ h2 {
 	border-bottom: 1px solid #D3D7CF;
 	padding-left: 0.5em;
 	margin-left: -0.5em;
+	margin-top: 0;
 }
 
 /* Tables */
@@ -49,6 +50,10 @@ th {
 td {
   border-top: 1px solid #666;
   border-bottom: 1px solid #666;
+}
+.plain td {
+	border: 0;
+	padding: 0;
 }
 
 /* Basic inline elements */
@@ -72,7 +77,7 @@ button img {
 	border:none;
 }
 select {
-	width: 10em;
+	width: 100%;
 }
 input {
 	padding: 0.15em;
@@ -94,6 +99,9 @@ label {
 
 .odd {
   background: #fafafa;
+}
+p.right {
+	text-align: right;
 }
 
 /* error classes */
@@ -146,12 +154,12 @@ td.error input, td.error select {
 /* Specialcased elements */
 
 /* Box used for selecting which groups to use for a course */
-#groups p {
+#change-groups p {
 	float: left;
 	padding: 0.2em 0.5em;
 	margin-right: 0.5em;
 	border: 1px solid #666;
-	width: 14%;
+	width: 18%;
 	min-height: 10em;
 	*height: 10em;
 }
@@ -249,9 +257,5 @@ td.error input, td.error select {
 	}
 	table a {
 		text-decoration: none;
-	}
-	.yui-u {
-		 float: none !important;
-		 width: auto !important;
 	}
 }

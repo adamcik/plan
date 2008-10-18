@@ -9,6 +9,10 @@
 {% endblock %}
 
 {% block bd %}
+    {% if not legend %}
+        {% include "add_courses.html" %}
+    {% endif %}
+
     {% include "schedule_table.html" %}
 
     <p class="noprint large">
@@ -24,25 +28,32 @@
             {% endif %}
         {% endif %}
         - <a href="#tips"><img alt="" src="{{ MEDIA_URL }}gfx/tips.png" />Tips</a>
+        {% if group_help %}
+            - <a href="groups">Change groups</a> to limit
+              groups/parallels in your schedule
+        {%  endif %}
     </p>
 
-    <div class="yui-g">
-        <div class="yui-u first">
-            {% include "courses.html" %}
-            {% include "exams.html" %}
+    {% if legend %}
+        <div class="yui-g">
+            <div class="yui-u first">
+                {% include "add_courses.html" %}
+                {% include "courses.html" %}
+                {% include "exams.html" %}
+            </div>
+            <div class="yui-u">
+                {% include "deadlines.html" %}
+                {% include "add_deadlines.html" %}
+            </div>
         </div>
-        <div class="yui-u">
-            {% include "deadlines.html" %}
-        </div>
-    </div>
+    {% endif %}
 
-    {% if advanced %}
-        {% if courses %}
-            {% include "groups.html" %}
-        {% endif %}
-        {% if lectures %}
-            {% include "lectures.html" %}
-        {% endif %}
+    {% if courses and advanced %}
+        {% include "groups.html" %}
+    {% endif %}
+
+    {% if lectures %}
+        {% include "lectures.html" %}
     {% endif %}
 
     {% include "tips.html" %}

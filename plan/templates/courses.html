@@ -50,22 +50,10 @@
     {% endif %}
 
 
-    {% if not legend or advanced %}
-        {% if not legend %}
-            <p class="noprint">
-                Please enter the codes for the courses you want to attend to get
-                started.
-            </p>
-        {% endif %}
+    {% if legend and advanced %}
         <p class="noprint">
-            <input id="course" type="text" name="course_add" style="width: 98%"/> <br />
-        </p>
-        <p class="noprint">
-            <button name="submit_add" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add course</button>
-            {% if legend %}
-                <button name="submit_name" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/name.png" /> Update names</button>
-                <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/remove.png" /> Remove selected</button>
-            {% endif %}
+            <button name="submit_name" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/name.png" /> Update names</button>
+            <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/remove.png" /> Remove selected</button>
         </p>
     {% else %}
         <p class="noprint">
