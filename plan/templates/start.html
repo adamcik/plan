@@ -61,7 +61,7 @@
             <h2>Top {{ stats|length }} courses</h2>
             <div id="stats">
                 {% for count,name,full_name,class in stats %}
-                    <div title="{{ full_name }}" style="width: {% widthratio count stats.0.0 95 %}%" class="lecture{% cycle 0,1,2,3,4,5,6,7 %}">
+                    <div title="{{ full_name }}" style="width: {% widthratio count stats.0.0 95 %}%" class="{{ class }}">
                         <b style="float: right;">{{ count }}</b>
                         <b>{{ name }}</b>
                     </div>

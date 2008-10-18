@@ -14,10 +14,6 @@ Cpurrent:
 
 * Add exam type to data model using "smart" primary key
 
-* custom names for courses
-
-* fix stats css classes
-
 * Print view
 
 Wishlist:

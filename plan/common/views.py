@@ -134,11 +134,15 @@ def getting_started(request):
         subscription_count = int(UserSet.objects.count())
         deadline_count = int(Deadline.objects.count())
 
+        stats = []
+        for i, row in enumerate(cursor.fetchall()):
+            stats.append(row + ('lecture%d' % (i % MAX_COLORS),))
+
         context = {
             'slug_count': slug_count,
             'subscription_count': subscription_count,
             'deadline_count': deadline_count,
-            'stats': cursor.fetchall(),
+            'stats': stats,
 
         }
 
