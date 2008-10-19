@@ -1,11 +1,11 @@
 from django.conf.urls.defaults import *
 from django.conf import settings
-from django.contrib import admin
 from django.contrib import databrowse
 
-from plan.common.models import *
+from plan.common.models import Course, Group, Lecture, Lecturer, Room, \
+        Semester, Type, Exam
 
-admin.autodiscover()
+from plan.common.admin import admin
 
 databrowse.site.register(Course)
 databrowse.site.register(Group)

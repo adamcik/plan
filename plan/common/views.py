@@ -195,6 +195,13 @@ def schedule(request, year, semester, slug, advanced=False, week=None,
 
     semester = get_semester(year, semester)
 
+    course_filter = {
+        'userset__slug': slug,
+        'userset__semester': semester,
+    }
+    course_list = Course.objects.filter(**course_filter). \
+        extra(select={'user_name': 'common_userset.name'}).distinct()
+
     initial_lectures = get_lectures(slug, semester)
 
     first_day = semester.get_first_day()
@@ -232,14 +239,7 @@ def schedule(request, year, semester, slug, advanced=False, week=None,
 
     t.tick('Done initializing')
 
-    course_filter = {
-        'userset__slug': slug,
-        'userset__semester': semester,
-    }
-    course_select = {
-        'user_name': 'common_userset.name',
-    }
-    for c in Course.objects.filter(**course_filter).extra(select=course_select).distinct():
+    for c in course_list:
         # Create an array containing our courses and add the css class
         if c.id not in color_map:
             color_index = (color_index + 1) % MAX_COLORS
@@ -285,7 +285,7 @@ def schedule(request, year, semester, slug, advanced=False, week=None,
 
         except IndexError:
             # We ran out of rows to check, simply append a new row
-            for j, time in enumerate(Lecture.START):
+            for j in range(len(Lecture.START)):
                 table[j][lecture.day].append({})
 
             # Update the header colspan
@@ -473,7 +473,8 @@ def schedule(request, year, semester, slug, advanced=False, week=None,
 
             # FIXME Loop usersets instead of courses
             name = c[0].user_name or c[0].name
-            courses[i][0].name_form = CourseNameForm(initial={'name': name}, prefix=c[0].id)
+            courses[i][0].name_form = CourseNameForm(initial={'name': name},
+                                                     prefix=c[0].id)
 
         t.tick('Done lecture css_clases and excluded status')
 
@@ -512,8 +513,8 @@ def schedule(request, year, semester, slug, advanced=False, week=None,
     t.tick('Returning repsonse')
     return response
 
-def select_groups(request, year, type, slug):
-    semester = get_semester(year, type)
+def select_groups(request, year, semester_type, slug):
+    semester = get_semester(year, semester_type)
 
     if request.method == 'POST':
         course_filter = {'userset__slug': slug}
@@ -525,12 +526,12 @@ def select_groups(request, year, type, slug):
             group_form = GroupForm(groups, request.POST, prefix=c.id)
 
             if group_form.is_valid():
-                set = UserSet.objects.get(
+                userset = UserSet.objects.get(
                         course=c,
                         slug=slug,
                         semester=semester
                     )
-                set.groups = group_form.cleaned_data['groups']
+                userset.groups = group_form.cleaned_data['groups']
 
         clear_cache(year, semester.get_type_display(), slug)
 
@@ -539,8 +540,8 @@ def select_groups(request, year, type, slug):
     return HttpResponseRedirect(reverse('schedule-advanced',
             args=[semester.year,semester.get_type_display(),slug]))
 
-def new_deadline(request, year, type, slug):
-    semester = get_semester(year, type)
+def new_deadline(request, year, semester_type, slug):
+    semester = get_semester(year, semester_type)
 
     if request.method == 'POST':
         clear_cache(year, semester.get_type_display(), slug)
@@ -573,8 +574,8 @@ def new_deadline(request, year, type, slug):
     return HttpResponseRedirect(reverse('schedule-advanced',
             args = [semester.year,semester.get_type_display(),slug]))
 
-def copy_deadlines(request, year, type, slug):
-    semester = get_semester(year, type)
+def copy_deadlines(request, year, semester_type, slug):
+    semester = get_semester(year, semester_type)
 
     if request.method == 'POST':
         if 'slugs' in request.POST:
@@ -641,7 +642,8 @@ def select_course(request, year, type, slug, add=False):
 
         post = request.POST.copy()
 
-        if 'submit_add' in post and 'submit_remove' in post and 'submit_name' in post:
+        if 'submit_add' in post and 'submit_remove' in post and \
+                'submit_name' in post:
             # IE6 doesn't handle <button> correctly, it submits all buttons
             if 'course_remove' in post:
                 # User has checked at least on course to remove, make a blind
@@ -718,7 +720,8 @@ def select_course(request, year, type, slug, add=False):
                 'course__name',
             ]
 
-            usersets = UserSet.objects.filter(**userset_filter).select_related(*userset_related)
+            usersets = UserSet.objects.filter(**userset_filter). \
+                            select_related(*userset_related)
 
             for u in usersets:
                 form = CourseNameForm(post, prefix=u.course_id)
@@ -730,7 +733,8 @@ def select_course(request, year, type, slug, add=False):
                     name = form.cleaned_data['name']
 
                     if name != u.course.name:
-                        # We don't check for empty strings as that equals not set
+                        # We don't check for empty strings as that
+                        # equals not set
                         logging.debug("Saving %s as %s" % (u.course.name, name))
                         u.name = name
                         u.save()

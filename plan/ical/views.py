@@ -2,18 +2,18 @@ import vobject
 
 from socket import gethostname
 from datetime import datetime, timedelta
-from dateutil.rrule import *
-from dateutil.parser import parse
+from dateutil.rrule import rrule, WEEKLY
 from dateutil.tz import tzlocal
 
 from django.http import HttpResponse
 
 from django.core.cache import cache
 
-from plan.common.models import *
+from plan.common.models import Exam, Deadline
 from plan.common.views import get_semester, get_lectures
 
-def ical(request, year, semester, slug, lectures=True, exams=True, deadlines=True):
+def ical(request, year, semester, slug, lectures=True, exams=True,
+            deadlines=True):
     semester = get_semester(year, semester)
 
     response = cache.get(request.path)
@@ -25,7 +25,7 @@ def ical(request, year, semester, slug, lectures=True, exams=True, deadlines=Tru
     cal.add('method').value = 'PUBLISH'  # IE/Outlook needs this
 
     if lectures:
-        add_lectutures(get_lectures(slug, semester).exclude(excluded_from__slug=slug), semester, cal)
+        add_lectutures(get_lectures(slug, semester), semester, cal)
 
     if exams:
         first_day = semester.get_first_day()
@@ -44,7 +44,8 @@ def ical(request, year, semester, slug, lectures=True, exams=True, deadlines=Tru
             'user_name': 'common_userset.name',
         }
 
-        exams = Exam.objects.filter(**exam_filter).select_related(*exam_related).extra(select=exam_select)
+        exams = Exam.objects.filter(**exam_filter). \
+                    select_related(*exam_related).extra(select=exam_select)
 
         add_exams(exams, semester, cal)
 
@@ -61,7 +62,8 @@ def ical(request, year, semester, slug, lectures=True, exams=True, deadlines=Tru
             'user_name': 'common_userset.name',
         }
 
-        deadlines = Deadline.objects.filter(**deadline_filter).select_related(*deadline_related).extra(select=deadline_select)
+        deadlines = Deadline.objects.filter(**deadline_filter). \
+                select_related(*deadline_related).extra(select=deadline_select)
 
         add_deadlines(deadlines, semester, cal)
 
@@ -84,6 +86,10 @@ def add_lectutures(lectures, semester, cal):
     '''Adds lectures to cal object for current semester'''
 
     for l in lectures:
+        # Skip excluded
+        if l.exclude:
+            continue
+
         weeks = l.weeks.values_list('number', flat=True)
 
         rrule_kwargs = {
@@ -126,10 +132,12 @@ def add_exams(exams, semester, cal):
 
         if e.type_name:
             summary = '%s - %s' % (e.type_name, e.user_name or e.course.name)
-            desc = '%s (%s) - %s (%s)' % (e.type_name, e.type, e.course.full_name, e.course.name)
+            desc = '%s (%s) - %s (%s)' % (e.type_name, e.type,
+                    e.course.full_name, e.course.name)
         else:
             summary = 'Exam (%s) - %s' % (e.type, e.user_name or e.course.name)
-            desc = 'Exam (%s) - %s (%s)' % (e.type, e.course.full_name, e.course.name)
+            desc = 'Exam (%s) - %s (%s)' % (e.type, e.course.full_name,
+                    e.course.name)
 
         vevent.add('summary').value = summary
         vevent.add('description').value = desc
@@ -172,7 +180,6 @@ def add_exams(exams, semester, cal):
 
 def add_deadlines(deadlines, semester, cal):
     for d in deadlines:
-
         vevent = cal.add('vevent')
 
         start = d.date

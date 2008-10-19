@@ -2,11 +2,15 @@ import re
 
 from urllib import urlopen, URLopener
 from BeautifulSoup import BeautifulSoup, NavigableString
+from dateutil.parser import parse
 
 from django.db import transaction
 from django.utils.http import urlquote
 
-from plan.common.models import *
+from plan.common.models import Lecture, Lecturer, Exam, Course, Room, Type, \
+        Semester, Group, Week
+
+is_text = lambda text: isinstance(text, NavigableString)
 
 @transaction.commit_on_success
 def scrape_courses():
@@ -28,9 +32,9 @@ def scrape_courses():
         m = re.match(r'^\s*(.+)\((.+)\)\s*$', contents)
 
         if m:
-            courses.append(m.group(2,1))
+            courses.append(m.group(2, 1))
 
-    for name,full_name in courses:
+    for name, full_name in courses:
         try:
             course = Course.objects.get(name=name.strip().upper())
         except Course.DoesNotExist:
@@ -60,13 +64,13 @@ def scrape_exams():
     for tr in main.findAll('tr')[4:]:
         results.append({})
 
-        for i,td in enumerate(tr.findAll('td')):
+        for i, td in enumerate(tr.findAll('td')):
             if i == 0:
                 results[-1]['course'] = td.contents
             elif i == 2:
                 results[-1]['type'] = td.contents
             elif i == 3:
-                results[-1]['time'] = td.findAll(text=lambda text: isinstance(text, NavigableString))
+                results[-1]['time'] = td.findAll(text=is_text)
             elif i == 4:
                 results[-1]['duration'] = td.contents
             elif i == 5:
@@ -85,16 +89,16 @@ def scrape_exams():
         else:
             comment = ''
 
-        time = {}
+        exam_time = {}
         for t in r['time']:
             if t.startswith('Innl.:'):
-                time['exam'] = parse(t.split(':', 1)[1], dayfirst=True)
+                exam_time['exam'] = parse(t.split(':', 1)[1], dayfirst=True)
 
             elif t.startswith('Ut:'):
-                time['handout'] = parse(t.split(':', 1)[1], dayfirst=True)
+                exam_time['handout'] = parse(t.split(':', 1)[1], dayfirst=True)
 
             else:
-                time['exam'] = parse(t, dayfirst=True)
+                exam_time['exam'] = parse(t, dayfirst=True)
         if r['type']:
             exam_type = r['type'][0]
         else:
@@ -103,8 +107,8 @@ def scrape_exams():
         exam = Exam(
                 course=course,
                 type=exam_type,
-                exam_time=time.get('exam'),
-                handout_time=time.get('handout', None),
+                exam_time=exam_time.get('exam'),
+                handout_time=exam_time.get('handout', None),
                 comment=comment,
                 duration=duration
                )
@@ -120,15 +124,17 @@ def scrape_course(course):
     course = course.upper().strip()
 
     # FIXME based on semester
-    url  = 'http://www.ntnu.no/studieinformasjon/timeplan/h08/?emnekode=%s' % urlquote(course.encode('latin-1'))
+    url  = 'http://www.ntnu.no/studieinformasjon/timeplan/h08/?emnekode=%s' % \
+            urlquote(course.encode('latin-1'))
 
     errors = []
 
     text_only = lambda text: isinstance(text, NavigableString)
 
-    for number in [1,2,3]:
+    for number in [1, 2, 3]:
         html = ''.join(urlopen('%s-%d' % (url, number)).readlines())
-        table = BeautifulSoup(html).findAll('div', 'hovedramme')[0].findAll('table')[1]
+        table = BeautifulSoup(html).findAll('div', 'hovedramme')[0]. \
+                    findAll('table')[1]
 
         # Try and get rid of stuff we don't need.
         table.extract()
@@ -149,12 +155,12 @@ def scrape_course(course):
     if errors:
         raise Exception(errors)
 
-    type = None
+    lecture_type = None
     for tr in table.findAll('tr')[2:-1]:
-        time, weeks, room, lecturer, groups  = [], [], [], [], []
+        course_time, weeks, room, lecturer, groups  = [], [], [], [], []
         lecture = True
 
-        for i,td in enumerate(tr.findAll('td')):
+        for i, td in enumerate(tr.findAll('td')):
             # Break td loose from rest of table so that any refrences we miss
             # don't cause to big memory problems
             td.extract()
@@ -163,10 +169,11 @@ def scrape_course(course):
             # element.
             if i == 0:
                 if td.get('colspan') == '4':
-                    type = td.findAll(text=text_only)
+                    lecture_type = td.findAll(text=text_only)
                     lecture = False
 
-                    [t.extract() for t in type]
+                    for t in lecture_type:
+                        t.extract()
                     break
                 else:
                     for t in td.findAll('b')[0].findAll(text=text_only):
@@ -174,19 +181,21 @@ def scrape_course(course):
 
                         day, period = t.split(' ', 1)
                         start, end = [x.strip() for x in period.split('-')]
-                        time.append([day,start,end])
+                        course_time.append([day, start, end])
 
                     for week in td.findAll(text=re.compile('^Uke:')):
                         week.extract()
                         for w in week.replace('Uke:', '', 1).split(','):
                             if '-' in w:
-                                x,y = w.split('-')
-                                weeks.extend(range(int(x),int(y)))
+                                x, y = w.split('-')
+                                weeks.extend(range(int(x), int(y)))
                             else:
                                 weeks.append(int(w.replace(',', '')))
             elif i == 1:
-                [room.extend(a.findAll(text=text_only)) for a in td.findAll('a')]
-                [r.extract() for r in room]
+                for a in td.findAll('a'):
+                    room.extend(a.findAll(text=text_only))
+                for r in room:
+                    r.extract()
             elif i == 2:
                 for l in td.findAll(text=text_only):
                     l.extract()
@@ -201,8 +210,8 @@ def scrape_course(course):
 
         if lecture:
             results.append({
-                'type': type,
-                'time': time,
+                'type': lecture_type,
+                'time': course_time,
                 'weeks': weeks,
                 'room': room,
                 'lecturer': lecturer,
@@ -226,19 +235,22 @@ def scrape_course(course):
             room = None
 
         if r['type']:
-            type, created = Type.objects.get_or_create(name=r['type'][0])
+            lecture_type, created = Type.objects.get_or_create(name=r['type'][0])
         else:
-            type = None
+            lecture_type = None
 
-        day = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag'].index(r['time'][0][0])
+        day = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag']. \
+                index(r['time'][0][0])
 
         # We choose to be slightly naive and only care about which hour
         # something starts.
         start = int(r['time'][0][1].split(':')[0])
         end = int(r['time'][0][2].split(':')[0])
 
-        start = dict(map(lambda x: (int(x[1].split(':')[0]),x[0]), Lecture.START))[start]
-        end = dict(map(lambda x: (int(x[1].split(':')[0]),x[0]), Lecture.END))[end]
+        start = dict(map(lambda x: (int(x[1].split(':')[0]), x[0]),
+                    Lecture.START))[start]
+        end = dict(map(lambda x: (int(x[1].split(':')[0]), x[0]),
+                    Lecture.END))[end]
 
         lecture, created = Lecture.objects.get_or_create(
             course=course,
@@ -247,7 +259,7 @@ def scrape_course(course):
             start_time=start,
             end_time=end,
             room = room,
-            type = type,
+            type = lecture_type,
         )
         r['id'] = lecture.id
 

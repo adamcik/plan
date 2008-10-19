@@ -1,5 +1,10 @@
+# pylint: disable-msg=C0111, R0904
+
 from django.contrib import admin
-from plan.common.models import *
+from django.contrib.auth.models import User
+
+from plan.common.models import Course, Exam, Group, Lecture, Lecturer, \
+        Room, Semester, Type, Deadline, UserSet
 
 class CourseAdmin(admin.ModelAdmin):
     list_display = ('name', 'full_name', 'url')
@@ -34,6 +39,7 @@ class TypeAdmin(admin.ModelAdmin):
 class DeadlineAdmin(admin.ModelAdmin):
     raw_id_fields = ('userset',)
 
+admin.site.register(User)
 admin.site.register(Course, CourseAdmin)
 admin.site.register(Exam, ExamAdmin)
 admin.site.register(Group)

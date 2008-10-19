@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta, time
-from urllib import quote as urlquote
 
 from django.db import models
 from django.template.defaultfilters import slugify
@@ -12,7 +11,8 @@ class UserSet(models.Model):
     name = models.CharField(max_length=50, blank=True)
 
     added = models.DateTimeField(auto_now_add=True)
-    exclude = models.ManyToManyField('Lecture', blank=True, null=True, related_name='excluded_from')
+    exclude = models.ManyToManyField('Lecture', blank=True, null=True,
+                                     related_name='excluded_from')
 
     class Meta:
         unique_together = (('slug', 'course'),)
@@ -23,7 +23,7 @@ class UserSet(models.Model):
 
     def save(self, *args, **kwargs):
         self.name = slugify(self.name)
-        super(UserSet,self).save(*args, **kwargs)
+        super(UserSet, self).save(*args, **kwargs)
 
 class Type(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -86,7 +86,10 @@ class Semester(models.Model):
         (FALL, 'h'),
     )
 
-    year = models.PositiveSmallIntegerField(choices=[(x,x) for x in range(datetime.now().year-1,datetime.now().year+2)])
+    YEAR_CURRENT = datetime.now().year
+    YEAR_CHOICES = [(x, x) for x in range(YEAR_CURRENT-1, YEAR_CURRENT+2)]
+
+    year = models.PositiveSmallIntegerField(choices=YEAR_CHOICES)
     type = models.PositiveSmallIntegerField(choices=TYPES)
 
     def __unicode__(self):
@@ -97,15 +100,15 @@ class Semester(models.Model):
 
     def get_first_day(self):
         if self.type == self.SPRING:
-            return datetime(self.year,1,1)
+            return datetime(self.year, 1, 1)
         else:
-            return datetime(self.year,6,30)
+            return datetime(self.year, 6, 30)
 
     def get_last_day(self):
         if self.type == self.SPRING:
-            return datetime(self.year,6,30)
+            return datetime(self.year, 6, 30)
         else:
-            return datetime(self.year,12,31)
+            return datetime(self.year, 12, 31)
 
     @staticmethod
     def current():
@@ -141,7 +144,11 @@ class Exam(models.Model):
         ordering = ('handout_time', 'exam_time')
 
 class Week(models.Model):
-    number = models.PositiveSmallIntegerField(choices=[(x,x) for x in range(1,53)], unique=True)
+    NUMBER_CHOICES = [(x, x) for x in range(1, 53)]
+
+
+    number = models.PositiveSmallIntegerField(choices=NUMBER_CHOICES,
+                                              unique=True)
 
     def __unicode__(self):
         return '%d' % self.number
@@ -159,8 +166,8 @@ class Lecturer(models.Model):
         ordering = ('name',)
 
 class Lecture(models.Model):
-    START = [(i, '%02d:15' % i) for i in range(8,20)]
-    END = [(i, '%02d:00' % i) for i in range(9,21)]
+    START = [(i, '%02d:15' % i) for i in range(8, 20)]
+    END = [(i, '%02d:00' % i) for i in range(9, 21)]
 
     DAYS = (
         (0, 'Monday'),
@@ -185,7 +192,10 @@ class Lecture(models.Model):
     lecturers = models.ManyToManyField(Lecturer, blank=True, null=True)
 
     def __unicode__(self):
-        return u'%s: %s-%s on %s' % (self.course, self.get_start_time_display(), self.get_end_time_display(), self.get_day_display())
+        return u'%s: %s-%s on %s' % (self.course,
+                                     self.get_start_time_display(),
+                                     self.get_end_time_display(),
+                                     self.get_day_display())
 
     class Meta:
         ordering = ('course', 'day', 'start_time')
@@ -220,7 +230,8 @@ class Deadline(models.Model):
 
     def __unicode__(self):
         if self.time:
-            return '%s %s- %s %s' % (self.userset, self.userset.slug, self.date, self.time)
+            return '%s %s- %s %s' % (self.userset, self.userset.slug,
+                                     self.date, self.time)
         else:
             return '%s %s- %s' % (self.userset, self.userset.slug, self.date)
 

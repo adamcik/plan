@@ -1,19 +1,16 @@
 from django import forms
 
-from plan.common.models import *
-
-class CourseForm(forms.Form):
-    courses = forms.models.ModelMultipleChoiceField(Course.objects.all())
+from plan.common.models import Deadline, Group
 
 class CourseNameForm(forms.Form):
-        name = forms.CharField(widget=forms.TextInput(attrs={'size':8}), required=False)
-
-class LectureForm(forms.models.ModelForm):
-    class Meta:
-        model = Lecture
+    '''Form for changing userset names'''
+    name = forms.CharField(widget=forms.TextInput(attrs={'size':8}),
+                           required=False)
 
 class GroupForm(forms.Form):
-    groups = forms.models.ModelMultipleChoiceField(Group.objects.all(), required=False)
+    '''Form for selecting groups for a course (has a custom init)'''
+    groups = forms.models.ModelMultipleChoiceField(Group.objects.all(),
+                                                   required=False)
 
     def __init__(self, queryset, *args, **kwargs):
         super(GroupForm, self).__init__(*args, **kwargs)
@@ -22,6 +19,7 @@ class GroupForm(forms.Form):
         self.fields['groups'].widget.attrs['size'] = 5
 
 class DeadlineForm(forms.models.ModelForm):
+    '''Form for adding deadlines'''
     class Meta:
         model = Deadline
 

@@ -1,3 +1,5 @@
+# pylint: disable-msg=C0301
+
 from django.conf.urls.defaults import *
 
 urlpatterns = patterns('plan.common.views',

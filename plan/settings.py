@@ -1,3 +1,4 @@
+# pylint: disable-msg=W0614, C0111
 # Django settings for plan project.
 
 import os
@@ -72,8 +73,8 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'plan.urls'
 
 TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
+    # Put strings here, like "/home/html/django_templates" or
+    # "C:/www/django/templates".  Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     BASE_PATH + '/plan/templates',
 )
