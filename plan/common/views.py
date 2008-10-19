@@ -41,58 +41,6 @@ def get_semester(year, semester):
     except (KeyError, Semester.DoesNotExist):
         raise Http404
 
-def get_lectures(slug, semester):
-    """
-        Get all lectures for userset during given period.
-
-        To do this we need to pull in a bunch of extra tables and manualy join them
-        in the where cluase. The first element in the custom where is the important
-        one that limits our results, the rest are simply meant for joining.
-    """
-    # FIXME this should be part of a custom manger
-
-    where = [
-        'common_userset_groups.group_id = common_group.id',
-        'common_userset_groups.userset_id = common_userset.id',
-        'common_group.id = common_lecture_groups.group_id',
-        'common_lecture_groups.lecture_id = common_lecture.id'
-    ]
-    tables = [
-        'common_userset_groups',
-        'common_group',
-        'common_lecture_groups'
-    ]
-    select = {
-        'user_name': 'common_userset.name',
-        'exclude': """common_lecture.id IN
-            (SELECT common_userset_exclude.lecture_id
-             FROM common_userset_exclude WHERE
-             common_userset_exclude.userset_id = common_userset.id)""",
-    }
-
-    filter = {
-        'course__userset__slug': slug,
-        'course__userset__semester': semester,
-    }
-
-    related = [
-        'type__name',
-        'course__name',
-    ]
-
-    order = [
-        'course__name',
-        'day',
-        'start_time',
-        'type__name',
-    ]
-
-    return  Lecture.objects.filter(**filter).\
-                distinct().\
-                select_related(*related).\
-                extra(where=where, tables=tables, select=select).\
-                order_by(*order)
-
 def shortcut(request, slug):
     get_list_or_404(UserSet, slug=slug)
 
@@ -202,7 +150,7 @@ def schedule(request, year, semester, slug, advanced=False, week=None,
     course_list = Course.objects.filter(**course_filter). \
         extra(select={'user_name': 'common_userset.name'}).distinct()
 
-    initial_lectures = get_lectures(slug, semester)
+    initial_lectures = Lecture.objects.get_lectures(slug, semester)
 
     first_day = semester.get_first_day()
     last_day = semester.get_last_day()

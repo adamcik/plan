@@ -9,8 +9,8 @@ from django.http import HttpResponse
 
 from django.core.cache import cache
 
-from plan.common.models import Exam, Deadline
-from plan.common.views import get_semester, get_lectures
+from plan.common.models import Exam, Deadline, Lecture
+from plan.common.views import get_semester
 
 def ical(request, year, semester, slug, lectures=True, exams=True,
             deadlines=True):
@@ -25,7 +25,7 @@ def ical(request, year, semester, slug, lectures=True, exams=True,
     cal.add('method').value = 'PUBLISH'  # IE/Outlook needs this
 
     if lectures:
-        add_lectutures(get_lectures(slug, semester), semester, cal)
+        add_lectutures(Lecture.objects.get_lectures(slug, semester), semester, cal)
 
     if exams:
         first_day = semester.get_first_day()

@@ -3,6 +3,8 @@ from datetime import datetime, timedelta, time
 from django.db import models
 from django.template.defaultfilters import slugify
 
+from plan.common.managers import LectureManager
+
 class UserSet(models.Model):
     slug = models.SlugField()
     course = models.ForeignKey('Course')
@@ -190,6 +192,8 @@ class Lecture(models.Model):
     weeks = models.ManyToManyField(Week, blank=True, null=True)
     groups = models.ManyToManyField(Group, blank=True, null=True)
     lecturers = models.ManyToManyField(Lecturer, blank=True, null=True)
+
+    objects = LectureManager()
 
     def __unicode__(self):
         return u'%s: %s-%s on %s' % (self.course,
