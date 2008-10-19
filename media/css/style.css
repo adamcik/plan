@@ -104,6 +104,12 @@ p.right {
 	text-align: right;
 }
 
+.icon {
+	background: no-repeat top left;
+	padding-left: 20px;
+	min-height: 20px;
+}
+
 /* error classes */
 .errorlist {
 	color: #A00000;

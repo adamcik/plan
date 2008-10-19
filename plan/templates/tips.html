@@ -1,33 +1,33 @@
 <h2 id="tips" class="noprint">Tips</h2>
 <div class="yui-g noprint">
     <div class="yui-u first">
-        <p style="background: url({{ MEDIA_URL }}gfx/add.png) no-repeat top left; padding-left: 20px; min-height: 20px">
+        <p style="background-image: url({{ MEDIA_URL }}gfx/add.png)" class="icon">
             Multiple courses can be added at once by separating course codes with spaces.
         </p>
-        <p style="background: url({{ MEDIA_URL }}gfx/link.png) no-repeat top left; padding-left: 20px; min-height: 20px">
+        <p style="background-image: url({{ MEDIA_URL }}gfx/link.png)" class="icon">
              For quick access to your schedule simply go to
             <a href="{% url shortcut slug %}">{{ request.META.HTTP_HOST }}{% url shortcut slug %}</a>
         </p>
-        <p style="background: url({{ MEDIA_URL }}gfx/hide.png) no-repeat top left; padding-left: 20px; min-height: 20px">
+        <p style="background-image: url({{ MEDIA_URL }}gfx/hide.png)" class="icon">
             Did you know that you can choose to hide lectures that you don't want to be shown under
             <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">adavanced options</a>?
         </p>
-        <p style="background: url({{ MEDIA_URL }}gfx/save.png) no-repeat top left; padding-left: 20px; min-height: 20px">
+        <p style="background-image: url({{ MEDIA_URL }}gfx/save.png)" class="icon">
             Did you know that you can select which groups (paralleller) you
             want to attend, and than you can select more that one group?
         </p>
-        <p style="background: url({{ MEDIA_URL }}gfx/name.png) no-repeat top left; padding-left: 20px; min-height: 20px">
+        <p style="background-image: url({{ MEDIA_URL }}gfx/name.png)" class="icon">
             Did you know that you can change which names are used for courses under
             <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">adavanced options</a>?
         </p>
     </div>
     <div class="yui-u">
-        <p style="background: url({{ MEDIA_URL }}gfx/list.png) no-repeat top left; padding-left: 20px; min-height: 20px">
+        <p style="background-image: url({{ MEDIA_URL }}gfx/list.png)" class="icon">
             The <a href="{% url course-list semester.year,semester.get_type_display,slug %}">course list</a>
             contains all courses for the current semester, including exam dates and
             allows you to easily select courses to add to your schedule.
         </p>
-        <p style="background: url({{ MEDIA_URL }}gfx/ical.png) no-repeat top left; padding-left: 20px; min-height: 20px">
+        <p style="background-image: url({{ MEDIA_URL }}gfx/ical.png)" class="icon">
             Calendar export:
             <a href="{% url schedule-ical-lectures semester.year,semester.get_type_display,slug %}">lectures</a>,
             <a href="{% url schedule-ical-exams semester.year,semester.get_type_display,slug %}">exams</a>,
@@ -36,7 +36,7 @@
             <br />
             Simply download or copy the link to the calendar you want and add it to any application that supports the Ical format.
         </p>
-        <p style="background: url({{ MEDIA_URL }}gfx/gcal.png) no-repeat top left; padding-left: 20px; min-height: 20px">
+        <p style="background-image: url({{ MEDIA_URL }}gfx/gcal.png)" class="icon">
             Google calendar:
             <a target="_blank" href="http://www.google.com/calendar/render?cid=http://{{ request.META.HTTP_HOST }}{% url schedule-ical-lectures semester.year,semester.get_type_display,slug %}">lectures</a>,
             <a target="_blank" href="http://www.google.com/calendar/render?cid=http://{{ request.META.HTTP_HOST }}{% url schedule-ical-exams semester.year,semester.get_type_display,slug %}">exams</a>,
@@ -45,7 +45,7 @@
             <br />
             Simply click the calendar type you want and it will be added to Google calendar.
         </p>
-        <p style="background: url({{ MEDIA_URL }}gfx/copy.png) no-repeat top left; padding-left: 20px; min-height: 20px">
+        <p style="background-image: url({{ MEDIA_URL }}gfx/copy.png)" class="icon">
             Enter a space separated list of your friends timetables to copy
             the deadlines they have entered for any classes you're both attending.
         </p>
