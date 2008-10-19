@@ -42,6 +42,8 @@ def get_semester(year, semester):
         raise Http404
 
 def shortcut(request, slug):
+    '''Redirect users to their timetable for the current semester'''
+
     semester = Semester.current()
 
     get_list_or_404(UserSet, slug=slug, semester__year=semester.year,
@@ -51,6 +53,8 @@ def shortcut(request, slug):
             args = [semester.year, semester.get_type_display(), slug]))
 
 def getting_started(request):
+    '''Intial top level page that greets users'''
+
     semester = Semester.current()
 
     if request.method == 'POST' and 'slug' in request.POST:
@@ -98,6 +102,8 @@ def getting_started(request):
 
 def schedule(request, year, semester, slug, advanced=False, week=None,
         deadline_form=None, cache_page=True):
+
+    '''Page that handels showing schedules'''
 
     t = request.timer
     response = cache.get(request.path)
@@ -460,6 +466,8 @@ def schedule(request, year, semester, slug, advanced=False, week=None,
     return response
 
 def select_groups(request, year, semester_type, slug):
+    '''Form handler for selecting groups to use in schedule'''
+
     semester = get_semester(year, semester_type)
 
     if request.method == 'POST':
@@ -487,6 +495,8 @@ def select_groups(request, year, semester_type, slug):
             args=[semester.year,semester.get_type_display(),slug]))
 
 def new_deadline(request, year, semester_type, slug):
+    '''Handels addition of tasks, reshows schedule view if form does not
+       validate'''
     semester = get_semester(year, semester_type)
 
     if request.method == 'POST':
@@ -521,6 +531,8 @@ def new_deadline(request, year, semester_type, slug):
             args = [semester.year,semester.get_type_display(),slug]))
 
 def copy_deadlines(request, year, semester_type, slug):
+    '''Handles importing of deadlines'''
+
     semester = get_semester(year, semester_type)
 
     if request.method == 'POST':
@@ -580,6 +592,11 @@ def copy_deadlines(request, year, semester_type, slug):
             args=[semester.year,semester.get_type_display(),slug]))
 
 def select_course(request, year, type, slug, add=False):
+    '''Handle selecting of courses from course list, change of names and
+       removeall of courses'''
+
+    # FIXME split ut three sub functions into seperate functions?
+
     semester = get_semester(year, type)
 
     if request.method == 'POST':
@@ -691,6 +708,8 @@ def select_course(request, year, type, slug, add=False):
             args=[semester.year, semester.get_type_display(), slug]))
 
 def select_lectures(request, year, type, slug):
+    '''Handle selection of lectures to hide'''
+
     if request.method == 'POST':
         excludes = request.POST.getlist('exclude')
 
@@ -711,9 +730,16 @@ def select_lectures(request, year, type, slug):
             args=[year,type,slug]))
 
 def list_courses(request, year, semester, slug):
+    '''Display a list of courses based on when exam is'''
+
+    # FIXME this needs to become custom SQL so that we can handle the joins
+    # correctly, courses without exams probably won't be listed.
+
+    # - Possible solution here is using Course.objects with custom sql?
+    # - Custom manager ?
+
     if request.method == 'POST':
         return select_course(request, year, semester, slug, add=True)
-
 
     response = cache.get('course_list')
 
