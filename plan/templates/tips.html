@@ -16,6 +16,10 @@
             Did you know that you can select which groups (paralleller) you
             want to attend, and than you can select more that one group?
         </p>
+        <p style="background: url({{ MEDIA_URL }}gfx/name.png) no-repeat top left; padding-left: 20px; min-height: 20px">
+            Did you know that you can change which names are used for courses under
+            <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">adavanced options</a>?
+        </p>
     </div>
     <div class="yui-u">
         <p style="background: url({{ MEDIA_URL }}gfx/list.png) no-repeat top left; padding-left: 20px; min-height: 20px">
