@@ -308,7 +308,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
             if all_groups:
                 course_groups_ids = course_groups.values_list('id', flat=True)
 
-                if len(course_groups_ids) > 1:
+                if len(course_groups_ids) > 2:
                     all_groups = set(initial_groups) == set(course_groups_ids)
 
             # SQL: For loop generates to quries per userset.
