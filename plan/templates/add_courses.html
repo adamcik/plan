@@ -1,6 +1,8 @@
 {% if advanced or not legend %}
     <form action="{% url change-course semester.year,semester.get_type_display,slug %}" method="post" class="noprint">
-        <h2>Add courses</h2>
+        {% if legend %}
+            <h2>Add courses</h2>
+        {% endif %}
         <p>
             <span class="large">Please enter the codes for the courses you want to attend:</span>
             <input id="course" type="text" name="course_add" size="46"/>

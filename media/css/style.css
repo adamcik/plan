@@ -187,6 +187,13 @@ td.error input, td.error select {
 	margin-right: 0.5em;
 }
 
+#help {
+	border: 1px solid #CCC;
+	background: #FFC;
+	padding: 1em 1em 0;
+	margin-bottom: 1em;
+}
+
 /* schedule styling */
 
 /* cell contents */

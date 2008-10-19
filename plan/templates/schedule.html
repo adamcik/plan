@@ -10,9 +10,18 @@
 
 {% block bd %}
     {% if not legend %}
-        {% include "add_courses.html" %}
+        <div id="help">
+            {% include "add_courses.html" %}
+        </div>
     {% endif %}
 
+    {% if group_help and legend %}
+        <div id="help" class="large">
+            <p>
+                Use <a href="#groups">change groups</a> to limit which groups/parallels you want in your schedule.
+            </p>
+        </div>
+    {%  endif %}
     {% include "schedule_table.html" %}
 
     <p class="noprint large">
@@ -28,10 +37,6 @@
             {% endif %}
         {% endif %}
         - <a href="#tips"><img alt="" src="{{ MEDIA_URL }}gfx/tips.png" />Tips</a>
-        {% if group_help %}
-            - <a href="groups">Change groups</a> to limit
-              groups/parallels in your schedule
-        {%  endif %}
     </p>
 
     {% if legend %}
