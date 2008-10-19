@@ -42,10 +42,10 @@ def get_semester(year, semester):
         raise Http404
 
 def shortcut(request, slug):
-    get_list_or_404(UserSet, slug=slug)
-
-    # FIXME .current should be on a manager
     semester = Semester.current()
+
+    get_list_or_404(UserSet, slug=slug, semester__year=semester.year,
+            semester__type=semester.type)
 
     return HttpResponseRedirect(reverse('schedule',
             args = [semester.year, semester.get_type_display(), slug]))
@@ -68,7 +68,9 @@ def getting_started(request):
     context = cache.get('stats')
 
     if not context:
-        limit = 20
+        slug_count = int(UserSet.objects.values('slug').distinct().count())
+        subscription_count = int(UserSet.objects.count())
+        deadline_count = int(Deadline.objects.count())
 
         cursor = connection.cursor()
         cursor.execute('''
@@ -76,11 +78,7 @@ def getting_started(request):
                 common_userset u JOIN common_course c ON (c.id = u.course_id)
             GROUP BY c.name, c.full_name
             ORDER BY num DESC
-            LIMIT %d''' % limit)
-
-        slug_count = int(UserSet.objects.values('slug').distinct().count())
-        subscription_count = int(UserSet.objects.count())
-        deadline_count = int(Deadline.objects.count())
+            LIMIT 20''')
 
         stats = []
         for i, row in enumerate(cursor.fetchall()):
