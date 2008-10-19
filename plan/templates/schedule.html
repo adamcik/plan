@@ -18,7 +18,7 @@
     {% if group_help and legend %}
         <div id="help" class="large">
             <p>
-                Use <a href="#groups">change groups</a> to limit which groups/parallels you want in your schedule.
+                Use <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}#groups">change groups</a> to limit which groups/parallels you want in your schedule.
             </p>
         </div>
     {%  endif %}
