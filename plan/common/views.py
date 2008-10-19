@@ -9,6 +9,7 @@ from django.template.context import RequestContext
 from django.template.defaultfilters import slugify
 from django.core.cache import cache
 from django.db import connection
+from django.db.models import Q
 from django.views.generic.list_detail import object_list
 from django.conf import settings
 
@@ -732,12 +733,6 @@ def select_lectures(request, year, type, slug):
 def list_courses(request, year, semester, slug):
     '''Display a list of courses based on when exam is'''
 
-    # FIXME this needs to become custom SQL so that we can handle the joins
-    # correctly, courses without exams probably won't be listed.
-
-    # - Possible solution here is using Course.objects with custom sql?
-    # - Custom manager ?
-
     if request.method == 'POST':
         return select_course(request, year, semester, slug, add=True)
 
@@ -749,23 +744,23 @@ def list_courses(request, year, semester, slug):
         first_day = semester.get_first_day()
         last_day = semester.get_last_day()
 
-        exams = Exam.objects.filter(
-                exam_date__gt=first_day,
-                exam_date__lt=last_day,
-                course__semesters__in=[semester]
-            ).select_related(
-                'course__name',
-                'course__full_name'
-            ).order_by(
-                'course__name',
-                'handout_date',
-                'exam_date'
-            )
+        no_exam = Q(exam__isnull=True)
+        with_exam = Q(exam__exam_date__gt=first_day, exam__exam_date__lt=last_day)
+
+        courses = Course.objects.filter(semesters__in=[semester]). \
+            filter(no_exam | with_exam).extra(select={
+                'exam_date': 'common_exam.exam_date',
+                'exam_time': 'common_exam.exam_time',
+                'handout_date': 'common_exam.handout_date',
+                'handout_time': 'common_exam.handout_time',
+                'type': 'common_exam.type',
+                'type_name': 'common_exam.type_name',
+            })
 
         response = object_list(request,
-                exams,
+                courses,
                 extra_context={'semester': semester},
-                template_object_name='exam',
+                template_object_name='course',
                 template_name='course_list.html')
 
         cache.set('course_list', response)

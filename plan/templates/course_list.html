@@ -31,51 +31,51 @@
                 </tr>
             </thead>
             <tbody>
-                {% for exam in exam_list %}
+                {% for course in course_list %}
                     <tr>
-                        {% ifchanged exam.course_id %}
-                            <td{% ifchanged exam.course.name.0 %} id="{{ exam.course.name.0 }}"{% endifchanged %}>
-                                <input type="checkbox" name="course_add" value="{{ exam.course.name }}" id="course_{{ exam.course_id }}" />
+                        {% ifchanged course.id %}
+                            <td{% ifchanged course.name.0 %} id="{{ course.name.0 }}"{% endifchanged %}>
+                                <input type="checkbox" name="course_add" value="{{ course.name }}" id="course_{{ course.id }}" />
                             </td>
                             <td>
-                                <label for="course_{{ exam.course_id }}"><b>{{ exam.course.name }}</b></label>
+                                <label for="course_{{ course.id }}"><b>{{ course.name }}</b></label>
                             </td>
                             <td class="small">
-                                <label for="course_{{ exam.course_id }}">{{ exam.course.full_name }}</label>
+                                <label for="course_{{ course.id }}">{{ course.full_name }}</label>
                             </td>
-                            <td align="number">
-                                {{ exam.course.points|default:""|floatformat:"1" }}
+                            <td align="right">
+                                {{ course.points|default:""|floatformat:"1" }}
                             </td>
                         {% else %}
                             <td colspan="4"></td>
                         {% endifchanged %}
                         <td>
-                            {{ exam.exam_date }}
+                            {{ course.exam_date|default_if_none:"-" }}
                         </td>
                         <td>
-                            {% if exam.exam_time %}
-                                {{ exam.exam_time|time:"H:i" }}
+                            {% if course.exam_time %}
+                                {{ course.exam_time|time:"H:i" }}
                             {% endif %}
                         </td>
                         <td>
-                            {% if exam.type_name %}
-                                {% if exam.type %}
-                                    {{ exam.type_name|lower|capfirst }} ({{ exam.type }})
+                            {% if course.type_name %}
+                                {% if course.type %}
+                                    {{ course.type_name|lower|capfirst }} ({{ course.type }})
                                 {% else %}
-                                    {{ exam.type_name|lower|capfirst }}
+                                    {{ course.type_name|lower|capfirst }}
                                 {% endif %}
                             {% else %}
-                                {{ exam.type }}
+                                {{ course.type|default_if_none:"-" }}
                             {% endif %}
                         </td>
                         <td>
-                            {% if exam.handout_date %}
-                                {{ exam.handout_date }}
+                            {% if course.handout_date %}
+                                {{ course.handout_date }}
                             {% endif %}
                         </td>
                         <td>
-                            {% if exam.handout_time %}
-                                {{ exam.handout_time|time:"H:i" }}
+                            {% if course.handout_time %}
+                                {{ course.handout_time|time:"H:i" }}
                             {% endif %}
                         </td>
                     </tr>
