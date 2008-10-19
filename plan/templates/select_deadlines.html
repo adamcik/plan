@@ -40,8 +40,10 @@
             </p>
         </form>
     {% else %}
-        <p>
-            No deadlines found. Return to your <a href="{% url schedule semester.year,semester.get_type_display,slug %}">schedule</a>.
-        </p>
+        <div id="help">
+            <p>
+                No deadlines found. Return to your <a href="{% url schedule semester.year,semester.get_type_display,slug %}">schedule</a>.
+            </p>
+        </div>
     {% endif %}
 {% endblock %}

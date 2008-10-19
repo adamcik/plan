@@ -5,18 +5,20 @@
 {% endblock %}
 
 {% block bd %}
-    <p class="large"><img alt="" src="{{ MEDIA_URL }}gfx/error.png" /> Adding the following courses failed:</p>
-    <ul>
-        {% for c in courses %}
-            <li>{{ c|upper }}</li>
-        {% endfor %}
-    </ul>
+    <div id="help">
+        <p class="large"><img alt="" src="{{ MEDIA_URL }}gfx/error.png" /> Adding the following courses failed:</p>
+        <ul>
+            {% for c in courses %}
+                <li>{{ c|upper }}</li>
+            {% endfor %}
+        </ul>
+        <p class="large">
+            Back to your <a href="{% url schedule-advanced year,type,slug %}">schedule</a>.
+        </p>
+    </div>
     <p>
         Please check that the courses that failed can be found at
         <a href="http://www.ntnu.no/studieinformasjon/timeplan">http://www.ntnu.no/studieinformasjon/timeplan</a>
         for this semster.
-    </p>
-    <p class="large">
-        Back to your <a href="{% url schedule-advanced year,type,slug %}">schedule</a>.
     </p>
 {% endblock %}

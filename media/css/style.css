@@ -119,8 +119,7 @@ p.right {
 	margin: 0;
 }
 td.error input, td.error select {
-	border: 1px solid #A00000;
-	background: #FEE;
+	background: #FCC;
 }
 
 /* Indicate that things have expired or are excluded */

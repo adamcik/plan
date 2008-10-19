@@ -47,9 +47,6 @@ def shortcut(request, slug):
 
     semester = Semester.current()
 
-    get_list_or_404(UserSet, slug=slug, semester__year=semester.year,
-            semester__type=semester.type)
-
     return HttpResponseRedirect(reverse('schedule',
             args = [semester.year, semester.get_type_display(), slug]))
 
@@ -520,7 +517,7 @@ def new_deadline(request, year, semester_type, slug):
             if deadline_form.is_valid():
                 deadline_form.save()
             else:
-                return schedule(request, year, type, slug, advanced=True,
+                return schedule(request, year, semester_type, slug, advanced=True,
                         deadline_form=deadline_form, cache_page=False)
 
         elif 'submit_remove' in post:
@@ -708,27 +705,27 @@ def select_course(request, year, semester_type, slug, add=False):
     return HttpResponseRedirect(reverse('schedule-advanced',
             args=[semester.year, semester.get_type_display(), slug]))
 
-def select_lectures(request, year, type, slug):
+def select_lectures(request, year, semester_type, slug):
     '''Handle selection of lectures to hide'''
+    semester = get_semester(year, semester_type)
 
     if request.method == 'POST':
         excludes = request.POST.getlist('exclude')
 
         userset_filter = {
             'slug': slug,
-            'semester__type': type,
-            'semester__year': year,
+            'semester': semester,
         }
 
         for userset in UserSet.objects.filter(**userset_filter):
             userset.exclude = userset.course.lecture_set.filter(id__in=excludes)
 
-        clear_cache(year, type, slug)
+        clear_cache(semester.year, semester.get_type_display(), slug)
 
         logging.debug('Deleted cache')
 
     return HttpResponseRedirect(reverse('schedule-advanced',
-            args=[year,type,slug]))
+            args=[semester.year, semester.get_type_display(), slug]))
 
 def list_courses(request, year, semester, slug):
     '''Display a list of courses based on when exam is'''
