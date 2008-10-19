@@ -101,7 +101,7 @@ def getting_started(request):
 
     return render_to_response('start.html', context, RequestContext(request))
 
-def schedule(request, year, semester, slug, advanced=False, week=None,
+def schedule(request, year, semester_type, slug, advanced=False, week=None,
         deadline_form=None, cache_page=True):
 
     '''Page that handels showing schedules'''
@@ -146,7 +146,7 @@ def schedule(request, year, semester, slug, advanced=False, week=None,
     # Keep track if all groups are selected for all courses
     all_groups = True
 
-    semester = get_semester(year, semester)
+    semester = get_semester(year, semester_type)
 
     course_filter = {
         'userset__slug': slug,
