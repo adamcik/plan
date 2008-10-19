@@ -592,13 +592,13 @@ def copy_deadlines(request, year, semester_type, slug):
     return HttpResponseRedirect(reverse('schedule',
             args=[semester.year,semester.get_type_display(),slug]))
 
-def select_course(request, year, type, slug, add=False):
+def select_course(request, year, semester_type, slug, add=False):
     '''Handle selecting of courses from course list, change of names and
        removeall of courses'''
 
     # FIXME split ut three sub functions into seperate functions?
 
-    semester = get_semester(year, type)
+    semester = get_semester(year, semester_type)
 
     if request.method == 'POST':
 
