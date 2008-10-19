@@ -42,20 +42,25 @@
     {% if legend %}
         <div class="yui-g">
             <div class="yui-u first">
-                {% include "add_courses.html" %}
                 {% include "courses.html" %}
                 {% include "exams.html" %}
+                {% if advanced %}
+                    {% include "deadlines.html" %}
+                {% endif %}
             </div>
             <div class="yui-u">
-                {% include "deadlines.html" %}
+                {% if not advanced %}
+                    {% include "deadlines.html" %}
+                {% endif %}
+                {% include "add_courses.html" %}
+                {% if courses and advanced %}
+                    {% include "groups.html" %}
+                {% endif %}
                 {% include "add_deadlines.html" %}
             </div>
         </div>
     {% endif %}
 
-    {% if courses and advanced %}
-        {% include "groups.html" %}
-    {% endif %}
 
     {% if lectures %}
         {% include "lectures.html" %}

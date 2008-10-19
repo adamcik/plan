@@ -164,7 +164,7 @@ td.error input, td.error select {
 	padding: 0.2em 0.5em;
 	margin-right: 0.5em;
 	border: 1px solid #666;
-	width: 18%;
+	width: 28%;
 	min-height: 10em;
 	*height: 10em;
 }
