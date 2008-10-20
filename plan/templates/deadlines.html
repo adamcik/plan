@@ -1,6 +1,4 @@
-{% if deadlines or not advanced %}
-    <h2 id="deadlines">Deadlines</h2>
-{% endif %}
+<h2 id="deadlines">Deadlines</h2>
 {% if deadlines %}
     <form method="post" action="{% url new-deadline semester.year,semester.get_type_display,slug %}#deadlines">
         <table>
@@ -36,6 +34,9 @@
         {% endif %}
     </form>
 {% endif %}
-{% if deadlines and not advanced %}
+{% if legend and not advanced %}
     <p class="noprint">Go to <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">advanced options</a> to add and remove deadlines.</p>
+{% endif %}
+{% if legend and advanced %}
+    <p>No deadlines to show, feel free to add some.</p>
 {% endif %}
