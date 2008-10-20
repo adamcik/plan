@@ -69,7 +69,7 @@ def getting_started(request):
 
     context = cache.get('stats')
 
-    if not context:
+    if not context or 'no-cache' in request.GET:
         slug_count = int(UserSet.objects.values('slug').distinct().count())
         subscription_count = int(UserSet.objects.count())
         deadline_count = int(Deadline.objects.count())
@@ -80,7 +80,7 @@ def getting_started(request):
                 common_userset u JOIN common_course c ON (c.id = u.course_id)
             GROUP BY c.name, c.full_name
             ORDER BY num DESC
-            LIMIT 20''')
+            LIMIT 15''')
 
         stats = []
         for i, row in enumerate(cursor.fetchall()):
@@ -141,7 +141,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
     rooms = {}
 
     # Keep track if all groups are selected for all courses
-    all_groups = True
+    all_groups = False
 
     semester = get_semester(year, semester_type)
 
@@ -305,10 +305,10 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
                     lecture__course__id=u.course_id
                 ).distinct()
 
-            if all_groups:
+            if not all_groups:
                 course_groups_ids = course_groups.values_list('id', flat=True)
 
-                if len(course_groups_ids) > 2:
+                if len(course_groups_ids) > 2 and len(initial_groups) > 2:
                     all_groups = set(initial_groups) == set(course_groups_ids)
 
             # SQL: For loop generates to quries per userset.
