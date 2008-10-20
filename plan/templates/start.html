@@ -25,23 +25,6 @@
                 To retrieve your timetable simply enter the same identifier
                 you used last time.
             </p>
-<!--
-            <h2>Screenshot</h2>
-            <p>
-                <img alt="Screenshot" src="{{ MEDIA_URL }}screenshot.png" />
-            </p>
--->
-            <h2>Disclaimer</h2>
-            <p>
-                This site is <b>not</b> run by NTNU and is not hosted on any of
-                their servers.
-            </p>
-            <p>
-                All course and exam data is retrived from NTNU's public sites.
-                All deadlines have been added manualy by users. Please note that
-                the course data displayed on this site can be out of sync with
-                NTNU if they make changes to their schedules
-            </p>
             <h2>Statistics</h2>
             <p class="small">
                 Total number of unique timetables -
@@ -58,6 +41,12 @@
                 <dt><b>exams:</b></dt>         <dd>{{ exam_count }}</dd>
                 -->
             </p>
+<!--
+            <h2>Screenshot</h2>
+            <p>
+                <img alt="Screenshot" src="{{ MEDIA_URL }}screenshot.png" />
+            </p>
+-->
         </div>
         <div class="yui-u">
             <h2>Top {{ stats|length }} courses</h2>
@@ -71,4 +60,15 @@
             </div>
         </div>
     </div>
+    <h2>Disclaimer</h2>
+    <p>
+        This site is <b>not</b> run by NTNU and is not hosted on any of
+        their servers.
+    </p>
+    <p>
+        All course and exam data is retrived from NTNU's public sites.
+        All deadlines have been added manualy by users. Please note that
+        the course data displayed on this site can be out of sync with
+        NTNU if they make changes to their schedules
+    </p>
 {% endblock %}
