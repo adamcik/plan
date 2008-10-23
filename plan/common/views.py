@@ -691,14 +691,16 @@ def select_course(request, year, semester_type, slug, add=False):
                 if form.is_valid():
                     logging.debug("Form for %s is valid" % u)
 
-                    name = form.cleaned_data['name']
+                    name = form.cleaned_data['name'].strip()
 
-                    if name != u.course.name:
-                        # We don't check for empty strings as that
-                        # equals not set
-                        logging.debug("Saving %s as %s" % (u.course.name, name))
-                        u.name = name
-                        u.save()
+                    if name.upper() == u.course.name.upper() or name == "":
+                        # Leave as blank if we match the current course name
+                        name = ""
+
+                    u.name = name
+
+                    logging.debug("Saving %s as %s" % (u.course.name, name))
+                    u.save()
                 else:
                     logging.debug("Form for %s is invalid" % u)
 
