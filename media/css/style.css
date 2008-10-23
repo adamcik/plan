@@ -178,8 +178,8 @@ td.error input, td.error select {
 #stats div {
 	margin-bottom: 1px;
 	padding: 0.1em 0.5em;
-	-moz-border-radius: 0 0.5em 0.5em 0;
-	-webkit-border-radius: 0 0.5em 0.5em 0;
+	-moz-border-radius: 0 2px 2px 0;
+	-webkit-border-radius: 0 2px 2px 0;
 }
 
 /* Links on all pages nedd constant width b */
@@ -197,6 +197,8 @@ td.error input, td.error select {
 	background: #FFC;
 	padding: 1em 1em 0;
 	margin-bottom: 1em;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
 }
 
 /* schedule styling */
