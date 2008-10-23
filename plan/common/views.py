@@ -422,7 +422,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
             courses[i] = (c[0], group_forms.get(c[0].id, None))
 
             # FIXME Loop usersets instead of courses
-            name = c[0].user_name or c[0].name
+            name = c[0].user_name or ''
             courses[i][0].name_form = CourseNameForm(initial={'name': name},
                                                      prefix=c[0].id)
 
