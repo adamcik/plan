@@ -367,28 +367,28 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
     t.tick('Done adding times')
 
     # Add colors and exlude status
-    for i, lecture in enumerate(initial_lectures):
-        initial_lectures[i].css_class = color_map[lecture.course_id]
+    for lecture in initial_lectures:
+        lecture.css_class = color_map[lecture.course_id]
 
         compact_weeks = compact_sequence(weeks.get(lecture.id, []))
 
-        initial_lectures[i].sql_weeks = compact_weeks
-        initial_lectures[i].sql_groups = groups.get(lecture.id, [])
-        initial_lectures[i].sql_lecturers = lecturers.get(lecture.id, [])
-        initial_lectures[i].sql_rooms = rooms.get(lecture.id, [])
+        lecture.sql_weeks = compact_weeks
+        lecture.sql_groups = groups.get(lecture.id, [])
+        lecture.sql_lecturers = lecturers.get(lecture.id, [])
+        lecture.sql_rooms = rooms.get(lecture.id, [])
 
     if advanced:
-        for i, c in enumerate(courses):
-            courses[i].group_form = group_forms.get(c.id, None)
-            courses[i].name_form = CourseNameForm(initial={'name': c.user_name or ''}, prefix=c.id)
+        for course in courses:
+            course.group_form = group_forms.get(c.id, None)
+            course.name_form = CourseNameForm(initial={'name': c.user_name or ''}, prefix=c.id)
 
         t.tick('Done lecture css_clases and excluded status')
 
-    for i, exam in enumerate(exam_list):
-        exam_list[i].css_class = color_map[exam.course_id]
+    for exam in exam_list:
+        exam.css_class = color_map[exam.course_id]
 
-    for i, deadline in enumerate(deadlines):
-        deadlines[i].css_class = color_map[deadline.userset.course_id]
+    for deadline in deadlines:
+        deadline.css_class = color_map[deadline.userset.course_id]
 
     t.tick('Starting render to response')
     response = render_to_response('schedule.html', {
