@@ -70,8 +70,9 @@ def getting_started(request):
             LIMIT 15''')
 
         stats = []
+        color_map = ColorMap(max=settings.MAX_COLORS)
         for i, row in enumerate(cursor.fetchall()):
-            stats.append(row + ('lecture%d' % (i % MAX_COLORS),))
+            stats.append(row + (color_map[i],))
 
         context = {
             'slug_count': slug_count,
