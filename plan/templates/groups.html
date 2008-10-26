@@ -6,11 +6,11 @@
         press <code>CTRL</code> and the groups you want.
     </p>
     <div id="change-groups">
-        {% for course,groups in courses %}
+        {% for course in courses %}
             <p class="{{ course.css_class }} groupbox" title="{{ course.full_name }}">
                 <b>{{ course.user_name|default:course }}</b> <br />
                 <span class="small">{{ course.full_name|truncatewords:"3" }}</span> <br />
-                {{ groups.groups }}
+                {{ course.group_form.groups }}
             </p>
         {% endfor %}
     </div>

@@ -1,6 +1,6 @@
-{% if advanced or not legend %}
+{% if advanced or not courses %}
     <form action="{% url change-course semester.year,semester.get_type_display,slug %}" method="post" class="noprint">
-        {% if legend %}
+        {% if courses %}
             <h2>Add courses</h2>
         {% endif %}
         <p>

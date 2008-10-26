@@ -1,6 +1,6 @@
 <form action="{% url change-course semester.year,semester.get_type_display,slug %}" method="post">
     <h2>Courses</h2>
-    {% if legend %}
+    {% if courses %}
         <table>
             <thead>
                 <tr>
@@ -14,7 +14,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for course in legend %}
+                {% for course in courses %}
                     <tr class="{{ course.css_class }}" title="{{ course.full_name }}">
                         {% if advanced %}
                             <td>
@@ -50,7 +50,7 @@
     {% endif %}
 
 
-    {% if legend and advanced %}
+    {% if courses and advanced %}
         <p class="noprint">
             <button name="submit_name" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/name.png" /> Update names</button>
             <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/remove.png" /> Remove selected</button>

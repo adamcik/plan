@@ -183,7 +183,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
 
         c.css_class = color_map[c.id]
 
-        courses.append((c, None))
+        courses.append(c)
 
         t.tick('Added course %s' % c.name)
 
@@ -401,13 +401,8 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
 
     if advanced:
         for i, c in enumerate(courses):
-            # FIXME cleanup use of tuple
-            courses[i] = (c[0], group_forms.get(c[0].id, None))
-
-            # FIXME Loop usersets instead of courses
-            name = c[0].user_name or ''
-            courses[i][0].name_form = CourseNameForm(initial={'name': name},
-                                                     prefix=c[0].id)
+            courses[i].group_form = group_forms.get(c.id, None)
+            courses[i].name_form = CourseNameForm(initial={'name': c.user_name or ''}, prefix=c.id)
 
         t.tick('Done lecture css_clases and excluded status')
 
@@ -427,7 +422,6 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
             'exams': exam_list,
             'group_help': all_groups,
             'lectures': initial_lectures,
-            'legend': map(lambda x: x[0], courses),
             'semester': semester,
             'slug': slug,
             'table': table,

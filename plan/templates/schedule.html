@@ -9,13 +9,13 @@
 {% endblock %}
 
 {% block bd %}
-    {% if not legend %}
+    {% if not courses %}
         <div id="help">
             {% include "add_courses.html" %}
         </div>
     {% endif %}
 
-    {% if group_help and legend %}
+    {% if group_help and courses %}
         <div id="help" class="large">
             <p>
                 Use <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}#groups">change groups</a> to limit which groups/parallels you want in your schedule.
@@ -27,7 +27,7 @@
     <p class="noprint large">
         <a href="{% url course-list semester.year,semester.get_type_display,slug %}">
             <img alt="" src="{{ MEDIA_URL }}gfx/list.png" />Course list</a>
-        {% if legend %}
+        {% if courses %}
             {% if advanced %}
                 - <a href="{% url schedule semester.year,semester.get_type_display,slug %}">
                     <img alt="" src="{{ MEDIA_URL }}gfx/advanced.png" />Hide advanced options</a>
@@ -39,7 +39,7 @@
         - <a href="#tips"><img alt="" src="{{ MEDIA_URL }}gfx/tips.png" />Tips</a>
     </p>
 
-    {% if legend %}
+    {% if courses %}
         <div class="yui-g">
             <div class="yui-u first">
                 {% include "courses.html" %}
