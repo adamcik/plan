@@ -232,6 +232,14 @@ class Deadline(models.Model):
             return self.date <= datetime.now().date()
     expired = property(is_expired)
 
+    def get_slug(self):
+        return self.userset.slug
+    slug = property(get_slug)
+
+    def get_course(self):
+        return self.userset.course
+    course = property(get_course)
+
     def __unicode__(self):
         if self.time:
             return '%s %s- %s %s' % (self.userset, self.userset.slug,

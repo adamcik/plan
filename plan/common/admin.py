@@ -6,8 +6,9 @@ from django.contrib.auth.models import User
 from plan.common.models import Course, Exam, Group, Lecture, Lecturer, \
         Room, Semester, Type, Deadline, UserSet
 
+
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ('name', 'full_name', 'url')
+    list_display = ('name', 'points', 'full_name', 'url')
     search_fields = ('name', 'full_name')
 
 class ExamAdmin(admin.ModelAdmin):
@@ -29,7 +30,6 @@ class LectureAdmin(admin.ModelAdmin):
 class UserSetAdmin(admin.ModelAdmin):
     list_display = ('slug', 'course', 'semester')
     search_fields = ('slug', 'course')
-    list_filter = ['slug']
 
     filter_horizontal = ('groups','exclude')
 
@@ -38,6 +38,10 @@ class TypeAdmin(admin.ModelAdmin):
 
 class DeadlineAdmin(admin.ModelAdmin):
     raw_id_fields = ('userset',)
+    ordering = ('userset__slug', 'userset__course__name', 'date', 'time')
+
+    list_display = ('course', 'slug', 'date', 'time', 'task')
+    list_display_links = ('course', 'slug')
 
 admin.site.register(User)
 admin.site.register(Course, CourseAdmin)
