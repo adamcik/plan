@@ -241,10 +241,6 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
 
             start += 1
 
-    # Compute where clause that limits the size of the following queries
-    lecture_id_where_clause = 'lecture_id IN (%s)' % \
-            ','.join([str(l.id) for l in initial_lectures])
-
     if courses:
         t.tick('Start getting rooms for lecture list')
         rooms = Lecture.helper(Room, initial_lectures)
