@@ -16,9 +16,7 @@ from django.conf import settings
 from plan.common.models import Course, Deadline, Exam, Group, \
         Lecture, Semester, UserSet
 from plan.common.forms import DeadlineForm, GroupForm, CourseNameForm
-from plan.common.utils import compact_sequence
-
-MAX_COLORS = 8
+from plan.common.utils import compact_sequence, ColorMap
 
 def clear_cache(*args):
     """Clears a users cache based on reverse"""
@@ -110,8 +108,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
     lectures = []
 
     # Color mapping for the courses
-    color_map = {}
-    color_index = 0
+    color_map = ColorMap(max=settings.MAX_COLORS)
 
     # Header colspans
     span = [1] * 5
@@ -176,11 +173,6 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
     t.tick('Done initializing')
 
     for c in course_list:
-        # Create an array containing our courses and add the css class
-        if c.id not in color_map:
-            color_index = (color_index + 1) % MAX_COLORS
-            color_map[c.id] = 'lecture%d' % color_index
-
         c.css_class = color_map[c.id]
 
         courses.append(c)
@@ -514,19 +506,16 @@ def copy_deadlines(request, year, semester_type, slug):
         if 'slugs' in request.POST:
             slugs = request.POST['slugs'].replace(',', ' ').split()
 
-            color_map = {}
-            color_index = 0
+            color_map = ColorMap(max=settings.MAX_COLORS)
 
             courses = Course.objects.filter(
                     userset__slug=slug,
                     userset__semester=semester,
                 ).distinct()
 
+            # Init color map
             for c in courses:
-                # Create an array containing our courses and add the css class
-                if c.id not in color_map:
-                    color_index = (color_index + 1) % MAX_COLORS
-                    color_map[c.id] = 'lecture%d' % color_index
+                color_map[c.id]
 
             deadlines = Deadline.objects.filter(
                     userset__slug__in=slugs,
