@@ -122,6 +122,18 @@ class Semester(models.Model):
         else:
             return Semester(type=Semester.FALL, year=now.year)
 
+    @staticmethod
+    def get_semester(year, semester):
+        """Utility method to help retrive semesters, does not get semester from DB"""
+
+        try:
+            semester_map = dict(map(lambda x: (x[1], x[0]), Semester.TYPES))
+            semester = semester_map[semester.lower()]
+
+            return Semester.objects.get(year=year, type=semester)
+        except (KeyError, Semester.DoesNotExist):
+            raise Http404
+
 
 
 class Exam(models.Model):

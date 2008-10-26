@@ -31,17 +31,6 @@ def clear_cache(*args):
     cache.delete(reverse('schedule-ical-lectures', args=args))
     cache.delete(reverse('schedule-ical-deadlines', args=args))
 
-def get_semester(year, semester):
-    """Utility method to help retrive semesters"""
-
-    try:
-        semester_map = dict(map(lambda x: (x[1], x[0]), Semester.TYPES))
-        semester = semester_map[semester.lower()]
-
-        return Semester.objects.get(year=year, type=semester)
-    except (KeyError, Semester.DoesNotExist):
-        raise Http404
-
 def shortcut(request, slug):
     '''Redirect users to their timetable for the current semester'''
 
@@ -143,7 +132,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
     # Keep track if all groups are selected for all courses
     all_groups = False
 
-    semester = get_semester(year, semester_type)
+    semester = Semester.get_semester(year, semester_type)
 
     course_filter = {
         'userset__slug': slug,
@@ -466,7 +455,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
 def select_groups(request, year, semester_type, slug):
     '''Form handler for selecting groups to use in schedule'''
 
-    semester = get_semester(year, semester_type)
+    semester = Semester.get_semester(year, semester_type)
 
     if request.method == 'POST':
         course_filter = {'userset__slug': slug}
@@ -495,7 +484,7 @@ def select_groups(request, year, semester_type, slug):
 def new_deadline(request, year, semester_type, slug):
     '''Handels addition of tasks, reshows schedule view if form does not
        validate'''
-    semester = get_semester(year, semester_type)
+    semester = Semester.get_semester(year, semester_type)
 
     if request.method == 'POST':
         clear_cache(year, semester.get_type_display(), slug)
@@ -531,7 +520,7 @@ def new_deadline(request, year, semester_type, slug):
 def copy_deadlines(request, year, semester_type, slug):
     '''Handles importing of deadlines'''
 
-    semester = get_semester(year, semester_type)
+    semester = Semester.get_semester(year, semester_type)
 
     if request.method == 'POST':
         if 'slugs' in request.POST:
@@ -595,7 +584,7 @@ def select_course(request, year, semester_type, slug, add=False):
 
     # FIXME split ut three sub functions into seperate functions?
 
-    semester = get_semester(year, semester_type)
+    semester = Semester.get_semester(year, semester_type)
 
     if request.method == 'POST':
 
@@ -709,7 +698,7 @@ def select_course(request, year, semester_type, slug, add=False):
 
 def select_lectures(request, year, semester_type, slug):
     '''Handle selection of lectures to hide'''
-    semester = get_semester(year, semester_type)
+    semester = Semester.get_semester(year, semester_type)
 
     if request.method == 'POST':
         excludes = request.POST.getlist('exclude')
@@ -738,7 +727,7 @@ def list_courses(request, year, semester, slug):
     response = cache.get('course_list')
 
     if not response:
-        semester = get_semester(year, semester)
+        semester = Semester.get_semester(year, semester)
 
         first_day = semester.get_first_day()
         last_day = semester.get_last_day()

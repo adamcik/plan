@@ -9,12 +9,11 @@ from django.http import HttpResponse
 
 from django.core.cache import cache
 
-from plan.common.models import Exam, Deadline, Lecture
-from plan.common.views import get_semester
+from plan.common.models import Exam, Deadline, Lecture, Semester
 
 def ical(request, year, semester, slug, lectures=True, exams=True,
             deadlines=True):
-    semester = get_semester(year, semester)
+    semester = Semester.get_semester(year, semester)
 
     response = cache.get(request.path)
 
