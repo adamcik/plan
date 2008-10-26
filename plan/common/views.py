@@ -141,7 +141,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
     first_day = semester.get_first_day()
     last_day = semester.get_last_day()
 
-    exam_list = Exam.objects.filter(
+    exams = Exam.objects.filter(
             exam_date__gt=first_day,
             exam_date__lt=last_day,
             course__userset__slug=slug,
@@ -384,7 +384,8 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
 
         t.tick('Done lecture css_clases and excluded status')
 
-    for exam in exam_list:
+    # FIXME replace these loops with a template tag ;)
+    for exam in exams:
         exam.css_class = color_map[exam.course_id]
 
     for deadline in deadlines:
@@ -397,7 +398,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
             'courses': courses,
             'deadline_form': deadline_form,
             'deadlines': deadlines,
-            'exams': exam_list,
+            'exams': exams,
             'group_help': all_groups,
             'lectures': initial_lectures,
             'semester': semester,
