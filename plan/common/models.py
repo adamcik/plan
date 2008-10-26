@@ -229,14 +229,14 @@ class Lecture(models.Model):
         ordering = ('course', 'day', 'start_time')
 
     @staticmethod
-    def helper(model, lectures):
+    def helper(model, lectures, field='name'):
         tmp = {}
         name = model._meta.object_name.lower()
 
         object_list = model.objects.filter(lecture__in=lectures). \
             extra(select={
                 'lecture_id': 'common_lecture_%ss.lecture_id' % name,
-            }).values_list('lecture_id', 'name')
+            }).values_list('lecture_id', field)
 
         for lecture, name in object_list:
             if lecture not in tmp:

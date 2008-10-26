@@ -14,7 +14,7 @@ from django.views.generic.list_detail import object_list
 from django.conf import settings
 
 from plan.common.models import Course, Deadline, Exam, Group, \
-        Lecture, Semester, UserSet, Room, Lecturer
+        Lecture, Semester, UserSet, Room, Lecturer, Week
 from plan.common.forms import DeadlineForm, GroupForm, CourseNameForm
 from plan.common.utils import compact_sequence, ColorMap
 
@@ -282,18 +282,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
         lecturers = Lecture.helper(Lecturer, initial_lectures)
         t.tick('Done getting lecturers for lecture list')
 
-        cursor.execute('''SELECT common_lecture_weeks.lecture_id,
-                common_week.number FROM common_lecture_weeks
-                INNER JOIN common_week
-                    ON (common_week.id = common_lecture_weeks.week_id)
-                WHERE %s''' % lecture_id_where_clause)
-
-        for lecture_id, name in cursor.fetchall():
-            if lecture_id not in weeks:
-                weeks[lecture_id] = []
-
-            weeks[lecture_id].append(name)
-
+        weeks = Lecture.helper(Week, initial_lectures, field='number')
         t.tick('Done getting weeks for lecture list')
 
     t.tick('Starting lecture expansion')
