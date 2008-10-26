@@ -260,11 +260,14 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
 
     if courses:
         for u in UserSet.objects.filter(slug=slug, semester=semester):
+            # FIXME need to redefine form to not use Models and querysets
+
             # SQL: this causes extra queries (can be worked around, subquery?)
+            # We can use the same trick as we did for rooms
             initial_groups = u.groups.values_list('id', flat=True)
 
             # SQL: this causes extra queries (hard to work around, probably not
-            # worh it)
+            # worh it) We can use the same trick as we did for rooms
             course_groups = Group.objects.filter(
                     lecture__course__id=u.course_id
                 ).distinct()
@@ -281,19 +284,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
 
         t.tick('Done creating groups forms')
 
-        # Do three custom sql queries to prevent and explosion of sql queries
-        # due to ORM. FIXME do same queries using ORM
-        cursor.execute('''SELECT common_lecture_groups.lecture_id,
-                common_group.name FROM common_lecture_groups
-                INNER JOIN common_group ON
-                    (common_group.id = common_lecture_groups.group_id)
-                WHERE %s''' % lecture_id_where_clause)
-
-        for lecture_id, name in cursor.fetchall():
-            if lecture_id not in groups:
-                groups[lecture_id] = []
-
-            groups[lecture_id].append(name)
+        groups = Group.get_groups(initial_lectures)
         t.tick('Done getting groups for lecture list')
 
         cursor.execute('''SELECT common_lecture_lecturers.lecture_id,

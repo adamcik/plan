@@ -65,6 +65,22 @@ class Group(models.Model):
     def __unicode__(self):
         return self.name
 
+    @staticmethod
+    def get_groups(lectures):
+        groups = {}
+
+        group_list = Group.objects.filter(lecture__in=lectures). \
+            extra(select={
+                'lecture_id': 'common_lecture_groups.lecture_id',
+            }).values_list('lecture_id', 'name')
+
+        for lecture, name in group_list:
+            if lecture not in groups:
+                groups[lecture] = []
+            groups[lecture].append(name)
+
+        return groups
+
 class Course(models.Model):
     name = models.CharField(max_length=100, unique=True)
     full_name = models.TextField(blank=True)
