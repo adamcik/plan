@@ -61,17 +61,9 @@ def getting_started(request):
         subscription_count = int(UserSet.objects.count())
         deadline_count = int(Deadline.objects.count())
 
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT COUNT(*) as num, c.name, c.full_name FROM
-                common_userset u JOIN common_course c ON (c.id = u.course_id)
-            GROUP BY c.name, c.full_name
-            ORDER BY num DESC
-            LIMIT 15''')
-
         stats = []
         color_map = ColorMap(max=settings.MAX_COLORS)
-        for i, row in enumerate(cursor.fetchall()):
+        for i, row in enumerate(Course.get_stats()):
             stats.append(row + (color_map[i],))
 
         context = {

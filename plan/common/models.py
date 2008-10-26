@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, time
 
-from django.db import models
+from django.db import models, connection
 from django.template.defaultfilters import slugify
 
 from plan.common.managers import LectureManager
@@ -74,6 +74,17 @@ class Course(models.Model):
     class Meta:
         ordering = ('name',)
 
+    @staticmethod
+    def get_stats(limit=15):
+        cursor = connection.cursor()
+        cursor.execute('''
+            SELECT COUNT(*) as num, c.name, c.full_name FROM
+                common_userset u JOIN common_course c ON (c.id = u.course_id)
+            GROUP BY c.name, c.full_name
+            ORDER BY num DESC
+            LIMIT %d''', [limit])
+
+        return cursor.fetchall()
 
 class Semester(models.Model):
     SPRING = 0
