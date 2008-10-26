@@ -133,7 +133,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
         'userset__slug': slug,
         'userset__semester': semester,
     }
-    course_list = Course.objects.filter(**course_filter). \
+    courses = Course.objects.filter(**course_filter). \
         extra(select={'user_name': 'common_userset.name'}).distinct()
 
     initial_lectures = Lecture.objects.get_lectures(slug, semester)
@@ -173,14 +173,9 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
 
     t.tick('Done initializing')
 
-    for c in course_list:
+    for c in courses:
         c.css_class = color_map[c.id]
-
-        courses.append(c)
-
-        t.tick('Added course %s' % c.name)
-
-    t.tick('Done building course array')
+    t.tick('Done adding color to course array')
 
     t.tick('Starting main lecture loop')
     for i, lecture in enumerate(initial_lectures):
