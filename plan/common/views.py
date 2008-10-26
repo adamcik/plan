@@ -109,9 +109,6 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
     # Extra info used to get the table right
     lectures = []
 
-    # ids of included lectures
-    included = []
-
     # Color mapping for the courses
     color_map = {}
     color_index = 0
@@ -205,9 +202,6 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
         rowspan = end - start + 1
 
         first = start
-
-        # Keep track of which lectures are displayed
-        included.append(lecture.id)
 
         # Try to find leftmost row that can fit our lecture, if we run out of
         # rows to test, ie IndexError, we append a fresh one to work with
