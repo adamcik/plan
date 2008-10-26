@@ -156,7 +156,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
             'userset__name',
         )
 
-    if not deadline_form:
+    if not deadline_form and advanced:
         usersets = UserSet.objects.filter(
                 slug=slug,
                 semester=semester,
@@ -250,7 +250,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
         rooms = Lecture.helper(Room, initial_lectures)
         t.tick('Done getting rooms for lecture list')
 
-    if courses:
+    if courses and advanced:
         for u in UserSet.objects.filter(slug=slug, semester=semester):
             # FIXME need to redefine form to not use Models and querysets
 
