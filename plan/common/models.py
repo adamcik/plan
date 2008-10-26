@@ -40,6 +40,23 @@ class Room(models.Model):
     def __unicode__(self):
         return self.name
 
+    @staticmethod
+    def get_rooms(lectures):
+        rooms = {}
+
+        room_list = Room.objects.filter(lecture__in=lectures). \
+                extra(select={
+                    'lecture_id': 'common_lecture_rooms.lecture_id',
+                }).values_list('lecture_id', 'name')
+
+        for lecture, name in room_list:
+            if lecture not in rooms:
+                rooms[lecture] = []
+
+            rooms[lecture].append(name)
+            
+        return rooms
+
 class Group(models.Model):
     DEFAULT = 'Unknown'
 
