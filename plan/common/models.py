@@ -40,23 +40,6 @@ class Room(models.Model):
     def __unicode__(self):
         return self.name
 
-    @staticmethod
-    def get_rooms(lectures):
-        rooms = {}
-
-        room_list = Room.objects.filter(lecture__in=lectures). \
-                extra(select={
-                    'lecture_id': 'common_lecture_rooms.lecture_id',
-                }).values_list('lecture_id', 'name')
-
-        for lecture, name in room_list:
-            if lecture not in rooms:
-                rooms[lecture] = []
-
-            rooms[lecture].append(name)
-            
-        return rooms
-
 class Group(models.Model):
     DEFAULT = 'Unknown'
 
@@ -64,22 +47,6 @@ class Group(models.Model):
 
     def __unicode__(self):
         return self.name
-
-    @staticmethod
-    def get_groups(lectures):
-        groups = {}
-
-        group_list = Group.objects.filter(lecture__in=lectures). \
-            extra(select={
-                'lecture_id': 'common_lecture_groups.lecture_id',
-            }).values_list('lecture_id', 'name')
-
-        for lecture, name in group_list:
-            if lecture not in groups:
-                groups[lecture] = []
-            groups[lecture].append(name)
-
-        return groups
 
 class Course(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -212,6 +179,7 @@ class Lecturer(models.Model):
     class Meta:
         ordering = ('name',)
 
+
 class Lecture(models.Model):
     START = [(i, '%02d:15' % i) for i in range(8, 20)]
     END = [(i, '%02d:00' % i) for i in range(9, 21)]
@@ -248,6 +216,23 @@ class Lecture(models.Model):
 
     class Meta:
         ordering = ('course', 'day', 'start_time')
+
+    @staticmethod
+    def helper(model, lectures):
+        tmp = {}
+        name = model._meta.object_name.lower()
+
+        object_list = model.objects.filter(lecture__in=lectures). \
+            extra(select={
+                'lecture_id': 'common_lecture_%ss.lecture_id' % name,
+            }).values_list('lecture_id', 'name')
+
+        for lecture, name in object_list:
+            if lecture not in tmp:
+                tmp[lecture] = []
+            tmp[lecture].append(name)
+
+        return tmp
 
 class Deadline(models.Model):
     userset = models.ForeignKey('UserSet')

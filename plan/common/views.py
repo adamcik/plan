@@ -255,7 +255,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
 
     if courses:
         t.tick('Start getting rooms for lecture list')
-        rooms = Room.get_rooms(initial_lectures)
+        rooms = Lecture.helper(Room, initial_lectures)
         t.tick('Done getting rooms for lecture list')
 
     if courses:
@@ -284,7 +284,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
 
         t.tick('Done creating groups forms')
 
-        groups = Group.get_groups(initial_lectures)
+        groups = Lecture.helper(Group, initial_lectures)
         t.tick('Done getting groups for lecture list')
 
         cursor.execute('''SELECT common_lecture_lecturers.lecture_id,
