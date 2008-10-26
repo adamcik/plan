@@ -14,11 +14,12 @@
             <table>
                 <thead>
                     <tr>
-                        <th></th>
-                        <th>Course</th>
-                        <th>Due date</th>
-                        <th>Time</th>
+                        <th style="width: 2%"></th>
+                        <th style="width: 9%">Course</th>
+                        <th style="width: 9%">Due date</th>
+                        <th style="width: 6%">Time</th>
                         <th>Task</th>
+                        <th>Course name</th>
                         <th>Source</th>
                     </tr>
                 </thead>
@@ -26,10 +27,11 @@
                     {% for d in deadlines %}
                         <tr class="{{ d.css_class }}">
                             <td><input type="checkbox" name="deadline_id" value="{{ d.id }}" checked="checked" /></td>
-                            <td>{{ d.userset }}</td>
+                            <td>{{ d.userset.course.name }}</td>
                             <td>{{ d.date }}</td>
                             <td>{{ d.time|time:"H:i" }}</td>
                             <td>{{ d.task }}</td>
+                            <td>{{ d.userset.course.full_name }}</td>
                             <td>{{ d.userset.slug }}</td>
                         </tr>
                     {% endfor %}
