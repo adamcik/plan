@@ -90,8 +90,6 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
         t.tick('Done, returning cache')
         return response
 
-    cursor = connection.cursor()
-
     # FIXME refactor alogrithm that generates time table to seperate function.
 
     # Data structure that stores what will become the html table
