@@ -67,7 +67,7 @@ def compact_sequence(sequence):
 class ColorMap(dict):
     """Magic dict that asigns colors"""
 
-    def __init__(self, index=0, max=8):
+    def __init__(self, index=0, max=settings.MAX_COLORS):
         self.index = index
         self.max = max
 

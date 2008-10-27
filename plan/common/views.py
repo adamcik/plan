@@ -62,7 +62,7 @@ def getting_started(request):
         deadline_count = int(Deadline.objects.count())
 
         stats = []
-        color_map = ColorMap(max=settings.MAX_COLORS)
+        color_map = ColorMap()
         for i, row in enumerate(Course.get_stats()):
             stats.append(row + (color_map[i],))
 
@@ -101,7 +101,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
     lectures = []
 
     # Color mapping for the courses
-    color_map = ColorMap(max=settings.MAX_COLORS)
+    color_map = ColorMap()
 
     # Header colspans
     span = [1] * 5
@@ -447,7 +447,7 @@ def copy_deadlines(request, year, semester_type, slug):
         if 'slugs' in request.POST:
             slugs = request.POST['slugs'].replace(',', ' ').split()
 
-            color_map = ColorMap(max=settings.MAX_COLORS)
+            color_map = ColorMap()
 
             courses = Course.objects.filter(
                     userset__slug=slug,
