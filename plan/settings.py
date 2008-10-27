@@ -97,6 +97,8 @@ INSTALLED_APPS = (
     'plan.common',
 )
 
+MAX_COLORS = 8
+
 try:
     from settings_local import *
 except ImportError:
