@@ -27,6 +27,23 @@ class UserSet(models.Model):
         self.name = slugify(self.name)
         super(UserSet, self).save(*args, **kwargs)
 
+    @staticmethod
+    def get_groups(slug, semester):
+        tmp = {}
+
+        group_list = Group.objects.filter(userset__slug=slug, userset__semester=semester). \
+            extra(select={
+                'userset_id': 'common_userset.id',
+                'group_id': 'common_group.id',
+            }).values_list('userset_id', 'group_id').distinct()
+
+        for userset, group in group_list:
+            if userset not in tmp:
+                tmp[userset] = []
+            tmp[userset].append(group)
+
+        return tmp
+
 class Type(models.Model):
     name = models.CharField(max_length=100, unique=True)
     optional = models.BooleanField()
@@ -85,6 +102,23 @@ class Course(models.Model):
             LIMIT %d''', [limit])
 
         return cursor.fetchall()
+
+    @staticmethod
+    def get_groups(courses):
+        tmp = {}
+
+        group_list = Group.objects.filter(lecture__course__in=courses). \
+            extra(select={
+                'course_id': 'common_lecture.course_id',
+                'group_id': 'common_group.id',
+            }).values_list('course_id', 'group_id', 'name').distinct()
+
+        for course, group, name in group_list:
+            if course not in tmp:
+                tmp[course] = []
+            tmp[course].append((group, name))
+
+        return tmp
 
 class Semester(models.Model):
     SPRING = 0

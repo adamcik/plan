@@ -156,7 +156,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
             'userset__name',
         )
 
-    if not deadline_form and advanced:
+    if advanced:
         usersets = UserSet.objects.filter(
                 slug=slug,
                 semester=semester,
@@ -164,6 +164,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
                 'course__name',
             )
 
+    if not deadline_form and advanced:
         deadline_form = DeadlineForm(usersets)
 
     t.tick('Done initializing')
@@ -247,28 +248,15 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
         t.tick('Done getting rooms for lecture list')
 
     if courses and advanced:
-        for u in UserSet.objects.filter(slug=slug, semester=semester):
-            # FIXME need to redefine form to not use Models and querysets
+        course_groups = Course.get_groups([u.course_id for u in usersets])
+        selected_groups = UserSet.get_groups(slug, semester)
 
-            # SQL: this causes extra queries (can be worked around, subquery?)
-            # We can use the same trick as we did for rooms
-            initial_groups = u.groups.values_list('id', flat=True)
+        for u in usersets:
+            if not all_groups and len(course_groups[u.course_id]) > 2:
+                all_groups = set(selected_groups[u.id]) == set(map(lambda a: a[0], course_groups[u.course_id]))
 
-            # SQL: this causes extra queries (hard to work around, probably not
-            # worh it) We can use the same trick as we did for rooms
-            course_groups = Group.objects.filter(
-                    lecture__course__id=u.course_id
-                ).distinct()
-
-            if not all_groups:
-                course_groups_ids = course_groups.values_list('id', flat=True)
-
-                if len(course_groups_ids) > 2 and len(initial_groups) > 2:
-                    all_groups = set(initial_groups) == set(course_groups_ids)
-
-            # SQL: For loop generates to quries per userset.
-            group_forms[u.course_id] = GroupForm(course_groups,
-                    initial={'groups': initial_groups}, prefix=u.course_id)
+            group_forms[u.course_id] = GroupForm(course_groups[u.course_id],
+                    initial={'groups': selected_groups[u.id]}, prefix=u.course_id)
 
         t.tick('Done creating groups forms')
 
@@ -385,12 +373,18 @@ def select_groups(request, year, semester_type, slug):
     semester = Semester.get_semester(year, semester_type)
 
     if request.method == 'POST':
-        course_filter = {'userset__slug': slug}
+        course_filter = {
+            'userset__slug': slug,
+            'userset__semester__year__exact': semester.year,
+            'userset__semester__type__exact': semester.type,
+        }
         courses = Course.objects.filter(**course_filter).\
                 distinct().order_by('id')
 
+        course_groups = Course.get_groups([c.id for c in courses])
+
         for c in courses:
-            groups = Group.objects.filter(lecture__course=c).distinct()
+            groups = course_groups[c.id]
             group_form = GroupForm(groups, request.POST, prefix=c.id)
 
             if group_form.is_valid():

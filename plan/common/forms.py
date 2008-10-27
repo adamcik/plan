@@ -9,13 +9,12 @@ class CourseNameForm(forms.Form):
 
 class GroupForm(forms.Form):
     '''Form for selecting groups for a course (has a custom init)'''
-    groups = forms.models.ModelMultipleChoiceField(Group.objects.all(),
-                                                   required=False)
+    groups = forms.MultipleChoiceField(required=False)
 
-    def __init__(self, queryset, *args, **kwargs):
+    def __init__(self, choices, *args, **kwargs):
         super(GroupForm, self).__init__(*args, **kwargs)
 
-        self.fields['groups'].queryset = queryset
+        self.fields['groups'].choices = choices
         self.fields['groups'].widget.attrs['size'] = 5
 
 class DeadlineForm(forms.models.ModelForm):
