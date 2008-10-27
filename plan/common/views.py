@@ -339,8 +339,8 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
 
     if advanced:
         for course in courses:
-            course.group_form = group_forms.get(c.id, None)
-            course.name_form = CourseNameForm(initial={'name': c.user_name or ''}, prefix=c.id)
+            course.group_form = group_forms.get(course.id, None)
+            course.name_form = CourseNameForm(initial={'name': c.user_name or ''}, prefix=course.id)
 
         t.tick('Done lecture css_clases and excluded status')
 
