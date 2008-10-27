@@ -250,7 +250,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
         selected_groups = UserSet.get_groups(slug, semester)
 
         for u in usersets:
-            if not all_groups and len(course_groups[u.course_id]) > 2:
+            if not all_groups and len(course_groups[u.course_id]) > 3:
                 all_groups = set(selected_groups[u.id]) == set(map(lambda a: a[0], course_groups[u.course_id]))
 
             group_forms[u.course_id] = GroupForm(course_groups[u.course_id],
