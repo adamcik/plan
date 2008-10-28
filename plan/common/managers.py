@@ -23,7 +23,7 @@ class LectureManager(models.Manager):
             'common_lecture_groups'
         ]
         select = {
-            'user_name': 'common_userset.name',
+            'alias': 'common_userset.name',
             'exclude': """common_lecture.id IN
                 (SELECT common_userset_exclude.lecture_id
                  FROM common_userset_exclude WHERE
@@ -64,7 +64,7 @@ class DeadlineManager(models.Manager):
                 'userset__course',
                 'userset__name',
             ).extra(select={
-                'user_name': 'common_userset.name',
+                'alias': 'common_userset.name',
             })
 
 class ExamManager(models.Manager):
@@ -83,7 +83,7 @@ class ExamManager(models.Manager):
                 'course__name',
                 'course__full_name',
             ).extra(
-                select={'user_name': 'common_userset.name'}
+                select={'alias': 'common_userset.name'}
             )
 
 class CourseManager(models.Manager):
@@ -94,7 +94,7 @@ class CourseManager(models.Manager):
             'userset__semester__type__exact': semester_type,
         }
         return self.get_query_set().filter(**course_filter). \
-            extra(select={'user_name': 'common_userset.name'}).distinct()
+            extra(select={'alias': 'common_userset.name'}).distinct()
 
     def get_courses_with_exams(self, year, semester_type, first, last):
         no_exam = Q(exam__isnull=True)
@@ -104,6 +104,7 @@ class CourseManager(models.Manager):
                 semesters__year__exact=year,
                 semesters__type__exact=semester_type,
             ).filter(no_exam | with_exam).extra(select={
+                'alias': 'common_userset.name',
                 'exam_date': 'common_exam.exam_date',
                 'exam_time': 'common_exam.exam_time',
                 'handout_date': 'common_exam.handout_date',

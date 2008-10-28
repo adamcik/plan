@@ -36,7 +36,7 @@
                             {% if course.name_form %}
                                 {{ course.name_form.name }}
                             {% else %}
-                                {{ course.user_name|default:"-" }}
+                                {{ course.alias|default:"-" }}
                             {% endif %}
                         </td>
                         <td>

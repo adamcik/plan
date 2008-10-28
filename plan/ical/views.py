@@ -72,7 +72,7 @@ def add_lectutures(lectures, semester, cal):
             'dtstart': datetime(int(semester.year),1,1)
         }
 
-        summary = l.user_name or l.course.name
+        summary = l.alias or l.course.name
         rooms = ', '.join(l.rooms.values_list('name', flat=True))
         desc = '%s - %s (%s)' % (l.type.name, l.course.full_name, l.course.name)
 
@@ -104,11 +104,11 @@ def add_exams(exams, semester, cal):
         vevent = cal.add('vevent')
 
         if e.type_name:
-            summary = '%s - %s' % (e.type_name, e.user_name or e.course.name)
+            summary = '%s - %s' % (e.type_name, e.alias or e.course.name)
             desc = '%s (%s) - %s (%s)' % (e.type_name, e.type,
                     e.course.full_name, e.course.name)
         else:
-            summary = 'Exam (%s) - %s' % (e.type, e.user_name or e.course.name)
+            summary = 'Exam (%s) - %s' % (e.type, e.alias or e.course.name)
             desc = 'Exam (%s) - %s (%s)' % (e.type, e.course.full_name,
                     e.course.name)
 
@@ -159,7 +159,7 @@ def add_deadlines(deadlines, semester, cal):
         if d.time:
             start = datetime.combine(d.date, d.time)
 
-        summary = '%s - %s' % (d.task, d.user_name or d.userset.course)
+        summary = '%s - %s' % (d.task, d.alias or d.userset.course)
         desc = '%s - %s (%s)' % (d.task, d.userset.course.full_name,
                 d.userset.course.name)
 

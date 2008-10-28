@@ -31,7 +31,7 @@
                                 {% if c.lecture %}title="{{ c.lecture.course.full_name }}"{% endif %}>
 
                                 {% if c.lecture %}
-                                    <div class="course">{{ c.lecture.user_name|default:c.lecture.course }}</div>
+                                    <div class="course">{{ c.lecture.alias|default:c.lecture.course }}</div>
                                     <div class="room">{{ c.lecture.sql_rooms|join:", "|truncatewords:2 }}</div>
                                     <div class="type">{{ c.lecture.type|default:"" }}</div>
                                 {% endif %}

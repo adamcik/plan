@@ -1,6 +1,6 @@
 from django import forms
 
-from plan.common.models import Deadline, Group
+from plan.common.models import Deadline
 
 class CourseNameForm(forms.Form):
     '''Form for changing userset names'''

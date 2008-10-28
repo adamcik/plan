@@ -10,7 +10,7 @@
     <div id="change-groups">
         {% for course in courses %}
             <p class="{% color course.id %} groupbox" title="{{ course.full_name }}">
-                <b>{{ course.user_name|default:course }}</b> <br />
+                <b>{{ course.alias|default:course }}</b> <br />
                 <span class="small">{{ course.full_name|truncatewords:"3" }}</span> <br />
                 {{ course.group_form.groups }}
             </p>

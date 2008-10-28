@@ -3,13 +3,11 @@
 import logging
 
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, Http404
-from django.shortcuts import render_to_response, get_list_or_404
+from django.http import HttpResponseRedirect
+from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.template.defaultfilters import slugify
 from django.core.cache import cache
-from django.db import connection
-from django.db.models import Q
 from django.views.generic.list_detail import object_list
 from django.conf import settings
 
@@ -154,7 +152,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
         for course in courses:
             course.group_form = group_forms.get(course.id, None)
 
-            name = course.user_name or ''
+            name = course.alias or ''
             course.name_form = CourseNameForm(initial={'name': name},
                      prefix=course.id)
 
