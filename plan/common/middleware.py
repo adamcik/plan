@@ -5,8 +5,6 @@ import sys
 from django.conf import settings
 from django.views.debug import technical_500_response
 
-from plan.common.utils import Timer
-
 class InternalIpMiddleware:
     '''Middleware that adds IP to INTERNAL ips if user is superuser'''
     def process_request(self, request):
