@@ -197,10 +197,11 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
 
     if courses:
         timer.tick('Start getting rooms for lecture list')
-        rooms = Lecture.helper(Room, initial_lectures)
+        rooms = Lecture.get_related(Room, initial_lectures)
         timer.tick('Done getting rooms for lecture list')
 
     if courses and advanced:
+        timer.tick('Creating groups forms')
         course_groups = Course.get_groups([u.course_id for u in usersets])
         selected_groups = UserSet.get_groups(slug, semester)
 
@@ -213,13 +214,13 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
 
         timer.tick('Done creating groups forms')
 
-        groups = Lecture.helper(Group, initial_lectures)
+        groups = Lecture.get_related(Group, initial_lectures)
         timer.tick('Done getting groups for lecture list')
 
-        lecturers = Lecture.helper(Lecturer, initial_lectures)
+        lecturers = Lecture.get_related(Lecturer, initial_lectures)
         timer.tick('Done getting lecturers for lecture list')
 
-        weeks = Lecture.helper(Week, initial_lectures, field='number')
+        weeks = Lecture.get_related(Week, initial_lectures, field='number')
         timer.tick('Done getting weeks for lecture list')
 
     timer.tick('Starting lecture expansion')

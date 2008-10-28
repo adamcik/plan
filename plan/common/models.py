@@ -270,7 +270,7 @@ class Lecture(models.Model):
         ordering = ('course', 'day', 'start_time')
 
     @staticmethod
-    def helper(model, lectures, field='name'):
+    def get_related(model, lectures, field='name'):
         tmp = {}
         name = model._meta.object_name.lower()
 
