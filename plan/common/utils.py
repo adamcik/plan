@@ -49,9 +49,21 @@ def compact_sequence(sequence):
 class ColorMap(dict):
     """Magic dict that asigns colors"""
 
-    def __init__(self, index=0, max=settings.MAX_COLORS):
+    colors = [
+        '#B3E2CD',
+        '#FDCDAC',
+        '#CBD5E8',
+        '#F4CAE4',
+        '#E6F5C9',
+        '#FFF2AE',
+        '#F1E2CC',
+        '#CCCCCC',
+    ]
+
+    def __init__(self, index=0, max=settings.MAX_COLORS, hex=False):
         self.index = index
         self.max = max
+        self.hex = hex
 
     def __getitem__(self, k):
         # Remeber to use super to preven inf loop
@@ -62,5 +74,8 @@ class ColorMap(dict):
             return super(ColorMap, self).__getitem__(k)
         else:
             self.index += 1
-            self[k] = 'color%d' % (self.index % self.max)
+            if self.hex:
+                self[k] = self.colors[self.index % self.max]
+            else:
+                self[k] = 'color%d' % (self.index % self.max)
             return super(ColorMap, self).__getitem__(k)

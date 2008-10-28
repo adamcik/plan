@@ -24,6 +24,7 @@ urlpatterns = patterns('',
 
     (r'^', include('plan.common.urls')),
     (r'^', include('plan.ical.urls')),
+    (r'^', include('plan.pdf.urls')),
 
     url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}, name='media'),
 )

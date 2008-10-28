@@ -64,6 +64,7 @@ class Timetable:
                         'i': start,
                         'j': lecture.day,
                         'k': row,
+                        'course': lecture.course_id,
                     })
 
                 start += 1
@@ -98,6 +99,7 @@ class Timetable:
                     break
 
             self.table[i][j][k]['colspan'] = expand_by
+            lecture['width'] = expand_by
 
             # Remove cells that will get replaced by colspan
             for l in xrange(k+1, k+expand_by):
@@ -108,4 +110,4 @@ class Timetable:
         times = zip(range(len(Lecture.START)), Lecture.START, Lecture.END)
 
         for i, start, end in times:
-            self.table[i].insert(0, [{'time': '%s&nbsp;-&nbsp;%s' % (start[1], end[1]) }])
+            self.table[i].insert(0, [{'time': '%s - %s' % (start[1], end[1]) }])
