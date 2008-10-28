@@ -167,6 +167,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
 
     t.tick('Done initializing')
 
+    # Do this in view to ensure consistent init of color_map
     for c in courses:
         c.css_class = color_map[c.id]
     t.tick('Done adding color to course array')
@@ -312,10 +313,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
 
     t.tick('Done adding times')
 
-    # Add colors and exlude status
     for lecture in initial_lectures:
-        lecture.css_class = color_map[lecture.course_id]
-
         compact_weeks = compact_sequence(weeks.get(lecture.id, []))
 
         lecture.sql_weeks = compact_weeks
@@ -326,21 +324,14 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
     if advanced:
         for course in courses:
             course.group_form = group_forms.get(course.id, None)
-            course.name_form = CourseNameForm(initial={'name': c.user_name or ''}, prefix=course.id)
-
-        t.tick('Done lecture css_clases and excluded status')
-
-    # FIXME replace these loops with a template tag ;)
-    for exam in exams:
-        exam.css_class = color_map[exam.course_id]
-
-    for deadline in deadlines:
-        deadline.css_class = color_map[deadline.userset.course_id]
+            course.name_form = CourseNameForm(initial={'name': course.user_name or ''}, prefix=course.id)
+        t.tick('Done setting up group and name forms')
 
     t.tick('Starting render to response')
     response = render_to_response('schedule.html', {
             'advanced': advanced,
             'colspan': span,
+            'color_map': color_map,
             'courses': courses,
             'deadline_form': deadline_form,
             'deadlines': deadlines,

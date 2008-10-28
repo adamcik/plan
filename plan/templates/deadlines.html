@@ -1,3 +1,5 @@
+{% load color %}
+
 <h2 id="deadlines">Deadlines</h2>
 {% if deadlines %}
     <form method="post" action="{% url new-deadline semester.year,semester.get_type_display,slug %}#deadlines">
@@ -15,7 +17,7 @@
             </thead>
             <tbody>
                 {% for d in deadlines %}
-                    <tr class="{{ d.css_class }}{% if d.expired %} expired{% endif %}">
+                    <tr class="{% color d.userset.course_id %}{% if d.expired %} expired{% endif %}">
                         {% if advanced %}
                             <td><input type="checkbox" name="deadline_remove" value="{{ d.id }}" class="noprint" /></td>
                         {% endif %}
