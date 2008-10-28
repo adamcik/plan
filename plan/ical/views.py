@@ -11,9 +11,9 @@ from django.core.cache import cache
 
 from plan.common.models import Exam, Deadline, Lecture, Semester
 
-def ical(request, year, semester, slug, lectures=True, exams=True,
+def ical(request, year, semester_type, slug, lectures=True, exams=True,
             deadlines=True):
-    semester = Semester.get_semester(year, semester)
+    semester = Semester(year=year, type=semester_type)
 
     response = cache.get(request.path)
 
@@ -24,45 +24,19 @@ def ical(request, year, semester, slug, lectures=True, exams=True,
     cal.add('method').value = 'PUBLISH'  # IE/Outlook needs this
 
     if lectures:
-        add_lectutures(Lecture.objects.get_lectures(slug, semester), semester, cal)
+        lectures = Lecture.objects.get_lectures(year, semester.type, slug)
+        add_lectutures(lectures, semester, cal)
 
     if exams:
-        first_day = semester.get_first_day()
-        last_day = semester.get_last_day()
+        first = semester.get_first_day()
+        last = semester.get_last_day()
 
-        exam_filter = {
-            'exam_date__gt': first_day,
-            'exam_date__lt': last_day,
-            'course__userset__slug': slug,
-        }
-        exam_related = [
-            'course__name',
-            'course__full_name',
-        ]
-        exam_select = {
-            'user_name': 'common_userset.name',
-        }
-
-        exams = Exam.objects.filter(**exam_filter). \
-                    select_related(*exam_related).extra(select=exam_select)
+        exams = Exam.objects.get_exams(year, semester.type, slug, first, last)
 
         add_exams(exams, semester, cal)
 
     if deadlines and slug:
-        deadline_filter = {
-            'userset__slug': slug,
-            'userset__semester': semester,
-        }
-        deadline_related = [
-            'userset__course__name',
-            'userset__course__full_name',
-        ]
-        deadline_select = {
-            'user_name': 'common_userset.name',
-        }
-
-        deadlines = Deadline.objects.filter(**deadline_filter). \
-                select_related(*deadline_related).extra(select=deadline_select)
+        deadlines = Deadline.objects.get_deadlines(year, semester.type, slug)
 
         add_deadlines(deadlines, semester, cal)
 
@@ -194,4 +168,3 @@ def add_deadlines(deadlines, semester, cal):
         vevent.add('dtstamp').value = datetime.now(tzlocal())
         vevent.add('uid').value = 'deadline-%d@%s' % (d.id, gethostname())
         vevent.add('dtstart').value = start
-
