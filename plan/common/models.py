@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, time
 from django.db import models, connection
 from django.template.defaultfilters import slugify
 
-from plan.common.managers import LectureManager
+from plan.common.managers import LectureManager, DeadlineManager
 
 class UserSet(models.Model):
     slug = models.SlugField()
@@ -294,6 +294,8 @@ class Lecture(models.Model):
         return tmp
 
 class Deadline(models.Model):
+    objects = DeadlineManager()
+
     userset = models.ForeignKey('UserSet')
 
     date = models.DateField(default=datetime.now().date()+timedelta(days=7))
@@ -338,13 +340,3 @@ class Deadline(models.Model):
     def get_course(self):
         return self.userset.course
     course = property(get_course)
-
-    @staticmethod
-    def get_deadlines(slug, semester): 
-        return Deadline.objects.filter(
-                userset__slug=slug,
-                userset__semester=semester,
-            ).select_related(
-                'userset__course',
-                'userset__name',
-            )

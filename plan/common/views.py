@@ -126,7 +126,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
     initial_lectures = Lecture.objects.get_lectures(slug, semester)
 
     exams = Exam.get_exams(slug, semester)
-    deadlines = Deadline.get_deadlines(slug, semester)
+    deadlines = Deadline.objects.get_deadlines(slug, semester)
 
     if advanced:
         usersets = UserSet.objects.filter(

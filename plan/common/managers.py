@@ -52,3 +52,12 @@ class LectureManager(models.Manager):
                     extra(where=where, tables=tables, select=select).\
                     order_by(*order)
 
+class DeadlineManager(models.Manager):
+    def get_deadlines(self, slug, semester):
+        return self.get_query_set().filter(
+                userset__slug=slug,
+                userset__semester=semester,
+            ).select_related(
+                'userset__course',
+                'userset__name',
+            )
