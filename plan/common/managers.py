@@ -1,9 +1,8 @@
 from django.db import models
-
-# FIXME convert semester to kwarg, and also take in type and year?
+from django.db.models import Q
 
 class LectureManager(models.Manager):
-    def get_lectures(self, slug, semester):
+    def get_lectures(self, year, semester_type, slug):
         """
             Get all lectures for userset during given period.
 
@@ -33,7 +32,8 @@ class LectureManager(models.Manager):
 
         filter = {
             'course__userset__slug': slug,
-            'course__userset__semester': semester,
+            'course__userset__semester__year__exact': year,
+            'course__userset__semester__type__exact': semester_type,
         }
 
         related = [
@@ -55,23 +55,29 @@ class LectureManager(models.Manager):
                     order_by(*order)
 
 class DeadlineManager(models.Manager):
-    def get_deadlines(self, slug, semester):
+    def get_deadlines(self, year, semester_type, slug):
         return self.get_query_set().filter(
                 userset__slug=slug,
-                userset__semester=semester,
+                userset__semester__year__exact=year,
+                userset__semester__type__exact=semester_type,
             ).select_related(
                 'userset__course',
                 'userset__name',
             )
 
 class ExamManager(models.Manager):
-    def get_exams(self, slug, semester):
-        return self.get_query_set().filter(
-                exam_date__gt=semester.get_first_day(),
-                exam_date__lt=semester.get_last_day(),
-                course__userset__slug=slug,
-                course__userset__semester=semester,
-            ).select_related(
+    def get_exams(self, year, semester_type, slug, first=None, last=None):
+        exam_filter = {
+            'course__userset__slug': slug,
+            'course__userset__semester__year__exact': year,
+            'course__userset__semester__type__exact': semester_type,
+        }
+        if first:
+            exam_filter['exam_date__gt'] = first
+        if last:
+            exam_filter['exam_date__lt'] = last
+
+        return self.get_query_set().filter(**exam_filter).select_related(
                 'course__name',
                 'course__full_name',
             ).extra(
@@ -79,19 +85,37 @@ class ExamManager(models.Manager):
             )
 
 class CourseManager(models.Manager):
-    def get_courses(self, slug, semester):
+    def get_courses(self, year, semester_type, slug):
         course_filter = {
             'userset__slug': slug,
-            'userset__semester': semester,
+            'userset__semester__year__exact': year,
+            'userset__semester__type__exact': semester_type,
         }
         return self.get_query_set().filter(**course_filter). \
             extra(select={'user_name': 'common_userset.name'}).distinct()
 
+    def get_courses_with_exams(self, year, semester_type, first, last):
+        no_exam = Q(exam__isnull=True)
+        with_exam = Q(exam__exam_date__gt=first, exam__exam_date__lt=last)
+
+        return self.get_query_set().filter(
+                semesters__year__exact=year,
+                semesters__type__exact=semester_type,
+            ).filter(no_exam | with_exam).extra(select={
+                'exam_date': 'common_exam.exam_date',
+                'exam_time': 'common_exam.exam_time',
+                'handout_date': 'common_exam.handout_date',
+                'handout_time': 'common_exam.handout_time',
+                'type': 'common_exam.type',
+                'type_name': 'common_exam.type_name',
+            })
+
 class UserSetManager(models.Manager):
-    def get_usersets(self, slug, semester):
+    def get_usersets(self, year, semester_type, slug):
         return self.get_query_set().filter(
                 slug=slug,
-                semester=semester,
+                semester__year__exact=year,
+                semester__type__exact=semester_type,
             ).select_related(
                 'course__name',
             )
