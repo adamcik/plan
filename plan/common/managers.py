@@ -63,7 +63,9 @@ class DeadlineManager(models.Manager):
             ).select_related(
                 'userset__course',
                 'userset__name',
-            )
+            ).extra(select={
+                'user_name': 'common_userset.name',
+            })
 
 class ExamManager(models.Manager):
     def get_exams(self, year, semester_type, slug, first=None, last=None):

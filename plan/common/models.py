@@ -157,7 +157,8 @@ class Semester(models.Model):
             except KeyError:
                 pass
 
-        self.year = int(self.year)
+        if self.year:
+            self.year = int(self.year)
 
     def __unicode__(self):
         return '%s %s' % (self.get_type_display(), self.year)
@@ -187,20 +188,6 @@ class Semester(models.Model):
         else:
             return Semester(type=Semester.FALL, year=now.year)
 
-    @staticmethod
-    def get_semester(year, semester):
-        """Utility method to help retrive semesters, does not get semester from DB"""
-
-        try:
-            semester_map = dict(map(lambda x: (x[1], x[0]), Semester.TYPES))
-            semester = semester_map[semester.lower()]
-
-            return Semester.objects.get(year=year, type=semester)
-        except (KeyError, Semester.DoesNotExist):
-            raise Http404
-
-
-
 class Exam(models.Model):
     exam_date = models.DateField(blank=True, null=True)
     exam_time = models.TimeField(blank=True, null=True)
@@ -227,9 +214,7 @@ class Exam(models.Model):
 class Week(models.Model):
     NUMBER_CHOICES = [(x, x) for x in range(1, 53)]
 
-
-    number = models.PositiveSmallIntegerField(choices=NUMBER_CHOICES,
-                                              unique=True)
+    number = models.PositiveIntegerField(choices=NUMBER_CHOICES, unique=True)
 
     def __unicode__(self):
         return '%d' % self.number

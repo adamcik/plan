@@ -30,6 +30,8 @@ def clear_cache(*args):
     cache.delete(reverse('schedule-ical-lectures', args=args))
     cache.delete(reverse('schedule-ical-deadlines', args=args))
 
+    logging.debug('Deleted cache')
+
 def shortcut(request, slug):
     '''Redirect users to their timetable for the current semester'''
 
@@ -98,13 +100,13 @@ def schedule(request, year, semester_type, slug, advanced=False,
     # Start setting up queries
     courses = Course.objects.get_courses(year, semester.type, slug)
 
+    deadlines = Deadline.objects.get_deadlines(year, semester.type, slug)
     lectures = Lecture.objects.get_lectures(year, semester.type, slug)
     exams = Exam.objects.get_exams(year, semester.type, slug)
-    deadlines = Deadline.objects.get_deadlines(year, semester.type, slug)
 
     # Use get_related to cut query counts
-    groups = Lecture.get_related(Group, lectures)
     lecturers = Lecture.get_related(Lecturer, lectures)
+    groups = Lecture.get_related(Group, lectures)
     rooms = Lecture.get_related(Room, lectures)
     weeks = Lecture.get_related(Week, lectures, field='number')
 
@@ -141,19 +143,23 @@ def schedule(request, year, semester_type, slug, advanced=False,
 
             for u in usersets:
                 if not all_groups and len(course_groups[u.course_id]) > 3:
-                    all_groups = set(selected_groups[u.id]) == set(map(lambda a: a[0], course_groups[u.course_id]))
+                    all_groups = set(selected_groups[u.id]) == \
+                            set(map(lambda a: a[0], course_groups[u.course_id]))
 
                 group_forms[u.course_id] = GroupForm(course_groups[u.course_id],
-                        initial={'groups': selected_groups[u.id]}, prefix=u.course_id)
+                        initial={'groups': selected_groups.get(u.id, [])},
+                        prefix=u.course_id)
 
         # Set up group forms
         for course in courses:
             course.group_form = group_forms.get(course.id, None)
-            course.name_form = CourseNameForm(initial={'name': course.user_name or ''}, prefix=course.id)
+
+            name = course.user_name or ''
+            course.name_form = CourseNameForm(initial={'name': name},
+                     prefix=course.id)
 
     response = render_to_response('schedule.html', {
             'advanced': advanced,
-            'colspan': table.span,
             'color_map': color_map,
             'courses': courses,
             'deadline_form': deadline_form,
@@ -163,7 +169,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
             'lectures': lectures,
             'semester': semester,
             'slug': slug,
-            'table': table.table,
+            'timetable': table,
         }, RequestContext(request))
 
     if cache_page:
@@ -178,16 +184,10 @@ def schedule(request, year, semester_type, slug, advanced=False,
 def select_groups(request, year, semester_type, slug):
     '''Form handler for selecting groups to use in schedule'''
 
-    semester = Semester.get_semester(year, semester_type)
+    semester = Semester(year=year, type=semester_type)
 
     if request.method == 'POST':
-        course_filter = {
-            'userset__slug': slug,
-            'userset__semester__year__exact': semester.year,
-            'userset__semester__type__exact': semester.type,
-        }
-        courses = Course.objects.filter(**course_filter).\
-                distinct().order_by('id')
+        courses = Course.objects.get_courses(year, semester.type, slug)
 
         course_groups = Course.get_groups([c.id for c in courses])
 
@@ -196,16 +196,12 @@ def select_groups(request, year, semester_type, slug):
             group_form = GroupForm(groups, request.POST, prefix=c.id)
 
             if group_form.is_valid():
-                userset = UserSet.objects.get(
-                        course=c,
-                        slug=slug,
-                        semester=semester
-                    )
+                userset = UserSet.objects.get_usersets(year,
+                        semester.type, slug).get(course=c)
+
                 userset.groups = group_form.cleaned_data['groups']
 
         clear_cache(year, semester.get_type_display(), slug)
-
-        logging.debug('Deleted cache')
 
     return HttpResponseRedirect(reverse('schedule-advanced',
             args=[semester.year,semester.get_type_display(),slug]))
@@ -213,11 +209,10 @@ def select_groups(request, year, semester_type, slug):
 def new_deadline(request, year, semester_type, slug):
     '''Handels addition of tasks, reshows schedule view if form does not
        validate'''
-    semester = Semester.get_semester(year, semester_type)
+    semester = Semester(year=year, type=semester_type)
 
     if request.method == 'POST':
         clear_cache(year, semester.get_type_display(), slug)
-        logging.debug('Deleted cache')
 
         post = request.POST.copy()
 
@@ -229,7 +224,7 @@ def new_deadline(request, year, semester_type, slug):
                 del post['submit_add']
 
         if 'submit_add' in post:
-            usersets = UserSet.objects.filter(slug=slug, semester=semester)
+            usersets = UserSet.objects.get_usersets(year, semester.type, slug)
             deadline_form = DeadlineForm(usersets, post)
 
             if deadline_form.is_valid():
@@ -239,7 +234,8 @@ def new_deadline(request, year, semester_type, slug):
                         deadline_form=deadline_form, cache_page=False)
 
         elif 'submit_remove' in post:
-            Deadline.objects.filter(
+            logging.debug(post.getlist('deadline_remove'))
+            Deadline.objects.get_deadlines(year, semester.type, slug).filter(
                     id__in=post.getlist('deadline_remove')
                 ).delete()
 
@@ -249,7 +245,7 @@ def new_deadline(request, year, semester_type, slug):
 def copy_deadlines(request, year, semester_type, slug):
     '''Handles importing of deadlines'''
 
-    semester = Semester.get_semester(year, semester_type)
+    semester = Semester(year=year, type=semester_type)
 
     if request.method == 'POST':
         if 'slugs' in request.POST:
@@ -257,10 +253,8 @@ def copy_deadlines(request, year, semester_type, slug):
 
             color_map = ColorMap()
 
-            courses = Course.objects.filter(
-                    userset__slug=slug,
-                    userset__semester=semester,
-                ).distinct()
+            courses = Course.objects.get_courses(year, semester.type, slug). \
+                    distinct()
 
             # Init color map
             for c in courses:
@@ -268,7 +262,8 @@ def copy_deadlines(request, year, semester_type, slug):
 
             deadlines = Deadline.objects.filter(
                     userset__slug__in=slugs,
-                    userset__semester=semester,
+                    userset__semester__year__exact=year,
+                    userset__semester__type__exact=semester.type,
                     userset__course__in=courses,
                 ).select_related(
                     'userset__course__id'
@@ -282,15 +277,17 @@ def copy_deadlines(request, year, semester_type, slug):
                 }, RequestContext(request))
 
         elif 'deadline_id' in request.POST:
-            deadline_id = request.POST.getlist('deadline_id')
-            deadlines = Deadline.objects.filter(id__in=deadline_id)
+            deadline_ids = request.POST.getlist('deadline_id')
+            deadlines = Deadline.objects.filter(
+                    id__in=deadline_ids,
+                    userset__semester__year__exact=year,
+                    userset__semester__type__exact=semester.type,
+                )
 
             for d in deadlines:
-                userset = UserSet.objects.get(
-                        slug=slug,
-                        semester=semester,
-                        course=d.userset.course
-                )
+                userset = UserSet.objects.get_usersets(year, semester.type,
+                    slug).get(course=d.userset.course)
+
                 Deadline.objects.get_or_create(
                         userset=userset,
                         date=d.date,
@@ -308,7 +305,8 @@ def select_course(request, year, semester_type, slug, add=False):
 
     # FIXME split ut three sub functions into seperate functions?
 
-    semester = Semester.get_semester(year, semester_type)
+    semester = Semester(type=semester_type)
+    semester = Semester.objects.get(year=year, type=semester.type)
 
     if request.method == 'POST':
 
@@ -348,7 +346,7 @@ def select_course(request, year, semester_type, slug, add=False):
                 try:
                     course = Course.objects.get(
                             name__iexact=l.strip(),
-                            semesters__in=[semester]
+                            semesters__in=[semester],
                         )
                     userset, created = UserSet.objects.get_or_create(
                             slug=slug,
@@ -379,31 +377,16 @@ def select_course(request, year, semester_type, slug, add=False):
                 if c.strip():
                     courses.append(c.strip())
 
-            sets = UserSet.objects.filter(
-                    slug__iexact=slug,
-                    course__id__in=courses
-                )
-            sets.delete()
+            UserSet.objects.get_usersets(year, semester.type, slug). \
+                    filter(course__id__in=courses).delete()
 
         elif 'submit_name' in post:
-            userset_filter = {
-                'slug': slug,
-                'semester': semester,
-            }
-            userset_related = [
-                'course__name',
-            ]
-
-            usersets = UserSet.objects.filter(**userset_filter). \
-                            select_related(*userset_related)
+            usersets = UserSet.objects.get_usersets(year, semester.type, slug)
 
             for u in usersets:
                 form = CourseNameForm(post, prefix=u.course_id)
-                logging.debug("Checking %s" % u)
 
                 if form.is_valid():
-                    logging.debug("Form for %s is valid" % u)
-
                     name = form.cleaned_data['name'].strip()
 
                     if name.upper() == u.course.name.upper() or name == "":
@@ -411,33 +394,24 @@ def select_course(request, year, semester_type, slug, add=False):
                         name = ""
 
                     u.name = name
-
-                    logging.debug("Saving %s as %s" % (u.course.name, name))
                     u.save()
-                else:
-                    logging.debug("Form for %s is invalid" % u)
 
     return HttpResponseRedirect(reverse('schedule-advanced',
             args=[semester.year, semester.get_type_display(), slug]))
 
 def select_lectures(request, year, semester_type, slug):
     '''Handle selection of lectures to hide'''
-    semester = Semester.get_semester(year, semester_type)
+    semester = Semester(year=year, type=semester_type)
 
     if request.method == 'POST':
         excludes = request.POST.getlist('exclude')
 
-        userset_filter = {
-            'slug': slug,
-            'semester': semester,
-        }
+        usersets = UserSet.objects.get_usersets(year, semester.type, slug)
 
-        for userset in UserSet.objects.filter(**userset_filter):
+        for userset in usersets:
             userset.exclude = userset.course.lecture_set.filter(id__in=excludes)
 
         clear_cache(semester.year, semester.get_type_display(), slug)
-
-        logging.debug('Deleted cache')
 
     return HttpResponseRedirect(reverse('schedule-advanced',
             args=[semester.year, semester.get_type_display(), slug]))
