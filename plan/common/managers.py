@@ -61,3 +61,17 @@ class DeadlineManager(models.Manager):
                 'userset__course',
                 'userset__name',
             )
+
+class ExamManager(models.Manager):
+    def get_exams(self, slug, semester):
+        return self.get_query_set().filter(
+                exam_date__gt=semester.get_first_day(),
+                exam_date__lt=semester.get_last_day(),
+                course__userset__slug=slug,
+                course__userset__semester=semester,
+            ).select_related(
+                'course__name',
+                'course__full_name',
+            ).extra(
+                select={'user_name': 'common_userset.name'}
+            )

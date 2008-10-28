@@ -125,7 +125,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
     # FIXME rename to lectures, however there is a conflict further down
     initial_lectures = Lecture.objects.get_lectures(slug, semester)
 
-    exams = Exam.get_exams(slug, semester)
+    exams = Exam.objects.get_exams(slug, semester)
     deadlines = Deadline.objects.get_deadlines(slug, semester)
 
     if advanced:

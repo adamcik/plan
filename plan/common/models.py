@@ -3,7 +3,8 @@ from datetime import datetime, timedelta, time
 from django.db import models, connection
 from django.template.defaultfilters import slugify
 
-from plan.common.managers import LectureManager, DeadlineManager
+from plan.common.managers import LectureManager, DeadlineManager, \
+        ExamManager
 
 class UserSet(models.Model):
     slug = models.SlugField()
@@ -196,25 +197,13 @@ class Exam(models.Model):
     type_name = models.CharField(max_length=100, blank=True, null=True)
     course = models.ForeignKey(Course)
 
+    objects = ExamManager()
+
     def __unicode__(self):
         return  '%s (%s)' % (self.course, self.type)
 
     class Meta:
         ordering = ('handout_time', 'exam_time')
-
-    @staticmethod
-    def get_exams(slug, semester):
-        return Exam.objects.filter(
-                exam_date__gt=semester.get_first_day(),
-                exam_date__lt=semester.get_last_day(),
-                course__userset__slug=slug,
-                course__userset__semester=semester,
-            ).select_related(
-                'course__name',
-                'course__full_name',
-            ).extra(
-                select={'user_name': 'common_userset.name'}
-            )
 
 class Week(models.Model):
     NUMBER_CHOICES = [(x, x) for x in range(1, 53)]
@@ -294,14 +283,13 @@ class Lecture(models.Model):
         return tmp
 
 class Deadline(models.Model):
-    objects = DeadlineManager()
-
     userset = models.ForeignKey('UserSet')
 
     date = models.DateField(default=datetime.now().date()+timedelta(days=7))
     time = models.TimeField(null=True, blank=True)
-
     task = models.CharField(max_length=255)
+
+    objects = DeadlineManager()
 
     class Meta:
         ordering = ('date', 'time')
