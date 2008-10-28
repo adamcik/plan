@@ -125,21 +125,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
     # FIXME rename to lectures, however there is a conflict further down
     initial_lectures = Lecture.objects.get_lectures(slug, semester)
 
-    first_day = semester.get_first_day()
-    last_day = semester.get_last_day()
-
-    # FIXME move to static method on Exam?
-    exams = Exam.objects.filter(
-            exam_date__gt=first_day,
-            exam_date__lt=last_day,
-            course__userset__slug=slug,
-            course__userset__semester=semester,
-        ).select_related(
-            'course__name',
-            'course__full_name',
-        ).extra(
-            select={'user_name': 'common_userset.name'}
-        )
+    exams = Exam.get_exams(slug, semester)
 
     # FIXME move to static method on Deadline?
     deadlines = Deadline.objects.filter(

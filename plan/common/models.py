@@ -202,6 +202,20 @@ class Exam(models.Model):
     class Meta:
         ordering = ('handout_time', 'exam_time')
 
+    @staticmethod
+    def get_exams(slug, semester):
+        return Exam.objects.filter(
+                exam_date__gt=semester.get_first_day(),
+                exam_date__lt=semester.get_last_day(),
+                course__userset__slug=slug,
+                course__userset__semester=semester,
+            ).select_related(
+                'course__name',
+                'course__full_name',
+            ).extra(
+                select={'user_name': 'common_userset.name'}
+            )
+
 class Week(models.Model):
     NUMBER_CHOICES = [(x, x) for x in range(1, 53)]
 
