@@ -4,15 +4,15 @@
     <thead>
         <tr>
             <th class="time"></th>
-            <th colspan="{{ colspan.0 }}">Monday</th>
-            <th colspan="{{ colspan.1 }}">Tuesday</th>
-            <th colspan="{{ colspan.2 }}">Wednesday</th>
-            <th colspan="{{ colspan.3 }}">Thursday</th>
-            <th colspan="{{ colspan.4 }}">Friday</th>
+            <th colspan="{{ timetable.span.0 }}">Monday</th>
+            <th colspan="{{ timetable.span.1 }}">Tuesday</th>
+            <th colspan="{{ timetable.span.2 }}">Wednesday</th>
+            <th colspan="{{ timetable.span.3 }}">Thursday</th>
+            <th colspan="{{ timetable.span.4 }}">Friday</th>
         </tr>
     </thead>
     <tbody>
-    {% for row in table %}
+    {% for row in timetable.table %}
         <tr class="{% cycle odd,even %}{% if forloop.last %} last{% endif %}{% if forloop.first %} first{% endif %}">
             {% for cells in row %}
                 {% if cells %}
