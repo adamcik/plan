@@ -17,6 +17,7 @@ from plan.common.models import Course, Deadline, Exam, Group, \
         Lecture, Semester, UserSet, Room, Lecturer, Week
 from plan.common.forms import DeadlineForm, GroupForm, CourseNameForm
 from plan.common.utils import compact_sequence, ColorMap
+from plan.common.timetable import Timetable
 
 def clear_cache(*args):
     """Clears a users cache based on reverse"""
@@ -86,19 +87,8 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
         timer.tick('Done, returning cache')
         return response
 
-    # FIXME refactor alogrithm that generates time table to seperate function.
-
-    # Data structure that stores what will become the html table
-    table = [[[{}] for a in Lecture.DAYS] for b in Lecture.START]
-
-    # Extra info used to get the table right
-    lectures = []
-
     # Color mapping for the courses
     color_map = ColorMap()
-
-    # Header colspans
-    span = [1] * 5
 
     # Array with courses to show
     courses = []
@@ -116,12 +106,15 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
     semester = Semester.get_semester(year, semester_type)
     courses = Course.objects.get_courses(slug, semester)
 
-    # FIXME rename to lectures, however there is a conflict further down
-    initial_lectures = Lecture.objects.get_lectures(slug, semester)
+    lectures = Lecture.objects.get_lectures(slug, semester)
     exams = Exam.objects.get_exams(slug, semester)
     deadlines = Deadline.objects.get_deadlines(slug, semester)
 
+    if courses:
+        rooms = Lecture.get_related(Room, lectures)
+
     if advanced:
+        # FIXME check when this is needed
         usersets = UserSet.objects.get_usersets(slug, semester)
     else:
         usersets = UserSet.objects.none()
@@ -129,76 +122,15 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
     if not deadline_form and advanced:
         deadline_form = DeadlineForm(usersets)
 
-    timer.tick('Done initializing')
-
     for c in courses:
         color_map[c.id]
-    timer.tick('Done initialising colors')
 
-    timer.tick('Starting main lecture loop')
-    for i, lecture in enumerate(initial_lectures):
-        if lecture.exclude:
-            continue
+    timer.tick('Done initializing')
 
-        # Our actual layout algorithm for handling collisions and displaying in
-        # tables:
-
-        start = lecture.start_time - Lecture.START[0][0]
-        end = lecture.end_time - Lecture.END[0][0]
-        rowspan = end - start + 1
-
-        first = start
-
-        # Try to find leftmost row that can fit our lecture, if we run out of
-        # rows to test, ie IndexError, we append a fresh one to work with
-        try:
-            row = 0
-            while start <= end:
-                if table[start][lecture.day][row]:
-                    # One of our time slots is taken, bump the row number and
-                    # restart our search
-                    row += 1
-                    start = first
-                else:
-                    start += 1
-
-        except IndexError:
-            # We ran out of rows to check, simply append a new row
-            for j in range(len(Lecture.START)):
-                table[j][lecture.day].append({})
-
-            # Update the header colspan
-            span[lecture.day] += 1
-
-        start = first
-        remove = False
-
-        while start <= end:
-            # Replace the cell we found with a base containing info about our
-            # lecture
-            table[start][lecture.day][row] = {
-                'lecture': lecture,
-                'rowspan': rowspan,
-                'remove': remove,
-            }
-
-            # Add lecture to our supplementary data structure and set the
-            # remove flag.
-            if not remove:
-                remove = True
-                lectures.append({
-                    'height': rowspan,
-                    'i': start,
-                    'j': lecture.day,
-                    'k': row,
-                })
-
-            start += 1
-
-    if courses:
-        timer.tick('Start getting rooms for lecture list')
-        rooms = Lecture.get_related(Room, initial_lectures)
-        timer.tick('Done getting rooms for lecture list')
+    table = Timetable(lectures, rooms)
+    table.place_lectures()
+    table.do_expansion()
+    table.insert_times()
 
     if courses and advanced:
         timer.tick('Creating groups forms')
@@ -214,59 +146,11 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
 
         timer.tick('Done creating groups forms')
 
-        groups = Lecture.get_related(Group, initial_lectures)
-        timer.tick('Done getting groups for lecture list')
+        groups = Lecture.get_related(Group, lectures)
+        lecturers = Lecture.get_related(Lecturer, lectures)
+        weeks = Lecture.get_related(Week, lectures, field='number')
 
-        lecturers = Lecture.get_related(Lecturer, initial_lectures)
-        timer.tick('Done getting lecturers for lecture list')
-
-        weeks = Lecture.get_related(Week, initial_lectures, field='number')
-        timer.tick('Done getting weeks for lecture list')
-
-    timer.tick('Starting lecture expansion')
     for lecture in lectures:
-        # Loop over supplementary data structure using this to figure out which
-        # colspan expansions are safe
-        i = lecture['i']
-        j = lecture['j']
-        k = lecture['k']
-
-        height = lecture['height']
-
-        expand_by = 1
-
-        r = rooms.get(table[i][j][k]['lecture'].id, [])
-        table[i][j][k]['lecture'].sql_rooms = r
-
-        # Find safe expansion of colspan
-        safe = True
-        for l in xrange(k+1, len(table[i][j])):
-            for m in xrange(i, i+height):
-                if table[m][j][l]:
-                    safe = False
-                    break
-            if safe:
-                expand_by += 1
-            else:
-                break
-
-        table[i][j][k]['colspan'] = expand_by
-
-        # Remove cells that will get replaced by colspan
-        for l in xrange(k+1, k+expand_by):
-            for m in xrange(i, i+height):
-                table[m][j][l]['remove'] = True
-    timer.tick('Done with lecture expansion')
-
-    # TODO add second round of expansion equalising colspan
-
-    # Insert extra cell containg times
-    times = zip(range(len(Lecture.START)), Lecture.START, Lecture.END)
-    for i, start, end in times:
-        table[i].insert(0, [{'time': '%s&nbsp;-&nbsp;%s' % (start[1], end[1]) }])
-    timer.tick('Done adding times')
-
-    for lecture in initial_lectures:
         compact_weeks = compact_sequence(weeks.get(lecture.id, []))
 
         lecture.sql_weeks = compact_weeks
@@ -283,17 +167,17 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
     timer.tick('Starting render to response')
     response = render_to_response('schedule.html', {
             'advanced': advanced,
-            'colspan': span,
+            'colspan': table.span,
             'color_map': color_map,
             'courses': courses,
             'deadline_form': deadline_form,
             'deadlines': deadlines,
             'exams': exams,
             'group_help': all_groups,
-            'lectures': initial_lectures,
+            'lectures': lectures,
             'semester': semester,
             'slug': slug,
-            'table': table,
+            'table': table.table,
         }, RequestContext(request))
 
     if cache_page:

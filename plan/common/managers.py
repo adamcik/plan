@@ -1,5 +1,7 @@
 from django.db import models
 
+# FIXME convert semester to kwarg, and also take in type and year?
+
 class LectureManager(models.Manager):
     def get_lectures(self, slug, semester):
         """
