@@ -140,7 +140,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
             group_forms[u.course_id] = GroupForm(course_groups[u.course_id],
                     initial={'groups': selected_groups[u.id]}, prefix=u.course_id)
 
-
+    if courses:
         groups = Lecture.get_related(Group, lectures)
         lecturers = Lecture.get_related(Lecturer, lectures)
         weeks = Lecture.get_related(Week, lectures, field='number')
