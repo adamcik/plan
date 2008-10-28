@@ -31,11 +31,14 @@ class UserSet(models.Model):
         super(UserSet, self).save(*args, **kwargs)
 
     @staticmethod
-    def get_groups(slug, semester):
+    def get_groups(year, semester_type, slug):
         tmp = {}
 
-        group_list = Group.objects.filter(userset__slug=slug, userset__semester=semester). \
-            extra(select={
+        group_list = Group.objects.filter(
+                userset__slug=slug,
+                userset__semester__year__exact=year,
+                userset__semester__type__exact=semester_type,
+            ).extra(select={
                 'userset_id': 'common_userset.id',
                 'group_id': 'common_group.id',
             }).values_list('userset_id', 'group_id').distinct()
@@ -143,6 +146,18 @@ class Semester(models.Model):
 
     year = models.PositiveSmallIntegerField(choices=YEAR_CHOICES)
     type = models.PositiveSmallIntegerField(choices=TYPES)
+
+    def __init__(self, *args, **kwargs):
+        super(Semester, self).__init__(*args, **kwargs)
+
+        if int != type(self.type) and not self.type.isdigit():
+            try:
+                lookup = dict(map(lambda a: (a[1], a[0]), self.TYPES))
+                self.type = lookup[self.type]
+            except KeyError:
+                pass
+
+        self.year = int(self.year)
 
     def __unicode__(self):
         return '%s %s' % (self.get_type_display(), self.year)
@@ -272,6 +287,10 @@ class Lecture(models.Model):
     @staticmethod
     def get_related(model, lectures, field='name'):
         tmp = {}
+
+        if not lectures:
+            return tmp
+
         name = model._meta.object_name.lower()
 
         object_list = model.objects.filter(lecture__in=lectures). \
