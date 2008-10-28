@@ -450,10 +450,8 @@ def copy_deadlines(request, year, semester_type, slug):
                     'userset__course__id'
                 ).exclude(userset__slug=slug)
 
-            for d in deadlines:
-                d.css_class = color_map[d.userset.course_id]
-
             return render_to_response('select_deadlines.html', {
+                    'color_map': color_map,
                     'deadlines': deadlines,
                     'semester': semester,
                     'slug': slug,

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load color %}
 
 {% block title %}
     {{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %} {{ semester.get_type_display }} {{ semester.year }} {{ block.super }}
@@ -25,7 +26,7 @@
                 </thead>
                 <tbody>
                     {% for d in deadlines %}
-                        <tr class="{{ d.css_class }}">
+                        <tr class="{% color d.userset.course_id %}">
                             <td><input type="checkbox" name="deadline_id" value="{{ d.id }}" checked="checked" /></td>
                             <td>{{ d.userset.course.name }}</td>
                             <td>{{ d.date }}</td>
