@@ -36,13 +36,14 @@ def shortcut(request, slug):
     semester = Semester.current()
 
     return HttpResponseRedirect(reverse('schedule',
-            args = [semester.year, semester.get_type_display(), slug]))
+            args = [semester.year, semester.get_type_display(), slug.strip()]))
 
 def getting_started(request):
     '''Intial top level page that greets users'''
 
     semester = Semester.current()
 
+    # Redirect user to their timetable
     if request.method == 'POST' and 'slug' in request.POST:
         slug = slugify(request.POST['slug'])
 
@@ -75,9 +76,8 @@ def getting_started(request):
 
     return render_to_response('start.html', context, RequestContext(request))
 
-def schedule(request, year, semester_type, slug, advanced=False, week=None,
-        deadline_form=None, cache_page=True):
-
+def schedule(request, year, semester_type, slug, advanced=False,
+        week=None, deadline_form=None, cache_page=True):
     '''Page that handels showing schedules'''
 
     response = cache.get(request.path)
@@ -88,63 +88,38 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
     # Color mapping for the courses
     color_map = ColorMap()
 
-    # Array with courses to show
-    courses = []
     group_forms = {}
-
-    # Helper arrays to keep query count down
-    groups = {}
-    lecturers = {}
-    weeks = {}
-    rooms = {}
 
     # Keep track if all groups are selected for all courses
     all_groups = False
 
-    semester = Semester.get_semester(year, semester_type)
-    courses = Course.objects.get_courses(slug, semester)
+    semester = Semester(year=year, type=semester_type)
 
-    lectures = Lecture.objects.get_lectures(slug, semester)
-    exams = Exam.objects.get_exams(slug, semester)
-    deadlines = Deadline.objects.get_deadlines(slug, semester)
+    # Start setting up queries
+    courses = Course.objects.get_courses(year, semester.type, slug)
 
-    if courses:
-        rooms = Lecture.get_related(Room, lectures)
+    lectures = Lecture.objects.get_lectures(year, semester.type, slug)
+    exams = Exam.objects.get_exams(year, semester.type, slug)
+    deadlines = Deadline.objects.get_deadlines(year, semester.type, slug)
 
-    if advanced:
-        # FIXME check when this is needed
-        usersets = UserSet.objects.get_usersets(slug, semester)
-    else:
-        usersets = UserSet.objects.none()
+    # Use get_related to cut query counts
+    groups = Lecture.get_related(Group, lectures)
+    lecturers = Lecture.get_related(Lecturer, lectures)
+    rooms = Lecture.get_related(Room, lectures)
+    weeks = Lecture.get_related(Week, lectures, field='number')
 
-    if not deadline_form and advanced:
-        deadline_form = DeadlineForm(usersets)
-
+    # Init colors in predictable maner
     for c in courses:
         color_map[c.id]
 
+    # Create Timetable
     table = Timetable(lectures, rooms)
     if lectures:
         table.place_lectures()
         table.do_expansion()
     table.insert_times()
 
-    if courses and advanced:
-        course_groups = Course.get_groups([u.course_id for u in usersets])
-        selected_groups = UserSet.get_groups(slug, semester)
-
-        for u in usersets:
-            if not all_groups and len(course_groups[u.course_id]) > 3:
-                all_groups = set(selected_groups[u.id]) == set(map(lambda a: a[0], course_groups[u.course_id]))
-
-            group_forms[u.course_id] = GroupForm(course_groups[u.course_id],
-                    initial={'groups': selected_groups[u.id]}, prefix=u.course_id)
-
-    if courses:
-        groups = Lecture.get_related(Group, lectures)
-        lecturers = Lecture.get_related(Lecturer, lectures)
-        weeks = Lecture.get_related(Week, lectures, field='number')
-
+    # Add extra info to lectures
     for lecture in lectures:
         compact_weeks = compact_sequence(weeks.get(lecture.id, []))
 
@@ -154,6 +129,24 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
         lecture.sql_rooms = rooms.get(lecture.id, [])
 
     if advanced:
+        usersets = UserSet.objects.get_usersets(year, semester.type, slug)
+
+        # Set up deadline form
+        if not deadline_form:
+            deadline_form = DeadlineForm(usersets)
+
+        if courses:
+            course_groups = Course.get_groups([u.course_id for u in usersets])
+            selected_groups = UserSet.get_groups(year, semester.type, slug)
+
+            for u in usersets:
+                if not all_groups and len(course_groups[u.course_id]) > 3:
+                    all_groups = set(selected_groups[u.id]) == set(map(lambda a: a[0], course_groups[u.course_id]))
+
+                group_forms[u.course_id] = GroupForm(course_groups[u.course_id],
+                        initial={'groups': selected_groups[u.id]}, prefix=u.course_id)
+
+        # Set up group forms
         for course in courses:
             course.group_form = group_forms.get(course.id, None)
             course.name_form = CourseNameForm(initial={'name': course.user_name or ''}, prefix=course.id)
@@ -174,14 +167,12 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
         }, RequestContext(request))
 
     if cache_page:
-
         if deadlines:
             cache_time = deadlines[0].get_seconds()
         else:
             cache_time = settings.CACHE_TIME
 
         cache.set(request.path, response, cache_time)
-
     return response
 
 def select_groups(request, year, semester_type, slug):
@@ -451,32 +442,19 @@ def select_lectures(request, year, semester_type, slug):
     return HttpResponseRedirect(reverse('schedule-advanced',
             args=[semester.year, semester.get_type_display(), slug]))
 
-def list_courses(request, year, semester, slug):
+def list_courses(request, year, semester_type, slug):
     '''Display a list of courses based on when exam is'''
 
     if request.method == 'POST':
-        return select_course(request, year, semester, slug, add=True)
+        return select_course(request, year, semester_type, slug, add=True)
 
     response = cache.get('course_list')
 
     if not response:
-        semester = Semester.get_semester(year, semester)
+        semester = Semester(year=year, type=semester_type)
 
-        first_day = semester.get_first_day()
-        last_day = semester.get_last_day()
-
-        no_exam = Q(exam__isnull=True)
-        with_exam = Q(exam__exam_date__gt=first_day, exam__exam_date__lt=last_day)
-
-        courses = Course.objects.filter(semesters__in=[semester]). \
-            filter(no_exam | with_exam).extra(select={
-                'exam_date': 'common_exam.exam_date',
-                'exam_time': 'common_exam.exam_time',
-                'handout_date': 'common_exam.handout_date',
-                'handout_time': 'common_exam.handout_time',
-                'type': 'common_exam.type',
-                'type_name': 'common_exam.type_name',
-            })
+        courses = Course.objects.get_courses_with_exams(year, semester.type,
+            semester.get_first_day(), semester.get_last_day())
 
         response = object_list(request,
                 courses,
