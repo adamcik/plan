@@ -124,12 +124,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
     deadlines = Deadline.objects.get_deadlines(slug, semester)
 
     if advanced:
-        usersets = UserSet.objects.filter(
-                slug=slug,
-                semester=semester,
-            ).select_related(
-                'course__name',
-            )
+        usersets = UserSet.objects.get_usersets(slug, semester)
 
     if not deadline_form and advanced:
         deadline_form = DeadlineForm(usersets)

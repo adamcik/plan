@@ -4,7 +4,7 @@ from django.db import models, connection
 from django.template.defaultfilters import slugify
 
 from plan.common.managers import LectureManager, DeadlineManager, \
-        ExamManager, CourseManager
+        ExamManager, CourseManager, UserSetManager
 
 class UserSet(models.Model):
     slug = models.SlugField()
@@ -16,6 +16,8 @@ class UserSet(models.Model):
     added = models.DateTimeField(auto_now_add=True)
     exclude = models.ManyToManyField('Lecture', blank=True, null=True,
                                      related_name='excluded_from')
+
+    objects = UserSetManager()
 
     class Meta:
         unique_together = (('slug', 'course'),)

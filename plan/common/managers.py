@@ -84,3 +84,12 @@ class CourseManager(models.Manager):
         }
         return self.get_query_set().filter(**course_filter). \
             extra(select={'user_name': 'common_userset.name'}).distinct()
+
+class UserSetManager(models.Manager):
+    def get_usersets(self, slug, semester):
+        return self.get_query_set().filter(
+                slug=slug,
+                semester=semester,
+            ).select_related(
+                'course__name',
+            )
