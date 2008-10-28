@@ -301,18 +301,28 @@ class Deadline(models.Model):
 
     task = models.CharField(max_length=255)
 
+    class Meta:
+        ordering = ('date', 'time')
+
+    def __unicode__(self):
+        if self.time:
+            return '%s %s- %s %s' % (self.userset, self.userset.slug,
+                                     self.date, self.time)
+        else:
+            return '%s %s- %s' % (self.userset, self.userset.slug, self.date)
+
     def get_datetime(self):
         if self.time:
             return datetime.combine(self.date, self.time)
         else:
             return datetime.combine(self.date, time())
+    datetime = property(get_datetime)
 
     def get_seconds(self):
         td = self.get_datetime() - datetime.now()
 
         return td.days * 3600 * 24 + td.seconds
-
-    datetime = property(get_datetime)
+    seconds = property(get_seconds)
 
     def is_expired(self):
         if self.time:
@@ -329,12 +339,12 @@ class Deadline(models.Model):
         return self.userset.course
     course = property(get_course)
 
-    def __unicode__(self):
-        if self.time:
-            return '%s %s- %s %s' % (self.userset, self.userset.slug,
-                                     self.date, self.time)
-        else:
-            return '%s %s- %s' % (self.userset, self.userset.slug, self.date)
-
-    class Meta:
-        ordering = ('date', 'time')
+    @staticmethod
+    def get_deadlines(slug, semester): 
+        return Deadline.objects.filter(
+                userset__slug=slug,
+                userset__semester=semester,
+            ).select_related(
+                'userset__course',
+                'userset__name',
+            )

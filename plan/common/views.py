@@ -126,15 +126,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
     initial_lectures = Lecture.objects.get_lectures(slug, semester)
 
     exams = Exam.get_exams(slug, semester)
-
-    # FIXME move to static method on Deadline?
-    deadlines = Deadline.objects.filter(
-            userset__slug=slug,
-            userset__semester=semester,
-        ).select_related(
-            'userset__course',
-            'userset__name',
-        )
+    deadlines = Deadline.get_deadlines(slug, semester)
 
     if advanced:
         usersets = UserSet.objects.filter(
