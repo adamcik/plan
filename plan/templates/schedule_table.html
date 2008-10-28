@@ -1,3 +1,5 @@
+{% load color %}
+
 <table id="schedule">
     <thead>
         <tr>
@@ -19,7 +21,7 @@
                             <td colspan="{{ c.colspan|default:"1" }}"
                                 rowspan="{{ c.rowspan|default:"1" }}"
                                 {% if c.class or forloop.last  %}
-                                    class="{{ c.class }}{% if forloop.last %} last{% endif %}"
+                                    class="{% color c.lecture.course_id %} {{ c.class }}{% if forloop.last %} last{% endif %}"
                                 {% endif %}
                                 {% if c.lecture %}title="{{ c.lecture.course.full_name }}"{% endif %}>
 

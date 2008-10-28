@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load color %}
 
 {% block hd %}
     <h1>unofficial timetable generator for NTNU students</h1>
@@ -51,8 +52,8 @@
         <div class="yui-u">
             <h2>Top {{ stats|length }} courses</h2>
             <div id="stats">
-                {% for count,name,full_name,class in stats %}
-                    <div title="{{ full_name }}" style="width: {% widthratio count stats.0.0 95 %}%" class="{{ class }}">
+                {% for count,name,full_name in stats %}
+                    <div title="{{ full_name }}" style="width: {% widthratio count stats.0.0 95 %}%" class="{% color name %}">
                         <b style="float: right;">{{ count }}</b>
                         <b>{{ name }}</b>
                     </div>

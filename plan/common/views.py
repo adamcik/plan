@@ -61,16 +61,12 @@ def getting_started(request):
         subscription_count = int(UserSet.objects.count())
         deadline_count = int(Deadline.objects.count())
 
-        stats = []
-        color_map = ColorMap()
-        for i, row in enumerate(Course.get_stats()):
-            stats.append(row + (color_map[i],))
-
         context = {
+            'color_map': ColorMap(),
             'slug_count': slug_count,
             'subscription_count': subscription_count,
             'deadline_count': deadline_count,
-            'stats': stats,
+            'stats': Course.get_stats(),
 
         }
 
@@ -167,10 +163,9 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
 
     t.tick('Done initializing')
 
-    # Do this in view to ensure consistent init of color_map
     for c in courses:
-        c.css_class = color_map[c.id]
-    t.tick('Done adding color to course array')
+        color_map[c.id]
+    t.tick('Done initialising colors')
 
     t.tick('Starting main lecture loop')
     for i, lecture in enumerate(initial_lectures):
@@ -210,7 +205,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
         start = first
         remove = False
 
-        css = [color_map[lecture.course_id], "lecture"]
+        css = ["lecture"]
 
         if lecture.type.optional:
             css.append('optional')
