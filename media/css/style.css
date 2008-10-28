@@ -181,6 +181,9 @@ td.error input, td.error select {
 	-moz-border-radius: 0 2px 2px 0;
 	-webkit-border-radius: 0 2px 2px 0;
 }
+#stats span {
+	float: right;
+}
 
 /* Links on all pages nedd constant width b */
 #links b {
