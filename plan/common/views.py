@@ -79,11 +79,11 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
 
     '''Page that handels showing schedules'''
 
-    t = request.timer
+    timer = request.timer
     response = cache.get(request.path)
 
     if response and 'no-cache' not in request.GET and cache_page:
-        t.tick('Done, returning cache')
+        timer.tick('Done, returning cache')
         return response
 
     # FIXME refactor alogrithm that generates time table to seperate function.
@@ -129,13 +129,13 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
     if not deadline_form and advanced:
         deadline_form = DeadlineForm(usersets)
 
-    t.tick('Done initializing')
+    timer.tick('Done initializing')
 
     for c in courses:
         color_map[c.id]
-    t.tick('Done initialising colors')
+    timer.tick('Done initialising colors')
 
-    t.tick('Starting main lecture loop')
+    timer.tick('Starting main lecture loop')
     for i, lecture in enumerate(initial_lectures):
         if lecture.exclude:
             continue
@@ -196,9 +196,9 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
             start += 1
 
     if courses:
-        t.tick('Start getting rooms for lecture list')
+        timer.tick('Start getting rooms for lecture list')
         rooms = Lecture.helper(Room, initial_lectures)
-        t.tick('Done getting rooms for lecture list')
+        timer.tick('Done getting rooms for lecture list')
 
     if courses and advanced:
         course_groups = Course.get_groups([u.course_id for u in usersets])
@@ -211,18 +211,18 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
             group_forms[u.course_id] = GroupForm(course_groups[u.course_id],
                     initial={'groups': selected_groups[u.id]}, prefix=u.course_id)
 
-        t.tick('Done creating groups forms')
+        timer.tick('Done creating groups forms')
 
         groups = Lecture.helper(Group, initial_lectures)
-        t.tick('Done getting groups for lecture list')
+        timer.tick('Done getting groups for lecture list')
 
         lecturers = Lecture.helper(Lecturer, initial_lectures)
-        t.tick('Done getting lecturers for lecture list')
+        timer.tick('Done getting lecturers for lecture list')
 
         weeks = Lecture.helper(Week, initial_lectures, field='number')
-        t.tick('Done getting weeks for lecture list')
+        timer.tick('Done getting weeks for lecture list')
 
-    t.tick('Starting lecture expansion')
+    timer.tick('Starting lecture expansion')
     for lecture in lectures:
         # Loop over supplementary data structure using this to figure out which
         # colspan expansions are safe
@@ -255,7 +255,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
         for l in xrange(k+1, k+expand_by):
             for m in xrange(i, i+height):
                 table[m][j][l]['remove'] = True
-    t.tick('Done with lecture expansion')
+    timer.tick('Done with lecture expansion')
 
     # TODO add second round of expansion equalising colspan
 
@@ -263,7 +263,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
     times = zip(range(len(Lecture.START)), Lecture.START, Lecture.END)
     for i, start, end in times:
         table[i].insert(0, [{'time': '%s&nbsp;-&nbsp;%s' % (start[1], end[1]) }])
-    t.tick('Done adding times')
+    timer.tick('Done adding times')
 
     for lecture in initial_lectures:
         compact_weeks = compact_sequence(weeks.get(lecture.id, []))
@@ -277,9 +277,9 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
         for course in courses:
             course.group_form = group_forms.get(course.id, None)
             course.name_form = CourseNameForm(initial={'name': course.user_name or ''}, prefix=course.id)
-        t.tick('Done setting up group and name forms')
+        timer.tick('Done setting up group and name forms')
 
-    t.tick('Starting render to response')
+    timer.tick('Starting render to response')
     response = render_to_response('schedule.html', {
             'advanced': advanced,
             'colspan': span,
@@ -296,7 +296,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
         }, RequestContext(request))
 
     if cache_page:
-        t.tick('Saving to cache')
+        timer.tick('Saving to cache')
 
         if deadlines:
             cache_time = deadlines[0].get_seconds()
@@ -305,7 +305,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
 
         cache.set(request.path, response, cache_time)
 
-    t.tick('Returning repsonse')
+    timer.tick('Returning repsonse')
     return response
 
 def select_groups(request, year, semester_type, slug):
