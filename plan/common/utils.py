@@ -73,9 +73,12 @@ class ColorMap(dict):
 
     def __getitem__(self, k):
         # Remeber to use super to preven inf loop
+        if k is None:
+            return ''
+
         if k in self:
             return super(ColorMap, self).__getitem__(k)
         else:
             self.index += 1
-            self[k] = 'lecture%d' % (self.index % self.max)
+            self[k] = 'color%d' % (self.index % self.max)
             return super(ColorMap, self).__getitem__(k)

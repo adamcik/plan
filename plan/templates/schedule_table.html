@@ -20,8 +20,13 @@
                         {% if not c.remove %}
                             <td colspan="{{ c.colspan|default:"1" }}"
                                 rowspan="{{ c.rowspan|default:"1" }}"
-                                {% if c.class or forloop.last  %}
-                                    class="{% color c.lecture.course_id %} {{ c.class }}{% if forloop.last %} last{% endif %}"
+                                {% if c.lecture or c.time or forloop.last  %}
+                                    class="{% if c.lecture %}lecture{% endif %}
+                                           {% color c.lecture.course_id %}
+                                           {% if c.lecture.optional %}optional{% endif %}
+                                           {% ifequal c.rowspan 1 %}single{% endifequal %}
+                                           {% if forloop.last %}last{% endif %}
+                                           {% if c.time %}time{% endif %}"
                                 {% endif %}
                                 {% if c.lecture %}title="{{ c.lecture.course.full_name }}"{% endif %}>
 

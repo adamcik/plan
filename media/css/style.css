@@ -128,14 +128,14 @@ td.error input, td.error select {
 }
 
 /* Color scheme for lectures */
-.lecture0  { background: #B3E2CD; }
-.lecture1  { background: #FDCDAC; }
-.lecture2  { background: #CBD5E8; }
-.lecture3  { background: #F4CAE4; }
-.lecture4  { background: #E6F5C9; }
-.lecture5  { background: #FFF2AE; }
-.lecture6  { background: #F1E2CC; }
-.lecture7  { background: #CCCCCC; }
+.color0  { background: #B3E2CD; }
+.color1  { background: #FDCDAC; }
+.color2  { background: #CBD5E8; }
+.color3  { background: #F4CAE4; }
+.color4  { background: #E6F5C9; }
+.color5  { background: #FFF2AE; }
+.color6  { background: #F1E2CC; }
+.color7  { background: #CCCCCC; }
 
 /* header/body/footer */
 #hd {

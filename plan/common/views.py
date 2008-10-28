@@ -114,17 +114,17 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
     all_groups = False
 
     semester = Semester.get_semester(year, semester_type)
-
     courses = Course.objects.get_courses(slug, semester)
 
     # FIXME rename to lectures, however there is a conflict further down
     initial_lectures = Lecture.objects.get_lectures(slug, semester)
-
     exams = Exam.objects.get_exams(slug, semester)
     deadlines = Deadline.objects.get_deadlines(slug, semester)
 
     if advanced:
         usersets = UserSet.objects.get_usersets(slug, semester)
+    else:
+        usersets = UserSet.objects.none()
 
     if not deadline_form and advanced:
         deadline_form = DeadlineForm(usersets)
@@ -173,14 +173,6 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
         start = first
         remove = False
 
-        css = ["lecture"]
-
-        if lecture.type.optional:
-            css.append('optional')
-
-        if rowspan == 1:
-            css.append('single')
-
         while start <= end:
             # Replace the cell we found with a base containing info about our
             # lecture
@@ -188,7 +180,6 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
                 'lecture': lecture,
                 'rowspan': rowspan,
                 'remove': remove,
-                'class': ' '.join(css),
             }
 
             # Add lecture to our supplementary data structure and set the
@@ -271,9 +262,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
     # Insert extra cell containg times
     times = zip(range(len(Lecture.START)), Lecture.START, Lecture.END)
     for i, start, end in times:
-        table[i].insert(0, [{'time': '%s&nbsp;-&nbsp;%s' % \
-                (start[1], end[1]), 'class': 'time'}])
-
+        table[i].insert(0, [{'time': '%s&nbsp;-&nbsp;%s' % (start[1], end[1]) }])
     t.tick('Done adding times')
 
     for lecture in initial_lectures:
