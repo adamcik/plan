@@ -15,17 +15,6 @@ class InternalIpMiddleware:
                 settings.INTERNAL_IPS += [request.META.get('REMOTE_ADDR')]
         return None
 
-class TimingMiddleware:
-    '''Debuging middleware that does timing'''
-    def process_request(self, request):
-        request.timer = Timer()
-        return None
-
-    def process_response(self, request, response):
-        if hasattr(request, 'timer'):
-            request.timer.tick('Done')
-        return response
-
 class UserBasedExceptionMiddleware(object):
     '''Exception middleware that gives super users technical_500_response'''
     def process_exception(self, request, exception):

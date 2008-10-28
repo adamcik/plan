@@ -1,24 +1,6 @@
-import time
-import logging
-
 from django.conf import settings
 from django.http import HttpResponseServerError
 from django.template import Context, loader
-
-class Timer(object):
-    '''http://www.djangosnippets.org/snippets/783/ -- By Ed and Rudy Menendez'''
-    def __init__(self):
-        self.bot = self.last_time = time.time()
-
-        logging.info(u'Starting timer at %s' % self.last_time)
-
-    def tick(self, msg='Timer'):
-        '''Put in a tick logging the time'''
-
-        now = time.time()
-        logging.info(u'%s: Since inception %.3f, since last call %.3f' % (
-                         msg, (now-self.bot)*1000, (now - self.last_time)*1000))
-        self.last_time = now
 
 def server_error(request, template_name='500.html'):
     """

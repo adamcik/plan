@@ -80,11 +80,9 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
 
     '''Page that handels showing schedules'''
 
-    timer = request.timer
     response = cache.get(request.path)
 
     if response and 'no-cache' not in request.GET and cache_page:
-        timer.tick('Done, returning cache')
         return response
 
     # Color mapping for the courses
@@ -125,15 +123,13 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
     for c in courses:
         color_map[c.id]
 
-    timer.tick('Done initializing')
-
     table = Timetable(lectures, rooms)
-    table.place_lectures()
-    table.do_expansion()
+    if lectures:
+        table.place_lectures()
+        table.do_expansion()
     table.insert_times()
 
     if courses and advanced:
-        timer.tick('Creating groups forms')
         course_groups = Course.get_groups([u.course_id for u in usersets])
         selected_groups = UserSet.get_groups(slug, semester)
 
@@ -144,7 +140,6 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
             group_forms[u.course_id] = GroupForm(course_groups[u.course_id],
                     initial={'groups': selected_groups[u.id]}, prefix=u.course_id)
 
-        timer.tick('Done creating groups forms')
 
         groups = Lecture.get_related(Group, lectures)
         lecturers = Lecture.get_related(Lecturer, lectures)
@@ -162,9 +157,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
         for course in courses:
             course.group_form = group_forms.get(course.id, None)
             course.name_form = CourseNameForm(initial={'name': course.user_name or ''}, prefix=course.id)
-        timer.tick('Done setting up group and name forms')
 
-    timer.tick('Starting render to response')
     response = render_to_response('schedule.html', {
             'advanced': advanced,
             'colspan': table.span,
@@ -181,7 +174,6 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
         }, RequestContext(request))
 
     if cache_page:
-        timer.tick('Saving to cache')
 
         if deadlines:
             cache_time = deadlines[0].get_seconds()
@@ -190,7 +182,6 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
 
         cache.set(request.path, response, cache_time)
 
-    timer.tick('Returning repsonse')
     return response
 
 def select_groups(request, year, semester_type, slug):
