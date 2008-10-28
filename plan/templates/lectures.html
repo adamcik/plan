@@ -1,6 +1,6 @@
 {% load color %}
 
-<h2>Lecture list</h2>
+<h2 id="lectures">Lecture list</h2>
 <form action="{% url change-lectures semester.year,semester.get_type_display,slug %}" method="post">
     <table>
         <thead>
@@ -40,7 +40,7 @@
         {% if advanced %}
             <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/hide.png" /> Hide selected lectures</button>
         {% else %}
-            Go to <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">advanced options</a> to toggle which lectures to hide.
+            Go to <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}#lectures">advanced options</a> to toggle which lectures to hide.
         {% endif %}
     </p>
 </form>

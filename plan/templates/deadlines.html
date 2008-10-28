@@ -37,7 +37,7 @@
     </form>
 {% endif %}
 {% if courses and not advanced %}
-    <p class="noprint">Go to <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">advanced options</a> to add and remove deadlines.</p>
+    <p class="noprint">Go to <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}#deadlines">advanced options</a> to add and remove deadlines.</p>
 {% endif %}
 {% if courses and advanced %}
     {% if not deadlines %}

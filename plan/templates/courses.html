@@ -1,7 +1,7 @@
 {% load color %}
 
 <form action="{% url change-course semester.year,semester.get_type_display,slug %}" method="post">
-    <h2>Courses</h2>
+    <h2 id="courses">Courses</h2>
     {% if courses %}
         <table>
             <thead>
@@ -59,7 +59,7 @@
         </p>
     {% else %}
         <p class="noprint">
-            Go to <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">advanced options</a>
+            Go to <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}#courses">advanced options</a>
             to add and remove courses.
         </p>
     {% endif %}
