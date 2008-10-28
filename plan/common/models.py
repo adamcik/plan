@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, time
 
 from django.db import models, connection
 from django.template.defaultfilters import slugify
+from django.http import Http404
 
 from plan.common.managers import LectureManager, DeadlineManager, \
         ExamManager, CourseManager, UserSetManager
@@ -155,7 +156,7 @@ class Semester(models.Model):
                 lookup = dict(map(lambda a: (a[1], a[0]), self.TYPES))
                 self.type = lookup[self.type]
             except KeyError:
-                pass
+                raise Http404
 
         if self.year:
             self.year = int(self.year)
