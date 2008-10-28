@@ -75,3 +75,12 @@ class ExamManager(models.Manager):
             ).extra(
                 select={'user_name': 'common_userset.name'}
             )
+
+class CourseManager(models.Manager):
+    def get_courses(self, slug, semester):
+        course_filter = {
+            'userset__slug': slug,
+            'userset__semester': semester,
+        }
+        return self.get_query_set().filter(**course_filter). \
+            extra(select={'user_name': 'common_userset.name'}).distinct()

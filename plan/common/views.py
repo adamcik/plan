@@ -115,12 +115,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None,
 
     semester = Semester.get_semester(year, semester_type)
 
-    course_filter = {
-        'userset__slug': slug,
-        'userset__semester': semester,
-    }
-    courses = Course.objects.filter(**course_filter). \
-        extra(select={'user_name': 'common_userset.name'}).distinct()
+    courses = Course.objects.get_courses(slug, semester)
 
     # FIXME rename to lectures, however there is a conflict further down
     initial_lectures = Lecture.objects.get_lectures(slug, semester)

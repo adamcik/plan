@@ -4,7 +4,7 @@ from django.db import models, connection
 from django.template.defaultfilters import slugify
 
 from plan.common.managers import LectureManager, DeadlineManager, \
-        ExamManager
+        ExamManager, CourseManager
 
 class UserSet(models.Model):
     slug = models.SlugField()
@@ -73,6 +73,8 @@ class Course(models.Model):
     points = models.DecimalField(decimal_places=2, max_digits=5, null=True)
 
     semesters = models.ManyToManyField('Semester', blank=True, null=True)
+
+    objects = CourseManager()
 
     def get_url(self):
         values = self.__dict__
