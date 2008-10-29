@@ -64,7 +64,7 @@ class Timetable:
                         'i': start,
                         'j': lecture.day,
                         'k': row,
-                        'course': lecture.course_id,
+                        'l': lecture,
                     })
 
                 start += 1

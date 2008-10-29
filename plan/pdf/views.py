@@ -1,17 +1,55 @@
+from datetime import datetime
+
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import landscape, A4
+from reportlab.lib.pagesizes import landscape, A6
+from reportlab.platypus import Paragraph, KeepInFrame
 from reportlab.platypus.tables import Table, TableStyle
 from reportlab.lib.colors import HexColor
 from reportlab.lib.units import cm
+from reportlab.lib.styles import getSampleStyleSheet
 
-from pprint import pprint
+styles = getSampleStyleSheet()
 
 from django.http import HttpResponse
 from django.core.cache import cache
 
-from plan.common.models import Lecture, Semester, Room
+from plan.common.models import Lecture, Semester, Room, Course
 from plan.common.timetable import Timetable
 from plan.common.utils import ColorMap
+
+outer_border = HexColor('#666666')
+inner_border = HexColor('#CCCCCC')
+backgrounds = [HexColor('#FFFFFF'), HexColor('#FAFAFA')]
+
+def _tablestyle():
+    table_style = TableStyle([
+        ('FONT',     (0,0),  (-1,-1),'Helvetica-Bold'),
+        ('FONTSIZE', (0,0),  (-1,-1), 6),
+        ('FONTSIZE', (0,0),  (-1,0),  8),
+        ('FONTSIZE', (0,0),  (0,-1),  6),
+
+        ('TOPPADDING',    (0,0),  (-1,-1), 1),
+        ('TOPPADDING',    (0,0),  (0,-1),  5),
+        ('BOTTOMPADDING', (0,0),  (-1,-1), 1),
+        ('LEFTPADDING',   (0,0),  (-1,-1), 2),
+        ('RIGHTPADDING',  (0,0),  (-1,-1), 1),
+
+        ('ALIGN',  (0,0),  (0,-1),  'CENTER'),
+        ('VALIGN', (0,0),  (0,-1),  'MIDDLE'),
+        ('ALIGN',  (1,0),  (-1,-1), 'LEFT'),
+        ('VALIGN', (1,0),  (-1,-1), 'TOP'),
+
+        ('LINEABOVE',  (0,1),  (-1,1),  1, outer_border),
+        ('LINEBELOW',  (0,-1), (-1,-1), 1, outer_border),
+        ('LINEBEFORE', (0,1),  (0,-1),  1, outer_border),
+        ('LINEAFTER',  (-1,1), (-1,-1), 1, outer_border),
+
+        ('LINEBELOW',  (0,1), (-1,-2), 0.5, inner_border),
+
+        ('ROWBACKGROUNDS', (0,0), (-1,-1), backgrounds),
+    ])
+
+    return table_style
 
 def pdf(request, year, semester_type, slug):
     semester = Semester(year=year, type=semester_type)
@@ -24,12 +62,12 @@ def pdf(request, year, semester_type, slug):
     color_map = ColorMap(hex=True)
 
     margin = 0.5*cm
-    width, height = landscape(A4)
+    width, height = landscape(A6)
 
     width -= 2*margin
     height -= 2*margin
 
-    time_width = 0.085 * width
+    time_width = 0.06 * width
     day_width = (width-time_width) / 5
 
     filename = '%s-%s-%s' % (year, semester.get_type_display(), slug)
@@ -39,6 +77,10 @@ def pdf(request, year, semester_type, slug):
 
     lectures = Lecture.objects.get_lectures(year, semester.type, slug)
     rooms = Lecture.get_related(Room, lectures)
+    courses = Course.objects.get_courses(year, semester.type, slug)
+
+    for course in courses:
+        color_map[course.id]
 
     timetable = Timetable(lectures, rooms)
     if lectures:
@@ -46,16 +88,26 @@ def pdf(request, year, semester_type, slug):
         timetable.do_expansion()
     timetable.insert_times()
 
-    page = canvas.Canvas(response, landscape(A4))
+    page = canvas.Canvas(response, landscape(A6))
+
+    paragraph_style = styles['Normal']
+    paragraph_style.fontSize = 8
+    paragraph_style.leading = 8
+
+    table_style = _tablestyle()
 
     data = [['']]
 
+    # Add days FIXME move to timetable
     for i,day in enumerate(['Monday', 'Tuesday', 'Wednsday', 'Thursday', 'Friday']):
         data[0].append(day)
         if timetable.span[i] > 1:
             extra = timetable.span[i] - 1
+
+            table_style.add('SPAN', (len(data[0])-1,0), (len(data[0])-1+extra,0))
             data[0].extend([''] * extra)
 
+    # Convert to "simple" datastruct
     for row in timetable.table:
         data_row = []
         for cells in row:
@@ -64,38 +116,50 @@ def pdf(request, year, semester_type, slug):
                 lecture = cell.get('lecture', '')
 
                 if lecture:
-                    lecture = lecture.alias or lecture.course
+                    if lecture.type.optional:
+                        paragraph_style.fontName = 'Helvetica'
+                    else:
+                        paragraph_style.fontName = 'Helvetica-Bold'
+
+                    content = Paragraph("%s <br/><font size=5>%s<br/>%s</font>" % (
+                            lecture.alias or lecture.course.name,
+                            lecture.type.name.replace('/', ' / '),
+                            ', '.join(lecture.sql_rooms)
+                        ), paragraph_style)
+
+                    # FIXME many keep in frames? first two with
+                    # maxheight=maxfontsize, last one = space thats left?
+                    content = [
+                        Paragraph(lecture.alias or lecture.course.name, paragraph_style),
+                        Paragraph('<font size=6>%s</font>' % lecture.type.name.replace('/', ' / '), paragraph_style),
+                        Paragraph('<font size=6>%s</font>' % ', '.join(lecture.sql_rooms), paragraph_style),
+                    ]
+
+                elif time:
+                    content = time.replace(' - ', '\n')
+                else:
+                    content = ''
 
                 if cell.get('remove', False):
-                    data_row.append('removed')
+                    data_row.append('')
                 else:
-                    data_row.append(str(time or lecture or ''))
+                    data_row.append(content)
 
         data.append(data_row)
 
-    style = TableStyle([
-        ('ALIGN',      (0,0),  (-1,-1), 'LEFT'),
-        ('VALIGN',     (0,0),  (-1,-1), 'TOP'),
-        ('LINEABOVE',  (0,1),  (-1,1),  1, HexColor('#666666')),
-        ('LINEBELOW',  (0,-1), (-1,-1), 1, HexColor('#666666')),
-        ('LINEBEFORE', (0,1),  (0,-1),  1, HexColor('#666666')),
-        ('LINEAFTER',  (-1,1), (-1,-1), 1, HexColor('#666666')),
-
-        ('LINEBELOW',  (0,1), (-1,-2), 1, HexColor('#CCCCCC')),
-
-        ('ROWBACKGROUNDS', (0,0), (-1,-1), [HexColor('#FFFFFF'), HexColor('#FAFAFA')]),
-    ])
-
+    # Calculate widths and line that splits days
     col_widths = [time_width]
-    for width in timetable.span:
+    for w in timetable.span:
         x = len(col_widths)
-        style.add('LINEBEFORE', (x,1),  (x,-1),  1, HexColor('#666666'))
-        col_widths.extend([float(day_width)/width] * width)
+        table_style.add('LINEBEFORE', (x,1),  (x,-1),  1, outer_border)
 
-    row_heights  = [14]
-    row_heights += [(height-14) / (len(data)-1)] * (len(data)-1)
+        col_widths.extend([float(day_width)/w] * w)
 
+    # Set row heights
+    row_heights  = [12]
+    row_heights += [(height-8) / (len(data)-1)] * (len(data)-1)
 
+    # Create spans, setup backgrounds and put content in KeepInFrame
     for lecture in timetable.lectures:
         offset = 0
         for o in timetable.span[:lecture['j']]:
@@ -107,15 +171,27 @@ def pdf(request, year, semester_type, slug):
         x2 = x1 + lecture['width'] - 1
         y2 = y1 + lecture['height'] - 1
 
-        style.add('SPAN', (x1,y1), (x2,y2))
-        style.add('BACKGROUND', (x1,y1), (x2,y2), 
-                HexColor(color_map[lecture['course']]))
+        table_style.add('SPAN', (x1,y1), (x2,y2))
+        table_style.add('BACKGROUND', (x1,y1), (x2,y2),
+                HexColor(color_map[lecture['l'].course_id]))
 
-    print style
+        content = data[y1][x1]
+        data[y1][x1] =  KeepInFrame(col_widths[x1]*lecture['width'],
+                                    row_heights[1]*lecture['height'],
+                                    content, mode='shrink')
 
-    table = Table(data, colWidths=col_widths, rowHeights=row_heights, style=style)
+    table = Table(data, colWidths=col_widths, rowHeights=row_heights,
+            style=table_style)
     table.wrapOn(page, width, height)
     table.drawOn(page, margin, margin)
+
+    # FIXME put table in KeepInFrame? and use this to create A4, A5 ...
+
+    note = 'Generated by %s - %s' % (request.META['HTTP_HOST'].split(':')[0],
+                datetime.now().date())
+
+    page.setFont('Helvetica', 6)
+    page.drawString(width + margin - page.stringWidth(note), margin-8, note)
 
     page.showPage()
     page.save()
