@@ -36,6 +36,8 @@
                     <img alt="" src="{{ MEDIA_URL }}gfx/advanced.png" />Advanced options</a>
             {% endif %}
         {% endif %}
+        - <a href="{% url schedule-pdf semester.year,semester.get_type_display,slug %}">
+                <img alt="" src="{{ MEDIA_URL }}gfx/pdf.png"/>Download schedule</a>
         - <a href="#tips"><img alt="" src="{{ MEDIA_URL }}gfx/tips.png" />Tips</a>
     </p>
 
