@@ -18,13 +18,21 @@ databrowse.site.register(Exam)
 
 handler500 = 'plan.common.utils.server_error'
 
-urlpatterns = patterns('',
+if settings.DEBUG:
+    urlpatterns = patterns('',
+        url(r"%s(?P<path>.*)$" % settings.MEDIA_URL[1:], 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
+        url(r'^500/$', 'django.views.generic.simple.direct_to_template', {'template': '500.html'}),
+        url(r'^404/$', 'django.views.generic.simple.direct_to_template', {'template': '404.html'}),
+    )
+else:
+    urlpatterns = patterns()
+
+urlpatterns += patterns('',
     (r'^admin/(.*)', admin.site.root),
     (r'^data/(.*)', databrowse.site.root),
 
     (r'^', include('plan.common.urls')),
     (r'^', include('plan.ical.urls')),
     (r'^', include('plan.pdf.urls')),
-
-    url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}, name='media'),
 )
+
