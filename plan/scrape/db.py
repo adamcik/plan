@@ -6,6 +6,7 @@ from decimal import Decimal
 from django.db import transaction
 from django.conf import settings
 
+from plan.settings_msqyl import *
 from plan.common.models import Course, Lecture, Lecturer, Semester, Group, \
         Type, Week, Room
 
@@ -16,10 +17,10 @@ def import_db(year, semester):
     semester, created = Semester.objects.get_or_create(year=year, type=semester)
 
     mysql_setings = {
-        'db': settings.TIMETABEL_DB,
-        'host': settings.TIMETABEL_HOST,
-        'user': settings.TIMETABEL_USER,
-        'passwd': settings.TIMETABEL_PASS,
+        'db': TIMETABEL_DB,
+        'host': TIMETABEL_HOST,
+        'user': TIMETABEL_USER,
+        'passwd': TIMETABEL_PASS,
         'use_unicode': True,
     }
 
