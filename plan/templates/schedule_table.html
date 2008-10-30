@@ -1,4 +1,6 @@
 {% load color %}
+{% load nbsp %}
+{% load strip %}
 
 <table id="schedule">
     <thead>
@@ -18,24 +20,26 @@
                 {% if cells %}
                     {% for c in cells %}
                         {% if not c.remove %}
-                            <td colspan="{{ c.colspan|default:"1" }}"
+                            <td {% stripspace %}
+                                colspan="{{ c.colspan|default:"1" }}"
                                 rowspan="{{ c.rowspan|default:"1" }}"
                                 {% if c.lecture or c.time or forloop.last  %}
                                     class="{% if c.lecture %}lecture{% endif %}
                                            {% color c.lecture.course_id %}
-                                           {% if c.lecture.optional %}optional{% endif %}
-                                           {% ifequal c.rowspan 1 %}single{% endifequal %}
-                                           {% if forloop.last %}last{% endif %}
-                                           {% if c.time %}time{% endif %}"
+                                           {% if c.lecture.optional %} optional{% endif %}
+                                           {% ifequal c.rowspan 1 %} single{% endifequal %}
+                                           {% if forloop.last %} last{% endif %}
+                                           {% if c.time %} time{% endif %}"
                                 {% endif %}
-                                {% if c.lecture %}title="{{ c.lecture.course.full_name }}"{% endif %}>
+                                {% if c.lecture %}title="{{ c.lecture.course.full_name }}"{% endif %}
+                            {% endstripspace %}>
 
                                 {% if c.lecture %}
                                     <div class="course">{{ c.lecture.alias|default:c.lecture.course }}</div>
                                     <div class="room">{{ c.lecture.sql_rooms|join:", "|truncatewords:2 }}</div>
                                     <div class="type">{{ c.lecture.type|default:"" }}</div>
                                 {% endif %}
-                                {{ c.time|safe|default:"" }}
+                                {{ c.time|escape|nbsp|default:"" }}
                             </td>
                         {% endif %}
                     {% endfor %}
