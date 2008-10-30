@@ -64,7 +64,7 @@ def pdf(request, year, semester_type, slug):
     width, height = landscape(A5)
 
     width -= 2*margin
-    height -= 2*margin
+    height -= 3*margin
 
     time_width = 0.06 * width
     day_width = (width-time_width) / 5
@@ -180,10 +180,14 @@ def pdf(request, year, semester_type, slug):
     page = canvas.Canvas(response, A4)
     page.translate(margin, A4[1]-margin)
 
-    if 'small' in request.GET:
-        page.scale(0.75,0.75)
+    if 'large' in request.GET:
+        page.translate(0.5*margin, 2.5*margin-A4[1])
+        page.scale(1.414, 1.414)
+        page.rotate(90)
+    elif 'small' in request.GET:
+        page.scale(0.707, 0.707)
     elif 'tiny' in request.GET:
-        page.scale(0.5,0.5)
+        page.scale(0.5, 0.5)
 
     table = Table(data, colWidths=col_widths, rowHeights=row_heights,
             style=table_style)
@@ -195,7 +199,19 @@ def pdf(request, year, semester_type, slug):
                 datetime.now().date())
 
     page.setFont('Helvetica', 10)
+    page.setStrokeColor(HexColor('#CCCCCC'))
+    page.setFillColor(HexColor('#666666'))
+    page.setLineWidth(0.7)
     page.drawString(width - page.stringWidth(note), - height - 10, note)
+
+    def cross(x,y):
+        page.line(x-2, y, x+2, y)
+        page.line(x, y-2, x, y+2)
+
+    cross(0,0)
+    cross(width, 0)
+    cross(0, -height-margin)
+    cross(width, -height-margin)
 
     page.showPage()
     page.save()
