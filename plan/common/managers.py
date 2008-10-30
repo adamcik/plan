@@ -104,7 +104,6 @@ class CourseManager(models.Manager):
                 semesters__year__exact=year,
                 semesters__type__exact=semester_type,
             ).filter(no_exam | with_exam).extra(select={
-                'alias': 'common_userset.name',
                 'exam_date': 'common_exam.exam_date',
                 'exam_time': 'common_exam.exam_time',
                 'handout_date': 'common_exam.handout_date',
