@@ -67,7 +67,8 @@ def getting_started(request):
         current = Semester.current(from_db=True)
 
         if not schedule_form:
-            schedule_form = ScheduleForm(initial={'semester': current.id})
+            schedule_form = ScheduleForm(initial={'semester': current.id,
+                'slug': request.COOKIES.get('last', '')})
 
         slug_count = int(UserSet.objects.filter(semester__in=[current]). \
                 values('slug').distinct().count())
