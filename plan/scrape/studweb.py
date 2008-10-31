@@ -4,7 +4,7 @@ from dateutil.parser import parse
 
 from django.db import transaction
 
-from plan.common.models import Exam
+from plan.common.models import Exam, Course
 
 @transaction.commit_on_success
 def import_xml(urls):

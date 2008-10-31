@@ -6,12 +6,12 @@ from decimal import Decimal
 from django.db import transaction
 from django.conf import settings
 
-from plan.settings_msqyl import *
+from plan.settings_mysql import *
 from plan.common.models import Course, Lecture, Lecturer, Semester, Group, \
         Type, Week, Room
 
 @transaction.commit_on_success
-def import_db(year, semester):
+def import_db(year, semester, prefix):
     '''Retrive all lectures for a given course'''
 
     semester, created = Semester.objects.get_or_create(year=year, type=semester)
@@ -30,8 +30,8 @@ def import_db(year, semester):
 
     c.execute("""
         SELECT emnekode,typenavn,dag,start,slutt,uke,romnavn,larer,aktkode
-        FROM h08_timeplan WHERE emnekode NOT LIKE '#%'
-    """)
+        FROM %s_timeplan WHERE emnekode NOT LIKE '#%%'
+    """ % prefix)
 
     added_lectures = []
 
@@ -60,17 +60,22 @@ def import_db(year, semester):
         try:
             day = ['mandag', 'tirsdag', 'onsdag', 'torsdag', 'fredag'].index(day)
         except ValueError:
-            print day
+            print "Could not add %s - %s on %s for %s" % (start, end, day, course)
             continue
 
         # Figure out times:
 
         # We choose to be slightly naive and only care about which hour
         # something starts.
-        start = dict(map(lambda x: (int(x[1].split(':')[0]), x[0]),
-                Lecture.START))[int(start.split(':')[0])]
-        end = dict(map(lambda x: (int(x[1].split(':')[0]), x[0]),
-                Lecture.END))[int(end.split(':')[0])]
+        try:
+            l = locals()
+            start = dict(map(lambda x: (int(x[1].split(':')[0]), x[0]),
+                    Lecture.START))[int(start.split(':')[0])]
+            end = dict(map(lambda x: (int(x[1].split(':')[0]), x[0]),
+                    Lecture.END))[int(end.split(':')[0])]
+        except KeyError, e:
+            print "Could not add %s - %s on %s for %s" % (start, end, day, course)
+            continue
 
         # Rooms:
         rooms = []
@@ -84,10 +89,10 @@ def import_db(year, semester):
         c2 = db.cursor()
         c2.execute("""
                 SELECT DISTINCT asp.studieprogramkode
-                FROM h08_akt_studieprogram asp,studieprogram sp
+                FROM %s_akt_studieprogram asp,studieprogram sp
                 WHERE asp.studieprogramkode=sp.studieprogram_kode
-                AND asp.aktkode = %s
-            """, groupcode)
+                AND asp.aktkode = %%s
+            """ % prefix, groupcode)
         for group in c2.fetchall():
             group, created = Group.objects.get_or_create(name=group[0])
             groups.append(group)
@@ -161,8 +166,8 @@ def import_db(year, semester):
     print Lecture.objects.exclude(id__in=added_lectures,
             semester=semester).values_list('id', flat=True)
 
-    c.execute("""SELECT emnekode,emnenavn,vekt FROM h08_fs_emne WHERE emnekode
-            NOT LIKE '#%'""")
+    c.execute("""SELECT emnekode,emnenavn,vekt FROM %s_fs_emne WHERE emnekode
+            NOT LIKE '#%%'""" % prefix)
 
     for code, name, points in c.fetchall():
         if not code.strip():
