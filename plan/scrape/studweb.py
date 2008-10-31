@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 from urllib import urlopen
 from xml.dom import minidom
 from dateutil.parser import parse
@@ -10,16 +12,51 @@ from plan.common.models import Exam, Course, Semester
 def import_xml(year, semester, url):
     added, updated = [], []
     semester = Semester.objects.get(year=year, type=semester)
+    first_day = semester.get_first_day().date()
 
     dom = minidom.parseString(urlopen(url).read())
 
     for n in dom.getElementsByTagName('dato_row'):
-        exam_kwargs = {}
-
         course_code = n.getElementsByTagName('emnekode')[0].firstChild
 
-        exam_date = n.getElementsByTagName('dato_eksamen') \
-                [0].firstChild
+        exam_year = n.getElementsByTagName('arstall_gjelder_i')[0].firstChild
+
+        if str(year) != exam_year.nodeValue:
+            print "Wrong year for %s" % course_code.nodeValue
+            print exam_year.nodeValue
+            n.unlink()
+            continue
+
+        exam_semester = n.getElementsByTagName('terminkode_gjelder_i')[0].firstChild
+
+        if semester.type == Semester.SPRING and exam_semester.nodeValue != u'VÅR':
+            print "Wrong semester for %s" % course_code.nodeValue
+            print exam_semester.nodeValue
+            n.unlink()
+            continue
+
+        if semester.type == Semester.FALL and exam_semester.nodeValue != u'HØST':
+            print "Wrong semester for %s" % course_code.nodeValue
+            print exam_semester.nodeValue
+            n.unlink()
+            continue
+
+
+        exam_kwargs = {}
+
+        exam_date = n.getElementsByTagName('dato_eksamen')[0].firstChild
+        if exam_date:
+            exam_kwargs['exam_date'] = parse(exam_date.nodeValue).date()
+
+        handin_date = n.getElementsByTagName('dato_innlevering')[0].firstChild
+        if handin_date:
+            exam_kwargs['exam_date'] = parse(handin_date.nodeValue).date()
+
+        if exam_kwargs['exam_date'] < first_day:
+            print "%s's exam is in the past - %s" % (course_code.nodeValue, exam_kwargs['exam_date'])
+            n.unlink()
+            continue
+
         exam_time = n.getElementsByTagName('klokkeslett_fremmote_tid') \
                 [0].firstChild
 
@@ -27,8 +64,6 @@ def import_xml(year, semester, url):
         handout_time = n.getElementsByTagName('klokkeslett_uttak') \
                 [0].firstChild
 
-        handin_date = n.getElementsByTagName('dato_innlevering') \
-                [0].firstChild
         handin_time = n.getElementsByTagName('klokkeslett_innlevering') \
                 [0].firstChild
 
@@ -47,14 +82,13 @@ def import_xml(year, semester, url):
                 [0].firstChild
 
         if not status_code or status_code.nodeValue != 'ORD':
+            n.unlink()
             continue
 
         course, created = Course.objects.get_or_create(
                 name=course_code.nodeValue)
         exam_kwargs['course'] = course
 
-        if exam_date:
-            exam_kwargs['exam_date'] = parse(exam_date.nodeValue).date()
         if exam_time:
             exam_kwargs['exam_time'] = parse(exam_time.nodeValue).time()
 
@@ -65,8 +99,6 @@ def import_xml(year, semester, url):
             exam_kwargs['handout_time'] = parse(handout_time.nodeValue) \
                     .time()
 
-        if handin_date:
-            exam_kwargs['exam_date'] = parse(handin_date.nodeValue).date()
         if handin_time:
             exam_kwargs['exam_time'] = parse(handin_time.nodeValue).time()
 
@@ -82,10 +114,10 @@ def import_xml(year, semester, url):
             raise e
 
         if created:
-            print "Added exam for %s" % course.name
+            print "Added exam for %s - %s" % (course.name, exam.exam_date)
             added.append(exam.id)
         else:
-            print "Updated exam for %s" % course.name
+            print "Updated exam for %s - %s" %( course.name, exam.exam_date)
             updated.append(exam.id)
 
         if duration:
