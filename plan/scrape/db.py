@@ -176,7 +176,6 @@ def import_db(year, semester, prefix):
         course, created = Course.objects.get_or_create(
                 name=''.join(code.split('-')[:-1]).upper().strip())
 
-        print points
         if points:
             course.points = Decimal(points.strip().replace(',', '.'))
         course.full_name = name
