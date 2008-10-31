@@ -215,6 +215,7 @@ class Exam(models.Model):
     type = models.CharField(max_length=1, blank=True)
     type_name = models.CharField(max_length=100, blank=True, null=True)
     course = models.ForeignKey(Course)
+    semester = models.ForeignKey(Semester, null=True)
 
     objects = ExamManager()
 
