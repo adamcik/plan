@@ -1,6 +1,6 @@
 from django import forms
 
-from plan.common.models import Deadline
+from plan.common.models import Deadline, Semester
 
 class CourseNameForm(forms.Form):
     '''Form for changing userset names'''
@@ -30,3 +30,7 @@ class DeadlineForm(forms.models.ModelForm):
         self.fields['time'].widget.attrs['size'] = 2
         self.fields['date'].widget.attrs['size'] = 7
         self.fields['task'].widget.attrs['size'] = 28
+
+class ScheduleForm(forms.Form):
+    slug = forms.CharField()
+    semester = forms.ModelChoiceField(Semester.objects.all(), required=False)

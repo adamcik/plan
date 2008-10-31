@@ -151,7 +151,8 @@ class Semester(models.Model):
     def __init__(self, *args, **kwargs):
         super(Semester, self).__init__(*args, **kwargs)
 
-        if int != type(self.type) and not self.type.isdigit():
+        if int != type(self.type) and self.type is not None \
+                and not self.type.isdigit():
             try:
                 lookup = dict(map(lambda a: (a[1], a[0]), self.TYPES))
                 self.type = lookup[self.type]
@@ -165,7 +166,7 @@ class Semester(models.Model):
         return '%s %s' % (self.get_type_display(), self.year)
 
     class Meta:
-        ordering = ('-year', '-type')
+        ordering = ('year', '-type')
 
     def get_first_day(self):
         if self.type == self.SPRING:
@@ -180,14 +181,19 @@ class Semester(models.Model):
             return datetime(self.year, 12, 31)
 
     @staticmethod
-    def current():
+    def current(from_db=False):
         now = datetime.now()
 
         # Default to current semester
         if now.month <= 6:
-            return Semester(type=Semester.SPRING, year=now.year)
+            current = Semester(type=Semester.SPRING, year=now.year)
         else:
-            return Semester(type=Semester.FALL, year=now.year)
+            current = Semester(type=Semester.FALL, year=now.year)
+
+        if not from_db:
+            return current
+
+        return Semester.objects.get(year=current.year, type=current.type)
 
 class Exam(models.Model):
     exam_date = models.DateField(blank=True, null=True)

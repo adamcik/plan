@@ -13,7 +13,8 @@ from django.conf import settings
 
 from plan.common.models import Course, Deadline, Exam, Group, \
         Lecture, Semester, UserSet, Room, Lecturer, Week
-from plan.common.forms import DeadlineForm, GroupForm, CourseNameForm
+from plan.common.forms import DeadlineForm, GroupForm, CourseNameForm, \
+        ScheduleForm
 from plan.common.utils import compact_sequence, ColorMap
 from plan.common.timetable import Timetable
 
@@ -40,16 +41,20 @@ def shortcut(request, slug):
 
 def getting_started(request):
     '''Intial top level page that greets users'''
-
-    semester = Semester.current()
+    schedule_form = None
 
     # Redirect user to their timetable
     if request.method == 'POST' and 'slug' in request.POST:
-        slug = slugify(request.POST['slug'])
+        schedule_form = ScheduleForm(request.POST)
 
-        if slug.strip():
-            response = HttpResponseRedirect(reverse('schedule',
-                    args = [semester.year, semester.get_type_display(), slug]))
+        if schedule_form.is_valid():
+            slug = slugify(schedule_form.cleaned_data['slug'])
+            semester = schedule_form.cleaned_data['semester'] or \
+                Semester.current()
+
+            if slug.strip():
+                response = HttpResponseRedirect(reverse('schedule', args=[
+                    semester.year, semester.get_type_display(), slug]))
 
             # Store last timetable visited in a cookie so that we can populate
             # the field with a default value next time.
@@ -59,6 +64,11 @@ def getting_started(request):
     context = cache.get('stats')
 
     if not context or 'no-cache' in request.GET:
+        if not schedule_form:
+            current = Semester.current(from_db=True)
+            schedule_form = ScheduleForm(initial={'semester': current.id})
+            print current
+
         slug_count = int(UserSet.objects.values('slug').distinct().count())
         subscription_count = int(UserSet.objects.count())
         deadline_count = int(Deadline.objects.count())
@@ -69,7 +79,7 @@ def getting_started(request):
             'subscription_count': subscription_count,
             'deadline_count': deadline_count,
             'stats': Course.get_stats(),
-
+            'schedule_form': schedule_form,
         }
 
         cache.set('stats', context)

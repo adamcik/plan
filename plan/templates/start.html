@@ -17,7 +17,9 @@
                         you select is in already taken, create another one.
                     </p>
                     <p class="right">
-                        <input type="text" name="slug" value="{{ request.COOKIES.last|default:"" }}" />
+                        {% for field in schedule_form%}
+                            {{ field }}
+                        {% endfor %}
                         <button type="submit">Start <img alt="" src="{{ MEDIA_URL }}gfx/start.png" /></button>
                     </p>
                 </form>
