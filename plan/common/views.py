@@ -441,8 +441,7 @@ def list_courses(request, year, semester_type, slug):
     if not response:
         semester = Semester(year=year, type=semester_type)
 
-        courses = Course.objects.get_courses_with_exams(year, semester.type,
-            semester.get_first_day(), semester.get_last_day())
+        courses = Course.objects.get_courses_with_exams(year, semester.type)
 
         response = object_list(request,
                 courses,

@@ -68,16 +68,12 @@ class DeadlineManager(models.Manager):
             })
 
 class ExamManager(models.Manager):
-    def get_exams(self, year, semester_type, slug, first=None, last=None):
+    def get_exams(self, year, semester_type, slug):
         exam_filter = {
             'course__userset__slug': slug,
-            'course__userset__semester__year__exact': year,
-            'course__userset__semester__type__exact': semester_type,
+            'semester__year__exact': year,
+            'semester__type__exact': semester_type,
         }
-        if first:
-            exam_filter['exam_date__gt'] = first
-        if last:
-            exam_filter['exam_date__lt'] = last
 
         return self.get_query_set().filter(**exam_filter).select_related(
                 'course__name',
@@ -96,9 +92,10 @@ class CourseManager(models.Manager):
         return self.get_query_set().filter(**course_filter). \
             extra(select={'alias': 'common_userset.name'}).distinct()
 
-    def get_courses_with_exams(self, year, semester_type, first, last):
+    def get_courses_with_exams(self, year, semester_type):
         no_exam = Q(exam__isnull=True)
-        with_exam = Q(exam__exam_date__gt=first, exam__exam_date__lt=last)
+        with_exam = Q(semesters__year__exact=year,
+                semesters__type__exact=semester_type)
 
         return self.get_query_set().filter(
                 semesters__year__exact=year,
@@ -110,7 +107,7 @@ class CourseManager(models.Manager):
                 'handout_time': 'common_exam.handout_time',
                 'type': 'common_exam.type',
                 'type_name': 'common_exam.type_name',
-            })
+            }).distinct()
 
 class UserSetManager(models.Manager):
     def get_usersets(self, year, semester_type, slug):
