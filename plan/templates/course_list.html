@@ -9,86 +9,92 @@
 {% endblock %}
 
 {% block bd %}
-    <form action="." method="post">
-        <p>
-            <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add coures to schedule</button>
+    {% if not course_list %}
+        <div id="help">
+            <p>No courses to show for this semester.</p>
+        </div>
+    {% else %}
+        <form action="." method="post">
+            <p>
+                <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add coures to schedule</button>
 
-            &nbsp;&nbsp;&nbsp;&nbsp; Jump to:
-            {% for l in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
-                <a href="#{{ l }}">{{ l }}</a>
-            {% endfor %}
-        </p>
-        <table>
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>Course</th>
-                    <th>Name</th>
-                    <th>Credits</th>
-                    <th colspan="2">Exam time</th>
-                    <th>Exam Type</th>
-                    <th colspan="2">Handout time</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for course in course_list %}
+                &nbsp;&nbsp;&nbsp;&nbsp; Jump to:
+                {% for l in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
+                    <a href="#{{ l }}">{{ l }}</a>
+                {% endfor %}
+            </p>
+            <table>
+                <thead>
                     <tr>
-                        {% ifchanged course.id %}
-                            <td{% ifchanged course.name.0 %} id="{{ course.name.0 }}"{% endifchanged %}>
-                                <input type="checkbox" name="course_add" value="{{ course.name }}" id="course_{{ course.id }}" />
+                        <th></th>
+                        <th>Course</th>
+                        <th>Name</th>
+                        <th>Credits</th>
+                        <th colspan="2">Exam time</th>
+                        <th>Exam Type</th>
+                        <th colspan="2">Handout time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for course in course_list %}
+                        <tr>
+                            {% ifchanged course.id %}
+                                <td{% ifchanged course.name.0 %} id="{{ course.name.0 }}"{% endifchanged %}>
+                                    <input type="checkbox" name="course_add" value="{{ course.name }}" id="course_{{ course.id }}" />
+                                </td>
+                                <td>
+                                    <label for="course_{{ course.id }}"><b>{{ course.name }}</b></label>
+                                </td>
+                                <td class="small">
+                                    <label for="course_{{ course.id }}">{{ course.full_name }}</label>
+                                </td>
+                                <td align="right">
+                                    {{ course.points|default:""|floatformat:"1" }}
+                                </td>
+                            {% else %}
+                                <td colspan="4"></td>
+                            {% endifchanged %}
+                            <td>
+                                {{ course.exam_date|default_if_none:"-" }}
                             </td>
                             <td>
-                                <label for="course_{{ course.id }}"><b>{{ course.name }}</b></label>
-                            </td>
-                            <td class="small">
-                                <label for="course_{{ course.id }}">{{ course.full_name }}</label>
-                            </td>
-                            <td align="right">
-                                {{ course.points|default:""|floatformat:"1" }}
-                            </td>
-                        {% else %}
-                            <td colspan="4"></td>
-                        {% endifchanged %}
-                        <td>
-                            {{ course.exam_date|default_if_none:"-" }}
-                        </td>
-                        <td>
-                            {% if course.exam_time %}
-                                {{ course.exam_time|time:"H:i" }}
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if course.type_name %}
-                                {% if course.type %}
-                                    {{ course.type_name|lower|capfirst }} ({{ course.type }})
-                                {% else %}
-                                    {{ course.type_name|lower|capfirst }}
+                                {% if course.exam_time %}
+                                    {{ course.exam_time|time:"H:i" }}
                                 {% endif %}
-                            {% else %}
-                                {{ course.type|default_if_none:"-" }}
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if course.handout_date %}
-                                {{ course.handout_date }}
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if course.handout_time %}
-                                {{ course.handout_time|time:"H:i" }}
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <p>
-            <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add coures to schedule</button>
+                            </td>
+                            <td>
+                                {% if course.type_name %}
+                                    {% if course.type %}
+                                        {{ course.type_name|lower|capfirst }} ({{ course.type }})
+                                    {% else %}
+                                        {{ course.type_name|lower|capfirst }}
+                                    {% endif %}
+                                {% else %}
+                                    {{ course.type|default_if_none:"-" }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if course.handout_date %}
+                                    {{ course.handout_date }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if course.handout_time %}
+                                    {{ course.handout_time|time:"H:i" }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p>
+                <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add coures to schedule</button>
 
-            &nbsp;&nbsp;&nbsp;&nbsp; Jump to:
-            {% for l in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
-                <a href="#{{ l }}">{{ l }}</a>
-            {% endfor %}
-        </p>
-    </form>
+                &nbsp;&nbsp;&nbsp;&nbsp; Jump to:
+                {% for l in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
+                    <a href="#{{ l }}">{{ l }}</a>
+                {% endfor %}
+            </p>
+        </form>
+    {% endif %}
 {% endblock %}
