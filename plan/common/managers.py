@@ -93,9 +93,12 @@ class CourseManager(models.Manager):
             extra(select={'alias': 'common_userset.name'}).distinct()
 
     def get_courses_with_exams(self, year, semester_type):
-        no_exam = Q(exam__isnull=True)
-        with_exam = Q(semesters__year__exact=year,
-                semesters__type__exact=semester_type)
+        no_exam = Q(exam__isnull=True,
+                    semesters__year__exact=year,
+                    semesters__type__exact=semester_type)
+
+        with_exam = Q(exam__semester__year__exact=year,
+                      exam__semester__type__exact=semester_type)
 
         return self.get_query_set().filter(
                 semesters__year__exact=year,
@@ -107,7 +110,7 @@ class CourseManager(models.Manager):
                 'handout_time': 'common_exam.handout_time',
                 'type': 'common_exam.type',
                 'type_name': 'common_exam.type_name',
-            }).distinct()
+            })
 
 class UserSetManager(models.Manager):
     def get_usersets(self, year, semester_type, slug):
