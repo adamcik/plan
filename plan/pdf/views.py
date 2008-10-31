@@ -176,14 +176,17 @@ def pdf(request, year, semester_type, slug):
     page = canvas.Canvas(response, A4)
     page.translate(margin, A4[1]-margin)
 
-    if 'large' in request.GET:
+    size = request.POST.get('size', 'A5')
+    if 'A4' == size:
         page.translate(0.5*margin, 2.5*margin-A4[1])
         page.scale(1.414, 1.414)
         page.rotate(90)
-    elif 'small' in request.GET:
+    elif 'A6' == size:
         page.scale(0.707, 0.707)
-    elif 'tiny' in request.GET:
+    elif 'A7' == size:
         page.scale(0.5, 0.5)
+
+    print request.POST
 
     table = Table(data, colWidths=col_widths, rowHeights=row_heights,
             style=table_style)
