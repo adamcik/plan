@@ -101,14 +101,20 @@ class Course(models.Model):
         ordering = ('name',)
 
     @staticmethod
-    def get_stats(limit=15):
+    def get_stats(semester=None, limit=15):
+        if hasattr(semester, 'pk'):
+            semester_id = semester.pk
+        else:
+            semester_id = semester
+
         cursor = connection.cursor()
         cursor.execute('''
             SELECT COUNT(*) as num, c.name, c.full_name FROM
                 common_userset u JOIN common_course c ON (c.id = u.course_id)
+            WHERE u.semester_id = %d
             GROUP BY c.name, c.full_name
             ORDER BY num DESC
-            LIMIT %d''', [limit])
+            LIMIT %d''', [semester_id, limit])
 
         return cursor.fetchall()
 

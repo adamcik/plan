@@ -53,14 +53,18 @@
         </div>
         <div class="yui-u">
             <h2>Top {{ stats|length }} courses</h2>
-            <div id="stats">
-                {% for count,name,full_name in stats %}
-                    <div title="{{ full_name }}" style="width: {% widthratio count stats.0.0 95 %}%" class="{% color name %}">
-                        <span>{{ count }}</span>
-                        {{ name }}
-                    </div>
-                {% endfor %}
-            </div>
+            {% if stats %}
+                <div id="stats">
+                    {% for count,name,full_name in stats %}
+                        <div title="{{ full_name }}" style="width: {% widthratio count stats.0.0 95 %}%" class="{% color name %}">
+                            <span>{{ count }}</span>
+                            {{ name }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                No coures have been added to any schedules yet.
+            {% endif %}
         </div>
     </div>
     <h2>Disclaimer</h2>

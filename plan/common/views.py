@@ -64,21 +64,26 @@ def getting_started(request):
     context = cache.get('stats')
 
     if not context or 'no-cache' in request.GET:
-        if not schedule_form:
-            current = Semester.current(from_db=True)
-            schedule_form = ScheduleForm(initial={'semester': current.id})
-            print current
+        current = Semester.current(from_db=True)
 
-        slug_count = int(UserSet.objects.values('slug').distinct().count())
-        subscription_count = int(UserSet.objects.count())
-        deadline_count = int(Deadline.objects.count())
+        if not schedule_form:
+            schedule_form = ScheduleForm(initial={'semester': current.id})
+
+        slug_count = int(UserSet.objects.filter(semester__in=[current]). \
+                values('slug').distinct().count())
+
+        subscription_count = int(UserSet.objects.filter(semester__in=\
+                [current]).count())
+
+        deadline_count = int(Deadline.objects.filter(userset__semester__in=\
+                [current]).count())
 
         context = {
             'color_map': ColorMap(),
             'slug_count': slug_count,
             'subscription_count': subscription_count,
             'deadline_count': deadline_count,
-            'stats': Course.get_stats(),
+            'stats': Course.get_stats(semester=current),
             'schedule_form': schedule_form,
         }
 
