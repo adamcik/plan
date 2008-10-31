@@ -61,6 +61,10 @@ a {
 	color: #204A87;
 }
 
+img {
+	vertical-align: text-bottom;
+}
+
 /* Form elements */
 button {
 	font-size: 93%;
@@ -75,9 +79,6 @@ button img {
 	vertical-align: middle;
 	padding:0;
 	border:none;
-}
-select {
-	width: 100%;
 }
 input {
 	padding: 0.15em;
@@ -167,6 +168,9 @@ td.error input, td.error select {
 	width: 28%;
 	min-height: 10em;
 	*height: 10em;
+}
+#change-groups select {
+	width: 100%;
 }
 
 /* Stats box on front page (needs special casing for graph) */
