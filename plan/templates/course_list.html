@@ -11,18 +11,25 @@
 {% block bd %}
     {% if not course_list %}
         <div id="help">
-            <p>No courses to show for this semester.</p>
+            <p>No courses to show for this semester. Back to <a href="..">your</a> schedule.</p>
         </div>
     {% else %}
         <form action="." method="post">
-            <p>
-                <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add coures to schedule</button>
-
-                &nbsp;&nbsp;&nbsp;&nbsp; Jump to:
-                {% for l in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
-                    <a href="#{{ l }}">{{ l }}</a>
-                {% endfor %}
-            </p>
+            <div class="yui-g">
+                <div class="yui-u first">
+                    <p>
+                        Jump to:
+                        {% for l in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
+                            <a href="#{{ l }}">{{ l }}</a>
+                        {% endfor %}
+                    </p>
+                </div>
+                <div class="yui-u">
+                    <p class="right">
+                        <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add coures to schedule</button>
+                    </p>
+                </div>
+            </div>
             <table>
                 <thead>
                     <tr>
@@ -87,14 +94,21 @@
                     {% endfor %}
                 </tbody>
             </table>
-            <p>
-                <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add coures to schedule</button>
-
-                &nbsp;&nbsp;&nbsp;&nbsp; Jump to:
-                {% for l in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
-                    <a href="#{{ l }}">{{ l }}</a>
-                {% endfor %}
-            </p>
+            <div class="yui-g">
+                <div class="yui-u first">
+                    <p>
+                        Jump to:
+                        {% for l in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
+                            <a href="#{{ l }}">{{ l }}</a>
+                        {% endfor %}
+                    </p>
+                </div>
+                <div class="yui-u">
+                    <p class="right">
+                        <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/add.png" /> Add coures to schedule</button>
+                    </p>
+                </div>
+            </div>
         </form>
     {% endif %}
 {% endblock %}
