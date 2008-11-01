@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 import logging
+from time import time
 
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
@@ -28,6 +29,8 @@ def clear_cache(*args):
     cache.delete(reverse('schedule-ical-exams', args=args))
     cache.delete(reverse('schedule-ical-lectures', args=args))
     cache.delete(reverse('schedule-ical-deadlines', args=args))
+
+    cache.delete('%s-group_help' % reverse('schedule', args=args))
 
     logging.debug('Deleted cache')
 
@@ -106,9 +109,6 @@ def schedule(request, year, semester_type, slug, advanced=False,
 
     group_forms = {}
 
-    # Keep track if all groups are selected for all courses
-    all_groups = False
-
     semester = Semester(year=year, type=semester_type)
 
     # Start setting up queries
@@ -159,10 +159,6 @@ def schedule(request, year, semester_type, slug, advanced=False,
                 if not course_groups.get(u.course_id, False):
                     continue
 
-                if not all_groups and len(course_groups[u.course_id]) > 3:
-                    all_groups = set(selected_groups[u.id]) == \
-                            set(map(lambda a: a[0], course_groups[u.course_id]))
-
                 group_forms[u.course_id] = GroupForm(course_groups[u.course_id],
                         initial={'groups': selected_groups.get(u.id, [])},
                         prefix=u.course_id)
@@ -175,6 +171,11 @@ def schedule(request, year, semester_type, slug, advanced=False,
             course.name_form = CourseNameForm(initial={'name': name},
                      prefix=course.id)
 
+    group_help = '%s-group_help' % reverse('schedule',
+            args=[year, semester.get_type_display(), slug])
+
+    group_help = cache.get(group_help, 0)
+
     response = render_to_response('schedule.html', {
             'advanced': advanced,
             'color_map': color_map,
@@ -182,7 +183,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
             'deadline_form': deadline_form,
             'deadlines': deadlines,
             'exams': exams,
-            'group_help': all_groups,
+            'group_help': group_help,
             'lectures': lectures,
             'semester': semester,
             'slug': slug,
@@ -194,6 +195,14 @@ def schedule(request, year, semester_type, slug, advanced=False,
             cache_time = deadlines[0].get_seconds()
         else:
             cache_time = settings.CACHE_TIME
+
+        logging.debug('Group help time: %s, current time: %s, diff %s' %
+            (group_help, time(), group_help - time()))
+        group_help -= time()
+        if group_help > 0:
+            cache_time = group_help
+
+        logging.debug('Cache time: %.2f min' % (cache_time / 60))
 
         cache.set(request.path, response, cache_time)
     return response
@@ -380,6 +389,10 @@ def select_course(request, year, semester_type, slug, add=False):
                 except Course.DoesNotExist:
                     errors.append(l)
 
+            group_help = '%s-group_help' % reverse('schedule',
+                    args=[year, semester.get_type_display(), slug])
+            cache.set(group_help, int(time())+60*10, 60*10)
+
             if errors:
                 return render_to_response('error.html', {
                         'courses': errors,
@@ -445,10 +458,14 @@ def list_courses(request, year, semester_type, slug):
         semester = Semester(year=year, type=semester_type)
 
         courses = Course.objects.get_courses_with_exams(year, semester.type)
+        course_count = Course.objects.filter(
+                semesters__year__exact=year,
+                semesters__type__exact=semester.type).count()
 
         response = object_list(request,
                 courses,
-                extra_context={'semester': semester},
+                extra_context={'semester': semester,
+                               'course_count': course_count},
                 template_object_name='course',
                 template_name='course_list.html')
 
