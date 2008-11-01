@@ -35,7 +35,7 @@ def import_db(year, semester, prefix):
 
     added_lectures = []
 
-    for l in Lecture.objects.all():
+    for l in Lecture.objects.filter(semester=semester):
         l.rooms.clear()
         l.weeks.clear()
         l.lecturers.clear()
@@ -68,14 +68,20 @@ def import_db(year, semester, prefix):
         # We choose to be slightly naive and only care about which hour
         # something starts.
         try:
-            l = locals()
             start = dict(map(lambda x: (int(x[1].split(':')[0]), x[0]),
                     Lecture.START))[int(start.split(':')[0])]
             end = dict(map(lambda x: (int(x[1].split(':')[0]), x[0]),
                     Lecture.END))[int(end.split(':')[0])]
         except KeyError, e:
-            print "Could not add %s - %s on %s for %s" % (start, end, day, course)
-            continue
+            if int(end.split(':')[0]) == 8:
+                print "Converting %s to 09:00 for %s" % (end, course)
+                end = 9
+            elif int(end.split(':')[0]) == 0:
+                print "Converting %s to 20:00 for %s" % (end, course)
+                end = Lecture.END[-1][0]
+            else:
+                print "Could not add %s - %s on %s for %s" % (start, end, day, course)
+                continue
 
         # Rooms:
         rooms = []
@@ -96,6 +102,7 @@ def import_db(year, semester, prefix):
         for group in c2.fetchall():
             group, created = Group.objects.get_or_create(name=group[0])
             groups.append(group)
+
         if not groups:
             group, created = Group.objects.get_or_create(name=Group.DEFAULT)
             groups = [group]
@@ -139,13 +146,9 @@ def import_db(year, semester, prefix):
             mysql_set = set(map(lambda g: g.id, groups))
 
             if psql_set == mysql_set:
-                # Append data
-                for r in rooms:
-                    lecture.rooms.add(r)
-                for w in weeks:
-                    lecture.weeks.add(w)
-                for l in lecturers:
-                    lecture.lecturers.add(l)
+                lecture.rooms = rooms
+                lecture.weeks = weeks
+                lecture.lecturers = lecturers
 
                 added_lectures.append(lecture.id)
                 added = True
@@ -163,8 +166,8 @@ def import_db(year, semester, prefix):
             lecture.weeks = weeks
             lecture.lecturers = lecturers
 
-    print Lecture.objects.exclude(id__in=added_lectures,
-            semester=semester).values_list('id', flat=True)
+    to_remove =  Lecture.objects.exclude(id__in=added_lectures). \
+            filter(semester=semester).values_list('id', flat=True)
 
     c.execute("""SELECT emnekode,emnenavn,vekt FROM %s_fs_emne WHERE emnekode
             NOT LIKE '#%%'""" % prefix)
@@ -185,3 +188,5 @@ def import_db(year, semester, prefix):
             print "Added course %s" % course.name
         else:
             print "Updated course %s" % course.name
+
+    return to_remove
