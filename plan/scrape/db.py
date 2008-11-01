@@ -176,8 +176,12 @@ def import_db(year, semester, prefix):
         if not code.strip():
             continue
 
-        course, created = Course.objects.get_or_create(
-                name=''.join(code.split('-')[:-1]).upper().strip())
+        code = ''.join(code.split('-')[:-1]).upper().strip()
+
+        if name[0] in ['"', "'"] and name[0] == name[-1]:
+            name = name[1:-1]
+
+        course, created = Course.objects.get_or_create(name=code)
 
         if points:
             course.points = Decimal(points.strip().replace(',', '.'))
