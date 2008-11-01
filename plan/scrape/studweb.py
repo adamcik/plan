@@ -129,13 +129,14 @@ def import_xml(year, semester, url):
         if long_typename:
             exam.type_name = long_typename.nodeValue
 
-        exam.semester = semester
         exam.save()
 
         n.unlink()
 
     to_delete = Exam.objects.exclude(id__in=added+updated). \
             filter(semester__in=[semester])
+
+    Exam.objects.filter(id__in=added+updated).update(semester=semester)
 
     print 'Added %d exams' % len(added)
     print 'Updated %d exams' % len(updated)
