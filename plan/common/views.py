@@ -156,6 +156,9 @@ def schedule(request, year, semester_type, slug, advanced=False,
             selected_groups = UserSet.get_groups(year, semester.type, slug)
 
             for u in usersets:
+                if not course_groups.get(u.course_id, False):
+                    continue
+
                 if not all_groups and len(course_groups[u.course_id]) > 3:
                     all_groups = set(selected_groups[u.id]) == \
                             set(map(lambda a: a[0], course_groups[u.course_id]))
