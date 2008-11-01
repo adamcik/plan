@@ -29,7 +29,7 @@ class LectureAdmin(admin.ModelAdmin):
 
 class UserSetAdmin(admin.ModelAdmin):
     list_display = ('slug', 'course', 'semester')
-    search_fields = ('slug', 'course')
+    search_fields = ('slug', 'course__name')
 
     filter_horizontal = ('groups','exclude')
 
