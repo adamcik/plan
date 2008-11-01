@@ -25,7 +25,7 @@ class UserSet(models.Model):
         ordering = ('slug', 'course')
 
     def __unicode__(self):
-        return '%s' % (self.course)
+        return '%s - %s' % (self.slug, self.course)
 
     def save(self, *args, **kwargs):
         self.name = slugify(self.name)
