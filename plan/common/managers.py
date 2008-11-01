@@ -110,7 +110,7 @@ class CourseManager(models.Manager):
                 'handout_time': 'common_exam.handout_time',
                 'type': 'common_exam.type',
                 'type_name': 'common_exam.type_name',
-            })
+            }).distinct()
 
 class UserSetManager(models.Manager):
     def get_usersets(self, year, semester_type, slug):
