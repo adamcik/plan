@@ -20,7 +20,7 @@
         </thead>
         <tbody>
             {% for l in lectures %}
-                <tr class="{% color l.course_id %}{% if l.exclude %} excluded{% endif %}">
+                <tr class="{% color l.course_id %}{% if l.exclude %} excluded{% endif %}" title="l.course.full_name">
                     {% if advanced %}
                         <td><input type="checkbox" name="exclude" value="{{ l.id }}"{% if l.exclude %} checked="checked"{% endif %} class="noprint" /></td>
                     {% endif %}
