@@ -152,7 +152,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
             deadline_form = DeadlineForm(usersets)
 
         if courses:
-            course_groups = Course.get_groups([u.course_id for u in usersets])
+            course_groups = Course.get_groups(year, semester.type, [u.course_id for u in usersets])
             selected_groups = UserSet.get_groups(year, semester.type, slug)
 
             for u in usersets:
@@ -163,7 +163,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
                         initial={'groups': selected_groups.get(u.id, [])},
                         prefix=u.course_id)
 
-        # Set up group forms
+        # Set up group forms and course name forms
         for course in courses:
             course.group_form = group_forms.get(course.id, None)
 
@@ -215,7 +215,7 @@ def select_groups(request, year, semester_type, slug):
     if request.method == 'POST':
         courses = Course.objects.get_courses(year, semester.type, slug)
 
-        course_groups = Course.get_groups([c.id for c in courses])
+        course_groups = Course.get_groups(year, semester.type, [c.id for c in courses])
 
         for c in courses:
             groups = course_groups[c.id]
