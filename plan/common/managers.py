@@ -34,6 +34,8 @@ class LectureManager(models.Manager):
             'course__userset__slug': slug,
             'course__userset__semester__year__exact': year,
             'course__userset__semester__type__exact': semester_type,
+            'semester__year__exact': year,
+            'semester__type__exact': semester_type,
         }
 
         related = [
@@ -71,6 +73,8 @@ class ExamManager(models.Manager):
     def get_exams(self, year, semester_type, slug):
         exam_filter = {
             'course__userset__slug': slug,
+            'course__userset__semester__year__exact': year,
+            'course__userset__semester__type__exact': semester_type,
             'semester__year__exact': year,
             'semester__type__exact': semester_type,
         }
