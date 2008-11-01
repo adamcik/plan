@@ -1,12 +1,8 @@
 Cpurrent:
 --------
-* RRULEs for ical?
-
 * Allow custom lectures?
 
 * Link to official data source per course for comparison.
-
-* redirect to course list for first timers adding a text input for manual input
 
 * translate
 
@@ -14,11 +10,10 @@ Cpurrent:
 
 * Add exam type to data model using "smart" primary key
 
-* Print view
-
 * VTODO
 
 * Ignore boolean on userset for group warning ?
+  set cache value for about 10 min that indicates that we should warn ;)
 
 * Css hover magic for rooms lists with more than one room
 
@@ -27,13 +22,13 @@ Cpurrent:
 Wishlist:
 ---------
 
+* RRULEs for ical?
+
 * User wants "Coursne name (course code)" for ical summary
 
 * Link to official data source per course for comparison.
 
 * redirect to course list for first timers adding a text input for manual input
-
-* translate
 
 * Room links to map
 
@@ -59,3 +54,6 @@ Won't fix:
   Needs to work around curent cacheing, or cacheing needs to be moved to template level.
 
 * Cleanup urls for my debug stuff.
+
+* redirect to course list for first timers adding a text input for manual input
+
