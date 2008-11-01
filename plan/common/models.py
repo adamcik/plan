@@ -21,7 +21,7 @@ class UserSet(models.Model):
     objects = UserSetManager()
 
     class Meta:
-        unique_together = (('slug', 'course'),)
+        unique_together = (('slug', 'course', 'semester'),)
         ordering = ('slug', 'course')
 
     def __unicode__(self):
@@ -119,11 +119,14 @@ class Course(models.Model):
         return cursor.fetchall()
 
     @staticmethod
-    def get_groups(courses):
+    def get_groups(year, semester_type, courses):
         tmp = {}
 
-        group_list = Group.objects.filter(lecture__course__in=courses). \
-            extra(select={
+        group_list = Group.objects.filter(
+                lecture__course__in=courses,
+                lecture__semester__year__exact=year,
+                lecture__semester__type__exact=semester_type,
+            ).extra(select={
                 'course_id': 'common_lecture.course_id',
                 'group_id': 'common_group.id',
             }).values_list('course_id', 'group_id', 'name').distinct()
