@@ -365,6 +365,7 @@ def select_course(request, year, semester_type, slug, add=False):
                 lookup.extend(l.replace(',', '').split())
 
             errors = []
+            max_group_count = 0
 
             # FIXME limit max courses to for instance 30
 
@@ -383,15 +384,22 @@ def select_course(request, year, semester_type, slug, add=False):
                     groups = Group.objects.filter(
                             lecture__course=course
                         ).distinct()
+
+                    group_count = 0
                     for g in groups:
                         userset.groups.add(g)
+                        group_count += 1
+
+                    if group_count > max_group_count:
+                        max_group_count = group_count
 
                 except Course.DoesNotExist:
                     errors.append(l)
 
-            group_help = '%s-group_help' % reverse('schedule',
-                    args=[year, semester.get_type_display(), slug])
-            cache.set(group_help, int(time())+60*10, 60*10)
+            if max_group_count > 2:
+                group_help = '%s-group_help' % reverse('schedule',
+                        args=[year, semester.get_type_display(), slug])
+                cache.set(group_help, int(time())+60*10, 60*10)
 
             if errors:
                 return render_to_response('error.html', {

@@ -12,9 +12,6 @@ Cpurrent:
 
 * VTODO
 
-* Ignore boolean on userset for group warning ?
-  set cache value for about 10 min that indicates that we should warn ;)
-
 * Css hover magic for rooms lists with more than one room
 
 * logging imports better
