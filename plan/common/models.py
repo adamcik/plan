@@ -189,6 +189,11 @@ class Semester(models.Model):
         else:
             return datetime(self.year, 12, 31)
 
+    def next(self):
+        if self.type == self.SPRING:
+            return Semester(year=self.year, type=self.FALL)
+        return Semester(year=self.year+1, type=self.SPRING)
+
     @staticmethod
     def current(from_db=False):
         now = datetime.now()
