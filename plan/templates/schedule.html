@@ -25,38 +25,33 @@
 
     {% include "schedule_table.html" %}
 
-    <form action="{% url schedule-pdf semester.year,semester.get_type_display,slug %}" method="post">
-        <div class="yui-g noprint">
-            <div class="yui-u first">
-                <p class="large">
-                    <a href="{% url course-list semester.year,semester.get_type_display,slug %}">
-                        <img alt="" src="{{ MEDIA_URL }}gfx/list.png" />Course list</a>
-                    {% if courses %}
-                        {% if advanced %}
-                            - <a href="{% url schedule semester.year,semester.get_type_display,slug %}">
-                                <img alt="" src="{{ MEDIA_URL }}gfx/advanced.png" />Hide advanced options</a>
-                        {% else %}
-                            - <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">
-                                <img alt="" src="{{ MEDIA_URL }}gfx/advanced.png" />Advanced options</a>
-                        {% endif %}
+    <div class="yui-g noprint">
+        <div class="yui-u first">
+            <p class="large">
+                <a href="{% url course-list semester.year,semester.get_type_display,slug %}">
+                    <img alt="" src="{{ MEDIA_URL }}gfx/list.png" />Course list</a>
+                {% if courses %}
+                    {% if advanced %}
+                        - <a href="{% url schedule semester.year,semester.get_type_display,slug %}">
+                            <img alt="" src="{{ MEDIA_URL }}gfx/advanced.png" />Hide advanced options</a>
+                    {% else %}
+                        - <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}">
+                            <img alt="" src="{{ MEDIA_URL }}gfx/advanced.png" />Advanced options</a>
                     {% endif %}
-                    - <a href="#tips"><img alt="" src="{{ MEDIA_URL }}gfx/tips.png" />Tips</a>
-                </p>
-            </div>
-            <div class="yui-u">
-                <p class="right">
-                    <img alt="" src="{{ MEDIA_URL }}gfx/pdf.png"/>
-                    <select name="size">
-                        <option value="A4">A4</option>
-                        <option value="A5" selected="selected">A5</option>
-                        <option value="A6">A6</option>
-                        <option value="A7">A7</option>
-                    </select>
-                    <button>Get PDF</button>
-                </p>
-            </div>
+                {% endif %}
+                - <a href="#tips"><img alt="" src="{{ MEDIA_URL }}gfx/tips.png" />Tips</a>
+            </p>
         </div>
-    </form>
+        <div class="yui-u">
+            <p class="right">
+                <img alt="" src="{{ MEDIA_URL }}gfx/pdf.png"/>
+                <a href="{% url schedule-pdf-size semester.year,semester.get_type_display,slug,"A4" %}">A4</a>
+                <a href="{% url schedule-pdf-size semester.year,semester.get_type_display,slug,"A5" %}">A5</a>
+                <a href="{% url schedule-pdf-size semester.year,semester.get_type_display,slug,"A6" %}">A6</a>
+                <a href="{% url schedule-pdf-size semester.year,semester.get_type_display,slug,"A7" %}">A7</a>
+            </p>
+        </div>
+    </div>
 
     {% if next_message and not group_help and courses %}
         <div id="help" class="large">

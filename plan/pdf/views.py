@@ -1,3 +1,5 @@
+import logging
+
 from datetime import datetime
 
 from reportlab.pdfgen import canvas
@@ -10,7 +12,8 @@ from reportlab.lib.styles import getSampleStyleSheet
 
 styles = getSampleStyleSheet()
 
-from django.http import HttpResponse
+from django.core.urlresolvers import reverse
+from django.http import HttpResponse, Http404
 from django.core.cache import cache
 
 from plan.common.models import Lecture, Semester, Room, Course
@@ -20,6 +23,17 @@ from plan.common.utils import ColorMap
 outer_border = HexColor('#666666')
 inner_border = HexColor('#CCCCCC')
 backgrounds = [HexColor('#FFFFFF'), HexColor('#FAFAFA')]
+
+def clear_cache(*args):
+    """Clears a users cache based on reverse"""
+
+    args = list(args)
+
+    cache.delete(reverse('schedule-pdf', args=args))
+    for s in ['A4', 'A5', 'A6', 'A7']:
+        cache.delete(reverse('schedule-pdf-size', args=args+[s]))
+
+    logging.debug('Deleted pdf cache')
 
 def _tablestyle():
     table_style = TableStyle([
@@ -50,10 +64,13 @@ def _tablestyle():
 
     return table_style
 
-def pdf(request, year, semester_type, slug):
+def pdf(request, year, semester_type, slug, size=None):
+    if size is not None and size not in ['A4', 'A5', 'A6', 'A7']:
+        raise Http404
+
     semester = Semester(year=year, type=semester_type)
 
-    response = cache.get(request.path+request.POST.get('size', ''))
+    response = cache.get(request.path)
 
     if response and 'no-cache' not in request.GET:
         return response
@@ -176,7 +193,6 @@ def pdf(request, year, semester_type, slug):
     page = canvas.Canvas(response, A4)
     page.translate(margin, A4[1]-margin)
 
-    size = request.POST.get('size', 'A5')
     if 'A4' == size:
         page.translate(0.5*margin, 2.5*margin-A4[1])
         page.scale(1.414, 1.414)
@@ -185,8 +201,6 @@ def pdf(request, year, semester_type, slug):
         page.scale(0.707, 0.707)
     elif 'A7' == size:
         page.scale(0.5, 0.5)
-    else:
-        size = 'A5'
 
     table = Table(data, colWidths=col_widths, rowHeights=row_heights,
             style=table_style)

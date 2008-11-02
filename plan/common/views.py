@@ -18,6 +18,7 @@ from plan.common.forms import DeadlineForm, GroupForm, CourseNameForm, \
         ScheduleForm
 from plan.common.utils import compact_sequence, ColorMap
 from plan.common.timetable import Timetable
+from plan.pdf.views import clear_cache as clear_pdf_cache
 
 def clear_cache(*args):
     """Clears a users cache based on reverse"""
@@ -32,15 +33,14 @@ def clear_cache(*args):
     cache.delete(reverse('schedule-ical-lectures', args=args))
     cache.delete(reverse('schedule-ical-deadlines', args=args))
 
-    for s in ['A4', 'A5', 'A6', 'A7']:
-        cache.delete(reverse('schedule', args=args)+s)
-
     for w in Semester().get_weeks():
         cache.delete(reverse('schedule-week', args=args+[w]))
 
     cache.delete('%s-group_help' % reverse('schedule', args=args))
 
-    logging.debug('Deleted cache')
+    logging.debug('Deleted common cache')
+
+    clear_pdf_cache(*args)
 
 def shortcut(request, slug):
     '''Redirect users to their timetable for the current semester'''

@@ -16,6 +16,8 @@ Cpurrent:
 
 * logging imports better
 
+* custom clear cache signal to handle clearing better
+
 Wishlist:
 ---------
 
