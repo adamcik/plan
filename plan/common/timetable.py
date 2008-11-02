@@ -13,7 +13,7 @@ class Timetable:
         '''Add basics to datastructure'''
 
         for i, lecture in enumerate(self.lecture_queryset):
-            if lecture.exclude:
+            if lecture.exclude or not lecture.show_week:
                 continue
 
             start = lecture.start_time - Lecture.START[0][0]

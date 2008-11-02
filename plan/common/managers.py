@@ -2,7 +2,7 @@ from django.db import models, connection
 from django.db.models import Q
 
 class LectureManager(models.Manager):
-    def get_lectures(self, year, semester_type, slug):
+    def get_lectures(self, year, semester_type, slug, week=None):
         """
             Get all lectures for userset during given period.
 
@@ -24,11 +24,18 @@ class LectureManager(models.Manager):
         ]
         select = {
             'alias': 'common_userset.name',
-            'exclude': """common_lecture.id IN
+            'exclude': '''common_lecture.id IN
                 (SELECT common_userset_exclude.lecture_id
                  FROM common_userset_exclude WHERE
-                 common_userset_exclude.userset_id = common_userset.id)""",
+                 common_userset_exclude.userset_id = common_userset.id)''',
+            'show_week': 'true or %s',
         }
+
+        if week:
+            select['show_week'] = '''
+                SELECT COUNT(*) FROM common_week w JOIN common_lecture_weeks lw
+                 ON (w.id = lw.week_id) WHERE lw.lecture_id = common_lecture.id AND
+                 w.number = %s'''
 
         filter = {
             'course__userset__slug': slug,
@@ -53,7 +60,7 @@ class LectureManager(models.Manager):
         return  self.get_query_set().filter(**filter).\
                     distinct().\
                     select_related(*related).\
-                    extra(where=where, tables=tables, select=select).\
+                    extra(where=where, tables=tables, select=select, select_params=[week]).\
                     order_by(*order)
 
 class DeadlineManager(models.Manager):

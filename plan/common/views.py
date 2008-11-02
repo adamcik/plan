@@ -22,6 +22,8 @@ from plan.common.timetable import Timetable
 def clear_cache(*args):
     """Clears a users cache based on reverse"""
 
+    args = list(args)
+
     cache.delete('stats')
     cache.delete(reverse('schedule', args=args))
     cache.delete(reverse('schedule-advanced', args=args))
@@ -32,6 +34,9 @@ def clear_cache(*args):
 
     for s in ['A4', 'A5', 'A6', 'A7']:
         cache.delete(reverse('schedule', args=args)+s)
+
+    for w in Semester().get_weeks():
+        cache.delete(reverse('schedule-week', args=args+[w]))
 
     cache.delete('%s-group_help' % reverse('schedule', args=args))
 
@@ -118,7 +123,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
     courses = Course.objects.get_courses(year, semester.type, slug)
 
     deadlines = Deadline.objects.get_deadlines(year, semester.type, slug)
-    lectures = Lecture.objects.get_lectures(year, semester.type, slug)
+    lectures = Lecture.objects.get_lectures(year, semester.type, slug, week)
     exams = Exam.objects.get_exams(year, semester.type, slug)
 
     # Use get_related to cut query counts
