@@ -128,7 +128,8 @@ td.error input, td.error select {
 	text-decoration: line-through;
 }
 
-/* Color scheme for lectures */
+/* Colors from www.ColorBrewer.org by Cynthia A. Brewer, Geography, Pennsylvania State University. */
+/* http://www.personal.psu.edu/cab38/ColorBrewer/ColorBrewer_updates.html */
 .color0  { background: #B3E2CD; }
 .color1  { background: #FDCDAC; }
 .color2  { background: #CBD5E8; }

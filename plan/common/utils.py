@@ -49,6 +49,9 @@ def compact_sequence(sequence):
 class ColorMap(dict):
     """Magic dict that asigns colors"""
 
+    # Colors from www.ColorBrewer.org by Cynthia A. Brewer, Geography,
+    # Pennsylvania State University.
+    # http://www.personal.psu.edu/cab38/ColorBrewer/ColorBrewer_updates.html
     colors = [
         '#B3E2CD',
         '#FDCDAC',
