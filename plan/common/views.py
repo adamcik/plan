@@ -30,6 +30,9 @@ def clear_cache(*args):
     cache.delete(reverse('schedule-ical-lectures', args=args))
     cache.delete(reverse('schedule-ical-deadlines', args=args))
 
+    for s in ['A4', 'A5', 'A6', 'A7']:
+        cache.delete(reverse('schedule', args=args)+s)
+
     cache.delete('%s-group_help' % reverse('schedule', args=args))
 
     logging.debug('Deleted cache')

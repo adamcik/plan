@@ -53,7 +53,7 @@ def _tablestyle():
 def pdf(request, year, semester_type, slug):
     semester = Semester(year=year, type=semester_type)
 
-    response = cache.get(request.path)
+    response = cache.get(request.path+request.POST.get('size', ''))
 
     if response and 'no-cache' not in request.GET:
         return response
@@ -185,8 +185,8 @@ def pdf(request, year, semester_type, slug):
         page.scale(0.707, 0.707)
     elif 'A7' == size:
         page.scale(0.5, 0.5)
-
-    print request.POST
+    else:
+        size = 'A5'
 
     table = Table(data, colWidths=col_widths, rowHeights=row_heights,
             style=table_style)
@@ -203,5 +203,5 @@ def pdf(request, year, semester_type, slug):
     page.showPage()
     page.save()
 
-    cache.set(request.path, response)
+    cache.set(request.path+size, response)
     return response
