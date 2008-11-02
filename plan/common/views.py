@@ -466,17 +466,12 @@ def list_courses(request, year, semester_type, slug):
         semester = Semester(year=year, type=semester_type)
 
         courses = Course.objects.get_courses_with_exams(year, semester.type)
-        course_count = Course.objects.filter(
-                semesters__year__exact=year,
-                semesters__type__exact=semester.type).count()
 
-        response = object_list(request,
-                courses,
-                extra_context={'semester': semester,
-                               'course_count': course_count},
-                template_object_name='course',
-                template_name='course_list.html')
+        response = render_to_response('course_list.html', {
+                'semester': semester,
+                'course_list': courses,
+            }, RequestContext(request))
 
-        cache.set('course_list', response)
+        cache.set(''.join(request.path.split('/')[:-1]), response)
 
     return response

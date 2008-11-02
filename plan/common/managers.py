@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, connection
 from django.db.models import Q
 
 class LectureManager(models.Manager):
@@ -97,24 +97,24 @@ class CourseManager(models.Manager):
             extra(select={'alias': 'common_userset.name'}).distinct()
 
     def get_courses_with_exams(self, year, semester_type):
-        no_exam = Q(exam__isnull=True,
-                    semesters__year__exact=year,
-                    semesters__type__exact=semester_type)
+        cursor = connection.cursor()
 
-        with_exam = Q(exam__semester__year__exact=year,
-                      exam__semester__type__exact=semester_type)
+        cursor.execute('''
+            SELECT c.id as id, c.name, c.full_name, c.points,
+                   e.exam_date, e.exam_time, e.type, e.type_name,
+                   e.handout_date, e.handout_time
+            FROM common_course c
+            JOIN common_course_semesters cs ON
+                (c.id = cs.course_id)
+            JOIN common_semester s ON
+                (cs.semester_id = s.id)
+            LEFT OUTER JOIN common_exam e ON
+                (e.course_id = c.id AND e.semester_id = s.id)
+            WHERE s.year = %d AND s.type = %d
+            ORDER BY c.name, e.exam_date, e.exam_time, e.type;
+        ''', [int(year), int(semester_type)])
 
-        return self.get_query_set().filter(
-                semesters__year__exact=year,
-                semesters__type__exact=semester_type,
-            ).filter(no_exam | with_exam).extra(select={
-                'exam_date': 'common_exam.exam_date',
-                'exam_time': 'common_exam.exam_time',
-                'handout_date': 'common_exam.handout_date',
-                'handout_time': 'common_exam.handout_time',
-                'type': 'common_exam.type',
-                'type_name': 'common_exam.type_name',
-            }).distinct()
+        return cursor.dictfetchall()
 
 class UserSetManager(models.Manager):
     def get_usersets(self, year, semester_type, slug):
