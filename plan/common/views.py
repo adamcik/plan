@@ -171,6 +171,15 @@ def schedule(request, year, semester_type, slug, advanced=False,
             course.name_form = CourseNameForm(initial={'name': name},
                      prefix=course.id)
 
+    next_semester = Semester.current().next()
+
+    if next_semester.year == semester.year and \
+            next_semester.type == semester.type:
+        next_message = False
+    else:
+        next_message = UserSet.objects.get_usersets(next_semester.year, next_semester.type, slug).count()
+        next_message = next_message == 0
+
     group_help = '%s-group_help' % reverse('schedule',
             args=[year, semester.get_type_display(), slug])
 
@@ -184,8 +193,10 @@ def schedule(request, year, semester_type, slug, advanced=False,
             'deadlines': deadlines,
             'exams': exams,
             'group_help': group_help,
+            'next_message': next_message,
             'lectures': lectures,
             'semester': semester,
+            'next_semester': next_semester,
             'slug': slug,
             'timetable': table,
         }, RequestContext(request))

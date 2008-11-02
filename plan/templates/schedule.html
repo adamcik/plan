@@ -16,12 +16,13 @@
     {% endif %}
 
     {% if group_help and courses %}
-        <div id="help" class="large">
+        <div id="help">
             <p>
                 Use <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}#groups">change groups</a> to limit which groups/parallels you want in your schedule.
             </p>
         </div>
     {%  endif %}
+
     {% include "schedule_table.html" %}
 
     <form action="{% url schedule-pdf semester.year,semester.get_type_display,slug %}" method="post">
@@ -42,18 +43,31 @@
                     - <a href="#tips"><img alt="" src="{{ MEDIA_URL }}gfx/tips.png" />Tips</a>
                 </p>
             </div>
-            <div class="yui-u" style="text-align: right">
-                <img alt="" src="{{ MEDIA_URL }}gfx/pdf.png"/>
-                <select name="size">
-                    <option value="A4">A4</option>
-                    <option value="A5" selected="selected">A5</option>
-                    <option value="A6">A6</option>
-                    <option value="A7">A7</option>
-                </select>
-                <button>Get PDF</button>
+            <div class="yui-u">
+                <p class="right">
+                    <img alt="" src="{{ MEDIA_URL }}gfx/pdf.png"/>
+                    <select name="size">
+                        <option value="A4">A4</option>
+                        <option value="A5" selected="selected">A5</option>
+                        <option value="A6">A6</option>
+                        <option value="A7">A7</option>
+                    </select>
+                    <button>Get PDF</button>
+                </p>
             </div>
         </div>
     </form>
+
+    {% if next_message and not group_help and courses %}
+        <div id="help" class="large">
+            <p>
+                Next years lectures are now available, go to
+                <a href="{% url schedule next_semester.year,next_semester.get_type_display,slug %}">{% url schedule "2009","spring",slug %}</a>
+                to start adding your courses.
+            </p>
+        </div>
+    {%  endif %}
+
 
     {% if courses %}
         <div class="yui-g">
