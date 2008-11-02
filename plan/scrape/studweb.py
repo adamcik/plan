@@ -85,8 +85,11 @@ def import_xml(year, semester, url):
             n.unlink()
             continue
 
+        if not course_code.nodeValue.strip():
+            continue
+
         course, created = Course.objects.get_or_create(
-                name=course_code.nodeValue)
+                name=course_code.nodeValue.strip())
         exam_kwargs['course'] = course
 
         if exam_time:
