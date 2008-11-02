@@ -31,7 +31,7 @@ def ical(request, year, semester_type, slug, lectures=True, exams=True,
         first = semester.get_first_day()
         last = semester.get_last_day()
 
-        exams = Exam.objects.get_exams(year, semester.type, slug, first, last)
+        exams = Exam.objects.get_exams(year, semester.type, slug)
 
         add_exams(exams, semester, cal)
 
