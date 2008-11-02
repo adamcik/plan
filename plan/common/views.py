@@ -410,6 +410,9 @@ def select_course(request, year, semester_type, slug, add=False):
                 except Course.DoesNotExist:
                     errors.append(l)
 
+            if UserSet.objects.get_usersets(year, semester.type, slug).count() > 20:
+                logging.warning("%s has more than 20 courses." % request.path)
+
             if max_group_count > 2:
                 group_help = '%s-group_help' % reverse('schedule',
                         args=[year, semester.get_type_display(), slug])
