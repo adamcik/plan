@@ -110,7 +110,7 @@ class CourseManager(models.Manager):
                 (cs.semester_id = s.id)
             LEFT OUTER JOIN common_exam e ON
                 (e.course_id = c.id AND e.semester_id = s.id)
-            WHERE s.year = %d AND s.type = %d
+            WHERE s.year = %d AND s.type = %d AND c.name ~ '^\\\w+\\\d+$'
             ORDER BY c.name, e.exam_date, e.exam_time, e.type;
         ''', [int(year), int(semester_type)])
 
