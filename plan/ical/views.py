@@ -140,7 +140,7 @@ def add_exams(exams, semester, cal):
             vevent.add('dtstart').value = start
 
             if e.duration is None or not e.exam_time:
-                pass
+                duration = timedelta()
             elif e.duration == 30:
                 duration = timedelta(minutes=30)
             else:
