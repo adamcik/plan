@@ -1,4 +1,5 @@
 from django import forms
+from django.db.models import Q
 
 from plan.common.models import Deadline, Semester
 
@@ -40,6 +41,13 @@ class ScheduleForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super(ScheduleForm, self).__init__(*args, **kwargs)
+
+        current = Semester.current()
+        semester_test = Q(year__exact=current.year, type__gte=current.type) | \
+            Q(year__gte=current.year)
+
+        self.fields['semester'].queryset = self.fields['semester']. \
+                queryset.filter(semester_test)
 
         if len(self.fields['semester'].queryset) == 1:
             self.fields['semester'].widget = forms.HiddenInput()
