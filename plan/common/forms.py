@@ -37,3 +37,9 @@ class DeadlineForm(forms.models.ModelForm):
 class ScheduleForm(forms.Form):
     slug = forms.CharField()
     semester = forms.ModelChoiceField(Semester.objects.all(), required=False)
+
+    def __init__(self, *args, **kwargs):
+        super(ScheduleForm, self).__init__(*args, **kwargs)
+
+        if len(self.fields['semester'].queryset) == 1:
+            self.fields['semester'].widget = forms.HiddenInput()
