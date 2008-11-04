@@ -79,7 +79,7 @@ def getting_started(request):
 
         if not schedule_form:
             schedule_form = ScheduleForm(initial={'semester': current.id,
-                'slug': request.COOKIES.get('last', '')})
+                'slug': '%s'})
 
         slug_count = int(UserSet.objects.filter(semester__in=[current]). \
                 values('slug').distinct().count())
@@ -96,10 +96,12 @@ def getting_started(request):
             'subscription_count': subscription_count,
             'deadline_count': deadline_count,
             'stats': Course.get_stats(semester=current),
-            'schedule_form': schedule_form,
+            'schedule_form': '\n'.join([str(f) for f in schedule_form]),
         }
 
-        cache.set('stats', context)
+#        cache.set('stats', context)
+
+    context['schedule_form'] = context['schedule_form'] % request.COOKIES.get('last', '')
 
     return render_to_response('start.html', context, RequestContext(request))
 

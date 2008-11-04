@@ -17,9 +17,7 @@
                         you select is in already taken, create another one.
                     </p>
                     <p class="right">
-                        {% for field in schedule_form%}
-                            {{ field }}
-                        {% endfor %}
+                        {{ schedule_form|safe }}
                         <button type="submit">Start <img alt="" src="{{ MEDIA_URL }}gfx/start.png" /></button>
                     </p>
                 </form>
