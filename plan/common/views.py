@@ -92,6 +92,7 @@ def getting_started(request):
 
         context = {
             'color_map': ColorMap(),
+            'current': current,
             'slug_count': slug_count,
             'subscription_count': subscription_count,
             'deadline_count': deadline_count,

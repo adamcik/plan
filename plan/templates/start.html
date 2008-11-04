@@ -26,7 +26,7 @@
                 To retrieve your timetable simply enter the same identifier
                 you used last time.
             </p>
-            <h2>Statistics</h2>
+            <h2>Statistics {{ current }}</h2>
             <p class="small">
                 Total number of unique timetables -
                 <a href="http://munin.1024.no/1024.no/1024.no-ntnu_1024_no_schedules.html">{{ slug_count }}</a>
@@ -50,7 +50,7 @@
 -->
         </div>
         <div class="yui-u">
-            <h2>Top {{ stats|length }} courses</h2>
+            <h2>Top {{ stats|length }} courses {{ current }}</h2>
             {% if stats %}
                 <div id="stats">
                     {% for count,name,full_name in stats %}
