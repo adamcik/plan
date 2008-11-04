@@ -184,6 +184,8 @@ def schedule(request, year, semester_type, slug, advanced=False,
     if next_semester.year == semester.year and \
             next_semester.type == semester.type:
         next_message = False
+    elif not Semester.objects.filter(year=next_semester.year, type=next_semester.type).count():
+        next_message = False
     else:
         next_message = UserSet.objects.get_usersets(next_semester.year, next_semester.type, slug).count()
         next_message = next_message == 0
