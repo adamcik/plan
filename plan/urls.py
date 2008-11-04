@@ -25,7 +25,7 @@ if settings.DEBUG:
         url(r'^404/$', 'django.views.generic.simple.direct_to_template', {'template': '404.html'}),
     )
 else:
-    urlpatterns = patterns()
+    urlpatterns = patterns('')
 
 urlpatterns += patterns('',
     (r'^admin/(.*)', admin.site.root),
