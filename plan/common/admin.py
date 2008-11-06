@@ -9,7 +9,7 @@ from plan.common.models import Course, Exam, Group, Lecture, Lecturer, \
 
 class CourseAdmin(admin.ModelAdmin):
     list_display = ('name', 'points', 'full_name', 'url')
-    list_filter = ('semester',)
+    list_filter = ('semesters',)
     search_fields = ('name', 'full_name')
 
 class ExamAdmin(admin.ModelAdmin):
