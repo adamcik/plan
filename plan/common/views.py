@@ -18,8 +18,14 @@ from plan.common.forms import DeadlineForm, GroupForm, CourseNameForm, \
         ScheduleForm
 from plan.common.utils import compact_sequence, ColorMap
 from plan.common.timetable import Timetable
+
+# FIXME, handle with signals
 from plan.pdf.views import clear_cache as clear_pdf_cache
 
+# FIXME Split views that do multiple form handling tasks into seperate views
+# that call the top one.
+
+# FIXME, handle with signals
 def clear_cache(*args):
     """Clears a users cache based on reverse"""
 
@@ -50,9 +56,14 @@ def shortcut(request, slug):
     return HttpResponseRedirect(reverse('schedule',
             args = [semester.year, semester.get_type_display(), slug.strip()]))
 
-def getting_started(request):
+def getting_started(request, year=None, semester_type=None):
     '''Intial top level page that greets users'''
     schedule_form = None
+
+    if year and semester_type:
+        semester = Semester(year=year, type=semester_type)
+    else:
+        semester = Semester.current()
 
     # Redirect user to their timetable
     if request.method == 'POST' and 'slug' in request.POST:
@@ -67,40 +78,43 @@ def getting_started(request):
                 response = HttpResponseRedirect(reverse('schedule', args=[
                     semester.year, semester.get_type_display(), slug]))
 
-            # Store last timetable visited in a cookie so that we can populate
-            # the field with a default value next time.
-            response.set_cookie('last', slug, 60*60*24*7*4)
-            return response
+                # Store last timetable visited in a cookie so that we can populate
+                # the field with a default value next time.
+                response.set_cookie('last', slug, 60*60*24*7*4)
+                return response
 
-    context = cache.get('stats')
+    context = cache.get('stats-%s-%s' % (semester.year, semester.type))
 
     if not context or 'no-cache' in request.GET:
-        current = Semester.current(from_db=True)
+        try:
+            semester = Semester.objects.get(year=semester.year, type=semester.type)
+        except Semester.DoesNotExist:
+            return HttpResponseRedirect('/')
 
         if not schedule_form:
-            schedule_form = ScheduleForm(initial={'semester': current.id,
+            schedule_form = ScheduleForm(initial={'semester': semester.id,
                 'slug': '%s'})
 
-        slug_count = int(UserSet.objects.filter(semester__in=[current]). \
+        slug_count = int(UserSet.objects.filter(semester__in=[semester]). \
                 values('slug').distinct().count())
 
         subscription_count = int(UserSet.objects.filter(semester__in=\
-                [current]).count())
+                [semester]).count())
 
         deadline_count = int(Deadline.objects.filter(userset__semester__in=\
-                [current]).count())
+                [semester]).count())
 
         context = {
             'color_map': ColorMap(),
-            'current': current,
+            'current': semester,
             'slug_count': slug_count,
             'subscription_count': subscription_count,
             'deadline_count': deadline_count,
-            'stats': Course.get_stats(semester=current),
+            'stats': Course.get_stats(semester=semester),
             'schedule_form': '\n'.join([str(f) for f in schedule_form]),
         }
 
-#        cache.set('stats', context)
+        cache.set('stats-%s-%s' % (semester.year, semester.type), context)
 
     context['schedule_form'] = context['schedule_form'] % request.COOKIES.get('last', '')
 

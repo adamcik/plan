@@ -4,6 +4,8 @@ from django.conf.urls.defaults import *
 
 urlpatterns = patterns('plan.common.views',
     url(r'^$', 'getting_started', name='frontpage'),
+    url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/$', 'getting_started', name='frontpage-semester'),
+
     url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/$', 'schedule', name='schedule'),
     url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/\+$', 'schedule', {'advanced': True}, name='schedule-advanced'),
     url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/(?P<week>\d{1,2})/$', 'schedule', name='schedule-week'),
