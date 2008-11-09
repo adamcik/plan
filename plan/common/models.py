@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta, time
 
 from django.db import models, connection
-from django.template.defaultfilters import slugify
 from django.http import Http404
 
 from plan.common.managers import LectureManager, DeadlineManager, \
@@ -26,10 +25,6 @@ class UserSet(models.Model):
 
     def __unicode__(self):
         return '%s - %s' % (self.slug, self.course)
-
-    def save(self, *args, **kwargs):
-        self.name = slugify(self.name)
-        super(UserSet, self).save(*args, **kwargs)
 
     @staticmethod
     def get_groups(year, semester_type, slug):
