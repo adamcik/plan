@@ -31,7 +31,8 @@ def clear_cache(*args):
 
     args = list(args)
 
-    cache.delete('stats')
+    # FIXME this does not seem to work for stats
+    cache.delete('stats-%s-%s' % (args[0], args[1]))
     cache.delete(reverse('schedule', args=args))
     cache.delete(reverse('schedule-advanced', args=args))
     cache.delete(reverse('schedule-ical', args=args))
@@ -114,7 +115,7 @@ def getting_started(request, year=None, semester_type=None):
             'schedule_form': '\n'.join([str(f) for f in schedule_form]),
         }
 
-        cache.set('stats-%s-%s' % (semester.year, semester.type), context)
+        cache.set('stats-%s-%s' % (semester.year, semester.type), context, 3*60)
 
     context['schedule_form'] = context['schedule_form'] % request.COOKIES.get('last', '')
 
