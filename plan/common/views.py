@@ -3,14 +3,14 @@
 import logging
 from time import time
 
+from django.conf import settings
+from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.template.defaultfilters import slugify
-from django.core.cache import cache
 from django.views.generic.list_detail import object_list
-from django.conf import settings
 
 from plan.common.models import Course, Deadline, Exam, Group, \
         Lecture, Semester, UserSet, Room, Lecturer, Week
@@ -371,7 +371,11 @@ def select_course(request, year, semester_type, slug, add=False):
     # FIXME split ut three sub functions into seperate functions?
 
     semester = Semester(type=semester_type)
-    semester = Semester.objects.get(year=year, type=semester.type)
+    try:
+        semester = Semester.objects.get(year=year, type=semester.type)
+    except Semester.DoesNotExist:
+        return HttpResponseRedirect(reverse('schedule', args=
+                [year,semester.get_type_display(),slug]))
 
     if request.method == 'POST':
 
