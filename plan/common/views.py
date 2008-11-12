@@ -506,7 +506,7 @@ def list_courses(request, year, semester_type, slug):
     if request.method == 'POST':
         return select_course(request, year, semester_type, slug, add=True)
 
-    response = cache.get('course_list')
+    response = cache.get(''.join(request.path.split('/')[:-2]))
 
     if not response:
         semester = Semester(year=year, type=semester_type)
@@ -518,6 +518,6 @@ def list_courses(request, year, semester_type, slug):
                 'course_list': courses,
             }, RequestContext(request))
 
-        cache.set(''.join(request.path.split('/')[:-1]), response)
+        cache.set(''.join(request.path.split('/')[:-2]), response)
 
     return response
