@@ -15,6 +15,7 @@ styles = getSampleStyleSheet()
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404
 from django.core.cache import cache
+from django.template.defaultfilters import force_escape
 
 from plan.common.models import Lecture, Semester, Room, Course
 from plan.common.timetable import Timetable
@@ -135,7 +136,7 @@ def pdf(request, year, semester_type, slug, size=None):
                         paragraph_style.fontName = 'Helvetica'
 
                     content = [
-                        Paragraph(lecture.alias or lecture.course.name, paragraph_style),
+                        Paragraph(force_escape(lecture.alias or lecture.course.name), paragraph_style),
                     ]
                     paragraph_style.leading = 8
                     content += [
