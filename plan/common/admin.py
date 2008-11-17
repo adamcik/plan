@@ -39,8 +39,9 @@ class TypeAdmin(admin.ModelAdmin):
     list_display = ('name', 'optional')
 
 class DeadlineAdmin(admin.ModelAdmin):
-    raw_id_fields = ('userset',)
     ordering = ('userset__slug', 'userset__course__name', 'date', 'time')
+
+    search_fields = ('userset__slug', 'userset__course__name', 'task')
 
     list_display = ('course', 'slug', 'date', 'time', 'task')
     list_display_links = ('course', 'slug')
