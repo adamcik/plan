@@ -112,7 +112,7 @@ def import_db(year, semester, prefix):
         for w in week.split(','):
             if '-' in w:
                 x, y = w.split('-')
-                for i in range(int(x), int(y)):
+                for i in range(int(x), int(y)+1):
                     w2, created = Week.objects.get_or_create(number=i)
                     weeks.append(w2)
             else:

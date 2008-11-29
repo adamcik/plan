@@ -188,7 +188,7 @@ def scrape_course(course):
                         for w in week.replace('Uke:', '', 1).split(','):
                             if '-' in w:
                                 x, y = w.split('-')
-                                weeks.extend(range(int(x), int(y)))
+                                weeks.extend(range(int(x), int(y)+1))
                             else:
                                 weeks.append(int(w.replace(',', '')))
             elif i == 1:
