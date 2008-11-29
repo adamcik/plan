@@ -117,7 +117,8 @@ def getting_started(request, year=None, semester_type=None):
 
         cache.set('stats-%s-%s' % (semester.year, semester.type), context, 3*60)
 
-    context['schedule_form'] = context['schedule_form'] % request.COOKIES.get('last', '')
+    if '%s' in context['schedule_form']:
+        context['schedule_form'] = context['schedule_form'] % request.COOKIES.get('last', '')
 
     return render_to_response('start.html', context, RequestContext(request))
 
