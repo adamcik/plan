@@ -8,6 +8,10 @@
     <h1>{{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %}  {{ semester.get_type_display }} {{ semester.year }} schedule</h1>
 {% endblock %}
 
+{% block meta %}
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+{% endblock %}
+
 {% block bd %}
     {% if not courses %}
         <div id="help">
