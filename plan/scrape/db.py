@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+import re
 import MySQLdb
 from decimal import Decimal
 
@@ -109,15 +110,17 @@ def import_db(year, semester, prefix):
 
         # Weeks
         weeks = []
-        for w in week.split(','):
+        for w in re.split(r',? ', week):
             if '-' in w:
                 x, y = w.split('-')
                 for i in range(int(x), int(y)+1):
                     w2, created = Week.objects.get_or_create(number=i)
                     weeks.append(w2)
-            else:
+            elif w.isdigit():
                 w2, created = Week.objects.get_or_create(number=w)
                 weeks.append(w2)
+            else:
+                print "Messed up week '%s'" % w
 
         # Lecturer:
         lecturers = []
