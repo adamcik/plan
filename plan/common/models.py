@@ -24,7 +24,7 @@ class UserSet(models.Model):
         ordering = ('slug', 'course')
 
     def __unicode__(self):
-        return '%s - %s' % (self.slug, self.course)
+        return u'%s - %s' % (self.slug, self.course)
 
     @staticmethod
     def get_groups(year, semester_type, slug):
@@ -167,7 +167,7 @@ class Semester(models.Model):
             self.year = int(self.year)
 
     def __unicode__(self):
-        return '%s %s' % (self.get_type_display(), self.year)
+        return u'%s %s' % (self.get_type_display(), self.year)
 
     class Meta:
         ordering = ('year', '-type')
@@ -226,7 +226,7 @@ class Exam(models.Model):
     objects = ExamManager()
 
     def __unicode__(self):
-        return  '%s (%s)' % (self.course, self.type)
+        return  u'%s (%s)' % (self.course, self.type)
 
     class Meta:
         ordering = ('handout_time', 'exam_time')
@@ -237,7 +237,7 @@ class Week(models.Model):
     number = models.PositiveIntegerField(choices=NUMBER_CHOICES, unique=True)
 
     def __unicode__(self):
-        return '%d' % self.number
+        return u'%d' % self.number
 
     class Meta:
         ordering = ('number',)
@@ -324,10 +324,10 @@ class Deadline(models.Model):
 
     def __unicode__(self):
         if self.time:
-            return '%s %s- %s %s' % (self.userset, self.userset.slug,
+            return u'%s %s- %s %s' % (self.userset, self.userset.slug,
                                      self.date, self.time)
         else:
-            return '%s %s- %s' % (self.userset, self.userset.slug, self.date)
+            return u'%s %s- %s' % (self.userset, self.userset.slug, self.date)
 
     def get_datetime(self):
         if self.time:
