@@ -258,7 +258,11 @@ def select_groups(request, year, semester_type, slug):
         course_groups = Course.get_groups(year, semester.type, [c.id for c in courses])
 
         for c in courses:
-            groups = course_groups[c.id]
+            try:
+                groups = course_groups[c.id]
+            except KeyError: # Skip courses without groups
+                continue
+
             group_form = GroupForm(groups, request.POST, prefix=c.id)
 
             if group_form.is_valid():
