@@ -27,6 +27,16 @@
         </div>
     {%  endif %}
 
+    {% if request.GET.export and courses %}
+        <div id="help">
+            <p>
+                {% for c in courses %}
+                    {{ c }}
+                {% endfor %}
+            </p>
+        </div>
+    {% endif %}
+
     {% include "schedule_table.html" %}
 
     <div class="yui-g noprint">
@@ -44,15 +54,20 @@
                     {% endif %}
                 {% endif %}
                 - <a href="#tips"><img alt="" src="{{ MEDIA_URL }}gfx/tips.png" />Tips</a>
-            </p>
-        </div>
-        <div class="yui-u">
-            <p class="right">
-                <img alt="" src="{{ MEDIA_URL }}gfx/pdf.png"/>
+                - <img alt="" src="{{ MEDIA_URL }}gfx/pdf.png"/>
                 <a href="{% url schedule-pdf-size semester.year,semester.get_type_display,slug,"A4" %}">A4</a>
                 <a href="{% url schedule-pdf-size semester.year,semester.get_type_display,slug,"A5" %}">A5</a>
                 <a href="{% url schedule-pdf-size semester.year,semester.get_type_display,slug,"A6" %}">A6</a>
                 <a href="{% url schedule-pdf-size semester.year,semester.get_type_display,slug,"A7" %}">A7</a>
+            </p>
+        </div>
+        <div class="yui-u">
+            <p class="right">
+                Weeks
+                <a href="{% url schedule semester.year,semester.get_type_display,slug %}">All</a>
+                {% for w in weeks %}
+                    <a href="{% url schedule-week semester.year,semester.get_type_display,slug,w %}">{{ w }}</a>
+                {% endfor %}
             </p>
         </div>
     </div>

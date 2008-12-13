@@ -151,6 +151,14 @@ def schedule(request, year, semester_type, slug, advanced=False,
     rooms = Lecture.get_related(Room, lectures)
     weeks = Lecture.get_related(Week, lectures, field='number')
 
+    min_week, max_week = None, None
+    for w in weeks.values():
+        if not min_week or min_week > w[0]:
+            min_week = w[0]
+
+        if not max_week or max_week < w[-1]:
+            max_week = w[-1]
+
     # Init colors in predictable maner
     for c in courses:
         color_map[c.id]
@@ -228,6 +236,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
             'next_semester': next_semester,
             'slug': slug,
             'timetable': table,
+            'weeks': range(min_week, max_week+1),
         }, RequestContext(request))
 
     if cache_page:
