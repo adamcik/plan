@@ -260,9 +260,12 @@ td.error input, td.error select {
 	border-left: 1px solid #666;
 }
 
+#schedule td.lecture {
+	border-right: 1px solid #CCC;
+}
 /* Proper :first-child  selectors would be nice, but
  * classes from the templates should do the trick */
-#schedule td.last, #schedule td.lecture {
+#schedule td.last, #schedule td.last.lecture {
 	border-right: 1px solid #666;
 }
 #schedule tr.first td {
