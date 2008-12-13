@@ -1,11 +1,24 @@
 {% extends "base.html" %}
 
 {% block title %}
-    {{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %} {{ semester.get_type_display }} {{ semester.year }} {{ block.super }}
+    {{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %}
+    {{ semester.get_type_display }}
+    {{ semester.year }}
+    {% if week %}
+        for week {{ week }}
+    {% endif %}
+    {{ block.super }}
 {% endblock %}
 
 {% block hd %}
-    <h1>{{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %}  {{ semester.get_type_display }} {{ semester.year }} schedule</h1>
+    <h1>
+        {{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %}
+        {{ semester.get_type_display }}
+        {{ semester.year }} schedule
+        {% if week %}
+            for week {{ week }}
+        {% endif %}
+    </h1>
 {% endblock %}
 
 {% block meta %}

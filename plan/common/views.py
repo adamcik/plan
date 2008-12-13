@@ -236,6 +236,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
             'next_semester': next_semester,
             'slug': slug,
             'timetable': table,
+            'week': week,
             'weeks': range(min_week, max_week+1),
         }, RequestContext(request))
 
