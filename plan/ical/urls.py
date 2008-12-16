@@ -3,7 +3,7 @@ from django.conf.urls.defaults import *
 exams = {'exams': True, 'lectures': False, 'deadlines': False}
 lectures = {'exams': False, 'lectures': True, 'deadlines': False}
 deadlines = {'exams': False, 'lectures': False, 'deadlines': True}
-selector = {}
+selector = {'exams': False, 'lectures': False, 'deadlines': False}
 
 # FIXME we can probably handle all cases with new selector approach
 urlpatterns = patterns('plan.ical.views',
