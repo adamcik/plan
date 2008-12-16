@@ -151,7 +151,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
     rooms = Lecture.get_related(Room, lectures)
     weeks = Lecture.get_related(Week, lectures, field='number')
 
-    min_week, max_week = None, None
+    min_week, max_week = 0, 0
     for w in weeks.values():
         if not min_week or min_week > w[0]:
             min_week = w[0]
@@ -222,6 +222,11 @@ def schedule(request, year, semester_type, slug, advanced=False,
 
     group_help = cache.get(group_help, 0)
 
+    week_range = range(min_week, max_week+1)
+
+    if not min_week or not max_week:
+        week_range = []
+
     response = render_to_response('schedule.html', {
             'advanced': advanced,
             'color_map': color_map,
@@ -237,7 +242,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
             'slug': slug,
             'timetable': table,
             'week': week,
-            'weeks': range(min_week, max_week+1),
+            'weeks': week_range,
         }, RequestContext(request))
 
     if cache_page:
