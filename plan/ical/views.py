@@ -5,14 +5,30 @@ from datetime import datetime, timedelta
 from dateutil.rrule import rrule, WEEKLY
 from dateutil.tz import tzlocal
 
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 
 from django.core.cache import cache
 
 from plan.common.models import Exam, Deadline, Lecture, Semester
 
 def ical(request, year, semester_type, slug, lectures=True, exams=True,
-            deadlines=True):
+            deadlines=True, selector=None):
+    if selector:
+        parts = selector.split('+')
+
+        if 'lectures' in parts:
+            parts.remove('lectures')
+            lectures = True
+        if 'exams' in parts:
+            parts.remove('exams')
+            exams = True
+        if 'deadlines' in parts:
+            parts.remove('deadlines')
+            deadlines = True
+
+        if parts:
+            raise Http404
+
     semester = Semester(year=year, type=semester_type)
 
     response = cache.get(request.path)
