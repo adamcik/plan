@@ -29,7 +29,7 @@ class DeadlineForm(forms.models.ModelForm):
 
         self.fields['userset'].queryset = queryset
         self.fields['userset'].widget.attrs['style'] = 'width: 7em'
-        self.fields['userset'].label_from_instance = lambda obj: obj.course.name
+        self.fields['userset'].label_from_instance = lambda obj: obj.name or obj.course.name
 
         self.fields['time'].widget.attrs['size'] = 2
         self.fields['date'].widget.attrs['size'] = 7
