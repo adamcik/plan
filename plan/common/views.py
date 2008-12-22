@@ -52,7 +52,7 @@ def clear_cache(*args):
 def shortcut(request, slug):
     '''Redirect users to their timetable for the current semester'''
 
-    semester = Semester.current()
+    semester = Semester.current(early=True)
 
     return HttpResponseRedirect(reverse('schedule',
             args = [semester.year, semester.get_type_display(), slug.strip()]))
@@ -64,7 +64,7 @@ def getting_started(request, year=None, semester_type=None):
     if year and semester_type:
         semester = Semester(year=year, type=semester_type)
     else:
-        semester = Semester.current()
+        semester = Semester.current(early=True)
 
     # Redirect user to their timetable
     if request.method == 'POST' and 'slug' in request.POST:
@@ -73,7 +73,7 @@ def getting_started(request, year=None, semester_type=None):
         if schedule_form.is_valid():
             slug = slugify(schedule_form.cleaned_data['slug'])
             semester = schedule_form.cleaned_data['semester'] or \
-                Semester.current()
+                semester
 
             if slug.strip():
                 response = HttpResponseRedirect(reverse('schedule', args=[

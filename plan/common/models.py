@@ -193,8 +193,11 @@ class Semester(models.Model):
         return xrange(0,53)
 
     @staticmethod
-    def current(from_db=False):
+    def current(from_db=False, early=False):
         now = datetime.now()
+
+        if early:
+            now += timedelta(weeks=2)
 
         # Default to current semester
         if now.month <= 6:
