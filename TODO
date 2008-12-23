@@ -4,6 +4,8 @@ Current:
 
 * css last bug
 
+* CSS sprites
+
 * Allow custom lectures?
 
 * Link to official data source per course for comparison.
@@ -23,6 +25,10 @@ Current:
 * custom clear cache signal to handle clearing better
 
 * free text search for adding courses
+
+* selector syntax for viewing multiple schedules in same screen
+
+* view course lectures without adding
 
 Wishlist:
 ---------
