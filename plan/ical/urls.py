@@ -1,15 +1,5 @@
 from django.conf.urls.defaults import *
 
-exams = {'exams': True, 'lectures': False, 'deadlines': False}
-lectures = {'exams': False, 'lectures': True, 'deadlines': False}
-deadlines = {'exams': False, 'lectures': False, 'deadlines': True}
-selector = {'exams': False, 'lectures': False, 'deadlines': False}
-
-# FIXME we can probably handle all cases with new selector approach
 urlpatterns = patterns('plan.ical.views',
-    url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/ical/$', 'ical', name='schedule-ical'),
-    url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/ical/exams/$', 'ical', exams, name='schedule-ical-exams'),
-    url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/ical/lectures/$', 'ical', lectures, name='schedule-ical-lectures'),
-    url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/ical/deadlines/$', 'ical', deadlines, name='schedule-ical-deadlines'),
-    url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/ical/(?P<selector>\w+[+\w]*)/$', 'ical', selector, name='schedule-ical-selector'),
+    url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/(?P<slug>[a-zA-Z0-9-_]+)/ical/(?:(?P<selector>\w+[+\w]*)/)?$', 'ical', name='schedule-ical'),
 )

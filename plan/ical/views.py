@@ -1,5 +1,6 @@
 import vobject
 
+from copy import copy
 from socket import gethostname
 from datetime import datetime, timedelta
 from dateutil.rrule import rrule, WEEKLY
@@ -11,22 +12,21 @@ from django.core.cache import cache
 
 from plan.common.models import Exam, Deadline, Lecture, Semester
 
-def ical(request, year, semester_type, slug, lectures=True, exams=True,
-            deadlines=True, selector=None):
+HOSTNAME = gethostname()
+
+def ical(request, year, semester_type, slug, selector=None):
+    resources = [u'lectures', u'exams', u'deadlines']
+
     if selector:
         parts = selector.split('+')
 
-        if 'lectures' in parts:
-            parts.remove('lectures')
-            lectures = True
-        if 'exams' in parts:
-            parts.remove('exams')
-            exams = True
-        if 'deadlines' in parts:
-            parts.remove('deadlines')
-            deadlines = True
+        for resource in copy(resources):
+            if resource in parts:
+                parts.remove(resource)
+            else:
+                resources.remove(resource)
 
-        if parts:
+        if parts: # Invalid selctors
             raise Http404
 
     semester = Semester(year=year, type=semester_type)
@@ -39,21 +39,16 @@ def ical(request, year, semester_type, slug, lectures=True, exams=True,
     cal = vobject.iCalendar()
     cal.add('method').value = 'PUBLISH'  # IE/Outlook needs this
 
-    if lectures:
+    if 'lectures' in resources:
         lectures = Lecture.objects.get_lectures(year, semester.type, slug)
         add_lectutures(lectures, semester, cal)
 
-    if exams:
-        first = semester.get_first_day()
-        last = semester.get_last_day()
-
+    if 'exams' in resources:
         exams = Exam.objects.get_exams(year, semester.type, slug)
-
         add_exams(exams, semester, cal)
 
-    if deadlines and slug:
+    if 'deadlines' in resources:
         deadlines = Deadline.objects.get_deadlines(year, semester.type, slug)
-
         add_deadlines(deadlines, semester, cal)
 
     icalstream = cal.serialize()
@@ -75,8 +70,7 @@ def add_lectutures(lectures, semester, cal):
     '''Adds lectures to cal object for current semester'''
 
     for l in lectures:
-        # Skip excluded
-        if l.exclude:
+        if l.exclude: # Skip excluded
             continue
 
         weeks = l.weeks.values_list('number', flat=True)
@@ -89,6 +83,8 @@ def add_lectutures(lectures, semester, cal):
         }
 
         summary = l.alias or l.course.name
+        # FIXME this propably causes an extra query that could easily be
+        # avoided
         rooms = ', '.join(l.rooms.values_list('name', flat=True))
         desc = '%s - %s (%s)' % (l.type.name, l.course.full_name, l.course.name)
 
@@ -109,7 +105,7 @@ def add_lectutures(lectures, semester, cal):
             vevent.add('dtstamp').value = datetime.now(tzlocal())
 
             vevent.add('uid').value = 'lecture-%d-%s@%s' % \
-                    (l.id, d.strftime('%Y%m%d'), gethostname())
+                    (l.id, d.strftime('%Y%m%d'), HOSTNAME)
 
             if l.type.optional:
                 vevent.add('transp').value = 'TRANSPARENT'
@@ -132,7 +128,7 @@ def add_exams(exams, semester, cal):
         vevent.add('description').value = desc
         vevent.add('dtstamp').value = datetime.now(tzlocal())
 
-        vevent.add('uid').value = 'exam-%d@%s' % (e.id, gethostname())
+        vevent.add('uid').value = 'exam-%d@%s' % (e.id, HOSTNAME)
 
         if e.handout_time:
             if e.handout_time:
@@ -157,7 +153,7 @@ def add_exams(exams, semester, cal):
 
             if e.duration is None or not e.exam_time:
                 duration = timedelta()
-            elif e.duration == 30:
+            elif e.duration == 30: # FIXME is this right?
                 duration = timedelta(minutes=30)
             else:
                 duration = timedelta(hours=e.duration)
@@ -182,5 +178,5 @@ def add_deadlines(deadlines, semester, cal):
         vevent.add('summary').value = summary
         vevent.add('description').value = desc
         vevent.add('dtstamp').value = datetime.now(tzlocal())
-        vevent.add('uid').value = 'deadline-%d@%s' % (d.id, gethostname())
+        vevent.add('uid').value = 'deadline-%d@%s' % (d.id, HOSTNAME)
         vevent.add('dtstart').value = start
