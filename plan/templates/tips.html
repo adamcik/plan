@@ -29,18 +29,18 @@
         </p>
         <p style="background-image: url({{ MEDIA_URL }}gfx/ical.png)" class="icon">
             Calendar export:
-            <a href="{% url schedule-ical-lectures semester.year,semester.get_type_display,slug %}">lectures</a>,
-            <a href="{% url schedule-ical-exams semester.year,semester.get_type_display,slug %}">exams</a>,
-            <a href="{% url schedule-ical-deadlines semester.year,semester.get_type_display,slug %}">deadlines</a> or
+            <a href="{% url schedule-ical semester.year,semester.get_type_display,slug,"lectures" %}">lectures</a>,
+            <a href="{% url schedule-ical semester.year,semester.get_type_display,slug,"exams" %}">exams</a>,
+            <a href="{% url schedule-ical semester.year,semester.get_type_display,slug,"deadlines" %}">deadlines</a> or
             <a href="{% url schedule-ical semester.year,semester.get_type_display,slug %}">all combined</a>.
             <br />
             Simply download or copy the link to the calendar you want and add it to any application that supports the Ical format.
         </p>
         <p style="background-image: url({{ MEDIA_URL }}gfx/gcal.png)" class="icon">
             Google calendar:
-            <a target="_blank" href="http://www.google.com/calendar/render?cid=http://{{ request.META.HTTP_HOST }}{% url schedule-ical-lectures semester.year,semester.get_type_display,slug %}">lectures</a>,
-            <a target="_blank" href="http://www.google.com/calendar/render?cid=http://{{ request.META.HTTP_HOST }}{% url schedule-ical-exams semester.year,semester.get_type_display,slug %}">exams</a>,
-            <a target="_blank" href="http://www.google.com/calendar/render?cid=http://{{ request.META.HTTP_HOST }}{% url schedule-ical-deadlines semester.year,semester.get_type_display,slug %}">deadlines</a> or
+            <a target="_blank" href="http://www.google.com/calendar/render?cid=http://{{ request.META.HTTP_HOST }}{% url schedule-ical semester.year,semester.get_type_display,slug,"lectures" %}">lectures</a>,
+            <a target="_blank" href="http://www.google.com/calendar/render?cid=http://{{ request.META.HTTP_HOST }}{% url schedule-ical semester.year,semester.get_type_display,slug,"exams" %}">exams</a>,
+            <a target="_blank" href="http://www.google.com/calendar/render?cid=http://{{ request.META.HTTP_HOST }}{% url schedule-ical semester.year,semester.get_type_display,slug,"deadlines" %}">deadlines</a> or
             <a target="_blank" href="http://www.google.com/calendar/render?cid=http://{{ request.META.HTTP_HOST }}{% url schedule-ical semester.year,semester.get_type_display,slug %}">all combined</a>.
             <br />
             Simply click the calendar type you want and it will be added to Google calendar.
