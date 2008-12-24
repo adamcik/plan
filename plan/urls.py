@@ -7,16 +7,10 @@ from plan.common.models import Course, Group, Lecture, Lecturer, Room, \
 
 from plan.common.admin import admin
 
-databrowse.site.register(Course)
-databrowse.site.register(Group)
-databrowse.site.register(Lecture)
-databrowse.site.register(Lecturer)
-databrowse.site.register(Room)
-databrowse.site.register(Semester)
-databrowse.site.register(Type)
-databrowse.site.register(Exam)
-
 handler500 = 'plan.common.utils.server_error'
+
+for model in [Course, Group, Lecture, Lecturer, Room, Semester, Type, Exam]:
+    databrowse.site.register(model)
 
 if settings.DEBUG:
     urlpatterns = patterns('',
