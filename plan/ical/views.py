@@ -10,7 +10,7 @@ from django.http import HttpResponse, Http404
 
 from django.core.cache import cache
 
-from plan.common.models import Exam, Deadline, Lecture, Semester
+from plan.common.models import Exam, Deadline, Lecture, Semester, Room
 
 HOSTNAME = gethostname()
 
@@ -69,6 +69,8 @@ def ical(request, year, semester_type, slug, selector=None):
 def add_lectutures(lectures, semester, cal):
     '''Adds lectures to cal object for current semester'''
 
+    all_rooms = Lecture.get_related(Room, lectures)
+
     for l in lectures:
         if l.exclude: # Skip excluded
             continue
@@ -83,9 +85,7 @@ def add_lectutures(lectures, semester, cal):
         }
 
         summary = l.alias or l.course.name
-        # FIXME this propably causes an extra query that could easily be
-        # avoided
-        rooms = ', '.join(l.rooms.values_list('name', flat=True))
+        rooms = ', '.join(all_rooms.get(l.id, []))
         desc = '%s - %s (%s)' % (l.type.name, l.course.full_name, l.course.name)
 
         for d in rrule(WEEKLY, **rrule_kwargs):
