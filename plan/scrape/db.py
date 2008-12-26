@@ -12,10 +12,16 @@ from plan.common.models import Course, Lecture, Lecturer, Semester, Group, \
         Type, Week, Room
 
 @transaction.commit_on_success
-def import_db(year, semester, prefix):
+def import_db(year, semester_type, prefix=None):
     '''Retrive all lectures for a given course'''
 
-    semester, created = Semester.objects.get_or_create(year=year, type=semester)
+    semester, created = Semester.objects.get_or_create(year=year, type=semester_type)
+
+    if not prefix:
+        if semester_type == Semester.SPRING:
+            prefix = 'v%s' % str(year)[-2:]
+        else:
+            prefix = 'h%s' % str(year)[-2:]
 
     mysql_setings = {
         'db': TIMETABEL_DB,
@@ -47,7 +53,7 @@ def import_db(year, semester, prefix):
             continue
 
         # Remove -1 etc. from course code
-        code = ''.join(code.split('-')[:-1]).upper()
+        code = '-'.join(code.split('-')[:-1]).upper()
 
         # Get and or update course
         course, created = Course.objects.get_or_create(name=code)
@@ -69,17 +75,17 @@ def import_db(year, semester, prefix):
         # We choose to be slightly naive and only care about which hour
         # something starts.
         try:
-            start = dict(map(lambda x: (int(x[1].split(':')[0]), x[0]),
+            start_slot = dict(map(lambda x: (int(x[1].split(':')[0]), x[0]),
                     Lecture.START))[int(start.split(':')[0])]
-            end = dict(map(lambda x: (int(x[1].split(':')[0]), x[0]),
+            end_slot = dict(map(lambda x: (int(x[1].split(':')[0]), x[0]),
                     Lecture.END))[int(end.split(':')[0])]
         except KeyError, e:
             if int(end.split(':')[0]) == 8:
                 print "Converting %s to 09:00 for %s" % (end, course)
-                end = 9
+                end_slot = 9
             elif int(end.split(':')[0]) == 0:
                 print "Converting %s to 20:00 for %s" % (end, course)
-                end = Lecture.END[-1][0]
+                end_slot = Lecture.END[-1][0]
             else:
                 print "Could not add %s - %s on %s for %s" % (start, end, day, course)
                 continue
@@ -133,11 +139,12 @@ def import_db(year, semester, prefix):
         lecture_kwargs = {
             'course': course,
             'day': day,
-            'start_time': start,
-            'end_time': end,
+            'start_time': start_slot,
+            'end_time': end_slot,
             'semester': semester,
             'type': course_type,
         }
+
         if not course_type:
             del lecture_kwargs['type']
 
@@ -168,6 +175,9 @@ def import_db(year, semester, prefix):
             lecture.rooms = rooms
             lecture.weeks = weeks
             lecture.lecturers = lecturers
+
+        lecture.start = start
+        lecture.end = end
 
     to_remove =  Lecture.objects.exclude(id__in=added_lectures). \
             filter(semester=semester).values_list('id', flat=True)
