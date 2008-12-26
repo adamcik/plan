@@ -265,6 +265,8 @@ class Lecture(models.Model):
         (2, 'Wednesday'),
         (3, 'Thursday'),
         (4, 'Friday'),
+#        (5, 'Saturday'),
+#        (6, 'Sunday'),
     )
 
     course = models.ForeignKey(Course)
@@ -274,6 +276,9 @@ class Lecture(models.Model):
 
     start_time = models.PositiveSmallIntegerField(choices=START)
     end_time  = models.PositiveSmallIntegerField(choices=END)
+
+    start = models.TimeField()
+    end = models.TimeField()
 
     rooms = models.ManyToManyField(Room, blank=True, null=True)
     type = models.ForeignKey(Type, blank=True, null=True)
