@@ -91,6 +91,9 @@ INSTALLED_APPS = (
     'django.contrib.databrowse',
     'django.contrib.contenttypes',
     'plan.common',
+    'plan.scrape',
+    'plan.ical',
+    'plan.pdf',
 )
 
 MAX_COLORS = 8
