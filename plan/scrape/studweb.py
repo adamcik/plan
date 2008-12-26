@@ -8,11 +8,22 @@ from django.db import transaction
 
 from plan.common.models import Exam, Course, Semester
 
+def _url(semester):
+    if Semester.SPRING == semester.type:
+        return 'http://www.ntnu.no/eksamen/plan/%sv/dato.XML' \
+            % str(semester.year)[-2:]
+    else:
+        return 'http://www.ntnu.no/eksamen/plan/%sh/dato.XML' \
+            % str(semester.year)[-2:]
+
 @transaction.commit_on_success
-def import_xml(year, semester, url):
+def update_exams(year, semester, url=None):
     added, updated = [], []
     semester = Semester.objects.get(year=year, type=semester)
     first_day = semester.get_first_day().date()
+
+    if not url:
+        url = _url(semester)
 
     dom = minidom.parseString(urlopen(url).read())
 
@@ -145,6 +156,5 @@ def import_xml(year, semester, url):
 
     print 'Added %d exams' % len(added)
     print 'Updated %d exams' % len(updated)
-    print 'Deleting %d exams' % len(to_delete)
 
-    to_delete.delete()
+    return to_delete
