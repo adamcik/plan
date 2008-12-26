@@ -3,7 +3,7 @@ from optparse import make_option
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from plan.scrape.db import import_db
+from plan.scrape.db import update_lectures
 from plan.common.models import Semester, Lecture
 
 class Command(BaseCommand):
@@ -24,7 +24,7 @@ class Command(BaseCommand):
         if options['type'] is not None:
             semester.type = options['type']
 
-        to_delete = import_db(semester.year, semester.type)
+        to_delete = update_lectures(semester.year, semester.type)
         to_delete = Lecture.objects.filter(id__in=to_delete)
 
         buffer = []

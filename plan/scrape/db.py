@@ -11,18 +11,13 @@ from plan.settings_mysql import *
 from plan.common.models import Course, Lecture, Lecturer, Semester, Group, \
         Type, Week, Room
 
-@transaction.commit_on_success
-def import_db(year, semester_type, prefix=None):
-    '''Retrive all lectures for a given course'''
+def _prefix(semester):
+    if semester.type == Semester.SPRING:
+        return 'v%s' % str(semester.year)[-2:]
+    else:
+        return 'h%s' % str(semester.year)[-2:]
 
-    semester, created = Semester.objects.get_or_create(year=year, type=semester_type)
-
-    if not prefix:
-        if semester_type == Semester.SPRING:
-            prefix = 'v%s' % str(year)[-2:]
-        else:
-            prefix = 'h%s' % str(year)[-2:]
-
+def _connection():
     mysql_setings = {
         'db': TIMETABEL_DB,
         'host': TIMETABEL_HOST,
@@ -31,8 +26,17 @@ def import_db(year, semester_type, prefix=None):
         'use_unicode': True,
     }
 
-    db = MySQLdb.connect(**mysql_setings)
+    return MySQLdb.connect(**mysql_setings)
 
+@transaction.commit_on_success
+def update_lectures(year, semester_type, prefix=None):
+    '''Retrive all lectures for a given course'''
+
+    semester, created = Semester.objects.get_or_create(year=year, type=semester_type)
+
+    prefix = prefix or _prefix(semester)
+
+    db = _connection()
     c = db.cursor()
 
     c.execute("""
@@ -182,6 +186,16 @@ def import_db(year, semester_type, prefix=None):
     to_remove =  Lecture.objects.exclude(id__in=added_lectures). \
             filter(semester=semester).values_list('id', flat=True)
 
+    return to_remove
+
+def update_courses(year, semester_type, prefix=None):
+    semester, created = Semester.objects.get_or_create(year=year, type=semester_type)
+
+    prefix = prefix or _prefix(semester)
+
+    db = _connection()
+    c = db.cursor()
+
     c.execute("""SELECT emnekode,emnenavn,vekt FROM %s_fs_emne WHERE emnekode
             NOT LIKE '#%%'""" % prefix)
 
@@ -205,5 +219,3 @@ def import_db(year, semester_type, prefix=None):
             print "Added course %s" % course.name
         else:
             print "Updated course %s" % course.name
-
-    return to_remove
