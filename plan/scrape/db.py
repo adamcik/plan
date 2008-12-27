@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+import logging
 import re
 import MySQLdb
 from decimal import Decimal
@@ -10,6 +11,8 @@ from django.conf import settings
 from plan.settings_mysql import *
 from plan.common.models import Course, Lecture, Lecturer, Semester, Group, \
         Type, Week, Room
+
+logger = logging.getLogger('scrape.db')
 
 def _prefix(semester):
     if semester.type == Semester.SPRING:
@@ -71,7 +74,7 @@ def update_lectures(year, semester_type, prefix=None):
         try:
             day = ['mandag', 'tirsdag', 'onsdag', 'torsdag', 'fredag'].index(day)
         except ValueError:
-            print "Could not add %s - %s on %s for %s" % (start, end, day, course)
+            logger.warning("Could not add %s - %s on %s for %s" % (start, end, day, course))
             continue
 
         # Figure out times:
@@ -85,13 +88,13 @@ def update_lectures(year, semester_type, prefix=None):
                     Lecture.END))[int(end.split(':')[0])]
         except KeyError, e:
             if int(end.split(':')[0]) == 8:
-                print "Converting %s to 09:00 for %s" % (end, course)
+                logger.info("Converting %s to 09:00 for %s" % (end, course))
                 end_slot = 9
             elif int(end.split(':')[0]) == 0:
-                print "Converting %s to 20:00 for %s" % (end, course)
+                logger.info("Converting %s to 20:00 for %s" % (end, course))
                 end_slot = Lecture.END[-1][0]
             else:
-                print "Could not add %s - %s on %s for %s" % (start, end, day, course)
+                logger.warning("Could not add %s - %s on %s for %s" % (start, end, day, course))
                 continue
 
         # Rooms:
@@ -130,7 +133,7 @@ def update_lectures(year, semester_type, prefix=None):
                 w2, created = Week.objects.get_or_create(number=w)
                 weeks.append(w2)
             else:
-                print "Messed up week '%s'" % w
+                logger.warning("Messed up week '%s' for %s" % (w, course))
 
         # Lecturer:
         lecturers = []
@@ -216,6 +219,6 @@ def update_courses(year, semester_type, prefix=None):
         course.save()
 
         if created:
-            print "Added course %s" % course.name
+            logger.info("Added course %s" % course.name)
         else:
-            print "Updated course %s" % course.name
+            logger.info("Updated course %s" % course.name)

@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+import logging
 from urllib import urlopen
 from xml.dom import minidom
 from dateutil.parser import parse
@@ -7,6 +8,8 @@ from dateutil.parser import parse
 from django.db import transaction
 
 from plan.common.models import Exam, Course, Semester
+
+logger = logging.getLogger('scrape.studweb')
 
 def _url(semester):
     if Semester.SPRING == semester.type:
@@ -33,22 +36,19 @@ def update_exams(year, semester, url=None):
         exam_year = n.getElementsByTagName('arstall_gjelder_i')[0].firstChild
 
         if str(year) != exam_year.nodeValue:
-            print "Wrong year for %s" % course_code.nodeValue
-            print exam_year.nodeValue
+            logger.warning("Wrong year for %s: %s" % (course_code.nodeValue, exam_year.nodeValue))
             n.unlink()
             continue
 
         exam_semester = n.getElementsByTagName('terminkode_gjelder_i')[0].firstChild
 
         if semester.type == Semester.SPRING and exam_semester.nodeValue != u'VÅR':
-            print "Wrong semester for %s" % course_code.nodeValue
-            print exam_semester.nodeValue
+            logger.warning("Wrong semester for %s: %s" % (course_code.nodeValue, exam_semester.nodeValue))
             n.unlink()
             continue
 
         if semester.type == Semester.FALL and exam_semester.nodeValue != u'HØST':
-            print "Wrong semester for %s" % course_code.nodeValue
-            print exam_semester.nodeValue
+            logger.warning("Wrong semester for %s: %s" % (course_code.nodeValue, exam_semester.nodeValue))
             n.unlink()
             continue
 
@@ -64,7 +64,7 @@ def update_exams(year, semester, url=None):
             exam_kwargs['exam_date'] = parse(handin_date.nodeValue).date()
 
         if exam_kwargs['exam_date'] < first_day:
-            print "%s's exam is in the past - %s" % (course_code.nodeValue, exam_kwargs['exam_date'])
+            logger.warning("%s's exam is in the past - %s" % (course_code.nodeValue, exam_kwargs['exam_date']))
             n.unlink()
             continue
 
@@ -130,10 +130,10 @@ def update_exams(year, semester, url=None):
             raise e
 
         if created:
-            print "Added exam for %s - %s" % (course.name, exam.exam_date)
+            logger.info( "Added exam for %s - %s" % (course.name, exam.exam_date))
             added.append(exam.id)
         else:
-            print "Updated exam for %s - %s" %( course.name, exam.exam_date)
+            logger.info("Updated exam for %s - %s" %( course.name, exam.exam_date))
             updated.append(exam.id)
 
         if duration:
@@ -154,7 +154,7 @@ def update_exams(year, semester, url=None):
 
     Exam.objects.filter(id__in=added+updated).update(semester=semester)
 
-    print 'Added %d exams' % len(added)
-    print 'Updated %d exams' % len(updated)
+    logger.info('Added %d exams' % len(added))
+    logger.info('Updated %d exams' % len(updated))
 
     return to_delete
