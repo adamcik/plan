@@ -185,6 +185,7 @@ def update_lectures(year, semester_type, prefix=None):
 
         lecture.start = start
         lecture.end = end
+        lecture.save()
 
     to_remove =  Lecture.objects.exclude(id__in=added_lectures). \
             filter(semester=semester).values_list('id', flat=True)

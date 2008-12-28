@@ -5,6 +5,9 @@ from django.db import transaction
 
 from plan.scrape.db import update_courses
 from plan.common.models import Semester
+from plan.common.logger import init_console
+
+init_console()
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
@@ -27,5 +30,7 @@ class Command(BaseCommand):
 
         if raw_input('Save changes? [y/N] ').lower() == 'y':
             transaction.commit()
+            print 'Saving changes...'
         else:
             transaction.rollback()
+            print 'Ignoring changes...'

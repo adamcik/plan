@@ -289,10 +289,10 @@ class Lecture(models.Model):
     objects = LectureManager()
 
     def __unicode__(self):
-        return u'%s: %s-%s on %s' % (self.course,
+        return u'%10s %s-%s on %3s' % (self.course,
                                      self.get_start_time_display(),
                                      self.get_end_time_display(),
-                                     self.get_day_display())
+                                     self.get_day_display()[:3])
 
     class Meta:
         ordering = ('course', 'day', 'start_time')

@@ -5,6 +5,9 @@ from django.db import transaction
 
 from plan.scrape.studweb import update_exams
 from plan.common.models import Exam, Semester
+from plan.common.logger import init_console
+
+init_console()
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
@@ -26,21 +29,29 @@ class Command(BaseCommand):
 
         to_delete = update_exams(semester.year, semester.type)
 
-        buffer = []
-        for l in to_delete:
-            if len(buffer) != 3:
-                buffer.append(str(l).ljust(35)[:34])
-            else:
+        if to_delete:
+            print 'Delete the following?'
+            print '---------------------'
+
+            buffer = []
+            for l in to_delete:
+                if len(buffer) != 3:
+                    buffer.append(str(l).ljust(35)[:34])
+                else:
+                    print ' - '.join(buffer)
+                    buffer = []
+
+            if buffer:
                 print ' - '.join(buffer)
-                buffer = []
 
-        if buffer:
-            print ' - '.join(buffer)
+            print '---------------------'
 
-        if options['delete'] or raw_input('Delete? [y/N] ').lower() == 'y':
-            to_delete.delete()
+            if options['delete'] or raw_input('Delete? [y/N] ').lower() == 'y':
+                to_delete.delete()
 
         if raw_input('Save changes? [y/N] ').lower() == 'y':
             transaction.commit()
+            print 'Saving changes...'
         else:
             transaction.rollback()
+            print 'Ignoring changes...'
