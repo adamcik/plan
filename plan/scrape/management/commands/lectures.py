@@ -28,7 +28,6 @@ class Command(BaseCommand):
             semester.type = options['type']
 
         to_delete = update_lectures(semester.year, semester.type)
-        to_delete = Lecture.objects.filter(id__in=to_delete)
 
         if to_delete:
             print 'Delete the following?'
