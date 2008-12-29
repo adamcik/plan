@@ -137,4 +137,4 @@ class Timetable:
         if end > 20:
             end = 20
 
-        return (start-8, end-8)
+        return (start-8, end-9)
