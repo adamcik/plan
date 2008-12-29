@@ -31,8 +31,9 @@ def clear_cache(*args):
     args = list(args)
 
     cache.delete(reverse('schedule-pdf', args=args))
-    for s in ['A4', 'A5', 'A6', 'A7']:
-        cache.delete(reverse('schedule-pdf-size', args=args+[s]))
+# FIXME
+#    for s in ['A4', 'A5', 'A6', 'A7']:
+#        cache.delete(reverse('schedule-pdf-size', args=args+[s]))
 
     logging.debug('Deleted pdf cache')
 
@@ -132,17 +133,19 @@ def pdf(request, year, semester_type, slug, size=None):
                 lecture = cell.get('lecture', '')
 
                 if lecture:
-                    if lecture.type.optional:
+                    if lecture.type and lecture.type.optional:
                         paragraph_style.fontName = 'Helvetica'
 
                     content = [
                         Paragraph(force_escape(lecture.alias or lecture.course.name), paragraph_style),
                     ]
                     paragraph_style.leading = 8
-                    content += [
-                        Paragraph('<font size=6>%s</font>' % lecture.type.name.replace('/', ' / '), paragraph_style),
-                        Paragraph('<font size=6>%s</font>' % ', '.join(lecture.sql_rooms), paragraph_style),
-                    ]
+
+                    if lecture.type:
+                        content += [Paragraph('<font size=6>%s</font>' % lecture.type.name.replace('/', ' / '), paragraph_style)]
+
+                    content += [Paragraph('<font size=6>%s</font>' % ', '.join(lecture.sql_rooms), paragraph_style)]
+
                     paragraph_style.leading = 12
                     paragraph_style.fontName = 'Helvetica-Bold'
 

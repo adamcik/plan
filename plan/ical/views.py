@@ -86,7 +86,11 @@ def add_lectutures(lectures, semester, cal):
 
         summary = l.alias or l.course.name
         rooms = ', '.join(all_rooms.get(l.id, []))
-        desc = '%s - %s (%s)' % (l.type.name, l.course.full_name, l.course.name)
+        # FIXME type can be none
+        if l.type:
+            desc = '%s - %s (%s)' % (l.type.name, l.course.full_name, l.course.name)
+        else:
+            desc = '%s (%s)' % (l.course.full_name, l.course.name)
 
         for d in rrule(WEEKLY, **rrule_kwargs):
             vevent = cal.add('vevent')
@@ -94,20 +98,18 @@ def add_lectutures(lectures, semester, cal):
             vevent.add('location').value = rooms
             vevent.add('description').value = desc
 
-            (hour, minute) = l.get_start_time_display().split(':')
-            vevent.add('dtstart').value = d.replace(hour=int(hour),
-                    minute=int(minute), tzinfo=tzlocal())
+            vevent.add('dtstart').value = d.replace(hour=l.start.hour,
+                    minute=l.start.minute, tzinfo=tzlocal())
 
-            (hour, minute) = l.get_end_time_display().split(':')
-            vevent.add('dtend').value = d.replace(hour=int(hour),
-                    minute=int(minute), tzinfo=tzlocal())
+            vevent.add('dtend').value = d.replace(hour=l.end.hour,
+                    minute=l.end.minute, tzinfo=tzlocal())
 
             vevent.add('dtstamp').value = datetime.now(tzlocal())
 
             vevent.add('uid').value = 'lecture-%d-%s@%s' % \
                     (l.id, d.strftime('%Y%m%d'), HOSTNAME)
 
-            if l.type.optional:
+            if l.type and l.type.optional:
                 vevent.add('transp').value = 'TRANSPARENT'
 
 def add_exams(exams, semester, cal):

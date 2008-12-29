@@ -28,7 +28,7 @@ class LectureManager(models.Manager):
                 (SELECT common_userset_exclude.lecture_id
                  FROM common_userset_exclude WHERE
                  common_userset_exclude.userset_id = common_userset.id)''',
-            'show_week': 'true or %s',
+            'show_week': '%s',
         }
 
         if week:
@@ -53,14 +53,16 @@ class LectureManager(models.Manager):
         order = [
             'course__name',
             'day',
-            'start_time',
+            'start',
             'type__name',
         ]
+
+        params = [week or True]
 
         return  self.get_query_set().filter(**filter).\
                     distinct().\
                     select_related(*related).\
-                    extra(where=where, tables=tables, select=select, select_params=[week]).\
+                    extra(where=where, tables=tables, select=select, select_params=params).\
                     order_by(*order)
 
 class DeadlineManager(models.Manager):
@@ -117,11 +119,12 @@ class CourseManager(models.Manager):
                 (cs.semester_id = s.id)
             LEFT OUTER JOIN common_exam e ON
                 (e.course_id = c.id AND e.semester_id = s.id)
-            WHERE s.year = %d AND s.type = %d AND c.name ~ '^\\\w+\\\d+$'
+            WHERE s.year = %s AND s.type = %s
             ORDER BY c.name, e.exam_date, e.exam_time, e.type;
         ''', [int(year), int(semester_type)])
+            #WHERE s.year = %s AND s.type = %s AND c.name ~ '^\\\w+\\\d+$'
 
-        return cursor.dictfetchall()
+        return cursor.fetchall()
 
 class UserSetManager(models.Manager):
     def get_usersets(self, year, semester_type, slug):

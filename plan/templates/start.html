@@ -50,7 +50,7 @@
 -->
         </div>
         <div class="yui-u">
-            <h2>Top {{ stats|length }} courses {{ current }}</h2>
+            <h2>Top {{ limit }} courses {{ current }}</h2>
             {% if stats %}
                 <div id="stats">
                     {% for count,name,full_name in stats %}

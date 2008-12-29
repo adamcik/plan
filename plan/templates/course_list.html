@@ -43,51 +43,51 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for course in course_list %}
+                    {% for id,name,full_name,points,exam_date,exam_time,type,type_name,handout_date,handout_time in course_list %}
                         <tr>
-                            {% ifchanged course.id %}
-                                <td{% ifchanged course.name.0 %} id="{{ course.name.0 }}"{% endifchanged %}>
-                                    <input type="checkbox" name="course_add" value="{{ course.name }}" id="course_{{ course.id }}" />
+                            {% ifchanged id %}
+                                <td{% ifchanged name.0 %} id="{{ name.0 }}"{% endifchanged %}>
+                                    <input type="checkbox" name="course_add" value="{{ name }}" id="course_{{ id }}" />
                                 </td>
                                 <td>
-                                    <label for="course_{{ course.id }}"><b>{{ course.name }}</b></label>
+                                    <label for="course_{{ id }}"><b>{{ name }}</b></label>
                                 </td>
                                 <td class="small">
-                                    <label for="course_{{ course.id }}">{{ course.full_name }}</label>
+                                    <label for="course_{{ id }}">{{ full_name }}</label>
                                 </td>
                                 <td align="right">
-                                    {{ course.points|default:""|floatformat:"1" }}
+                                    {{ points|default:""|floatformat:"1" }}
                                 </td>
                             {% else %}
                                 <td colspan="4"></td>
                             {% endifchanged %}
                             <td>
-                                {{ course.exam_date|default_if_none:"-" }}
+                                {{ exam_date|default_if_none:"-" }}
                             </td>
                             <td>
-                                {% if course.exam_time %}
-                                    {{ course.exam_time|time:"H:i" }}
+                                {% if exam_time %}
+                                    {{ exam_time|time }}
                                 {% endif %}
                             </td>
                             <td>
-                                {% if course.type_name %}
-                                    {% if course.type %}
-                                        {{ course.type_name|lower|capfirst }} ({{ course.type }})
+                                {% if type_name %}
+                                    {% if type %}
+                                        {{ type_name|lower|capfirst }} ({{ type }})
                                     {% else %}
-                                        {{ course.type_name|lower|capfirst }}
+                                        {{ type_name|lower|capfirst }}
                                     {% endif %}
                                 {% else %}
-                                    {{ course.type|default_if_none:"-" }}
+                                    {{ type|default_if_none:"-" }}
                                 {% endif %}
                             </td>
                             <td>
-                                {% if course.handout_date %}
-                                    {{ course.handout_date }}
+                                {% if handout_date %}
+                                    {{ handout_date }}
                                 {% endif %}
                             </td>
                             <td>
-                                {% if course.handout_time %}
-                                    {{ course.handout_time|time:"H:i" }}
+                                {% if handout_time %}
+                                    {{ handout_time|time }}
                                 {% endif %}
                             </td>
                         </tr>

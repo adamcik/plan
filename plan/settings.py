@@ -98,6 +98,8 @@ INSTALLED_APPS = (
 
 MAX_COLORS = 8
 
+CACHE_TIME = 60*60*24
+
 try:
     from settings_local import *
 except ImportError:

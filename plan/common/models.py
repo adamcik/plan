@@ -103,15 +103,16 @@ class Course(models.Model):
             semester_id = semester
 
         cursor = connection.cursor()
+        # FIXME check if %s should be %d
         cursor.execute('''
             SELECT COUNT(*) as num, c.name, c.full_name FROM
                 common_userset u JOIN common_course c ON (c.id = u.course_id)
-            WHERE u.semester_id = %d
+            WHERE u.semester_id = %s
             GROUP BY c.name, c.full_name
             ORDER BY num DESC
-            LIMIT %d''', [semester_id, limit])
+            LIMIT %s''', [semester_id, limit])
 
-        return cursor.fetchall()
+        return (cursor.fetchall(), limit)
 
     @staticmethod
     def get_groups(year, semester_type, courses):

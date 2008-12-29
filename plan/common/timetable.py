@@ -4,6 +4,7 @@ class Timetable:
     def __init__(self, lectures, rooms={}):
         self.lecture_queryset = lectures
         self.lectures = []
+        # FIXME remove Lecture.START
         self.table = [[[{}] for a in Lecture.DAYS] for b in Lecture.START]
         self.span = [1] * 5
 
@@ -16,8 +17,7 @@ class Timetable:
             if lecture.exclude or not lecture.show_week:
                 continue
 
-            start = lecture.start_time - Lecture.START[0][0]
-            end = lecture.end_time - Lecture.END[0][0]
+            start, end = self.map_to_slot(lecture)
             rowspan = end - start + 1
 
             first = start
@@ -106,8 +106,35 @@ class Timetable:
                 for m in xrange(i, i+height):
                     self.table[m][j][l]['remove'] = True
 
+    # FIXME add an insert_days method
+
     def insert_times(self):
+        # FIXME remove Lecture.START
         times = zip(range(len(Lecture.START)), Lecture.START, Lecture.END)
 
         for i, start, end in times:
             self.table[i].insert(0, [{'time': '%s - %s' % (start[1], end[1]) }])
+
+    def map_to_slot(self, lecture):
+        '''Maps a given lecture to zero-indexed start and stop slots
+           ensuring that start < end'''
+
+        start = lecture.start.hour
+        end = lecture.end.hour
+
+        if start == end:
+            end += 1
+
+        if start < 8:
+            start = 8
+
+        if end < 9:
+            end = 9
+
+        if start > 19:
+            start = 19
+
+        if end > 20:
+            end = 20
+
+        return (start-8, end-8)

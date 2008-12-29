@@ -36,9 +36,10 @@ def clear_cache(*args):
     cache.delete(reverse('schedule', args=args))
     cache.delete(reverse('schedule-advanced', args=args))
     cache.delete(reverse('schedule-ical', args=args))
-    cache.delete(reverse('schedule-ical-exams', args=args))
-    cache.delete(reverse('schedule-ical-lectures', args=args))
-    cache.delete(reverse('schedule-ical-deadlines', args=args))
+# FIXME
+#    cache.delete(reverse('schedule-ical-exams', args=args))
+#    cache.delete(reverse('schedule-ical-lectures', args=args))
+#    cache.delete(reverse('schedule-ical-deadlines', args=args))
 
     for w in Semester().get_weeks():
         cache.delete(reverse('schedule-week', args=args+[w]))
@@ -105,13 +106,16 @@ def getting_started(request, year=None, semester_type=None):
         deadline_count = int(Deadline.objects.filter(userset__semester__in=\
                 [semester]).count())
 
+        stats, limit = Course.get_stats(semester=semester)
+
         context = {
             'color_map': ColorMap(),
             'current': semester,
             'slug_count': slug_count,
             'subscription_count': subscription_count,
             'deadline_count': deadline_count,
-            'stats': Course.get_stats(semester=semester),
+            'stats': stats,
+            'limit': limit,
             'schedule_form': '\n'.join([str(f) for f in schedule_form]),
         }
 
