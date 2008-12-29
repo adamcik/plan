@@ -119,10 +119,9 @@ class CourseManager(models.Manager):
                 (cs.semester_id = s.id)
             LEFT OUTER JOIN common_exam e ON
                 (e.course_id = c.id AND e.semester_id = s.id)
-            WHERE s.year = %s AND s.type = %s
+            WHERE s.year = %%s AND s.type = %%s AND c.name %s
             ORDER BY c.name, e.exam_date, e.exam_time, e.type;
-        ''', [int(year), int(semester_type)])
-            #WHERE s.year = %s AND s.type = %s AND c.name ~ '^\\\w+\\\d+$'
+        ''' % connection.operators['regex'], [year, semester_type, '^\\w+\\d+$'])
 
         return cursor.fetchall()
 
