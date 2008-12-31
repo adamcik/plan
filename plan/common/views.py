@@ -18,37 +18,13 @@ from plan.common.forms import DeadlineForm, GroupForm, CourseNameForm, \
         ScheduleForm
 from plan.common.utils import compact_sequence, ColorMap
 from plan.common.timetable import Timetable
+from plan.common.cache import clear_cache, get_realm
 
 # FIXME, handle with signals
 from plan.pdf.views import clear_cache as clear_pdf_cache
 
 # FIXME Split views that do multiple form handling tasks into seperate views
 # that call the top one.
-
-# FIXME, handle with signals
-def clear_cache(*args):
-    """Clears a users cache based on reverse"""
-
-    args = list(args)
-
-    # FIXME this does not seem to work for stats
-    cache.delete('stats-%s-%s' % (args[0], args[1]))
-    cache.delete(reverse('schedule', args=args))
-    cache.delete(reverse('schedule-advanced', args=args))
-    cache.delete(reverse('schedule-ical', args=args))
-# FIXME
-#    cache.delete(reverse('schedule-ical-exams', args=args))
-#    cache.delete(reverse('schedule-ical-lectures', args=args))
-#    cache.delete(reverse('schedule-ical-deadlines', args=args))
-
-    for w in Semester().get_weeks():
-        cache.delete(reverse('schedule-week', args=args+[w]))
-
-    cache.delete('%s-group_help' % reverse('schedule', args=args))
-
-    logging.debug('Deleted common cache')
-
-    clear_pdf_cache(*args)
 
 def shortcut(request, slug):
     '''Redirect users to their timetable for the current semester'''
@@ -85,7 +61,8 @@ def getting_started(request, year=None, semester_type=None):
                 response.set_cookie('last', slug, 60*60*24*7*4)
                 return response
 
-    context = cache.get('stats-%s-%s' % (semester.year, semester.type))
+    realm = get_realm(semester.year, semester.type)
+    context = cache.get('stats', realm=realm)
 
     if not context or 'no-cache' in request.GET:
         try:
@@ -119,7 +96,8 @@ def getting_started(request, year=None, semester_type=None):
             'schedule_form': '\n'.join([str(f) for f in schedule_form]),
         }
 
-        cache.set('stats-%s-%s' % (semester.year, semester.type), context, 3*60)
+        # FIXME cache time
+        cache.set('stats', context, 3*60, realm=realm)
 
     if '%s' in context['schedule_form']:
         context['schedule_form'] = context['schedule_form'] % request.COOKIES.get('last', '')
@@ -130,8 +108,10 @@ def schedule(request, year, semester_type, slug, advanced=False,
         week=None, deadline_form=None, cache_page=True):
     '''Page that handels showing schedules'''
 
-    response = cache.get(request.path)
+    realm = get_realm(year, semester_type, slug)
+    response = cache.get(request.path, realm=realm)
 
+    # FIXME no-cache hack
     if response and 'no-cache' not in request.GET and cache_page:
         return response
 
@@ -224,6 +204,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
     group_help = '%s-group_help' % reverse('schedule',
             args=[year, semester.get_type_display(), slug])
 
+    # FIXME
     group_help = cache.get(group_help, 0)
 
     week_range = range(min_week, max_week+1)
@@ -250,6 +231,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
         }, RequestContext(request))
 
     if cache_page:
+        # FIXME this code needs some work
         if deadlines:
             cache_time = deadlines[0].get_seconds()
         else:
@@ -263,7 +245,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
 
         logging.debug('Cache time: %.2f min' % (cache_time / 60))
 
-        cache.set(request.path, response, cache_time)
+        cache.set(request.path, response, cache_time, realm=realm)
     return response
 
 def select_groups(request, year, semester_type, slug):
@@ -290,7 +272,7 @@ def select_groups(request, year, semester_type, slug):
 
                 userset.groups = group_form.cleaned_data['groups']
 
-        clear_cache(year, semester.get_type_display(), slug)
+        clear_cache(year, semester_type, slug)
 
     return HttpResponseRedirect(reverse('schedule-advanced',
             args=[semester.year,semester.get_type_display(),slug]))
@@ -301,7 +283,7 @@ def new_deadline(request, year, semester_type, slug):
     semester = Semester(year=year, type=semester_type)
 
     if request.method == 'POST':
-        clear_cache(year, semester.get_type_display(), slug)
+        clear_cache(year, semester_type, slug)
 
         post = request.POST.copy()
 
@@ -383,7 +365,7 @@ def copy_deadlines(request, year, semester_type, slug):
                         time=d.time,
                         task=d.task
                 )
-            clear_cache(year, semester.get_type_display(), slug)
+            clear_cache(year, semester_type, slug)
 
     return HttpResponseRedirect(reverse('schedule',
             args=[semester.year,semester.get_type_display(),slug]))
@@ -403,7 +385,7 @@ def select_course(request, year, semester_type, slug, add=False):
 
     if request.method == 'POST':
 
-        clear_cache(year, semester.get_type_display(), slug)
+        clear_cache(year, semester_type, slug)
 
         post = request.POST.copy()
 
@@ -469,6 +451,8 @@ def select_course(request, year, semester_type, slug, add=False):
             if max_group_count > 2:
                 group_help = '%s-group_help' % reverse('schedule',
                         args=[year, semester.get_type_display(), slug])
+                # FIXME don't hardcode times, also see if group help can be
+                # solved nicer
                 cache.set(group_help, int(time())+60*10, 60*10)
 
             if errors:
@@ -519,7 +503,7 @@ def select_lectures(request, year, semester_type, slug):
         for userset in usersets:
             userset.exclude = userset.course.lecture_set.filter(id__in=excludes)
 
-        clear_cache(semester.year, semester.get_type_display(), slug)
+        clear_cache(year, semester_type, slug)
 
     return HttpResponseRedirect(reverse('schedule-advanced',
             args=[semester.year, semester.get_type_display(), slug]))
@@ -530,7 +514,9 @@ def list_courses(request, year, semester_type, slug):
     if request.method == 'POST':
         return select_course(request, year, semester_type, slug, add=True)
 
-    response = cache.get(''.join(request.path.split('/')[:-2]))
+    # FIXME :/
+    realm = get_realm(year, semester_type)
+    response = cache.get('courses', realm=realm)
 
     if not response:
         semester = Semester(year=year, type=semester_type)
@@ -542,6 +528,6 @@ def list_courses(request, year, semester_type, slug):
                 'course_list': courses,
             }, RequestContext(request))
 
-        cache.set(''.join(request.path.split('/')[:-2]), response)
+        cache.set('courses', response, realm=realm)
 
     return response

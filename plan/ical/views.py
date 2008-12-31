@@ -9,8 +9,10 @@ from dateutil.tz import tzlocal
 from django.http import HttpResponse, Http404
 
 from django.core.cache import cache
+from django.core.urlresolvers import reverse
 
-from plan.common.models import Exam, Deadline, Lecture, Semester, Room
+from plan.common.models import Exam, Deadline, Lecture, Semester, Room, Week
+from plan.common.cache import clear_cache, get_realm
 
 HOSTNAME = gethostname()
 
@@ -31,9 +33,14 @@ def ical(request, year, semester_type, slug, selector=None):
 
     semester = Semester(year=year, type=semester_type)
 
-    response = cache.get(request.path)
+    cache_key  = reverse('schedule-ical', args=[semester.year, semester.get_type_display(), slug])
+    cache_key += '+'.join(resources)
 
-    if response and 'plain' not in request.GET:
+    cache_realm = get_realm(semester.year, semester.type, slug)
+
+    response = cache.get(cache_key, realm=cache_realm)
+
+    if response and 'no-cache' not in request.GET:
         return response
 
     cal = vobject.iCalendar()
@@ -54,15 +61,14 @@ def ical(request, year, semester_type, slug, selector=None):
     icalstream = cal.serialize()
 
     if 'plain' in request.GET:
-        response = HttpResponse(icalstream)
-        response['Content-Type'] = 'text/plain; charset=utf-8'
+        response = HttpResponse('<html><head></head><body><pre>%s</pre></body></html>' % icalstream)
     else:
         response = HttpResponse(icalstream, mimetype='text/calendar')
         response['Content-Type'] = 'text/calendar; charset=utf-8'
         response['Filename'] = '%s.ics' % slug  # IE needs this
         response['Content-Disposition'] = 'attachment; filename=%s.ics' % slug
 
-        cache.set(request.path, response)
+    cache.set(cache_key, response, realm=cache_realm)
 
     return response
 
@@ -70,12 +76,13 @@ def add_lectutures(lectures, semester, cal):
     '''Adds lectures to cal object for current semester'''
 
     all_rooms = Lecture.get_related(Room, lectures)
+    all_weeks = Lecture.get_related(Week, lectures, field='number')
 
     for l in lectures:
         if l.exclude: # Skip excluded
             continue
 
-        weeks = l.weeks.values_list('number', flat=True)
+        weeks = all_weeks[l.id]
 
         rrule_kwargs = {
             'byweekno': weeks,
@@ -86,7 +93,7 @@ def add_lectutures(lectures, semester, cal):
 
         summary = l.alias or l.course.name
         rooms = ', '.join(all_rooms.get(l.id, []))
-        # FIXME type can be none
+
         if l.type:
             desc = '%s - %s (%s)' % (l.type.name, l.course.full_name, l.course.name)
         else:

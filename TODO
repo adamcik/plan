@@ -30,6 +30,10 @@ Current:
 
 * view course lectures without adding
 
+* fix caching
+
+* remove plain no-cache etc and replace with middleware
+
 Wishlist:
 ---------
 

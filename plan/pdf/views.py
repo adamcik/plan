@@ -20,22 +20,11 @@ from django.template.defaultfilters import force_escape
 from plan.common.models import Lecture, Semester, Room, Course
 from plan.common.timetable import Timetable
 from plan.common.utils import ColorMap
+from plan.common.cache import get_realm, clear_cache
 
 outer_border = HexColor('#666666')
 inner_border = HexColor('#CCCCCC')
 backgrounds = [HexColor('#FFFFFF'), HexColor('#FAFAFA')]
-
-def clear_cache(*args):
-    """Clears a users cache based on reverse"""
-
-    args = list(args)
-
-    cache.delete(reverse('schedule-pdf', args=args))
-# FIXME
-#    for s in ['A4', 'A5', 'A6', 'A7']:
-#        cache.delete(reverse('schedule-pdf-size', args=args+[s]))
-
-    logging.debug('Deleted pdf cache')
 
 def _tablestyle():
     table_style = TableStyle([
@@ -72,7 +61,8 @@ def pdf(request, year, semester_type, slug, size=None):
 
     semester = Semester(year=year, type=semester_type)
 
-    response = cache.get(request.path)
+    cache_realm = get_realm(year, semester_type, slug)
+    response = cache.get(request.path, realm=cache_realm)
 
     if response and 'no-cache' not in request.GET:
         return response
@@ -221,5 +211,6 @@ def pdf(request, year, semester_type, slug, size=None):
     page.showPage()
     page.save()
 
-    cache.set(request.path+size, response)
+    cache.set(request.path, response, realm=cache_realm)
+
     return response
