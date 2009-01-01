@@ -1,7 +1,7 @@
-from django.test import TestCase
+from plan.common.tests import BaseTestCase
 
-class EmptyViewTestCase(TestCase):
+class EmptyViewTestCase(BaseTestCase):
     pass
 
-class ViewTestCase(TestCase):
+class ViewTestCase(BaseTestCase):
     fixtures = ['test_data.json']

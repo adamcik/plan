@@ -1,6 +1,21 @@
+import datetime
+
 from django.test import TestCase
 
-class EmptyViewTestCase(TestCase):
+class MockDatetime(datetime.datetime):
+    @classmethod
+    def now(cls):
+        return datetime.datetime(2009, 1, 1)
+
+class BaseTestCase(TestCase):
+    def setUp(self):
+        self.datetime = datetime.datetime
+        datetime.datetime = MockDatetime
+
+    def tearDown(self):
+        datetime.datetime = self.datetime
+
+class EmptyViewTestCase(BaseTestCase):
     def test_index(self):
         response = self.client.get('/')
 
@@ -13,7 +28,7 @@ class EmptyViewTestCase(TestCase):
         self.failUnlessEqual(response.status_code, 404)
         self.assertTemplateUsed(response, '404.html')
 
-class ViewTestCase(TestCase):
+class ViewTestCase(BaseTestCase):
     fixtures = ['test_data.json']
 
     def test_index(self):
@@ -28,18 +43,18 @@ class ViewTestCase(TestCase):
     def test_advanced_schedule(self):
         pass
 
-class TimetableTestCase(TestCase):
+class TimetableTestCase(BaseTestCase):
     fixtures = ['test_data.json']
 
     def test_place(self):
         pass
 
-class MangerTestCase(TestCase):
+class MangerTestCase(BaseTestCase):
     fixtures = ['test_data.json']
 
     # FIXME test all custom manager methods
 
-class UtilTestCase(TestCase):
+class UtilTestCase(BaseTestCase):
     fixtures = ['test_data.json']
 
     def test_colormap(self):
@@ -48,5 +63,5 @@ class UtilTestCase(TestCase):
     def test_compact_sequence(self):
         pass
 
-class FormTestCase(TestCase):
+class FormTestCase(BaseTestCase):
     pass
