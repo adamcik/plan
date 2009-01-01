@@ -1,0 +1,181 @@
+[
+    {
+        "pk": 1, 
+        "model": "common.type", 
+        "fields": {
+            "optional": false, 
+            "name": "Type 1"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "common.type", 
+        "fields": {
+            "optional": false, 
+            "name": "Type 2"
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "common.type", 
+        "fields": {
+            "optional": true, 
+            "name": "Type 3"
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "common.room", 
+        "fields": {
+            "name": "Room 1"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "common.room", 
+        "fields": {
+            "name": "Room 2"
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "common.room", 
+        "fields": {
+            "name": "Room 3"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "common.group", 
+        "fields": {
+            "name": "Group 1"
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "common.group", 
+        "fields": {
+            "name": "Group 2"
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "common.course", 
+        "fields": {
+            "url": "", 
+            "points": "1.00", 
+            "semesters": [
+                1
+            ], 
+            "name": "Course 1 ", 
+            "full_name": "Course 1 full name"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "common.course", 
+        "fields": {
+            "url": "", 
+            "points": "1.00", 
+            "semesters": [
+                1
+            ], 
+            "name": "Course 2", 
+            "full_name": "Course 2 full name"
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "common.course", 
+        "fields": {
+            "url": "", 
+            "points": "1.00", 
+            "semesters": [
+                1
+            ], 
+            "name": "Course 3", 
+            "full_name": "Course 3 full name"
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "common.semester", 
+        "fields": {
+            "type": 0, 
+            "year": 2009
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "common.lecturer", 
+        "fields": {
+            "name": "Person 1"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "common.lecturer", 
+        "fields": {
+            "name": "Person 2"
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "common.lecturer", 
+        "fields": {
+            "name": "Person 3"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "common.lecture", 
+        "fields": {
+            "lecturers": [
+                1
+            ], 
+            "end": "10:00:00", 
+            "start": "08:15:00", 
+            "start_time": null, 
+            "course": 1, 
+            "semester": 1, 
+            "end_time": null, 
+            "groups": [
+                1
+            ], 
+            "weeks": [
+                1
+            ], 
+            "type": 1, 
+            "day": 0, 
+            "rooms": [
+                1
+            ]
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "common.lecture", 
+        "fields": {
+            "lecturers": [
+                2
+            ], 
+            "end": "12:00:00", 
+            "start": "10:15:00", 
+            "start_time": null, 
+            "course": 1, 
+            "semester": 1, 
+            "end_time": null, 
+            "groups": [
+                2
+            ], 
+            "weeks": [
+                2
+            ], 
+            "type": 2, 
+            "day": 0, 
+            "rooms": [
+                2
+            ]
+        }
+    }
+]
