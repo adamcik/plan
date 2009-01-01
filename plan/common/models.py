@@ -147,6 +147,7 @@ class Semester(models.Model):
         (FALL, 'h'),
     )
 
+    # FIXME this will only get updated when server restarts :/
     YEAR_CURRENT = datetime.now().year
     YEAR_CHOICES = [(x, x) for x in range(YEAR_CURRENT-1, YEAR_CURRENT+2)]
 

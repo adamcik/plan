@@ -29,7 +29,13 @@ from plan.pdf.views import clear_cache as clear_pdf_cache
 def shortcut(request, slug):
     '''Redirect users to their timetable for the current semester'''
 
-    semester = Semester.current(early=True)
+    try:
+        semester = Semester.current(from_db=True, early=True)
+    except Semester.DoesNotExist:
+        try:
+            semester = Semester.current(from_db=True)
+        except Semester.DoesNotExist:
+            raise Http404
 
     return HttpResponseRedirect(reverse('schedule',
             args = [semester.year, semester.get_type_display(), slug.strip()]))
