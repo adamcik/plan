@@ -1,7 +1,4 @@
 from django.test import TestCase
-from django.core.urlresolvers import reverse
-
-from plan.common.models import Semester
 
 class EmptyViewTestCase(TestCase):
     def test_index(self):
