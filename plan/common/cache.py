@@ -72,7 +72,7 @@ class CacheClass(BaseCache):
     def add(self, key, *args, **kwargs):
         key, kwargs = self._realm(key, **kwargs)
         logger.debug('Adding key: %s' % key)
-        return self.cache(key, *args, **kwargs)
+        return self.cache.add(key, *args, **kwargs)
 
     def get(self, key, *args, **kwargs):
         key, kwargs = self._realm(key, **kwargs)
