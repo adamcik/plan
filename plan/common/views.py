@@ -7,7 +7,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, Http404
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
 from django.template.defaultfilters import slugify
 from django.views.generic.list_detail import object_list
@@ -123,6 +123,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
     group_forms = {}
 
     semester = Semester(year=year, type=semester_type)
+    semester = get_object_or_404(Semester, year=semester.year, type=semester.type)
 
     # Start setting up queries
     courses = Course.objects.get_courses(year, semester.type, slug)
