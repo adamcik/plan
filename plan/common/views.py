@@ -6,7 +6,7 @@ from time import time
 from django.conf import settings
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.template.defaultfilters import slugify
@@ -68,6 +68,8 @@ def getting_started(request, year=None, semester_type=None):
         try:
             semester = Semester.objects.get(year=semester.year, type=semester.type)
         except Semester.DoesNotExist:
+            if request.path == '/':
+                return render_to_response('start.html', {'missing': True}, RequestContext(request))
             return HttpResponseRedirect('/')
 
         if not schedule_form:

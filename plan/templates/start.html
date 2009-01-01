@@ -6,74 +6,82 @@
 {% endblock %}
 
 {% block bd %}
-    <div class="yui-g">
-        <div class="yui-u first">
-            <h2>Getting started</h2>
-            <div id="help">
-                <form action="." method="post">
-                    <p class="large">
-                        Please enter a short string identifying your personal
-                        timetable, ie. username, nickname etc. If the identifier
-                        you select is in already taken, create another one.
-                    </p>
-                    <p class="right">
-                        {{ schedule_form|safe }}
-                        <button type="submit">Start <img alt="" src="{{ MEDIA_URL }}gfx/start.png" /></button>
-                    </p>
-                </form>
-            </div>
+    {% if missing %}
+        <div id="help" class="large">
             <p>
-                To retrieve your timetable simply enter the same identifier
-                you used last time.
+                Sorry, no semesters have been loaded yet.
             </p>
-            <h2>Statistics {{ current }}</h2>
-            <p class="small">
-                Total number of unique timetables -
-                <a href="http://munin.1024.no/1024.no/1024.no-ntnu_1024_no_schedules.html">{{ slug_count }}</a>
-                <br />
-                Total number of courses added to timetables -
-                <a href="http://munin.1024.no/1024.no/1024.no-ntnu_1024_no_subscriptions.html">{{ subscription_count }}</a>
-                <br />
-                Total number of deadlines added to timetables -
-                <a href="http://munin.1024.no/1024.no/1024.no-ntnu_1024_no_deadlines.html">{{ deadline_count }}</a>
-                <!--
-                <dt><b>lectures:</b></dt>      <dd>{{ lecture_count }}</dd>
-                <dt><b>courses:</b></dt>       <dd>{{ course_count }}</dd>
-                <dt><b>exams:</b></dt>         <dd>{{ exam_count }}</dd>
-                -->
-            </p>
-<!--
-            <h2>Screenshot</h2>
-            <p>
-                <img alt="Screenshot" src="{{ MEDIA_URL }}screenshot.png" />
-            </p>
--->
         </div>
-        <div class="yui-u">
-            <h2>Top {{ limit }} courses {{ current }}</h2>
-            {% if stats %}
-                <div id="stats">
-                    {% for count,name,full_name in stats %}
-                        <div title="{{ full_name }}" style="width: {% widthratio count stats.0.0 95 %}%" class="{% color name %}">
-                            <span>{{ count }}</span>
-                            {{ name }}
-                        </div>
-                    {% endfor %}
+    {% else %}
+        <div class="yui-g">
+            <div class="yui-u first">
+                <h2>Getting started</h2>
+                <div id="help">
+                    <form action="." method="post">
+                        <p class="large">
+                            Please enter a short string identifying your personal
+                            timetable, ie. username, nickname etc. If the identifier
+                            you select is in already taken, create another one.
+                        </p>
+                        <p class="right">
+                            {{ schedule_form|safe }}
+                            <button type="submit">Start <img alt="" src="{{ MEDIA_URL }}gfx/start.png" /></button>
+                        </p>
+                    </form>
                 </div>
-            {% else %}
-                No coures have been added to any schedules yet.
-            {% endif %}
+                <p>
+                    To retrieve your timetable simply enter the same identifier
+                    you used last time.
+                </p>
+                <h2>Statistics {{ current }}</h2>
+                <p class="small">
+                    Total number of unique timetables -
+                    <a href="http://munin.1024.no/1024.no/1024.no-ntnu_1024_no_schedules.html">{{ slug_count }}</a>
+                    <br />
+                    Total number of courses added to timetables -
+                    <a href="http://munin.1024.no/1024.no/1024.no-ntnu_1024_no_subscriptions.html">{{ subscription_count }}</a>
+                    <br />
+                    Total number of deadlines added to timetables -
+                    <a href="http://munin.1024.no/1024.no/1024.no-ntnu_1024_no_deadlines.html">{{ deadline_count }}</a>
+                    <!--
+                    <dt><b>lectures:</b></dt>      <dd>{{ lecture_count }}</dd>
+                    <dt><b>courses:</b></dt>       <dd>{{ course_count }}</dd>
+                    <dt><b>exams:</b></dt>         <dd>{{ exam_count }}</dd>
+                    -->
+                </p>
+    <!--
+                <h2>Screenshot</h2>
+                <p>
+                    <img alt="Screenshot" src="{{ MEDIA_URL }}screenshot.png" />
+                </p>
+    -->
+            </div>
+            <div class="yui-u">
+                <h2>Top {{ limit }} courses {{ current }}</h2>
+                {% if stats %}
+                    <div id="stats">
+                        {% for count,name,full_name in stats %}
+                            <div title="{{ full_name }}" style="width: {% widthratio count stats.0.0 95 %}%" class="{% color name %}">
+                                <span>{{ count }}</span>
+                                {{ name }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    No coures have been added to any schedules yet.
+                {% endif %}
+            </div>
         </div>
-    </div>
-    <h2>Disclaimer</h2>
-    <p>
-        This site is <b>not</b> run by NTNU and is not hosted on any of
-        their servers.
-    </p>
-    <p>
-        All course and exam data is retrived from NTNU's public sites.
-        All deadlines have been added manualy by users. Please note that
-        the course data displayed on this site can be out of sync with
-        NTNU if they make changes to their schedules.
-    </p>
+        <h2>Disclaimer</h2>
+        <p>
+            This site is <b>not</b> run by NTNU and is not hosted on any of
+            their servers.
+        </p>
+        <p>
+            All course and exam data is retrived from NTNU's public sites.
+            All deadlines have been added manualy by users. Please note that
+            the course data displayed on this site can be out of sync with
+            NTNU if they make changes to their schedules.
+        </p>
+    {% endif %}
 {% endblock %}
