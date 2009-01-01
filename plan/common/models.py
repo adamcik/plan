@@ -276,8 +276,8 @@ class Lecture(models.Model):
 
     day = models.PositiveSmallIntegerField(choices=DAYS)
 
-    start_time = models.PositiveSmallIntegerField(choices=START)
-    end_time  = models.PositiveSmallIntegerField(choices=END)
+    start_time = models.PositiveSmallIntegerField(choices=START, blank=True, null=True)
+    end_time  = models.PositiveSmallIntegerField(choices=END, blank=True, null=True)
 
     start = models.TimeField()
     end = models.TimeField()
