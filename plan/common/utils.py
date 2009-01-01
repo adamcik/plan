@@ -47,11 +47,12 @@ def compact_sequence(sequence):
     return compact
 
 class ColorMap(dict):
-    """Magic dict that asigns colors"""
+    """Magic dict that assigns colors"""
 
     # Colors from www.ColorBrewer.org by Cynthia A. Brewer, Geography,
     # Pennsylvania State University.
     # http://www.personal.psu.edu/cab38/ColorBrewer/ColorBrewer_updates.html
+
     colors = [
         '#B3E2CD',
         '#FDCDAC',
@@ -69,7 +70,7 @@ class ColorMap(dict):
         self.hex = hex
 
     def __getitem__(self, k):
-        # Remeber to use super to preven inf loop
+        # Remember to use super to prevent inf loop
         if k is None:
             return ''
 
