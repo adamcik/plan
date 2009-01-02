@@ -2,7 +2,7 @@
 # Django settings for plan project.
 
 import os
-BASE_PATH = os.path.dirname(os.path.abspath(__file__)) + '/..'
+BASE_PATH = os.path.dirname(os.path.abspath(__file__)) + '/../..'
 
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
@@ -96,11 +96,15 @@ INSTALLED_APPS = (
     'plan.pdf',
 )
 
+TEST_RUNNER = 'plan.common.test_runner.test_runner_with_coverage'
+
+COVERAGE_MODULES = (
+    'plan.common',
+    'plan.scrape',
+    'plan.ical',
+    'plan.pdf',
+)
+
 MAX_COLORS = 8
 
 CACHE_TIME = 60*60*24
-
-try:
-    from settings_local import *
-except ImportError:
-    pass
