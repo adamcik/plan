@@ -1,4 +1,5 @@
-settings_local.py
+plan/settings/local.py
+plan/settings/mysql.py
 djangologging
 stats
 dump
