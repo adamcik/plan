@@ -8,7 +8,6 @@ from decimal import Decimal
 from django.db import transaction
 from django.conf import settings
 
-from plan.settings_mysql import *
 from plan.common.models import Course, Lecture, Lecturer, Semester, Group, \
         Type, Week, Room
 
@@ -22,10 +21,10 @@ def _prefix(semester):
 
 def _connection():
     mysql_setings = {
-        'db': TIMETABEL_DB,
-        'host': TIMETABEL_HOST,
-        'user': TIMETABEL_USER,
-        'passwd': TIMETABEL_PASS,
+        'db': settings.MYSQL_NAME,
+        'host': settings.MYSQL_HOST,
+        'user': settings.MYSQL_USER,
+        'passwd': settings.MYSQL_PASSWORD,
         'use_unicode': True,
     }
 
