@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, time
 
 from django.db import models, connection
 from django.http import Http404
+from django.template.defaultfilters import time
 
 from plan.common.managers import LectureManager, DeadlineManager, \
         ExamManager, CourseManager, UserSetManager
@@ -292,8 +293,8 @@ class Lecture(models.Model):
 
     def __unicode__(self):
         return u'%10s %s-%s on %3s' % (self.course,
-                                     self.get_start_time_display(),
-                                     self.get_end_time_display(),
+                                     time(self.start),
+                                     time(self.end),
                                      self.get_day_display()[:3])
 
     class Meta:
