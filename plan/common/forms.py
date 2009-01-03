@@ -8,6 +8,14 @@ class CourseNameForm(forms.Form):
     name = forms.CharField(widget=forms.TextInput(attrs={'size':8}),
                            required=False)
 
+    def clean_name(self):
+        name = self.cleaned_data['name']
+
+        if len(name) > 47:
+            name = '%s...' % name[:47].rstrip()
+
+        return name
+
 class GroupForm(forms.Form):
     '''Form for selecting groups for a course (has a custom init)'''
     groups = forms.MultipleChoiceField(required=False)
