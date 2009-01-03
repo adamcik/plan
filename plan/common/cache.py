@@ -4,7 +4,7 @@ from time import time
 from django.http import QueryDict
 from django.conf import settings
 from django.utils.http import int_to_base36
-from django.core.cache import get_cache as get_cache
+from django.core.cache import get_cache
 from django.core.cache.backends.base import InvalidCacheBackendError, BaseCache
 
 logger = logging.getLogger()
@@ -17,6 +17,7 @@ def get_realm(year, semester, slug=None):
     return ':'.join([str(a) for a in args])
 
 def clear_cache(year, semester, slug):
+    from django.core.cache import cache
     cache.delete(get_realm(year, semester, slug))
     cache.delete(get_realm(year, semester))
 
