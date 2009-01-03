@@ -17,7 +17,7 @@ def server_error(request, template_name='500.html'):
     return HttpResponseServerError(t.render(context))
 
 def compact_sequence(sequence):
-    '''Nice little function that replaces sucessive ints n, ..., m  with n-m'''
+    '''Compact sequences of numbers into array of strings [i, j, k-l, n-m]'''
     if not sequence:
         return []
 
@@ -27,22 +27,22 @@ def compact_sequence(sequence):
     first = sequence[0]
     last = sequence[0] - 1
 
-    for week in sequence:
-        if last == week - 1:
-            last = week
+    for item in sequence:
+        if last == item - 1:
+            last = item
         else:
             if first != last:
                 compact.append('%d-%d' % (first, last))
             else:
-                compact.append(first)
+                compact.append('%d' % first)
 
-            first = week
-            last = week
+            first = item
+            last = item
 
     if first != last:
         compact.append('%d-%d' % (first, last))
     else:
-        compact.append(first)
+        compact.append('%d' % first)
 
     return compact
 
@@ -64,9 +64,9 @@ class ColorMap(dict):
         '#CCCCCC',
     ]
 
-    def __init__(self, index=0, max=settings.MAX_COLORS, hex=False):
+    def __init__(self, index=0, hex=False):
         self.index = index
-        self.max = max
+        self.max = len(self.colors)
         self.hex = hex
 
     def __getitem__(self, k):

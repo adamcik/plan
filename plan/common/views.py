@@ -104,7 +104,7 @@ def getting_started(request, year=None, semester_type=None):
             'schedule_form': '\n'.join([str(f) for f in schedule_form]),
         }
 
-        # FIXME cache time
+        # FIXME cache time, don't hardcode
         cache.set('stats', context, 3*60, realm=realm)
 
     if '%s' in context['schedule_form']:
@@ -133,7 +133,6 @@ def schedule(request, year, semester_type, slug, advanced=False,
 
     # Start setting up queries
     courses = Course.objects.get_courses(year, semester.type, slug)
-
     deadlines = Deadline.objects.get_deadlines(year, semester.type, slug)
     lectures = Lecture.objects.get_lectures(year, semester.type, slug, week)
     exams = Exam.objects.get_exams(year, semester.type, slug)

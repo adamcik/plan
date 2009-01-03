@@ -125,4 +125,5 @@ COVERAGE_MODULES = (
 
 MAX_COLORS = 8
 
+CACHE_BACKEND = 'plan.common.cache://?backend=locmem'
 CACHE_TIME = 60*60*24

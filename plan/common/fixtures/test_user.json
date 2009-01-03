@@ -1,0 +1,110 @@
+[
+    {
+        "pk": 1, 
+        "model": "common.userset", 
+        "fields": {
+            "added": "2009-01-03 10:13:53", 
+            "name": "", 
+            "course": 1, 
+            "semester": 1, 
+            "groups": [
+                1, 
+                2
+            ], 
+            "exclude": [
+                7
+            ], 
+            "slug": "adamcik"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "common.userset", 
+        "fields": {
+            "added": "2009-01-03 10:16:14", 
+            "name": "", 
+            "course": 2, 
+            "semester": 1, 
+            "groups": [
+                1
+            ], 
+            "exclude": [], 
+            "slug": "adamcik"
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "common.userset", 
+        "fields": {
+            "added": "2009-01-03 10:16:21", 
+            "name": "", 
+            "course": 3, 
+            "semester": 1, 
+            "groups": [
+                2
+            ], 
+            "exclude": [], 
+            "slug": "adamcik"
+        }
+    },
+    {
+        "pk": 4, 
+        "model": "common.userset", 
+        "fields": {
+            "added": "2009-01-03 13:41:56", 
+            "name": "", 
+            "course": 1, 
+            "semester": 1, 
+            "groups": [
+                1
+            ], 
+            "exclude": [], 
+            "slug": "foo"
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "common.userset", 
+        "fields": {
+            "added": "2009-01-03 13:42:14", 
+            "name": "", 
+            "course": 2, 
+            "semester": 1, 
+            "groups": [
+                2
+            ], 
+            "exclude": [], 
+            "slug": "foo"
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "common.deadline", 
+        "fields": {
+            "date": "2009-03-09", 
+            "task": "Task 1", 
+            "userset": 4, 
+            "time": null
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "common.deadline", 
+        "fields": {
+            "date": "2009-03-10", 
+            "task": "Task 1", 
+            "userset": 1, 
+            "time": null
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "common.deadline", 
+        "fields": {
+            "date": "2009-03-11", 
+            "task": "Task 2", 
+            "userset": 1, 
+            "time": null
+        }
+    }
+]

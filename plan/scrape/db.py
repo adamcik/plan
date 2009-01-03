@@ -2,8 +2,8 @@
 
 import logging
 import re
-import MySQLdb
 from decimal import Decimal
+
 
 from django.db import transaction
 from django.conf import settings
@@ -20,6 +20,8 @@ def _prefix(semester):
         return 'h%s' % str(semester.year)[-2:]
 
 def _connection():
+    import MySQLdb
+
     mysql_setings = {
         'db': settings.MYSQL_NAME,
         'host': settings.MYSQL_HOST,
