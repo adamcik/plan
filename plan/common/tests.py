@@ -1,4 +1,5 @@
 import datetime
+from copy import copy
 
 from django.test import TestCase
 
@@ -53,29 +54,50 @@ class TimetableTestCase(BaseTestCase):
         from plan.common.timetable import Timetable
 
         lectures = Lecture.objects.get_lectures(2009, Semester.SPRING, 'adamcik')
-        
+
         timetable = Timetable(lectures)
         timetable.place_lectures()
-        timetable.do_expansion()
-        timetable.insert_times()
+
+        rows = []
 
         lectures = dict([(l.id, l) for l in lectures])
+        lecture2 = {'lecture': lectures[2], 'rowspan': 2, 'remove': False}
+        lecture3 = {'lecture': lectures[3], 'rowspan': 2, 'remove': False}
+        lecture4 = {'lecture': lectures[4], 'rowspan': 6, 'remove': False}
+        lecture5 = {'lecture': lectures[5], 'rowspan': 2, 'remove': False}
+        lecture8 = {'lecture': lectures[8], 'rowspan': 1, 'remove': False}
 
-        for r in timetable.table:
-            print r
+        rows.append([[lecture2, lecture4, {}],       [{}], [{}], [{}], [{}]])
 
-        row = [[{'time': '08:15 - 09:00'}], [{}, {}, {}], [{}], [{}], [{}], [{}]]
-        row = [[{'time': '09:15 - 10:00'}], [{}, {}, {}], [{}], [{}], [{}], [{}]]
-        row = [[{'time': '10:15 - 11:00'}], [{}, {}, {}], [{}], [{}], [{}], [{}]]
-        row = [[{'time': '11:15 - 12:00'}], [{}, {}, {}], [{}], [{}], [{}], [{}]]
-        row = [[{'time': '12:15 - 13:00'}], [{}, {}, {}], [{}], [{}], [{}], [{}]]
-        row = [[{'time': '13:15 - 14:00'}], [{}, {}, {}], [{}], [{}], [{}], [{}]]
-        row = [[{'time': '14:15 - 15:00'}], [{}, {}, {}], [{}], [{}], [{}], [{}]]
-        row = [[{'time': '15:15 - 16:00'}], [{}, {}, {}], [{}], [{}], [{}], [{}]]
-        row = [[{'time': '16:15 - 17:00'}], [{}, {}, {}], [{}], [{}], [{}], [{}]]
-        row = [[{'time': '17:15 - 18:00'}], [{}, {}, {}], [{}], [{}], [{}], [{}]]
-        row = [[{'time': '18:15 - 19:00'}], [{}, {}, {}], [{}], [{}], [{}], [{}]]
-        row = [[{'time': '19:15 - 20:00'}], [{}, {}, {}], [{}], [{}], [{}], [{}]]
+        lecture2 = copy(lecture2)
+        lecture2['remove'] = True
+
+        lecture4 = copy(lecture4)
+        lecture4['remove'] = True
+
+        rows.append([[lecture2, lecture4, lecture5], [{}], [{}], [{}], [{}]])
+
+        lecture5 = copy(lecture5)
+        lecture5['remove'] = True
+
+        rows.append([[lecture3, lecture4, lecture5], [{}], [{}], [{}], [{}]])
+
+        lecture3 = copy(lecture3)
+        lecture3['remove'] = True
+
+        rows.append([[lecture3, lecture4, {}],       [{}], [{}], [{}], [{}]])
+        rows.append([[{},       lecture4, {}],       [{}], [{}], [{}], [{}]])
+        rows.append([[{},       lecture4, {}],       [{}], [{}], [{}], [{}]])
+        rows.append([[{},       {},       {}],       [{}], [{}], [{}], [{}]])
+        rows.append([[lecture8, {},       {}],       [{}], [{}], [{}], [{}]])
+        rows.append([[{},       {},       {}],       [{}], [{}], [{}], [{}]])
+        rows.append([[{},       {},       {}],       [{}], [{}], [{}], [{}]])
+        rows.append([[{},       {},       {}],       [{}], [{}], [{}], [{}]])
+        rows.append([[{},       {},       {}],       [{}], [{}], [{}], [{}]])
+
+
+        for t,r in zip(timetable.table, rows):
+            self.assertEquals(t,r)
 
 class ManagerTestCase(BaseTestCase):
     fixtures = ['test_data.json', 'test_user.json']
@@ -83,22 +105,27 @@ class ManagerTestCase(BaseTestCase):
     def test_get_lectures(self):
         from plan.common.models import Lecture, Semester
 
+        # Exclude lectures connected to other courses and excluded from userset
         control = Lecture.objects.exclude(id__in=[6,7])
-        
+
+        # Try showing all lectures
         lectures = Lecture.objects.get_lectures(2009, Semester.SPRING, 'adamcik')
-        lectures = filter(lambda a: a.show_week and not a.exclude, lectures)
+        lectures = filter(lambda l: l.show_week and not l.exclude, lectures)
         self.assertEquals(set(lectures), set(control))
 
+        # Try showing only lectures in week 1
         lectures = Lecture.objects.get_lectures(2009, Semester.SPRING, 'adamcik', 1)
-        lectures = filter(lambda a: a.show_week and not a.exclude, lectures)
+        lectures = filter(lambda l: l.show_week and not l.exclude, lectures)
         self.assertEquals(set(lectures), set(control.filter(weeks__number=1)))
 
+        # Try showing lectures in week 2
         lectures = Lecture.objects.get_lectures(2009, Semester.SPRING, 'adamcik', 2)
-        lectures = filter(lambda a: a.show_week and not a.exclude, lectures)
+        lectures = filter(lambda l: l.show_week and not l.exclude, lectures)
         self.assertEquals(set(lectures), set(control.filter(weeks__number=2)))
 
+        # Try lectures in week 3, ie none
         lectures = Lecture.objects.get_lectures(2009, Semester.SPRING, 'adamcik', 3)
-        lectures = filter(lambda a: a.show_week and not a.exclude, lectures)
+        lectures = filter(lambda l: l.show_week and not l.exclude, lectures)
         self.assertEquals(set(lectures), set())
 
     def test_get_deadlines(self):
@@ -107,7 +134,7 @@ class ManagerTestCase(BaseTestCase):
         control = Deadline.objects.filter(id__in=[1,2])
 
         deadlines = Deadline.objects.get_deadlines(2009, Semester.SPRING, 'adamcik')
-        self.assertEquals(set(deadlines), set(control)) 
+        self.assertEquals(set(deadlines), set(control))
 
     def test_get_exams(self):
         from plan.common.models import Exam, Semester
