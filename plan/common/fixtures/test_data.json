@@ -1,6 +1,14 @@
 [
     {
         "pk": 1, 
+        "model": "common.semester", 
+        "fields": {
+            "type": 0, 
+            "year": 2009
+        }
+    }, 
+    {
+        "pk": 1, 
         "model": "common.type", 
         "fields": {
             "optional": false, 
@@ -42,6 +50,27 @@
         "model": "common.room", 
         "fields": {
             "name": "Room 3"
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "common.lecturer", 
+        "fields": {
+            "name": "Person 1"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "common.lecturer", 
+        "fields": {
+            "name": "Person 2"
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "common.lecturer", 
+        "fields": {
+            "name": "Person 3"
         }
     }, 
     {
@@ -119,14 +148,6 @@
     }, 
     {
         "pk": 1, 
-        "model": "common.semester", 
-        "fields": {
-            "type": 0, 
-            "year": 2009
-        }
-    }, 
-    {
-        "pk": 1, 
         "model": "common.exam", 
         "fields": {
             "comment": "", 
@@ -187,27 +208,6 @@
             "duration": 4, 
             "exam_date": "2009-05-15", 
             "type": "S"
-        }
-    }, 
-    {
-        "pk": 1, 
-        "model": "common.lecturer", 
-        "fields": {
-            "name": "Person 1"
-        }
-    }, 
-    {
-        "pk": 2, 
-        "model": "common.lecturer", 
-        "fields": {
-            "name": "Person 2"
-        }
-    }, 
-    {
-        "pk": 3, 
-        "model": "common.lecturer", 
-        "fields": {
-            "name": "Person 3"
         }
     }, 
     {
@@ -346,6 +346,28 @@
             ], 
             "weeks": [
                 2
+            ], 
+            "type": null, 
+            "day": 0, 
+            "rooms": []
+        }
+    }, 
+    {
+        "pk": 8, 
+        "model": "common.lecture", 
+        "fields": {
+            "lecturers": [], 
+            "end": "16:00:00", 
+            "start": "15:15:00", 
+            "start_time": null, 
+            "course": 1, 
+            "semester": 1, 
+            "end_time": null, 
+            "groups": [
+                1
+            ], 
+            "weeks": [
+                1
             ], 
             "type": null, 
             "day": 0, 
