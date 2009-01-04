@@ -122,6 +122,12 @@ class Timetable:
         start = lecture.start.hour
         end = lecture.end.hour
 
+        if start >= 0 and start < 4:
+            start += 24
+
+        if end >= 0 and end < 4:
+            end += 24
+
         if start == end:
             end += 1
 
