@@ -92,9 +92,15 @@ class ViewTestCase(BaseTestCase):
 
         s = Semester.current()
 
-        for name in ['schedule', 'schedule-advanced']:
-            url = reverse(name, args=[s.year, s.get_type_display(), 'adamcik'])
+        week = 1
+        for name in ['schedule', 'schedule-advanced', 'schedule-week', 'schedule-week']:
+            args = [s.year, s.get_type_display(), 'adamcik']
 
+            if name.endswith('week'):
+                args.append(week)
+                week += 1
+
+            url = reverse(name, args=args)
             realm = get_realm(s, 'adamcik')
 
             response = self.client.get(url)
