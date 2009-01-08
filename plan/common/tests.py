@@ -73,7 +73,14 @@ class ViewTestCase(BaseTestCase):
         self.assertEquals(stats, None)
 
     def test_shortcut(self):
-        pass
+        from django.core.urlresolvers import reverse
+        from plan.common.models import Semester
+
+        s = Semester.current()
+        url = reverse('schedule', args=[s.year, s.get_type_display(), 'adamcik'])
+
+        response = self.client.get('/adamcik/')
+        self.assertRedirects(response, url)
 
     def test_schedule(self):
         pass
