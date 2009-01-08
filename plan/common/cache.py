@@ -9,17 +9,17 @@ from django.core.cache.backends.base import InvalidCacheBackendError, BaseCache
 
 logger = logging.getLogger()
 
-def get_realm(year, semester, slug=None):
-    args = [year, semester]
+def get_realm(semester, slug=None):
+    args = [semester.year, semester.get_type_display()]
     if slug:
         args.append(slug)
 
     return ':'.join([str(a) for a in args])
 
-def clear_cache(year, semester, slug):
+def clear_cache(semester, slug):
     from django.core.cache import cache
-    cache.delete(get_realm(year, semester, slug))
-    cache.delete(get_realm(year, semester))
+    cache.delete(get_realm(semester, slug))
+    cache.delete(get_realm(semester))
 
 class CacheClass(BaseCache):
     def __init__(self, *args, **kwargs):

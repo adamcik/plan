@@ -20,9 +20,6 @@ from plan.common.utils import compact_sequence, ColorMap
 from plan.common.timetable import Timetable
 from plan.common.cache import clear_cache, get_realm
 
-# FIXME, handle with signals
-from plan.pdf.views import clear_cache as clear_pdf_cache
-
 # FIXME Split views that do multiple form handling tasks into seperate views
 # that call the top one.
 
@@ -67,7 +64,7 @@ def getting_started(request, year=None, semester_type=None):
                 response.set_cookie('last', slug, 60*60*24*7*4)
                 return response
 
-    realm = get_realm(semester.year, semester.get_type_display())
+    realm = get_realm(semester)
     context = cache.get('stats', realm=realm)
 
     if not context or 'no-cache' in request.GET:
@@ -116,7 +113,9 @@ def schedule(request, year, semester_type, slug, advanced=False,
         week=None, deadline_form=None, cache_page=True):
     '''Page that handels showing schedules'''
 
-    realm = get_realm(year, semester_type, slug)
+    semester = Semester(year=year, type=semester_type)
+
+    realm = get_realm(semester, slug)
     response = cache.get(request.path, realm=realm)
 
     # FIXME no-cache hack
@@ -128,7 +127,6 @@ def schedule(request, year, semester_type, slug, advanced=False,
 
     group_forms = {}
 
-    semester = Semester(year=year, type=semester_type)
     semester = get_object_or_404(Semester, year=semester.year, type=semester.type)
 
     # Start setting up queries
@@ -280,7 +278,7 @@ def select_groups(request, year, semester_type, slug):
 
                 userset.groups = group_form.cleaned_data['groups']
 
-        clear_cache(year, semester_type, slug)
+        clear_cache(semester, slug)
 
     return HttpResponseRedirect(reverse('schedule-advanced',
             args=[semester.year,semester.get_type_display(),slug]))
@@ -291,7 +289,7 @@ def new_deadline(request, year, semester_type, slug):
     semester = Semester(year=year, type=semester_type)
 
     if request.method == 'POST':
-        clear_cache(year, semester_type, slug)
+        clear_cache(semester, slug)
 
         post = request.POST.copy()
 
@@ -373,7 +371,7 @@ def copy_deadlines(request, year, semester_type, slug):
                         time=d.time,
                         task=d.task
                 )
-            clear_cache(year, semester_type, slug)
+            clear_cache(semester, slug)
 
     return HttpResponseRedirect(reverse('schedule',
             args=[semester.year,semester.get_type_display(),slug]))
@@ -393,7 +391,7 @@ def select_course(request, year, semester_type, slug, add=False):
 
     if request.method == 'POST':
 
-        clear_cache(year, semester_type, slug)
+        clear_cache(semester, slug)
 
         post = request.POST.copy()
 
@@ -511,7 +509,7 @@ def select_lectures(request, year, semester_type, slug):
         for userset in usersets:
             userset.exclude = userset.course.lecture_set.filter(id__in=excludes)
 
-        clear_cache(year, semester_type, slug)
+        clear_cache(semester, slug)
 
     return HttpResponseRedirect(reverse('schedule-advanced',
             args=[semester.year, semester.get_type_display(), slug]))
@@ -522,12 +520,13 @@ def list_courses(request, year, semester_type, slug):
     if request.method == 'POST':
         return select_course(request, year, semester_type, slug, add=True)
 
+    semester = Semester(year=year, type=semester_type)
+
     # FIXME :/
-    realm = get_realm(year, semester_type)
+    realm = get_realm(semester)
     response = cache.get('courses', realm=realm)
 
     if not response:
-        semester = Semester(year=year, type=semester_type)
 
         courses = Course.objects.get_courses_with_exams(year, semester.type)
 

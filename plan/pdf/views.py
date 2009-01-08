@@ -20,7 +20,7 @@ from django.template.defaultfilters import force_escape
 from plan.common.models import Lecture, Semester, Room, Course
 from plan.common.timetable import Timetable
 from plan.common.utils import ColorMap
-from plan.common.cache import get_realm, clear_cache
+from plan.common.cache import get_realm
 
 outer_border = HexColor('#666666')
 inner_border = HexColor('#CCCCCC')
@@ -61,7 +61,7 @@ def pdf(request, year, semester_type, slug, size=None):
 
     semester = Semester(year=year, type=semester_type)
 
-    cache_realm = get_realm(year, semester_type, slug)
+    cache_realm = get_realm(semester, slug)
     response = cache.get(request.path, realm=cache_realm)
 
     if response and 'no-cache' not in request.GET:

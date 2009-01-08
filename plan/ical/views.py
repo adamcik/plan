@@ -12,7 +12,7 @@ from django.core.cache import cache
 from django.core.urlresolvers import reverse
 
 from plan.common.models import Exam, Deadline, Lecture, Semester, Room, Week
-from plan.common.cache import clear_cache, get_realm
+from plan.common.cache import get_realm
 
 HOSTNAME = gethostname()
 
@@ -36,7 +36,7 @@ def ical(request, year, semester_type, slug, selector=None):
     cache_key  = reverse('schedule-ical', args=[semester.year, semester.get_type_display(), slug])
     cache_key += '+'.join(resources)
 
-    cache_realm = get_realm(semester.year, semester.type, slug)
+    cache_realm = get_realm(semester, slug)
 
     response = cache.get(cache_key, realm=cache_realm)
 
