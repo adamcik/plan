@@ -4,8 +4,9 @@ from copy import copy
 from django.test import TestCase
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
+from django.utils.datastructures import MultiValueDict
 
-from plan.common.models import Semester
+from plan.common.models import Semester, Group, UserSet
 from plan.common.cache import get_realm, clear_cache
 
 # FIXME test that api limits things to one semester
@@ -152,6 +153,8 @@ class ViewTestCase(BaseTestCase):
              'course_remove': 4},
         ]
 
+        usersets = list(UserSet.objects.filter(slug='adamcik').order_by('id').values_list())
+
         for data in post_data:
             original_response = self.client.get(original_url)
 
@@ -168,13 +171,18 @@ class ViewTestCase(BaseTestCase):
 
             self.clear()
 
+            new_usersets = list(UserSet.objects.filter(slug='adamcik').order_by('id').values_list())
+            self.assert_(new_usersets != usersets)
+
+            usersets = new_usersets
+
     def test_change_groups(self):
         original_url = self.url('schedule-advanced')
         url = self.url('change-groups')
 
         post_data = [
             {'1-groups': '1',
-             '2-groups': '1',
+             '2-groups': '',
              '3-groups': '2'},
             {'1-groups': '',
              '2-groups': '',
@@ -183,6 +191,8 @@ class ViewTestCase(BaseTestCase):
              '2-groups': '',
              '3-groups': '2'}
         ]
+
+        groups = list(Group.objects.filter(userset__slug='adamcik').order_by('id').values_list())
 
         for data in post_data:
             original_response = self.client.get(original_url)
@@ -199,6 +209,12 @@ class ViewTestCase(BaseTestCase):
             self.assert_(original_response.content != response.content)
 
             self.clear()
+
+            new_groups = list(Group.objects.filter(userset__slug='adamcik').order_by('id').values_list())
+            self.assert_(groups != new_groups)
+
+            groups = new_groups
+
 
     def test_change_lectures(self):
         pass
