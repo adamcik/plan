@@ -99,8 +99,6 @@ INSTALLED_APPS = (
 #TEST_RUNNER = 'plan.common.test_runner.test_runner_with_coverage'
 
 COVERAGE_MODULES = (
-    'plan',
-    'plan.common',
     'plan.common.admin',
     'plan.common.cache',
     'plan.common.forms',
@@ -112,13 +110,10 @@ COVERAGE_MODULES = (
     'plan.common.urls',
     'plan.common.utils',
     'plan.common.views',
-    'plan.scrape',
     'plan.scrape.db',
     'plan.scrape.studweb',
-    'plan.ical',
     'plan.ical.urls',
     'plan.ical.views',
-    'plan.pdf',
     'plan.pdf.urls',
     'plan.pdf.views',
 )
