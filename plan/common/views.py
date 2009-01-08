@@ -522,9 +522,8 @@ def list_courses(request, year, semester_type, slug):
 
     semester = Semester(year=year, type=semester_type)
 
-    # FIXME :/
-    realm = get_realm(semester)
-    response = cache.get('courses', realm=realm)
+    key = '/'.join([str(semester.year), semester.get_type_display(), 'courses'])
+    response = cache.get(key)
 
     if not response:
 
@@ -535,6 +534,6 @@ def list_courses(request, year, semester_type, slug):
                 'course_list': courses,
             }, RequestContext(request))
 
-        cache.set('courses', response, realm=realm)
+        cache.set(key, response)
 
     return response

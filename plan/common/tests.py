@@ -118,24 +118,23 @@ class ViewTestCase(BaseTestCase):
         from django.core.urlresolvers import reverse
         from django.core.cache import cache
         from plan.common.models import Semester
-        from plan.common.cache import clear_cache, get_realm
+        from plan.common.cache import clear_cache
 
         s = Semester.current()
         url = reverse('course-list', args=[s.year, s.get_type_display(), 'adamcik'])
-        realm = get_realm(s)
+        key = '/'.join([str(s.year), s.get_type_display(), 'courses'])
 
         response = self.client.get(url)
         self.failUnlessEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'course_list.html')
 
-        cache_response = cache.get('courses', realm=realm)
+        cache_response = cache.get(key)
         self.assertEquals(response.content, cache_response.content)
 
         clear_cache(s, 'adamcik')
-        cache_response = cache.get('courses', realm=realm)
+        cache_response = cache.get(key)
 
-        # FIXME this should ideally not be invalidated by clear
-        self.assertEquals(cache_response, None)
+        self.assertEquals(response.content, cache_response.content)
 
 class TimetableTestCase(BaseTestCase):
     fixtures = ['test_data.json', 'test_user.json']
