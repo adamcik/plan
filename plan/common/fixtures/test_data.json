@@ -373,5 +373,71 @@
             "day": 0, 
             "rooms": []
         }
+    }, 
+    {
+        "pk": 9, 
+        "model": "common.lecture", 
+        "fields": {
+            "lecturers": [], 
+            "end": "21:00:00", 
+            "start": "07:00:00", 
+            "start_time": null, 
+            "course": 1, 
+            "semester": 1, 
+            "end_time": null, 
+            "groups": [
+                1
+            ], 
+            "weeks": [
+                1
+            ], 
+            "type": null, 
+            "day": 1, 
+            "rooms": []
+        }
+    }, 
+    {
+        "pk": 10,
+        "model": "common.lecture",
+        "fields": {
+            "lecturers": [],
+            "end": "08:30:00",
+            "start": "08:15:00",
+            "start_time": null,
+            "course": 1,
+            "semester": 1,
+            "end_time": null,
+            "groups": [
+                1
+            ],
+            "weeks": [
+                1
+            ], 
+            "type": null, 
+            "day": 2, 
+            "rooms": []
+        }
+    },
+    {
+        "pk": 11, 
+        "model": "common.lecture", 
+        "fields": {
+            "lecturers": [], 
+            "end": "00:00:00", 
+            "start": "19:15:00", 
+            "start_time": null, 
+            "course": 1, 
+            "semester": 1, 
+            "end_time": null, 
+            "groups": [
+                1
+            ], 
+            "weeks": [
+                1
+            ], 
+            "type": null, 
+            "day": 2, 
+            "rooms": []
+        }
     }
 ]
