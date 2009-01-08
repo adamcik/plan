@@ -39,13 +39,15 @@ class ViewTestCase(BaseTestCase):
         from plan.common.cache import clear_cache, get_realm
         from plan.common.models import Semester
 
+        s = Semester.current()
+
         # Load page
         response = self.client.get('/')
         self.failUnlessEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'start.html')
 
         # Check that cache gets set
-        realm = get_realm(2009, Semester.SPRING)
+        realm = get_realm(s.year, s.get_type_display())
         stats = cache.get('stats', realm=realm)
 
         expected_stats = {
@@ -67,7 +69,7 @@ class ViewTestCase(BaseTestCase):
         self.assertEquals(stats, expected_stats)
 
         # Check that cache gets cleared
-        clear_cache(2009, Semester.SPRING, 'adamcik')
+        clear_cache(s.year, s.get_type_display(), 'adamcik')
         stats = cache.get('stats', realm=realm)
 
         self.assertEquals(stats, None)
@@ -83,10 +85,28 @@ class ViewTestCase(BaseTestCase):
         self.assertRedirects(response, url)
 
     def test_schedule(self):
-        pass
+        from django.core.urlresolvers import reverse
+        from django.core.cache import cache
+        from plan.common.models import Semester
+        from plan.common.cache import clear_cache, get_realm
 
-    def test_advanced_schedule(self):
-        pass
+        s = Semester.current()
+
+        for name in ['schedule', 'schedule-advanced']:
+            url = reverse(name, args=[s.year, s.get_type_display(), 'adamcik'])
+
+            realm = get_realm(s.year, s.get_type_display(), 'adamcik')
+
+            response = self.client.get(url)
+            self.assertTemplateUsed(response, 'schedule.html')
+
+            cache_response = cache.get(url, realm=realm)
+            self.assertEquals(response.content, cache_response.content)
+
+            clear_cache(s.year, s.get_type_display(), 'adamcik')
+            cache_response = cache.get(url, realm=realm)
+
+            self.assertEquals(cache_response, None)
 
 class TimetableTestCase(BaseTestCase):
     fixtures = ['test_data.json', 'test_user.json']

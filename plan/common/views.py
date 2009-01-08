@@ -67,7 +67,7 @@ def getting_started(request, year=None, semester_type=None):
                 response.set_cookie('last', slug, 60*60*24*7*4)
                 return response
 
-    realm = get_realm(semester.year, semester.type)
+    realm = get_realm(semester.year, semester.get_type_display())
     context = cache.get('stats', realm=realm)
 
     if not context or 'no-cache' in request.GET:
