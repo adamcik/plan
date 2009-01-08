@@ -108,6 +108,29 @@ class ViewTestCase(BaseTestCase):
 
             self.assertEquals(cache_response, None)
 
+    def test_course_list(self):
+        from django.core.urlresolvers import reverse
+        from django.core.cache import cache
+        from plan.common.models import Semester
+        from plan.common.cache import clear_cache, get_realm
+
+        s = Semester.current()
+        url = reverse('course-list', args=[s.year, s.get_type_display(), 'adamcik'])
+        realm = get_realm(s)
+
+        response = self.client.get(url)
+        self.failUnlessEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'course_list.html')
+
+        cache_response = cache.get('courses', realm=realm)
+        self.assertEquals(response.content, cache_response.content)
+
+        clear_cache(s, 'adamcik')
+        cache_response = cache.get('courses', realm=realm)
+
+        # FIXME this should ideally not be invalidated by clear
+        self.assertEquals(cache_response, None)
+
 class TimetableTestCase(BaseTestCase):
     fixtures = ['test_data.json', 'test_user.json']
 
@@ -262,6 +285,3 @@ class UtilTestCase(BaseTestCase):
 
         seq = compact_sequence([])
         self.assertEquals(seq, [])
-
-class FormTestCase(BaseTestCase):
-    pass
