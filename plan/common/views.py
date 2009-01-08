@@ -390,9 +390,7 @@ def select_course(request, year, semester_type, slug, add=False):
                 [year,semester.get_type_display(),slug]))
 
     if request.method == 'POST':
-
         clear_cache(semester, slug)
-
         post = request.POST.copy()
 
         if 'submit_add' in post and 'submit_remove' in post and \
@@ -440,6 +438,7 @@ def select_course(request, year, semester_type, slug, add=False):
                             lecture__course=course
                         ).distinct()
 
+                    # FIXME cleanup uneeded for loop
                     group_count = 0
                     for g in groups:
                         userset.groups.add(g)
@@ -455,6 +454,7 @@ def select_course(request, year, semester_type, slug, add=False):
                 logging.warning("%s has more than 20 courses." % request.path)
 
             if max_group_count > 2:
+                # FIXME realm for caching instead?
                 group_help = '%s-group_help' % reverse('schedule',
                         args=[year, semester.get_type_display(), slug])
                 # FIXME don't hardcode times, also see if group help can be

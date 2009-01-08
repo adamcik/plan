@@ -2,6 +2,8 @@ import datetime
 from copy import copy
 
 from django.test import TestCase
+from django.core.cache import cache
+from django.core.urlresolvers import reverse
 
 # FIXME test that api limits things to one semester
 
@@ -35,7 +37,6 @@ class ViewTestCase(BaseTestCase):
     fixtures = ['test_data.json', 'test_user.json']
 
     def test_index(self):
-        from django.core.cache import cache
         from plan.common.cache import clear_cache, get_realm
         from plan.common.models import Semester
 
@@ -75,7 +76,6 @@ class ViewTestCase(BaseTestCase):
         self.assertEquals(stats, None)
 
     def test_shortcut(self):
-        from django.core.urlresolvers import reverse
         from plan.common.models import Semester
 
         s = Semester.current()
@@ -85,10 +85,10 @@ class ViewTestCase(BaseTestCase):
         self.assertRedirects(response, url)
 
     def test_schedule(self):
-        from django.core.urlresolvers import reverse
-        from django.core.cache import cache
         from plan.common.models import Semester
         from plan.common.cache import clear_cache, get_realm
+
+        # FIXME add group help testing
 
         s = Semester.current()
 
@@ -115,8 +115,6 @@ class ViewTestCase(BaseTestCase):
             self.assertEquals(cache_response, None)
 
     def test_course_list(self):
-        from django.core.urlresolvers import reverse
-        from django.core.cache import cache
         from plan.common.models import Semester
         from plan.common.cache import clear_cache
 
@@ -137,7 +135,40 @@ class ViewTestCase(BaseTestCase):
         self.assertEquals(response.content, cache_response.content)
 
     def test_change_course(self):
-        pass
+        from plan.common.models import Semester
+        from plan.common.cache import clear_cache, get_realm
+
+        semester = Semester.current()
+        realm = get_realm(semester, 'adamcik')
+        args = [semester.year, semester.get_type_display(), 'adamcik']
+
+        original_url = reverse('schedule-advanced', args=args)
+        url = reverse('change-course', args=args)
+
+        post_data = [
+            {'submit_add': True,
+             'course_add': 'COURSE4'},
+            {'submit_name': True,
+             '4-name': 'foo'},
+            {'submit_remove': True,
+             'course_remove': 4},
+        ]
+
+        for data in post_data:
+            original_response = self.client.get(original_url)
+
+            response = self.client.post(url, data)
+
+            self.assert_(response['Location'].endswith(original_url))
+            self.assertEquals(response.status_code, 302)
+
+            cache_response = cache.get(original_url, realm=realm)
+            self.assertEquals(cache_response, None)
+
+            response = self.client.get(original_url)
+            self.assert_(original_response.content != response.content)
+
+            clear_cache(semester, 'adamcik')
 
     def test_change_groups(self):
         pass
