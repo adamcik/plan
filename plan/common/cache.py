@@ -1,5 +1,5 @@
 import logging
-from time import time
+from uuid import uuid4
 
 from django.http import QueryDict
 from django.conf import settings
@@ -18,6 +18,7 @@ def get_realm(semester, slug=None):
 
 def clear_cache(semester, slug):
     from django.core.cache import cache
+
     cache.delete(get_realm(semester, slug))
     cache.delete(get_realm(semester))
 
@@ -62,7 +63,7 @@ class CacheClass(BaseCache):
             prefix = self.cache.get(realm)
 
             if not prefix:
-                prefix = int_to_base36(int(time()*1000000))
+                prefix = int_to_base36(uuid4().int)
                 self.cache.set(realm, prefix)
                 logger.debug('Setting realm: %s' % realm)
 
