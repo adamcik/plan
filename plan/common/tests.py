@@ -6,7 +6,7 @@ from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.utils.datastructures import MultiValueDict
 
-from plan.common.models import Semester, Group, UserSet
+from plan.common.models import Semester, Group, UserSet, Lecture
 from plan.common.cache import get_realm, clear_cache
 
 # FIXME test that api limits things to one semester
@@ -58,6 +58,8 @@ class EmptyViewTestCase(BaseTestCase):
 
 class ViewTestCase(BaseTestCase):
     fixtures = ['test_data.json', 'test_user.json']
+
+    # FIXME check what happens when we do GET against change functions
 
     def test_index(self):
         # Load page
@@ -217,7 +219,40 @@ class ViewTestCase(BaseTestCase):
 
 
     def test_change_lectures(self):
-        pass
+        original_url = self.url('schedule-advanced')
+        url = self.url('change-lectures')
+
+        post_data = [
+            {'exclude': ('2', '3', '8')},
+            {'exclude': ('2')},
+            #{}, # FIXME add to test
+            {'exclude': ('2', '3', '8', '9', '7', '10', '11', '4', '5', '6')},
+            {'exclude': ('2')},
+            {'exclude': ('2', '3', '8')},
+        ]
+
+        lectures = list(Lecture.objects.filter(excluded_from__slug='adamcik').order_by('id').values_list())
+
+        for data in post_data:
+            original_response = self.client.get(original_url)
+
+            response = self.client.post(url, MultiValueDict(data))
+
+            self.assert_(response['Location'].endswith(original_url))
+            self.assertEquals(response.status_code, 302)
+
+            cache_response = self.get(original_url)
+            self.assertEquals(cache_response, None)
+
+            response = self.client.get(original_url)
+            self.assert_(original_response.content != response.content)
+
+            self.clear()
+
+            new_lectures = list(Lecture.objects.filter(excluded_from__slug='adamcik').order_by('id').values_list())
+            self.assert_(lectures != new_lectures)
+
+            lectures = new_lectures
 
     def test_new_deadline(self):
         pass

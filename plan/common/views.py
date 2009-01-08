@@ -507,7 +507,10 @@ def select_lectures(request, year, semester_type, slug):
         usersets = UserSet.objects.get_usersets(year, semester.type, slug)
 
         for userset in usersets:
-            userset.exclude = userset.course.lecture_set.filter(id__in=excludes)
+            if excludes:
+                userset.exclude = userset.course.lecture_set.filter(id__in=excludes)
+            else:
+                userset.exclude.clear()
 
         clear_cache(semester, slug)
 
