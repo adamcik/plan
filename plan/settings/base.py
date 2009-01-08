@@ -96,7 +96,7 @@ INSTALLED_APPS = (
     'plan.pdf',
 )
 
-TEST_RUNNER = 'plan.common.test_runner.test_runner_with_coverage'
+#TEST_RUNNER = 'plan.common.test_runner.test_runner_with_coverage'
 
 COVERAGE_MODULES = (
     'plan',
