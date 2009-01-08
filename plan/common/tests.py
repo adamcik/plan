@@ -5,6 +5,9 @@ from django.test import TestCase
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
 
+from plan.common.models import Semester
+from plan.common.cache import get_realm, clear_cache
+
 # FIXME test that api limits things to one semester
 
 class MockDatetime(datetime.datetime):
@@ -13,6 +16,10 @@ class MockDatetime(datetime.datetime):
         return datetime.datetime(2009, 1, 1)
 
 class BaseTestCase(TestCase):
+    semester = Semester.current(from_db=True)
+    realm = get_realm(semester, 'adamcik')
+    default_args = [semester.year, semester.get_type_display(), 'adamcik']
+
     def setUp(self):
         self.datetime = datetime.datetime
         datetime.datetime = MockDatetime
@@ -20,15 +27,30 @@ class BaseTestCase(TestCase):
     def tearDown(self):
         datetime.datetime = self.datetime
 
+    def url(self, name, *args):
+        if args:
+            return reverse(name, args=args)
+        else:
+            return reverse(name, args=self.default_args)
+
+    def url_basic(self, name):
+        return reverse(name)
+
+    def clear(self, ):
+        clear_cache(self.semester, 'adamcik')
+
+    def get(self, key):
+        return cache.get(key, realm=self.realm)
+
 class EmptyViewTestCase(BaseTestCase):
     def test_index(self):
-        response = self.client.get('/')
+        response = self.client.get(self.url_basic('frontpage'))
 
         self.failUnlessEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'start.html')
 
     def test_shortcut(self):
-        response = self.client.get('/adamcik/')
+        response = self.client.get(self.url('shortcut', 'adamcik'))
 
         self.failUnlessEqual(response.status_code, 404)
         self.assertTemplateUsed(response, '404.html')
@@ -37,18 +59,13 @@ class ViewTestCase(BaseTestCase):
     fixtures = ['test_data.json', 'test_user.json']
 
     def test_index(self):
-        from plan.common.cache import clear_cache, get_realm
-        from plan.common.models import Semester
-
-        semester = Semester.current()
-
         # Load page
-        response = self.client.get('/')
+        response = self.client.get(self.url_basic('frontpage'))
         self.failUnlessEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'start.html')
 
         # Check that cache gets set
-        realm = get_realm(semester)
+        realm = get_realm(self.semester)
         stats = cache.get('stats', realm=realm)
 
         expected_stats = {
@@ -61,7 +78,7 @@ class ViewTestCase(BaseTestCase):
             'slug_count': 2,
             'schedule_form': '<input type="text" name="slug" value="%s" id="id_slug" />\n' + \
                              '<input type="hidden" name="semester" value="1" id="id_semester" />',
-            'current': Semester.current(from_db=True),
+            'current': self.semester,
             'color_map': {},
             'limit': 15,
             'deadline_count': 3
@@ -70,27 +87,19 @@ class ViewTestCase(BaseTestCase):
         self.assertEquals(stats, expected_stats)
 
         # Check that cache gets cleared
-        clear_cache(semester, 'adamcik')
+        self.clear()
         stats = cache.get('stats', realm=realm)
 
         self.assertEquals(stats, None)
 
     def test_shortcut(self):
-        from plan.common.models import Semester
-
-        s = Semester.current()
-        url = reverse('schedule', args=[s.year, s.get_type_display(), 'adamcik'])
-
-        response = self.client.get('/adamcik/')
-        self.assertRedirects(response, url)
+        response = self.client.get(self.url('shortcut', 'adamcik'))
+        self.assertRedirects(response, self.url('schedule'))
 
     def test_schedule(self):
-        from plan.common.models import Semester
-        from plan.common.cache import clear_cache, get_realm
-
         # FIXME add group help testing
 
-        s = Semester.current()
+        s = self.semester
 
         week = 1
         for name in ['schedule', 'schedule-advanced', 'schedule-week', 'schedule-week']:
@@ -100,26 +109,22 @@ class ViewTestCase(BaseTestCase):
                 args.append(week)
                 week += 1
 
-            url = reverse(name, args=args)
-            realm = get_realm(s, 'adamcik')
+            url = self.url(name, *args)
 
             response = self.client.get(url)
             self.assertTemplateUsed(response, 'schedule.html')
 
-            cache_response = cache.get(url, realm=realm)
+            cache_response = self.get(url)
             self.assertEquals(response.content, cache_response.content)
 
-            clear_cache(s, 'adamcik')
-            cache_response = cache.get(url, realm=realm)
+            self.clear()
+            cache_response = self.get(url)
 
             self.assertEquals(cache_response, None)
 
     def test_course_list(self):
-        from plan.common.models import Semester
-        from plan.common.cache import clear_cache
-
         s = Semester.current()
-        url = reverse('course-list', args=[s.year, s.get_type_display(), 'adamcik'])
+        url = self.url('course-list')
         key = '/'.join([str(s.year), s.get_type_display(), 'courses'])
 
         response = self.client.get(url)
@@ -129,21 +134,14 @@ class ViewTestCase(BaseTestCase):
         cache_response = cache.get(key)
         self.assertEquals(response.content, cache_response.content)
 
-        clear_cache(s, 'adamcik')
+        self.clear()
         cache_response = cache.get(key)
 
         self.assertEquals(response.content, cache_response.content)
 
     def test_change_course(self):
-        from plan.common.models import Semester
-        from plan.common.cache import clear_cache, get_realm
-
-        semester = Semester.current()
-        realm = get_realm(semester, 'adamcik')
-        args = [semester.year, semester.get_type_display(), 'adamcik']
-
-        original_url = reverse('schedule-advanced', args=args)
-        url = reverse('change-course', args=args)
+        original_url = self.url('schedule-advanced')
+        url = self.url('change-course')
 
         post_data = [
             {'submit_add': True,
@@ -162,13 +160,13 @@ class ViewTestCase(BaseTestCase):
             self.assert_(response['Location'].endswith(original_url))
             self.assertEquals(response.status_code, 302)
 
-            cache_response = cache.get(original_url, realm=realm)
+            cache_response = self.get(original_url)
             self.assertEquals(cache_response, None)
 
             response = self.client.get(original_url)
             self.assert_(original_response.content != response.content)
 
-            clear_cache(semester, 'adamcik')
+            self.clear()
 
     def test_change_groups(self):
         pass
