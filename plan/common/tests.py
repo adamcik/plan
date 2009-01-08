@@ -72,13 +72,13 @@ class ViewTestCase(BaseTestCase):
         stats = cache.get('stats', realm=realm)
 
         expected_stats = {
-            'subscription_count': 5,
+            'subscription_count': 6,
             'stats': [
-                (2, u'COURSE2', u'Course 2 full name'),
+                (3, u'COURSE2', u'Course 2 full name'),
                 (2, u'COURSE1', u'Course 1 full name'),
                 (1, u'COURSE3', u'Course 3 full name')
             ],
-            'slug_count': 2,
+            'slug_count': 3,
             'schedule_form': '<input type="text" name="slug" value="%s" id="id_slug" />\n' + \
                              '<input type="hidden" name="semester" value="1" id="id_semester" />',
             'current': self.semester,
@@ -256,9 +256,11 @@ class ViewTestCase(BaseTestCase):
 
     def test_new_deadline(self):
         pass
+        # FIXME
 
     def test_copy_deadlines(self):
         pass
+        # FIXME
 
 class TimetableTestCase(BaseTestCase):
     fixtures = ['test_data.json', 'test_user.json']

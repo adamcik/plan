@@ -78,6 +78,21 @@
         }
     }, 
     {
+        "pk": 6, 
+        "model": "common.userset", 
+        "fields": {
+            "added": "2009-01-03 13:42:14", 
+            "name": "", 
+            "course": 2, 
+            "semester": 1, 
+            "groups": [
+                2
+            ], 
+            "exclude": [], 
+            "slug": "baz"
+        }
+    }, 
+    {
         "pk": 3, 
         "model": "common.deadline", 
         "fields": {
