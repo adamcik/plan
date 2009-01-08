@@ -169,7 +169,36 @@ class ViewTestCase(BaseTestCase):
             self.clear()
 
     def test_change_groups(self):
-        pass
+        original_url = self.url('schedule-advanced')
+        url = self.url('change-groups')
+
+        post_data = [
+            {'1-groups': '1',
+             '2-groups': '1',
+             '3-groups': '2'},
+            {'1-groups': '',
+             '2-groups': '',
+             '3-groups': ''},
+            {'1-groups': ('1','2'),
+             '2-groups': '',
+             '3-groups': '2'}
+        ]
+
+        for data in post_data:
+            original_response = self.client.get(original_url)
+
+            response = self.client.post(url, MultiValueDict(data))
+
+            self.assert_(response['Location'].endswith(original_url))
+            self.assertEquals(response.status_code, 302)
+
+            cache_response = self.get(original_url)
+            self.assertEquals(cache_response, None)
+
+            response = self.client.get(original_url)
+            self.assert_(original_response.content != response.content)
+
+            self.clear()
 
     def test_change_lectures(self):
         pass
