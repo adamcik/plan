@@ -32,10 +32,45 @@ class EmptyViewTestCase(BaseTestCase):
         self.assertTemplateUsed(response, '404.html')
 
 class ViewTestCase(BaseTestCase):
-    fixtures = ['test_data.json']
+    fixtures = ['test_data.json', 'test_user.json']
 
     def test_index(self):
-        pass
+        from django.core.cache import cache
+        from plan.common.cache import clear_cache, get_realm
+        from plan.common.models import Semester
+
+        # Load page
+        response = self.client.get('/')
+        self.failUnlessEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'start.html')
+
+        # Check that cache gets set
+        realm = get_realm(2009, Semester.SPRING)
+        stats = cache.get('stats', realm=realm)
+
+        expected_stats = {
+            'subscription_count': 5,
+            'stats': [
+                (2, u'COURSE2', u'Course 2 full name'),
+                (2, u'COURSE1', u'Course 1 full name'),
+                (1, u'COURSE3', u'Course 3 full name')
+            ],
+            'slug_count': 2,
+            'schedule_form': '<input type="text" name="slug" value="%s" id="id_slug" />\n' + \
+                             '<input type="hidden" name="semester" value="1" id="id_semester" />',
+            'current': Semester.current(from_db=True),
+            'color_map': {},
+            'limit': 15,
+            'deadline_count': 3
+        }
+
+        self.assertEquals(stats, expected_stats)
+
+        # Check that cache gets cleared
+        clear_cache(2009, Semester.SPRING, 'adamcik')
+        stats = cache.get('stats', realm=realm)
+
+        self.assertEquals(stats, None)
 
     def test_shortcut(self):
         pass
