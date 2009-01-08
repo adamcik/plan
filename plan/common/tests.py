@@ -136,6 +136,21 @@ class ViewTestCase(BaseTestCase):
 
         self.assertEquals(response.content, cache_response.content)
 
+    def test_change_course(self):
+        pass
+
+    def test_change_groups(self):
+        pass
+
+    def test_change_lectures(self):
+        pass
+
+    def test_new_deadline(self):
+        pass
+
+    def test_copy_deadlines(self):
+        pass
+
 class TimetableTestCase(BaseTestCase):
     fixtures = ['test_data.json', 'test_user.json']
 
