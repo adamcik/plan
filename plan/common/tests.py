@@ -13,8 +13,8 @@ from plan.common.cache import get_realm, clear_cache
 
 class MockDatetime(datetime.datetime):
     @classmethod
-    def now(cls):
-        return datetime.datetime(2009, 1, 1)
+    def now(cls, tz=None):
+        return datetime.datetime(2009, 1, 1, tzinfo=tz)
 
 class BaseTestCase(TestCase):
     semester = Semester.current(from_db=True)
