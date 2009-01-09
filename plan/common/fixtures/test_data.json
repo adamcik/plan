@@ -163,6 +163,22 @@
         }
     }, 
     {
+        "pk": 5, 
+        "model": "common.exam", 
+        "fields": {
+            "comment": "", 
+            "handout_time": null, 
+            "type_name": "", 
+            "exam_time": "09:00:00", 
+            "course": 1, 
+            "semester": 1, 
+            "handout_date": "2009-05-01", 
+            "duration": null, 
+            "exam_date": "2009-05-15", 
+            "type": ""
+        }
+    }, 
+    {
         "pk": 2, 
         "model": "common.exam", 
         "fields": {
