@@ -202,7 +202,7 @@ def pdf(request, year, semester_type, slug, size=None):
     table.wrapOn(page, width, height)
     table.drawOn(page, 0,-height)
 
-    note = request.META['HTTP_HOST'].split(':')[0]
+    note = request.META.get('HTTP_HOST', '').split(':')[0]
 
     page.setFont('Helvetica', 10)
     page.setFillColor(HexColor('#666666'))
