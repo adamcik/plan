@@ -46,6 +46,17 @@ def compact_sequence(sequence):
 
     return compact
 
+COLORS = [
+    '#B3E2CD',
+    '#FDCDAC',
+    '#CBD5E8',
+    '#F4CAE4',
+    '#E6F5C9',
+    '#FFF2AE',
+    '#F1E2CC',
+    '#CCCCCC',
+]
+
 class ColorMap(dict):
     """Magic dict that assigns colors"""
 
@@ -53,20 +64,9 @@ class ColorMap(dict):
     # Pennsylvania State University.
     # http://www.personal.psu.edu/cab38/ColorBrewer/ColorBrewer_updates.html
 
-    colors = [
-        '#B3E2CD',
-        '#FDCDAC',
-        '#CBD5E8',
-        '#F4CAE4',
-        '#E6F5C9',
-        '#FFF2AE',
-        '#F1E2CC',
-        '#CCCCCC',
-    ]
-
     def __init__(self, index=0, hex=False):
         self.index = index
-        self.max = len(self.colors)
+        self.max = len(COLORS)
         self.hex = hex
 
     def __getitem__(self, k):
@@ -79,7 +79,7 @@ class ColorMap(dict):
         else:
             self.index += 1
             if self.hex:
-                self[k] = self.colors[self.index % self.max]
+                self[k] = COLORS[self.index % self.max]
             else:
                 self[k] = 'color%d' % (self.index % self.max)
             return super(ColorMap, self).__getitem__(k)

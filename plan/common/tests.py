@@ -392,7 +392,7 @@ class UtilTestCase(BaseTestCase):
     fixtures = ['test_data.json']
 
     def test_colormap(self):
-        from plan.common.utils import ColorMap
+        from plan.common.utils import ColorMap, COLORS
 
         c = ColorMap()
         keys = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 3, 5, 6]
@@ -401,7 +401,7 @@ class UtilTestCase(BaseTestCase):
 
         c = ColorMap(hex=True)
         for k in keys:
-            self.assertEquals(c[k], c.colors[k % c.max])
+            self.assertEquals(c[k], COLORS[k % c.max])
 
         self.assertEquals(c[None], '')
 
