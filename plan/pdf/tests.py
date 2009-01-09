@@ -1,8 +1,6 @@
 from plan.common.tests import BaseTestCase
 
 class EmptyViewTestCase(BaseTestCase):
-    fixtures = ['test_data.json']
-
     def test_pdf(self):
         args = self.default_args
 
