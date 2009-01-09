@@ -74,5 +74,9 @@ class EmptyViewTestCase(BaseTestCase):
             response = self.client.get(url)
             self.assertEquals(response.status_code, 404)
 
+        url = self.url('schedule-ical')
+        response = self.client.get(url, {'plain': True})
+        self.assertEquals(response.status_code, 200)
+
 class ViewTestCase(EmptyViewTestCase):
     fixtures = ['test_data.json', 'test_user.json']

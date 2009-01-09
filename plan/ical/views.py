@@ -150,7 +150,7 @@ def add_exams(exams, semester, cal):
 
         vevent.add('uid').value = 'exam-%d@%s' % (e.id, HOSTNAME)
 
-        if e.handout_time:
+        if e.handout_date:
             if e.handout_time:
                 vevent.add('dtstart').value = datetime.combine(e.handout_date,
                         e.handout_time).replace(tzinfo=tzlocal())
