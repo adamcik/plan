@@ -16,7 +16,7 @@ from plan.common.cache import get_realm
 
 HOSTNAME = gethostname()
 
-def ical(request, year, semester_type, slug, selector=None):
+def get_resources(selector):
     resources = [u'lectures', u'exams', u'deadlines']
 
     if selector:
@@ -28,8 +28,16 @@ def ical(request, year, semester_type, slug, selector=None):
             else:
                 resources.remove(resource)
 
-        if parts: # Invalid selctors
-            raise Http404
+        if parts:
+            return []
+
+    return resources
+
+def ical(request, year, semester_type, slug, selector=None):
+    resources = get_resources(selector)
+
+    if not resources: # Invalid selectors
+        raise Http404
 
     semester = Semester(year=year, type=semester_type)
 
@@ -80,6 +88,9 @@ def add_lectutures(lectures, semester, cal):
 
     for l in lectures:
         if l.exclude: # Skip excluded
+            continue
+
+        if l.id not in all_weeks:
             continue
 
         weeks = all_weeks[l.id]
