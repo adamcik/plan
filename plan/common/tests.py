@@ -95,12 +95,25 @@ class ViewTestCase(BaseTestCase):
 
         self.assertEquals(stats, None)
 
+        semester = self.semester
+        args = [semester.year, semester.get_type_display()]
+        response = self.client.get(self.url('frontpage-semester', *args))
+        self.failUnlessEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'start.html')
+
+        # FIXME test posting to index
+        # FIXME test missing code 76
+
     def test_shortcut(self):
         response = self.client.get(self.url('shortcut', 'adamcik'))
         self.assertRedirects(response, self.url('schedule'))
 
     def test_schedule(self):
         # FIXME add group help testing
+        # FIXME courses without lectures
+        # FIXME test next semester message
+        # FIXME test cache time for deadlines etc
+        # FIXME test group-help message
 
         s = self.semester
 
@@ -115,6 +128,12 @@ class ViewTestCase(BaseTestCase):
             url = self.url(name, *args)
 
             response = self.client.get(url)
+            self.assertEquals(response.status_code, 200)
+            self.assertTemplateUsed(response, 'schedule.html')
+
+            # Check twice to test cache code 
+            response = self.client.get(url)
+            self.assertEquals(response.status_code, 200)
             self.assertTemplateUsed(response, 'schedule.html')
 
             cache_response = self.get(url)
@@ -126,6 +145,8 @@ class ViewTestCase(BaseTestCase):
             self.assertEquals(cache_response, None)
 
     def test_course_list(self):
+        # FIXME test POST
+
         s = Semester.current()
         url = self.url('course-list')
         key = '/'.join([str(s.year), s.get_type_display(), 'courses'])
@@ -143,6 +164,13 @@ class ViewTestCase(BaseTestCase):
         self.assertEquals(response.content, cache_response.content)
 
     def test_change_course(self):
+        # FIXME test semester does not exist
+        # FIXME test ie handling
+        # FIXME test invalid course
+        # FIXME test more that 20 warning
+        # FIXME test group-help
+        # FIXME test error.html
+
         original_url = self.url('schedule-advanced')
         url = self.url('change-course')
 
@@ -182,6 +210,8 @@ class ViewTestCase(BaseTestCase):
             usersets = new_usersets
 
     def test_change_groups(self):
+        # FIXME test for courses without groups
+
         original_url = self.url('schedule-advanced')
         url = self.url('change-groups')
 
@@ -222,6 +252,8 @@ class ViewTestCase(BaseTestCase):
 
 
     def test_change_lectures(self):
+        # FIXME test nulling out excludes
+
         original_url = self.url('schedule-advanced')
         url = self.url('change-lectures')
 
@@ -269,6 +301,10 @@ class TimetableTestCase(BaseTestCase):
     fixtures = ['test_data.json', 'test_user.json']
 
     def test_timetable(self):
+        # FIXME test expansion
+        # FIXME test instert times
+        # FIXME test map_to_slot
+
         from plan.common.models import Lecture, Semester
         from plan.common.timetable import Timetable
 
@@ -321,6 +357,26 @@ class TimetableTestCase(BaseTestCase):
 
         for t,r in zip(timetable.table, rows):
             self.assertEquals(t,r)
+
+class MiddlewaresTestCase(BaseTestCase):
+    pass
+
+    # FIXME test InternalIpMiddleware
+    # FIXME test UserBasedExceptionMiddleware
+
+class ModelsTestCase(BaseTestCase):
+    pass
+
+    # FIXME test unicode
+    # FIXME test course.get_url
+    # FIXME test get_stats(int)
+    # FIXME test semester.init customisation
+    # FIXME test get_first and last day
+    # FIXME test semester.next and get_weeks
+    # FIXME test semester.current
+    # FIXME test deadline.get_datetime
+    # FIXME test deadline.get_slug
+    # FIXME test deadline.get_course
 
 class ManagerTestCase(BaseTestCase):
     fixtures = ['test_data.json', 'test_user.json']
