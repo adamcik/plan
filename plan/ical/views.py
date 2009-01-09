@@ -171,17 +171,10 @@ def add_exams(exams, semester, cal):
 
             vevent.add('dtstart').value = start
 
-            if e.duration is None or not e.exam_time:
-                duration = timedelta()
-            elif e.duration == 30: # FIXME is this right?
-                duration = timedelta(minutes=30)
+            if e.duration and e.exam_time:
+                vevent.add('dtend').value = start + timedelta(hours=e.duration)
             else:
-                duration = timedelta(hours=e.duration)
-
-            if e.duration is None:
                 vevent.add('dtend').value = start
-            else:
-                vevent.add('dtend').value = start + duration
 
 def add_deadlines(deadlines, semester, cal):
     for d in deadlines:
