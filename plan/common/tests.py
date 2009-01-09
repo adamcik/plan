@@ -379,7 +379,7 @@ class ManagerTestCase(BaseTestCase):
 
         # Ensure that courses without exams are included and courses with
         # multiple exams on time per exam
-        self.assertEquals(courses, [1, 1, 2, 3, 4, 4])
+        self.assertEquals(courses, [1, 1, 1, 1, 2, 3, 4, 4])
 
     def test_get_usersets(self):
         from plan.common.models import UserSet, Semester
