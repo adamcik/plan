@@ -4,7 +4,7 @@
         "model": "common.userset", 
         "fields": {
             "added": "2009-01-03 10:13:53", 
-            "name": "", 
+            "name": "foo", 
             "course": 1, 
             "semester": 1, 
             "groups": [

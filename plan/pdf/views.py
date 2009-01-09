@@ -126,9 +126,8 @@ def pdf(request, year, semester_type, slug, size=None):
                     if lecture.type and lecture.type.optional:
                         paragraph_style.fontName = 'Helvetica'
 
-                    content = [
-                        Paragraph(force_escape(lecture.alias or lecture.course.name), paragraph_style),
-                    ]
+                    name = lecture.alias or lecture.course.name
+                    content = [Paragraph(force_escape(name), paragraph_style)]
                     paragraph_style.leading = 8
 
                     if lecture.type:
