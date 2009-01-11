@@ -1,10 +1,14 @@
 Current:
 --------
+* Add maintnance mode
+
 * weeks in pdf
 
 * css last bug
 
 * CSS sprites
+
+* css icons
 
 * Allow custom lectures?
 
@@ -22,43 +26,28 @@ Current:
 
 * logging imports better
 
-* custom clear cache signal to handle clearing better
-
 * free text search for adding courses
 
 * selector syntax for viewing multiple schedules in same screen
 
 * view course lectures without adding
 
-* fix caching
-
 * remove plain no-cache etc and replace with middleware
 
 Wishlist:
 ---------
-
 * RRULEs for ical?
-
-* User wants "Coursne name (course code)" for ical summary
-
-* Link to official data source per course for comparison.
-
-* redirect to course list for first timers adding a text input for manual input
 
 * Room links to map
 
-* Show current week view
-
 Long term:
 ----------
-* Support variable start stop times:
-  - Store actual times in db
-  - Map times to intervals that we want to show.
-
 * Add meta sets that are not linked to semesters years, MDTD-1 MTDT-2 etc
 
 Won't fix:
 ----------
+* User wants "Coursne name (course code)" for ical summary (superseeded by alias)
+
 * AJAX helper for adding courses?
 
 * Allow setting of course urls? addtional urls?
