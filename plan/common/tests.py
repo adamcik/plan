@@ -134,7 +134,6 @@ class ViewTestCase(BaseTestCase):
             # Check twice to test cache code 
             response = self.client.get(url)
             self.assertEquals(response.status_code, 200)
-            self.assertTemplateUsed(response, 'schedule.html')
 
             cache_response = self.get(url)
             self.assertEquals(response.content, cache_response.content)
