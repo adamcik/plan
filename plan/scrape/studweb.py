@@ -28,6 +28,8 @@ def update_exams(year, semester, url=None):
     if not url:
         url = _url(semester)
 
+    logger.info('Getting url: %s', url)
+
     dom = minidom.parseString(urlopen(url).read())
 
     for n in dom.getElementsByTagName('dato_row'):

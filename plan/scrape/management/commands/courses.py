@@ -1,3 +1,4 @@
+import logging
 from optparse import make_option
 
 from django.core.management.base import BaseCommand
@@ -8,6 +9,8 @@ from plan.common.models import Semester
 from plan.common.logger import init_console
 
 init_console()
+
+logger = logging.getLogger()
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
@@ -25,6 +28,8 @@ class Command(BaseCommand):
 
         if options['type'] is not None:
             semester.type = options['type']
+
+        logger.info('Updating exams for %s', semester)
 
         update_courses(semester.year, semester.type)
 

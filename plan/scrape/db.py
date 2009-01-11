@@ -40,6 +40,8 @@ def update_lectures(year, semester_type, prefix=None):
 
     prefix = prefix or _prefix(semester)
 
+    logger.info('Using prefix: %s', prefix)
+
     db = _connection()
     c = db.cursor()
 
