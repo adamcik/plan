@@ -18,6 +18,7 @@ class Command(BaseCommand):
             make_option('-s', '--spring', action='store_const', dest='type', const=Semester.SPRING),
             make_option('-f', '--fall', action='store_const', dest='type', const=Semester.FALL),
             make_option('-d', '--delete', action='store_const', dest='delete', const=1),
+            make_option('-l', '--limit', action='store', dest='limit', default=None),
         )
 
     @transaction.commit_manually
@@ -32,7 +33,7 @@ class Command(BaseCommand):
 
         logger.info('Updating lectures for %s', semester)
 
-        to_delete = update_lectures(semester.year, semester.type)
+        to_delete = update_lectures(semester.year, semester.type, limit=options['limit'])
 
         if to_delete:
             print 'Delete the following?'

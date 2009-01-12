@@ -33,22 +33,31 @@ def _connection():
     return MySQLdb.connect(**mysql_setings)
 
 @transaction.commit_on_success
-def update_lectures(year, semester_type, prefix=None):
+def update_lectures(year, semester_type, prefix=None, limit=None):
     '''Retrive all lectures for a given course'''
 
     semester, created = Semester.objects.get_or_create(year=year, type=semester_type)
 
     prefix = prefix or _prefix(semester)
 
-    logger.info('Using prefix: %s', prefix)
+    logger.debug('Using prefix: %s', prefix)
 
     db = _connection()
     c = db.cursor()
 
-    c.execute("""
-        SELECT emnekode,typenavn,dag,start,slutt,uke,romnavn,larer,aktkode
-        FROM %s_timeplan WHERE emnekode NOT LIKE '#%%'
-    """ % prefix)
+    query = """
+            SELECT emnekode,typenavn,dag,start,slutt,uke,romnavn,larer,aktkode
+            FROM %s_timeplan WHERE emnekode NOT LIKE '#%%'
+        """ % prefix
+
+    if limit:
+        logger.info('Limiting to %s*', limit)
+
+        query  = query.replace('%', '%%')
+        query += ' AND emnekode LIKE %s'
+        c.execute(query, (limit+'%',))
+    else:
+        c.execute(query)
 
     added_lectures = []
 
@@ -161,11 +170,15 @@ def update_lectures(year, semester_type, prefix=None):
         lectures = Lecture.objects.filter(**lecture_kwargs)
         added = False
 
+        if len(lectures) > 1:
+            logger.warning('Got %d lectures for %s', len(lectures), lecture_kwargs)
+
         for lecture in lectures:
             psql_set = set(lecture.groups.values_list('id', flat=True))
             mysql_set = set(map(lambda g: g.id, groups))
 
             if psql_set == mysql_set:
+                # FIXME need extra check against weeks and rooms
                 lecture.rooms = rooms
                 lecture.weeks = weeks
                 lecture.lecturers = lecturers
@@ -192,6 +205,9 @@ def update_lectures(year, semester_type, prefix=None):
 
     to_remove =  Lecture.objects.exclude(id__in=added_lectures). \
             filter(semester=semester)
+
+    if limit:
+        to_remove = to_remove.filter(course__name__startswith=limit)
 
     return to_remove
 
