@@ -44,11 +44,11 @@ class Command(BaseCommand):
                 if len(buffer) != 3:
                     buffer.append(str(l))
                 else:
-                    print ' '.join(buffer)
+                    print ' | '.join(buffer)
                     buffer = []
 
             if buffer:
-                print ' '.join(buffer)
+                print ' | '.join(buffer)
 
             print '---------------------'
 
