@@ -60,8 +60,14 @@ def update_lectures(year, semester_type, prefix=None, limit=None):
         c.execute(query)
 
     added_lectures = []
+    mysql_lecture_count = 0
 
-    for l in Lecture.objects.filter(semester=semester):
+    lectures = Lecture.objects.filter(semester=semester)
+
+    if limit:
+        lectures = lectures.filter(course__name__startswith=limit)
+
+    for l in lectures:
         l.rooms.clear()
         l.weeks.clear()
         l.lecturers.clear()
@@ -70,6 +76,8 @@ def update_lectures(year, semester_type, prefix=None, limit=None):
         code, course_type, day, start, end, week, room, lecturer, groupcode = row
         if not code.strip():
             continue
+
+        mysql_lecture_count += 1
 
         # Remove -1 etc. from course code
         code = '-'.join(code.split('-')[:-1]).upper()
@@ -134,15 +142,16 @@ def update_lectures(year, semester_type, prefix=None, limit=None):
             groups = [group]
 
         # Weeks
+        # FIXME seriosuly this generates way to many db queries...
         weeks = []
         for w in re.split(r',? ', week):
             if '-' in w:
                 x, y = w.split('-')
                 for i in range(int(x), int(y)+1):
-                    w2, created = Week.objects.get_or_create(number=i)
+                    w2 = Week.objects.get(number=i)
                     weeks.append(w2)
             elif w.isdigit():
-                w2, created = Week.objects.get_or_create(number=w)
+                w2 = Week.objects.get(number=w)
                 weeks.append(w2)
             else:
                 logger.warning("Messed up week '%s' for %s" % (w, course))
@@ -168,10 +177,9 @@ def update_lectures(year, semester_type, prefix=None, limit=None):
             del lecture_kwargs['type']
 
         lectures = Lecture.objects.filter(**lecture_kwargs)
-        added = False
+        lectures = lectures.exclude(id__in=added_lectures)
 
-        if len(lectures) > 1:
-            logger.warning('Got %d lectures for %s', len(lectures), lecture_kwargs)
+        added = False
 
         for lecture in lectures:
             psql_set = set(lecture.groups.values_list('id', flat=True))
@@ -203,11 +211,19 @@ def update_lectures(year, semester_type, prefix=None, limit=None):
         lecture.end = end
         lecture.save()
 
+        # FIXME this is backward
+        if added:
+            logger.debug('%s saved', Lecture.objects.get(pk=lecture.pk))
+        else:
+            logger.debug('%s added', Lecture.objects.get(pk=lecture.pk))
+
     to_remove =  Lecture.objects.exclude(id__in=added_lectures). \
             filter(semester=semester)
 
     if limit:
         to_remove = to_remove.filter(course__name__startswith=limit)
+
+    logger.info('%d lectures in source db, %d in destination', mysql_lecture_count, len(added_lectures))
 
     return to_remove
 
