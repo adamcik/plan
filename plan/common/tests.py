@@ -17,13 +17,18 @@ class MockDatetime(datetime.datetime):
         return datetime.datetime(2009, 1, 1, tzinfo=tz)
 
 class BaseTestCase(TestCase):
-    semester = Semester.current(from_db=True)
-    realm = get_realm(semester, 'adamcik')
-    default_args = [semester.year, semester.get_type_display(), 'adamcik']
 
     def setUp(self):
         self.datetime = datetime.datetime
         datetime.datetime = MockDatetime
+
+        self.semester = Semester.current()
+        self.realm = get_realm(self.semester, 'adamcik')
+        self.default_args = [
+                self.semester.year,
+                self.semester.get_type_display(),
+                'adamcik'
+            ]
 
     def tearDown(self):
         datetime.datetime = self.datetime
@@ -81,13 +86,16 @@ class ViewTestCase(BaseTestCase):
             'slug_count': 3,
             'schedule_form': '<input type="text" name="slug" value="%s" id="id_slug" />\n' + \
                              '<input type="hidden" name="semester" value="1" id="id_semester" />',
-            'current': self.semester,
+            'current': Semester.current(from_db=True),
             'color_map': {},
             'limit': 15,
             'deadline_count': 3
         }
 
-        self.assertEquals(stats, expected_stats)
+        self.assertEquals(set(stats.keys()), set(expected_stats.keys()))
+
+        for key,item in stats.items():
+            self.assertEquals((key, item), (key, expected_stats[key]))
 
         # Check that cache gets cleared
         self.clear()
