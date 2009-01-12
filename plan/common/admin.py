@@ -25,7 +25,7 @@ class LectureAdmin(admin.ModelAdmin):
     filter_horizontal = ('weeks', 'groups', 'lecturers', 'rooms')
 
     list_per_page = 50
-    list_filter = ['semester', 'day', 'start', 'rooms']
+    list_filter = ['semester', 'day', 'start', 'end', 'rooms']
     list_select_related = True
 
 class UserSetAdmin(admin.ModelAdmin):
