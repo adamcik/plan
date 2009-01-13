@@ -11,8 +11,8 @@ class CourseNameForm(forms.Form):
     def clean_name(self):
         name = self.cleaned_data['name']
 
-        if len(name) > 47:
-            name = '%s...' % name[:47].rstrip()
+        if len(name) > 40:
+            name = '%s...' % name[:40].rstrip()
 
         return name
 
