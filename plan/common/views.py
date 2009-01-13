@@ -114,6 +114,8 @@ def schedule(request, year, semester_type, slug, advanced=False,
         week=None, all=False, deadline_form=None, cache_page=True):
     '''Page that handels showing schedules'''
 
+    # FIXME this behaveiour becomes problematic when we want to show timetabels
+    # from the next semester
     if not all and not week and not advanced:
         week = (datetime.now() + timedelta(days=2)).isocalendar()[1]
         url = '%s%s/' % (request.path, week)
