@@ -55,12 +55,15 @@ def update_lectures(year, semester_type, prefix=None, limit=None):
 
         query  = query.replace('%', '%%')
         query += ' AND emnekode LIKE %s'
+        query += ' ORDER BY emnekode, dag, start, slutt, uke, romnavn'
         c.execute(query, (limit+'%',))
     else:
+        query += ' ORDER BY emnekode, dag, start, slutt, uke, romnavn'
         c.execute(query)
 
     added_lectures = []
     mysql_lecture_count = 0
+    skipped = 0
 
     lectures = Lecture.objects.filter(semester=semester)
 
@@ -78,6 +81,7 @@ def update_lectures(year, semester_type, prefix=None, limit=None):
             continue
 
         mysql_lecture_count += 1
+        skipped += 1
 
         # Remove -1 etc. from course code
         code = '-'.join(code.split('-')[:-1]).upper()
@@ -217,13 +221,16 @@ def update_lectures(year, semester_type, prefix=None, limit=None):
         else:
             logger.debug('%s added', Lecture.objects.get(pk=lecture.pk))
 
+        skipped -= 1
+
     to_remove =  Lecture.objects.exclude(id__in=added_lectures). \
             filter(semester=semester)
 
     if limit:
         to_remove = to_remove.filter(course__name__startswith=limit)
 
-    logger.info('%d lectures in source db, %d in destination', mysql_lecture_count, len(added_lectures))
+    logger.info('%d lectures in source db, %d in destination, diff %d, skipped %d',
+            mysql_lecture_count, len(added_lectures), mysql_lecture_count - len(added_lectures), skipped)
 
     return to_remove
 
