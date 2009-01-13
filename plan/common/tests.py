@@ -126,12 +126,17 @@ class ViewTestCase(BaseTestCase):
         s = self.semester
 
         week = 1
-        for name in ['schedule', 'schedule-advanced', 'schedule-week', 'schedule-week']:
+        for name in ['schedule', 'schedule-advanced', 'schedule-week', 'schedule-week', 'schedule-all']:
             args = [s.year, s.get_type_display(), 'adamcik']
 
             if name.endswith('week'):
                 args.append(week)
                 week += 1
+
+            if name in ['schedule', 'schedule-all']:
+                week = 1
+                args.append(week)
+                name = 'schedule-week'
 
             url = self.url(name, *args)
 

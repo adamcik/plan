@@ -2,6 +2,7 @@
 
 import logging
 from time import time
+from datetime import datetime
 
 from django.conf import settings
 from django.core.cache import cache
@@ -110,13 +111,19 @@ def getting_started(request, year=None, semester_type=None):
     return render_to_response('start.html', context, RequestContext(request))
 
 def schedule(request, year, semester_type, slug, advanced=False,
-        week=None, deadline_form=None, cache_page=True):
+        week=None, all=False, deadline_form=None, cache_page=True):
     '''Page that handels showing schedules'''
+
+    if not all and not week and not advanced:
+        week = datetime.now().isocalendar()[1]
+        url = '%s%s/' % (request.path, week)
+    else:
+        url = request.path
 
     semester = Semester(year=year, type=semester_type)
 
     realm = get_realm(semester, slug)
-    response = cache.get(request.path, realm=realm)
+    response = cache.get(url, realm=realm)
 
     # FIXME no-cache hack
     if response and 'no-cache' not in request.GET and cache_page:
@@ -251,7 +258,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
 
         logging.debug('Cache time: %.2f min' % (cache_time / 60))
 
-        cache.set(request.path, response, cache_time, realm=realm)
+        cache.set(url, response, cache_time, realm=realm)
     return response
 
 def select_groups(request, year, semester_type, slug):

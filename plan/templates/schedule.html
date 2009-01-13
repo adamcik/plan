@@ -6,6 +6,8 @@
     {{ semester.year }}
     {% if week %}
         for week {{ week }}
+    {% else %}
+        for all weeks
     {% endif %}
     {{ block.super }}
 {% endblock %}
@@ -17,6 +19,8 @@
         {{ semester.year }} schedule
         {% if week %}
             for week {{ week }}
+        {% else %}
+            for all weeks
         {% endif %}
     </h1>
 {% endblock %}
@@ -77,7 +81,7 @@
         <div class="yui-u">
             <p class="right">
                 <img src="{{ MEDIA_URL }}gfx/week.png" alt="" /> Weeks:
-                <a href="{% url schedule semester.year,semester.get_type_display,slug %}">All</a>
+                <a href="{% url schedule-all semester.year,semester.get_type_display,slug %}">All</a>
                 {% for w in weeks %}
                     <a href="{% url schedule-week semester.year,semester.get_type_display,slug,w %}">{{ w }}</a>
                 {% endfor %}
