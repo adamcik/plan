@@ -1,43 +1,31 @@
 Current:
 --------
+* broken post for /2008/fall/
+* Default view should be current week
 * Add maintnance mode
-
 * weeks in pdf
-
 * css last bug
-
 * CSS sprites
-
 * css icons
-
 * Allow custom lectures?
-
 * Link to official data source per course for comparison.
-
 * translate
-
 * Use "smarter" primary keys, ie course code for courses etc.
-
 * Add exam type to data model using "smart" primary key
-
 * VTODO
-
 * Css hover magic for rooms lists with more than one room
-
 * logging imports better
-
 * free text search for adding courses
-
 * selector syntax for viewing multiple schedules in same screen
-
 * view course lectures without adding
-
 * remove plain no-cache etc and replace with middleware
+* union/intersection/subtraction of slugs
+* Warning that class was available for previous semester
+* Proper user feedback
 
 Wishlist:
 ---------
 * RRULEs for ical?
-
 * Room links to map
 
 Long term:
@@ -47,17 +35,11 @@ Long term:
 Won't fix:
 ----------
 * User wants "Coursne name (course code)" for ical summary (superseeded by alias)
-
 * AJAX helper for adding courses?
-
 * Allow setting of course urls? addtional urls?
-
 * Better user feedbacks when stuff can't be added (add
   'message:<slug>:<remote_addr>' in cache. not sure about remote_addr)
-
   Needs to work around curent cacheing, or cacheing needs to be moved to template level.
-
 * Cleanup urls for my debug stuff.
-
 * redirect to course list for first timers adding a text input for manual input
 
