@@ -2,7 +2,7 @@
 
 import logging
 from time import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.core.cache import cache
@@ -115,7 +115,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
     '''Page that handels showing schedules'''
 
     if not all and not week and not advanced:
-        week = datetime.now().isocalendar()[1]
+        week = (datetime.now() + timedelta(days=2)).isocalendar()[1]
         url = '%s%s/' % (request.path, week)
     else:
         url = request.path
