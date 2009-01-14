@@ -93,7 +93,7 @@ class ExamManager(models.Manager):
                 'course__full_name',
             ).extra(
                 select={'alias': 'common_userset.name'}
-            )
+            ).order_by('exam_date', 'exam_time')
 
 class CourseManager(models.Manager):
     def get_courses(self, year, semester_type, slug):
