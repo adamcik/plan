@@ -55,7 +55,7 @@ def _tablestyle():
 
     return table_style
 
-def pdf(request, year, semester_type, slug, size=None):
+def pdf(request, year, semester_type, slug, size=None, week=None):
     if size is not None and size not in ['A4', 'A5', 'A6', 'A7']:
         raise Http404
 
@@ -80,10 +80,13 @@ def pdf(request, year, semester_type, slug, size=None):
 
     filename = '%s-%s-%s' % (year, semester.get_type_display(), slug)
 
+    if week:
+        filename += '-%s' % week
+
     response = HttpResponse(mimetype='application/pdf')
     response['Content-Disposition'] = 'attachment; filename=%s.pdf' % filename
 
-    lectures = Lecture.objects.get_lectures(year, semester.type, slug)
+    lectures = Lecture.objects.get_lectures(year, semester.type, slug, week)
     rooms = Lecture.get_related(Room, lectures)
     courses = Course.objects.get_courses(year, semester.type, slug)
 
@@ -105,7 +108,8 @@ def pdf(request, year, semester_type, slug, size=None):
 
     data = [['']]
 
-    # Add days FIXME move to timetable
+    # Add days
+    # FIXME move to timetable
     for i,day in enumerate(['Monday', 'Tuesday', 'Wednsday', 'Thursday', 'Friday']):
         data[0].append(day)
         if timetable.span[i] > 1:
