@@ -1,8 +1,10 @@
 Current:
 --------
+* map slots for all lectures in one go, don't call map code over and over
+  - revert to storing slot in db?
+* remove start_time end_time from db and code
 * replace <button> with input :( damm you IE
 * broken post for /2008/fall/
-* Default view should be current week
 * Add maintnance mode
 * weeks in pdf
 * css last bug
