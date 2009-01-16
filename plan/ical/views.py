@@ -68,13 +68,16 @@ def ical(request, year, semester_type, slug, selector=None):
 
     icalstream = cal.serialize()
 
+    # FIXME solve this with middleware?
     if 'plain' in request.GET:
         response = HttpResponse('<html><head></head><body><pre>%s</pre></body></html>' % icalstream)
     else:
+        filename = '%s.ics' % '-'.join([str(semester.year), semester.get_type_display(), slug] + resources)
+
         response = HttpResponse(icalstream, mimetype='text/calendar')
         response['Content-Type'] = 'text/calendar; charset=utf-8'
-        response['Filename'] = '%s.ics' % slug  # IE needs this
-        response['Content-Disposition'] = 'attachment; filename=%s.ics' % slug
+        response['Filename'] = filename  # IE needs this
+        response['Content-Disposition'] = 'attachment; filename=%s' % filename
 
     cache.set(cache_key, response, realm=cache_realm)
 
