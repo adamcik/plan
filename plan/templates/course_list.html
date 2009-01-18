@@ -8,6 +8,10 @@
     <h1>All courses during {{ semester.get_type_display }} {{ semester.year }} semester</h1>
 {% endblock %}
 
+{% block meta %}
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+{% endblock %}
+
 {% block bd %}
     {% if not course_list %}
         <div id="help">
