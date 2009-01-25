@@ -7,7 +7,6 @@ from dateutil.rrule import rrule, WEEKLY
 from dateutil.tz import tzlocal
 
 from django.http import HttpResponse, Http404
-
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
 
@@ -15,6 +14,7 @@ from plan.common.models import Exam, Deadline, Lecture, Semester, Room, Week
 from plan.common.cache import get_realm
 
 HOSTNAME = gethostname()
+CUSTOM_TITLE = False # FIXME decide if this should be used or remove the dead code
 
 def get_resources(selector):
     resources = [u'lectures', u'exams', u'deadlines']
@@ -44,6 +44,9 @@ def ical(request, year, semester_type, slug, selector=None):
     cache_key  = reverse('schedule-ical', args=[semester.year, semester.get_type_display(), slug])
     cache_key += '+'.join(resources)
 
+    title  = reverse('schedule', args=[semester.year, semester.get_type_display(), slug])
+    title += '+'.join(resources)
+
     cache_realm = get_realm(semester, slug)
 
     response = cache.get(cache_key, realm=cache_realm)
@@ -53,6 +56,20 @@ def ical(request, year, semester_type, slug, selector=None):
 
     cal = vobject.iCalendar()
     cal.add('method').value = 'PUBLISH'  # IE/Outlook needs this
+
+    if CUSTOM_TITLE:
+        if slug.lower().endswith('s'):
+            description = "%(slug)s' %(semester)s %(year)s schedule for %(resources)s"
+        else:
+            description = "%(slug)s's %(semester)s %(year)s schedule for %(resources)s"
+
+        cal.add('X-WR-CALNAME').value = title.strip('/')
+        cal.add('X-WR-CALDESC').value = description % {
+            'slug': slug,
+            'semester': semester.get_type_display(),
+            'year': semester.year,
+            'resources': ', '.join(resources),
+        }
 
     if 'lectures' in resources:
         lectures = Lecture.objects.get_lectures(year, semester.type, slug)
