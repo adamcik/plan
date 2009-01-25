@@ -1,5 +1,7 @@
 Current:
 --------
+* croudsource new lecture and deadline data
+* fix colors for pdf
 * map slots for all lectures in one go, don't call map code over and over
   - revert to storing slot in db?
 * remove start_time end_time from db and code
@@ -7,7 +9,6 @@ Current:
 * warn about colisions for exam dates
 * broken post for /2008/fall/
 * Add maintnance mode
-* weeks in pdf
 * css last bug
 * CSS sprites
 * css icons
@@ -16,16 +17,15 @@ Current:
 * translate
 * Use "smarter" primary keys, ie course code for courses etc.
 * Add exam type to data model using "smart" primary key
-* VTODO
 * Css hover magic for rooms lists with more than one room
-* logging imports better
 * free text search for adding courses
-* selector syntax for viewing multiple schedules in same screen
 * view course lectures without adding
-* remove plain no-cache etc and replace with middleware
+* remove plain no-cache etc and replace with middleware (user.is_authenticated?)
+* selector syntax for viewing multiple schedules in same screen
 * union/intersection/subtraction of slugs
 * Warning that class was available for previous semester
 * Proper user feedback
+* VTODO
 
 Ideas from IME:
 ---------------
