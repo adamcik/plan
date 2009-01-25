@@ -4,6 +4,7 @@ Current:
   - revert to storing slot in db?
 * remove start_time end_time from db and code
 * replace <button> with input :( damm you IE
+* warn about colisions for exam dates
 * broken post for /2008/fall/
 * Add maintnance mode
 * weeks in pdf
@@ -25,6 +26,23 @@ Current:
 * union/intersection/subtraction of slugs
 * Warning that class was available for previous semester
 * Proper user feedback
+
+Ideas from IME:
+---------------
+* mobile version
+* iphone/ipdod-touch version
+* fix Gcal import issues
+* data retrival from ntnu webservice
+* pre defined plans for student groups
+* sso -> timetable with preset course data
+* deadline retrival
+* reuse other peoples entries
+* exams and facebook events
+
+Other major feature ideas:
+--------------------------
+* Course anouncements via RSS
+* Course official deadlines via iCal
 
 Wishlist:
 ---------
