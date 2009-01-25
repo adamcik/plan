@@ -4,7 +4,7 @@
 "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
   <head>
-    <title>{% block title %}schedule{% endblock %}</title>
+    <title>{% block title %}Unofficial timetable generator for NTNU students{% endblock %}</title>
     <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/200901130001.css" />
     <link rel="icon" type="image/png" href="{{ MEDIA_URL }}gfx/time.png" />
     {% block meta %}{% endblock %}
@@ -26,7 +26,7 @@
               This data may not reflect the actual lecture times due to changes or erroneous imports.
               The service is provided as is, please ensure that the data is correct before relying on it.
             </p>
-            <p>Code and design &copy; Thomas Adamcik 2008 &ndash; Built with:
+            <p>Code and design &copy; Thomas Adamcik 2008-{% now "Y" %} &ndash; Built with:
                 <a href="http://www.python.org/">Python</a> &bull;
                 <a href="http://www.djangoproject.org">Django</a> &bull;
                 <a href="http://developer.yahoo.com/yui/">Yahoo! UI Library</a> &bull;

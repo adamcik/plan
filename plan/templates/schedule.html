@@ -3,13 +3,12 @@
 {% block title %}
     {{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %}
     {{ semester.get_type_display }}
-    {{ semester.year }}
+    {{ semester.year }} schedule
     {% if week %}
         for week {{ week }}
     {% else %}
         for all weeks
     {% endif %}
-    {{ block.super }}
 {% endblock %}
 
 {% block hd %}

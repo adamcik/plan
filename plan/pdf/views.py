@@ -110,7 +110,7 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
 
     # Add days
     # FIXME move to timetable
-    for i,day in enumerate(['Monday', 'Tuesday', 'Wednsday', 'Thursday', 'Friday']):
+    for i,day in enumerate(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']):
         data[0].append(day)
         if timetable.span[i] > 1:
             extra = timetable.span[i] - 1
