@@ -72,10 +72,17 @@
                 {% endif %}
                 - <a href="#tips"><img alt="" src="{{ MEDIA_URL }}gfx/tips.png" />Tips</a>
                 - <img alt="" src="{{ MEDIA_URL }}gfx/pdf.png"/>
-                <a href="{% url schedule-pdf semester.year,semester.get_type_display,slug,"A4" %}">A4</a>
-                <a href="{% url schedule-pdf semester.year,semester.get_type_display,slug,"A5" %}">A5</a>
-                <a href="{% url schedule-pdf semester.year,semester.get_type_display,slug,"A6" %}">A6</a>
-                <a href="{% url schedule-pdf semester.year,semester.get_type_display,slug,"A7" %}">A7</a>
+                {% if week %}
+                    <a href="{% url schedule-pdf semester.year,semester.get_type_display,slug,"A4",week %}">A4</a>
+                    <a href="{% url schedule-pdf semester.year,semester.get_type_display,slug,"A5",week %}">A5</a>
+                    <a href="{% url schedule-pdf semester.year,semester.get_type_display,slug,"A6",week %}">A6</a>
+                    <a href="{% url schedule-pdf semester.year,semester.get_type_display,slug,"A7",week %}">A7</a>
+                {% else %}
+                    <a href="{% url schedule-pdf semester.year,semester.get_type_display,slug,"A4" %}">A4</a>
+                    <a href="{% url schedule-pdf semester.year,semester.get_type_display,slug,"A5" %}">A5</a>
+                    <a href="{% url schedule-pdf semester.year,semester.get_type_display,slug,"A6" %}">A6</a>
+                    <a href="{% url schedule-pdf semester.year,semester.get_type_display,slug,"A7" %}">A7</a>
+                {% endif %}
             </p>
         </div>
         <div class="yui-u">
