@@ -52,7 +52,7 @@ def getting_started(request, year=None, semester_type=None):
         schedule_form = ScheduleForm(request.POST)
 
         if schedule_form.is_valid():
-            slug = slugify(schedule_form.cleaned_data['slug'])
+            slug = schedule_form.cleaned_data['slug']
             semester = schedule_form.cleaned_data['semester'] or \
                 semester
 
