@@ -63,6 +63,9 @@ class ScheduleForm(forms.Form):
         if len(self.fields['semester'].queryset) == 1:
             self.fields['semester'].widget = forms.HiddenInput()
 
+        self.fields['slug'].widget.attrs['size'] = 12
+        self.fields['slug'].widget.attrs['id'] = 's'
+
     def clean_slug(self):
         slug = self.cleaned_data['slug'].lower()
 
