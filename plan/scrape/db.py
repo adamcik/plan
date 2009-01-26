@@ -3,7 +3,7 @@
 import logging
 import re
 from decimal import Decimal
-
+from dateutil.parser import parse
 
 from django.db import transaction
 from django.conf import settings
@@ -101,25 +101,8 @@ def update_lectures(year, semester_type, prefix=None, limit=None):
             logger.warning("Could not add %s - %s on %s for %s" % (start, end, day, course))
             continue
 
-        # Figure out times:
-
-        # We choose to be slightly naive and only care about which hour
-        # something starts.
-        try:
-            start_slot = dict(map(lambda x: (int(x[1].split(':')[0]), x[0]),
-                    Lecture.START))[int(start.split(':')[0])]
-            end_slot = dict(map(lambda x: (int(x[1].split(':')[0]), x[0]),
-                    Lecture.END))[int(end.split(':')[0])]
-        except KeyError, e:
-            if int(end.split(':')[0]) == 8:
-                logger.info("Converting %s to 09:00 for %s" % (end, course))
-                end_slot = 9
-            elif int(end.split(':')[0]) == 0:
-                logger.info("Converting %s to 20:00 for %s" % (end, course))
-                end_slot = Lecture.END[-1][0]
-            else:
-                logger.warning("Could not add %s - %s on %s for %s" % (start, end, day, course))
-                continue
+        start = parse(start).time()
+        end = parse(end).time()
 
         # Rooms:
         rooms = []
@@ -171,8 +154,8 @@ def update_lectures(year, semester_type, prefix=None, limit=None):
         lecture_kwargs = {
             'course': course,
             'day': day,
-            'start_time': start_slot,
-            'end_time': end_slot,
+            'start': start,
+            'end': end,
             'semester': semester,
             'type': course_type,
         }

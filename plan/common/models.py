@@ -259,9 +259,6 @@ class Lecturer(models.Model):
 
 
 class Lecture(models.Model):
-    START = [(i, '%02d:15' % i) for i in range(8, 20)]
-    END = [(i, '%02d:00' % i) for i in range(9, 21)]
-
     DAYS = (
         (0, 'Monday'),
         (1, 'Tuesday'),
@@ -276,9 +273,6 @@ class Lecture(models.Model):
     semester = models.ForeignKey(Semester)
 
     day = models.PositiveSmallIntegerField(choices=DAYS)
-
-    start_time = models.PositiveSmallIntegerField(choices=START, blank=True, null=True)
-    end_time  = models.PositiveSmallIntegerField(choices=END, blank=True, null=True)
 
     start = models.TimeField()
     end = models.TimeField()
@@ -300,7 +294,7 @@ class Lecture(models.Model):
             self.get_day_display()[:3])
 
     class Meta:
-        ordering = ('course', 'day', 'start_time')
+        ordering = ('course', 'day', 'start')
 
     @staticmethod
     def get_related(model, lectures, field='name'):

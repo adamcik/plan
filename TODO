@@ -1,10 +1,9 @@
 Current:
 --------
 * croudsource new lecture and deadline data
-* fix colors for pdf
+* fix colors for pdf with respect to print
 * map slots for all lectures in one go, don't call map code over and over
   - revert to storing slot in db?
-* remove start_time end_time from db and code
 * replace <button> with input :( damm you IE
 * warn about colisions for exam dates
 * broken post for /2008/fall/

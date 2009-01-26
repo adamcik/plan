@@ -267,10 +267,8 @@
             ], 
             "end": "10:00:00", 
             "start": "08:15:00", 
-            "start_time": null, 
             "course": 1, 
             "semester": 1, 
-            "end_time": null, 
             "groups": [
                 1
             ], 
@@ -293,10 +291,8 @@
             ], 
             "end": "12:00:00", 
             "start": "10:15:00", 
-            "start_time": null, 
             "course": 1, 
             "semester": 1, 
-            "end_time": null, 
             "groups": [
                 2
             ], 
@@ -317,10 +313,8 @@
             "lecturers": [], 
             "end": "12:00:00", 
             "start": "08:15:00", 
-            "start_time": null, 
             "course": 1, 
             "semester": 1, 
-            "end_time": null, 
             "groups": [
                 1
             ], 
@@ -341,10 +335,8 @@
             ], 
             "end": "14:00:00", 
             "start": "08:15:00", 
-            "start_time": null, 
             "course": 2, 
             "semester": 1, 
-            "end_time": null, 
             "groups": [
                 1
             ], 
@@ -365,10 +357,8 @@
             "lecturers": [], 
             "end": "11:00:00", 
             "start": "09:15:00", 
-            "start_time": null, 
             "course": 3, 
             "semester": 1, 
-            "end_time": null, 
             "groups": [
                 2
             ], 
@@ -385,10 +375,8 @@
             "lecturers": [], 
             "end": "12:00:00", 
             "start": "08:15:00", 
-            "start_time": null, 
             "course": 4, 
             "semester": 1, 
-            "end_time": null, 
             "groups": [
                 2
             ], 
@@ -407,10 +395,8 @@
             "lecturers": [], 
             "end": "16:00:00", 
             "start": "15:15:00", 
-            "start_time": null, 
             "course": 1, 
             "semester": 1, 
-            "end_time": null, 
             "groups": [
                 1
             ], 
@@ -429,10 +415,8 @@
             "lecturers": [], 
             "end": "21:00:00", 
             "start": "07:00:00", 
-            "start_time": null, 
             "course": 1, 
             "semester": 1, 
-            "end_time": null, 
             "groups": [
                 1
             ], 
@@ -451,10 +435,8 @@
             "lecturers": [],
             "end": "08:30:00",
             "start": "08:15:00",
-            "start_time": null,
             "course": 1,
             "semester": 1,
-            "end_time": null,
             "groups": [
                 1
             ],
@@ -473,10 +455,8 @@
             "lecturers": [], 
             "end": "00:00:00", 
             "start": "19:15:00", 
-            "start_time": null, 
             "course": 1, 
             "semester": 1, 
-            "end_time": null, 
             "groups": [
                 1
             ], 

@@ -242,22 +242,15 @@ def scrape_course(course):
         day = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag']. \
                 index(r['time'][0][0])
 
-        # We choose to be slightly naive and only care about which hour
-        # something starts.
-        start = int(r['time'][0][1].split(':')[0])
-        end = int(r['time'][0][2].split(':')[0])
-
-        start = dict(map(lambda x: (int(x[1].split(':')[0]), x[0]),
-                    Lecture.START))[start]
-        end = dict(map(lambda x: (int(x[1].split(':')[0]), x[0]),
-                    Lecture.END))[end]
+        start = parse(r['time'][0][1]).time()
+        end = parse(r['time'][0][2]).time()
 
         lecture, created = Lecture.objects.get_or_create(
             course=course,
             day=day,
             semester=semester,
-            start_time=start,
-            end_time=end,
+            start=start,
+            end=end,
             room = room,
             type = lecture_type,
         )

@@ -1,11 +1,12 @@
 from plan.common.models import Lecture
 
 class Timetable:
+    slots = 12
+
     def __init__(self, lectures, rooms={}):
         self.lecture_queryset = lectures
         self.lectures = []
-        # FIXME remove Lecture.START
-        self.table = [[[{}] for a in Lecture.DAYS] for b in Lecture.START]
+        self.table = [[[{}] for a in Lecture.DAYS] for b in range(self.slots)]
         self.span = [1] * 5
 
         self.rooms = rooms
@@ -37,7 +38,7 @@ class Timetable:
 
             except IndexError:
                 # We ran out of rows to check, simply append a new row
-                for j in range(len(Lecture.START)):
+                for j in range(self.slots):
                     self.table[j][lecture.day].append({})
 
                 # Update the header colspan
@@ -109,11 +110,9 @@ class Timetable:
     # FIXME add an insert_days method
 
     def insert_times(self):
-        # FIXME remove Lecture.START
-        times = zip(range(len(Lecture.START)), Lecture.START, Lecture.END)
 
-        for i, start, end in times:
-            self.table[i].insert(0, [{'time': '%s - %s' % (start[1], end[1]) }])
+        for i in range(8, 20):
+            self.table[i-8].insert(0, [{'time': '%02d:15 - %02d:00' % (i, i+1) }])
 
     def map_to_slot(self, lecture):
         '''Maps a given lecture to zero-indexed start and stop slots
