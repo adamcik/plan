@@ -24,18 +24,19 @@ class LectureManager(models.Manager):
         ]
         select = {
             'alias': 'common_userset.name',
-            'exclude': '''common_lecture.id IN
-                (SELECT common_userset_exclude.lecture_id
+            'exclude': '''
+                EXISTS (SELECT 1
                  FROM common_userset_exclude WHERE
-                 common_userset_exclude.userset_id = common_userset.id)''',
+                 common_userset_exclude.userset_id = common_userset.id AND
+                 common_userset_exclude.lecture_id = common_lecture.id)''',
             'show_week': '%s',
         }
 
         if week:
             select['show_week'] = '''
-                SELECT COUNT(*) FROM common_week w JOIN common_lecture_weeks lw
+                EXISTS (SELECT 1 FROM common_week w JOIN common_lecture_weeks lw
                  ON (w.id = lw.week_id) WHERE lw.lecture_id = common_lecture.id AND
-                 w.number = %s'''
+                 w.number = %s)'''
 
         filter = {
             'course__userset__slug': slug,
