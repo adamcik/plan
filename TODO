@@ -20,7 +20,8 @@ Current:
 * free text search for adding courses
 * view course lectures without adding
 * remove plain no-cache etc and replace with middleware (user.is_authenticated?)
-* selector syntax for viewing multiple schedules in same screen
+* selector syntax for viewing multiple schedules in same screen (one color per
+ person?)
 * union/intersection/subtraction of slugs
 * Warning that class was available for previous semester
 * Proper user feedback
