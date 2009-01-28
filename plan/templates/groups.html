@@ -14,6 +14,7 @@
                 <span class="small">{{ course.full_name|truncatewords:"3" }}</span> <br />
                 {{ course.group_form.groups }}
             </p>
+            {% cycle "" "" "<hr style='visibility: hidden; clear: both; margin: 0' />" %}
         {% endfor %}
     </div>
     <p style="clear: both">
