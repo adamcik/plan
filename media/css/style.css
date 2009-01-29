@@ -106,9 +106,13 @@ p.right {
 }
 
 .icon {
-	background: no-repeat top left;
+	background-repeat: no-repeat;
+	background-position: top left;
 	padding-left: 20px;
 	min-height: 20px;
+}
+input.icon {
+	background-position: 2px center;
 }
 
 /* error classes */

@@ -400,30 +400,11 @@ def select_course(request, year, semester_type, slug, add=False):
 
     if request.method == 'POST':
         clear_cache(semester, slug)
-        post = request.POST.copy()
 
-        if 'submit_add' in post and 'submit_remove' in post and \
-                'submit_name' in post:
-            # IE6 doesn't handle <button> correctly, it submits all buttons
-            if 'course_remove' in post:
-                # User has checked at least on course to remove, make a blind
-                # guess and remove submit_add button.
-                del post['submit_add']
-                del post['submit_name']
-            else:
-                if post['course_add'].strip():
-                    # Someone put something in course add box, assumme thats
-                    # what they want to do
-                    del post['submit_remove']
-                    del post['submit_name']
-                else:
-                    del post['submit_remove']
-                    del post['submit_add']
-
-        if 'submit_add' in post or add:
+        if 'submit_add' in request.POST or add:
             lookup = []
 
-            for l in post.getlist('course_add'):
+            for l in request.POST.getlist('course_add'):
                 lookup.extend(l.replace(',', '').split())
 
             errors = []
@@ -478,20 +459,20 @@ def select_course(request, year, semester_type, slug, add=False):
                         'type': semester.get_type_display()
                     }, RequestContext(request))
 
-        elif 'submit_remove' in post:
+        elif 'submit_remove' in request.POST:
             courses = []
-            for c in post.getlist('course_remove'):
+            for c in request.POST.getlist('course_remove'):
                 if c.strip():
                     courses.append(c.strip())
 
             UserSet.objects.get_usersets(year, semester.type, slug). \
                     filter(course__id__in=courses).delete()
 
-        elif 'submit_name' in post:
+        elif 'submit_name' in request.POST:
             usersets = UserSet.objects.get_usersets(year, semester.type, slug)
 
             for u in usersets:
-                form = CourseNameForm(post, prefix=u.course_id)
+                form = CourseNameForm(request.POST, prefix=u.course_id)
 
                 if form.is_valid():
                     name = form.cleaned_data['name'].strip()
