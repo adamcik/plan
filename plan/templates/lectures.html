@@ -38,7 +38,7 @@
     </table>
     <p class="noprint">
         {% if advanced %}
-            <button type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/hide.png" /> Hide selected lectures</button>
+            <button type="submit"><span class="icon hide">Hide selected lectures</span></button>
         {% else %}
             Go to <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}#lectures">advanced options</a> to toggle which lectures to hide.
         {% endif %}

@@ -59,8 +59,8 @@
                 <input name="submit_remove" type="submit" value="Remove selected" style="background-image: url({{ MEDIA_URL }}gfx/remove.png)" class="icon" style="width: 10em; height: 1.8em" />
             <![endif]-->
             <!--[if gt IE 6]><!-->
-                <button name="submit_name" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/name.png" /> Update names</button>
-                <button name="submit_remove" type="submit"><img alt="" src="{{ MEDIA_URL }}gfx/remove.png" /> Remove selected</button>
+                <button name="submit_name" type="submit"><span class="icon name">Update names</span></button>
+                <button name="submit_remove" type="submit"><span class="icon remove"> Remove selected</span></button>
             <!--<![endif]-->
         </p>
     {% else %}

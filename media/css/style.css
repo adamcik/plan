@@ -67,7 +67,6 @@ img {
 
 /* Form elements */
 button {
-	font-size: 93%;
 	font-family: inherit;
 	vertical-align: bottom;
 	padding: 0;
@@ -107,29 +106,35 @@ p.right {
 
 .icon {
 	background-repeat: no-repeat;
-	background-position: top left;
-	padding-left: 20px;
+  background-image: url(../gfx/sprite.png);
+	padding-left: 18px;
 	min-height: 20px;
 }
-input.icon, a.icon, span.icon {
-	background-position: 2px center;
+
+.icon.start    {
+	background-position: right -680px;
+	padding-left: 0;
+	padding-right: 18px;
 }
 
-.icon.add      { background-image: url(../gfx/add.png); }
-.icon.advanced { background-image: url(../gfx/advanced.png); }
-.icon.copy     { background-image: url(../gfx/copy.png); }
-.icon.error    { background-image: url(../gfx/error.png); }
-.icon.gcal     { background-image: url(../gfx/gcal.png); }
-.icon.hide     { background-image: url(../gfx/hide.png); }
-.icon.ical     { background-image: url(../gfx/ical.png); }
-.icon.link     { background-image: url(../gfx/link.png); }
-.icon.list     { background-image: url(../gfx/list.png); }
-.icon.name     { background-image: url(../gfx/name.png); }
-.icon.pdf      { background-image: url(../gfx/pdf.png); }
-.icon.save     { background-image: url(../gfx/save.png); }
-.icon.start    { background-image: url(../gfx/star.png); }
-.icon.tips     { background-image: url(../gfx/tips.png); }
-.icon.week     { background-image: url(../gfx/week.png); }
+.icon.copy     { background-position: 0 -100px; }
+.icon.warning  { background-position: 0 -216px; }
+.icon.advanced { background-position: 0 -332px; }
+.icon.gcal     { background-position: 0 -448px; }
+.icon.pdf      { background-position: 0 -564px; }
+.icon.time     { background-position: 0 -796px; }
+.icon.list     { background-position: 0 -912px; }
+.icon.week     { background-position: 0 -1028px; }
+.icon.add      { background-position: 0 -1144px; }
+.icon.link     { background-position: 0 -1260px; }
+.icon.tips     { background-position: 0 -1376px; }
+.icon.save     { background-position: 0 -1492px; }
+.icon.hide     { background-position: 0 -1608px; }
+.icon.ical     { background-position: 0 -1724px; }
+.icon.error    { background-position: 0 -1840px; }
+.icon.name     { background-position: 0 -1956px; }
+.icon.remove   { background-position: 0 -2072px; }
+
 
 /* error classes */
 .errorlist {
