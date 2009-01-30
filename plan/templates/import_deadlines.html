@@ -1,0 +1,14 @@
+{% if courses and advanced %}
+    <form method="post" action="{% url copy-deadlines semester.year,semester.get_type_display,slug %}" class="noprint">
+        <h2>Import deadlines</h2>
+        <p>
+            If you enter the idenfiers for other timetables with the
+            same course as your's, you will be given the option to
+            import their deadlines.
+        </p>
+        <p>
+            <input type="text" name="slugs" size="42" />
+            <input type="submit" class="icon copy submit" value="Import deadlines" />
+        </p>
+    </form>
+{% endif %}
