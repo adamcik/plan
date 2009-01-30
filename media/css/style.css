@@ -67,17 +67,13 @@ img {
 
 /* Form elements */
 button {
+	font-size: 100%;
 	font-family: inherit;
 	vertical-align: bottom;
-	padding: 0;
+	padding: 0.15em;
 	/* Magic to check buttons the correct size in IE6 */
 	width: auto;
 	overflow:visible;
-}
-button img {
-	vertical-align: middle;
-	padding:0;
-	border:none;
 }
 input {
 	padding: 0.15em;
@@ -107,33 +103,32 @@ p.right {
 .icon {
 	background-repeat: no-repeat;
   background-image: url(../gfx/sprite.png);
+	background-position: left top;
 	padding-left: 18px;
-	min-height: 20px;
 }
 
 .icon.start    {
-	background-position: right -680px;
+	background-position: right -650px;
 	padding-left: 0;
 	padding-right: 18px;
 }
 
-.icon.copy     { background-position: 0 -100px; }
-.icon.warning  { background-position: 0 -216px; }
-.icon.advanced { background-position: 0 -332px; }
-.icon.gcal     { background-position: 0 -448px; }
-.icon.pdf      { background-position: 0 -564px; }
-.icon.time     { background-position: 0 -796px; }
-.icon.list     { background-position: 0 -912px; }
-.icon.week     { background-position: 0 -1028px; }
-.icon.add      { background-position: 0 -1144px; }
-.icon.link     { background-position: 0 -1260px; }
-.icon.tips     { background-position: 0 -1376px; }
-.icon.save     { background-position: 0 -1492px; }
-.icon.hide     { background-position: 0 -1608px; }
-.icon.ical     { background-position: 0 -1724px; }
-.icon.error    { background-position: 0 -1840px; }
-.icon.name     { background-position: 0 -1956px; }
-.icon.remove   { background-position: 0 -2072px; }
+.icon.copy     { background-position: 0 -95px; }
+.icon.warning  { background-position: 0 -206px; }
+.icon.advanced { background-position: 0 -317px; }
+.icon.gcal     { background-position: 0 -428px; }
+.icon.pdf      { background-position: 0 -539px; }
+.icon.list     { background-position: 0 -761px; }
+.icon.week     { background-position: 0 -872px; }
+.icon.add      { background-position: 0 -983px; }
+.icon.link     { background-position: 0 -1094px; }
+.icon.tips     { background-position: 0 -1205px; }
+.icon.save     { background-position: 0 -1316px; }
+.icon.hide     { background-position: 0 -1427px; }
+.icon.ical     { background-position: 0 -1538px; }
+.icon.error    { background-position: 0 -1649px; }
+.icon.name     { background-position: 0 -1760px; }
+.icon.remove   { background-position: 0 -1871px; }
 
 
 /* error classes */
