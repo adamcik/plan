@@ -118,6 +118,7 @@ input.icon, a.icon, span.icon {
 .icon.add      { background-image: url(../gfx/add.png); }
 .icon.advanced { background-image: url(../gfx/advanced.png); }
 .icon.copy     { background-image: url(../gfx/copy.png); }
+.icon.error    { background-image: url(../gfx/error.png); }
 .icon.gcal     { background-image: url(../gfx/gcal.png); }
 .icon.hide     { background-image: url(../gfx/hide.png); }
 .icon.ical     { background-image: url(../gfx/ical.png); }

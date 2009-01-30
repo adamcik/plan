@@ -9,13 +9,12 @@
 {% endblock %}
 
 {% block bd %}
-    <div class="large" id="help">
-        <p>
-            <img alt="" src="{{ MEDIA_URL}}gfx/error.png" />
-            An internal server error has occurred, sorry about the inconvenience.
+    <div id="help">
+        <p class="icon error large">
+            An error has occurred, sorry about the inconvenience.
         </p>
+        <ul>
+            <li>The server administrator has all ready been notified of this error.</li>
+        </ul>
     </div>
-    <p>
-        The server administrator has all ready been notified of this error.
-    </p>
 {% endblock %}
