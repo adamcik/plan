@@ -104,7 +104,6 @@ class Course(models.Model):
             semester_id = semester
 
         cursor = connection.cursor()
-        # FIXME check if %s should be %d
         cursor.execute('''
             SELECT COUNT(*) as num, c.name, c.full_name FROM
                 common_userset u JOIN common_course c ON (c.id = u.course_id)
@@ -148,11 +147,7 @@ class Semester(models.Model):
         (FALL, 'h'),
     )
 
-    # FIXME this will only get updated when server restarts :/
-    YEAR_CURRENT = datetime.now().year
-    YEAR_CHOICES = [(x, x) for x in range(YEAR_CURRENT-1, YEAR_CURRENT+2)]
-
-    year = models.PositiveSmallIntegerField(choices=YEAR_CHOICES)
+    year = models.PositiveSmallIntegerField()
     type = models.PositiveSmallIntegerField(choices=TYPES)
 
     def __init__(self, *args, **kwargs):
