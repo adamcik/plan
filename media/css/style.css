@@ -111,9 +111,24 @@ p.right {
 	padding-left: 20px;
 	min-height: 20px;
 }
-input.icon {
+input.icon, a.icon, span.icon {
 	background-position: 2px center;
 }
+
+.icon.add      { background-image: url(../gfx/add.png); }
+.icon.advanced { background-image: url(../gfx/advanced.png); }
+.icon.copy     { background-image: url(../gfx/copy.png); }
+.icon.gcal     { background-image: url(../gfx/gcal.png); }
+.icon.hide     { background-image: url(../gfx/hide.png); }
+.icon.ical     { background-image: url(../gfx/ical.png); }
+.icon.link     { background-image: url(../gfx/link.png); }
+.icon.list     { background-image: url(../gfx/list.png); }
+.icon.name     { background-image: url(../gfx/name.png); }
+.icon.pdf      { background-image: url(../gfx/pdf.png); }
+.icon.save     { background-image: url(../gfx/save.png); }
+.icon.start    { background-image: url(../gfx/star.png); }
+.icon.tips     { background-image: url(../gfx/tips.png); }
+.icon.week     { background-image: url(../gfx/week.png); }
 
 /* error classes */
 .errorlist {
