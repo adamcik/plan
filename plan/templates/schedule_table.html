@@ -35,13 +35,9 @@
                                         {% ifequal c.rowspan 1 %}
                                             single
                                         {% endifequal %}
-                                        {% if forloop.last %}
+                                        {% if c.last %}
                                             last
                                         {% endif %}
-                                           last-{{ cells|length }}-{{ c.colspan|default:"1"|add:forloop.counter0 }}
-                                        {% ifequal cells|length       c.colspan|default:"1"|add:forloop.counter0 %}
-                                            last1
-                                        {% endifequal %}
                                         {% if c.time %}
                                             time
                                         {% endif %}

@@ -102,17 +102,25 @@ class Timetable:
             self.table[i][j][k]['colspan'] = expand_by
             lecture['width'] = expand_by
 
+            if k+expand_by == len(self.table[i][j]):
+                self.table[i][j][k]['last'] = True
+
             # Remove cells that will get replaced by colspan
             for l in xrange(k+1, k+expand_by):
                 for m in xrange(i, i+height):
                     self.table[m][j][l]['remove'] = True
+
+        # Add last marker
+        for day in self.table:
+            for slot in day:
+                slot[-1]['last'] = True
 
     # FIXME add an insert_days method
 
     def insert_times(self):
 
         for i in range(8, 20):
-            self.table[i-8].insert(0, [{'time': '%02d:15 - %02d:00' % (i, i+1) }])
+            self.table[i-8].insert(0, [{'time': '%02d:15 - %02d:00' % (i, i+1), 'last': True }])
 
     def map_to_slot(self, lecture):
         '''Maps a given lecture to zero-indexed start and stop slots
