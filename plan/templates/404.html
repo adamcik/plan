@@ -11,7 +11,7 @@
 {% block bd %}
     <div id="help">
         <p class="large">
-            <code>{{ request_path }}</code> could not be found. Try going back or
+            <code>{{ request_path|default:"-" }}</code> could not be found. Try going back or
             starting over from the <a href="{% url frontpage %}">frontpage</a>.
         </p>
     </div>
