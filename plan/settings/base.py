@@ -64,6 +64,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'plan.common.middleware.UserBasedExceptionMiddleware',
+    'plan.common.middleware.TimeViewMiddleware',
 )
 
 ROOT_URLCONF = 'plan.urls'
