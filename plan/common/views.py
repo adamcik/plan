@@ -116,15 +116,18 @@ def schedule(request, year, semester_type, slug, advanced=False,
         week=None, all=False, deadline_form=None, cache_page=True):
     '''Page that handels showing schedules'''
 
-    # FIXME this behaveiour becomes problematic when we want to show timetabels
-    # from the next semester
-    if not all and not week and not advanced:
+    # Don't do any db stuff until after the cache lines further down
+    semester = Semester(year=year, type=semester_type)
+    current = Semester.current()
+
+    if semester.year != current.year and semester.type != current.type:
+        url = request.path
+    elif not all and not week and not advanced:
+        # Start new week on saturdays
         week = (datetime.now() + timedelta(days=2)).isocalendar()[1]
-        url = '%s%s/' % (request.path, week)
+        url = reverse('schedule-week', args=[semester.year, semester.type, slug, week])
     else:
         url = request.path
-
-    semester = Semester(year=year, type=semester_type)
 
     realm = get_realm(semester, slug)
     response = cache.get(url, realm=realm)
