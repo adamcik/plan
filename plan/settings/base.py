@@ -66,6 +66,7 @@ MIDDLEWARE_CLASSES = (
     'plan.common.middleware.CacheMiddleware',
     'plan.common.middleware.UserBasedExceptionMiddleware',
     'plan.common.middleware.TimeViewMiddleware',
+    'plan.common.middleware.PlainContentMiddleware',
 )
 
 ROOT_URLCONF = 'plan.urls'

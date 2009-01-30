@@ -55,3 +55,15 @@ class CacheMiddleware(object):
             request.cache = cache
 
         return None
+
+class PlainContentMiddleware(object):
+    def process_response(self, request, response):
+        if 'plain' in request.GET:
+            if 'Filename' in response:
+                del response['Filename']
+            if 'Content-Disposition' in response:
+                del response['Content-Disposition']
+
+            response['Content-Type'] = 'text/plain; charset=utf-8'
+
+        return response
