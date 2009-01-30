@@ -44,12 +44,14 @@ def getting_started(request, year=None, semester_type=None):
 
     if year and semester_type:
         semester = Semester(year=year, type=semester_type)
+        qs = Semester.objects.filter(year=semester.year, type=semester.type)
     else:
         semester = Semester.current(early=True)
+        qs = None
 
     # Redirect user to their timetable
     if request.method == 'POST' and 'slug' in request.POST:
-        schedule_form = ScheduleForm(request.POST)
+        schedule_form = ScheduleForm(request.POST, queryset=qs)
 
         if schedule_form.is_valid():
             slug = schedule_form.cleaned_data['slug']
@@ -72,13 +74,13 @@ def getting_started(request, year=None, semester_type=None):
         try:
             semester = Semester.objects.get(year=semester.year, type=semester.type)
         except Semester.DoesNotExist:
-            if request.path == '/':
+            if not year and not semester_type:
                 return render_to_response('start.html', {'missing': True}, RequestContext(request))
-            return HttpResponseRedirect('/')
+            return HttpResponseRedirect(reverse('frontpage'))
 
         if not schedule_form:
             schedule_form = ScheduleForm(initial={'semester': semester.id,
-                'slug': '%s'})
+                'slug': '%s'}, queryset=qs)
 
         slug_count = int(UserSet.objects.filter(semester__in=[semester]). \
                 values('slug').distinct().count())
