@@ -68,9 +68,9 @@ def getting_started(request, year=None, semester_type=None):
                 return response
 
     realm = get_realm(semester)
-    context = cache.get('stats', realm=realm)
+    context = request.cache.get('stats', realm=realm)
 
-    if not context or 'no-cache' in request.GET:
+    if not context:
         try:
             semester = Semester.objects.get(year=semester.year, type=semester.type)
         except Semester.DoesNotExist:
@@ -130,10 +130,9 @@ def schedule(request, year, semester_type, slug, advanced=False,
         url = request.path
 
     realm = get_realm(semester, slug)
-    response = cache.get(url, realm=realm)
+    response = request.cache.get(url, realm=realm)
 
-    # FIXME no-cache hack
-    if response and 'no-cache' not in request.GET and cache_page:
+    if response:
         return response
 
     # Color mapping for the courses
@@ -225,7 +224,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
             args=[year, semester.get_type_display(), slug])
 
     # FIXME
-    group_help = cache.get(group_help, 0)
+    group_help = request.cache.get(group_help, 0)
 
     week_range = range(min_week, max_week+1)
 
@@ -521,7 +520,7 @@ def list_courses(request, year, semester_type, slug):
     semester = Semester(year=year, type=semester_type)
 
     key = '/'.join([str(semester.year), semester.get_type_display(), 'courses'])
-    response = cache.get(key)
+    response = request.cache.get(key)
 
     if not response:
 

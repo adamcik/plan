@@ -15,7 +15,7 @@ Current:
 * Css hover magic for rooms lists with more than one room
 * free text search for adding courses
 * view course lectures without adding
-* remove plain no-cache etc and replace with middleware (user.is_authenticated?)
+* remove plain
 * selector syntax for viewing multiple schedules in same screen (one color per
  person?)
 * union/intersection/subtraction of slugs
