@@ -171,6 +171,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
     if lectures:
         table.place_lectures()
         table.do_expansion()
+    table.add_last_marker()
     table.insert_times()
 
     # Add extra info to lectures
@@ -223,7 +224,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
     group_help = '%s-group_help' % reverse('schedule',
             args=[year, semester.get_type_display(), slug])
 
-    # FIXME
+    # FIXME rethink how help messages are given
     group_help = request.cache.get(group_help, 0)
 
     week_range = range(min_week, max_week+1)

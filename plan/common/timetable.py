@@ -110,6 +110,8 @@ class Timetable:
                 for m in xrange(i, i+height):
                     self.table[m][j][l]['remove'] = True
 
+
+    def add_last_marker(self):
         # Add last marker
         for day in self.table:
             for slot in day:
