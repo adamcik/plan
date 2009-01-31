@@ -221,11 +221,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
         next_message = UserSet.objects.get_usersets(next_semester.year, next_semester.type, slug).count()
         next_message = next_message == 0
 
-    group_help = '%s-group_help' % reverse('schedule',
-            args=[year, semester.get_type_display(), slug])
-
-    # FIXME rethink how help messages are given
-    group_help = request.cache.get(group_help, 0)
+    group_help = request.cache.get('group-help', 0, realm=realm)
 
     week_range = range(min_week, max_week+1)
 
@@ -251,19 +247,17 @@ def schedule(request, year, semester_type, slug, advanced=False,
         }, RequestContext(request))
 
     if cache_page:
-        # FIXME this code needs some work
         if deadlines:
+            # time until next deadline
             cache_time = deadlines[0].get_seconds()
         else:
+            # default cache time
             cache_time = settings.CACHE_TIME_SCHECULDE
 
-        logging.debug('Group help time: %s, current time: %s, diff %s' %
-            (group_help, time(), group_help - time()))
         group_help -= time()
-        if group_help > 0:
-            cache_time = group_help
 
-        logging.debug('Cache time: %.2f min' % (cache_time / 60))
+        if group_help > 0 and group_help < cache_time:
+            cache_time = group_help
 
         cache.set(url, response, cache_time, realm=realm)
     return response
@@ -396,7 +390,9 @@ def select_course(request, year, semester_type, slug, add=False):
 
     # FIXME split ut three sub functions into seperate functions?
 
-    semester = Semester(type=semester_type)
+    semester = Semester(year=year, type=semester_type)
+    realm = get_realm(semester, slug)
+
     try:
         semester = Semester.objects.get(year=year, type=semester.type)
     except Semester.DoesNotExist:
@@ -416,7 +412,6 @@ def select_course(request, year, semester_type, slug, add=False):
             max_group_count = 0
 
             # FIXME limit max courses to for instance 30
-
             for l in lookup:
                 try:
                     course = Course.objects.get(
@@ -449,12 +444,8 @@ def select_course(request, year, semester_type, slug, add=False):
                 logging.warning("%s has more than 20 courses." % request.path)
 
             if max_group_count > 2:
-                # FIXME realm for caching instead?
-                group_help = '%s-group_help' % reverse('schedule',
-                        args=[year, semester.get_type_display(), slug])
-                # FIXME don't hardcode times, also see if group help can be
-                # solved nicer
-                cache.set(group_help, int(time())+60*10, 60*10)
+                cache.set('group-help', int(time())+settings.CACHE_TIME_HELP,
+                        settings.CACHE_TIME_HELP, realm=realm)
 
             if errors:
                 return render_to_response('error.html', {
