@@ -104,8 +104,7 @@ def getting_started(request, year=None, semester_type=None):
             'schedule_form': '\n'.join([str(f) for f in schedule_form]),
         }
 
-        # FIXME cache time, don't hardcode
-        cache.set('stats', context, 3*60, realm=realm)
+        cache.set('stats', context, settings.CACHE_TIME_STATS, realm=realm)
 
     if '%s' in context['schedule_form']:
         context['schedule_form'] = context['schedule_form'] % request.COOKIES.get('last', '')
@@ -254,7 +253,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
         if deadlines:
             cache_time = deadlines[0].get_seconds()
         else:
-            cache_time = settings.CACHE_TIME
+            cache_time = settings.CACHE_TIME_SCHECULDE
 
         logging.debug('Group help time: %s, current time: %s, diff %s' %
             (group_help, time(), group_help - time()))
