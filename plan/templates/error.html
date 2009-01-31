@@ -6,13 +6,21 @@
 
 {% block bd %}
     <div id="help">
-        <p class="large"><img alt="" src="{{ MEDIA_URL }}gfx/error.png" /> Adding the following courses failed:</p>
-        <ul>
-            {% for c in courses %}
-                <li>{{ c|upper }}</li>
-            {% endfor %}
-        </ul>
-        <p class="large">
+        {% if to_many_usersets %}
+            <p class="large icon error">
+                Sorry, but the generator has been set up to limit timetables
+                to {{ max }} courses.
+            </p>
+        {% endif %}
+        {% if courses %}
+            <p class="large"><img alt="" src="{{ MEDIA_URL }}gfx/error.png" /> Adding the following courses failed:</p>
+            <ul>
+                {% for c in courses %}
+                    <li>{{ c|upper }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <p class="large right">
             Back to your <a href="{% url schedule-advanced year,type,slug %}">schedule</a>.
         </p>
     </div>

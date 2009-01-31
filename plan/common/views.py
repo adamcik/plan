@@ -408,12 +408,22 @@ def select_course(request, year, semester_type, slug, add=False):
             for l in request.POST.getlist('course_add'):
                 lookup.extend(l.replace(',', '').split())
 
+            usersets = set(UserSet.objects.get_usersets(semester.year,
+                semester.type, slug).values_list('course__name', flat=True))
+
+            print usersets
+
             errors = []
             max_group_count = 0
+            to_many_usersets = False
 
             # FIXME limit max courses to for instance 30
             for l in lookup:
                 try:
+                    if len(usersets) > settings.TIMETABLE_MAX_COURSES:
+                        to_many_usersets = True
+                        break
+
                     course = Course.objects.get(
                             name__iexact=l.strip(),
                             semesters__in=[semester],
@@ -423,6 +433,8 @@ def select_course(request, year, semester_type, slug, add=False):
                             course=course,
                             semester=semester
                         )
+
+                    usersets.add(course.name)
 
                     groups = Group.objects.filter(
                             lecture__course=course
@@ -447,12 +459,14 @@ def select_course(request, year, semester_type, slug, add=False):
                 cache.set('group-help', int(time())+settings.CACHE_TIME_HELP,
                         settings.CACHE_TIME_HELP, realm=realm)
 
-            if errors:
+            if errors or to_many_usersets:
                 return render_to_response('error.html', {
                         'courses': errors,
+                        'max': settings.TIMETABLE_MAX_COURSES,
                         'slug': slug,
                         'year': year,
-                        'type': semester.get_type_display()
+                        'type': semester.get_type_display(),
+                        'to_many_usersets': to_many_usersets,
                     }, RequestContext(request))
 
         elif 'submit_remove' in request.POST:
