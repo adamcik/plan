@@ -440,14 +440,10 @@ def select_course(request, year, semester_type, slug, add=False):
                             lecture__course=course
                         ).distinct()
 
-                    # FIXME cleanup uneeded for loop
-                    group_count = 0
-                    for g in groups:
-                        userset.groups.add(g)
-                        group_count += 1
+                    userset.groups = groups
 
-                    if group_count > max_group_count:
-                        max_group_count = group_count
+                    if len(groups) > max_group_count:
+                        max_group_count = len(groups)
 
                 except Course.DoesNotExist:
                     errors.append(l)
