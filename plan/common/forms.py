@@ -2,8 +2,9 @@
 
 from django import forms
 from django.db.models import Q
-from django.template.defaultfilters import slugify
+from django.template.defaultfilters import slugify # FIXME replace
 
+#from plan.common.templatetags.slugify import slugify
 from plan.common.models import Deadline, Semester
 
 class CourseNameForm(forms.Form):
@@ -71,11 +72,4 @@ class ScheduleForm(forms.Form):
 
     def clean_slug(self):
         slug = self.cleaned_data['slug'].lower()
-
-        # FIXME remove this before next semester...
-        return slugify(slug)
-
-        for letters in [(u'æ', u'ae'), (u'ø', u'o'), (u'å', u'aa')]:
-            slug = slug.replace(*letters)
-
         return slugify(slug)

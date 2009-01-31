@@ -20,6 +20,7 @@ from plan.common.forms import DeadlineForm, GroupForm, CourseNameForm, \
 from plan.common.utils import compact_sequence, ColorMap
 from plan.common.timetable import Timetable
 from plan.common.cache import clear_cache, get_realm
+#from plan.common.templatetags.slugify import slugify
 
 # FIXME Split views that do multiple form handling tasks into seperate views
 # that call the top one.
