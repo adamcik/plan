@@ -9,6 +9,7 @@
     </p>
     <div id="change-groups">
         {% for course in courses %}
+            {# FIXME skip courses without lectures/groups #}
             <p class="{% color course.id %} groupbox" title="{{ course.full_name }}">
                 <b>{{ course.alias|default:course }}</b> <br />
                 <span class="small">{{ course.full_name|truncatewords:"3" }}</span> <br />
