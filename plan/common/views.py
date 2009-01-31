@@ -411,8 +411,6 @@ def select_course(request, year, semester_type, slug, add=False):
             usersets = set(UserSet.objects.get_usersets(semester.year,
                 semester.type, slug).values_list('course__name', flat=True))
 
-            print usersets
-
             errors = []
             max_group_count = 0
             to_many_usersets = False
