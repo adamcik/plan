@@ -10,7 +10,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
-from django.template.defaultfilters import slugify
+from django.template.defaultfilters import slugify # FIXME Replace with custom slugify
 from django.views.generic.list_detail import object_list
 
 from plan.common.models import Course, Deadline, Exam, Group, \
