@@ -122,7 +122,7 @@ def course_query(request, year, semester_type):
     if limit > 100:
         limit = 100
 
-    response = cache.get(cache_key)
+    response = cache.get(cache_key, prefix=True)
 
     if response and request.use_cache:
         return response
@@ -143,7 +143,7 @@ def course_query(request, year, semester_type):
     for course in courses:
         response.write('%s|%s\n' % (course.name, course.full_name))
 
-    cache.set(cache_key, response, settings.CACHE_TIME_QUERY)
+    cache.set(cache_key, response, settings.CACHE_TIME_QUERY, prefix=True)
 
     return response
 
@@ -551,7 +551,7 @@ def list_courses(request, year, semester_type, slug):
     semester = Semester(year=year, type=semester_type)
 
     key = '/'.join([str(semester.year), semester.get_type_display(), 'courses'])
-    response = cache.get(key)
+    response = cache.get(key, prefix=True)
 
     if not response or not request.use_cache:
 
@@ -562,6 +562,6 @@ def list_courses(request, year, semester_type, slug):
                 'course_list': courses,
             }, RequestContext(request))
 
-        cache.set(key, response)
+        cache.set(key, response, prefix=True)
 
     return response

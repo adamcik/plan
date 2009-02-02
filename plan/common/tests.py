@@ -167,11 +167,11 @@ class ViewTestCase(BaseTestCase):
         self.failUnlessEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'course_list.html')
 
-        cache_response = cache.get(key)
+        cache_response = cache.get(key, prefix=True)
         self.assertEquals(response.content, cache_response.content)
 
         self.clear()
-        cache_response = cache.get(key)
+        cache_response = cache.get(key, prefix=True)
 
         self.assertEquals(response.content, cache_response.content)
 
