@@ -450,7 +450,6 @@ def select_course(request, year, semester_type, slug, add=False):
             max_group_count = 0
             to_many_usersets = False
 
-            # FIXME limit max courses to for instance 30
             for l in lookup:
                 try:
                     if len(usersets) > settings.TIMETABLE_MAX_COURSES:
@@ -480,9 +479,6 @@ def select_course(request, year, semester_type, slug, add=False):
 
                 except Course.DoesNotExist:
                     errors.append(l)
-
-            if UserSet.objects.get_usersets(year, semester.type, slug).count() > 20:
-                logging.warning("%s has more than 20 courses." % request.path)
 
             if max_group_count > 2:
                 cache.set('group-help', int(time())+settings.CACHE_TIME_HELP,
