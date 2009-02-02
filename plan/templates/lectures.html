@@ -1,46 +1,48 @@
 {% load color %}
 
-<h2 id="lectures">Lecture list</h2>
-<form action="{% url change-lectures semester.year,semester.get_type_display,slug %}" method="post">
-    <table>
-        <thead>
-            <tr>
-                {% if advanced %}
-                    <th></th>
-                {% endif %}
-                <th>Course</th>
-                <th>Day</th>
-                <th style="width: 7em">Time</th>
-                <th>Rooms</th>
-                <th>Type</th>
-                <th>Groups</th>
-                <th>Lecturers</th>
-                <th>Weeks</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for l in lectures %}
-                <tr class="{% color l.course_id %}{% if l.exclude %} excluded{% endif %}" title="{{ l.course.full_name }}">
+{% if lectures %}
+    <h2 id="lectures">Lecture list</h2>
+    <form action="{% url change-lectures semester.year,semester.get_type_display,slug %}" method="post">
+        <table>
+            <thead>
+                <tr>
                     {% if advanced %}
-                        <td><input type="checkbox" name="exclude" value="{{ l.id }}"{% if l.exclude %} checked="checked"{% endif %} class="noprint" /></td>
+                        <th></th>
                     {% endif %}
-                    <td>{{ l.alias|default:l.course }}</td>
-                    <td>{{ l.get_day_display }}</td>
-                    <td>{{ l.start|time }}-{{ l.end|time }}</td>
-                    <td class="small">{{ l.sql_rooms|join:", " }}</td>
-                    <td class="small">{{ l.type|default:"" }}</td>
-                    <td class="small">{{ l.sql_groups|join:", " }}</td>
-                    <td>{{ l.sql_lecturers|join:", " }}</td>
-                    <td class="small">{{ l.sql_weeks|join:", " }}</td>
+                    <th>Course</th>
+                    <th>Day</th>
+                    <th style="width: 7em">Time</th>
+                    <th>Rooms</th>
+                    <th>Type</th>
+                    <th>Groups</th>
+                    <th>Lecturers</th>
+                    <th>Weeks</th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <p class="noprint">
-        {% if advanced %}
-            <button type="submit"><span class="icon hide">Hide selected lectures</span></button>
-        {% else %}
-            Go to <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}#lectures">advanced options</a> to toggle which lectures to hide.
-        {% endif %}
-    </p>
-</form>
+            </thead>
+            <tbody>
+                {% for l in lectures %}
+                    <tr class="{% color l.course_id %}{% if l.exclude %} excluded{% endif %}" title="{{ l.course.full_name }}">
+                        {% if advanced %}
+                            <td><input type="checkbox" name="exclude" value="{{ l.id }}"{% if l.exclude %} checked="checked"{% endif %} class="noprint" /></td>
+                        {% endif %}
+                        <td>{{ l.alias|default:l.course }}</td>
+                        <td>{{ l.get_day_display }}</td>
+                        <td>{{ l.start|time }}-{{ l.end|time }}</td>
+                        <td class="small">{{ l.sql_rooms|join:", " }}</td>
+                        <td class="small">{{ l.type|default:"" }}</td>
+                        <td class="small">{{ l.sql_groups|join:", " }}</td>
+                        <td>{{ l.sql_lecturers|join:", " }}</td>
+                        <td class="small">{{ l.sql_weeks|join:", " }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p class="noprint">
+            {% if advanced %}
+                <button type="submit"><span class="icon hide">Hide selected lectures</span></button>
+            {% else %}
+                Go to <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}#lectures">advanced options</a> to toggle which lectures to hide.
+            {% endif %}
+        </p>
+    </form>
+{% endif %}

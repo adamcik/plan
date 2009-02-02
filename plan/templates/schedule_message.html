@@ -1,0 +1,9 @@
+{% if next_message and not group_help and courses %}
+    <div id="help" class="large">
+        <p>
+            Next years lectures are now available, go to
+            <a href="{% url schedule next_semester.year,next_semester.get_type_display,slug %}">{% url schedule "2009","spring",slug %}</a>
+            to start adding your courses.
+        </p>
+    </div>
+{%  endif %}

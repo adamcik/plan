@@ -1,24 +1,26 @@
 {% load color %}
 
-<form action="{% url change-groups semester.year,semester.get_type_display,slug %}" method="post" class="noprint">
-    <h2 id="groups">Change groups</h2>
-    <p>
-        Each lecture is connected to one or more groups, please select which
-        group's lectures you want to attend. To select more than one group
-        press <code>CTRL</code> and the groups you want.
-    </p>
-    <div id="change-groups">
-        {% for course in courses %}
-            {# FIXME skip courses without lectures/groups #}
-            <p class="{% color course.id %} groupbox" title="{{ course.full_name }}">
-                <b>{{ course.alias|default:course }}</b> <br />
-                <span class="small">{{ course.full_name|truncatewords:"3" }}</span> <br />
-                {{ course.group_form.groups }}
-            </p>
-            {% cycle "" "" "<hr style='visibility: hidden; clear: both; margin: 0' />" %}
-        {% endfor %}
-    </div>
-    <p style="clear: both">
-        <button type="submit"><span class="icon save">Save groups</span></button>
-    </p>
-</form>
+{% if courses and advanced %}
+    <form action="{% url change-groups semester.year,semester.get_type_display,slug %}" method="post" class="noprint">
+        <h2 id="groups">Change groups</h2>
+        <p>
+            Each lecture is connected to one or more groups, please select which
+            group's lectures you want to attend. To select more than one group
+            press <code>CTRL</code> and the groups you want.
+        </p>
+        <div id="change-groups">
+            {% for course in courses %}
+                {# FIXME skip courses without lectures/groups #}
+                <p class="{% color course.id %} groupbox" title="{{ course.full_name }}">
+                    <b>{{ course.alias|default:course }}</b> <br />
+                    <span class="small">{{ course.full_name|truncatewords:"3" }}</span> <br />
+                    {{ course.group_form.groups }}
+                </p>
+                {% cycle "" "" "<hr style='visibility: hidden; clear: both; margin: 0' />" %}
+            {% endfor %}
+        </div>
+        <p style="clear: both">
+            <button type="submit"><span class="icon save">Save groups</span></button>
+        </p>
+    </form>
+{% endif %}
