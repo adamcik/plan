@@ -70,9 +70,9 @@ def getting_started(request, year=None, semester_type=None):
                 return response
 
     realm = get_realm(semester)
-    context = request.cache.get('stats', realm=realm)
+    context = cache.get('stats', realm=realm)
 
-    if not context:
+    if not context or not request.use_cache:
         try:
             semester = Semester.objects.get(year=semester.year, type=semester.type)
         except Semester.DoesNotExist:
@@ -122,9 +122,9 @@ def course_query(request, year, semester_type):
     if limit > 100:
         limit = 100
 
-    response = request.cache.get(cache_key)
+    response = cache.get(cache_key)
 
-    if response:
+    if response and request.use_cache:
         return response
 
     response = HttpResponse(mimetype='text/plain; charset=utf-8')
@@ -165,9 +165,9 @@ def schedule(request, year, semester_type, slug, advanced=False,
         url = request.path
 
     realm = get_realm(semester, slug)
-    response = request.cache.get(url, realm=realm)
+    response = cache.get(url, realm=realm)
 
-    if response:
+    if response and request.use_cache:
         return response
 
     # Color mapping for the courses
@@ -256,7 +256,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
         next_message = UserSet.objects.get_usersets(next_semester.year, next_semester.type, slug).count()
         next_message = next_message == 0
 
-    group_help = request.cache.get('group-help', 0, realm=realm)
+    group_help = cache.get('group-help', 0, realm=realm)
 
     week_range = range(min_week, max_week+1)
 
@@ -551,9 +551,9 @@ def list_courses(request, year, semester_type, slug):
     semester = Semester(year=year, type=semester_type)
 
     key = '/'.join([str(semester.year), semester.get_type_display(), 'courses'])
-    response = request.cache.get(key)
+    response = cache.get(key)
 
-    if not response:
+    if not response or not request.use_cache:
 
         courses = Course.objects.get_courses_with_exams(year, semester.type)
 

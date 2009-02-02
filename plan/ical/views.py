@@ -49,9 +49,9 @@ def ical(request, year, semester_type, slug, selector=None):
 
     cache_realm = get_realm(semester, slug)
 
-    response = request.cache.get(cache_key, realm=cache_realm)
+    response = cache.get(cache_key, realm=cache_realm)
 
-    if response:
+    if response and request.use_cache:
         return response
 
     cal = vobject.iCalendar()

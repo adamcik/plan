@@ -3,12 +3,12 @@
 from time import time
 import sys
 import re
+import logging
 
 from django.conf import settings
 from django.core.cache import cache, get_cache
 from django.views.debug import technical_500_response
 
-dummy_cache = get_cache('plan.common.cache://?backend=dummy')
 stats = re.compile(r'<!--\s*TIME\s*-->')
 
 class InternalIpMiddleware(object):
@@ -50,9 +50,9 @@ class CacheMiddleware(object):
 
     def process_request(self, request):
         if 'no-cache' in request.GET or 'no-cache' in request.COOKIES:
-            request.cache = dummy_cache
+            request.use_cache = False
         else:
-            request.cache = cache
+            request.use_cache = True
 
         return None
 

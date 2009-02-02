@@ -62,9 +62,9 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
     semester = Semester(year=year, type=semester_type)
 
     cache_realm = get_realm(semester, slug)
-    response = request.cache.get(request.path, realm=cache_realm)
+    response = cache.get(request.path, realm=cache_realm)
 
-    if response:
+    if response and request.use_cache:
         return response
 
     color_map = ColorMap(hex=True)
