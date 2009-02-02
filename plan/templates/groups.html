@@ -10,13 +10,18 @@
         </p>
         <div id="change-groups">
             {% for course in courses %}
-                {# FIXME skip courses without lectures/groups #}
-                <p class="{% color course.id %} groupbox" title="{{ course.full_name }}">
-                    <b>{{ course.alias|default:course }}</b> <br />
-                    <span class="small">{{ course.full_name|truncatewords:"3" }}</span> <br />
-                    {{ course.group_form.groups }}
-                </p>
-                {% cycle "" "" "<hr style='visibility: hidden; clear: both; margin: 0' />" %}
+                    <p class="{% color course.id %} groupbox" title="{{ course.full_name }}">
+                        <b>{{ course.alias|default:course }}</b> <br />
+                        <span class="small">{{ course.full_name|truncatewords:"3" }}</span> <br />
+                        {% if course.group_form %}
+                            {{ course.group_form.groups }}
+                        {% else %}
+                            <select disabled="disabled" multiple="multiple" size="5">
+                                <option>No groups<option>
+                            </select>
+                        {% endif %}
+                    </p>
+                    {% cycle "" "" "<hr style='visibility: hidden; clear: both; margin: 0' />" %}
             {% endfor %}
         </div>
         <p style="clear: both">
