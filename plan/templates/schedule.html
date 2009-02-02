@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block extrahead %}
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+{% endblock %}
+
 {% block title %}
     {{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %}
     {{ semester.get_type_display }}
@@ -22,10 +26,6 @@
             for all weeks
         {% endif %}
     </h1>
-{% endblock %}
-
-{% block meta %}
-    <meta name="robots" content="noindex, nofollow, noarchive" />
 {% endblock %}
 
 {% block bd %}
