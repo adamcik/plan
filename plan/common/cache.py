@@ -48,6 +48,11 @@ class CacheClass(BaseCache):
         except IndexError:
             raise InvalidCacheBackendError, "Backend not set"
 
+        try:
+            self.prefix = params.pop('prefix', [''])[0]
+        except IndexError:
+            self.prefix = ''
+
         backend_uri = '%s://%s/?%s' % (scheme, host, params.urlencode())
 
         self.cache = get_cache(backend_uri)
@@ -55,7 +60,7 @@ class CacheClass(BaseCache):
         if hasattr(self.cache, 'close'):
             self.close = self.cache.close
 
-    def _realm(self, key, **kwargs):
+    def _realm(self, key, global_prefix, **kwargs):
         realm = kwargs.pop('realm', None)
         logger.debug('Getting realm: %s' % realm)
 
@@ -69,33 +74,37 @@ class CacheClass(BaseCache):
 
             key = ':'.join([prefix, key])
 
+        if global_prefix:
+            key = ':'.join([global_prefix, key])
+
         return (key, kwargs)
 
     def add(self, key, *args, **kwargs):
-        key, kwargs = self._realm(key, **kwargs)
+        key, kwargs = self._realm(key, self.prefix, **kwargs)
         logger.debug('Adding key: %s' % key)
         return self.cache.add(key, *args, **kwargs)
 
     def get(self, key, *args, **kwargs):
-        key, kwargs = self._realm(key, **kwargs)
+        key, kwargs = self._realm(key, self.prefix, **kwargs)
         logger.debug('Getting key: %s' % key)
         return self.cache.get(key, *args, **kwargs)
 
     def set(self, key, *args, **kwargs):
-        key, kwargs = self._realm(key, **kwargs)
+        key, kwargs = self._realm(key, self.prefix, **kwargs)
         logger.debug('Setting key: %s' % key)
         return self.cache.set(key, *args, **kwargs)
 
     def delete(self, key, *args, **kwargs):
+        key, kwargs = self._realm(key, self.prefix, **kwargs)
         logger.debug('Deleting key: %s' % key)
         return self.cache.delete(key, *args, **kwargs)
 
     def get_many(self, keys, *args, **kwargs):
-        key, kwargs = self._realm(key, **kwargs)
+        key, kwargs = self._realm(key, self.prefix, **kwargs)
         logger.debug('Gettings keys: %s' % keys)
         return self.cache.get_many(keys, *args, **kwargs)
 
     def has_key(self, key, *args, **kwargs):
-        key, kwargs = self._realm(key, **kwargs)
+        key, kwargs = self._realm(key, self.prefix, **kwargs)
         logger.debug('Checking key: %s' % key)
         return self.cache.has_key(key, *args, **kwargs)
