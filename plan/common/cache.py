@@ -18,8 +18,8 @@ def get_realm(semester, slug=None):
 def clear_cache(semester, slug):
     from django.core.cache import cache
 
-    cache.delete(get_realm(semester, slug))
-    cache.delete(get_realm(semester))
+    cache.delete(':'.join([settings.CACHE_PREFIX, get_realm(semester, slug)]))
+    cache.delete(':'.join([settings.CACHE_PREFIX, get_realm(semester)]))
 
 class CacheClass(BaseCache):
     def __init__(self, *args, **kwargs):
@@ -30,11 +30,11 @@ class CacheClass(BaseCache):
 
     def _realm(self, key, **kwargs):
         realm = kwargs.pop('realm', None)
-        realm = ':'.join([settings.CACHE_PREFIX, realm])
 
         logger.debug('Getting realm: %s' % realm)
 
         if realm:
+            realm = ':'.join([settings.CACHE_PREFIX, realm])
             prefix = self.cache.get(realm)
 
             if not prefix:
