@@ -4,10 +4,11 @@ import logging
 from time import time
 from datetime import datetime, timedelta
 
+from django.db.models import Q
 from django.conf import settings
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
 from django.template.defaultfilters import slugify # FIXME Replace with custom slugify
@@ -83,6 +84,7 @@ def getting_started(request, year=None, semester_type=None):
             schedule_form = ScheduleForm(initial={'semester': semester.id,
                 'slug': '%s'}, queryset=qs)
 
+        # FIXME, move all of this into get stats
         slug_count = int(UserSet.objects.filter(semester__in=[semester]). \
                 values('slug').distinct().count())
 
@@ -111,6 +113,38 @@ def getting_started(request, year=None, semester_type=None):
         context['schedule_form'] = context['schedule_form'] % request.COOKIES.get('last', '')
 
     return render_to_response('start.html', context, RequestContext(request))
+
+def course_query(request, year, semester_type):
+    limit = request.GET.get('limit', '10')
+    query = request.GET.get('q', '').strip()
+    cache_key = ':'.join([request.path, query, limit])
+
+    if limit > 100:
+        limit = 100
+
+    response = request.cache.get(cache_key)
+
+    if response:
+        return response
+
+    response = HttpResponse(mimetype='text/plain; charset=utf-8')
+    semester = Semester(year=year, type=semester_type)
+
+    if not query:
+        return response
+
+    name_or_full_name = Q(name__icontains=query) | Q(full_name__icontains=query)
+
+    courses = Course.objects.filter(name_or_full_name,
+        semesters__year__exact=semester.year,
+         semesters__type__exact=semester.type)[:limit]
+
+    for course in courses:
+        response.write('%s|%s\n' % (course.name, course.full_name))
+
+    cache.set(cache_key, response, settings.CACHE_TIME_QUERY)
+
+    return response
 
 def schedule(request, year, semester_type, slug, advanced=False,
         week=None, all=False, deadline_form=None, cache_page=True):

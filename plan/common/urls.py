@@ -6,6 +6,8 @@ urlpatterns = patterns('plan.common.views',
     url(r'^$', 'getting_started', name='frontpage'),
     url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/$', 'getting_started', name='frontpage-semester'),
 
+    url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/\+$', 'course_query', name='course-query'),
+
     url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/(?P<slug>[a-z0-9-_]+)/$', 'schedule', name='schedule'),
     url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/(?P<slug>[a-z0-9-_]+)/\+$', 'schedule', {'advanced': True}, name='schedule-advanced'),
     url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/(?P<slug>[a-z0-9-_]+)/all/$', 'schedule', {'all': True}, name='schedule-all'),
