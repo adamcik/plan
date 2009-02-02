@@ -1,0 +1,7 @@
+BEGIN;
+ALTER TABLE common_lecture ALTER "start" SET NOT NULL;
+ALTER TABLE common_lecture ALTER "end" SET NOT NULL;
+
+ALTER TABLE common_lecture DROP "start_time";
+ALTER TABLE common_lecture DROP "end_time";
+COMMIT;
