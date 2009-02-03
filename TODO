@@ -1,12 +1,13 @@
 Current:
 --------
+* use pip + virtualenv? for nice enviroment
 * croudsource new lecture and deadline data
 * fix colors for pdf with respect to print
 * map slots for all lectures in one go, don't call map code over and over
   - revert to storing slot in db?
 * warn about colisions for exam dates
 * broken post for /2008/fall/
-* Add maintnance mode
+* Add maintnance mode - also add site wide notice system
 * Allow custom lectures?
 * Link to official data source per course for comparison.
 * translate
