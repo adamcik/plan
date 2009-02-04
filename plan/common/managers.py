@@ -2,7 +2,7 @@ from django.db import models, connection
 from django.db.models import Q
 
 class LectureManager(models.Manager):
-    def get_lectures(self, year, semester_type, slug, week=None):
+    def get_lectures(self, year, semester_type, slug=None, week=None, course=None):
         """
             Get all lectures for userset during given period.
 
@@ -10,6 +10,11 @@ class LectureManager(models.Manager):
             in the where cluase. The first element in the custom where is the important
             one that limits our results, the rest are simply meant for joining.
         """
+
+        if not slug and not course:
+            raise Exception('Invalid invocation of get_lectures')
+        elif slug and course:
+            raise Exception('Invalid invocation of get_lectures')
 
         where = [
             'common_userset_groups.group_id = common_group.id',
@@ -22,6 +27,7 @@ class LectureManager(models.Manager):
             'common_group',
             'common_lecture_groups'
         ]
+
         select = {
             'alias': 'common_userset.name',
             'exclude': '''
@@ -38,13 +44,26 @@ class LectureManager(models.Manager):
                  ON (w.id = lw.week_id) WHERE lw.lecture_id = common_lecture.id AND
                  w.number = %s)'''
 
-        filter = {
-            'course__userset__slug': slug,
-            'course__userset__semester__year__exact': year,
-            'course__userset__semester__type__exact': semester_type,
-            'semester__year__exact': year,
-            'semester__type__exact': semester_type,
-        }
+        if slug:
+            filter = {
+                'course__userset__slug': slug,
+                'course__userset__semester__year__exact': year,
+                'course__userset__semester__type__exact': semester_type,
+                'semester__year__exact': year,
+                'semester__type__exact': semester_type,
+            }
+        else:
+            filter = {
+                'course__name': course,
+                'course__semesters__year__exact': year,
+                'course__semesters__type__exact': semester_type,
+                'semester__year__exact': year,
+                'semester__type__exact': semester_type,
+            }
+            where = []
+            tables = []
+            select['alias'] = 'NULL'
+            select['exclude'] = 'False'
 
         related = [
             'type__name',
