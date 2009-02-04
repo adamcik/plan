@@ -1,20 +1,19 @@
 Current:
 --------
+* re-refactor cache
+* editable deadlines
 * use pip + virtualenv? for nice enviroment
 * croudsource new lecture and deadline data
 * fix colors for pdf with respect to print
 * map slots for all lectures in one go, don't call map code over and over
   - revert to storing slot in db?
 * warn about colisions for exam dates
-* broken post for /2008/fall/
 * Add maintnance mode - also add site wide notice system
 * Allow custom lectures?
 * Link to official data source per course for comparison.
 * translate
-* Use "smarter" primary keys, ie course code for courses etc.
 * Add exam type to data model using "smart" primary key
 * Css hover magic for rooms lists with more than one room
-* free text search for adding courses
 * view course lectures without adding
 * selector syntax for viewing multiple schedules in same screen (one color per
  person?)
@@ -23,8 +22,9 @@ Current:
 * Proper user feedback
 * VTODO
 * Lasse wants "$ALIAS F/L/Ø" etc for ical
-* Look at http://bassistance.de/jquery-plugins/jquery-plugin-autocomplete/
-* Look at lupy, http://www.rkblog.rk.edu.pl/w/p/django-lupy/ 
+* Look at lupy, http://www.rkblog.rk.edu.pl/w/p/django-lupy/
+* Refactor courses to have one per semester
+* Refactor to add student objects
 
 Ideas from IME:
 ---------------
