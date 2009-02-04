@@ -41,7 +41,7 @@ class Command(BaseCommand):
             buffer = []
             for l in to_delete:
                 if len(buffer) != 3:
-                    buffer.append(str(l).ljust(35)[:34])
+                    buffer.append(str(l).ljust(15)[:14])
                 else:
                     print ' - '.join(buffer)
                     buffer = []

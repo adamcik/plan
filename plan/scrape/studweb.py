@@ -135,7 +135,7 @@ def update_exams(year, semester, url=None):
             logger.info( "Added exam for %s - %s" % (course.name, exam.exam_date))
             added.append(exam.id)
         else:
-            logger.info("Updated exam for %s - %s" %( course.name, exam.exam_date))
+            logger.debug("Updated exam for %s - %s" %( course.name, exam.exam_date))
             updated.append(exam.id)
 
         if duration:
