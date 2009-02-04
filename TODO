@@ -1,6 +1,5 @@
 Current:
 --------
-* re-refactor cache
 * editable deadlines
 * use pip + virtualenv? for nice enviroment
 * croudsource new lecture and deadline data

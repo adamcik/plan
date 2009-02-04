@@ -7,11 +7,10 @@ from dateutil.rrule import rrule, WEEKLY
 from dateutil.tz import tzlocal
 
 from django.http import HttpResponse, Http404
-from django.core.cache import cache
 from django.core.urlresolvers import reverse
 
 from plan.common.models import Exam, Deadline, Lecture, Semester, Room, Week
-from plan.common.cache import get_realm
+from plan.common.cache import get_realm, cache
 
 HOSTNAME = gethostname()
 CUSTOM_TITLE = False # FIXME decide if this should be used or remove the dead code

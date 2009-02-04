@@ -14,13 +14,12 @@ styles = getSampleStyleSheet()
 
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404
-from django.core.cache import cache
 from django.template.defaultfilters import force_escape
 
 from plan.common.models import Lecture, Semester, Room, Course
 from plan.common.timetable import Timetable
 from plan.common.utils import ColorMap
-from plan.common.cache import get_realm
+from plan.common.cache import get_realm, cache
 
 outer_border = HexColor('#666666')
 inner_border = HexColor('#CCCCCC')

@@ -2,12 +2,11 @@ import datetime
 from copy import copy
 
 from django.test import TestCase
-from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.utils.datastructures import MultiValueDict
 
 from plan.common.models import Semester, Group, UserSet, Lecture
-from plan.common.cache import get_realm, clear_cache
+from plan.common.cache import get_realm, clear_cache, cache
 
 # FIXME test that api limits things to one semester
 

@@ -6,7 +6,6 @@ import re
 import logging
 
 from django.conf import settings
-from django.core.cache import cache, get_cache
 from django.views.debug import technical_500_response
 
 stats = re.compile(r'<!--\s*TIME\s*-->')

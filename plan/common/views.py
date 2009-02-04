@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 
 from django.db.models import Q
 from django.conf import settings
-from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404
@@ -20,7 +19,7 @@ from plan.common.forms import DeadlineForm, GroupForm, CourseNameForm, \
         ScheduleForm
 from plan.common.utils import compact_sequence, ColorMap
 from plan.common.timetable import Timetable
-from plan.common.cache import clear_cache, get_realm
+from plan.common.cache import clear_cache, get_realm, cache
 #from plan.common.templatetags.slugify import slugify
 
 # FIXME Split views that do multiple form handling tasks into seperate views
