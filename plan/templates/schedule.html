@@ -3,19 +3,21 @@
 {% block extrahead %}
     <meta name="robots" content="noindex, nofollow, noarchive" />
 
-    <script src="{{ MEDIA_URL }}js/200902021345.js" type="text/javascript"></script>
-    <script type="text/javascript">
-      $(function() {
-        $('#course').autocomplete('{% url course-query semester.year,semester.get_type_display %}', {
-          max: 100,
-          minChars: 2,
-          multiple: true,
-          formatItem: function(row) { return row[0] + ': ' + row[1]},
-          formatResult: function(row) { return row[0] },
-          width: $('#course').outerWidth()
-        }){% if not advanced %}.focus(){% endif %};
-      });
-    </script>
+    {% comment %}
+        <script src="{{ MEDIA_URL }}js/200902021345.js" type="text/javascript"></script>
+        <script type="text/javascript">
+          $(function() {
+            $('#course').autocomplete('{% url course-query semester.year,semester.get_type_display %}', {
+              max: 100,
+              minChars: 2,
+              multiple: true,
+              formatItem: function(row) { return row[0] + ': ' + row[1]},
+              formatResult: function(row) { return row[0] },
+              width: $('#course').outerWidth()
+            }){% if not advanced %}.focus(){% endif %};
+          });
+        </script>
+    {% endcomment %}
 {% endblock %}
 
 {% block title %}
