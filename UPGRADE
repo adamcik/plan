@@ -1,3 +1,14 @@
+--  1. Maintenance mode
+--  2. Update cache backend setting
+--  3. bzr up
+--  4. Check status
+--  5. Update apache config
+--  6. Check status
+--  7. Update DB
+--  8. Check status
+--  9. Leave maintenance
+-- 10. Check for uppercase slugs
+
 BEGIN;
 ALTER TABLE common_lecture ALTER "start" SET NOT NULL;
 ALTER TABLE common_lecture ALTER "end" SET NOT NULL;
