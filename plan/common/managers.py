@@ -99,20 +99,34 @@ class DeadlineManager(models.Manager):
             })
 
 class ExamManager(models.Manager):
-    def get_exams(self, year, semester_type, slug):
-        exam_filter = {
-            'course__userset__slug': slug,
-            'course__userset__semester__year__exact': year,
-            'course__userset__semester__type__exact': semester_type,
-            'semester__year__exact': year,
-            'semester__type__exact': semester_type,
-        }
+    def get_exams(self, year, semester_type, slug=None, course=None):
+        if not slug and not course:
+            raise Exception('Invalid invocation of get_exams')
+        elif slug and course:
+            raise Exception('Invalid invocation of get_exams')
+
+        if slug:
+            exam_filter = {
+                'course__userset__slug': slug,
+                'course__userset__semester__year__exact': year,
+                'course__userset__semester__type__exact': semester_type,
+                'semester__year__exact': year,
+                'semester__type__exact': semester_type,
+            }
+            select = {'alias': 'common_userset.name'}
+        else:
+            exam_filter = {
+                'course__name': course,
+                'semester__year__exact': year,
+                'semester__type__exact': semester_type,
+            }
+            select = {}
 
         return self.get_query_set().filter(**exam_filter).select_related(
                 'course__name',
                 'course__full_name',
             ).extra(
-                select={'alias': 'common_userset.name'}
+                select=select
             ).order_by('exam_date', 'exam_time')
 
 class CourseManager(models.Manager):
