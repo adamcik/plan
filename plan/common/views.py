@@ -28,6 +28,8 @@ from plan.common.cache import clear_cache, get_realm, cache
 def shortcut(request, slug):
     '''Redirect users to their timetable for the current semester'''
 
+    slug = slugify(slug)
+
     try:
         semester = Semester.current(from_db=True, early=True)
     except Semester.DoesNotExist:
