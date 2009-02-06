@@ -84,24 +84,12 @@ def getting_started(request, year=None, semester_type=None):
                 'slug': '%s'}, queryset=qs)
 
         # FIXME, move all of this into get stats
-        slug_count = int(UserSet.objects.filter(semester=semester).values('slug').distinct().count())
-        subscription_count = int(UserSet.objects.filter(semester=semester).count())
-        deadline_count = int(Deadline.objects.filter(userset__semester=semester).count())
-        course_count = int(Course.objects.filter(userset__semester=semester).values('name').distinct().count())
-
-        stats, limit = Course.get_stats(semester=semester)
-
-        context = {
+        context = Course.get_stats(semester=semester)
+        context.update({
             'color_map': ColorMap(),
             'current': semester,
-            'slug_count': slug_count,
-            'course_count': course_count,
-            'subscription_count': subscription_count,
-            'deadline_count': deadline_count,
-            'stats': stats,
-            'limit': limit,
             'schedule_form': '\n'.join([str(f) for f in schedule_form]),
-        }
+        })
 
         cache.set('stats', context, settings.CACHE_TIME_STATS, realm=realm)
 

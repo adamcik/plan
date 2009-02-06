@@ -103,6 +103,11 @@ class Course(models.Model):
         else:
             semester_id = semester
 
+        slug_count = int(UserSet.objects.filter(semester=semester).values('slug').distinct().count())
+        subscription_count = int(UserSet.objects.filter(semester=semester).count())
+        deadline_count = int(Deadline.objects.filter(userset__semester=semester).count())
+        course_count = int(Course.objects.filter(userset__semester=semester).values('name').distinct().count())
+
         cursor = connection.cursor()
         cursor.execute('''
             SELECT COUNT(*) as num, c.name, c.full_name FROM
@@ -112,7 +117,14 @@ class Course(models.Model):
             ORDER BY num DESC
             LIMIT %s''', [semester_id, limit])
 
-        return (cursor.fetchall(), limit)
+        return {
+            'slug_count': slug_count,
+            'course_count': course_count,
+            'subscription_count': subscription_count,
+            'deadline_count': deadline_count,
+            'stats': cursor.fetchall(),
+            'limit': limit,
+        }
 
     @staticmethod
     def get_groups(year, semester_type, courses):
