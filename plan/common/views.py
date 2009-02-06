@@ -28,8 +28,6 @@ from plan.common.cache import clear_cache, get_realm, cache
 def shortcut(request, slug):
     '''Redirect users to their timetable for the current semester'''
 
-    slug = slugify(slug)
-
     try:
         semester = Semester.current(from_db=True, early=True)
     except Semester.DoesNotExist:
@@ -39,7 +37,7 @@ def shortcut(request, slug):
             raise Http404
 
     return HttpResponseRedirect(reverse('schedule',
-            args = [semester.year, semester.get_type_display(), slug.strip()]))
+            args = [semester.year, semester.get_type_display(), slug]))
 
 def getting_started(request, year=None, semester_type=None):
     '''Intial top level page that greets users'''
