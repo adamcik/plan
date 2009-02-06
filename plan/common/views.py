@@ -84,14 +84,10 @@ def getting_started(request, year=None, semester_type=None):
                 'slug': '%s'}, queryset=qs)
 
         # FIXME, move all of this into get stats
-        slug_count = int(UserSet.objects.filter(semester__in=[semester]). \
-                values('slug').distinct().count())
-
-        subscription_count = int(UserSet.objects.filter(semester__in=\
-                [semester]).count())
-
-        deadline_count = int(Deadline.objects.filter(userset__semester__in=\
-                [semester]).count())
+        slug_count = int(UserSet.objects.filter(semester=semester).values('slug').distinct().count())
+        subscription_count = int(UserSet.objects.filter(semester=semester).count())
+        deadline_count = int(Deadline.objects.filter(userset__semester=semester).count())
+        course_count = int(Course.objects.filter(userset__semester=semester).values('name').distinct().count())
 
         stats, limit = Course.get_stats(semester=semester)
 
@@ -99,6 +95,7 @@ def getting_started(request, year=None, semester_type=None):
             'color_map': ColorMap(),
             'current': semester,
             'slug_count': slug_count,
+            'course_count': course_count,
             'subscription_count': subscription_count,
             'deadline_count': deadline_count,
             'stats': stats,
