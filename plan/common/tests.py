@@ -82,6 +82,7 @@ class ViewTestCase(BaseTestCase):
                 (2, u'COURSE1', u'Course 1 full name'),
                 (1, u'COURSE3', u'Course 3 full name')
             ],
+            'course_count': 3,
             'slug_count': 3,
             'schedule_form': '<input value="%s" type="text" id="s" name="slug" size="12" />\n' + \
                              '<input type="hidden" name="semester" value="1" id="id_semester" />',
