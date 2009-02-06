@@ -333,18 +333,9 @@ def new_deadline(request, year, semester_type, slug):
     if request.method == 'POST':
         clear_cache(semester, slug)
 
-        post = request.POST.copy()
-
-        if 'submit_add' in post and 'submit_remove' in post:
-            # IE6 doesn't handle <button> correctly, it submits all buttons
-            if 'deadline_remove' in post:
-                # User has checked at least on deadline to remove, make a blind
-                # guess and remove submit_add button.
-                del post['submit_add']
-
-        if 'submit_add' in post:
+        if 'submit_add' in request.POST:
             usersets = UserSet.objects.get_usersets(year, semester.type, slug)
-            deadline_form = DeadlineForm(usersets, post)
+            deadline_form = DeadlineForm(usersets, request.POST)
 
             if deadline_form.is_valid():
                 deadline_form.save()
@@ -352,10 +343,10 @@ def new_deadline(request, year, semester_type, slug):
                 return schedule(request, year, semester_type, slug, advanced=True,
                         deadline_form=deadline_form, cache_page=False)
 
-        elif 'submit_remove' in post:
-            logging.debug(post.getlist('deadline_remove'))
+        elif 'submit_remove' in request.POST:
+            logging.debug(request.POST.getlist('deadline_remove'))
             Deadline.objects.get_deadlines(year, semester.type, slug).filter(
-                    id__in=post.getlist('deadline_remove')
+                    id__in=request.POST.getlist('deadline_remove')
                 ).delete()
 
     return HttpResponseRedirect(reverse('schedule-advanced',
