@@ -117,12 +117,8 @@ def course_query(request, year, semester_type):
     if not query:
         return response
 
-    name_or_full_name = Q(name__icontains=query) | Q(full_name__icontains=query)
-
-    courses = Course.objects.filter(name_or_full_name,
-        name__regex='[0-9]+', # FIXME assumes course codes must contain numbers
-        semesters__year__exact=semester.year,
-        semesters__type__exact=semester.type)[:limit]
+    courses = Course.objects.search(semester.year, semester.type,
+        query, limit)
 
     for course in courses:
         response.write('%s|%s\n' % (course.name, course.full_name))

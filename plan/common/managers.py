@@ -159,6 +159,15 @@ class CourseManager(models.Manager):
 
         return cursor.fetchall()
 
+    def search(self, year, semester_type, query, limit=10):
+        name_or_full_name = Q(name__icontains=query) | Q(full_name__icontains=query)
+
+        return self.get_query_set().filter(name_or_full_name,
+            name__regex='[0-9]+', # FIXME assumes course codes must contain numbers
+            semesters__year__exact=year,
+            semesters__type__exact=semester_type)[:limit]
+
+
 class UserSetManager(models.Manager):
     def get_usersets(self, year, semester_type, slug):
         return self.get_query_set().filter(
