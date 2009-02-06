@@ -5,7 +5,7 @@
     <h1>unofficial timetable generator for NTNU students</h1>
 {% endblock %}
 
-{% block onload %}onload="document.f.s.focus();"{% endblock %}
+{% block onload %}onload="var s=document.getElementById('s'); if(s) s.focus();"{% endblock %}
 
 {% block bd %}
     {% if missing %}
@@ -19,7 +19,7 @@
             <div class="yui-u first">
                 <h2>Getting started</h2>
                 <div id="help">
-                    <form action="{% url frontpage %}" method="post" name="f">
+                    <form action="{% url frontpage %}" method="post">
                         <p class="large">
                             Please enter a short name identifying your personal
                             timetable, ie. username, nickname etc. If the name
