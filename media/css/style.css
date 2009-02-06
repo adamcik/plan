@@ -51,9 +51,15 @@ td {
   border-top: 1px solid #666;
   border-bottom: 1px solid #666;
 }
-.plain td {
+table#munin {
+	width: auto;
+}
+table#munin td {
 	border: 0;
-	padding: 0;
+	padding: 0 1em 0.2em;
+}
+table#munin a {
+	color: #204A87;
 }
 
 /* Basic inline elements */
