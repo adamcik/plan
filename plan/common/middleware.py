@@ -13,6 +13,7 @@ stats = re.compile(r'<!--\s*TIME\s*-->')
 class InternalIpMiddleware(object):
     '''Middleware that adds IP to INTERNAL ips if user is superuser'''
 
+    # FIXME munging settings during runtime is somewhat questionable...
     def process_request(self, request):
         if request.user.is_authenticated() and request.user.is_superuser:
             if request.META.get('REMOTE_ADDR') not in settings.INTERNAL_IPS:
@@ -35,9 +36,7 @@ class TimeViewMiddleware(object):
 
         start = time()
         response = view_func(request, *view_args, **view_kwargs)
-        total = time() - start
-
-        total *= 1000
+        total = (time() - start) * 1000
 
         response.content = stats.sub('%.2f ms' % total, response.content)
 
