@@ -1,5 +1,6 @@
 Current:
 --------
+* convert to more general ical/event/todo model?
 * editable deadlines
 * use pip + virtualenv? for nice enviroment
 * croudsource new lecture and deadline data
