@@ -47,7 +47,7 @@ class DeadlineForm(forms.models.ModelForm):
 
         self.fields['time'].widget.attrs['size'] = 2
         self.fields['date'].widget.attrs['size'] = 7
-        self.fields['task'].widget.attrs['size'] = 28
+        self.fields['task'].widget.attrs['size'] = 20
 
 class ScheduleForm(forms.Form):
     slug = forms.CharField()
