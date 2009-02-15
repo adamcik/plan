@@ -16,7 +16,7 @@ class StripNode(template.Node):
 
     def render(self, context):
         output = self.nodelist.render(context)
-        return re.sub('\s+', ' ', output)
+        return re.sub('\s+', ' ', output).strip()
 
 @register.tag(name='stripblank')
 def do_stripblank(parser, token):
