@@ -71,7 +71,7 @@ def getting_started(request, year=None, semester_type=None):
     realm = get_realm(semester)
     context = cache.get('stats', realm=realm)
 
-    if not context or not request.use_cache:
+    if not context or not getattr(request, 'use_cache', True):
         try:
             semester = Semester.objects.get(year=semester.year, type=semester.type)
         except Semester.DoesNotExist:
@@ -108,7 +108,7 @@ def course_query(request, year, semester_type):
 
     response = cache.get(cache_key, prefix=True)
 
-    if response and request.use_cache:
+    if response and getattr(request, 'use_cache', True):
         return response
 
     response = HttpResponse(mimetype='text/plain; charset=utf-8')
@@ -147,7 +147,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
     realm = get_realm(semester, slug)
     response = cache.get(url, realm=realm)
 
-    if response and request.use_cache:
+    if response and getattr(request, 'use_cache', True):
         return response
 
     # Color mapping for the courses
@@ -524,7 +524,7 @@ def list_courses(request, year, semester_type, slug):
     key = '/'.join([str(semester.year), semester.get_type_display(), 'courses'])
     response = cache.get(key, prefix=True)
 
-    if not response or not request.use_cache:
+    if not response or not getattr(request, 'use_cache', True):
 
         courses = Course.objects.get_courses_with_exams(year, semester.type)
 

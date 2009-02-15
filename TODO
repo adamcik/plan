@@ -2,6 +2,7 @@ Current:
 --------
 * convert to more general ical/event/todo model?
 * editable deadlines
+* Done boolean/timestamp to deadlines
 * use pip + virtualenv? for nice enviroment
 * croudsource new lecture and deadline data
 * fix colors for pdf with respect to print
