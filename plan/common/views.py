@@ -67,34 +67,33 @@ def getting_started(request, year=None, semester_type=None):
             return response
 
     realm = get_realm(semester)
-    context = cache.get('stats', realm=realm)
+    response = cache.get('frontpage', realm=realm)
 
-    if not context or not getattr(request, 'use_cache', True):
-        try:
-            semester = Semester.objects.get(year=semester.year, type=semester.type)
-        except Semester.DoesNotExist:
-            if not year and not semester_type:
-                return render_to_response('start.html', {'missing': True}, RequestContext(request))
-            return HttpResponseRedirect(reverse('frontpage'))
+    if response and getattr(request, 'use_cache', True):
+        return response
 
-        if not schedule_form:
-            schedule_form = ScheduleForm(initial={'semester': semester.id,
-                'slug': '%s'}, queryset=qs)
+    try:
+        semester = Semester.objects.get(year=semester.year, type=semester.type)
+    except Semester.DoesNotExist:
+        if not year and not semester_type:
+            return render_to_response('start.html', {'missing': True}, RequestContext(request))
+        return HttpResponseRedirect(reverse('frontpage'))
 
-        # FIXME, move all of this into get stats
-        context = Course.get_stats(semester=semester)
-        context.update({
-            'color_map': ColorMap(),
-            'current': semester,
-            'schedule_form': '\n'.join([str(f) for f in schedule_form]),
-        })
+    if not schedule_form:
+        schedule_form = ScheduleForm(initial={'semester': semester.id}, queryset=qs)
 
-        cache.set('stats', context, settings.CACHE_TIME_STATS, realm=realm)
+    context = Course.get_stats(semester=semester)
+    context.update({
+        'color_map': ColorMap(),
+        'current': semester,
+        'schedule_form': schedule_form,
+    })
 
-    if '%s' in context['schedule_form']:
-        context['schedule_form'] = context['schedule_form'] % request.COOKIES.get('last', '')
+    response = render_to_response('start.html', context, RequestContext(request))
 
-    return render_to_response('start.html', context, RequestContext(request))
+    cache.set('frontpage', response, settings.CACHE_TIME_FRONTPAGE, realm=realm)
+
+    return response
 
 def course_query(request, year, semester_type):
     limit = request.GET.get('limit', '10')

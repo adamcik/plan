@@ -9,6 +9,7 @@ from plan.common.models import Semester, Group, UserSet, Lecture
 from plan.common.cache import get_realm, clear_cache, cache
 
 # FIXME test that api limits things to one semester
+# FIXME test get_stats
 
 class MockDatetime(datetime.datetime):
     @classmethod
@@ -73,35 +74,15 @@ class ViewTestCase(BaseTestCase):
 
         # Check that cache gets set
         realm = get_realm(self.semester)
-        stats = cache.get('stats', realm=realm)
+        cached_response = cache.get('frontpage', realm=realm)
 
-        expected_stats = {
-            'subscription_count': 6,
-            'stats': [
-                (3, u'COURSE2', u'Course 2 full name'),
-                (2, u'COURSE1', u'Course 1 full name'),
-                (1, u'COURSE3', u'Course 3 full name')
-            ],
-            'course_count': 3,
-            'slug_count': 3,
-            'schedule_form': '<input value="%s" type="text" id="s" name="slug" size="12" />\n' + \
-                             '<input type="hidden" name="semester" value="1" id="id_semester" />',
-            'current': Semester.current(from_db=True),
-            'color_map': {},
-            'limit': 15,
-            'deadline_count': 3
-        }
-
-        self.assertEquals(set(stats.keys()), set(expected_stats.keys()))
-
-        for key,item in stats.items():
-            self.assertEquals((key, item), (key, expected_stats[key]))
+        self.assertEquals(response.content, cached_response.content)
 
         # Check that cache gets cleared
         self.clear()
-        stats = cache.get('stats', realm=realm)
+        cached_response = cache.get('frontpage', realm=realm)
 
-        self.assertEquals(stats, None)
+        self.assertEquals(cached_response, None)
 
         semester = self.semester
         args = [semester.year, semester.get_type_display()]

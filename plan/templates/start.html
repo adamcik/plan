@@ -1,11 +1,25 @@
 {% extends "base.html" %}
 {% load color %}
+{% load strip %}
 
 {% block hd %}
     <h1>unofficial timetable generator for NTNU students</h1>
 {% endblock %}
 
-{% block onload %}onload="var s=document.getElementById('s'); if(s) s.focus();"{% endblock %}
+{% block onload %}onload="{% stripspace %}
+    var s=document.getElementById('s');
+    if (s) {
+         s.focus();
+
+        if (document.cookie) {
+            var last = document.cookie.match(/last=([a-z0-9_-]+)/);
+
+            if (last[1]) {
+                s.value = last[1];
+            }
+        }
+    }
+{% endstripspace %}"{% endblock %}
 
 {% block bd %}
     {% if missing %}
@@ -27,7 +41,8 @@
                             one.
                         </p>
                         <p class="right">
-                            {{ schedule_form|safe }}
+                            {{ schedule_form.semester }}
+                            {{ schedule_form.slug }}
                             <button type="submit"><span class="icon start">Start</span></button>
                         </p>
                     </form>
