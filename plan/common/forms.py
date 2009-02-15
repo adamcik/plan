@@ -73,5 +73,9 @@ class ScheduleForm(forms.Form):
         self.fields['slug'].widget.attrs['id'] = 's'
 
     def clean_slug(self):
-        slug = self.cleaned_data['slug'].lower()
-        return slugify(slug)
+        slug = slugify(self.cleaned_data['slug'])
+
+        if not slug:
+            raise forms.ValidationError('Invalid slug')
+
+        return slug

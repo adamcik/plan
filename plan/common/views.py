@@ -56,17 +56,15 @@ def getting_started(request, year=None, semester_type=None):
 
         if schedule_form.is_valid():
             slug = schedule_form.cleaned_data['slug']
-            semester = schedule_form.cleaned_data['semester'] or \
-                semester
+            semester = schedule_form.cleaned_data['semester'] or semester
 
-            if slug.strip():
-                response = HttpResponseRedirect(reverse('schedule', args=[
-                    semester.year, semester.get_type_display(), slug]))
+            response = HttpResponseRedirect(reverse('schedule', args=[
+                semester.year, semester.get_type_display(), slug]))
 
-                # Store last timetable visited in a cookie so that we can populate
-                # the field with a default value next time.
-                response.set_cookie('last', slug, 60*60*24*7*4)
-                return response
+            # Store last timetable visited in a cookie so that we can populate
+            # the field with a default value next time.
+            response.set_cookie('last', slug, settings.TIMETABLE_COOKIE_AGE)
+            return response
 
     realm = get_realm(semester)
     context = cache.get('stats', realm=realm)
