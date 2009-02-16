@@ -22,12 +22,14 @@ from plan.common.timetable import Timetable
 from plan.common.cache import clear_cache, get_realm, cache
 #from plan.common.templatetags.slugify import slugify
 
+# FIXME split into frontpage/semester, course, deadline, schedule files
 # FIXME Split views that do multiple form handling tasks into seperate views
 # that call the top one.
 
 def shortcut(request, slug):
     '''Redirect users to their timetable for the current semester'''
 
+    # FIXME this logic should be hidden by current()
     try:
         semester = Semester.current(from_db=True, early=True)
     except Semester.DoesNotExist:
@@ -98,10 +100,12 @@ def getting_started(request, year=None, semester_type=None):
 def course_query(request, year, semester_type):
     limit = request.GET.get('limit', '10')
     query = request.GET.get('q', '').strip()
-    cache_key = ':'.join([request.path, query, limit])
 
-    if limit > 100:
-        limit = 100
+    cache_key = ':'.join([request.path, query, limit])
+    cache_key = cache_key.lower()
+
+    if limit > settings.TIMETABLE_AJAX_LIMIT:
+        limit = settings.TIMETABLE_AJAX_LIMIT
 
     response = cache.get(cache_key, prefix=True)
 
@@ -120,7 +124,7 @@ def course_query(request, year, semester_type):
     for course in courses:
         response.write('%s|%s\n' % (course.name, course.full_name))
 
-    cache.set(cache_key, response, settings.CACHE_TIME_QUERY, prefix=True)
+    cache.set(cache_key, response, settings.CACHE_TIME_AJAX, prefix=True)
 
     return response
 
