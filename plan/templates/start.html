@@ -7,16 +7,19 @@
 {% endblock %}
 
 {% block onload %}onload="{% stripspace %}
-    var s=document.getElementById('s');
+    var s = document.getElementById('s');
+
     if (s) {
-         s.focus();
+        s.focus();
 
         if (document.cookie) {
             var last = document.cookie.match(/last=([a-z0-9_-]+)/);
 
-            if (last[1]) {
+            if (s.value)
+                return;
+
+            if (last)
                 s.value = last[1];
-            }
         }
     }
 {% endstripspace %}"{% endblock %}
