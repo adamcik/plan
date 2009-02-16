@@ -37,7 +37,7 @@ class CacheClass(BaseCache):
 
             if not prefix:
                 prefix = int_to_base36(uuid4().int)
-                django_cache.set(realm, prefix)
+                django_cache.set(realm, prefix, settings.CACHE_TIME_REALM)
                 logger.debug('Setting realm: %s' % realm)
 
             key = ':'.join([settings.CACHE_PREFIX, prefix, key])
