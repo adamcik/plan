@@ -1,31 +1,53 @@
 Current:
 --------
-* convert to more general ical/event/todo model?
-* editable deadlines
-* Done boolean/timestamp to deadlines
-* use pip + virtualenv? for nice enviroment
-* croudsource new lecture and deadline data
-* fix colors for pdf with respect to print
-* map slots for all lectures in one go, don't call map code over and over
-  - revert to storing slot in db?
-* warn about colisions for exam dates
-* Add maintnance mode - also add site wide notice system
-* Allow custom lectures?
-* Link to official data source per course for comparison.
-* translate
-* Add exam type to data model using "smart" primary key
-* Css hover magic for rooms lists with more than one room
-* view course lectures without adding
-* selector syntax for viewing multiple schedules in same screen (one color per
- person?)
-* union/intersection/subtraction of slugs
-* Warning that class was available for previous semester
-* Proper user feedback
-* VTODO
-* Lasse wants "$ALIAS F/L/Ø" etc for ical
-* Look at lupy, http://www.rkblog.rk.edu.pl/w/p/django-lupy/
-* Refactor courses to have one per semester
-* Refactor to add student objects
+o Refactor
+  - Review data model
+  - Refactor courses to have one per semester
+  - Refactor to add student objects
+  - Allow custom lectures?
+  - Add exam type to data model
+
+o Optimize
+  - Remove meta ordering
+  - Optimize db big time with respect to indexes!
+  - map slots for all lectures in one go, don't call map code over and over
+    * revert to storing slot in db?
+    * find out actuall cost of current approach
+
+o deadlines
+  - editable
+  - Done boolean/timestamp
+
+o messages
+  - warn about colisions for exam dates
+  - Warning that class was available for previous semester
+  - Proper user feedback
+
+o ical
+  - recurance
+  - VTODO
+  - Lasse wants "$ALIAS F/L/Ø" etc for ical
+
+o UI
+  - translate
+  - custom colors
+  - view course lectures without adding
+  - selector syntax for viewing multiple schedules in same screen (one color
+    per person?)
+  - union/intersection/subtraction of slugs
+  - fix colors for pdf with respect to print
+
+* ideas
+  - hosting
+    * use pip + virtualenv? for nice enviroment
+  - course
+    * Link to official data source per course for comparison.
+  - convert to more general ical/event/todo model?
+  - Css hover magic for rooms lists with more than one room
+  - croudsource new lecture and deadline data
+  - Look at lupy, http://www.rkblog.rk.edu.pl/w/p/django-lupy/
+  - add feedback field
+
 
 Ideas from IME:
 ---------------
