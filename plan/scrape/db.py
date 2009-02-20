@@ -215,6 +215,8 @@ def update_lectures(year, semester_type, prefix=None, limit=None):
     logger.info('%d lectures in source db, %d in destination, diff %d, skipped %d',
             mysql_lecture_count, len(added_lectures), mysql_lecture_count - len(added_lectures), skipped)
 
+    db.close()
+
     return to_remove
 
 def update_courses(year, semester_type, prefix=None):
@@ -248,3 +250,5 @@ def update_courses(year, semester_type, prefix=None):
             logger.info("Added course %s" % course.name)
         else:
             logger.info("Updated course %s" % course.name)
+
+    db.close()
