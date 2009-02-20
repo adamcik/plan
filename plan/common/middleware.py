@@ -47,12 +47,17 @@ class CacheMiddleware(object):
        instance should only be used for retrival'''
 
     def process_request(self, request):
-        if 'no-cache' in request.GET or 'no-cache' in request.COOKIES:
-            request.use_cache = False
-        else:
-            request.use_cache = True
+        request.use_cache = not self._ignore_cache(request)
 
         return None
+
+    def _ignore_cache(self, request):
+        return (
+            (request.user.is_authenticated() and
+             request.META.get('HTTP_CACHE_CONTROL', '').lower() == 'no-cache') or
+            'no-cache' in request.GET or
+            'no-cache' in request.COOKIES
+        )
 
 class PlainContentMiddleware(object):
     def process_response(self, request, response):
