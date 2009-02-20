@@ -1,0 +1,12 @@
+postgresql-8.3
+memcached
+libapache2-mod-wsgi (mod_rewrite, mod_expire, mod_deflate)
+
+python-django
+python-psycopg2
+python-memcache
+python-vobject
+python-dateutil
+python-reportlab
+python-beautifulsoup
+python-xml
