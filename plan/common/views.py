@@ -265,7 +265,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
     if cache_page:
         if deadlines:
             # time until next deadline
-            cache_time = deadlines[0].get_seconds()
+            cache_time = deadlines[0].seconds
         else:
             # default cache time
             cache_time = settings.CACHE_TIME_SCHECULDE

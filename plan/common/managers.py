@@ -96,7 +96,10 @@ class DeadlineManager(models.Manager):
                 'userset__name',
             ).extra(select={
                 'alias': 'common_userset.name',
-            })
+            }).order_by(
+                'date',
+                'time',
+            )
 
 class ExamManager(models.Manager):
     def get_exams(self, year, semester_type, slug=None, course=None):
@@ -127,7 +130,8 @@ class ExamManager(models.Manager):
                 'course__full_name',
             ).extra(
                 select=select
-            ).order_by('exam_date', 'exam_time')
+            ).order_by('handout_date', 'handout_time',
+                    'exam_date', 'exam_time')
 
 class CourseManager(models.Manager):
     def get_courses(self, year, semester_type, slug):
@@ -137,7 +141,8 @@ class CourseManager(models.Manager):
             'userset__semester__type__exact': semester_type,
         }
         return self.get_query_set().filter(**course_filter). \
-            extra(select={'alias': 'common_userset.name'}).distinct()
+            extra(select={'alias': 'common_userset.name'}).distinct().\
+            order_by('name')
 
     def get_courses_with_exams(self, year, semester_type):
         cursor = connection.cursor()
@@ -165,7 +170,7 @@ class CourseManager(models.Manager):
         return self.get_query_set().filter(name_or_full_name,
             name__regex='[0-9]+', # FIXME assumes course codes must contain numbers
             semesters__year__exact=year,
-            semesters__type__exact=semester_type)[:limit]
+            semesters__type__exact=semester_type).order_by('name')[:limit]
 
 
 class UserSetManager(models.Manager):
@@ -176,4 +181,4 @@ class UserSetManager(models.Manager):
                 semester__type__exact=semester_type,
             ).select_related(
                 'course__name',
-            )
+            ).order_by('slug', 'course__name')

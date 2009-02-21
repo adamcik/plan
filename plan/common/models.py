@@ -22,7 +22,6 @@ class UserSet(models.Model):
 
     class Meta:
         unique_together = (('slug', 'course', 'semester'),)
-        ordering = ('slug', 'course')
 
     def __unicode__(self):
         return u'%s - %s' % (self.slug, self.course)
@@ -92,9 +91,6 @@ class Course(models.Model):
 
     def __unicode__(self):
         return self.name
-
-    class Meta:
-        ordering = ('name',)
 
     @staticmethod
     def get_stats(semester=None, limit=15):
@@ -179,9 +175,6 @@ class Semester(models.Model):
     def __unicode__(self):
         return u'%s %s' % (self.get_type_display(), self.year)
 
-    class Meta:
-        ordering = ('year', '-type')
-
     def get_first_day(self):
         if self.type == self.SPRING:
             return datetime(self.year, 1, 1)
@@ -241,9 +234,6 @@ class Exam(models.Model):
     def __unicode__(self):
         return  u'%s (%s)' % (self.course, self.type)
 
-    class Meta:
-        ordering = ('handout_time', 'exam_time')
-
 class Week(models.Model):
     NUMBER_CHOICES = [(x, x) for x in range(1, 53)]
 
@@ -252,18 +242,11 @@ class Week(models.Model):
     def __unicode__(self):
         return u'%d' % self.number
 
-    class Meta:
-        ordering = ('number',)
-
 class Lecturer(models.Model):
     name = models.CharField(max_length=200)
 
     def __unicode__(self):
         return self.name
-
-    class Meta:
-        ordering = ('name',)
-
 
 class Lecture(models.Model):
     DAYS = (
@@ -300,9 +283,6 @@ class Lecture(models.Model):
             time_filter(self.end),
             self.get_day_display()[:3])
 
-    class Meta:
-        ordering = ('course', 'day', 'start')
-
     @staticmethod
     def get_related(model, lectures, field='name'):
         tmp = {}
@@ -333,9 +313,6 @@ class Deadline(models.Model):
 
     objects = DeadlineManager()
 
-    class Meta:
-        ordering = ('date', 'time')
-
     def __unicode__(self):
         if self.time:
             return u'%s %s- %s %s' % (self.userset, self.userset.slug,
@@ -343,30 +320,30 @@ class Deadline(models.Model):
         else:
             return u'%s %s- %s' % (self.userset, self.userset.slug, self.date)
 
-    def get_datetime(self):
+    @property
+    def datetime(self):
         if self.time:
             return datetime.combine(self.date, self.time)
         else:
             return datetime.combine(self.date, time())
-    datetime = property(get_datetime)
 
-    def get_seconds(self):
-        td = self.get_datetime() - datetime.now()
+    @property
+    def seconds(self):
+        td = self.datetime - datetime.now()
 
         return td.days * 3600 * 24 + td.seconds
-    seconds = property(get_seconds)
 
-    def is_expired(self):
+    @property
+    def expired(self):
         if self.time:
             return datetime.combine(self.date, self.time) < datetime.now()
         else:
             return self.date <= datetime.now().date()
-    expired = property(is_expired)
 
-    def get_slug(self):
+    @property
+    def slug(self):
         return self.userset.slug
-    slug = property(get_slug)
 
-    def get_course(self):
+    @property
+    def course(self):
         return self.userset.course
-    course = property(get_course)

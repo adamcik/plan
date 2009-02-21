@@ -8,7 +8,6 @@ o Refactor
   - Add exam type to data model
 
 o Optimize
-  - Remove meta ordering
   - Optimize db big time with respect to indexes!
   - map slots for all lectures in one go, don't call map code over and over
     * revert to storing slot in db?
