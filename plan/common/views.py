@@ -145,6 +145,9 @@ def schedule(request, year, semester_type, slug, advanced=False,
     else:
         url = request.path
 
+    if week:
+        week = int(week)
+
     realm = get_realm(semester, slug)
     response = cache.get(url, realm=realm)
 
@@ -170,13 +173,28 @@ def schedule(request, year, semester_type, slug, advanced=False,
     rooms = Lecture.get_related(Room, lectures)
     weeks = Lecture.get_related(Week, lectures, field='number')
 
-    min_week, max_week = 0, 0
-    for w in weeks.values():
-        if not min_week or min_week > w[0]:
-            min_week = w[0]
+    schedule_weeks = set()
+    for lecture_week_set in weeks.values():
+        for lecture_week in lecture_week_set:
+            schedule_weeks.add(lecture_week)
 
-        if not max_week or max_week < w[-1]:
-            max_week = w[-1]
+    schedule_weeks = list(schedule_weeks)
+    schedule_weeks.sort()
+
+    if schedule_weeks:
+        schedule_weeks = range(schedule_weeks[0], schedule_weeks[-1]+1)
+
+    try:
+        next_week = schedule_weeks[schedule_weeks.index(week)+1]
+    except (IndexError, ValueError):
+        next_week = None
+    try:
+        if schedule_weeks.index(week) != 0:
+            prev_week = schedule_weeks[schedule_weeks.index(week)-1]
+        else:
+            prev_week = None
+    except (IndexError, ValueError):
+        prev_week = None
 
     # Init colors in predictable maner
     for c in courses:
@@ -239,13 +257,9 @@ def schedule(request, year, semester_type, slug, advanced=False,
 
     group_help = cache.get('group-help', 0, realm=realm)
 
-    week_range = range(min_week, max_week+1)
-
-    if not min_week or not max_week:
-        week_range = []
-
     response = render_to_response('schedule.html', {
             'advanced': advanced,
+            'all': all,
             'color_map': color_map,
             'courses': courses,
             'deadline_form': deadline_form,
@@ -259,7 +273,9 @@ def schedule(request, year, semester_type, slug, advanced=False,
             'slug': slug,
             'timetable': table,
             'week': week,
-            'weeks': week_range,
+            'next_week': next_week,
+            'prev_week': prev_week,
+            'weeks': schedule_weeks,
         }, RequestContext(request))
 
     if cache_page:

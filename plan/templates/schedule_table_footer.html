@@ -27,9 +27,10 @@
         <div class="yui-u">
             <p class="right">
                 <span class="icon week">Weeks:</span>
-                <a href="{% url schedule-all semester.year,semester.get_type_display,slug %}">All</a>
+                <a href="{% url schedule-all semester.year,semester.get_type_display,slug %}"{% if all%} class="current"{% endif %}>All</a>
+                <a href="{% url schedule semester.year,semester.get_type_display,slug %}">Current</a>
                 {% for w in weeks %}
-                    <a href="{% url schedule-week semester.year,semester.get_type_display,slug,w %}">{{ w }}</a>
+                    <a href="{% url schedule-week semester.year,semester.get_type_display,slug,w %}"{% ifequal w week %} class="current"{% endifequal %}>{{ w }}</a>
                 {% endfor %}
             </p>
         </div>

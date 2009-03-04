@@ -112,6 +112,10 @@ p.right {
 	text-align: right;
 }
 
+.current {
+	font-weight: bold;
+}
+
 .icon {
 	background-repeat: no-repeat;
   background-image: url(../gfx/sprite.png);
@@ -180,6 +184,7 @@ td.error input, td.error select {
 	padding-left: 1em;
 	margin-bottom: 1em;
 	min-height: 25em;
+	position: relative;
 }
 #ft {
 	padding: 1em 0.5em 0;
@@ -238,6 +243,20 @@ td.error input, td.error select {
 	margin-bottom: 1em;
 	-moz-border-radius: 5px;
 	-webkit-border-radius: 5px;
+}
+
+#next, #previous {
+	position: absolute;
+	top: 3.7em;
+	text-decoration: none;
+	color: #eeeeec;
+	font-size: 300%;
+}
+#next {
+	right: -0.5em;
+}
+#previous {
+	left: -0.2em;
 }
 
 #debug {
