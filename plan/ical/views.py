@@ -1,18 +1,18 @@
 import vobject
 
 from copy import copy
-from socket import gethostname
 from datetime import datetime, timedelta
 from dateutil.rrule import rrule, WEEKLY
 from dateutil.tz import tzlocal
 
 from django.http import HttpResponse, Http404
 from django.core.urlresolvers import reverse
+from django.conf import settings
 
 from plan.common.models import Exam, Deadline, Lecture, Semester, Room, Week
 from plan.common.cache import get_realm, cache
 
-HOSTNAME = gethostname()
+HOSTNAME = settings.ICAL_HOSTNAME
 CUSTOM_TITLE = False # FIXME decide if this should be used or remove the dead code
 
 def get_resources(selector):

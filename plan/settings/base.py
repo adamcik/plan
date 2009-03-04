@@ -2,6 +2,8 @@
 # Django settings for plan project.
 
 import os
+import socket
+
 BASE_PATH = os.path.dirname(os.path.abspath(__file__)) + '/../..'
 
 DEBUG = False
@@ -133,3 +135,5 @@ CACHE_TIME_SCHECULDE = 60*60*24*7   #  1w
 CACHE_TIME_FRONTPAGE = 10*60        # 10m
 CACHE_TIME_HELP      = 2*60         #  2m
 CACHE_TIME_AJAX      = 60*60*24*7   #  1w
+
+ICAL_HOSTNAME = socket.getfqdn()
