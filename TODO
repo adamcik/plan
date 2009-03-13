@@ -12,6 +12,7 @@ o Optimize
   - map slots for all lectures in one go, don't call map code over and over
     * revert to storing slot in db?
     * find out actuall cost of current approach
+  - Jinja?
 
 o deadlines
   - editable
@@ -28,6 +29,8 @@ o ical
   - Lasse wants "$ALIAS F/L/Ø" etc for ical
 
 o UI
+  - convert tips to list
+  - add hr for non-css viewing
   - translate
   - custom colors
   - view course lectures without adding
