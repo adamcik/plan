@@ -249,14 +249,24 @@ td.error input, td.error select {
 	position: absolute;
 	top: 3.7em;
 	text-decoration: none;
-	color: #eeeeec;
+	color: #D3D7CF;
 	font-size: 300%;
 }
 #next {
-	right: -0.5em;
+	right: -0.6em;
+	padding-right: 0.1em;
 }
 #previous {
-	left: -0.2em;
+	left: -0.3em;
+	padding-left: 0.1em;
+}
+#next:hover {
+	padding-left: 0.1em;
+	padding-right: 0;
+}
+#previous:hover {
+	padding-left: 0;
+	padding-right: 0.1em;
 }
 
 #debug {
