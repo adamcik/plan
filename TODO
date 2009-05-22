@@ -1,5 +1,8 @@
 Current:
 --------
+o Bugs
+  - ÆØÅ in ajax lookup!?
+
 o Refactor
   - Review data model
   - Refactor courses to have one per semester
@@ -13,6 +16,7 @@ o Optimize
     * revert to storing slot in db?
     * find out actuall cost of current approach
   - Jinja?
+  - use regroup?
 
 o deadlines
   - editable
@@ -40,6 +44,7 @@ o UI
   - fix colors for pdf with respect to print
 
 * ideas
+  - south or dmigrations?
   - hosting
     * use pip + virtualenv? for nice enviroment
   - course
