@@ -136,6 +136,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
     semester = Semester(year=year, type=semester_type)
     current = Semester.current()
 
+    # FIXME refactor to get_current_week...
     if semester.year != current.year and semester.type != current.type:
         url = request.path
     elif not all and not week and not advanced:
