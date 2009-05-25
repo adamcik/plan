@@ -46,8 +46,15 @@ class CacheMiddleware(object):
     '''Attaches either a real or dummy cache instance to our request, cache
        instance should only be used for retrival'''
 
+    def __init__(self):
+        self.logger = logging.getLogger('plan.middleware.cache')
+
     def process_request(self, request):
-        request.use_cache = not self._ignore_cache(request)
+        request.use_cache = True
+
+        if self._ignore_cache(request):
+            self.logger.debug('Ignoring cache')
+            request.use_cache = False
 
         return None
 
@@ -60,8 +67,13 @@ class CacheMiddleware(object):
         )
 
 class PlainContentMiddleware(object):
+    def __init__(self):
+        self.logger = logging.getLogger('plan.middleware.plain')
+
     def process_response(self, request, response):
         if 'plain' in request.GET:
+            self.logger.debug('Forcing text/plain')
+
             if 'Filename' in response:
                 del response['Filename']
             if 'Content-Disposition' in response:
