@@ -22,7 +22,7 @@ class CourseNameForm(forms.Form):
 
 class GroupForm(forms.Form):
     '''Form for selecting groups for a course (has a custom init)'''
-    groups = forms.MultipleChoiceField(required=False)
+    groups = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple)
 
     def __init__(self, choices, *args, **kwargs):
         super(GroupForm, self).__init__(*args, **kwargs)

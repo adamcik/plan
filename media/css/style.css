@@ -191,17 +191,34 @@ td.error input, td.error select {
 /* Specialcased elements */
 
 /* Box used for selecting which groups to use for a course */
-#change-groups p {
+#change-groups div {
 	float: left;
 	padding: 0.2em 0.5em;
 	margin-right: 0.5em;
+	margin-bottom: 0.5em;
 	border: 1px solid #666;
 	width: 28%;
-	min-height: 10em;
-	*height: 10em;
+	height: 8em;
 }
-#change-groups select {
+#change-groups p {
+	overflow: hidden;
+	height: 30%;
+	margin-bottom: 0.25em;
+}
+#change-groups div div {
+	overflow: auto;
+	height: 63%;
 	width: 100%;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	float: none;
+}
+#change-groups ul {
+	margin: 0;
+}
+#change-groups li {
+	list-style: none;
 }
 
 /* Stats box on front page (needs special casing for graph) */
