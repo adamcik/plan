@@ -46,6 +46,16 @@
         $('#lectures input[name=exclude]').click(add_exclude_to_lectures);
         $('#courses input[name=course_remove]:checked').each(add_exclude_to_courses);
         $('#courses input[name=course_remove]').click(add_exclude_to_courses);
+
+        $('#change-groups div.groupbox').each(function() {
+            var div = $(this);
+            var a = $('<a style="float: right" class="small" href="#">Toggle</a>');
+
+            a.toggle(function() { div.find(':checkbox').removeAttr('checked'); return false; },
+                     function() { div.find(':checkbox').attr('checked', 'checked'); return false; });
+
+            div.prepend(a);
+        })
       });
     </script>
 {% endblock %}
