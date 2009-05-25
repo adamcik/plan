@@ -264,15 +264,15 @@ td.error input, td.error select {
 	font-size: 300%;
 }
 #next {
-	right: -0.6em;
-	padding-right: 0.1em;
+	right: -0.55em;
+	padding-right: 0.05em;
 }
 #previous {
-	left: -0.3em;
-	padding-left: 0.1em;
+	left: -0.25em;
+	padding-left: 0.05em;
 }
 #next:hover {
-	padding-left: 0.1em;
+	padding-left: 0.05em;
 	padding-right: 0;
 }
 #previous:hover {
