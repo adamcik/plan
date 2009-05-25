@@ -61,8 +61,8 @@
                 <h2>Top {{ limit }} courses {{ current }}</h2>
                 {% if stats %}
                     <div id="stats">
-                        {% for count,name,full_name in stats %}
-                            <div title="{{ full_name }}" style="width: {% widthratio count stats.0.0 95 %}%" class="{% color name %}">
+                        {% for count,course_id,name,full_name in stats %}
+                            <div title="{{ full_name }}" style="width: {% widthratio count stats.0.0 95 %}%" class="{% color course_id %}">
                                 <span>{{ count }}</span>
                                 {{ name }}
                             </div>
