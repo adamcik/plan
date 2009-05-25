@@ -5,10 +5,14 @@ o Bugs
 
 o Refactor
   - Review data model
+    - Don't have unique week anymore, simply have week with foreign key to
+      lecture so that we don't need werid many to many link
   - Refactor courses to have one per semester
   - Refactor to add student objects
   - Allow custom lectures?
   - Add exam type to data model
+  - Add exams to timetable display, ie. make an abstract event for lectures,
+    deadlines and exams.
 
 o Optimize
   - Optimize db big time with respect to indexes!
@@ -42,8 +46,10 @@ o UI
     per person?)
   - union/intersection/subtraction of slugs
   - fix colors for pdf with respect to print
+  - add hr's
 
 * ideas
+  - Humanise text and translate?
   - south or dmigrations?
   - hosting
     * use pip + virtualenv? for nice enviroment
