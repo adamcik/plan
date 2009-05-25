@@ -21,6 +21,31 @@
           formatResult: function(row) { return row[0] },
           width: $('#course').outerWidth()
         }){% if not advanced %}.focus(){% endif %};
+
+        function add_exclude_to_lectures() {
+            var input = $(this);
+
+            if (input.is(':checked')) {
+                $('.lecture-' + input.val()).addClass('excluded');
+            } else {
+                $('.lecture-' + input.val()).removeClass('excluded');
+            }
+        };
+
+        function add_exclude_to_courses() {
+            var input = $(this);
+
+            if (input.is(':checked')) {
+                $('.course-' + input.val()).addClass('excluded');
+            } else {
+                $('.course-' + input.val()).removeClass('excluded');
+            }
+        };
+
+        $('#lectures input[name=exclude]:checked').each(add_exclude_to_lectures);
+        $('#lectures input[name=exclude]').click(add_exclude_to_lectures);
+        $('#courses input[name=course_remove]:checked').each(add_exclude_to_courses);
+        $('#courses input[name=course_remove]').click(add_exclude_to_courses);
       });
     </script>
 {% endblock %}
