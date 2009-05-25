@@ -158,22 +158,16 @@ p.right {
 td.error input, td.error select {
 	background: #FCC;
 }
-
 /* Indicate that things have expired or are excluded */
-.excluded td, .expired td {
+.expired td {
+	color: #555753;
+}
+.excluded td, .excluded {
 	text-decoration: line-through;
 }
-
-/* Colors from www.ColorBrewer.org by Cynthia A. Brewer, Geography, Pennsylvania State University. */
-/* http://www.personal.psu.edu/cab38/ColorBrewer/ColorBrewer_updates.html */
-.color0  { background: #B3E2CD; }
-.color1  { background: #FDCDAC; }
-.color2  { background: #CBD5E8; }
-.color3  { background: #F4CAE4; }
-.color4  { background: #E6F5C9; }
-.color5  { background: #FFF2AE; }
-.color6  { background: #F1E2CC; }
-.color7  { background: #CCCCCC; }
+.excluded select, .excluded option, .excluded input {
+	text-decoration: none !important;
+}
 
 /* header/body/footer */
 #hd {
