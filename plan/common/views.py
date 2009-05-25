@@ -86,7 +86,7 @@ def getting_started(request, year=None, semester_type=None):
 
     context = Course.get_stats(semester=semester)
     context.update({
-        'color_map': ColorMap(),
+        'color_map': ColorMap(hex=True),
         'current': semester,
         'schedule_form': schedule_form,
     })
@@ -156,7 +156,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
         return response
 
     # Color mapping for the courses
-    color_map = ColorMap()
+    color_map = ColorMap(hex=True)
 
     group_forms = {}
 
