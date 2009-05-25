@@ -149,6 +149,9 @@ def schedule(request, year, semester_type, slug, advanced=False,
     if week:
         week = int(week)
 
+    if week is not None and (week <= 0 or week > 53):
+        raise Http404
+
     realm = get_realm(semester, slug)
     response = cache.get(url, realm=realm)
 
