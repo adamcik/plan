@@ -22,7 +22,7 @@
           width: $('#course').outerWidth()
         }){% if not advanced %}.focus(){% endif %};
 
-        function add_exclude_to_lectures() {
+        function add_hidden_to_lectures() {
             var input = $(this);
 
             if (input.is(':checked')) {
@@ -32,20 +32,32 @@
             }
         };
 
-        function add_exclude_to_courses() {
+        function add_delete_to_courses() {
             var input = $(this);
 
             if (input.is(':checked')) {
-                $('.course-' + input.val()).addClass('excluded');
+                $('.course-' + input.val()).addClass('delete');
             } else {
-                $('.course-' + input.val()).removeClass('excluded');
+                $('.course-' + input.val()).removeClass('delete');
             }
         };
 
-        $('#lectures input[name=exclude]:checked').each(add_exclude_to_lectures);
-        $('#lectures input[name=exclude]').click(add_exclude_to_lectures);
-        $('#courses input[name=course_remove]:checked').each(add_exclude_to_courses);
-        $('#courses input[name=course_remove]').click(add_exclude_to_courses);
+        function add_delete_to_deadlines() {
+            var input = $(this);
+
+            if (input.is(':checked')) {
+                $('.deadline-' + input.val()).addClass('delete');
+            } else {
+                $('.deadline-' + input.val()).removeClass('delete');
+            }
+        }
+
+        $('#lectures input[name=exclude]:checked').each(add_hidden_to_lectures);
+        $('#lectures input[name=exclude]').click(add_hidden_to_lectures);
+        $('#courses input[name=course_remove]:checked').each(add_delete_to_courses);
+        $('#courses input[name=course_remove]').click(add_delete_to_courses);
+        $('#deadlines input[name=deadline_remove]:checked').each(add_delete_to_deadlines);
+        $('#deadlines input[name=deadline_remove]').click(add_delete_to_deadlines);
 
         $('#change-groups div.groupbox').each(function() {
             var div = $(this);

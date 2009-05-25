@@ -165,7 +165,7 @@ td.error input, td.error select {
 .expired td, .hidden td {
 	color: #555753;
 }
-.excluded td, .excluded p, .excluded .course, .excluded .type, .excluded .room {
+.delete td, .delete p, .delete .course, .delete .type, .delete .room {
 	text-decoration: line-through;
 }
 

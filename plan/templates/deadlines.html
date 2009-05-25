@@ -1,7 +1,7 @@
-<h2 id="deadlines">Deadlines</h2>
+<h2>Deadlines</h2>
 {% if deadlines %}
     <form method="post" action="{% url new-deadline semester.year,semester.get_type_display,slug %}#deadlines">
-        <table>
+        <table id="deadlines">
             <thead>
                 <tr>
                     {% if advanced %}
