@@ -80,6 +80,7 @@
             {% include "add_courses.html" %}
         </div>
     {% endif %}
+    {% include "schedule_message.html" %}
 
     {% if group_help %}
         <div id="help">
@@ -91,7 +92,6 @@
 
     {% include "schedule_table.html" %}
     {% include "schedule_table_footer.html" %}
-    {% include "schedule_message.html" %}
 
     {% if courses %}
         <div class="yui-g">

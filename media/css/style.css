@@ -250,10 +250,13 @@ td.error input, td.error select {
 #help {
 	border: 1px solid #CCC;
 	background: #FFC;
-	padding: 1em 1em 0;
+	padding: 0.5em 0.5em 0;
 	margin-bottom: 1em;
 	-moz-border-radius: 5px;
 	-webkit-border-radius: 5px;
+}
+#help p {
+	margin-bottom: 0.5em;
 }
 
 #next, #previous {
