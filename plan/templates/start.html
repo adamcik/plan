@@ -25,11 +25,13 @@
 {% endstripspace %}"{% endblock %}
 
 {% block extrastyle %}
-    <style type="text/css">
-        {% for count,course_id,name,full_name in stats %}
-            .course-{{ course_id }} { background-color: {% color course_id %} }
-        {% endfor %}
-    </style>
+    {% if stats %}
+        <style type="text/css">
+            {% for count,course_id,name,full_name in stats %}
+                .course-{{ course_id }} { background-color: {% color course_id %} }
+            {% endfor %}
+        </style>
+    {% endif %}
 {% endblock %}
 
 {% block bd %}

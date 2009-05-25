@@ -2,11 +2,13 @@
 {% load color %}
 
 {% block extrahead %}
-    <style type="text/css">
-      {% for course in courses %}
-        .course-{{ course.id }} { background-color: {% color course.id %} }
-      {% endfor %}
-    </style>
+    {% if courses %}
+        <style type="text/css">
+          {% for course in courses %}
+            .course-{{ course.id }} { background-color: {% color course.id %} }
+          {% endfor %}
+        </style>
+    {% endif %}
 
     <meta name="robots" content="noindex, nofollow, noarchive" />
 
@@ -61,7 +63,7 @@
 
         $('#change-groups div.groupbox').each(function() {
             var div = $(this);
-            var a = $('<a class="tiny">Toggle</a>');
+            var a = $('<a class="tiny">Toggle<\/a>');
 
             div.css('position', 'relative')
             a.css({position: 'absolute', top: 0, right: 2, cursor: 'pointer'});
