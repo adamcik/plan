@@ -1,4 +1,3 @@
-{% load color %}
 {% load nbsp %}
 {% load strip %}
 
@@ -31,9 +30,10 @@
                                 rowspan="{{ c.rowspan|default:"1" }}"
                                 {% if c.lecture or c.time or forloop.last  %}
                                     class="
-                                        {% color c.lecture.course_id %}
                                         {% if c.lecture %}
                                             lecture
+                                            lecture-{{ c.lecture.id }}
+                                            course-{{ c.lecture.course_id }}
                                         {% endif %}
                                         {% if c.lecture.optional %}
                                             optional

@@ -1,5 +1,3 @@
-{% load color %}
-
 <h2>Exams</h2>
 {% if exams %}
     <table>
@@ -16,7 +14,7 @@
         </thead>
         <tbody>
             {% for exam in exams %}
-                <tr class="{% color exam.course_id %}" title="{{ exam.course.full_name }}">
+                <tr class="course-{{ exam.course_id }} exam-{{ exam.id }}" title="{{ exam.course.full_name }}">
                     <td>
                         {{ exam.exam_date }}
                     </td>

@@ -1,9 +1,7 @@
-{% load color %}
-
 <form action="{% url change-course semester.year,semester.get_type_display,slug %}" method="post">
-    <h2 id="courses">Courses</h2>
+    <h2>Courses</h2>
     {% if courses %}
-        <table>
+        <table id="courses">
             <thead>
                 <tr>
                     {% if advanced %}
@@ -17,7 +15,7 @@
             </thead>
             <tbody>
                 {% for course in courses %}
-                    <tr class="{% color course.id %}" title="{{ course.full_name }}">
+                    <tr class="course-{{ course.id }}" title="{{ course.full_name }}">
                         {% if advanced %}
                             <td>
                                 <input type="checkbox" name="course_remove" value="{{ course.id }}" class="noprint" />

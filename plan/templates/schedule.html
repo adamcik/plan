@@ -1,6 +1,13 @@
 {% extends "base.html" %}
+{% load color %}
 
 {% block extrahead %}
+    <style type="text/css">
+      {% for course in courses %}
+        .course-{{ course.id }} { background-color: {% color course.id %} }
+      {% endfor %}
+    </style>
+
     <meta name="robots" content="noindex, nofollow, noarchive" />
 
     <script src="{{ MEDIA_URL }}js/200902021345.js" type="text/javascript"></script>

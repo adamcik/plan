@@ -1,9 +1,7 @@
-{% load color %}
-
 {% if lectures %}
-    <h2 id="lectures">Lecture list</h2>
+    <h2>Lecture list</h2>
     <form action="{% url change-lectures semester.year,semester.get_type_display,slug %}" method="post">
-        <table>
+        <table id="lectures">
             <thead>
                 <tr>
                     {% if advanced %}
@@ -21,7 +19,7 @@
             </thead>
             <tbody>
                 {% for l in lectures %}
-                    <tr class="{% color l.course_id %}{% if l.exclude %} excluded{% endif %}" title="{{ l.course.full_name }}">
+                    <tr class="course-{{ l.course_id }} lecture-{{ l.id }}{% if l.exclude %} excluded{% endif %}" title="{{ l.course.full_name }}">
                         {% if advanced %}
                             <td><input type="checkbox" name="exclude" value="{{ l.id }}"{% if l.exclude %} checked="checked"{% endif %} class="noprint" /></td>
                         {% endif %}
