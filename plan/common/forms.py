@@ -51,7 +51,7 @@ class DeadlineForm(forms.models.ModelForm):
 
 class ScheduleForm(forms.Form):
     slug = forms.CharField()
-    semester = forms.ModelChoiceField(Semester.objects.all())
+    semester = forms.ModelChoiceField(Semester.objects.all(), empty_label=None)
 
     def __init__(self, *args, **kwargs):
         qs = kwargs.pop('queryset', None)
@@ -68,6 +68,8 @@ class ScheduleForm(forms.Form):
 
         if len(qs) == 1:
             self.fields['semester'].widget = forms.HiddenInput()
+
+        self.fields['semester'].queryset = qs
 
         self.fields['slug'].widget.attrs['size'] = 12
         self.fields['slug'].widget.attrs['id'] = 's'
