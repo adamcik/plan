@@ -11,12 +11,14 @@ def do_stripspace(parser, token):
     return StripNode(nodelist)
 
 class StripNode(template.Node):
+    regexp = re.compile('\s+')
+
     def __init__(self, nodelist):
         self.nodelist = nodelist
 
     def render(self, context):
         output = self.nodelist.render(context)
-        return re.sub('\s+', ' ', output).strip()
+        return re.sub(self.regexp, ' ', output).strip()
 
 @register.tag(name='stripblank')
 def do_stripblank(parser, token):
