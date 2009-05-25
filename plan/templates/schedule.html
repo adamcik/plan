@@ -26,9 +26,9 @@
             var input = $(this);
 
             if (input.is(':checked')) {
-                $('.lecture-' + input.val()).addClass('excluded');
+                $('.lecture-' + input.val()).addClass('hidden');
             } else {
-                $('.lecture-' + input.val()).removeClass('excluded');
+                $('.lecture-' + input.val()).removeClass('hidden');
             }
         };
 
@@ -49,7 +49,10 @@
 
         $('#change-groups div.groupbox').each(function() {
             var div = $(this);
-            var a = $('<a style="float: right" class="small" href="#">Toggle</a>');
+            var a = $('<a class="tiny">Toggle</a>');
+
+            div.css('position', 'relative')
+            a.css({position: 'absolute', top: 0, right: 2, cursor: 'pointer'});
 
             a.toggle(function() { div.find(':checkbox').removeAttr('checked'); return false; },
                      function() { div.find(':checkbox').attr('checked', 'checked'); return false; });

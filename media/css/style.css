@@ -104,6 +104,9 @@ label {
 .small {
 	font-size: 93%; /* 12px */
 }
+.tiny {
+	font-size: 77%;  /* 10px */
+}
 
 .odd {
   background: #fafafa;
@@ -159,14 +162,11 @@ td.error input, td.error select {
 	background: #FCC;
 }
 /* Indicate that things have expired or are excluded */
-.expired td {
+.expired td, .hidden td {
 	color: #555753;
 }
-.excluded td, .excluded {
+.excluded td, .excluded p, .excluded .course, .excluded .type, .excluded .room {
 	text-decoration: line-through;
-}
-.excluded select, .excluded option, .excluded input {
-	text-decoration: none !important;
 }
 
 /* header/body/footer */
