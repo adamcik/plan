@@ -164,7 +164,7 @@ td.error input, td.error select {
 	background: #FCC;
 }
 /* Indicate that things have expired or are excluded */
-.expired td, .hidden td {
+.expired td, .hidden td, .hidden .course, .hidden .type, .hidden .room {
 	color: #555753;
 }
 .delete td, .delete p, .delete .course, .delete .type, .delete .room {
