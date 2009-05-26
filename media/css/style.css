@@ -126,29 +126,31 @@ p.right {
 	padding-left: 18px;
 }
 
-.icon.start    {
+.icon.start {
 	background-position: right -650px;
 	padding-left: 0;
 	padding-right: 18px;
 }
+.large .icon.start {
+	background-position: right -649px;
+}
 
-.icon.copy     { background-position: 0 -95px; }
-.icon.warning  { background-position: 0 -206px; }
-.icon.advanced { background-position: 0 -317px; }
-.icon.gcal     { background-position: 0 -428px; }
-.icon.pdf      { background-position: 0 -539px; }
-.icon.list     { background-position: 0 -761px; }
-.icon.week     { background-position: 0 -872px; }
-.icon.add      { background-position: 0 -983px; }
-.icon.link     { background-position: 0 -1094px; }
-.icon.tips     { background-position: 0 -1205px; }
-.icon.save     { background-position: 0 -1316px; }
-.icon.hide     { background-position: 0 -1427px; }
-.icon.ical     { background-position: 0 -1538px; }
-.icon.error    { background-position: 0 -1649px; }
-.icon.name     { background-position: 0 -1760px; }
-.icon.remove   { background-position: 0 -1871px; }
-
+.icon.copy     { background-position: 0 -95px;   } .large .icon.copy     { background-position: 0 -94px;   }
+.icon.warning  { background-position: 0 -206px;  } .large .icon.warning  { background-position: 0 -205px;  }
+.icon.advanced { background-position: 0 -317px;  } .large .icon.advanced { background-position: 0 -316px;  }
+.icon.gcal     { background-position: 0 -428px;  } .large .icon.gcal     { background-position: 0 -427px;  }
+.icon.pdf      { background-position: 0 -539px;  } .large .icon.pdf      { background-position: 0 -538px;  }
+.icon.list     { background-position: 0 -761px;  } .large .icon.list     { background-position: 0 -760px;  }
+.icon.week     { background-position: 0 -872px;  } .large .icon.week     { background-position: 0 -871px;  }
+.icon.add      { background-position: 0 -983px;  } .large .icon.add      { background-position: 0 -982px;  }
+.icon.link     { background-position: 0 -1094px; } .large .icon.link     { background-position: 0 -1093px; }
+.icon.tips     { background-position: 0 -1205px; } .large .icon.tips     { background-position: 0 -1204px; }
+.icon.save     { background-position: 0 -1316px; } .large .icon.save     { background-position: 0 -1315px; }
+.icon.hide     { background-position: 0 -1427px; } .large .icon.hide     { background-position: 0 -1426px; }
+.icon.ical     { background-position: 0 -1538px; } .large .icon.ical     { background-position: 0 -1537px; }
+.icon.error    { background-position: 0 -1649px; } .large .icon.error    { background-position: 0 -1648px; }
+.icon.name     { background-position: 0 -1760px; } .large .icon.name     { background-position: 0 -1759px; }
+.icon.remove   { background-position: 0 -1871px; } .large .icon.remove   { background-position: 0 -1870px; }
 
 /* error classes */
 .errorlist {
