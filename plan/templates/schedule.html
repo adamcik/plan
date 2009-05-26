@@ -17,7 +17,7 @@
       $(function() {
         $('#course').autocomplete('{% url course-query semester.year,semester.get_type_display %}', {
           max: 100,
-          minChars: 2,
+          minChars: 3,
           multiple: true,
           formatItem: function(row) { return row[0] + ': ' + row[1]},
           formatResult: function(row) { return row[0] },
