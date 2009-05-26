@@ -101,7 +101,7 @@ def course_query(request, year, semester_type):
     limit = request.GET.get('limit', '10')
     query = request.GET.get('q', '').strip()
 
-    cache_key = ':'.join([request.path, query, limit])
+    cache_key = ':'.join([request.path, slugify(query), limit])
     cache_key = cache_key.lower()
 
     if limit > settings.TIMETABLE_AJAX_LIMIT:
@@ -121,6 +121,8 @@ def course_query(request, year, semester_type):
     courses = Course.objects.search(semester.year, semester.type,
         query, limit)
 
+    # FIXME use template instead
+    # FIXME truncate words 3
     for course in courses:
         response.write('%s|%s\n' % (course.name, course.full_name))
 
