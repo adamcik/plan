@@ -1,6 +1,8 @@
 from django.db import models, connection
 from django.db.models import Q
 
+from plan.common.utils import build_search
+
 class LectureManager(models.Manager):
     def get_lectures(self, year, semester_type, slug=None, week=None, course=None):
         """
@@ -165,12 +167,17 @@ class CourseManager(models.Manager):
         return cursor.fetchall()
 
     def search(self, year, semester_type, query, limit=10):
-        name_or_full_name = Q(name__icontains=query) | Q(full_name__icontains=query)
+        search_filter = build_search(query, ['name__icontains', 'full_name__icontains', 'userset__name__exact'])
 
-        return self.get_query_set().filter(name_or_full_name,
-            name__regex='[0-9]+', # FIXME assumes course codes must contain numbers
-            semesters__year__exact=year,
-            semesters__type__exact=semester_type).order_by('name')[:limit]
+        qs = self.get_query_set()
+        qs = qs.filter(search_filter)
+        qs = qs.filter(name__regex='[0-9]+', # FIXME assumes course codes must contain numbers
+                       semesters__year__exact=year,
+                       semesters__type__exact=semester_type)
+        qs = qs.distinct()
+        qs = qs.order_by('name')
+
+        return qs[:limit]
 
 
 class UserSetManager(models.Manager):
