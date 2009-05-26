@@ -66,7 +66,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'plan.common.middleware.CacheMiddleware',
     'plan.common.middleware.UserBasedExceptionMiddleware',
-    'plan.common.middleware.TimeViewMiddleware',
     'plan.common.middleware.PlainContentMiddleware',
 )
 

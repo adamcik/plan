@@ -1,14 +1,13 @@
 # pylint: disable-msg=W0232, C0111
 
-from time import time
 import sys
 import re
 import logging
+from time import time
 
 from django.conf import settings
 from django.views.debug import technical_500_response
-
-stats = re.compile(r'<!--\s*TIME\s*-->')
+from django.http import HttpResponseServerError
 
 class InternalIpMiddleware(object):
     '''Middleware that adds IP to INTERNAL ips if user is superuser'''
@@ -26,21 +25,6 @@ class UserBasedExceptionMiddleware(object):
     def process_exception(self, request, exception):
         if request.user.is_superuser:
             return technical_500_response(request, *sys.exc_info())
-
-class TimeViewMiddleware(object):
-    '''Shows view timing info if cookie or get variable is set'''
-
-    def process_view(self, request, view_func, view_args, view_kwargs):
-        if 'time' not in request.COOKIES and 'time' not in request.GET:
-            return None
-
-        start = time()
-        response = view_func(request, *view_args, **view_kwargs)
-        total = (time() - start) * 1000
-
-        response.content = stats.sub('%.2f ms' % total, response.content)
-
-        return response
 
 class CacheMiddleware(object):
     '''Attaches either a real or dummy cache instance to our request, cache

@@ -285,13 +285,6 @@ td.error input, td.error select {
 	padding-right: 0.1em;
 }
 
-#debug {
-	position: absolute;
-	top: 0;
-	right: 0;
-	color: #D3D7CF;
-}
-
 /* schedule styling */
 
 /* cell contents */
