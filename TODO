@@ -1,8 +1,5 @@
 Current:
 --------
-o Bugs
-  - ÆØÅ in ajax lookup!?
-
 o Refactor
   - Review data model
     - Don't have unique week anymore, simply have week with foreign key to
@@ -60,6 +57,10 @@ o UI
   - croudsource new lecture and deadline data
   - Look at lupy, http://www.rkblog.rk.edu.pl/w/p/django-lupy/
   - add feedback field
+  - allow for iframes embeding?
+
+* doc
+  - write docs in sphinx
 
 
 Ideas from IME:
