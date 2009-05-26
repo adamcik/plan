@@ -1,6 +1,34 @@
+from operator import and_, or_
+
 from django.conf import settings
 from django.http import HttpResponseServerError
 from django.template import Context, loader
+from django.db.models import Q
+from django.utils.text import smart_split
+
+def build_search(searchstring, filters, max_query_length=4, combine=and_):
+    count = 0
+    search_filter = Q()
+
+    for word in smart_split(searchstring):
+        if word[0] in ['"', "'"]:
+            if word[0] == word[-1]:
+                word = word[1:-1]
+            else:
+                word = word[1:]
+
+        if count > max_query_length:
+            break
+
+        local_filter = Q()
+        for filter in filters:
+            local_filter |= Q(**{filter: word})
+
+        search_filter = combine(search_filter, local_filter)
+        count += 1
+
+    return search_filter
+
 
 def server_error(request, template_name='500.html'):
     """
