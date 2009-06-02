@@ -235,11 +235,14 @@ def schedule(request, year, semester_type, slug, advanced=False,
             selected_groups = UserSet.get_groups(year, semester.type, slug)
 
             for u in usersets:
-                if not course_groups.get(u.course_id, False):
+                userset_groups = list(course_groups.get(u.course_id, []))
+                initial_groups = list(selected_groups.get(u.id, []))
+
+                if not userset_groups:
                     continue
 
                 group_forms[u.course_id] = GroupForm(course_groups[u.course_id],
-                        initial={'groups': selected_groups.get(u.id, [])},
+                        initial={'groups': initial_groups},
                         prefix=u.course_id)
 
         # Set up group forms and course name forms
