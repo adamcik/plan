@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 import logging
-from urllib import urlopen
+from urllib2 import urlopen, HTTPError
 from xml.dom import minidom
 from dateutil.parser import parse
 
@@ -30,7 +30,14 @@ def update_exams(year, semester, url=None):
 
     logger.info('Getting url: %s', url)
 
-    dom = minidom.parseString(urlopen(url).read())
+    try:
+        xml_data = urlopen(url).read()
+    except HTTPError, e:
+        logger.error('XML retrival failed: %s', e)
+        return
+
+    dom = minidom.parseString(xml_data)
+
 
     for n in dom.getElementsByTagName('dato_row'):
         course_code = n.getElementsByTagName('emnekode')[0].firstChild
