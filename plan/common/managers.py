@@ -1,3 +1,5 @@
+#encoding: utf-8
+
 from django.db import models, connection
 from django.db.models import Q
 
@@ -162,7 +164,7 @@ class CourseManager(models.Manager):
                 (e.course_id = c.id AND e.semester_id = s.id)
             WHERE s.year = %%s AND s.type = %%s AND c.name %s
             ORDER BY c.name, e.exam_date, e.exam_time, e.type;
-        ''' % connection.operators['regex'], [year, semester_type, '^\\w+\\d+$'])
+        ''' % connection.operators['regex'], [year, semester_type, '[0-9]+'])
 
         return cursor.fetchall()
 
