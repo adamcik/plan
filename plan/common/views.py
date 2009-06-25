@@ -190,6 +190,10 @@ def schedule(request, year, semester_type, slug, advanced=False,
     if schedule_weeks:
         schedule_weeks = range(schedule_weeks[0], schedule_weeks[-1]+1)
 
+    if week is not None and week not in schedule_weeks:
+        return HttpResponseRedirect(reverse('schedule-all',
+                args=[semester.year,semester.get_type_display(),slug]))
+
     try:
         next_week = schedule_weeks[schedule_weeks.index(week)+1]
     except (IndexError, ValueError):
