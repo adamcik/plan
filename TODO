@@ -10,6 +10,9 @@ o Refactor
   - Add exam type to data model
   - Add exams to timetable display, ie. make an abstract event for lectures,
     deadlines and exams.
+  - How valid course codes are deterimined [\wÆØÅ]+\d+ ? use manager to control
+    this ?
+  - Settings should provide usable out of the box defaults
 
 o Optimize
   - Optimize db big time with respect to indexes!
@@ -26,7 +29,8 @@ o deadlines
 o messages
   - warn about colisions for exam dates
   - Warning that class was available for previous semester
-  - Proper user feedback
+  - Proper user feedback - site notifications etc
+  - Feedbackform
 
 o ical
   - recurance
