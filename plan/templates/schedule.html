@@ -14,66 +14,68 @@
 
     <script src="{{ MEDIA_URL }}js/200902021345.js" type="text/javascript"></script>
     <script type="text/javascript">
-      $(function() {
-        $('#course').autocomplete('{% url course-query semester.year,semester.get_type_display %}', {
-          max: 100,
-          minChars: 3,
-          multiple: true,
-          formatItem: function(row) { return row[0] + ': ' + row[1]},
-          formatResult: function(row) { return row[0] },
-          width: $('#course').outerWidth()
-        }){% if not advanced %}.focus(){% endif %};
+        $(function() {
+          $('#course').autocomplete('{% url course-query semester.year,semester.get_type_display %}', {
+            max: 100,
+            minChars: 3,
+            multiple: true,
+            formatItem: function(row) { return row[0] + ': ' + row[1]},
+            formatResult: function(row) { return row[0] },
+            width: $('#course').outerWidth()
+          }){% if not advanced %}.focus(){% endif %};
 
-        function add_hidden_to_lectures() {
-            var input = $(this);
+          function add_hidden_to_lectures() {
+              var input = $(this);
 
-            if (input.is(':checked')) {
-                $('.lecture-' + input.val()).addClass('hidden');
-            } else {
-                $('.lecture-' + input.val()).removeClass('hidden');
-            }
-        };
+              if (input.is(':checked')) {
+                  $('.lecture-' + input.val()).addClass('hidden');
+              } else {
+                  $('.lecture-' + input.val()).removeClass('hidden');
+              }
+          };
 
-        function add_delete_to_courses() {
-            var input = $(this);
+          function add_delete_to_courses() {
+              var input = $(this);
 
-            if (input.is(':checked')) {
-                $('.course-' + input.val()).addClass('delete');
-            } else {
-                $('.course-' + input.val()).removeClass('delete');
-            }
-        };
+              if (input.is(':checked')) {
+                  $('.course-' + input.val()).addClass('delete');
+              } else {
+                  $('.course-' + input.val()).removeClass('delete');
+              }
+          };
 
-        function add_delete_to_deadlines() {
-            var input = $(this);
+          function add_delete_to_deadlines() {
+              var input = $(this);
 
-            if (input.is(':checked')) {
-                $('.deadline-' + input.val()).addClass('delete');
-            } else {
-                $('.deadline-' + input.val()).removeClass('delete');
-            }
-        }
+              if (input.is(':checked')) {
+                  $('.deadline-' + input.val()).addClass('delete');
+              } else {
+                  $('.deadline-' + input.val()).removeClass('delete');
+              }
+          }
 
-        $('#lectures input[name=exclude]:checked').each(add_hidden_to_lectures);
-        $('#lectures input[name=exclude]').click(add_hidden_to_lectures);
-        $('#courses input[name=course_remove]:checked').each(add_delete_to_courses);
-        $('#courses input[name=course_remove]').click(add_delete_to_courses);
-        $('#deadlines input[name=deadline_remove]:checked').each(add_delete_to_deadlines);
-        $('#deadlines input[name=deadline_remove]').click(add_delete_to_deadlines);
+          $('#lectures input[name=exclude]:checked').each(add_hidden_to_lectures);
+          $('#lectures input[name=exclude]').click(add_hidden_to_lectures);
+          $('#courses input[name=course_remove]:checked').each(add_delete_to_courses);
+          $('#courses input[name=course_remove]').click(add_delete_to_courses);
+          $('#deadlines input[name=deadline_remove]:checked').each(add_delete_to_deadlines);
+          $('#deadlines input[name=deadline_remove]').click(add_delete_to_deadlines);
 
-        $('#change-groups div.groupbox').each(function() {
-            var div = $(this);
-            var a = $('<a class="tiny">Toggle<\/a>');
+          $('#change-groups div.groupbox').each(function() {
+              var div = $(this);
+              var a = $(document.createElement('a'));
+              a.addClass("tiny")
+              a.text("Toggle");
 
-            div.css('position', 'relative')
-            a.css({position: 'absolute', top: 0, right: 2, cursor: 'pointer'});
+              div.css('position', 'relative')
+              a.css({position: 'absolute', top: 0, right: 2, cursor: 'pointer'});
 
-            a.toggle(function() { div.find(':checkbox').removeAttr('checked'); return false; },
-                     function() { div.find(':checkbox').attr('checked', 'checked'); return false; });
+              a.toggle(function() { div.find(':checkbox').removeAttr('checked'); return false; },
+                       function() { div.find(':checkbox').attr('checked', 'checked'); return false; });
 
-            div.prepend(a);
-        })
-      });
+              div.prepend(a);
+          })
+        });
     </script>
 {% endblock %}
 
