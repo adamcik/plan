@@ -1,7 +1,7 @@
-{% extends "base.html" %}
+{% extends "base_site.html" %}
 {% load color %}
 
-{% block extrahead %}
+{% block extrastyle %}
     {% if courses %}
         <style type="text/css">
           {% for course in courses %}
@@ -9,6 +9,10 @@
           {% endfor %}
         </style>
     {% endif %}
+{% endblock %}
+
+{% block extrahead %}
+    {{ block.super }}
 
     <meta name="robots" content="noindex, nofollow, noarchive" />
 
