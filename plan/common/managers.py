@@ -169,7 +169,9 @@ class CourseManager(models.Manager):
         return cursor.fetchall()
 
     def search(self, year, semester_type, query, limit=10):
-        search_filter = build_search(query, ['name__icontains', 'full_name__icontains', 'userset__name__exact'])
+        search_filter = build_search(query, ['name__icontains',
+                                             'full_name__icontains',
+                                             'userset__name__exact'])
 
         qs = self.get_query_set()
         qs = qs.filter(search_filter)
