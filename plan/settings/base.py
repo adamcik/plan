@@ -4,7 +4,7 @@
 import os
 import socket
 
-BASE_PATH = os.path.dirname(os.path.abspath(__file__)) + '/../..'
+BASE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
 
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
@@ -93,11 +93,32 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.databrowse',
     'django.contrib.contenttypes',
+    'compress',
     'plan.common',
     'plan.scrape',
     'plan.ical',
     'plan.pdf',
 )
+
+COMPRESS = True
+COMPRESS_VERSION = True
+COMPRESS_CSS_FILTERS = None
+COMPRESS_CSS = {
+    'screen': {
+        'source_filenames': ('css/reset-fonts-grids.css',
+                             'css/base-min.css',
+                             'css/style.css',),
+        'output_filename': 'compressed/screen.r?.css',
+    },
+}
+COMPRESS_JS = {
+    'all': {
+        'source_filenames': ('js/jquery-1.3.1.min.js',
+                             'js/jquery.autocomplete.min.js',
+                             'js/scripts.js'),
+        'output_filename': 'compressed/all.r?.js',
+    },
+}
 
 #TEST_RUNNER = 'plan.common.test_runner.test_runner_with_coverage'
 
