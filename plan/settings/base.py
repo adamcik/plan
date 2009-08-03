@@ -1,15 +1,19 @@
 # pylint: disable-msg=W0614, C0111
 # Django settings for plan project.
 
-import os
+from os.path import realpath, join, dirname
 import socket
 
-BASE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
+BASE_PATH = realpath(join(dirname(__file__), '..', '..'))
 
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+
 LOGGING_OUTPUT_ENABLED = DEBUG
 LOGGING_LOG_SQL = DEBUG
+
+DATABASE_ENGINE = 'sqlite3'
+DATABASE_NAME = join(BASE_PATH, 'plan.sqlite')
 
 USE_ETAGS = True
 

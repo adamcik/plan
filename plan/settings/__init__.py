@@ -1,2 +1,6 @@
 from plan.settings.base import *
-from plan.settings.local import *
+
+try:
+    from plan.settings.local import *
+except ImportError:
+    pass
