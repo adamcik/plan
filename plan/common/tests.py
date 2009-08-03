@@ -11,27 +11,17 @@ from plan.common.cache import get_realm, clear_cache, cache
 # FIXME test that api limits things to one semester
 # FIXME test get_stats
 
-class MockDatetime(datetime.datetime):
-    @classmethod
-    def now(cls, tz=None):
-        return datetime.datetime(2009, 1, 1, tzinfo=tz)
-
 class BaseTestCase(TestCase):
 
     def setUp(self):
-        self.datetime = datetime.datetime
-        datetime.datetime = MockDatetime
+        self.semester = Semester.objects.get(type=Semester.SPRING, year=2009)
 
-        self.semester = Semester.current()
         self.realm = get_realm(self.semester, 'adamcik')
         self.default_args = [
                 self.semester.year,
                 self.semester.get_type_display(),
                 'adamcik'
             ]
-
-    def tearDown(self):
-        datetime.datetime = self.datetime
 
     def url(self, name, *args):
         if args:
@@ -76,6 +66,7 @@ class ViewTestCase(BaseTestCase):
         realm = get_realm(self.semester)
         cached_response = cache.get('frontpage', realm=realm)
 
+        self.assertEquals(True, cached_response is not None)
         self.assertEquals(response.content, cached_response.content)
 
         # Check that cache gets cleared
@@ -186,8 +177,8 @@ class ViewTestCase(BaseTestCase):
 
             response = self.client.post(url, data)
 
-            self.assert_(response['Location'].endswith(original_url))
             self.assertEquals(response.status_code, 302)
+            self.assert_(response['Location'].endswith(original_url))
 
             cache_response = self.get(original_url)
             self.assertEquals(cache_response, None)
