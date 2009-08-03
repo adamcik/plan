@@ -7,6 +7,9 @@ from django.template.defaultfilters import time as time_filter
 from plan.common.managers import LectureManager, DeadlineManager, \
         ExamManager, CourseManager, UserSetManager
 
+# To allow for overriding of the codes idea of now() for tests
+now = datetime.now
+
 class UserSet(models.Model):
     slug = models.SlugField()
     course = models.ForeignKey('Course')
@@ -197,16 +200,16 @@ class Semester(models.Model):
 
     @staticmethod
     def current(from_db=False, early=False):
-        now = datetime.now()
+        current_time = now()
 
         if early:
-            now += timedelta(weeks=2)
+            current_time += timedelta(weeks=2)
 
         # Default to current semester
-        if now.month <= 6:
-            current = Semester(type=Semester.SPRING, year=now.year)
+        if current_time.month <= 6:
+            current = Semester(type=Semester.SPRING, year=current_time.year)
         else:
-            current = Semester(type=Semester.FALL, year=now.year)
+            current = Semester(type=Semester.FALL, year=current_time.year)
 
         if not from_db:
             return current
@@ -307,7 +310,7 @@ class Lecture(models.Model):
 class Deadline(models.Model):
     userset = models.ForeignKey('UserSet')
 
-    date = models.DateField(default=datetime.now().date()+timedelta(days=7))
+    date = models.DateField(default=now().date()+timedelta(days=7))
     time = models.TimeField(null=True, blank=True)
     task = models.CharField(max_length=255)
 
@@ -329,16 +332,16 @@ class Deadline(models.Model):
 
     @property
     def seconds(self):
-        td = self.datetime - datetime.now()
+        td = self.datetime - now()
 
         return td.days * 3600 * 24 + td.seconds
 
     @property
     def expired(self):
         if self.time:
-            return datetime.combine(self.date, self.time) < datetime.now()
+            return datetime.combine(self.date, self.time) < now()
         else:
-            return self.date <= datetime.now().date()
+            return self.date <= now().date()
 
     @property
     def slug(self):

@@ -26,6 +26,9 @@ from plan.common.cache import clear_cache, get_realm, cache
 # FIXME Split views that do multiple form handling tasks into seperate views
 # that call the top one.
 
+# To allow for overriding of the codes idea of now() for tests
+now = datetime.now
+
 def shortcut(request, slug):
     '''Redirect users to their timetable for the current semester'''
 
@@ -143,7 +146,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
         url = request.path
     elif not all and not week and not advanced:
         # Start new week on saturdays
-        week = (datetime.now() + timedelta(days=2)).isocalendar()[1]
+        week = (now() + timedelta(days=2)).isocalendar()[1]
         url = reverse('schedule-week', args=[semester.year, semester.type, slug, week])
     else:
         url = request.path

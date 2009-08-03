@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from copy import copy
 
 from django.test import TestCase
@@ -14,6 +14,10 @@ from plan.common.cache import get_realm, clear_cache, cache
 class BaseTestCase(TestCase):
 
     def setUp(self):
+        from plan.common import models, views
+        models.now = lambda: datetime(2009, 1, 1)
+        views.now = lambda: datetime(2009, 1, 1)
+
         self.semester, created = Semester.objects.get_or_create(type=Semester.SPRING, year=2009)
 
         self.realm = get_realm(self.semester, 'adamcik')
