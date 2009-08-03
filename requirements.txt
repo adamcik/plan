@@ -1,0 +1,2 @@
+-e git://github.com/pelme/django-compress.git#egg=compress
+-e hg+http://bitbucket.org/andrewgodwin/south/@stableish#egg=south
