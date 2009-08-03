@@ -1,4 +1,7 @@
-#TEST_RUNNER = 'plan.common.test_runner.test_runner_with_coverage'
+from plan.settings.base import *
+from plan.settings.local import *
+
+TEST_RUNNER = 'plan.common.test_runner.test_runner_with_coverage'
 
 COVERAGE_MODULES = (
     'plan.common.admin',
@@ -12,8 +15,8 @@ COVERAGE_MODULES = (
     'plan.common.urls',
     'plan.common.utils',
     'plan.common.views',
-#    'plan.scrape.db',
-#    'plan.scrape.studweb',
+    'plan.scrape.db',
+    'plan.scrape.studweb',
     'plan.ical.urls',
     'plan.ical.views',
     'plan.pdf.urls',
