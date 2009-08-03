@@ -18,7 +18,7 @@ class BaseTestCase(TestCase):
         models.now = lambda: datetime(2009, 1, 1)
         views.now = lambda: datetime(2009, 1, 1)
 
-        self.semester, created = Semester.objects.get_or_create(type=Semester.SPRING, year=2009)
+        self.semester = Semester.current()
 
         self.realm = get_realm(self.semester, 'adamcik')
         self.default_args = [
