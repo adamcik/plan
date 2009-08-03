@@ -1,3 +1,12 @@
--e git://github.com/pelme/django-compress.git#egg=compress
--e hg+http://bitbucket.org/andrewgodwin/south/@stableish#egg=south
--e svn+http://code.djangoproject.com/svn/django/tags/releases/1.1#egg=django
+yolk                   # Util to list installed packages
+
+Django == 1.0.3        # Django webframework
+psycopg2               # Postgres database adapter
+python-memcached       # Memcache client library
+
+vobject                # Ical generation
+                       # PDF generation
+http://www.reportlab.org/ftp/ReportLab_2_2.tgz
+
+django-compress        # CSS and JS compression
+south                  # Database migrations
