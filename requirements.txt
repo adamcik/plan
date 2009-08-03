@@ -1,4 +1,5 @@
 yolk                   # Util to list installed packages
+ipython                # Better interactive python shell
 
 Django == 1.0.3        # Django webframework
 psycopg2               # Postgres database adapter
