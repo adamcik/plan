@@ -47,6 +47,8 @@ class EmptyViewTestCase(BaseTestCase):
             self.assertEquals(response.status_code, 200)
 
             cached_response = self.get(cache_url)
+
+            self.assertEquals(True, cached_response is not None)
             self.assertEquals(response.content, cached_response.content)
 
             # Repeat to trim cache code

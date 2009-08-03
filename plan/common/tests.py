@@ -14,7 +14,7 @@ from plan.common.cache import get_realm, clear_cache, cache
 class BaseTestCase(TestCase):
 
     def setUp(self):
-        self.semester = Semester.objects.get(type=Semester.SPRING, year=2009)
+        self.semester, created = Semester.objects.get_or_create(type=Semester.SPRING, year=2009)
 
         self.realm = get_realm(self.semester, 'adamcik')
         self.default_args = [
