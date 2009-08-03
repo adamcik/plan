@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+
+{% load compressed %}
 {% load google %}
 
 {% block title %}
@@ -6,7 +8,7 @@
 {% endblock %}
 
 {% block style %}
-    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/200906022348.css" />
+    {% compressed_css 'screen' %}
 {% endblock %}
 
 {% block extrahead %}
@@ -14,6 +16,7 @@
 {% endblock %}
 
 {% block extrascript %}
+    {% compressed_js 'all' %}
     {% googleanalytics %}
 {% endblock %}
 
