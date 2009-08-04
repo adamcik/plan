@@ -2,9 +2,8 @@
 
 from django import forms
 from django.db.models import Q
-from django.template.defaultfilters import slugify # FIXME replace
 
-#from plan.common.templatetags.slugify import slugify
+from plan.common.templatetags.slugify import slugify
 from plan.common.models import Deadline, Semester
 
 class CourseNameForm(forms.Form):
