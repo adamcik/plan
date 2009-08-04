@@ -12,15 +12,15 @@ class CourseNameForm(forms.Form):
                            required=False)
 
     def clean_name(self):
-        name = self.cleaned_data['name']
+        name = self.cleaned_data['name'].strip()
 
         if len(name) > 40:
-            name = '%s...' % name[:40].rstrip()
+            name = '%s...' % name[:40]
 
         return name
 
 class GroupForm(forms.Form):
-    '''Form for selecting groups for a course (has a custom init)'''
+    '''Form for selecting groups for a course'''
     groups = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple)
 
     def __init__(self, choices, *args, **kwargs):
@@ -53,6 +53,8 @@ class ScheduleForm(forms.Form):
     semester = forms.ModelChoiceField(Semester.objects.all(), empty_label=None)
 
     def __init__(self, *args, **kwargs):
+        '''Display form for choosing schedule. If only one semester is
+           available hide to field.'''
         qs = kwargs.pop('queryset', None)
 
         super(ScheduleForm, self).__init__(*args, **kwargs)
@@ -77,6 +79,6 @@ class ScheduleForm(forms.Form):
         slug = slugify(self.cleaned_data['slug'])
 
         if not slug:
-            raise forms.ValidationError('Invalid slug')
+            raise forms.ValidationError('Invalid value.')
 
         return slug
