@@ -15,6 +15,11 @@
     <meta name="robots" content="noindex, nofollow, noarchive" />
 {% endblock %}
 
+{% block extrascript %}
+    <script type="text/javascript">var autocomplete_url = "{% url course-query semester.year,semester.get_type_display %}";</script>
+    {{ block.super }}
+{% endblock %}
+
 {% block title %}
     {{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %}
     {{ semester.get_type_display }}
