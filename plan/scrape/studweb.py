@@ -72,6 +72,11 @@ def update_exams(year, semester, url=None):
         if handin_date:
             exam_kwargs['exam_date'] = parse(handin_date.nodeValue).date()
 
+        if 'exam_date' not in exam_kwargs:
+            logger.warning("%s's exam does not have a date." % (course_code.nodeValue))
+            n.unlink()
+            continue
+
         if exam_kwargs['exam_date'] < first_day:
             logger.warning("%s's exam is in the past - %s" % (course_code.nodeValue, exam_kwargs['exam_date']))
             n.unlink()
