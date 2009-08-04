@@ -227,8 +227,13 @@ def update_courses(year, semester_type, prefix=None):
     db = _connection()
     c = db.cursor()
 
-    c.execute("""SELECT emnekode,emnenavn,vekt FROM %s_fs_emne WHERE emnekode
-            NOT LIKE '#%%'""" % prefix)
+    if year > 2009 or (year == 2009 and semester_type == Semester.FALL):
+        vekt = 'en_navn'
+    else:
+        vekt = 'vekt'
+
+    c.execute("""SELECT emnekode,emnenavn,%s as vekt FROM %s_fs_emne WHERE emnekode
+            NOT LIKE '#%%'""" % (vekt, prefix))
 
     for code, name, points in c.fetchall():
         if not code.strip():
@@ -242,6 +247,9 @@ def update_courses(year, semester_type, prefix=None):
         course, created = Course.objects.get_or_create(name=code)
 
         if points:
+            if vekt == 'en_navn':
+                points = points.replace('SP', '')
+
             course.points = Decimal(points.strip().replace(',', '.'))
         course.full_name = name
         course.save()
