@@ -97,7 +97,6 @@ Long term:
 Won't fix:
 ----------
 * User wants "Coursne name (course code)" for ical summary (superseeded by alias)
-* AJAX helper for adding courses?
 * Allow setting of course urls? addtional urls?
 * Better user feedbacks when stuff can't be added (add
   'message:<slug>:<remote_addr>' in cache. not sure about remote_addr)

@@ -2,6 +2,7 @@ from datetime import datetime
 from copy import copy
 
 from django.test import TestCase
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils.datastructures import MultiValueDict
 
@@ -11,8 +12,21 @@ from plan.common.cache import get_realm, clear_cache, cache
 # FIXME test that api limits things to one semester
 # FIXME test get_stats
 
-class BaseTestCase(TestCase):
+class NotUsingDummyCache(TestCase):
+    def testNotUsingDummyCache(self):
+        self.assertEquals(False, 'dummy' in settings.CACHE_BACKEND)
 
+        self.assertEquals(None, cache.get('test-value'))
+
+        cache.set('test-value', 'foo')
+
+        self.assertEquals('foo', cache.get('test-value'))
+
+        cache.delete('test-value')
+
+        self.assertEquals(None, cache.get('test-value'))
+
+class BaseTestCase(TestCase):
     def setUp(self):
         from plan.common import models, views
         models.now = lambda: datetime(2009, 1, 1)
