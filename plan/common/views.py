@@ -10,7 +10,6 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
-from django.template.defaultfilters import slugify # FIXME Replace with custom slugify
 from django.views.generic.list_detail import object_list
 
 from plan.common.models import Course, Deadline, Exam, Group, \
@@ -20,7 +19,7 @@ from plan.common.forms import DeadlineForm, GroupForm, CourseNameForm, \
 from plan.common.utils import compact_sequence, ColorMap
 from plan.common.timetable import Timetable
 from plan.common.cache import clear_cache, get_realm, cache
-#from plan.common.templatetags.slugify import slugify
+from plan.common.templatetags.slugify import slugify
 
 # FIXME split into frontpage/semester, course, deadline, schedule files
 # FIXME Split views that do multiple form handling tasks into seperate views
