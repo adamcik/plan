@@ -1,0 +1,18 @@
+{% extends "base_site.html" %}
+
+{% block title %}
+    {{ block.super }} - Page not found
+{% endblock %}
+
+{% block hd %}
+    <h1>Page not found</h1>
+{% endblock %}
+
+{% block bd %}
+    <div id="help">
+        <p class="large">
+            <code>{{ request_path|default:"-" }}</code> could not be found. Try going back or
+            starting over from the <a href="{% url frontpage %}">frontpage</a>.
+        </p>
+    </div>
+{% endblock %}

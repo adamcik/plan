@@ -1,0 +1,34 @@
+{% if courses and advanced %}
+    <form action="{% url change-groups semester.year,semester.get_type_display,slug %}" method="post" class="noprint">
+        <h2 id="groups">Change groups</h2>
+        <p>
+            Please choose the course variant you belong to.
+        </p>
+        <div id="change-groups">
+            {% for course in courses %}
+                    <div class="course-{{ course.id }} groupbox" title="{{ course.full_name }}">
+                        <p>
+                            <strong>{{ course.alias|default:course }}</strong>
+                            {% if course.full_name %}
+                                <br />
+                                <span class="small">{{ course.full_name|truncatewords:"3" }}</span>
+                            {% endif %}
+                        </p>
+                        <div>
+                            {% if course.group_form %}
+                                {{ course.group_form.groups }}
+                            {% else %}
+                                <ul>
+                                    <li>No groups</li>
+                                </ul>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% cycle "" "" "<hr style='visibility: hidden; clear: both; margin: 0' />" %}
+            {% endfor %}
+        </div>
+        <p style="clear: both">
+            <button type="submit"><span class="icon save">Save groups</span></button>
+        </p>
+    </form>
+{% endif %}

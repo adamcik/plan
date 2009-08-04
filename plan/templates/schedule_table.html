@@ -1,0 +1,72 @@
+{% load nbsp %}
+{% load strip %}
+
+{% if prev_week %}
+    <a href="{% url schedule-week semester.year,semester.get_type_display,slug,prev_week %}" id="previous">«</a>
+{% endif %}
+{% if next_week %}
+    <a href="{% url schedule-week semester.year,semester.get_type_display,slug,next_week %}" id="next">»</a>
+{% endif %}
+<table id="schedule">
+    <thead>
+        <tr>
+            <th class="time"></th>
+            <th colspan="{{ timetable.span.0 }}">Monday</th>
+            <th colspan="{{ timetable.span.1 }}">Tuesday</th>
+            <th colspan="{{ timetable.span.2 }}">Wednesday</th>
+            <th colspan="{{ timetable.span.3 }}">Thursday</th>
+            <th colspan="{{ timetable.span.4 }}">Friday</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for row in timetable.table %}
+        <tr class="{% cycle odd,even %}{% if forloop.last %} last{% endif %}{% if forloop.first %} first{% endif %}">
+            {% for cells in row %}
+                {% if cells %}
+                    {% for c in cells %}
+                        {% if not c.remove %}
+                            <td {% stripspace %}
+                                colspan="{{ c.colspan|default:"1" }}"
+                                rowspan="{{ c.rowspan|default:"1" }}"
+                                {% if c.lecture or c.time or forloop.last  %}
+                                    class="
+                                        {% if c.lecture %}
+                                            lecture
+                                            lecture-{{ c.lecture.id }}
+                                            course-{{ c.lecture.course_id }}
+                                        {% endif %}
+                                        {% if c.lecture.optional %}
+                                            optional
+                                        {% endif %}
+                                        {% ifequal c.rowspan 1 %}
+                                            single
+                                        {% endifequal %}
+                                        {% if c.last %}
+                                            last
+                                        {% endif %}
+                                        {% if c.time %}
+                                            time
+                                        {% endif %}
+                                    "
+                                {% endif %}
+                                {% if c.lecture %}title="{{ c.lecture.course.full_name }}"{% endif %}
+                            {% endstripspace %}>
+
+                                {% if c.lecture %}
+                                    <div class="course">{{ c.lecture.alias|default:c.lecture.course }}</div>
+                                    <div class="room">{{ c.lecture.sql_rooms|join:", "|truncatewords:2 }}</div>
+                                    <div class="type">{{ c.lecture.type|default:"" }}</div>
+                                {% endif %}
+                                {{ c.time|escape|nbsp|default:"" }}
+                            </td>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <td></td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+    {% endfor %}
+
+    </tbody>
+</table>

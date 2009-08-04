@@ -1,0 +1,87 @@
+{% extends "base_site.html" %}
+{% load color %}
+
+{% block extrastyle %}
+    {% if courses %}
+        <style type="text/css">
+          {% for course in courses %}
+            .course-{{ course.id }} { background-color: {% color course.id %} }
+          {% endfor %}
+        </style>
+    {% endif %}
+{% endblock %}
+
+{% block extrahead %}
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+{% endblock %}
+
+{% block title %}
+    {{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %}
+    {{ semester.get_type_display }}
+    {{ semester.year }} schedule
+    {% if week %}
+        for week {{ week }}
+    {% else %}
+        for all weeks
+    {% endif %}
+{% endblock %}
+
+{% block hd %}
+    <h1>
+        {{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %}
+        {{ semester.get_type_display }}
+        {{ semester.year }} schedule
+        {% if week %}
+            for week {{ week }}
+        {% else %}
+            for all weeks
+        {% endif %}
+    </h1>
+{% endblock %}
+
+{% block bd %}
+    {% if not courses %}
+        <div id="help">
+            {% include "add_courses.html" %}
+        </div>
+    {% endif %}
+    {% include "schedule_message.html" %}
+
+    {% if group_help %}
+        <div id="help">
+            <p>
+                Use <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}#groups">change groups</a> to limit which groups/parallels you want in your schedule.
+            </p>
+        </div>
+    {%  endif %}
+
+    {% include "schedule_table.html" %}
+    {% include "schedule_table_footer.html" %}
+
+    {% if courses %}
+        <div class="yui-g">
+            <div class="yui-u first">
+                {% include "courses.html" %}
+                {% include "exams.html" %}
+
+                {% if advanced %}
+                    {% include "deadlines.html" %}
+                {% endif %}
+            </div>
+            <div class="yui-u">
+                {% include "notice.html" %}
+                {% if not advanced %}
+                    {% include "deadlines.html" %}
+                {% endif %}
+
+                {% include "add_courses.html" %}
+                {% include "groups.html" %}
+                {% include "add_deadlines.html" %}
+                {% include "import_deadlines.html" %}
+            </div>
+        </div>
+    {% endif %}
+
+    {% include "lectures.html" %}
+    {% include "tips.html" %}
+{% endblock %}

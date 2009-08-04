@@ -1,0 +1,56 @@
+<h2>Exams</h2>
+{% if exams %}
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 19%">Date</th>
+                <th style="width:  8%">Time</th>
+                <th style="width:  4%">Dur.</th>
+                <th>Type</th>
+                <th style="width: 18%">Course</th>
+                <th>Handout</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for exam in exams %}
+                <tr class="course-{{ exam.course_id }} exam-{{ exam.id }}" title="{{ exam.course.full_name }}">
+                    <td>
+                        {{ exam.exam_date }}
+                    </td>
+                    <td>
+                        {% if exam.exam_time %}
+                            {{ exam.exam_time|time }}
+                        {% endif %}
+                    </td>
+                    <td align="center">{{ exam.duration|default:"-" }}</td>
+                    <td>
+                        {% if exam.type_name %}
+                            {{ exam.type_name|lower|capfirst }}
+                        {% else %}
+                            {{ exam.type }}
+                        {% endif %}
+                    </td>
+                    <td>{{ exam.alias|default:exam.course.name }}</td>
+                    <td>
+                        {% if not exam.handout_date %}
+                            -
+                        {% else %}
+                            {{ exam.handout_date }}
+                            {% if exam.handout_time %}
+                                {{ exam.handout_time|time }}
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                    <td>{{ exam.course.comment|default:"" }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    {% if courses %}
+        <p>Didn't find any exams for selected courses.</p>
+    {% else %}
+        <p>You need to add at least one course before exams will be shown.</p>
+    {% endif %}
+{% endif %}

@@ -1,0 +1,44 @@
+<h2>Deadlines</h2>
+{% if deadlines %}
+    <form method="post" action="{% url new-deadline semester.year,semester.get_type_display,slug %}#deadlines">
+        <table id="deadlines">
+            <thead>
+                <tr>
+                    {% if advanced %}
+                        <th style="width: 5%"></th>
+                    {% endif %}
+                    <th style="width: 18%">Course</th>
+                    <th style="width: 19%">Due date</th>
+                    <th style="width:  8%">Time</th>
+                    <th>Task</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in deadlines %}
+                    <tr class="course-{{ d.userset.course_id }} deadline-{{ d.id }}{% if d.expired %} expired{% endif %}">
+                        {% if advanced %}
+                            <td><input type="checkbox" name="deadline_remove" value="{{ d.id }}" class="noprint" /></td>
+                        {% endif %}
+                        <td>{{ d.userset.name|default:d.userset.course }}</td>
+                        <td align="center">{{ d.date }}</td>
+                        <td align="center">{{ d.time|time }}</td>
+                        <td>{{ d.task }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if advanced and deadlines %}
+            <p class="noprint">
+                <button name="submit_remove" type="submit"><span class="icon remove">Remove selected</span></button>
+            </p>
+        {% endif %}
+    </form>
+{% endif %}
+{% if courses and not advanced %}
+    <p class="noprint">Go to <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}#deadlines">advanced options</a> to add and remove deadlines.</p>
+{% endif %}
+{% if courses and advanced %}
+    {% if not deadlines %}
+        <p>No deadlines to show, feel free to add some.</p>
+    {% endif %}
+{% endif %}

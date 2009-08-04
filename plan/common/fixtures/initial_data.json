@@ -1,0 +1,380 @@
+[
+    {
+        "pk": 1, 
+        "model": "common.group", 
+        "fields": {
+            "name": "Other"
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "common.week", 
+        "fields": {
+            "number": 1
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "common.week", 
+        "fields": {
+            "number": 2
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "common.week", 
+        "fields": {
+            "number": 3
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "common.week", 
+        "fields": {
+            "number": 4
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "common.week", 
+        "fields": {
+            "number": 5
+        }
+    }, 
+    {
+        "pk": 6, 
+        "model": "common.week", 
+        "fields": {
+            "number": 6
+        }
+    }, 
+    {
+        "pk": 7, 
+        "model": "common.week", 
+        "fields": {
+            "number": 7
+        }
+    }, 
+    {
+        "pk": 8, 
+        "model": "common.week", 
+        "fields": {
+            "number": 8
+        }
+    }, 
+    {
+        "pk": 9, 
+        "model": "common.week", 
+        "fields": {
+            "number": 9
+        }
+    }, 
+    {
+        "pk": 10, 
+        "model": "common.week", 
+        "fields": {
+            "number": 10
+        }
+    }, 
+    {
+        "pk": 11, 
+        "model": "common.week", 
+        "fields": {
+            "number": 11
+        }
+    }, 
+    {
+        "pk": 12, 
+        "model": "common.week", 
+        "fields": {
+            "number": 12
+        }
+    }, 
+    {
+        "pk": 13, 
+        "model": "common.week", 
+        "fields": {
+            "number": 13
+        }
+    }, 
+    {
+        "pk": 14, 
+        "model": "common.week", 
+        "fields": {
+            "number": 14
+        }
+    }, 
+    {
+        "pk": 15, 
+        "model": "common.week", 
+        "fields": {
+            "number": 15
+        }
+    }, 
+    {
+        "pk": 16, 
+        "model": "common.week", 
+        "fields": {
+            "number": 16
+        }
+    }, 
+    {
+        "pk": 17, 
+        "model": "common.week", 
+        "fields": {
+            "number": 17
+        }
+    }, 
+    {
+        "pk": 18, 
+        "model": "common.week", 
+        "fields": {
+            "number": 18
+        }
+    }, 
+    {
+        "pk": 19, 
+        "model": "common.week", 
+        "fields": {
+            "number": 19
+        }
+    }, 
+    {
+        "pk": 20, 
+        "model": "common.week", 
+        "fields": {
+            "number": 20
+        }
+    }, 
+    {
+        "pk": 21, 
+        "model": "common.week", 
+        "fields": {
+            "number": 21
+        }
+    }, 
+    {
+        "pk": 22, 
+        "model": "common.week", 
+        "fields": {
+            "number": 22
+        }
+    }, 
+    {
+        "pk": 23, 
+        "model": "common.week", 
+        "fields": {
+            "number": 23
+        }
+    }, 
+    {
+        "pk": 24, 
+        "model": "common.week", 
+        "fields": {
+            "number": 24
+        }
+    }, 
+    {
+        "pk": 25, 
+        "model": "common.week", 
+        "fields": {
+            "number": 25
+        }
+    }, 
+    {
+        "pk": 26, 
+        "model": "common.week", 
+        "fields": {
+            "number": 26
+        }
+    }, 
+    {
+        "pk": 27, 
+        "model": "common.week", 
+        "fields": {
+            "number": 27
+        }
+    }, 
+    {
+        "pk": 28, 
+        "model": "common.week", 
+        "fields": {
+            "number": 28
+        }
+    }, 
+    {
+        "pk": 29, 
+        "model": "common.week", 
+        "fields": {
+            "number": 29
+        }
+    }, 
+    {
+        "pk": 30, 
+        "model": "common.week", 
+        "fields": {
+            "number": 30
+        }
+    }, 
+    {
+        "pk": 31, 
+        "model": "common.week", 
+        "fields": {
+            "number": 31
+        }
+    }, 
+    {
+        "pk": 32, 
+        "model": "common.week", 
+        "fields": {
+            "number": 32
+        }
+    }, 
+    {
+        "pk": 33, 
+        "model": "common.week", 
+        "fields": {
+            "number": 33
+        }
+    }, 
+    {
+        "pk": 34, 
+        "model": "common.week", 
+        "fields": {
+            "number": 34
+        }
+    }, 
+    {
+        "pk": 35, 
+        "model": "common.week", 
+        "fields": {
+            "number": 35
+        }
+    }, 
+    {
+        "pk": 36, 
+        "model": "common.week", 
+        "fields": {
+            "number": 36
+        }
+    }, 
+    {
+        "pk": 37, 
+        "model": "common.week", 
+        "fields": {
+            "number": 37
+        }
+    }, 
+    {
+        "pk": 38, 
+        "model": "common.week", 
+        "fields": {
+            "number": 38
+        }
+    }, 
+    {
+        "pk": 39, 
+        "model": "common.week", 
+        "fields": {
+            "number": 39
+        }
+    }, 
+    {
+        "pk": 40, 
+        "model": "common.week", 
+        "fields": {
+            "number": 40
+        }
+    }, 
+    {
+        "pk": 41, 
+        "model": "common.week", 
+        "fields": {
+            "number": 41
+        }
+    }, 
+    {
+        "pk": 42, 
+        "model": "common.week", 
+        "fields": {
+            "number": 42
+        }
+    }, 
+    {
+        "pk": 43, 
+        "model": "common.week", 
+        "fields": {
+            "number": 43
+        }
+    }, 
+    {
+        "pk": 44, 
+        "model": "common.week", 
+        "fields": {
+            "number": 44
+        }
+    }, 
+    {
+        "pk": 45, 
+        "model": "common.week", 
+        "fields": {
+            "number": 45
+        }
+    }, 
+    {
+        "pk": 46, 
+        "model": "common.week", 
+        "fields": {
+            "number": 46
+        }
+    }, 
+    {
+        "pk": 47, 
+        "model": "common.week", 
+        "fields": {
+            "number": 47
+        }
+    }, 
+    {
+        "pk": 48, 
+        "model": "common.week", 
+        "fields": {
+            "number": 48
+        }
+    }, 
+    {
+        "pk": 49, 
+        "model": "common.week", 
+        "fields": {
+            "number": 49
+        }
+    }, 
+    {
+        "pk": 50, 
+        "model": "common.week", 
+        "fields": {
+            "number": 50
+        }
+    }, 
+    {
+        "pk": 51, 
+        "model": "common.week", 
+        "fields": {
+            "number": 51
+        }
+    }, 
+    {
+        "pk": 52, 
+        "model": "common.week", 
+        "fields": {
+            "number": 52
+        }
+    }, 
+    {
+        "pk": 53, 
+        "model": "common.week", 
+        "fields": {
+            "number": 53
+        }
+    }
+]

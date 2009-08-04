@@ -1,0 +1,382 @@
+/*
+ * Copyright (c) 2009, Thomas Adamcik. All rights reserved.
+ * */
+/* Basic block elements */
+h1,h2 {
+	font-family: Georgia;
+	clear: both;
+}
+h1 {
+	padding-left: 0.6em;
+	font-size: 167%;
+	margin-bottom: -0.3em;
+}
+h2 {
+	border-bottom: 1px solid #D3D7CF;
+	padding-left: 0.5em;
+	margin-left: -0.5em;
+	margin-top: 0;
+}
+
+/* Tables */
+table {
+	width: 100%;
+}
+table a {
+	color: #000;
+}
+td, th {
+	border: 0;
+}
+th {
+	text-align: left;
+	padding: 0 0.5em;
+	font-size: 93%;
+}
+td {
+  border-top: 1px solid #666;
+  border-bottom: 1px solid #666;
+}
+table#munin {
+	width: auto;
+}
+table#munin td {
+	border: 0;
+	padding: 0 1em 0.2em;
+}
+table#munin a {
+	color: #204A87;
+}
+
+/* Basic inline elements */
+a {
+	color: #204A87;
+}
+
+img {
+	vertical-align: text-bottom;
+}
+
+/* Form elements */
+button {
+	font-size: 100%;
+	font-family: inherit;
+	padding: 0.09em;
+	padding-left: 0;
+	padding-right: 0.2em;
+	vertical-align: bottom;
+	/* Magic to check buttons the correct size in IE6 */
+	width: auto;
+	overflow:visible;
+}
+button .icon {
+	/* Pulls background up */
+	padding-top: 1px;
+}
+input {
+	padding: 0.15em;
+}
+textarea[cols], input[size] {
+	width: auto; /* Don't override sizes set in html */
+}
+label {
+	cursor: pointer;
+}
+
+/* Generic classes */
+.large {
+	font-size: 116%; /* 15px */
+}
+.small {
+	font-size: 93%; /* 12px */
+}
+.tiny {
+	font-size: 77%;  /* 10px */
+}
+
+.odd {
+  background: #fafafa;
+}
+p.right {
+	text-align: right;
+}
+
+.current {
+	font-weight: bold;
+}
+
+.icon {
+	background-repeat: no-repeat;
+  background-image: url(../gfx/sprite.png);
+	background-position: left top;
+	padding-left: 18px;
+}
+
+.icon.start {
+	background-position: right -650px;
+	padding-left: 0;
+	padding-right: 18px;
+}
+.large .icon.start {
+	background-position: right -649px;
+}
+
+.icon.copy     { background-position: 0 -95px;   } .large .icon.copy     { background-position: 0 -94px;   }
+.icon.warning  { background-position: 0 -206px;  } .large .icon.warning  { background-position: 0 -205px;  }
+.icon.advanced { background-position: 0 -317px;  } .large .icon.advanced { background-position: 0 -316px;  }
+.icon.gcal     { background-position: 0 -428px;  } .large .icon.gcal     { background-position: 0 -427px;  }
+.icon.pdf      { background-position: 0 -539px;  } .large .icon.pdf      { background-position: 0 -538px;  }
+.icon.list     { background-position: 0 -761px;  } .large .icon.list     { background-position: 0 -760px;  }
+.icon.week     { background-position: 0 -872px;  } .large .icon.week     { background-position: 0 -871px;  }
+.icon.add      { background-position: 0 -983px;  } .large .icon.add      { background-position: 0 -982px;  }
+.icon.link     { background-position: 0 -1094px; } .large .icon.link     { background-position: 0 -1093px; }
+.icon.tips     { background-position: 0 -1205px; } .large .icon.tips     { background-position: 0 -1204px; }
+.icon.save     { background-position: 0 -1316px; } .large .icon.save     { background-position: 0 -1315px; }
+.icon.hide     { background-position: 0 -1427px; } .large .icon.hide     { background-position: 0 -1426px; }
+.icon.ical     { background-position: 0 -1538px; } .large .icon.ical     { background-position: 0 -1537px; }
+.icon.error    { background-position: 0 -1649px; } .large .icon.error    { background-position: 0 -1648px; }
+.icon.name     { background-position: 0 -1760px; } .large .icon.name     { background-position: 0 -1759px; }
+.icon.remove   { background-position: 0 -1871px; } .large .icon.remove   { background-position: 0 -1870px; }
+
+/* error classes */
+.errorlist {
+	color: #A00000;
+	text-size: 85%;
+}
+.error {
+	margin: 0;
+}
+td.error input, td.error select {
+	background: #FCC;
+}
+/* Indicate that things have expired or are excluded */
+.expired td, .hidden td, .hidden .course, .hidden .type, .hidden .room {
+	color: #555753;
+}
+.delete td, .delete p, .delete .course, .delete .type, .delete .room {
+	text-decoration: line-through;
+}
+
+/* header/body/footer */
+#hd {
+	border-bottom: 2px solid #D3D7CF;
+	margin-bottom: 1em;
+}
+#bd {
+	padding-left: 1em;
+	margin-bottom: 1em;
+	min-height: 25em;
+	position: relative;
+}
+#ft {
+	padding: 1em 0.5em 0;
+	color: #2E3436;
+	margin-bottom: 1em;
+	border-bottom: 1px solid #D3D7CF;
+	border-top: 1px solid #D3D7CF;
+}
+
+/* Specialcased elements */
+
+/* Box used for selecting which groups to use for a course */
+#change-groups div {
+	float: left;
+	padding: 0.2em;
+	margin-right: 0.5em;
+	margin-bottom: 0.5em;
+	border: 1px solid #666;
+	width: 30%;
+	height: 8em;
+}
+#change-groups p {
+	overflow: hidden;
+	height: 30%;
+	margin-bottom: 0.25em;
+}
+#change-groups div div {
+	overflow: auto;
+	height: 63%;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	float: none;
+}
+#change-groups ul {
+	margin: 0;
+}
+#change-groups li {
+	list-style: none;
+}
+
+/* Stats box on front page (needs special casing for graph) */
+#stats {
+	border-left: 0.2em solid #D3D7CF;
+	padding: 0.2em 0;
+	font-size: 93%;
+}
+#stats div {
+	margin-bottom: 1px;
+	padding: 0.1em 0.5em;
+	-moz-border-radius: 0 2px 2px 0;
+	-webkit-border-radius: 0 2px 2px 0;
+}
+#stats span {
+	float: right;
+}
+
+/* Links on all pages nedd constant width b */
+#links b {
+	font-size: 93%;
+	width: 9em;
+	text-align: right;
+	display: block;
+	float: left;
+	margin-right: 0.5em;
+}
+
+#help {
+	border: 1px solid #CCC;
+	background: #FFC;
+	padding: 0.5em 0.5em 0;
+	margin-bottom: 1em;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+}
+#help p {
+	margin-bottom: 0.5em;
+}
+
+#next, #previous {
+	position: absolute;
+	top: 3.7em;
+	text-decoration: none;
+	color: #D3D7CF;
+	font-size: 300%;
+}
+#next {
+	right: -0.55em;
+	padding-right: 0.05em;
+}
+#previous {
+	left: -0.25em;
+	padding-left: 0.05em;
+}
+#next:hover {
+	padding-left: 0.05em;
+	padding-right: 0;
+}
+#previous:hover {
+	padding-left: 0;
+	padding-right: 0.1em;
+}
+
+/* schedule styling */
+
+/* cell contents */
+#schedule .course {
+	float: left;
+}
+#schedule .room {
+	font-size: 77%;
+  float: right;
+	margin-left: 0.5em;
+}
+#schedule .type {
+	clear: both;
+	font-size: 77%;
+}
+/* single cells need to be smaller */
+#schedule .single {
+	font-size: 77%;
+}
+#schedule .single .type, #schedule .single .room {
+	font-size: 100%;
+}
+
+#schedule .optional {
+	color: #555753;
+}
+
+#schedule td {
+	border-color: #CCC;
+  padding: 0.1em 0.2em;
+  vertical-align: top;
+  height: 2em;
+}
+#schedule th {
+  width: 18.6%;
+  font-variant: small-caps;
+	font-weight: normal;
+}
+
+/* time col */
+#schedule .time {
+  text-align: center;
+  vertical-align: middle;
+	font-size: 77%;
+  width: 7%;
+	white-space: nowrap;
+}
+#schedule td.time {
+	border-left: 1px solid #666;
+}
+
+#schedule td.lecture {
+	border-right: 1px solid #CCC;
+}
+/* Proper :first-child  selectors would be nice, but
+ * classes from the templates should do the trick */
+#schedule td.last, #schedule td.last.lecture {
+	border-right: 1px solid #666;
+}
+#schedule tr.first td {
+	border-top: 1px solid #666;
+}
+#schedule tr.last td {
+	border-bottom: 1px solid #666;
+}
+
+@media print {
+	/* FIXME dont like noprint :( */
+	#ft, #django_log, .noprint {
+		display: none;
+	}
+	table a {
+		text-decoration: none;
+	}
+}
+
+/* From http://bassistance.de/jquery-plugins/jquery-plugin-autocomplete
+ * Version: 1.0.2
+ * License: MIT/GPL */
+.ac_results {
+	border: 1px solid black;
+	background-color: white;
+	overflow: hidden;
+	z-index: 99999;
+}
+
+.ac_results ul {
+	width: 100%;
+	list-style-position: outside;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.ac_results li {
+	padding: 0.1em 0.3em;
+	cursor: default;
+	display: block;
+	overflow: hidden;
+}
+
+.ac_odd {
+	background-color: #FAFAFA;
+}
+
+.ac_over {
+	background-color: #0A246A;
+	color: white;
+}

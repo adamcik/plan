@@ -1,0 +1,32 @@
+{% extends "base_site.html" %}
+
+{% block hd %}
+    <h1>Couldn't add one or more courses</h1>
+{% endblock %}
+
+{% block bd %}
+    <div id="help">
+        {% if to_many_usersets %}
+            <p class="large icon error">
+                Sorry, but the generator has been set up to limit timetables
+                to {{ max }} courses.
+            </p>
+        {% endif %}
+        {% if courses %}
+            <p class="large"><img alt="" src="{{ MEDIA_URL }}gfx/error.png" /> Adding the following courses failed:</p>
+            <ul>
+                {% for c in courses %}
+                    <li>{{ c|upper }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <p class="large right">
+            Back to your <a href="{% url schedule-advanced year,type,slug %}">schedule</a>.
+        </p>
+    </div>
+    <p>
+        Please check that the courses that failed can be found at
+        <a href="http://www.ntnu.no/studieinformasjon/timeplan">http://www.ntnu.no/studieinformasjon/timeplan</a>
+        for this semster.
+    </p>
+{% endblock %}
