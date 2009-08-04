@@ -6,7 +6,7 @@ from django.utils.http import int_to_base36
 from django.core.cache import cache as django_cache
 from django.core.cache.backends.base import  BaseCache
 
-logger = logging.getLogger()
+logger = logging.getLogger('plan.common.cache')
 
 def get_realm(semester, slug=None):
     args = [semester.year, semester.get_type_display()]
