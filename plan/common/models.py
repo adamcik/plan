@@ -161,6 +161,9 @@ class Semester(models.Model):
     year = models.PositiveSmallIntegerField()
     type = models.PositiveSmallIntegerField(choices=TYPES)
 
+    class Meta:
+        unique_together = [('year', 'type'),]
+
     def __init__(self, *args, **kwargs):
         super(Semester, self).__init__(*args, **kwargs)
 
