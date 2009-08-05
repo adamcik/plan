@@ -13,24 +13,23 @@ class CourseAdmin(admin.ModelAdmin):
     search_fields = ('name', 'full_name')
 
 class ExamAdmin(admin.ModelAdmin):
-    list_display = ('course', 'type', 'exam_date', 'exam_time', 'duration', 'comment', 'semester')
+    list_display = ('course', 'type', 'exam_date', 'exam_time', 'duration', 'comment')
     search_fields = ('course__name', 'type')
-    list_filter = ['type', 'duration', 'semester']
+    list_filter = ['type', 'duration']
 
 class LectureAdmin(admin.ModelAdmin):
-    list_display = ('course', 'day', 'start', 'end', 'type', 'semester')
+    list_display = ('course', 'day', 'start', 'end', 'type')
 
     search_fields = ('course__name', 'type__name')
 
     filter_horizontal = ('weeks', 'groups', 'lecturers', 'rooms')
 
     list_per_page = 50
-    list_filter = ['semester', 'day', 'start', 'end', 'rooms']
+    list_filter = ['day', 'start', 'end', 'rooms']
     list_select_related = True
 
 class UserSetAdmin(admin.ModelAdmin):
-    list_display = ('slug', 'course', 'semester')
-    list_filter = ('semester',)
+    list_display = ('slug', 'course')
     search_fields = ('slug', 'course__name')
 
     filter_horizontal = ('groups','exclude')
