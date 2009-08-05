@@ -35,8 +35,8 @@ class UserSet(models.Model):
 
         group_list = Group.objects.filter(
                 userset__slug=slug,
-                userset__semester__year__exact=year,
-                userset__semester__type__exact=semester_type,
+                userset__course__semester__year__exact=year,
+                userset__course__semester__type__exact=semester_type,
             ).extra(select={
                 'userset_id': 'common_userset.id',
                 'group_id': 'common_group.id',
@@ -134,8 +134,8 @@ class Course(models.Model):
 
         group_list = Group.objects.filter(
                 lecture__course__in=courses,
-                lecture__semester__year__exact=year,
-                lecture__semester__type__exact=semester_type,
+                lecture__course__semester__year__exact=year,
+                lecture__course__semester__type__exact=semester_type,
             ).extra(select={
                 'course_id': 'common_lecture.course_id',
                 'group_id': 'common_group.id',
