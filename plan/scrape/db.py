@@ -13,12 +13,6 @@ from plan.common.models import Course, Lecture, Lecturer, Semester, Group, \
 
 logger = logging.getLogger('scrape.db')
 
-def _prefix(semester):
-    if semester.type == Semester.SPRING:
-        return 'v%s' % str(semester.year)[-2:]
-    else:
-        return 'h%s' % str(semester.year)[-2:]
-
 def _connection():
     import MySQLdb
 
@@ -38,7 +32,7 @@ def update_lectures(year, semester_type, prefix=None, limit=None):
 
     semester, created = Semester.objects.get_or_create(year=year, type=semester_type)
 
-    prefix = prefix or _prefix(semester)
+    prefix = prefix or semester.prefix
 
     logger.debug('Using prefix: %s', prefix)
 
@@ -222,7 +216,7 @@ def update_lectures(year, semester_type, prefix=None, limit=None):
 def update_courses(year, semester_type, prefix=None):
     semester, created = Semester.objects.get_or_create(year=year, type=semester_type)
 
-    prefix = prefix or _prefix(semester)
+    prefix = prefix or semester.prefix
 
     db = _connection()
     c = db.cursor()
