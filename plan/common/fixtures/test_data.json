@@ -100,9 +100,7 @@
         "fields": {
             "url": "", 
             "points": "1", 
-            "semesters": [
-                1
-            ], 
+            "semester": 1,
             "name": "COURSE1", 
             "full_name": "Course 1 full name"
         }
@@ -113,9 +111,7 @@
         "fields": {
             "url": "", 
             "points": "1", 
-            "semesters": [
-                1
-            ], 
+            "semester": 1, 
             "name": "COURSE2", 
             "full_name": "Course 2 full name"
         }
@@ -126,9 +122,7 @@
         "fields": {
             "url": "", 
             "points": "1", 
-            "semesters": [
-                1
-            ], 
+            "semester": 1, 
             "name": "COURSE3", 
             "full_name": "Course 3 full name"
         }
@@ -139,9 +133,7 @@
         "fields": {
             "url": "", 
             "points": "1", 
-            "semesters": [
-                1
-            ], 
+            "semester": 1, 
             "name": "COURSE4", 
             "full_name": "Course 4 full name"
         }
@@ -155,7 +147,6 @@
             "type_name": "", 
             "exam_time": "09:00:00", 
             "course": 1, 
-            "semester": 1, 
             "handout_date": null, 
             "duration": null, 
             "exam_date": "2009-05-05", 
@@ -171,7 +162,6 @@
             "type_name": "", 
             "exam_time": "09:00:00", 
             "course": 1, 
-            "semester": 1, 
             "handout_date": null, 
             "duration": "3", 
             "exam_date": "2009-05-15", 
@@ -187,7 +177,6 @@
             "type_name": "", 
             "exam_time": null, 
             "course": 1, 
-            "semester": 1, 
             "handout_date": "2009-05-02", 
             "duration": "1", 
             "exam_date": "2009-05-15", 
@@ -203,7 +192,6 @@
             "type_name": "", 
             "exam_time": null, 
             "course": 1, 
-            "semester": 1, 
             "handout_date": null, 
             "duration": "1", 
             "exam_date": "2009-05-15", 
@@ -219,7 +207,6 @@
             "type_name": "Type 1", 
             "exam_time": "14:00:00", 
             "course": 2, 
-            "semester": 1, 
             "handout_date": "2009-05-01", 
             "duration": 1, 
             "exam_date": "2009-05-06", 
@@ -235,7 +222,6 @@
             "type_name": "", 
             "exam_time": "09:00:00", 
             "course": 4, 
-            "semester": 1, 
             "handout_date": null, 
             "duration": null, 
             "exam_date": "2009-05-03", 
@@ -251,7 +237,6 @@
             "type_name": "Type 2", 
             "exam_time": "09:00:00", 
             "course": 4, 
-            "semester": 1, 
             "handout_date": null, 
             "duration": 4, 
             "exam_date": "2009-05-15", 
@@ -268,7 +253,6 @@
             "end": "10:00:00", 
             "start": "08:15:00", 
             "course": 1, 
-            "semester": 1, 
             "groups": [
                 1
             ], 
@@ -292,7 +276,6 @@
             "end": "12:00:00", 
             "start": "10:15:00", 
             "course": 1, 
-            "semester": 1, 
             "groups": [
                 2
             ], 
@@ -314,7 +297,6 @@
             "end": "12:00:00", 
             "start": "08:15:00", 
             "course": 1, 
-            "semester": 1, 
             "groups": [
                 1
             ], 
@@ -336,7 +318,6 @@
             "end": "14:00:00", 
             "start": "08:15:00", 
             "course": 2, 
-            "semester": 1, 
             "groups": [
                 1
             ], 
@@ -358,7 +339,6 @@
             "end": "11:00:00", 
             "start": "09:15:00", 
             "course": 3, 
-            "semester": 1, 
             "groups": [
                 2
             ], 
@@ -376,7 +356,6 @@
             "end": "12:00:00", 
             "start": "08:15:00", 
             "course": 4, 
-            "semester": 1, 
             "groups": [
                 2
             ], 
@@ -396,7 +375,6 @@
             "end": "16:00:00", 
             "start": "15:15:00", 
             "course": 1, 
-            "semester": 1, 
             "groups": [
                 1
             ], 
@@ -416,7 +394,6 @@
             "end": "21:00:00", 
             "start": "07:00:00", 
             "course": 1, 
-            "semester": 1, 
             "groups": [
                 1
             ], 
@@ -436,7 +413,6 @@
             "end": "08:30:00",
             "start": "08:15:00",
             "course": 1,
-            "semester": 1,
             "groups": [
                 1
             ],
@@ -456,7 +432,6 @@
             "end": "00:00:00", 
             "start": "19:15:00", 
             "course": 1, 
-            "semester": 1, 
             "groups": [
                 1
             ], 

@@ -6,7 +6,6 @@
             "added": "2009-01-03 10:13:53", 
             "name": "foo", 
             "course": 1, 
-            "semester": 1, 
             "groups": [
                 1, 
                 2
@@ -24,7 +23,6 @@
             "added": "2009-01-03 10:16:14", 
             "name": "", 
             "course": 2, 
-            "semester": 1, 
             "groups": [
                 1
             ], 
@@ -39,7 +37,6 @@
             "added": "2009-01-03 10:16:21", 
             "name": "", 
             "course": 3, 
-            "semester": 1, 
             "groups": [
                 2
             ], 
@@ -54,7 +51,6 @@
             "added": "2009-01-03 13:41:56", 
             "name": "", 
             "course": 1, 
-            "semester": 1, 
             "groups": [
                 1
             ], 
@@ -69,7 +65,6 @@
             "added": "2009-01-03 13:42:14", 
             "name": "", 
             "course": 2, 
-            "semester": 1, 
             "groups": [
                 2
             ], 
@@ -84,7 +79,6 @@
             "added": "2009-01-03 13:42:14", 
             "name": "", 
             "course": 2, 
-            "semester": 1, 
             "groups": [
                 2
             ], 
