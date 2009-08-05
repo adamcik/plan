@@ -168,8 +168,8 @@ class CourseManager(models.Manager):
         qs = self.get_query_set()
         qs = qs.filter(search_filter)
         qs = qs.filter(name__regex='[0-9]+', # FIXME assumes course codes must contain numbers
-                       semesters__year__exact=year,
-                       semesters__type__exact=semester_type)
+                       semester__year__exact=year,
+                       semester__type__exact=semester_type)
         qs = qs.distinct()
         qs = qs.order_by('name')
 

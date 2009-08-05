@@ -1,4 +1,5 @@
 from django.utils.datastructures import MultiValueDict
+from django.core.urlresolvers import reverse
 
 from plan.common.tests.base import BaseTestCase
 from plan.common.cache import get_realm, cache
@@ -246,3 +247,19 @@ class ViewTestCase(BaseTestCase):
     def test_copy_deadlines(self):
         pass
         # FIXME
+
+    def test_course_query(self):
+        url = reverse('course-query', args=[self.semester.year,
+                self.semester.get_type_display()])
+
+        response = self.client.get(url)
+
+        self.assertEquals("", response.content)
+
+        response = self.client.get(url, {'q': 'COURSE'})
+        lines = response.content.split('\n')
+
+        self.assertEquals("COURSE1|Course 1 full name", lines[0])
+        self.assertEquals("COURSE2|Course 2 full name", lines[1])
+        self.assertEquals("COURSE3|Course 3 full name", lines[2])
+        self.assertEquals("COURSE4|Course 4 full name", lines[3])
