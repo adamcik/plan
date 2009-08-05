@@ -7,7 +7,6 @@ from urllib import urlopen, URLopener, urlencode
 from BeautifulSoup import BeautifulSoup, NavigableString
 from dateutil.parser import parse
 
-from django.db import transaction
 from django.utils.http import urlquote
 
 from plan.common.models import Lecture, Lecturer, Exam, Course, Room, Type, \
@@ -77,164 +76,156 @@ def update_courses(year, semester_type):
 
     return courses
 
-# FIXME take semester as parameter
-@transaction.commit_on_success
-def scrape_course(course):
+def update_lectures(year, semester_type, limit=None, prefix=None):
     '''Retrive all lectures for a given course'''
 
-    course = course.upper().strip()
+    semester, created = Semester.objects.get_or_create(year=year, type=semester_type)
 
-    # FIXME based on semester
-    url  = 'http://www.ntnu.no/studieinformasjon/timeplan/h08/?emnekode=%s' % \
-            urlquote(course.encode('latin-1'))
+    prefix = prefix or semester.prefix
+    results = []
+    lectures = []
 
-    errors = []
+    for course in Course.objects.filter(semesters__in=[semester]):
+        url  = 'http://www.ntnu.no/studieinformasjon/timeplan/%s/?%s' % \
+                (prefix, urlencode({'emnekode': course.name.encode('utf-8')}))
 
-    text_only = lambda text: isinstance(text, NavigableString)
+        for number in [1, 2, 3]:
+            html = ''.join(urlopen('%s-%d' % (url, number)).readlines())
+            main = BeautifulSoup(html).findAll('div', 'hovedramme')[0]
 
-    for number in [1, 2, 3]:
-        html = ''.join(urlopen('%s-%d' % (url, number)).readlines())
-        table = BeautifulSoup(html).findAll('div', 'hovedramme')[0]. \
-                    findAll('table')[1]
 
-        # Try and get rid of stuff we don't need.
-        table.extract()
-        del html
+            if not main.findAll('h1', text=lambda t: course.name in t):
+                main.extract()
+                del html
+                del main
+                continue
 
-        results = []
+            table = main.findAll('table')[1]
 
-        try:
-            title = table.findAll('h2')[0].contents[0].split('-')[2].strip()
+            # Try and get rid of stuff we don't need.
+            table.extract()
+            main.extract()
+            del html
+            del main
 
-            errors = []
             break
 
-        except IndexError:
-            errors.append(('Course does not exsist', '%s-%d' % (url, number)))
-            del table
+        lecture_type = None
+        for tr in table.findAll('tr')[1:-1]:
+            course_time, weeks, room, lecturer, groups  = [], [], [], [], []
+            lecture = True
 
-    if errors:
-        raise Exception(errors)
+            for i, td in enumerate(tr.findAll('td')):
+                # Break td loose from rest of table so that any refrences we miss
+                # don't cause to big memory problems
+                td.extract()
 
-    lecture_type = None
-    for tr in table.findAll('tr')[2:-1]:
-        course_time, weeks, room, lecturer, groups  = [], [], [], [], []
-        lecture = True
+                # Loop over our td's basing our action on the td's index in the tr
+                # element.
+                if i == 0:
+                    if td.get('colspan') == '4':
+                        lecture_type = td.findAll(text=is_text)
+                        lecture = False
+                    else:
+                        for t in td.findAll('b')[0].findAll(text=is_text):
+                            t.extract()
 
-        for i, td in enumerate(tr.findAll('td')):
-            # Break td loose from rest of table so that any refrences we miss
-            # don't cause to big memory problems
-            td.extract()
+                            day, period = t.split(' ', 1)
+                            start, end = [x.strip() for x in period.split('-')]
+                            course_time.append([day, start, end])
 
-            # Loop over our td's basing our action on the td's index in the tr
-            # element.
-            if i == 0:
-                if td.get('colspan') == '4':
-                    lecture_type = td.findAll(text=text_only)
-                    lecture = False
+                        for week in td.findAll(text=re.compile('^Uke:')):
+                            week.extract()
+                            for w in week.replace('Uke:', '', 1).split(','):
+                                if '-' in w:
+                                    x, y = w.split('-')
+                                    weeks.extend(range(int(x), int(y)+1))
+                                else:
+                                    weeks.append(int(w.replace(',', '')))
+                elif i == 1:
+                    for a in td.findAll('a'):
+                        room.extend(a.findAll(text=is_text))
+                    for r in room:
+                        r.extract()
+                elif i == 2:
+                    for l in td.findAll(text=is_text):
+                        l.extract()
 
-                    for t in lecture_type:
-                        t.extract()
-                    break
-                else:
-                    for t in td.findAll('b')[0].findAll(text=text_only):
-                        t.extract()
+                        lecturer.append(l.replace('&nbsp;', ''))
+                elif i == 3:
+                    for g in td.findAll(text=is_text):
+                        if g.replace('&nbsp;','').strip():
+                            g.extract()
 
-                        day, period = t.split(' ', 1)
-                        start, end = [x.strip() for x in period.split('-')]
-                        course_time.append([day, start, end])
+                            groups.append(g)
 
-                    for week in td.findAll(text=re.compile('^Uke:')):
-                        week.extract()
-                        for w in week.replace('Uke:', '', 1).split(','):
-                            if '-' in w:
-                                x, y = w.split('-')
-                                weeks.extend(range(int(x), int(y)+1))
-                            else:
-                                weeks.append(int(w.replace(',', '')))
-            elif i == 1:
-                for a in td.findAll('a'):
-                    room.extend(a.findAll(text=text_only))
-                for r in room:
-                    r.extract()
-            elif i == 2:
-                for l in td.findAll(text=text_only):
-                    l.extract()
+            if lecture:
+                results.append({
+                    'type': lecture_type,
+                    'time': course_time,
+                    'weeks': weeks,
+                    'room': room,
+                    'lecturer': lecturer,
+                    'groups': groups,
+                })
 
-                    lecturer.append(l.replace('&nbsp;', ''))
-            elif i == 3:
-                for g in td.findAll(text=text_only):
-                    if g.replace('&nbsp;','').strip():
-                        g.extract()
+        del table
 
-                        groups.append(g)
+        for r in results:
+            if r['type']:
+                name = unicode(r['type'][0])
+                lecture_type, created = Type.objects.get_or_create(name=name)
+            else:
+                lecture_type = None
 
-        if lecture:
-            results.append({
-                'type': lecture_type,
-                'time': course_time,
-                'weeks': weeks,
-                'room': room,
-                'lecturer': lecturer,
-                'groups': groups,
-                'title': title,
-            })
+            day = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag']. \
+                    index(r['time'][0][0])
 
-    del table
+            start = parse(r['time'][0][1]).time()
+            end = parse(r['time'][0][2]).time()
 
-    semester = Semester.objects.all()[0]
-    course, created = Course.objects.get_or_create(name=course.upper())
+            lecture, created = Lecture.objects.get_or_create(
+                course=course,
+                day=day,
+                semester=semester,
+                start=start,
+                end=end,
+                type = lecture_type,
+            )
 
-    for r in results:
-        if not course.full_name:
-            course.full_name = r['title']
-            course.save()
+            if not created:
+                lecture.rooms.clear()
+                lecture.weeks.clear()
+                lecture.lecturers.clear()
 
-        if r['room']:
-            room, created = Room.objects.get_or_create(name=r['room'][0])
-        else:
-            room = None
+            if r['room']:
+                for room in r['room']:
+                    name = unicode(room)
+                    room, created = Room.objects.get_or_create(name=name)
+                    lecture.rooms.add(room)
 
-        if r['type']:
-            lecture_type, created = Type.objects.get_or_create(name=r['type'][0])
-        else:
-            lecture_type = None
-
-        day = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag']. \
-                index(r['time'][0][0])
-
-        start = parse(r['time'][0][1]).time()
-        end = parse(r['time'][0][2]).time()
-
-        lecture, created = Lecture.objects.get_or_create(
-            course=course,
-            day=day,
-            semester=semester,
-            start=start,
-            end=end,
-            room = room,
-            type = lecture_type,
-        )
-        r['id'] = lecture.id
-
-        if r['groups']:
-            for g in r['groups']:
-                group, created = Group.objects.get_or_create(name=g)
+            if r['groups']:
+                for g in r['groups']:
+                    name = unicode(g)
+                    group, created = Group.objects.get_or_create(name=name)
+                    lecture.groups.add(group)
+            else:
+                group, created = Group.objects.get_or_create(name=Group.DEFAULT)
                 lecture.groups.add(group)
-        else:
-            group, created = Group.objects.get_or_create(name=Group.DEFAULT)
-            lecture.groups.add(group)
 
-        for w in  r['weeks']:
-            week, created = Week.objects.get_or_create(number=w)
-            lecture.weeks.add(w)
+            for w in  r['weeks']:
+                week, created = Week.objects.get_or_create(number=w)
+                lecture.weeks.add(w)
 
-        for l in r['lecturer']:
-            if l.strip():
-                lecturer, created = Lecturer.objects.get_or_create(name=l)
-                lecture.lecturers.add(lecturer)
+            for l in r['lecturer']:
+                if l.strip():
+                    name = unicode(l)
+                    lecturer, created = Lecturer.objects.get_or_create(name=name)
+                    lecture.lecturers.add(lecturer)
 
-        lecture.save()
+            lecture.save()
+            lectures.append(lecture)
 
-    return results
+            logger.info('Saved %s' % lecture)
 
+    return lectures
