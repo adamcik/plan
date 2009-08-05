@@ -252,14 +252,6 @@ class Exam(models.Model):
 class Week(models.Model):
     NUMBER_CHOICES = [(x, x) for x in range(1, 53)]
 
-    number = models.PositiveIntegerField(choices=NUMBER_CHOICES, unique=True)
-
-    def __unicode__(self):
-        return u'%d' % self.number
-
-class NewWeek(models.Model):
-    NUMBER_CHOICES = [(x, x) for x in range(1, 53)]
-
     lecture = models.ForeignKey('Lecture')
     number = models.PositiveIntegerField(choices=NUMBER_CHOICES)
 
@@ -295,7 +287,6 @@ class Lecture(models.Model):
 
     rooms = models.ManyToManyField(Room, blank=True, null=True)
     type = models.ForeignKey(Type, blank=True, null=True)
-    weeks = models.ManyToManyField(Week, blank=True, null=True)
     groups = models.ManyToManyField(Group, blank=True, null=True)
     lecturers = models.ManyToManyField(Lecturer, blank=True, null=True)
 
