@@ -13,7 +13,7 @@ now = datetime.now
 class UserSet(models.Model):
     slug = models.SlugField()
     course = models.ForeignKey('Course')
-    semester = models.ForeignKey('Semester')
+
     groups = models.ManyToManyField('Group', blank=True, null=True)
     name = models.CharField(max_length=50, blank=True)
 
@@ -24,7 +24,7 @@ class UserSet(models.Model):
     objects = UserSetManager()
 
     class Meta:
-        unique_together = (('slug', 'course', 'semester'),)
+        unique_together = (('slug', 'course'),)
 
     def __unicode__(self):
         return u'%s - %s' % (self.slug, self.course)
@@ -244,7 +244,6 @@ class Exam(models.Model):
     type = models.CharField(max_length=1, blank=True)
     type_name = models.CharField(max_length=100, blank=True, null=True)
     course = models.ForeignKey(Course)
-    semester = models.ForeignKey(Semester, null=True)
 
     objects = ExamManager()
 
@@ -277,7 +276,6 @@ class Lecture(models.Model):
     )
 
     course = models.ForeignKey(Course)
-    semester = models.ForeignKey(Semester)
 
     day = models.PositiveSmallIntegerField(choices=DAYS)
 
