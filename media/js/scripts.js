@@ -1,5 +1,5 @@
 $(function() {
-  $('#course').autocomplete('../+', {
+  $('#course').autocomplete(autocomplete_url, {
     max: 100,
     minChars: 3,
     multiple: true,
