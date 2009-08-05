@@ -28,11 +28,17 @@ def update_courses(year, semester_type):
     courses = []
 
     for letter in u'ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ':
-        url = 'http://www.ntnu.no/studieinformasjon/timeplan/h09/?' + urlencode({'bokst': letter.encode('utf-8')})
+        url = 'http://www.ntnu.no/studieinformasjon/timeplan/%s/?%s' % (
+            semester.prefix, urlencode({'bokst': letter.encode('utf-8')}))
 
         logger.info('Retriving %s', url)
 
-        html = ''.join(opener.open(url).readlines())
+        try:
+            html = ''.join(opener.open(url).readlines())
+        except IOError, e:
+            logger.error('Loading falied')
+            continue
+
         soup = BeautifulSoup(html)
 
         hovedramme = soup.findAll('div', {'class': 'hovedramme'})[0]
