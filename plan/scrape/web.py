@@ -30,7 +30,7 @@ def update_courses(year, semester_type):
 
     for letter in u'ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ':
         url = 'http://www.ntnu.no/studieinformasjon/timeplan/%s/?%s' % (
-            semester.prefix, urlencode({'bokst': letter.encode('utf-8')}))
+            semester.prefix, urlencode({'bokst': letter.encode('latin1')}))
 
         logger.info('Retriving %s', url)
 
