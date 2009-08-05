@@ -89,8 +89,8 @@ class DeadlineManager(models.Manager):
     def get_deadlines(self, year, semester_type, slug):
         return self.get_query_set().filter(
                 userset__slug=slug,
-                userset__semester__year__exact=year,
-                userset__semester__type__exact=semester_type,
+                userset__course__semester__year__exact=year,
+                userset__course__semester__type__exact=semester_type,
             ).select_related(
                 'userset__course',
                 'userset__name',
