@@ -255,4 +255,4 @@ def update_lectures(year, semester_type, limit=None, prefix=None):
         del lecture
         del r
 
-    return Lecture.objects.filter(id__in=lectures)
+    return Lecture.objects.exclude(id__in=lectures).filter(semester=semester)
