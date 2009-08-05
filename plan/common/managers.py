@@ -150,12 +150,10 @@ class CourseManager(models.Manager):
                    e.exam_date, e.exam_time, e.type, e.type_name,
                    e.handout_date, e.handout_time
             FROM common_course c
-            JOIN common_course_semesters cs ON
-                (c.id = cs.course_id)
             JOIN common_semester s ON
-                (cs.semester_id = s.id)
+                (c.semester_id = s.id)
             LEFT OUTER JOIN common_exam e ON
-                (e.course_id = c.id AND e.semester_id = s.id)
+                (e.course_id = c.id)
             WHERE s.year = %%s AND s.type = %%s AND c.name %s
             ORDER BY c.name, e.exam_date, e.exam_time, e.type;
         ''' % connection.operators['regex'], [year, semester_type, '[0-9]+'])
