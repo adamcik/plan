@@ -8,6 +8,7 @@ from BeautifulSoup import BeautifulSoup, NavigableString
 from dateutil.parser import parse
 
 from django.utils.http import urlquote
+from django.db import connection
 
 from plan.common.models import Lecture, Lecturer, Exam, Course, Room, Type, \
         Semester, Group, Week
@@ -114,6 +115,7 @@ def update_lectures(year, semester_type, limit=None, prefix=None):
         for tr in table.findAll('tr')[1:-1]:
             course_time, weeks, room, lecturer, groups  = [], [], [], [], []
             lecture = True
+            tr.extract()
 
             for i, td in enumerate(tr.findAll('td')):
                 # Break td loose from rest of table so that any refrences we miss
@@ -159,6 +161,9 @@ def update_lectures(year, semester_type, limit=None, prefix=None):
 
                             groups.append(g)
 
+                del td
+            del tr
+
             if lecture:
                 results.append({
                     'type': lecture_type,
@@ -172,6 +177,8 @@ def update_lectures(year, semester_type, limit=None, prefix=None):
         del table
 
         for r in results:
+            connection.queries = connection.queries[-5:]
+
             if r['type']:
                 name = unicode(r['type'][0])
                 lecture_type, created = Type.objects.get_or_create(name=name)
@@ -224,8 +231,11 @@ def update_lectures(year, semester_type, limit=None, prefix=None):
                     lecture.lecturers.add(lecturer)
 
             lecture.save()
-            lectures.append(lecture)
+            lectures.append(lecture.id)
 
             logger.info('Saved %s' % lecture)
 
-    return lectures
+            del lecture
+            del r
+
+    return Lecture.objects.filter(id__in=lectures)
