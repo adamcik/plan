@@ -87,9 +87,9 @@ def update_lectures(year, semester_type, limit=None, prefix=None):
     results = []
     lectures = []
 
-    for course in Course.objects.filter(semesters__in=[semester]):
+    for course in Course.objects.filter(semesters__in=[semester]).distinct().order_by('name'):
         url  = 'http://www.ntnu.no/studieinformasjon/timeplan/%s/?%s' % \
-                (prefix, urlencode({'emnekode': course.name.encode('utf-8')}))
+                (prefix, urlencode({'emnekode': course.name.encode('latin1')}))
 
         table = None
 
