@@ -26,7 +26,6 @@ def _connection():
 
     return MySQLdb.connect(**mysql_setings)
 
-@transaction.commit_on_success
 def update_lectures(year, semester_type, prefix=None, limit=None):
     '''Retrive all lectures for a given course'''
 
