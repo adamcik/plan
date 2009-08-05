@@ -32,7 +32,7 @@ def update_courses(year, semester_type):
         url = 'http://www.ntnu.no/studieinformasjon/timeplan/%s/?%s' % (
             semester.prefix, urlencode({'bokst': letter.encode('latin1')}))
 
-        logger.info('Retriving %s', url)
+        logger.info('Retrieving %s', url)
 
         try:
             html = ''.join(opener.open(url).readlines())
@@ -102,7 +102,7 @@ def update_lectures(year, semester_type, limit=None, prefix=None):
         for number in [1, 2, 3]:
             final_url = '%s-%d' % (url, number)
 
-            logger.info('Retriving %s', final_url)
+            logger.info('Retrieving %s', final_url)
 
             html = ''.join(urlopen(final_url).readlines())
             main = BeautifulSoup(html).findAll('div', 'hovedramme')[0]
