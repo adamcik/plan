@@ -250,7 +250,7 @@ def update_lectures(year, semester_type, limit=None, prefix=None):
         lecture.save()
         lectures.append(lecture.id)
 
-        logger.info('Saved %s' % lecture)
+        logger.info(u'Saved %s' % lecture)
 
         del lecture
         del r
