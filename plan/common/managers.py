@@ -111,17 +111,15 @@ class ExamManager(models.Manager):
         if slug:
             exam_filter = {
                 'course__userset__slug': slug,
-                'course__userset__semester__year__exact': year,
-                'course__userset__semester__type__exact': semester_type,
-                'semester__year__exact': year,
-                'semester__type__exact': semester_type,
+                'course__semester__year__exact': year,
+                'course__semester__type__exact': semester_type,
             }
             select = {'alias': 'common_userset.name'}
         else:
             exam_filter = {
                 'course__name': course,
-                'semester__year__exact': year,
-                'semester__type__exact': semester_type,
+                'course__semester__year__exact': year,
+                'course__semester__type__exact': semester_type,
             }
             select = {}
 
