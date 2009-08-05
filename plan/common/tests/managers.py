@@ -55,3 +55,14 @@ class ManagerTestCase(BaseTestCase):
         usersets = UserSet.objects.get_usersets(2009, Semester.SPRING, 'adamcik')
         self.assertEquals(set(control), set(usersets))
 
+    def test_search(self):
+        control = Course.objects.all()
+        courses = Course.objects.search(2009, Semester.SPRING, 'COURSE')
+
+        self.assertEquals(set(control), set(courses))
+
+        control = Course.objects.filter(name='COURSE1')
+        courses = Course.objects.search(2009, Semester.SPRING, 'COURSE1')
+
+        self.assertEquals(set(control), set(courses))
+
