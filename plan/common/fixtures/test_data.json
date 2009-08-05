@@ -256,9 +256,6 @@
             "groups": [
                 1
             ], 
-            "weeks": [
-                1
-            ], 
             "type": 1, 
             "day": 0, 
             "rooms": [
@@ -279,9 +276,6 @@
             "groups": [
                 2
             ], 
-            "weeks": [
-                2
-            ], 
             "type": 2, 
             "day": 0, 
             "rooms": [
@@ -299,9 +293,6 @@
             "course": 1, 
             "groups": [
                 1
-            ], 
-            "weeks": [
-                2
             ], 
             "type": null, 
             "day": 1, 
@@ -321,9 +312,6 @@
             "groups": [
                 1
             ], 
-            "weeks": [
-                2
-            ], 
             "type": 3, 
             "day": 0, 
             "rooms": [
@@ -342,8 +330,6 @@
             "groups": [
                 2
             ], 
-            "weeks": [], 
-            "type": null, 
             "day": 0, 
             "rooms": []
         }
@@ -357,9 +343,6 @@
             "start": "08:15:00", 
             "course": 4, 
             "groups": [
-                2
-            ], 
-            "weeks": [
                 2
             ], 
             "type": null, 
@@ -378,9 +361,6 @@
             "groups": [
                 1
             ], 
-            "weeks": [
-                1
-            ], 
             "type": null, 
             "day": 0, 
             "rooms": []
@@ -395,9 +375,6 @@
             "start": "07:00:00", 
             "course": 1, 
             "groups": [
-                1
-            ], 
-            "weeks": [
                 1
             ], 
             "type": null, 
@@ -416,9 +393,6 @@
             "groups": [
                 1
             ],
-            "weeks": [
-                1
-            ], 
             "type": null, 
             "day": 2, 
             "rooms": []
@@ -435,12 +409,81 @@
             "groups": [
                 1
             ], 
-            "weeks": [
-                1
-            ], 
             "type": null, 
             "day": 2, 
             "rooms": []
+        }
+    },
+    {
+        "pk": 1,
+        "model": "common.week",
+        "fields": {
+            "lecture": 2,
+            "number": 1
+        }
+    },
+    {
+        "pk": 2,
+        "model": "common.week",
+        "fields": {
+            "lecture": 3,
+            "number": 2
+        }
+    },
+    {
+        "pk": 3,
+        "model": "common.week",
+        "fields": {
+            "lecture": 7,
+            "number": 2
+        }
+    },
+    {
+        "pk": 4,
+        "model": "common.week",
+        "fields": {
+            "lecture": 4,
+            "number": 2
+        }
+    },
+    {
+        "pk": 5,
+        "model": "common.week",
+        "fields": {
+            "lecture": 6,
+            "number": 2
+        }
+    },
+    {
+        "pk": 6,
+        "model": "common.week",
+        "fields": {
+            "lecture": 8,
+            "number": 1
+        }
+    },
+    {
+        "pk": 7,
+        "model": "common.week",
+        "fields": {
+            "lecture": 9,
+            "number": 1
+        }
+    },
+    {
+        "pk": 8,
+        "model": "common.week",
+        "fields": {
+            "lecture": 10,
+            "number": 1
+        }
+    },
+    {
+        "pk": 9,
+        "model": "common.week",
+        "fields": {
+            "lecture": 11,
+            "number": 1
         }
     }
 ]
