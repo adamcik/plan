@@ -3,7 +3,7 @@
 {% load strip %}
 
 {% block hd %}
-    <h1>unofficial timetable generator for NTNU students</h1>
+    <h1>Timetable generator for NTNU students</h1>
 {% endblock %}
 
 {% block onload %}onload="{% stripspace %}
@@ -83,16 +83,5 @@
                 {% endif %}
             </div>
         </div>
-        <h2>Disclaimer</h2>
-        <p>
-            This site is <b>not</b> run by NTNU and is not hosted on any of
-            their servers.
-        </p>
-        <p>
-            All course and exam data is retrived from NTNU's public sites.
-            All deadlines have been added manualy by users. Please note that
-            the course data displayed on this site can be out of sync with
-            NTNU if they make changes to their schedules.
-        </p>
     {% endif %}
 {% endblock %}
