@@ -94,6 +94,8 @@ class Course(models.Model):
         return self.url % values
 
     def __unicode__(self):
+        if self.version:
+            return u'-'.join([self.name, self.version])
         return self.name
 
     @staticmethod
