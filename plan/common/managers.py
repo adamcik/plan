@@ -141,8 +141,8 @@ class CourseManager(models.Manager):
     def get_courses(self, year, semester_type, slug):
         course_filter = {
             'userset__slug': slug,
-            'userset__semester__year__exact': year,
-            'userset__semester__type__exact': semester_type,
+            'userset__course__semester__year__exact': year,
+            'userset__course__semester__type__exact': semester_type,
         }
         return self.get_query_set().filter(**course_filter). \
             extra(select={'alias': 'common_userset.name'}).distinct().\
