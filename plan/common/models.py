@@ -201,6 +201,13 @@ class Semester(models.Model):
     def get_weeks(self):
         return xrange(0,53)
 
+    @property
+    def prefix(self):
+        if self.type == self.SPRING:
+            return 'v%s' % str(self.year)[-2:]
+        else:
+            return 'h%s' % str(self.year)[-2:]
+
     @staticmethod
     def current(from_db=False, early=False):
         current_time = now()
