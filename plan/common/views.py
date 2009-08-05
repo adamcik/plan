@@ -461,12 +461,11 @@ def select_course(request, year, semester_type, slug, add=False):
 
                     course = Course.objects.get(
                             name__iexact=l.strip(),
-                            semesters__in=[semester],
+                            semester=semester,
                         )
                     userset, created = UserSet.objects.get_or_create(
                             slug=slug,
                             course=course,
-                            semester=semester
                         )
 
                     usersets.add(course.name)
