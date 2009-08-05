@@ -105,16 +105,16 @@ class Course(models.Model):
         else:
             semester_id = semester
 
-        slug_count = int(UserSet.objects.filter(semester=semester).values('slug').distinct().count())
-        subscription_count = int(UserSet.objects.filter(semester=semester).count())
-        deadline_count = int(Deadline.objects.filter(userset__semester=semester).count())
-        course_count = int(Course.objects.filter(userset__semester=semester).values('name').distinct().count())
+        slug_count = int(UserSet.objects.filter(course__semester=semester).values('slug').distinct().count())
+        subscription_count = int(UserSet.objects.filter(course__semester=semester).count())
+        deadline_count = int(Deadline.objects.filter(userset__course__semester=semester).count())
+        course_count = int(Course.objects.filter(userset__course__semester=semester).values('name').distinct().count())
 
         cursor = connection.cursor()
         cursor.execute('''
             SELECT COUNT(*) as num, c.id, c.name, c.full_name FROM
                 common_userset u JOIN common_course c ON (c.id = u.course_id)
-            WHERE u.semester_id = %s
+            WHERE c.semester_id = %s
             GROUP BY c.id, c.name, c.full_name
             ORDER BY num DESC
             LIMIT %s''', [semester_id, limit])
