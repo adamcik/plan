@@ -22,7 +22,7 @@ class LectureAdmin(admin.ModelAdmin):
 
     search_fields = ('course__name', 'type__name')
 
-    filter_horizontal = ('weeks', 'groups', 'lecturers', 'rooms')
+    filter_horizontal = ('groups', 'lecturers', 'rooms')
 
     list_per_page = 50
     list_filter = ['day', 'start', 'end', 'rooms']
