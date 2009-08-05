@@ -51,18 +51,14 @@ class LectureManager(models.Manager):
         if slug:
             filter = {
                 'course__userset__slug': slug,
-                'course__userset__semester__year__exact': year,
-                'course__userset__semester__type__exact': semester_type,
-                'semester__year__exact': year,
-                'semester__type__exact': semester_type,
+                'course__semester__year__exact': year,
+                'course__semester__type__exact': semester_type,
             }
         else:
             filter = {
                 'course__name': course,
-                'course__semesters__year__exact': year,
-                'course__semesters__type__exact': semester_type,
-                'semester__year__exact': year,
-                'semester__type__exact': semester_type,
+                'course__semester__year__exact': year,
+                'course__semester__type__exact': semester_type,
             }
             where = []
             tables = []
