@@ -257,6 +257,18 @@ class Week(models.Model):
     def __unicode__(self):
         return u'%d' % self.number
 
+class NewWeek(models.Model):
+    NUMBER_CHOICES = [(x, x) for x in range(1, 53)]
+
+    lecture = models.ForeignKey('Lecture')
+    number = models.PositiveIntegerField(choices=NUMBER_CHOICES)
+
+    class Meta:
+        unique_together = [('lecture', 'number')]
+
+    def __unicode__(self):
+        return u'%s week %d' % (self.lecture, self.number)
+
 class Lecturer(models.Model):
     name = models.CharField(max_length=200)
 
