@@ -182,6 +182,7 @@ def update_lectures(year, semester_type, limit=None, prefix=None):
 
             if lecture:
                 results.append({
+                    'course': course,
                     'type': lecture_type,
                     'time': course_time,
                     'weeks': weeks,
@@ -208,7 +209,7 @@ def update_lectures(year, semester_type, limit=None, prefix=None):
         end = parse(r['time'][0][2]).time()
 
         lecture, created = Lecture.objects.get_or_create(
-            course=course,
+            course=r['course'],
             day=day,
             semester=semester,
             start=start,
