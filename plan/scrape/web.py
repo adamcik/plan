@@ -2,6 +2,7 @@
 
 import re
 import logging
+import gc
 
 from urllib import urlopen, URLopener, urlencode
 from BeautifulSoup import BeautifulSoup, NavigableString
@@ -90,8 +91,15 @@ def update_lectures(year, semester_type, limit=None, prefix=None):
         url  = 'http://www.ntnu.no/studieinformasjon/timeplan/%s/?%s' % \
                 (prefix, urlencode({'emnekode': course.name.encode('utf-8')}))
 
+        table = None
+
+
         for number in [1, 2, 3]:
-            html = ''.join(urlopen('%s-%d' % (url, number)).readlines())
+            final_url = '%s-%d' % (url, number)
+
+            logger.info('Retriving %s', final_url)
+
+            html = ''.join(urlopen(final_url).readlines())
             main = BeautifulSoup(html).findAll('div', 'hovedramme')[0]
 
 
@@ -110,6 +118,9 @@ def update_lectures(year, semester_type, limit=None, prefix=None):
             del main
 
             break
+
+        if not table:
+            continue
 
         lecture_type = None
         for tr in table.findAll('tr')[1:-1]:
@@ -176,66 +187,66 @@ def update_lectures(year, semester_type, limit=None, prefix=None):
 
         del table
 
-        for r in results:
-            connection.queries = connection.queries[-5:]
+    for r in results:
+        connection.queries = connection.queries[-5:]
 
-            if r['type']:
-                name = unicode(r['type'][0])
-                lecture_type, created = Type.objects.get_or_create(name=name)
-            else:
-                lecture_type = None
+        if r['type']:
+            name = unicode(r['type'][0])
+            lecture_type, created = Type.objects.get_or_create(name=name)
+        else:
+            lecture_type = None
 
-            day = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag']. \
-                    index(r['time'][0][0])
+        day = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag']. \
+                index(r['time'][0][0])
 
-            start = parse(r['time'][0][1]).time()
-            end = parse(r['time'][0][2]).time()
+        start = parse(r['time'][0][1]).time()
+        end = parse(r['time'][0][2]).time()
 
-            lecture, created = Lecture.objects.get_or_create(
-                course=course,
-                day=day,
-                semester=semester,
-                start=start,
-                end=end,
-                type = lecture_type,
-            )
+        lecture, created = Lecture.objects.get_or_create(
+            course=course,
+            day=day,
+            semester=semester,
+            start=start,
+            end=end,
+            type = lecture_type,
+        )
 
-            if not created:
-                lecture.rooms.clear()
-                lecture.weeks.clear()
-                lecture.lecturers.clear()
+        if not created:
+            lecture.rooms.clear()
+            lecture.weeks.clear()
+            lecture.lecturers.clear()
 
-            if r['room']:
-                for room in r['room']:
-                    name = unicode(room)
-                    room, created = Room.objects.get_or_create(name=name)
-                    lecture.rooms.add(room)
+        if r['room']:
+            for room in r['room']:
+                name = unicode(room)
+                room, created = Room.objects.get_or_create(name=name)
+                lecture.rooms.add(room)
 
-            if r['groups']:
-                for g in r['groups']:
-                    name = unicode(g)
-                    group, created = Group.objects.get_or_create(name=name)
-                    lecture.groups.add(group)
-            else:
-                group, created = Group.objects.get_or_create(name=Group.DEFAULT)
+        if r['groups']:
+            for g in r['groups']:
+                name = unicode(g)
+                group, created = Group.objects.get_or_create(name=name)
                 lecture.groups.add(group)
+        else:
+            group, created = Group.objects.get_or_create(name=Group.DEFAULT)
+            lecture.groups.add(group)
 
-            for w in  r['weeks']:
-                week, created = Week.objects.get_or_create(number=w)
-                lecture.weeks.add(w)
+        for w in  r['weeks']:
+            week, created = Week.objects.get_or_create(number=w)
+            lecture.weeks.add(w)
 
-            for l in r['lecturer']:
-                if l.strip():
-                    name = unicode(l)
-                    lecturer, created = Lecturer.objects.get_or_create(name=name)
-                    lecture.lecturers.add(lecturer)
+        for l in r['lecturer']:
+            if l.strip():
+                name = unicode(l)
+                lecturer, created = Lecturer.objects.get_or_create(name=name)
+                lecture.lecturers.add(lecturer)
 
-            lecture.save()
-            lectures.append(lecture.id)
+        lecture.save()
+        lectures.append(lecture.id)
 
-            logger.info('Saved %s' % lecture)
+        logger.info('Saved %s' % lecture)
 
-            del lecture
-            del r
+        del lecture
+        del r
 
     return Lecture.objects.filter(id__in=lectures)
