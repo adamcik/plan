@@ -1,6 +1,9 @@
-import re
+#encoding: utf-8
 
-from urllib import urlopen, URLopener
+import re
+import logging
+
+from urllib import urlopen, URLopener, urlencode
 from BeautifulSoup import BeautifulSoup, NavigableString
 from dateutil.parser import parse
 
@@ -10,42 +13,61 @@ from django.utils.http import urlquote
 from plan.common.models import Lecture, Lecturer, Exam, Course, Room, Type, \
         Semester, Group, Week
 
+logger = logging.getLogger('plan.scrape.web')
+
 is_text = lambda text: isinstance(text, NavigableString)
 
-@transaction.commit_on_success
-def scrape_courses():
+def update_courses(year, semester_type):
     '''Scrape the NTNU website to retrive all available courses'''
+
+    semester, created = Semester.objects.get_or_create(year=year, type=semester_type)
 
     opener = URLopener()
     opener.addheader('Accept', '*/*')
 
-    html = ''.join(opener.open('http://www.ntnu.no/studier/emner').readlines())
-    soup = BeautifulSoup(html)
-
     courses = []
-    for a in soup.findAll('div', id="browseForm")[0].findAll('a'):
-        contents = a.contents[0].strip()
 
-        if contents.endswith('(Nytt)'):
-            contents = contents[:-len('(Nytt)')]
+    for letter in u'ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ':
+        url = 'http://www.ntnu.no/studieinformasjon/timeplan/h09/?' + urlencode({'bokst': letter.encode('utf-8')})
 
-        m = re.match(r'^\s*(.+)\((.+)\)\s*$', contents)
+        logger.info('Retriving %s', url)
 
-        if m:
-            courses.append(m.group(2, 1))
+        html = ''.join(opener.open(url).readlines())
+        soup = BeautifulSoup(html)
 
+        hovedramme = soup.findAll('div', {'class': 'hovedramme'})[0]
+
+        table = hovedramme.findAll('table', recursive=False)[0]
+        table = table.findAll('table')[0]
+
+        table.extract()
+        hovedramme.extract()
+
+        for tr in table.findAll('tr'):
+            name, full_name = tr.findAll('a')
+
+            name = name.contents[0].split('-')[0]
+            full_name = full_name.contents[0]
+
+            if full_name.endswith('(Nytt)'):
+                full_name = contents.rstrip('(Nytt)')
+
+            courses.append((name, full_name))
+            
     for name, full_name in courses:
+        name = name.strip().upper()
+        full_name = full_name.strip()
+
         try:
-            course = Course.objects.get(name=name.strip().upper())
+            course = Course.objects.get(name=name)
         except Course.DoesNotExist:
-            course = Course(name=name.strip().upper())
+            course = Course(name=name)
 
-        if course.full_name != full_name.strip():
-            course.full_name = full_name.strip()
+        if course.full_name != full_name:
+            course.full_name = full_name
 
+        logger.info("Saved course %s" % course.name)
         course.save()
-
-    # FIXME delete unimported courses
 
     return courses
 
