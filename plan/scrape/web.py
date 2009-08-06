@@ -90,7 +90,7 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
     results = []
     lectures = []
 
-    courses = Course.objects.filter(semesters__in=[semester]).distinct().order_by('name')
+    courses = Course.objects.filter(semester=semester).distinct().order_by('name')
 
     if matches:
         courses = courses.filter(name__startswith=matches)
@@ -214,7 +214,6 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
         lecture, created = Lecture.objects.get_or_create(
             course=r['course'],
             day=day,
-            semester=semester,
             start=start,
             end=end,
             type = lecture_type,
@@ -222,8 +221,8 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
 
         if not created:
             lecture.rooms.clear()
-            lecture.weeks.clear()
             lecture.lecturers.clear()
+            Week.objects.filter(lecture=lecture).delete()
 
         if r['room']:
             for room in r['room']:
@@ -241,8 +240,7 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
             lecture.groups.add(group)
 
         for w in  r['weeks']:
-            week, created = Week.objects.get_or_create(number=w)
-            lecture.weeks.add(w)
+            Week.objects.create(lecture=lecture, number=w)
 
         for l in r['lecturer']:
             if l.strip():
@@ -257,8 +255,11 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
 
         del lecture
         del r
+
+    to_delete = Lecture.objects.exclude(id__in=lectures).filter(course__semester=semester)
     
     if matches:
-        return Lecture.objects.exclude(id__in=lectures).filter(semester=semester, name__startswith=matches)
+        return to_delete.filter(course__name__startswith=matches)
 
-    return Lecture.objects.exclude(id__in=lectures).filter(semester=semester)
+    return to_delete
+
