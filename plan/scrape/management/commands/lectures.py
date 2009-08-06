@@ -21,7 +21,7 @@ class Command(BaseCommand):
             make_option('-s', '--spring', action='store_const', dest='type', const=Semester.SPRING),
             make_option('-f', '--fall', action='store_const', dest='type', const=Semester.FALL),
             make_option('-d', '--delete', action='store_const', dest='delete', const=1),
-            make_option('-l', '--limit', action='store', dest='limit', default=None),
+            make_option('-m', '--matches', action='store', dest='matches', default=None),
         )
 
     @transaction.commit_manually
@@ -38,9 +38,9 @@ class Command(BaseCommand):
             logger.info('Updating lectures for %s', semester)
 
             if options['web']:
-                to_delete = update_lectures_from_web(semester.year, semester.type, limit=options['limit'])
+                to_delete = update_lectures_from_web(semester.year, semester.type, matches=options['matches'])
             else:
-                to_delete = update_lectures_from_db(semester.year, semester.type, limit=options['limit'])
+                to_delete = update_lectures_from_db(semester.year, semester.type, matches=options['matches'])
 
             if to_delete:
                 print 'Delete the following?'
