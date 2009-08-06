@@ -239,11 +239,11 @@ def update_courses(year, semester_type, prefix=None):
         if name[0] in ['"', "'"] and name[0] == name[-1]:
             name = name[1:-1]
 
-        if not re.match(settings.TIMETABLE_VALID_COURSE_NAMES, name):
-            logger.info('Skipped invalid course name: %s', name)
+        if not re.match(settings.TIMETABLE_VALID_COURSE_NAMES, code):
+            logger.info('Skipped invalid course name: %s', code)
             continue 
 
-        course, created = Course.objects.get_or_create(name=code)
+        course, created = Course.objects.get_or_create(name=code, semester=semester)
 
         if points:
             if vekt == 'en_navn':
