@@ -65,8 +65,8 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
 
     for l in lectures:
         l.rooms.clear()
-        l.weeks.clear()
         l.lecturers.clear()
+        Week.objects.filter(lecture=l).delete()
 
     for row in c.fetchall():
         code, course_type, day, start, end, week, room, lecturer, groupcode = row
