@@ -80,11 +80,11 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
         code = '-'.join(code.split('-')[:-1]).upper()
 
         if not re.match(settings.TIMETABLE_VALID_COURSE_NAMES, code):
+            logging.info('Skipped %s', code)
             continue 
 
         # Get and or update course
-        course, created = Course.objects.get_or_create(name=code)
-        course.semesters.add(semester)
+        course, created = Course.objects.get_or_create(name=code, semester=semester)
 
         # Load or create type:
         if course_type:
@@ -130,12 +130,11 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
         for w in re.split(r',? ', week):
             if '-' in w:
                 x, y = w.split('-')
-                for i in range(int(x), int(y)+1):
-                    w2 = Week.objects.get(number=i)
-                    weeks.append(w2)
+                weeks.extend(range(int(x), int(y)+1))
+
             elif w.isdigit():
-                w2 = Week.objects.get(number=w)
-                weeks.append(w2)
+                weeks.append(w)
+
             else:
                 logger.warning("Messed up week '%s' for %s" % (w, course))
 
@@ -152,7 +151,6 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
             'day': day,
             'start': start,
             'end': end,
-            'semester': semester,
             'type': course_type,
         }
 
@@ -171,7 +169,6 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
             if psql_set == mysql_set:
                 # FIXME need extra check against weeks and rooms
                 lecture.rooms = rooms
-                lecture.weeks = weeks
                 lecture.lecturers = lecturers
 
                 added_lectures.append(lecture.id)
@@ -187,12 +184,14 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
             # Simply set data since we are saving new lecture
             lecture.groups = groups
             lecture.rooms = rooms
-            lecture.weeks = weeks
             lecture.lecturers = lecturers
 
         lecture.start = start
         lecture.end = end
         lecture.save()
+
+        for week in weeks:
+            Week.objects.create(lecture=lecture, number=week)
 
         # FIXME this is backward
         if added:
