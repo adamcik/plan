@@ -8,6 +8,7 @@ from BeautifulSoup import BeautifulSoup, NavigableString
 from dateutil.parser import parse
 
 from django.utils.http import urlquote
+from django.conf import settings
 from django.db import connection
 
 from plan.common.models import Lecture, Lecturer, Exam, Course, Room, Type, \
