@@ -387,8 +387,6 @@ def copy_deadlines(request, year, semester_type, slug):
 
             deadlines = Deadline.objects.filter(
                     userset__slug__in=slugs,
-                    userset__semester__year__exact=year,
-                    userset__semester__type__exact=semester.type,
                     userset__course__in=courses,
                 ).select_related(
                     'userset__course__id'
@@ -405,8 +403,8 @@ def copy_deadlines(request, year, semester_type, slug):
             deadline_ids = request.POST.getlist('deadline_id')
             deadlines = Deadline.objects.filter(
                     id__in=deadline_ids,
-                    userset__semester__year__exact=year,
-                    userset__semester__type__exact=semester.type,
+                    userset__course__semester__year__exact=year,
+                    userset__course__semester__type__exact=semester.type,
                 )
 
             for d in deadlines:
@@ -421,7 +419,7 @@ def copy_deadlines(request, year, semester_type, slug):
                 )
             clear_cache(semester, slug)
 
-    return HttpResponseRedirect(reverse('schedule',
+    return HttpResponseRedirect(reverse('schedule-advanced',
             args=[semester.year,semester.get_type_display(),slug]))
 
 def select_course(request, year, semester_type, slug, add=False):
