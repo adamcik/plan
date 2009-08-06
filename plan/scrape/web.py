@@ -69,10 +69,7 @@ def update_courses(year, semester_type):
         name = name.strip().upper()
         full_name = full_name.strip()
 
-        try:
-            course = Course.objects.get(name=name)
-        except Course.DoesNotExist:
-            course = Course(name=name)
+        course, created = Course.objects.get_or_create(name=name, semester=semester)
 
         if course.full_name != full_name:
             course.full_name = full_name
