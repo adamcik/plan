@@ -74,7 +74,7 @@ class Course(models.Model):
     name = models.CharField(max_length=100)
     full_name = models.TextField(blank=True)
     url = models.URLField(verify_exists=False, blank=True)
-    points = models.DecimalField(decimal_places=2, max_digits=5, null=True)
+    points = models.DecimalField(decimal_places=2, max_digits=5, null=True, blank=True)
     version = models.CharField(max_length=20, blank=True, null=True)
 
     semester = models.ForeignKey('Semester')
