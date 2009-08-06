@@ -142,13 +142,14 @@ def schedule(request, year, semester_type, slug, advanced=False,
     semester = Semester(year=year, type=semester_type)
     current = Semester.current()
 
+    # Start new week on saturdays
+    current_week = (now() + timedelta(days=2)).isocalendar()[1]
+
     # FIXME refactor to get_current_week...
     if semester.year != current.year and semester.type != current.type:
         url = request.path
     elif not all and not week and not advanced:
-        # Start new week on saturdays
-        week = (now() + timedelta(days=2)).isocalendar()[1]
-        url = reverse('schedule-week', args=[semester.year, semester.type, slug, week])
+        url = reverse('schedule-week', args=[semester.year, semester.type, slug, current_week])
     else:
         url = request.path
 
@@ -194,7 +195,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
     if schedule_weeks:
         schedule_weeks = range(schedule_weeks[0], schedule_weeks[-1]+1)
 
-    if week is not None and week not in schedule_weeks:
+    if current_week not in schedule_weeks and not week and not all and not advanced:
         return HttpResponseRedirect(reverse('schedule-all',
                 args=[semester.year,semester.get_type_display(),slug]))
 
@@ -279,6 +280,8 @@ def schedule(request, year, semester_type, slug, advanced=False,
             'all': all,
             'color_map': color_map,
             'courses': courses,
+            'current': (week == current_week),
+            'current_week': current_week,
             'deadline_form': deadline_form,
             'deadlines': deadlines,
             'exams': exams,
