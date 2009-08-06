@@ -99,7 +99,7 @@ def add_lectutures(lectures, semester, cal):
     '''Adds lectures to cal object for current semester'''
 
     all_rooms = Lecture.get_related(Room, lectures)
-    all_weeks = Lecture.get_related(Week, lectures, field='number')
+    all_weeks = Lecture.get_related(Week, lectures, field='number', use_extra=False)
 
     for l in lectures:
         if l.exclude: # Skip excluded
