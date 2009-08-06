@@ -11,6 +11,8 @@ from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
 from django.views.generic.list_detail import object_list
+from django.utils.html import escape
+from django.utils.text import truncate_words
 
 from plan.common.models import Course, Deadline, Exam, Group, \
         Lecture, Semester, UserSet, Room, Lecturer, Week
@@ -123,10 +125,10 @@ def course_query(request, year, semester_type):
     courses = Course.objects.search(semester.year, semester.type,
         query, limit)
 
-    # FIXME use template instead
-    # FIXME truncate words 3
     for course in courses:
-        response.write('%s|%s\n' % (course.name, course.full_name))
+        name = escape(course.name)
+        full_name = escape(truncate_words(course.full_name, 5))
+        response.write(u'%s|%s\n' % (name, full_name or u'?'))
 
     cache.set(cache_key, response, settings.CACHE_TIME_AJAX, prefix=True)
 
