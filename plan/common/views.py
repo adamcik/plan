@@ -179,7 +179,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
     lecturers = Lecture.get_related(Lecturer, lectures)
     groups = Lecture.get_related(Group, lectures)
     rooms = Lecture.get_related(Room, lectures)
-    weeks = Lecture.get_related(Week, lectures, field='number')
+    weeks = Lecture.get_related(Week, lectures, field='number', use_extra=False)
 
     schedule_weeks = set()
     for lecture_week_set in weeks.values():

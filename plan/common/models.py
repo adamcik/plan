@@ -301,7 +301,7 @@ class Lecture(models.Model):
             self.get_day_display()[:3])
 
     @staticmethod
-    def get_related(model, lectures, field='name'):
+    def get_related(model, lectures, field='name', use_extra=True):
         tmp = {}
 
         if not lectures:
@@ -309,10 +309,14 @@ class Lecture(models.Model):
 
         name = model._meta.object_name.lower()
 
-        object_list = model.objects.filter(lecture__in=lectures). \
-            extra(select={
-                'lecture_id': 'common_lecture_%ss.lecture_id' % name,
-            }).values_list('lecture_id', field)
+        objects = model.objects.filter(lecture__in=lectures)
+
+        if use_extra: 
+            objects = objects.extra(select={
+                    'lecture_id': 'common_lecture_%ss.lecture_id' % name,
+                }).values_list('lecture_id', field)
+
+        object_list = objects.values_list('lecture_id', field)
 
         for lecture, name in object_list:
             if lecture not in tmp:
