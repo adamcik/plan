@@ -244,6 +244,8 @@ class ViewTestCase(BaseTestCase):
         url = self.url('new-deadline')
         deadlines = Deadline.objects.all().count()
 
+
+        # Add deadline
         responese = self.client.post(url, {'submit_add': '',
                                            'task': u'foo',
                                            'userset': 1,
@@ -251,19 +253,40 @@ class ViewTestCase(BaseTestCase):
                                            'time': u''})
 
         self.assertRedirects(responese, self.url('schedule-advanced'))
-        self.assertEquals(deadlines+1,  Deadline.objects.all().count())
+        self.assertEquals(deadlines+1, Deadline.objects.all().count())
 
         deadline = Deadline.objects.get(userset=1, task='foo')
 
+        # Remove deadline
         responese = self.client.post(url, {'submit_remove': '',
                                            'deadline_remove': [deadline.id]})
         
         self.assertRedirects(responese, self.url('schedule-advanced'))
-        self.assertEquals(deadlines,  Deadline.objects.all().count())
+        self.assertEquals(deadlines, Deadline.objects.all().count())
+
+        # Add deadline to wrong user
+        responese = self.client.post(url, {'submit_add': '',
+                                           'task': u'foo',
+                                           'userset': 4,
+                                           'date': u'2009-08-08',
+                                           'time': u''})
+
+        self.assertEquals(200, responese.status_code)
+        self.assertEquals(deadlines, Deadline.objects.all().count())
 
     def test_copy_deadlines(self):
-        pass
-        # FIXME
+        url = self.url('copy-deadlines')
+
+        responese = self.client.post(url, {'slugs': 'foo'})
+
+        self.assertContains(responese, 'Task 1', status_code=200)
+
+        deadlines = Deadline.objects.all().count()
+    
+        responese = self.client.post(url, {'deadline_id': ['3']})
+
+        self.assertRedirects(responese, self.url('schedule-advanced'))
+        self.assertEquals(deadlines+1, Deadline.objects.all().count())
 
     def test_course_query(self):
         url = reverse('course-query', args=[self.semester.year,
@@ -280,3 +303,4 @@ class ViewTestCase(BaseTestCase):
         self.assertEquals("COURSE2|Course 2 full name", lines[1])
         self.assertEquals("COURSE3|Course 3 full name", lines[2])
         self.assertEquals("COURSE4|Course 4 full name", lines[3])
+
