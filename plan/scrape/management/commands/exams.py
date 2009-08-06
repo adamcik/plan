@@ -22,41 +22,44 @@ class Command(BaseCommand):
 
     @transaction.commit_manually
     def handle(self, *args, **options):
-        semester = Semester.current()
+        try:
+            semester = Semester.current()
 
-        if options['year'] is not None:
-            semester.year = options['year']
+            if options['year'] is not None:
+                semester.year = options['year']
 
-        if options['type'] is not None:
-            semester.type = options['type']
+            if options['type'] is not None:
+                semester.type = options['type']
 
-        logger.info('Updating exams for %s', semester)
+            logger.info('Updating exams for %s', semester)
 
-        to_delete = update_exams(semester.year, semester.type)
+            to_delete = update_exams(semester.year, semester.type)
 
-        if to_delete:
-            print 'Delete the following?'
-            print '---------------------'
+            if to_delete:
+                print 'Delete the following?'
+                print '---------------------'
 
-            buffer = []
-            for l in to_delete:
-                if len(buffer) != 3:
-                    buffer.append(str(l).ljust(15)[:14])
-                else:
+                buffer = []
+                for l in to_delete:
+                    if len(buffer) != 3:
+                        buffer.append(str(l).ljust(15)[:14])
+                    else:
+                        print ' - '.join(buffer)
+                        buffer = []
+
+                if buffer:
                     print ' - '.join(buffer)
-                    buffer = []
 
-            if buffer:
-                print ' - '.join(buffer)
+                print '---------------------'
 
-            print '---------------------'
+                if options['delete'] or raw_input('Delete? [y/N] ').lower() == 'y':
+                    to_delete.delete()
 
-            if options['delete'] or raw_input('Delete? [y/N] ').lower() == 'y':
-                to_delete.delete()
+            if raw_input('Save changes? [y/N] ').lower() == 'y':
+                transaction.commit()
+                print 'Saving changes...'
+            else:
+                print 'Ignoring changes...'
 
-        if raw_input('Save changes? [y/N] ').lower() == 'y':
-            transaction.commit()
-            print 'Saving changes...'
-        else:
+        finally:
             transaction.rollback()
-            print 'Ignoring changes...'
