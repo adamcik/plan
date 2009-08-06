@@ -3,7 +3,7 @@ from django.core.urlresolvers import reverse
 
 from plan.common.tests.base import BaseTestCase
 from plan.common.cache import get_realm, cache
-from plan.common.models import Semester, Group, UserSet, Lecture
+from plan.common.models import Semester, Group, UserSet, Lecture, Deadline
 
 class EmptyViewTestCase(BaseTestCase):
     def test_index(self):
@@ -241,8 +241,25 @@ class ViewTestCase(BaseTestCase):
             lectures = new_lectures
 
     def test_new_deadline(self):
-        pass
-        # FIXME
+        url = self.url('new-deadline')
+        deadlines = Deadline.objects.all().count()
+
+        responese = self.client.post(url, {'submit_add': '',
+                                           'task': u'foo',
+                                           'userset': 1,
+                                           'date': u'2009-08-08',
+                                           'time': u''})
+
+        self.assertRedirects(responese, self.url('schedule-advanced'))
+        self.assertEquals(deadlines+1,  Deadline.objects.all().count())
+
+        deadline = Deadline.objects.get(userset=1, task='foo')
+
+        responese = self.client.post(url, {'submit_remove': '',
+                                           'deadline_remove': [deadline.id]})
+        
+        self.assertRedirects(responese, self.url('schedule-advanced'))
+        self.assertEquals(deadlines,  Deadline.objects.all().count())
 
     def test_copy_deadlines(self):
         pass
