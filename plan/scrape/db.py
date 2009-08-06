@@ -58,7 +58,7 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
     mysql_lecture_count = 0
     skipped = 0
 
-    lectures = Lecture.objects.filter(semester=semester)
+    lectures = Lecture.objects.filter(course__semester=semester)
 
     if matches:
         lectures = lectures.filter(course__name__startswith=matches)
@@ -203,7 +203,7 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
         skipped -= 1
 
     to_remove =  Lecture.objects.exclude(id__in=added_lectures). \
-            filter(semester=semester)
+            filter(course__semester=semester)
 
     if matches:
         to_remove = to_remove.filter(course__name__startswith=matches)
