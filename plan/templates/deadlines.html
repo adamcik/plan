@@ -19,7 +19,7 @@
                         {% if advanced %}
                             <td><input type="checkbox" name="deadline_remove" value="{{ d.id }}" class="noprint" /></td>
                         {% endif %}
-                        <td>{{ d.userset.name|default:d.userset.course }}</td>
+                        <td>{{ d.userset.name|default:d.userset.course.name }}</td>
                         <td align="center">{{ d.date }}</td>
                         <td align="center">{{ d.time|time }}</td>
                         <td>{{ d.task }}</td>

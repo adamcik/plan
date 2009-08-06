@@ -24,10 +24,10 @@
                         <td>
                             {% if course.url %}
                                 <a href="{{ course.get_url }}">
-                                    {{ course }}
+                                    {{ course.name }}
                                 </a>
                             {% else %}
-                                {{ course }}
+                                {{ course.name }}
                             {% endif %}
                         </td>
                         <td>
