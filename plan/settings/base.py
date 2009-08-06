@@ -1,3 +1,4 @@
+#encoding: utf-8
 # pylint: disable-msg=W0614, C0111
 # Django settings for plan project.
 
@@ -129,6 +130,9 @@ TIMETABLE_MAX_COLORS = 8
 TIMETABLE_AJAX_LIMIT = 100
 TIMETABLE_COOKIE_AGE = 60*60*24*7*4
 TIMETABLE_MAX_COURSES = 20
+
+# Assum course codes must end with digits
+TIMETABLE_VALID_COURSE_NAMES = r'[0-9]+$'
 
 CACHE_BACKEND = 'locmem://'
 CACHE_PREFIX = ''

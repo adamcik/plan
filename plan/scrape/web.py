@@ -2,7 +2,6 @@
 
 import re
 import logging
-import gc
 
 from urllib import urlopen, URLopener, urlencode
 from BeautifulSoup import BeautifulSoup, NavigableString
@@ -58,6 +57,10 @@ def update_courses(year, semester_type):
 
             if full_name.endswith('(Nytt)'):
                 full_name = contents.rstrip('(Nytt)')
+
+            if not re.match(settings.TIMETABLE_VALID_COURSE_NAMES, name):
+                logger.info('Skipped invalid course name: %s', name)
+                continue 
 
             courses.append((name, full_name))
             

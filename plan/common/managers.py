@@ -153,9 +153,9 @@ class CourseManager(models.Manager):
                 (c.semester_id = s.id)
             LEFT OUTER JOIN common_exam e ON
                 (e.course_id = c.id)
-            WHERE s.year = %%s AND s.type = %%s AND c.name %s
+            WHERE s.year = %s AND s.type = %s
             ORDER BY c.name, e.exam_date, e.exam_time, e.type;
-        ''' % connection.operators['regex'], [year, semester_type, '[0-9]+'])
+        ''', [year, semester_type])
 
         return cursor.fetchall()
 
@@ -166,8 +166,7 @@ class CourseManager(models.Manager):
 
         qs = self.get_query_set()
         qs = qs.filter(search_filter)
-        qs = qs.filter(name__regex='[0-9]+', # FIXME assumes course codes must contain numbers
-                       semester__year__exact=year,
+        qs = qs.filter(semester__year__exact=year,
                        semester__type__exact=semester_type)
         qs = qs.distinct()
         qs = qs.order_by('name')

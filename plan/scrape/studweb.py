@@ -19,7 +19,6 @@ def _url(semester):
         return 'http://www.ntnu.no/eksamen/plan/%sh/dato.XML' \
             % str(semester.year)[-2:]
 
-@transaction.commit_on_success
 def update_exams(year, semester, url=None):
     added, updated = [], []
     semester = Semester.objects.get(year=year, type=semester)

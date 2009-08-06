@@ -79,6 +79,9 @@ def update_lectures(year, semester_type, prefix=None, limit=None):
         # Remove -1 etc. from course code
         code = '-'.join(code.split('-')[:-1]).upper()
 
+        if not re.match(settings.TIMETABLE_VALID_COURSE_NAMES, code):
+            continue 
+
         # Get and or update course
         course, created = Course.objects.get_or_create(name=code)
         course.semesters.add(semester)
@@ -236,6 +239,10 @@ def update_courses(year, semester_type, prefix=None):
 
         if name[0] in ['"', "'"] and name[0] == name[-1]:
             name = name[1:-1]
+
+        if not re.match(settings.TIMETABLE_VALID_COURSE_NAMES, name):
+            logger.info('Skipped invalid course name: %s', name)
+            continue 
 
         course, created = Course.objects.get_or_create(name=code)
 
