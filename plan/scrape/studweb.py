@@ -40,6 +40,7 @@ def update_exams(year, semester, url=None):
 
     for n in dom.getElementsByTagName('dato_row'):
         course_code = n.getElementsByTagName('emnekode')[0].firstChild
+        course_name = n.getElementsByTagName('emne_emnenavn_bokmal')[0].firstChild
 
         exam_year = n.getElementsByTagName('arstall_gjelder_i')[0].firstChild
 
@@ -114,6 +115,10 @@ def update_exams(year, semester, url=None):
 
         course, created = Course.objects.get_or_create(
                 name=course_code.nodeValue.strip(), semester=semester)
+
+        if not course.full_name:
+            course.full_name = course_name.nodeValue
+            course.save()
 
         exam_kwargs['course'] = course
 
