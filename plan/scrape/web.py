@@ -81,7 +81,7 @@ def update_courses(year, semester_type):
 
     return courses
 
-def update_lectures(year, semester_type, limit=None, prefix=None):
+def update_lectures(year, semester_type, matches=None, prefix=None):
     '''Retrive all lectures for a given course'''
 
     semester, created = Semester.objects.get_or_create(year=year, type=semester_type)
@@ -92,8 +92,8 @@ def update_lectures(year, semester_type, limit=None, prefix=None):
 
     courses = Course.objects.filter(semesters__in=[semester]).distinct().order_by('name')
 
-    if limit:
-        courses = courses[:limit]
+    if matches:
+        courses = courses.filter(name__startswith=matches)
 
     for course in courses:
         url  = 'http://www.ntnu.no/studieinformasjon/timeplan/%s/?%s' % \
@@ -257,5 +257,8 @@ def update_lectures(year, semester_type, limit=None, prefix=None):
 
         del lecture
         del r
+    
+    if matches:
+        return Lecture.objects.exclude(id__in=lectures).filter(semester=semester, name__startswith=matches)
 
     return Lecture.objects.exclude(id__in=lectures).filter(semester=semester)

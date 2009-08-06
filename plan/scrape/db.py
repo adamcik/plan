@@ -26,7 +26,7 @@ def _connection():
 
     return MySQLdb.connect(**mysql_setings)
 
-def update_lectures(year, semester_type, prefix=None, limit=None):
+def update_lectures(year, semester_type, prefix=None, matches=None):
     '''Retrive all lectures for a given course'''
 
     semester, created = Semester.objects.get_or_create(year=year, type=semester_type)
@@ -43,13 +43,13 @@ def update_lectures(year, semester_type, prefix=None, limit=None):
             FROM %s_timeplan WHERE emnekode NOT LIKE '#%%'
         """ % prefix
 
-    if limit:
-        logger.info('Limiting to %s*', limit)
+    if matches:
+        logger.info('Limiting to %s*', matches)
 
         query  = query.replace('%', '%%')
         query += ' AND emnekode LIKE %s'
         query += ' ORDER BY emnekode, dag, start, slutt, uke, romnavn'
-        c.execute(query, (limit+'%',))
+        c.execute(query, (matches + '%',))
     else:
         query += ' ORDER BY emnekode, dag, start, slutt, uke, romnavn'
         c.execute(query)
@@ -60,8 +60,8 @@ def update_lectures(year, semester_type, prefix=None, limit=None):
 
     lectures = Lecture.objects.filter(semester=semester)
 
-    if limit:
-        lectures = lectures.filter(course__name__startswith=limit)
+    if matches:
+        lectures = lectures.filter(course__name__startswith=matches)
 
     for l in lectures:
         l.rooms.clear()
@@ -205,8 +205,8 @@ def update_lectures(year, semester_type, prefix=None, limit=None):
     to_remove =  Lecture.objects.exclude(id__in=added_lectures). \
             filter(semester=semester)
 
-    if limit:
-        to_remove = to_remove.filter(course__name__startswith=limit)
+    if matches:
+        to_remove = to_remove.filter(course__name__startswith=matches)
 
     logger.info('%d lectures in source db, %d in destination, diff %d, skipped %d',
             mysql_lecture_count, len(added_lectures), mysql_lecture_count - len(added_lectures), skipped)
