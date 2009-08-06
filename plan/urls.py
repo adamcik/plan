@@ -3,13 +3,13 @@ from django.conf import settings
 from django.contrib import databrowse
 
 from plan.common.models import Course, Group, Lecture, Lecturer, Room, \
-        Semester, Type, Exam
+        Semester, Type, Exam, Week
 
 from plan.common.admin import admin
 
 handler500 = 'plan.common.utils.server_error'
 
-for model in [Course, Group, Lecture, Lecturer, Room, Semester, Type, Exam]:
+for model in [Course, Group, Lecture, Lecturer, Room, Semester, Type, Exam, Week]:
     databrowse.site.register(model)
 
 if settings.DEBUG:

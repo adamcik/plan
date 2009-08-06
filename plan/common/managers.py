@@ -44,9 +44,8 @@ class LectureManager(models.Manager):
 
         if week:
             select['show_week'] = '''
-                EXISTS (SELECT 1 FROM common_week w JOIN common_lecture_weeks lw
-                 ON (w.id = lw.week_id) WHERE lw.lecture_id = common_lecture.id AND
-                 w.number = %s)'''
+                EXISTS (SELECT 1 FROM common_week w WHERE
+                    w.lecture_id = common_lecture.id AND w.number = %s)'''
 
         if slug:
             filter = {
