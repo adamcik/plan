@@ -16,12 +16,12 @@ class ManagerTestCase(BaseTestCase):
         # Try showing only lectures in week 1
         lectures = Lecture.objects.get_lectures(2009, Semester.SPRING, 'adamcik', 1)
         lectures = filter(lambda l: l.show_week and not l.exclude, lectures)
-        self.assertEquals(set(lectures), set(control.filter(weeks__number=1)))
+        self.assertEquals(set(lectures), set(control.filter(week__number=1)))
 
         # Try showing lectures in week 2
         lectures = Lecture.objects.get_lectures(2009, Semester.SPRING, 'adamcik', 2)
         lectures = filter(lambda l: l.show_week and not l.exclude, lectures)
-        self.assertEquals(set(lectures), set(control.filter(weeks__number=2)))
+        self.assertEquals(set(lectures), set(control.filter(week__number=2)))
 
         # Try lectures in week 3, ie none
         lectures = Lecture.objects.get_lectures(2009, Semester.SPRING, 'adamcik', 3)
