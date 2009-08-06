@@ -8,7 +8,7 @@
             {% for course in courses %}
                     <div class="course-{{ course.id }} groupbox" title="{{ course.full_name }}">
                         <p>
-                            <strong>{{ course.alias|default:course }}</strong>
+                            <strong>{{ course.alias|default:course.name }}</strong>
                             {% if course.full_name %}
                                 <br />
                                 <span class="small">{{ course.full_name|truncatewords:"3" }}</span>
