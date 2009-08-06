@@ -113,8 +113,7 @@ def update_exams(year, semester, url=None):
             continue
 
         course, created = Course.objects.get_or_create(
-                name=course_code.nodeValue.strip())
-        course.semesters.add(semester)
+                name=course_code.nodeValue.strip(), semester=semester)
 
         exam_kwargs['course'] = course
 
@@ -163,9 +162,7 @@ def update_exams(year, semester, url=None):
         n.unlink()
 
     to_delete = Exam.objects.exclude(id__in=added+updated). \
-            filter(semester__in=[semester])
-
-    Exam.objects.filter(id__in=added+updated).update(semester=semester)
+            filter(course__semester=semester)
 
     logger.info('Added %d exams' % len(added))
     logger.info('Updated %d exams' % len(updated))
