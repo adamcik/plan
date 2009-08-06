@@ -131,8 +131,8 @@ TIMETABLE_AJAX_LIMIT = 100
 TIMETABLE_COOKIE_AGE = 60*60*24*7*4
 TIMETABLE_MAX_COURSES = 20
 
-# Assum course codes must end with digits
-TIMETABLE_VALID_COURSE_NAMES = r'[0-9]+$'
+# Assume course codes must end with digits
+TIMETABLE_VALID_COURSE_NAMES = r'^.+[0-9]+$'
 
 CACHE_BACKEND = 'locmem://'
 CACHE_PREFIX = ''
