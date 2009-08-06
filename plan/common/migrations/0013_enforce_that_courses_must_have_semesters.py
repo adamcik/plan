@@ -1,19 +1,20 @@
 
 from south.db import db
 from django.db import models
-from django.conf import settings
 from plan.common.models import *
 
 class Migration:
-    no_dry_run = True
     
     def forwards(self, orm):
-        orm.Course.objects.exclude(name__regex=settings.TIMETABLE_VALID_COURSE_NAMES).delete()
-        orm.Course.objects.filter(semester=None).delete()
+        # Changing field 'Course.semester'
+        # (to signature: django.db.models.fields.related.ForeignKey(to=orm['common.Semester']))
+        db.alter_column('common_course', 'semester_id', orm['common.course:semester'])
     
     def backwards(self, orm):
-        pass
-    
+        
+        # Changing field 'Course.semester'
+        # (to signature: django.db.models.fields.related.ForeignKey(to=orm['common.Semester'], null=True, blank=True))
+        db.alter_column('common_course', 'semester_id', orm['common.course:semester'])
     
     models = {
         'common.course': {
@@ -21,7 +22,7 @@ class Migration:
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'points': ('django.db.models.fields.DecimalField', [], {'null': 'True', 'max_digits': '5', 'decimal_places': '2'}),
-            'semester': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['common.Semester']", 'null': 'True', 'blank': 'True'}),
+            'semester': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['common.Semester']"}),
             'url': ('django.db.models.fields.URLField', [], {'max_length': '200', 'blank': 'True'}),
             'version': ('django.db.models.fields.CharField', [], {'max_length': '20', 'null': 'True', 'blank': 'True'})
         },

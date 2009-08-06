@@ -77,7 +77,7 @@ class Course(models.Model):
     points = models.DecimalField(decimal_places=2, max_digits=5, null=True)
     version = models.CharField(max_length=20, blank=True, null=True)
 
-    semester = models.ForeignKey('Semester', null=True, blank=True)
+    semester = models.ForeignKey('Semester')
 
     objects = CourseManager()
 
@@ -95,8 +95,14 @@ class Course(models.Model):
 
     def __unicode__(self):
         if self.version:
-            return u'-'.join([self.name, self.version])
-        return self.name
+            name = u'-'.join([self.name, self.version])
+        else:
+            name = self.name
+
+        if self.semester:
+            return u'%s - %s' % (name, self.semester)
+
+        return name
 
     @staticmethod
     def get_stats(semester=None, limit=15):
