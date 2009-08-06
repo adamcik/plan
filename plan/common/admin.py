@@ -8,7 +8,7 @@ from plan.common.models import Course, Exam, Group, Lecture, Lecturer, \
 
 
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ('name', 'points', 'full_name', 'url')
+    list_display = ('name', 'points', 'full_name', 'url', 'semester')
     list_filter = ('semester',)
     search_fields = ('name', 'full_name')
 
