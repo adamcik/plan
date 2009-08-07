@@ -180,7 +180,7 @@ class Semester(models.Model):
     SPRING = 'spring'
     FALL = 'fall'
 
-    SEMESTER_TYPES = (  # FIXME i18n
+    SEMESTER_TYPES = (
         (SPRING, _('spring')),
         (FALL, _('fall')),
     )
