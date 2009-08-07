@@ -1,4 +1,5 @@
 {% extends "base_site.html" %}
+{% load title %}
 {% load color %}
 
 {% block extrastyle %}
@@ -21,26 +22,12 @@
 {% endblock %}
 
 {% block title %}
-    {{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %}
-    {{ semester.get_type_display }}
-    {{ semester.year }} schedule
-    {% if week %}
-        for week {{ week }}
-    {% else %}
-        for all weeks
-    {% endif %}
+    {% title semester slug week %}
 {% endblock %}
 
 {% block hd %}
     <h1>
-        {{ slug }}'{% ifnotequal slug|lower|slice:"-1:" "s" %}s{% endifnotequal %}
-        {{ semester.get_type_display }}
-        {{ semester.year }} schedule
-        {% if week %}
-            for week {{ week }}
-        {% else %}
-            for all weeks
-        {% endif %}
+        {% title semester slug week %}
     </h1>
 {% endblock %}
 

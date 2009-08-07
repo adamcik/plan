@@ -1,0 +1,25 @@
+{% load i18n %}
+
+{% if no_week %}
+    {% blocktrans %}
+        {{ slug }}{{ ending }}
+        {{ type }}
+        {{ year }} schedule
+    {% endblocktrans %}
+{% else %}
+    {% if week %}
+        {% blocktrans %}
+            {{ slug }}{{ ending }}
+            {{ type }}
+            {{ year }} schedule
+            for week {{ week }}
+        {% endblocktrans %}
+    {% else %}
+        {% blocktrans %}
+            {{ slug }}{{ ending }}
+            {{ type }}
+            {{ year }} schedule
+            for all weeks
+        {% endblocktrans %}
+    {% endif %}
+{% endif %}
