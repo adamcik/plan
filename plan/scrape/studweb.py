@@ -41,6 +41,7 @@ def update_exams(year, semester, url=None):
     for n in dom.getElementsByTagName('dato_row'):
         course_code = n.getElementsByTagName('emnekode')[0].firstChild
         course_name = n.getElementsByTagName('emne_emnenavn_bokmal')[0].firstChild
+        course_version = n.getElementsByTagName('versjonskode')[0].firstChild
 
         exam_year = n.getElementsByTagName('arstall_gjelder_i')[0].firstChild
 
@@ -60,7 +61,6 @@ def update_exams(year, semester, url=None):
             logger.warning("Wrong semester for %s: %s" % (course_code.nodeValue, exam_semester.nodeValue))
             n.unlink()
             continue
-
 
         exam_kwargs = {}
 
@@ -116,8 +116,12 @@ def update_exams(year, semester, url=None):
         course, created = Course.objects.get_or_create(
                 name=course_code.nodeValue.strip(), semester=semester)
 
-        if not course.full_name:
-            course.full_name = course_name.nodeValue
+        if not course.full_name and course_name.nodeValue.strip():
+            course.full_name = course_name.nodeValue.strip()
+            course.save()
+
+        if not course.version and course_version.nodeValue.strip():
+            course.version = course_version.nodeValue.strip()
             course.save()
 
         exam_kwargs['course'] = course

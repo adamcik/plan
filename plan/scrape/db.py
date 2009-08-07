@@ -227,14 +227,21 @@ def update_courses(year, semester_type, prefix=None):
     else:
         vekt = 'vekt'
 
-    c.execute("""SELECT emnekode,emnenavn,%s as vekt FROM %s_fs_emne WHERE emnekode
-            NOT LIKE '#%%'""" % (vekt, prefix))
+    c.execute("""SELECT emnekode,emnenavn,%s as vekt FROM %s_fs_emne WHERE
+            emnekode NOT LIKE '#%%' AND emnekode NOT LIKE '"%%'""" % (vekt, prefix))
 
     for code, name, points in c.fetchall():
-        if not code.strip():
+        code = code.strip().upper()
+    
+        if not code:
             continue
 
-        code = ''.join(code.split('-')[:-1]).upper().strip()
+        code, version = code.split('-', 2)[:2]
+        code = code.strip()
+        version = version.strip()
+
+        if not version:
+            version = None
 
         if name[0] in ['"', "'"] and name[0] == name[-1]:
             name = name[1:-1]
@@ -243,7 +250,15 @@ def update_courses(year, semester_type, prefix=None):
             logger.info('Skipped invalid course name: %s', code)
             continue 
 
-        course, created = Course.objects.get_or_create(name=code, semester=semester)
+        try:
+            course = Course.objects.get(name=code, semester=semester,
+                        version=None)
+            course.version = version
+            created = False
+
+        except Course.DoesNotExist:
+            course, created = Course.objects.get_or_create(name=code,
+                        semester=semester, version=version)
 
         if points:
             if vekt == 'en_navn':

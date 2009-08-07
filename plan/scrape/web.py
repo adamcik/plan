@@ -53,7 +53,7 @@ def update_courses(year, semester_type):
         for tr in table.findAll('tr'):
             name, full_name = tr.findAll('a')
 
-            name = name.contents[0].split('-')[0]
+            name, version = name.contents[0].split('-', 2)[:2]
             full_name = full_name.contents[0]
 
             if full_name.endswith('(Nytt)'):
@@ -63,13 +63,21 @@ def update_courses(year, semester_type):
                 logger.info('Skipped invalid course name: %s', name)
                 continue 
 
-            courses.append((name, full_name))
+            courses.append((name, full_name, version))
             
-    for name, full_name in courses:
+    for name, full_name, version in courses:
         name = name.strip().upper()
         full_name = full_name.strip()
+        version = version.strip()
 
-        course, created = Course.objects.get_or_create(name=name, semester=semester)
+        if not version:
+            version = None
+
+        try:
+            course = Course.objects.get(name=name, semester=semester, version=None)
+            course.version = version
+        except Course.DoesNotExist:
+            course, created = Course.objects.get_or_create(name=name, semester=semester, version=version)
 
         if course.full_name != full_name:
             course.full_name = full_name
