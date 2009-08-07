@@ -43,7 +43,7 @@ class ViewTestCase(BaseTestCase):
         self.assertEquals(cached_response, None)
 
         semester = self.semester
-        args = [semester.year, semester.get_type_display()]
+        args = [semester.year, semester.get_url_type_display()]
         response = self.client.get(self.url('frontpage-semester', *args))
         self.failUnlessEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'start.html')

@@ -9,7 +9,7 @@ from django.core.cache.backends.base import  BaseCache
 logger = logging.getLogger('plan.common.cache')
 
 def get_realm(semester, slug=None):
-    args = [semester.year, semester.get_type_display()]
+    args = [semester.year, semester.get_url_type_display()]
     if slug:
         args.append(slug)
 

@@ -17,7 +17,7 @@ class BaseTestCase(TestCase):
         self.realm = get_realm(self.semester, 'adamcik')
         self.default_args = [
                 self.semester.year,
-                self.semester.get_type_display(),
+                self.semester.get_url_type_display(),
                 'adamcik'
             ]
 

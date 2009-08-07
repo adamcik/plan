@@ -1,7 +1,7 @@
 {% load i18n %}
 
 {% if courses and advanced %}
-    <form method="post" action="{% url copy-deadlines semester.year,semester.get_type_display,slug %}" class="noprint">
+    <form method="post" action="{% url copy-deadlines semester.year,semester.get_url_type_display,slug %}" class="noprint">
         <h2>{% trans "Import deadlines" %}</h2>
         <p>
             {% blocktrans %}

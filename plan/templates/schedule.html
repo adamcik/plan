@@ -16,7 +16,7 @@
 {% endblock %}
 
 {% block extrascript %}
-    <script type="text/javascript">var autocomplete_url = "{% url course-query semester.year,semester.get_type_display %}";</script>
+    <script type="text/javascript">var autocomplete_url = "{% url course-query semester.year,semester.get_url_type_display %}";</script>
     {{ block.super }}
 {% endblock %}
 
@@ -55,7 +55,7 @@
     {% if group_help %}
         <div id="help">
             <p>
-                Use <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}#groups">change groups</a> to limit which groups/parallels you want in your schedule.
+                Use <a href="{% url schedule-advanced semester.year,semester.get_url_type_display,slug %}#groups">change groups</a> to limit which groups/parallels you want in your schedule.
             </p>
         </div>
     {%  endif %}

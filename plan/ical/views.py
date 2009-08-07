@@ -41,10 +41,10 @@ def ical(request, year, semester_type, slug, selector=None):
 
     semester = Semester(year=year, type=semester_type)
 
-    cache_key  = reverse('schedule-ical', args=[semester.year, semester.get_type_display(), slug])
+    cache_key  = reverse('schedule-ical', args=[semester.year, semester.get_url_type_display(), slug])
     cache_key += '+'.join(resources)
 
-    title  = reverse('schedule', args=[semester.year, semester.get_type_display(), slug])
+    title  = reverse('schedule', args=[semester.year, semester.get_url_type_display(), slug])
     title += '+'.join(resources)
 
     cache_realm = get_realm(semester, slug)
@@ -85,7 +85,7 @@ def ical(request, year, semester_type, slug, selector=None):
 
     icalstream = cal.serialize()
 
-    filename = '%s.ics' % '-'.join([str(semester.year), semester.get_type_display(), slug] + resources)
+    filename = '%s.ics' % '-'.join([str(semester.year), semester.get_url_type_display(), slug] + resources)
 
     response = HttpResponse(icalstream, mimetype='text/calendar')
     response['Content-Type'] = 'text/calendar; charset=utf-8'

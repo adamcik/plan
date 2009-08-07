@@ -3,10 +3,10 @@
 {% load strip %}
 
 {% if prev_week %}
-    <a href="{% url schedule-week semester.year,semester.get_type_display,slug,prev_week %}" id="previous">«</a>
+    <a href="{% url schedule-week semester.year,semester.get_url_type_display,slug,prev_week %}" id="previous">«</a>
 {% endif %}
 {% if next_week %}
-    <a href="{% url schedule-week semester.year,semester.get_type_display,slug,next_week %}" id="next">»</a>
+    <a href="{% url schedule-week semester.year,semester.get_url_type_display,slug,next_week %}" id="next">»</a>
 {% endif %}
 <table id="schedule">
     <thead>
