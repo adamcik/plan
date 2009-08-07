@@ -1,14 +1,15 @@
 {% extends "base_site.html" %}
 
 {% load title %}
+{% load i18n %}
 
 {% block title %}
-    {% title semester slu  {{ block.super }}
+    {% title semester slug %}  {{ block.super }}
 {% endblock %}
 
 {% block hd %}
     <h1>
-        Copy deadlines to 
+        {% trans "Copy deadlines to" %}
         {% title semester slug %}
     </h1>
 {% endblock %}
@@ -20,12 +21,12 @@
                 <thead>
                     <tr>
                         <th style="width: 2%"></th>
-                        <th style="width: 9%">Course</th>
-                        <th style="width: 9%">Due date</th>
-                        <th style="width: 6%">Time</th>
-                        <th>Task</th>
-                        <th>Course name</th>
-                        <th>Source</th>
+                        <th style="width: 9%">{% trans "Course" %}</th>
+                        <th style="width: 9%">{% trans "Due date" %}</th>
+                        <th style="width: 6%">{% trans "Time" %}</th>
+                        <th>{% trans "Task" %}</th>
+                        <th>{% trans "Course name" %}</th>
+                        <th>{% trans "Source" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -43,13 +44,16 @@
                 </tbody>
             </table>
             <p>
-                <button><span class="icon copy">Copy deadlines</span></button>
+                <button><span class="icon copy">{% trans "Copy deadlines" %}</span></button>
             </p>
         </form>
     {% else %}
         <div id="help">
             <p>
-                No deadlines found. Return to your <a href="{% url schedule semester.year,semester.type,slug %}">schedule</a>.
+                {% url schedule-advanced semester.year,semester.type,slug as advanced_url %}
+                {% blocktrans %}
+                    No deadlines found. Return to your <a href="{{ advanced_url }}">schedule</a>.
+                {% endblocktrans %}
             </p>
         </div>
     {% endif %}
