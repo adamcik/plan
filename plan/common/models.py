@@ -177,20 +177,16 @@ class Course(models.Model):
         return tmp
 
 class Semester(models.Model):
-    SPRING = 0
-    FALL = 1
+    SPRING = 'spring'
+    FALL = 'fall'
 
     SEMESTER_TYPES = (  # FIXME i18n
         (SPRING, _('spring')),
         (FALL, _('fall')),
     )
-    URL_MAP = {
-        'spring': SPRING,
-        'fall': FALL,
-    }
 
     year = models.PositiveSmallIntegerField(_('Year'))
-    type = models.PositiveSmallIntegerField(_('Type'), choices=SEMESTER_TYPES)
+    type = models.CharField(_('Type'), max_length=10, choices=SEMESTER_TYPES)
 
     class Meta:
         unique_together = [('year', 'type'),]
@@ -200,13 +196,6 @@ class Semester(models.Model):
 
     def __init__(self, *args, **kwargs):
         super(Semester, self).__init__(*args, **kwargs)
-
-        if int != type(self.type) and self.type is not None \
-                and not self.type.isdigit():
-            try:
-                self.type = self.URL_MAP[self.type]
-            except KeyError:
-                raise Http404
 
         if self.year:
             self.year = int(self.year)
@@ -233,10 +222,6 @@ class Semester(models.Model):
 
     def get_weeks(self):
         return xrange(0,53)
-
-    def get_url_type_display(self):
-        lookup = dict([(b, a) for a, b in self.URL_MAP.items()])
-        return lookup[self.type]
 
     @property
     def prefix(self):

@@ -10,7 +10,7 @@
 
 {% block bd %}
     {% if deadlines %}
-        <form method="post" action="{% url copy-deadlines semester.year,semester.get_url_type_display,slug %}">
+        <form method="post" action="{% url copy-deadlines semester.year,semester.type,slug %}">
             <table>
                 <thead>
                     <tr>
@@ -44,7 +44,7 @@
     {% else %}
         <div id="help">
             <p>
-                No deadlines found. Return to your <a href="{% url schedule semester.year,semester.get_url_type_display,slug %}">schedule</a>.
+                No deadlines found. Return to your <a href="{% url schedule semester.year,semester.type,slug %}">schedule</a>.
             </p>
         </div>
     {% endif %}

@@ -78,7 +78,7 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
     time_width = 0.06 * width
     day_width = (width-time_width) / 5
 
-    filename = '%s-%s-%s' % (year, semester.get_url_type_display(), slug)
+    filename = '%s-%s-%s' % (year, semester.type, slug)
 
     if week:
         filename += '-%s' % week
