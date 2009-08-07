@@ -1,4 +1,5 @@
 {% extends "base_site.html" %}
+{% load i18n %}
 {% load title %}
 {% load color %}
 
@@ -32,6 +33,8 @@
 {% endblock %}
 
 {% block bd %}
+    {% url schedule-advanced semester.year,semester.type,slug as advanced_url %}
+
     {% if not courses %}
         <div id="help">
             {% include "add_courses.html" %}
@@ -42,7 +45,9 @@
     {% if group_help %}
         <div id="help">
             <p>
-                Use <a href="{% url schedule-advanced semester.year,semester.type,slug %}#groups">change groups</a> to limit which groups/parallels you want in your schedule.
+                {% blocktrans %}
+                    Use <a href="{{ advanced_url }}#groups">change groups</a> to limit which groups/parallels you want in your schedule.
+                {% endblocktrans%}
             </p>
         </div>
     {%  endif %}

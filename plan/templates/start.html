@@ -1,9 +1,10 @@
 {% extends "base_site.html" %}
 {% load color %}
 {% load strip %}
+{% load i18n %}
 
 {% block hd %}
-    <h1>Timetable generator for NTNU students</h1>
+    <h1>{% trans "Timetable generator for NTNU students" %}</h1>
 {% endblock %}
 
 {% block onload %}onload="{% stripspace %}
@@ -38,7 +39,7 @@
     {% if missing %}
         <div id="help" class="large">
             <p>
-                Sorry, no semesters have been loaded yet.
+                {% trans "Sorry, no semesters have been loaded yet." %}
             </p>
         </div>
     {% else %}
@@ -48,27 +49,35 @@
                 <div id="help">
                     <form action="{% url frontpage %}" method="post">
                         <p class="large">
-                            Please enter a short name identifying your personal
-                            timetable, ie. username, nickname etc. If the name
-                            you select is in already taken, choose another
-                            one.
+                            {% blocktrans %}
+                                Please enter a short name identifying your personal
+                                timetable, ie. username, nickname etc. If the name
+                                you select is in already taken, choose another
+                                one.
+                            {% endblocktrans %}
                         </p>
                         <p class="right">
                             {{ schedule_form.semester }}
                             {{ schedule_form.slug }}
-                            <button type="submit"><span class="icon start">Start</span></button>
+                            <button type="submit"><span class="icon start">{% trans "Start" %}</span></button>
                         </p>
                     </form>
                 </div>
                 <p>
-                    To retrieve your timetable simply enter the same identifier
-                    you used last time.
+                    {% blocktrans %}
+                        To retrieve your timetable simply enter the same identifier
+                        you used last time.
+                    {% endblocktrans %}
                 </p>
                 {% include "notice.html" %}
                 {% include "statistics.html" %}
             </div>
             <div class="yui-u">
-                <h2>Top {{ limit }} courses {{ current }}</h2>
+                <h2>
+                    {% blocktrans %}
+                        Top {{ limit }} courses {{ current }}
+                    {% endblocktrans %}
+                </h2>
                 {% if stats %}
                     <div id="stats">
                         {% for count,course_id,name,full_name in stats %}
@@ -79,7 +88,7 @@
                         {% endfor %}
                     </div>
                 {% else %}
-                    No coures have been added to any schedules yet.
+                    {% trans "No coures have been added to any schedules yet." %}
                 {% endif %}
             </div>
         </div>

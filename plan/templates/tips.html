@@ -1,53 +1,80 @@
-<h2 id="tips" class="noprint">Tips</h2>
+{% load i18n %}
+
+{% url shortcut slug as shortcut_url %}
+{% url course-list semester.year,semester.type,slug as course_list_url %}
+{% url schedule-advanced semester.year,semester.type,slug as adavanced_url %}
+
+{% url schedule-ical semester.year,semester.type,slug,"lectures" as ical_lectures_url%}
+{% url schedule-ical semester.year,semester.type,slug,"exams" as ical_exams_url %}
+{% url schedule-ical semester.year,semester.type,slug,"deadlines" as ical_deadlines_url %}
+{% url schedule-ical semester.year,semester.type,slug as ical_all_url %}
+
+<h2 id="tips" class="noprint">{% trans "Tips" %}</h2>
 <div class="yui-g noprint">
     <div class="yui-u first">
         <p class="icon add">
-            Multiple courses can be added at once by separating course codes with spaces.
+            {% trans "Multiple courses can be added at once by separating course codes with spaces." %}
         </p>
         <p class="icon link">
-             For quick access to your schedule simply go to
-            <a href="{% url shortcut slug %}">{{ request.META.HTTP_HOST }}{% url shortcut slug %}</a>
+            {% blocktrans with request.META.HTTP_HOST as host %}
+                For quick access to your schedule simply go to
+                <a href="{{ shortcut_url }}">{{ host }}{{ shortcut_url }}</a>
+            {% endblocktrans %}
         </p>
         <p class="icon hide">
-            Did you know that you can choose to hide lectures that you don't want to be shown under
-            <a href="{% url schedule-advanced semester.year,semester.type,slug %}">advanced options</a>?
+            {% blocktrans %}
+                Did you know that you can choose to hide lectures that you don't want to be shown under
+                <a href="{{ adavanced_url }}">advanced options</a>?
+            {% endblocktrans %}
         </p>
         <p class="icon save">
-            Did you know that you can select which groups (paralleller) you
-            want to attend, and than you can select more that one group?
+            {% blocktrans %}
+                Did you know that you can select which groups (paralleller) you
+                want to attend, and than you can select more that one group?
+            {% endblocktrans %}
         </p>
         <p class="icon name">
-            Did you know that you can change which names are used for courses under
-            <a href="{% url schedule-advanced semester.year,semester.type,slug %}">advanced options</a>?
+            {% blocktrans %}
+                Did you know that you can change which names are used for courses under
+                <a href="{{ adavanced_url }}">advanced options</a>?
+            {% endblocktrans %}
         </p>
     </div>
     <div class="yui-u">
         <p class="icon list">
-            The <a href="{% url course-list semester.year,semester.type,slug %}">course list</a>
-            contains all courses for the current semester, including exam dates and
-            allows you to easily select courses to add to your schedule.
+            {% blocktrans %}
+                The <a href="{{ course_list_url}">course list</a>
+                contains all courses for the current semester, including exam dates and
+                allows you to easily select courses to add to your schedule.
+            {% endblocktrans %}
         </p>
         <p class="icon ical">
-            Calendar export:
-            <a href="{% url schedule-ical semester.year,semester.type,slug,"lectures" %}">lectures</a>,
-            <a href="{% url schedule-ical semester.year,semester.type,slug,"exams" %}">exams</a>,
-            <a href="{% url schedule-ical semester.year,semester.type,slug,"deadlines" %}">deadlines</a> or
-            <a href="{% url schedule-ical semester.year,semester.type,slug %}">all combined</a>.
+            {% blocktrans %}
+                Calendar export:
+                <a href="{{ ical_lectures_url }}">lectures</a>,
+                <a href="{{ ical_exams_url }}">exams</a>,
+                <a href="{{ ical_deadlines_url }}">deadlines</a> or
+                <a href="{{ ical_all_url }}">all combined</a>.
+            {% endblocktrans %}
             <br />
-            Simply download or copy the link to the calendar you want and add it to any application that supports the Ical format.
+            {% trans "Simply download or copy the link to the calendar you want and add it to any application that supports the Ical format." %}
         </p>
         <p class="icon gcal">
-            Google calendar:
-            <a target="_blank" href="http://www.google.com/calendar/render?cid=http://{{ request.META.HTTP_HOST }}{% url schedule-ical semester.year,semester.type,slug,"lectures" %}">lectures</a>,
-            <a target="_blank" href="http://www.google.com/calendar/render?cid=http://{{ request.META.HTTP_HOST }}{% url schedule-ical semester.year,semester.type,slug,"exams" %}">exams</a>,
-            <a target="_blank" href="http://www.google.com/calendar/render?cid=http://{{ request.META.HTTP_HOST }}{% url schedule-ical semester.year,semester.type,slug,"deadlines" %}">deadlines</a> or
-            <a target="_blank" href="http://www.google.com/calendar/render?cid=http://{{ request.META.HTTP_HOST }}{% url schedule-ical semester.year,semester.type,slug %}">all combined</a>.
+            {% blocktrans with "http://www.google.com/calendar/render?cid=http://" as google_cal_prefix and request.META.HTTP_HOST as host %}
+                Google calendar:
+                <a target="_blank" href="{{ google_cal_prefix }}{{ host }}{{ ical_lectures_url }}">lectures</a>,
+                <a target="_blank" href="{{ google_cal_prefix }}{{ host }}{{ ical_exams_url }}">exams</a>,
+                <a target="_blank" href="{{ google_cal_prefix }}{{ host }}{{ ical_deadlines_url }}">deadlines</a> or
+                <a target="_blank" href="{{ google_cal_prefix }}{{ host }}{{ ical_all_url }}">all combined</a>.
+            {% endblocktrans %}
             <br />
-            Simply click the calendar type you want and it will be added to Google calendar.
+            {% trans "Simply click the calendar type you want and it will be added to Google calendar." %}
         </p>
         <p class="icon copy">
-            Enter a space separated list of your friends timetables to copy
-            the deadlines they have entered for any classes you're both attending.
+            {% blocktrans %}
+                Enter a space separated list of your friends timetables to copy
+                the deadlines they have entered for any classes you're both attending.
+            {% endblocktrans %}
         </p>
     </div>
 </div>
