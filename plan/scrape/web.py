@@ -105,11 +105,15 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
         url  = 'http://www.ntnu.no/studieinformasjon/timeplan/%s/?%s' % \
                 (prefix, urlencode({'emnekode': course.name.encode('latin1')}))
 
+        if course.version:
+            versions_to_try = [course.version]
+        else:
+            versions_to_try = [1, 2, 3, 4]
+
         table = None
 
-
-        for number in [1, 2, 3]:
-            final_url = '%s-%d' % (url, number)
+        for number in versions_to_try:
+            final_url = '%s-%s' % (url, number)
 
             logger.info('Retrieving %s', final_url)
 
