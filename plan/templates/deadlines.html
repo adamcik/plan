@@ -2,7 +2,7 @@
 
 <h2>{% trans "Deadlines" %}</h2>
 {% if deadlines %}
-    <form method="post" action="{% url new-deadline semester.year,semester.get_type_display,slug %}#deadlines">
+    <form method="post" action="{% url new-deadline semester.year,semester.get_url_type_display,slug %}#deadlines">
         <table id="deadlines">
             <thead>
                 <tr>
@@ -38,7 +38,7 @@
 {% endif %}
 {% if courses and not advanced %}
     <p class="noprint">
-        {% url schedule-advanced semester.year,semester.get_type_display,slug as advanced_url %}
+        {% url schedule-advanced semester.year,semester.get_url_type_display,slug as advanced_url %}
         {% blocktrans %}
             Go to <a href="{{ advanced_url }}#deadlines">advanced options</a> to add and remove deadlines.
         {% endblocktrans %}

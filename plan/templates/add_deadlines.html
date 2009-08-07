@@ -2,7 +2,7 @@
 
 {% if advanced %}
     {% if courses %}
-        <form method="post" action="{% url new-deadline semester.year,semester.get_type_display,slug %}#deadlines" class="noprint">
+        <form method="post" action="{% url new-deadline semester.year,semester.get_url_type_display,slug %}#deadlines" class="noprint">
             <h2>{% trans "Add deadlines" %}</h2>
             <table>
                 <thead>

@@ -43,7 +43,7 @@ def shortcut(request, slug):
             raise Http404
 
     return HttpResponseRedirect(reverse('schedule',
-            args = [semester.year, semester.get_type_display(), slug]))
+            args = [semester.year, semester.get_url_type_display(), slug]))
 
 def getting_started(request, year=None, semester_type=None):
     '''Intial top level page that greets users'''
@@ -65,7 +65,7 @@ def getting_started(request, year=None, semester_type=None):
             semester = schedule_form.cleaned_data['semester'] or semester
 
             response = HttpResponseRedirect(reverse('schedule', args=[
-                semester.year, semester.get_type_display(), slug]))
+                semester.year, semester.get_url_type_display(), slug]))
 
             # Store last timetable visited in a cookie so that we can populate
             # the field with a default value next time.
@@ -197,7 +197,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
 
     if current_week not in schedule_weeks and not week and not all and not advanced:
         return HttpResponseRedirect(reverse('schedule-all',
-                args=[semester.year,semester.get_type_display(),slug]))
+                args=[semester.year,semester.get_url_type_display(),slug]))
 
     try:
         next_week = schedule_weeks[schedule_weeks.index(week)+1]
@@ -341,7 +341,7 @@ def select_groups(request, year, semester_type, slug):
         clear_cache(semester, slug)
 
     return HttpResponseRedirect(reverse('schedule-advanced',
-            args=[semester.year,semester.get_type_display(),slug]))
+            args=[semester.year,semester.get_url_type_display(),slug]))
 
 def new_deadline(request, year, semester_type, slug):
     '''Handels addition of tasks, reshows schedule view if form does not
@@ -368,7 +368,7 @@ def new_deadline(request, year, semester_type, slug):
                 ).delete()
 
     return HttpResponseRedirect(reverse('schedule-advanced',
-            args = [semester.year,semester.get_type_display(),slug]))
+            args = [semester.year,semester.get_url_type_display(),slug]))
 
 def copy_deadlines(request, year, semester_type, slug):
     '''Handles importing of deadlines'''
@@ -423,7 +423,7 @@ def copy_deadlines(request, year, semester_type, slug):
             clear_cache(semester, slug)
 
     return HttpResponseRedirect(reverse('schedule-advanced',
-            args=[semester.year,semester.get_type_display(),slug]))
+            args=[semester.year,semester.get_url_type_display(),slug]))
 
 def select_course(request, year, semester_type, slug, add=False):
     '''Handle selecting of courses from course list, change of names and
@@ -438,7 +438,7 @@ def select_course(request, year, semester_type, slug, add=False):
         semester = Semester.objects.get(year=year, type=semester.type)
     except Semester.DoesNotExist:
         return HttpResponseRedirect(reverse('schedule', args=
-                [year,semester.get_type_display(),slug]))
+                [year,semester.get_url_type_display(),slug]))
 
     if request.method == 'POST':
         clear_cache(semester, slug)
@@ -525,7 +525,7 @@ def select_course(request, year, semester_type, slug, add=False):
                     u.save()
 
     return HttpResponseRedirect(reverse('schedule-advanced',
-            args=[semester.year, semester.get_type_display(), slug]))
+            args=[semester.year, semester.get_url_type_display(), slug]))
 
 def select_lectures(request, year, semester_type, slug):
     '''Handle selection of lectures to hide'''
@@ -545,7 +545,7 @@ def select_lectures(request, year, semester_type, slug):
         clear_cache(semester, slug)
 
     return HttpResponseRedirect(reverse('schedule-advanced',
-            args=[semester.year, semester.get_type_display(), slug]))
+            args=[semester.year, semester.get_url_type_display(), slug]))
 
 def list_courses(request, year, semester_type, slug):
     '''Display a list of courses based on when exam is'''
@@ -555,7 +555,7 @@ def list_courses(request, year, semester_type, slug):
 
     semester = Semester(year=year, type=semester_type)
 
-    key = '/'.join([str(semester.year), semester.get_type_display(), 'courses'])
+    key = '/'.join([str(semester.year), semester.get_url_type_display(), 'courses'])
     response = cache.get(key, prefix=True)
 
     if not response or not getattr(request, 'use_cache', True):
