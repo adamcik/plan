@@ -8,6 +8,7 @@ from dateutil.tz import tzlocal
 from django.http import HttpResponse, Http404
 from django.core.urlresolvers import reverse
 from django.conf import settings
+from django.utils.translation import ugettext as _
 
 from plan.common.models import Exam, Deadline, Lecture, Semester, Room, Week
 from plan.common.cache import get_realm, cache
@@ -58,9 +59,9 @@ def ical(request, year, semester_type, slug, selector=None):
 
     if CUSTOM_TITLE:
         if slug.lower().endswith('s'):
-            description = "%(slug)s' %(semester)s %(year)s schedule for %(resources)s"
+            description = _("%(slug)s' %(semester)s %(year)s schedule for %(resources)s")
         else:
-            description = "%(slug)s's %(semester)s %(year)s schedule for %(resources)s"
+            description = _("%(slug)s's %(semester)s %(year)s schedule for %(resources)s")
 
         cal.add('X-WR-CALNAME').value = title.strip('/')
         cal.add('X-WR-CALDESC').value = description % {
@@ -155,8 +156,8 @@ def add_exams(exams, semester, cal):
             desc = '%s (%s) - %s (%s)' % (e.type_name, e.type,
                     e.course.full_name, e.course.name)
         else:
-            summary = 'Exam (%s) - %s' % (e.type, e.alias or e.course.name)
-            desc = 'Exam (%s) - %s (%s)' % (e.type, e.course.full_name,
+            summary = _('Exam') + ' (%s) - %s' % (e.type, e.alias or e.course.name)
+            desc = _('Exam') + ' (%s) - %s (%s)' % (e.type, e.course.full_name,
                     e.course.name)
 
         vevent.add('summary').value = summary

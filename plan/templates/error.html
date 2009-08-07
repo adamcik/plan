@@ -1,32 +1,43 @@
 {% extends "base_site.html" %}
 
+{% load i18n %}
+
 {% block hd %}
-    <h1>Couldn't add one or more courses</h1>
+    <h1>{% trans "Couldn't add one or more courses" %}</h1>
 {% endblock %}
 
 {% block bd %}
     <div id="help">
         {% if to_many_usersets %}
             <p class="large icon error">
-                Sorry, but the generator has been set up to limit timetables
-                to {{ max }} courses.
+                {% blocktrans %}
+                    Sorry, but the generator has been set up to limit
+                    timetables to {{ max }} courses.
+                {% endblocktrans %}
             </p>
         {% endif %}
         {% if courses %}
-            <p class="large"><img alt="" src="{{ MEDIA_URL }}gfx/error.png" /> Adding the following courses failed:</p>
+            <p class="large"><img alt="" src="{{ MEDIA_URL }}gfx/error.png" />
+                {% trans "Adding the following courses failed:" %}
+            </p>
             <ul>
                 {% for c in courses %}
-                    <li>{{ c|upper }}</li>
+                    <li>{{ c.name }}</li>
                 {% endfor %}
             </ul>
         {% endif %}
         <p class="large right">
-            Back to your <a href="{% url schedule-advanced year,type,slug %}">schedule</a>.
+            {% url schedule-advanced year,type,slug as adavanced_url %}
+            {% blocktrans %}
+                Back to your <a href="{{ adavanced_url }}">schedule</a>.
+            {% endblocktrans %}
         </p>
     </div>
     <p>
-        Please check that the courses that failed can be found at
-        <a href="http://www.ntnu.no/studieinformasjon/timeplan">http://www.ntnu.no/studieinformasjon/timeplan</a>
-        for this semster.
+        {% blocktrans %}
+            Please check that the courses that failed can be found at
+            <a href="http://www.ntnu.no/studieinformasjon/timeplan">http://www.ntnu.no/studieinformasjon/timeplan</a>
+            for this semster.
+        {% endblocktrans %}
     </p>
 {% endblock %}

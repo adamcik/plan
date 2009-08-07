@@ -1,14 +1,16 @@
-<h2>Exams</h2>
+{% load i18n %}
+
+<h2>{% trans "Exams" %}</h2>
 {% if exams %}
     <table>
         <thead>
             <tr>
-                <th style="width: 19%">Date</th>
-                <th style="width:  8%">Time</th>
-                <th style="width:  4%">Dur.</th>
-                <th>Type</th>
-                <th style="width: 18%">Course</th>
-                <th>Handout</th>
+                <th style="width: 19%">{% trans "Date" %}</th>
+                <th style="width:  8%">{% trans "Time" %}</th>
+                <th style="width:  4%">{% trans "Dur." %}</th>
+                <th>{% trans "Type" %}</th>
+                <th style="width: 18%">{% trans "Course" %}</th>
+                <th>{% trans "Handout" %}</th>
                 <th></th>
             </tr>
         </thead>
@@ -49,8 +51,8 @@
     </table>
 {% else %}
     {% if courses %}
-        <p>Didn't find any exams for selected courses.</p>
+        <p>{% trans "Didn't find any exams for selected courses." %}</p>
     {% else %}
-        <p>You need to add at least one course before exams will be shown.</p>
+        <p>{% trans "You need to add at least one course before exams will be shown." %}</p>
     {% endif %}
 {% endif %}

@@ -1,8 +1,10 @@
+{% load i18n %}
+
 {% if courses and advanced %}
     <form action="{% url change-groups semester.year,semester.get_type_display,slug %}" method="post" class="noprint">
         <h2 id="groups">Change groups</h2>
         <p>
-            Please choose the course variant you belong to.
+            {% trans "Please choose the course variant you belong to." %}
         </p>
         <div id="change-groups">
             {% for course in courses %}
@@ -28,7 +30,7 @@
             {% endfor %}
         </div>
         <p style="clear: both">
-            <button type="submit"><span class="icon save">Save groups</span></button>
+            <button type="submit"><span class="icon save">{% trans "Save groups" %}</span></button>
         </p>
     </form>
 {% endif %}

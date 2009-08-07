@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, time
 from django.db import models, connection
 from django.http import Http404
 from django.template.defaultfilters import time as time_filter
+from django.utils.translation import ugettext_lazy as _
 
 from plan.common.managers import LectureManager, DeadlineManager, \
         ExamManager, CourseManager, UserSetManager
@@ -11,20 +12,25 @@ from plan.common.managers import LectureManager, DeadlineManager, \
 now = datetime.now
 
 class UserSet(models.Model):
-    slug = models.SlugField()
+    slug = models.SlugField(_('Slug'))
+
     course = models.ForeignKey('Course')
-
     groups = models.ManyToManyField('Group', blank=True, null=True)
-    name = models.CharField(max_length=50, blank=True)
 
-    added = models.DateTimeField(auto_now_add=True)
+    name = models.CharField(_('Alias'), max_length=50, blank=True)
+
+    added = models.DateTimeField(_('Added'), auto_now_add=True)
+
     exclude = models.ManyToManyField('Lecture', blank=True, null=True,
-                                     related_name='excluded_from')
+        related_name='excluded_from')
 
     objects = UserSetManager()
 
     class Meta:
         unique_together = (('slug', 'course'),)
+
+        verbose_name = _('Userset')
+        verbose_name_plural = _('Userset')
 
     def __unicode__(self):
         return u'%s - %s' % (self.slug, self.course)
@@ -50,36 +56,52 @@ class UserSet(models.Model):
         return tmp
 
 class Type(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    optional = models.BooleanField()
+    name = models.CharField(_('Name'), max_length=100, unique=True)
+    optional = models.BooleanField(_('Optional'))
 
     def __unicode__(self):
         return self.name
+
+    class Meta:
+        verbose_name = _('Lecture type')
+        verbose_name_plural = _('Lecture types')
 
 class Room(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(_('Name'), max_length=100, unique=True)
 
     def __unicode__(self):
         return self.name
+
+    class Meta:
+        verbose_name = _('Room')
+        verbose_name_plural = _('Rooms')
 
 class Group(models.Model):
     DEFAULT = 'Other'
 
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(_('Name'), max_length=100, unique=True)
 
     def __unicode__(self):
         return self.name
 
+    class Meta:
+        verbose_name = _('Group')
+        verbose_name_plural = _('Groups')
+
 class Course(models.Model):
-    name = models.CharField(max_length=100)
-    full_name = models.TextField(blank=True)
-    url = models.URLField(verify_exists=False, blank=True)
-    points = models.DecimalField(decimal_places=2, max_digits=5, null=True, blank=True)
-    version = models.CharField(max_length=20, blank=True, null=True)
+    name = models.CharField(_('Code'), max_length=100)
+    full_name = models.TextField(_('Name'), blank=True)
+    url = models.URLField(_('URL'), verify_exists=False, blank=True)
+    points = models.DecimalField(_('Points'), decimal_places=2, max_digits=5, null=True, blank=True)
+    version = models.CharField(_('Version'), max_length=20, blank=True, null=True)
 
     semester = models.ForeignKey('Semester')
 
     objects = CourseManager()
+
+    class Meta:
+        verbose_name = _('Course')
+        verbose_name_plural = _('Courses')
 
     def get_url(self):
         values = self.__dict__
@@ -158,7 +180,7 @@ class Semester(models.Model):
     SPRING = 0
     FALL = 1
 
-    TYPES = (
+    TYPES = (  # FIXME i18n
         (SPRING, 'spring'),
         (FALL, 'fall'),
     )
@@ -167,11 +189,14 @@ class Semester(models.Model):
         (FALL, 'h'),
     )
 
-    year = models.PositiveSmallIntegerField()
-    type = models.PositiveSmallIntegerField(choices=TYPES)
+    year = models.PositiveSmallIntegerField(_('Year'))
+    type = models.PositiveSmallIntegerField(_('Type'), choices=TYPES)
 
     class Meta:
         unique_together = [('year', 'type'),]
+
+        verbose_name = _('Semester')
+        verbose_name_plural = _('Semesters')
 
     def __init__(self, *args, **kwargs):
         super(Semester, self).__init__(*args, **kwargs)
@@ -236,21 +261,28 @@ class Semester(models.Model):
         return Semester.objects.get(year=current.year, type=current.type)
 
 class Exam(models.Model):
-    exam_date = models.DateField(blank=True, null=True)
-    exam_time = models.TimeField(blank=True, null=True)
+    exam_date = models.DateField(_('Exam date'), blank=True, null=True)
+    exam_time = models.TimeField(_('Exam time'), blank=True, null=True)
 
-    handout_date = models.DateField(blank=True, null=True)
-    handout_time = models.TimeField(blank=True, null=True)
+    handout_date = models.DateField(_('Handout date'), blank=True, null=True)
+    handout_time = models.TimeField(_('Handout time'), blank=True, null=True)
 
-    duration = models.PositiveSmallIntegerField(blank=True, null=True)
+    duration = models.PositiveSmallIntegerField(_('Duration'), blank=True, null=True,
+            help_text=_('Duration in hours'))
 
-    comment = models.TextField(blank=True)
+    comment = models.TextField(_('Comment'), blank=True)
 
-    type = models.CharField(max_length=1, blank=True)
-    type_name = models.CharField(max_length=100, blank=True, null=True)
+    # FIXME add exam type model
+    type = models.CharField(_('Type'), max_length=1, blank=True)
+    type_name = models.CharField(_('Type name'), max_length=100, blank=True, null=True)
+
     course = models.ForeignKey(Course)
 
     objects = ExamManager()
+
+    class Meta:
+        verbose_name = _('Exam')
+        verbose_name_plural = _('Exams')
 
     def __unicode__(self):
         return  u'%s (%s)' % (self.course, self.type)
@@ -259,37 +291,44 @@ class Week(models.Model):
     NUMBER_CHOICES = [(x, x) for x in range(1, 53)]
 
     lecture = models.ForeignKey('Lecture')
-    number = models.PositiveIntegerField(choices=NUMBER_CHOICES)
+    number = models.PositiveIntegerField(_('Week number'), choices=NUMBER_CHOICES)
 
     class Meta:
         unique_together = [('lecture', 'number')]
+
+        verbose_name = _('Lecture week')
+        verbose_name_plural = _('Lecture weeks')
 
     def __unicode__(self):
         return u'%s week %d' % (self.lecture, self.number)
 
 class Lecturer(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(_('Name'), max_length=200)
+
+    class Meta:
+        verbose_name = _('Lecturer')
+        verbose_name_plural = _('Lecturers')
 
     def __unicode__(self):
         return self.name
 
 class Lecture(models.Model):
     DAYS = (
-        (0, 'Monday'),
-        (1, 'Tuesday'),
-        (2, 'Wednesday'),
-        (3, 'Thursday'),
-        (4, 'Friday'),
+        (0, _('Monday')),
+        (1, _('Tuesday')),
+        (2, _('Wednesday')),
+        (3, _('Thursday')),
+        (4, _('Friday')),
 #        (5, 'Saturday'),
 #        (6, 'Sunday'),
     )
 
     course = models.ForeignKey(Course)
 
-    day = models.PositiveSmallIntegerField(choices=DAYS)
+    day = models.PositiveSmallIntegerField(_('Week day'), choices=DAYS)
 
-    start = models.TimeField()
-    end = models.TimeField()
+    start = models.TimeField(_('Start time'))
+    end = models.TimeField(_('End time'))
 
     rooms = models.ManyToManyField(Room, blank=True, null=True)
     type = models.ForeignKey(Type, blank=True, null=True)
@@ -297,6 +336,10 @@ class Lecture(models.Model):
     lecturers = models.ManyToManyField(Lecturer, blank=True, null=True)
 
     objects = LectureManager()
+
+    class Meta:
+        verbose_name = _('Lecture')
+        verbose_name_plural = _('Lecture')
 
     def __unicode__(self):
         return u'%4d %10s %s-%s on %3s' % (
@@ -332,13 +375,19 @@ class Lecture(models.Model):
         return tmp
 
 class Deadline(models.Model):
+    DEFALULT_DATE = lambda: now().date()+timedelta(days=7)
+
     userset = models.ForeignKey('UserSet')
 
-    date = models.DateField(default=now().date()+timedelta(days=7))
-    time = models.TimeField(null=True, blank=True)
-    task = models.CharField(max_length=255)
+    date = models.DateField(_('Due date'), default=DEFALULT_DATE)
+    time = models.TimeField(_('Time'), null=True, blank=True)
+    task = models.CharField(_('Task'), max_length=255)
 
     objects = DeadlineManager()
+
+    class Meta:
+        verbose_name = _('Deadline')
+        verbose_name_plural = _('Deadlines')
 
     def __unicode__(self):
         if self.time:

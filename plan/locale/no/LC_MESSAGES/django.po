@@ -1,0 +1,532 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-08-07 12:37+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: common/models.py:15
+msgid "Slug"
+msgstr ""
+
+#: common/models.py:20 templates/courses.html:13
+msgid "Alias"
+msgstr ""
+
+#: common/models.py:22
+msgid "Added"
+msgstr ""
+
+#: common/models.py:32 common/models.py:33
+msgid "Userset"
+msgstr ""
+
+#: common/models.py:59 common/models.py:70 common/models.py:82
+#: common/models.py:93 common/models.py:306 templates/course_list.html:46
+msgid "Name"
+msgstr ""
+
+#: common/models.py:60
+msgid "Optional"
+msgstr ""
+
+#: common/models.py:66
+msgid "Lecture type"
+msgstr ""
+
+#: common/models.py:67
+msgid "Lecture types"
+msgstr ""
+
+#: common/models.py:76
+msgid "Room"
+msgstr ""
+
+#: common/models.py:77 templates/lectures.html:15
+msgid "Rooms"
+msgstr ""
+
+#: common/models.py:88
+msgid "Group"
+msgstr ""
+
+#: common/models.py:89 templates/lectures.html:17
+msgid "Groups"
+msgstr ""
+
+#: common/models.py:92
+msgid "Code"
+msgstr ""
+
+#: common/models.py:94
+msgid "URL"
+msgstr ""
+
+#: common/models.py:95
+msgid "Points"
+msgstr ""
+
+#: common/models.py:96
+msgid "Version"
+msgstr ""
+
+#: common/models.py:103 templates/add_deadlines.html:11
+#: templates/course_list.html:45 templates/courses.html:12
+#: templates/deadlines.html:12 templates/exams.html:12
+#: templates/lectures.html:12
+msgid "Course"
+msgstr ""
+
+#: common/models.py:104
+msgid "Courses"
+msgstr ""
+
+#: common/models.py:192
+msgid "Year"
+msgstr ""
+
+#: common/models.py:193 common/models.py:276 templates/exams.html:11
+#: templates/lectures.html:16
+msgid "Type"
+msgstr ""
+
+#: common/models.py:198
+msgid "Semester"
+msgstr ""
+
+#: common/models.py:199
+msgid "Semesters"
+msgstr ""
+
+#: common/models.py:264
+msgid "Exam date"
+msgstr ""
+
+#: common/models.py:265 templates/course_list.html:48
+msgid "Exam time"
+msgstr ""
+
+#: common/models.py:267
+msgid "Handout date"
+msgstr ""
+
+#: common/models.py:268 templates/course_list.html:50
+msgid "Handout time"
+msgstr ""
+
+#: common/models.py:270
+msgid "Duration"
+msgstr ""
+
+#: common/models.py:271
+msgid "Duration in hours"
+msgstr ""
+
+#: common/models.py:273
+msgid "Comment"
+msgstr ""
+
+#: common/models.py:277
+msgid "Type name"
+msgstr ""
+
+#: common/models.py:284 ical/views.py:159 ical/views.py:160
+msgid "Exam"
+msgstr ""
+
+#: common/models.py:285 templates/exams.html:3
+msgid "Exams"
+msgstr ""
+
+#: common/models.py:294
+msgid "Week number"
+msgstr ""
+
+#: common/models.py:299
+msgid "Lecture week"
+msgstr ""
+
+#: common/models.py:300
+msgid "Lecture weeks"
+msgstr ""
+
+#: common/models.py:309
+msgid "Lecturer"
+msgstr ""
+
+#: common/models.py:310 templates/lectures.html:18
+msgid "Lecturers"
+msgstr ""
+
+#: common/models.py:317 pdf/views.py:113 templates/schedule_table.html:15
+msgid "Monday"
+msgstr ""
+
+#: common/models.py:318 pdf/views.py:113 templates/schedule_table.html:16
+msgid "Tuesday"
+msgstr ""
+
+#: common/models.py:319 pdf/views.py:113 templates/schedule_table.html:17
+msgid "Wednesday"
+msgstr ""
+
+#: common/models.py:320 pdf/views.py:113 templates/schedule_table.html:18
+msgid "Thursday"
+msgstr ""
+
+#: common/models.py:321 pdf/views.py:113 templates/schedule_table.html:19
+msgid "Friday"
+msgstr ""
+
+#: common/models.py:328
+msgid "Week day"
+msgstr ""
+
+#: common/models.py:330
+msgid "Start time"
+msgstr ""
+
+#: common/models.py:331
+msgid "End time"
+msgstr ""
+
+#: common/models.py:341 common/models.py:342
+msgid "Lecture"
+msgstr ""
+
+#: common/models.py:382 templates/add_deadlines.html:12
+#: templates/deadlines.html:13
+msgid "Due date"
+msgstr ""
+
+#: common/models.py:383 templates/add_deadlines.html:13
+#: templates/deadlines.html:14 templates/exams.html:9
+#: templates/lectures.html:14
+msgid "Time"
+msgstr ""
+
+#: common/models.py:384 templates/add_deadlines.html:10
+#: templates/deadlines.html:15
+msgid "Task"
+msgstr ""
+
+#: common/models.py:389
+msgid "Deadline"
+msgstr ""
+
+#: common/models.py:390 templates/deadlines.html:3
+msgid "Deadlines"
+msgstr ""
+
+#: ical/views.py:62
+#, python-format
+msgid "%(slug)s' %(semester)s %(year)s schedule for %(resources)s"
+msgstr ""
+
+#: ical/views.py:64
+#, python-format
+msgid "%(slug)s's %(semester)s %(year)s schedule for %(resources)s"
+msgstr ""
+
+#: pdf/views.py:215
+msgid "Week"
+msgstr ""
+
+#: pdf/views.py:217
+msgid "All weeks"
+msgstr ""
+
+#: settings/base.py:48
+msgid "Norwegian"
+msgstr ""
+
+#: settings/base.py:49
+msgid "English"
+msgstr ""
+
+#: templates/404.html:6 templates/404.html.py:10
+msgid "Page not found"
+msgstr ""
+
+#: templates/404.html:17
+#, python-format
+msgid ""
+"\n"
+"                <code>%(path)s</code> could not be found. Try going back or\n"
+"                starting over from the <a href=\"%(frontpage_url)s"
+"\">frontpage</a>.\n"
+"            "
+msgstr ""
+
+#: templates/500.html:6 templates/500.html.py:10
+msgid "Server error"
+msgstr ""
+
+#: templates/500.html:16
+msgid "An error has occurred, sorry about the inconvenience."
+msgstr ""
+
+#: templates/500.html:19
+msgid "The server administrator has all ready been notified of this error."
+msgstr ""
+
+#: templates/add_courses.html:6
+msgid "Add courses"
+msgstr ""
+
+#: templates/add_courses.html:9
+msgid "Please enter the codes for the courses you want to attend"
+msgstr ""
+
+#: templates/add_courses.html:11
+msgid "Add course"
+msgstr ""
+
+#: templates/add_deadlines.html:6
+msgid "Add deadlines"
+msgstr ""
+
+#: templates/add_deadlines.html:34
+msgid "Add deadline"
+msgstr ""
+
+#: templates/course_list.html:6
+msgid "List of all courses"
+msgstr ""
+
+#: templates/course_list.html:11
+#, python-format
+msgid "All courses during %(semester)s semester"
+msgstr ""
+
+#: templates/course_list.html:22
+msgid ""
+"No courses to show for this semester. Back to <a href='..'>your</a> schedule."
+msgstr ""
+
+#: templates/course_list.html:29 templates/course_list.html.py:109
+msgid "Jump to:"
+msgstr ""
+
+#: templates/course_list.html:37 templates/course_list.html.py:117
+msgid "Add coures to schedule"
+msgstr ""
+
+#: templates/course_list.html:47 templates/courses.html:15
+msgid "Credits"
+msgstr ""
+
+#: templates/course_list.html:49
+msgid "Exam Type"
+msgstr ""
+
+#: templates/courses.html:14
+msgid "Description"
+msgstr ""
+
+#: templates/courses.html:58 templates/courses.html.py:62
+msgid "Update names"
+msgstr ""
+
+#: templates/courses.html:59 templates/courses.html.py:63
+#: templates/deadlines.html:34
+msgid "Remove selected"
+msgstr ""
+
+#: templates/courses.html:69
+#, python-format
+msgid ""
+"\n"
+"                Go to <a href=\"%(advanced_url)s#courses\">advanced options</"
+"a>\n"
+"                to add and remove courses.\n"
+"            "
+msgstr ""
+
+#: templates/deadlines.html:42
+#, python-format
+msgid ""
+"\n"
+"            Go to <a href=\"%(advanced_url)s#deadlines\">advanced options</"
+"a> to add and remove deadlines.\n"
+"        "
+msgstr ""
+
+#: templates/deadlines.html:49
+msgid "No deadlines to show, feel free to add some."
+msgstr ""
+
+#: templates/error.html:6
+msgid "Couldn't add one or more courses"
+msgstr ""
+
+#: templates/error.html:13
+#, python-format
+msgid ""
+"\n"
+"                    Sorry, but the generator has been set up to limit\n"
+"                    timetables to %(max)s courses.\n"
+"                "
+msgstr ""
+
+#: templates/error.html:21
+msgid "Adding the following courses failed:"
+msgstr ""
+
+#: templates/error.html:31
+#, python-format
+msgid ""
+"\n"
+"                Back to your <a href=\"%(adavanced_url)s\">schedule</a>.\n"
+"            "
+msgstr ""
+
+#: templates/error.html:37
+msgid ""
+"\n"
+"            Please check that the courses that failed can be found at\n"
+"            <a href=\"http://www.ntnu.no/studieinformasjon/timeplan\">http://"
+"www.ntnu.no/studieinformasjon/timeplan</a>\n"
+"            for this semster.\n"
+"        "
+msgstr ""
+
+#: templates/exams.html:8
+msgid "Date"
+msgstr ""
+
+#: templates/exams.html:10
+msgid "Dur."
+msgstr ""
+
+#: templates/exams.html:13
+msgid "Handout"
+msgstr ""
+
+#: templates/exams.html:54
+msgid "Didn't find any exams for selected courses."
+msgstr ""
+
+#: templates/exams.html:56
+msgid "You need to add at least one course before exams will be shown."
+msgstr ""
+
+#: templates/groups.html:7
+msgid "Please choose the course variant you belong to."
+msgstr ""
+
+#: templates/groups.html:33
+msgid "Save groups"
+msgstr ""
+
+#: templates/import_deadlines.html:5 templates/import_deadlines.html.py:15
+msgid "Import deadlines"
+msgstr ""
+
+#: templates/import_deadlines.html:7
+msgid ""
+"\n"
+"                If you enter the idenfiers for other timetables with the\n"
+"                same course as your's, you will be given the option to\n"
+"                import their deadlines.\n"
+"            "
+msgstr ""
+
+#: templates/lectures.html:4
+msgid "Lecture list"
+msgstr ""
+
+#: templates/lectures.html:13
+msgid "Day"
+msgstr ""
+
+#: templates/lectures.html:19
+msgid "Weeks"
+msgstr ""
+
+#: templates/lectures.html:42
+msgid "Hide selected lectures"
+msgstr ""
+
+#: templates/lectures.html:45
+#, python-format
+msgid ""
+"\n"
+"                    Go to <a href=\"%(advanced_url)s#lectures\">advanced "
+"options</a>\n"
+"                    to toggle which lectures to hide.\n"
+"                "
+msgstr ""
+
+#: templates/schedule_message.html:7
+#, python-format
+msgid ""
+"\n"
+"                Next semesters' lectures are now available, go to\n"
+"                <a href=\"%(next_semester_url)s\">%(next_semester_url)s</a>\n"
+"                to start adding your courses.\n"
+"            "
+msgstr ""
+
+#: templates/schedule_table_footer.html:7
+msgid "Course list"
+msgstr ""
+
+#: templates/schedule_table_footer.html:9
+msgid "Hide advanced options"
+msgstr ""
+
+#: templates/schedule_table_footer.html:11
+msgid "Advanced options"
+msgstr ""
+
+#: templates/schedule_table_footer.html:13
+msgid "Tips"
+msgstr ""
+
+#: templates/schedule_table_footer.html:31
+msgid "Weeks:"
+msgstr ""
+
+#: templates/schedule_table_footer.html:32
+msgid "All"
+msgstr ""
+
+#: templates/schedule_table_footer.html:33
+msgid "Current"
+msgstr ""
+
+#: templates/statistics.html:3
+#, python-format
+msgid ""
+"\n"
+"        Statistics %(current)s\n"
+"    "
+msgstr ""
+
+#: templates/statistics.html:9
+msgid "Total number of unique timetables"
+msgstr ""
+
+#: templates/statistics.html:13
+msgid "Total number of unique courses added"
+msgstr ""
+
+#: templates/statistics.html:17
+msgid "Total number of deadlines"
+msgstr ""
+
+#: templates/admin/base_site.html:5 templates/admin/base_site.html.py:9
+msgid "ntnu timetable admin"
+msgstr ""

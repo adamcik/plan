@@ -1,5 +1,7 @@
+from django.conf import settings
+
 from plan.common.tests.base import BaseTestCase
-from plan.common.utils import ColorMap, COLORS, compact_sequence
+from plan.common.utils import ColorMap, compact_sequence
 
 class UtilTestCase(BaseTestCase):
     fixtures = ['test_data.json']
@@ -13,7 +15,7 @@ class UtilTestCase(BaseTestCase):
 
         c = ColorMap(hex=True)
         for k in keys:
-            self.assertEquals(c[k], COLORS[k % c.max])
+            self.assertEquals(c[k], settings.TIMETABLE_COLORS[k % c.max])
 
         self.assertEquals(c[None], '')
 

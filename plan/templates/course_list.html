@@ -1,11 +1,15 @@
 {% extends "base_site.html" %}
 
+{% load i18n %}
+
 {% block title %}
-    List of all courses - {{ block.super }}
+    {% trans "List of all courses" %} - {{ block.super }}
 {% endblock %}
 
 {% block hd %}
-    <h1>All courses during {{ semester.get_type_display }} {{ semester.year }} semester</h1>
+    <h1>
+        {% blocktrans %}All courses during {{ semester }} semester{% endblocktrans %}
+    </h1>
 {% endblock %}
 
 {% block extrahead %}
@@ -15,14 +19,14 @@
 {% block bd %}
     {% if not course_list %}
         <div id="help">
-            <p>No courses to show for this semester. Back to <a href="..">your</a> schedule.</p>
+            <p>{% trans "No courses to show for this semester. Back to <a href='..'>your</a> schedule." %}</p>
         </div>
     {% else %}
         <form action="." method="post">
             <div class="yui-g">
                 <div class="yui-u first">
                     <p>
-                        Jump to:
+                        {% trans "Jump to:" %}
                         {% for l in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
                             <a href="#{{ l }}">{{ l }}</a>
                         {% endfor %}
@@ -30,7 +34,7 @@
                 </div>
                 <div class="yui-u">
                     <p class="right">
-                        <button type="submit"><span class="icon add">Add coures to schedule</span></button>
+                        <button type="submit"><span class="icon add">{% trans "Add coures to schedule" %}</span></button>
                     </p>
                 </div>
             </div>
@@ -38,12 +42,12 @@
                 <thead>
                     <tr>
                         <th></th>
-                        <th>Course</th>
-                        <th>Name</th>
-                        <th>Credits</th>
-                        <th colspan="2">Exam time</th>
-                        <th>Exam Type</th>
-                        <th colspan="2">Handout time</th>
+                        <th>{% trans "Course" %}</th>
+                        <th>{% trans "Name" %}</th>
+                        <th>{% trans "Credits" %}</th>
+                        <th colspan="2">{% trans "Exam time" %}</th>
+                        <th>{% trans "Exam Type" %}</th>
+                        <th colspan="2">{% trans "Handout time" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -102,7 +106,7 @@
             <div class="yui-g">
                 <div class="yui-u first">
                     <p>
-                        Jump to:
+                        {% trans "Jump to:" %}
                         {% for l in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
                             <a href="#{{ l }}">{{ l }}</a>
                         {% endfor %}
@@ -110,7 +114,7 @@
                 </div>
                 <div class="yui-u">
                     <p class="right">
-                        <button type="submit"><span class="icon add">Add coures to schedule</span></button>
+                        <button type="submit"><span class="icon add">{% trans "Add coures to schedule" %}</span></button>
                     </p>
                 </div>
             </div>

@@ -14,7 +14,8 @@ styles = getSampleStyleSheet()
 
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404
-from django.template.defaultfilters import force_escape
+from django.utils.html import escape
+from django.utils.translation import ugettext as _
 
 from plan.common.models import Lecture, Semester, Room, Course
 from plan.common.timetable import Timetable
@@ -109,7 +110,7 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
 
     # Add days
     # FIXME move to timetable
-    for i,day in enumerate(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']):
+    for i,day in enumerate([_('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'), _('Friday')]):
         data[0].append(day)
         if timetable.span[i] > 1:
             extra = timetable.span[i] - 1
@@ -130,7 +131,7 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
                         paragraph_style.fontName = 'Helvetica'
 
                     name = lecture.alias or lecture.course.name
-                    content = [Paragraph(force_escape(name), paragraph_style)]
+                    content = [Paragraph(escape(name), paragraph_style)]
                     paragraph_style.leading = 8
 
                     if lecture.type:
@@ -211,9 +212,9 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
     page.drawString(width - page.stringWidth(note) - 2, -height+2, note)
 
     if week:
-        week_text = 'Week %s' % week
+        week_text = _('Week') + ' %s' % week
     else:
-        week_text = 'All weeks'
+        week_text = _('All weeks')
 
     page.setFont('Helvetica', 8)
     page.setFillColor(HexColor('#000000'))

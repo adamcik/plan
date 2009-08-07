@@ -1,20 +1,22 @@
 {% extends "base_site.html" %}
 
+{% load i18n %}
+
 {% block title %}
-    {{ block.super }} - Server error
+    {{ block.super }} - {% trans "Server error" %}
 {% endblock %}
 
 {% block hd %}
-    <h1>Server error</h1>
+    <h1>{% trans "Server error" %}</h1>
 {% endblock %}
 
 {% block bd %}
     <div id="help">
         <p class="icon error large">
-            An error has occurred, sorry about the inconvenience.
+            {% trans "An error has occurred, sorry about the inconvenience." %}
         </p>
         <ul>
-            <li>The server administrator has all ready been notified of this error.</li>
+            <li>{% trans "The server administrator has all ready been notified of this error." %}</li>
         </ul>
     </div>
 {% endblock %}
