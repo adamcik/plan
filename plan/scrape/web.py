@@ -120,7 +120,6 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
             html = ''.join(urlopen(final_url).readlines())
             main = BeautifulSoup(html).findAll('div', 'hovedramme')[0]
 
-
             if not main.findAll('h1', text=lambda t: course.name in t):
                 main.extract()
                 del html
