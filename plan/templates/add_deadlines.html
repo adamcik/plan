@@ -1,14 +1,16 @@
+{% load i18n %}
+
 {% if advanced %}
     {% if courses %}
         <form method="post" action="{% url new-deadline semester.year,semester.get_type_display,slug %}#deadlines" class="noprint">
-            <h2>Add deadlines</h2>
+            <h2>{% trans "Add deadlines" %}</h2>
             <table>
                 <thead>
                     <tr>
-                        <th>Task</th>
-                        <th>Course</th>
-                        <th>Due date</th>
-                        <th>Time</th>
+                        <th>{% trans "Task" %}</th>
+                        <th>{% trans "Course" %}</th>
+                        <th>{% trans "Due date" %}</th>
+                        <th>{% trans "Time" %}</th>
                     </tr>
                 </thead>
                 <tbody class="plain">
@@ -29,7 +31,7 @@
                 </tbody>
             </table>
             <p>
-                <button name="submit_add" type="submit"><span class="icon add">Add deadline</span></button>
+                <button name="submit_add" type="submit"><span class="icon add">{% trans "Add deadline" %}</span></button>
             </p>
         </form>
     {% endif %}

@@ -1,14 +1,16 @@
+{% load i18n %}
+
 {% if courses %}
     <div class="yui-g noprint">
         <div class="yui-u first">
             <p class="large">
-                <a href="{% url course-list semester.year,semester.get_type_display,slug %}" class="icon list">Course list</a>
+                <a href="{% url course-list semester.year,semester.get_type_display,slug %}" class="icon list">{% trans "Course list" %}</a>
                 {% if advanced %}
-                    - <a href="{% url schedule semester.year,semester.get_type_display,slug %}" class="icon advanced">Hide advanced options</a>
+                    - <a href="{% url schedule semester.year,semester.get_type_display,slug %}" class="icon advanced">{% trans "Hide advanced options" %}</a>
                 {% else %}
-                    - <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}" class="icon advanced">Advanced options</a>
+                    - <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}" class="icon advanced">{% trans "Advanced options" %}</a>
                 {% endif %}
-                - <a href="#tips" class="icon tips">Tips</a>
+                - <a href="#tips" class="icon tips">{% trans "Tips" %}</a>
                     - <span class="icon pdf">
                         {% if week %}
                             <a href="{% url schedule-pdf semester.year,semester.get_type_display,slug,"A4",week %}">A4</a>
@@ -26,9 +28,9 @@
         </div>
         <div class="yui-u">
             <p class="right">
-                <span class="icon week">Weeks:</span>
-                <a href="{% url schedule-all semester.year,semester.get_type_display,slug %}"{% if all%} class="current"{% endif %}>All</a>
-                <a href="{% url schedule-week semester.year,semester.get_type_display,slug,current_week %}"{% if current %} class="current"{% endif %}>Current</a>
+                <span class="icon week">{% trans "Weeks:" %}</span>
+                <a href="{% url schedule-all semester.year,semester.get_type_display,slug %}"{% if all%} class="current"{% endif %}>{% trans "All" %}</a>
+                <a href="{% url schedule-week semester.year,semester.get_type_display,slug,current_week %}"{% if current %} class="current"{% endif %}>{% trans "Current" %}</a>
                 {% for w in weeks %}
                     <a href="{% url schedule-week semester.year,semester.get_type_display,slug,w %}"{% ifequal w week %} class="current"{% endifequal %}>{{ w }}</a>
                 {% endfor %}

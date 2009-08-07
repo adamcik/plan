@@ -1,3 +1,4 @@
+{% load i18n %}
 {% load nbsp %}
 {% load strip %}
 
@@ -11,11 +12,11 @@
     <thead>
         <tr>
             <th class="time"></th>
-            <th colspan="{{ timetable.span.0 }}">Monday</th>
-            <th colspan="{{ timetable.span.1 }}">Tuesday</th>
-            <th colspan="{{ timetable.span.2 }}">Wednesday</th>
-            <th colspan="{{ timetable.span.3 }}">Thursday</th>
-            <th colspan="{{ timetable.span.4 }}">Friday</th>
+            <th colspan="{{ timetable.span.0 }}">{% trans "Monday" %}</th>
+            <th colspan="{{ timetable.span.1 }}">{% trans "Tuesday" %}</th>
+            <th colspan="{{ timetable.span.2 }}">{% trans "Wednesday" %}</th>
+            <th colspan="{{ timetable.span.3 }}">{% trans "Thursday" %}</th>
+            <th colspan="{{ timetable.span.4 }}">{% trans "Friday" %}</th>
         </tr>
     </thead>
     <tbody>

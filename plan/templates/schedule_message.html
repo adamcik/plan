@@ -1,9 +1,14 @@
+{% load i18n %}
+
 {% if next_message and not group_help and courses %}
     <div id="help" class="large">
         <p class="icon tips">
-            Next semesters' lectures are now available, go to
-            <a href="{% url schedule next_semester.year,next_semester.get_type_display,slug %}">{% url schedule next_semester.year,next_semester.get_type_display,slug %}</a>
-            to start adding your courses.
+            {% url schedule next_semester.year,next_semester.get_type_display,slug as next_semester_url %}
+            {% blocktrans %}
+                Next semesters' lectures are now available, go to
+                <a href="{{ next_semester_url }}">{{ next_semester_url }}</a>
+                to start adding your courses.
+            {% endblocktrans %}
         </p>
     </div>
 {%  endif %}

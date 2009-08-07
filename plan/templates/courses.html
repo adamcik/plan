@@ -1,3 +1,5 @@
+{% load i18n %}
+
 <form action="{% url change-course semester.year,semester.get_type_display,slug %}" method="post">
     <h2>Courses</h2>
     {% if courses %}
@@ -7,10 +9,10 @@
                     {% if advanced %}
                         <th style="width:  5%"></th>
                     {% endif %}
-                    <th style="width: 18%">Course</th>
-                    <th>Alias</th>
-                    <th>Description</th>
-                    <th style="width: 10%">Credits</th>
+                    <th style="width: 18%">{% trans "Course" %}</th>
+                    <th>{% trans "Alias" %}</th>
+                    <th>{% trans "Description" %}</th>
+                    <th style="width: 10%">{% trans "Credits" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -53,18 +55,21 @@
     {% if courses and advanced %}
         <p class="noprint">
             <!--[if lte IE 6]>
-                <input name="submit_name" type="submit" value="Update names" class="icon name"  style="width: 9em; height: 1.8em;" />
-                <input name="submit_remove" type="submit" value="Remove selected" class="icon remove" style="width: 10em; height: 1.8em" />
+                <input name="submit_name" type="submit" value="{% trans "Update names" %}" class="icon name"  style="width: 9em; height: 1.8em;" />
+                <input name="submit_remove" type="submit" value="{% trans "Remove selected" %}" class="icon remove" style="width: 10em; height: 1.8em" />
             <![endif]-->
             <!--[if gt IE 6]><!-->
-                <button name="submit_name" type="submit"><span class="icon name">Update names</span></button>
-                <button name="submit_remove" type="submit"><span class="icon remove"> Remove selected</span></button>
+                <button name="submit_name" type="submit"><span class="icon name">{% trans "Update names" %}</span></button>
+                <button name="submit_remove" type="submit"><span class="icon remove">{% trans "Remove selected" %}</span></button>
             <!--<![endif]-->
         </p>
     {% else %}
         <p class="noprint">
-            Go to <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}#courses">advanced options</a>
-            to add and remove courses.
+            {% url schedule-advanced semester.year,semester.get_type_display,slug as advanced_url %}
+            {% blocktrans %}
+                Go to <a href="{{ advanced_url }}#courses">advanced options</a>
+                to add and remove courses.
+            {% endblocktrans %}
         </p>
     {% endif %}
 </form>

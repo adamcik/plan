@@ -1,5 +1,7 @@
+{% load i18n %}
+
 {% if lectures %}
-    <h2>Lecture list</h2>
+    <h2>{% trans "Lecture list" %}</h2>
     <form action="{% url change-lectures semester.year,semester.get_type_display,slug %}" method="post">
         <table id="lectures">
             <thead>
@@ -7,14 +9,14 @@
                     {% if advanced %}
                         <th></th>
                     {% endif %}
-                    <th>Course</th>
-                    <th>Day</th>
-                    <th style="width: 7em">Time</th>
-                    <th>Rooms</th>
-                    <th>Type</th>
-                    <th>Groups</th>
-                    <th>Lecturers</th>
-                    <th>Weeks</th>
+                    <th>{% trans "Course" %}</th>
+                    <th>{% trans "Day" %}</th>
+                    <th style="width: 7em">{% trans "Time" %}</th>
+                    <th>{% trans "Rooms" %}</th>
+                    <th>{% trans "Type" %}</th>
+                    <th>{% trans "Groups" %}</th>
+                    <th>{% trans "Lecturers" %}</th>
+                    <th>{% trans "Weeks" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -37,9 +39,13 @@
         </table>
         <p class="noprint">
             {% if advanced %}
-                <button type="submit"><span class="icon hide">Hide selected lectures</span></button>
+                <button type="submit"><span class="icon hide">{% trans "Hide selected lectures" %}</span></button>
             {% else %}
-                Go to <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}#lectures">advanced options</a> to toggle which lectures to hide.
+                {% url schedule-advanced semester.year,semester.get_type_display,slug as advanced_url %}
+                {% blocktrans %}
+                    Go to <a href="{{ advanced_url }}#lectures">advanced options</a>
+                    to toggle which lectures to hide.
+                {% endblocktrans %}
             {% endif %}
         </p>
     </form>

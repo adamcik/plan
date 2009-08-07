@@ -1,4 +1,6 @@
-<h2>Deadlines</h2>
+{% load i18n %}
+
+<h2>{% trans "Deadlines" %}</h2>
 {% if deadlines %}
     <form method="post" action="{% url new-deadline semester.year,semester.get_type_display,slug %}#deadlines">
         <table id="deadlines">
@@ -7,10 +9,10 @@
                     {% if advanced %}
                         <th style="width: 5%"></th>
                     {% endif %}
-                    <th style="width: 18%">Course</th>
-                    <th style="width: 19%">Due date</th>
-                    <th style="width:  8%">Time</th>
-                    <th>Task</th>
+                    <th style="width: 18%">{% trans "Course" %}</th>
+                    <th style="width: 19%">{% trans "Due date" %}</th>
+                    <th style="width:  8%">{% trans "Time" %}</th>
+                    <th>{% trans "Task" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -29,16 +31,21 @@
         </table>
         {% if advanced and deadlines %}
             <p class="noprint">
-                <button name="submit_remove" type="submit"><span class="icon remove">Remove selected</span></button>
+                <button name="submit_remove" type="submit"><span class="icon remove">{% trans "Remove selected" %}</span></button>
             </p>
         {% endif %}
     </form>
 {% endif %}
 {% if courses and not advanced %}
-    <p class="noprint">Go to <a href="{% url schedule-advanced semester.year,semester.get_type_display,slug %}#deadlines">advanced options</a> to add and remove deadlines.</p>
+    <p class="noprint">
+        {% url schedule-advanced semester.year,semester.get_type_display,slug as advanced_url %}
+        {% blocktrans %}
+            Go to <a href="{{ advanced_url }}#deadlines">advanced options</a> to add and remove deadlines.
+        {% endblocktrans %}
+    </p>
 {% endif %}
 {% if courses and advanced %}
     {% if not deadlines %}
-        <p>No deadlines to show, feel free to add some.</p>
+        <p>{% trans "No deadlines to show, feel free to add some." %}</p>
     {% endif %}
 {% endif %}

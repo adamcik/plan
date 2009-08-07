@@ -5,6 +5,9 @@
 from os.path import realpath, join, dirname
 import socket
 
+# Dummy translation fuction as we can't import real one
+ugettext = lambda s: s
+
 BASE_PATH = realpath(join(dirname(__file__), '..', '..'))
 
 DEBUG = True
@@ -33,13 +36,20 @@ TIME_ZONE = 'Europe/Oslo'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'no'
+LANGUAGE_CODE = 'en'
 
 SITE_ID = 1
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
-USE_I18N = False
+USE_I18N = True
+
+LANGUAGES = (
+  ('no', ugettext('Norwegian')),
+  ('en', ugettext('English')),
+)
+
+LOCALE_PATHS = [join(BASE_PATH, 'plan', 'locale')]
 
 TIME_FORMAT = "H:i"
 DATE_FORMAT = "Y-m-d"
