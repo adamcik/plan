@@ -1,7 +1,7 @@
 {% load i18n %}
 
 {% if courses and advanced %}
-    <form action="{% url change-groups semester.year,semester.get_url_type_display,slug %}" method="post" class="noprint">
+    <form action="{% url change-groups semester.year,semester.type,slug %}" method="post" class="noprint">
         <h2 id="groups">Change groups</h2>
         <p>
             {% trans "Please choose the course variant you belong to." %}

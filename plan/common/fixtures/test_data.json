@@ -3,7 +3,7 @@
         "pk": 1, 
         "model": "common.semester", 
         "fields": {
-            "type": 0, 
+            "type": "spring", 
             "year": 2009
         }
     }, 

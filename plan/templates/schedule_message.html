@@ -3,7 +3,7 @@
 {% if next_message and not group_help and courses %}
     <div id="help" class="large">
         <p class="icon tips">
-            {% url schedule next_semester.year,next_semester.get_url_type_display,slug as next_semester_url %}
+            {% url schedule next_semester.year,next_semester.type,slug as next_semester_url %}
             {% blocktrans %}
                 Next semesters' lectures are now available, go to
                 <a href="{{ next_semester_url }}">{{ next_semester_url }}</a>

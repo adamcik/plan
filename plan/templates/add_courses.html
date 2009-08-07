@@ -1,7 +1,7 @@
 {% load i18n %}
 
 {% if advanced or not courses %}
-    <form action="{% url change-course semester.year,semester.get_url_type_display,slug %}" method="post" class="noprint">
+    <form action="{% url change-course semester.year,semester.type,slug %}" method="post" class="noprint">
         {% if courses %}
             <h2>{% trans "Add courses" %}</h2>
         {% endif %}
