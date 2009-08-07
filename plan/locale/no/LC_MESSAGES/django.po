@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-07 12:37+0200\n"
+"POT-Creation-Date: 2009-08-07 14:06+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,7 +33,7 @@ msgid "Userset"
 msgstr ""
 
 #: common/models.py:59 common/models.py:70 common/models.py:82
-#: common/models.py:93 common/models.py:306 templates/course_list.html:46
+#: common/models.py:93 common/models.py:294 templates/course_list.html:46
 msgid "Name"
 msgstr ""
 
@@ -84,7 +84,7 @@ msgstr ""
 #: common/models.py:103 templates/add_deadlines.html:11
 #: templates/course_list.html:45 templates/courses.html:12
 #: templates/deadlines.html:12 templates/exams.html:12
-#: templates/lectures.html:12
+#: templates/lectures.html:12 templates/select_deadlines.html:24
 msgid "Course"
 msgstr ""
 
@@ -92,140 +92,148 @@ msgstr ""
 msgid "Courses"
 msgstr ""
 
-#: common/models.py:192
+#: common/models.py:184
+msgid "spring"
+msgstr ""
+
+#: common/models.py:185
+msgid "fall"
+msgstr ""
+
+#: common/models.py:188
 msgid "Year"
 msgstr ""
 
-#: common/models.py:193 common/models.py:276 templates/exams.html:11
+#: common/models.py:189 common/models.py:264 templates/exams.html:11
 #: templates/lectures.html:16
 msgid "Type"
 msgstr ""
 
-#: common/models.py:198
+#: common/models.py:194
 msgid "Semester"
 msgstr ""
 
-#: common/models.py:199
+#: common/models.py:195
 msgid "Semesters"
 msgstr ""
 
-#: common/models.py:264
+#: common/models.py:252
 msgid "Exam date"
 msgstr ""
 
-#: common/models.py:265 templates/course_list.html:48
+#: common/models.py:253 templates/course_list.html:48
 msgid "Exam time"
 msgstr ""
 
-#: common/models.py:267
+#: common/models.py:255
 msgid "Handout date"
 msgstr ""
 
-#: common/models.py:268 templates/course_list.html:50
+#: common/models.py:256 templates/course_list.html:50
 msgid "Handout time"
 msgstr ""
 
-#: common/models.py:270
+#: common/models.py:258
 msgid "Duration"
 msgstr ""
 
-#: common/models.py:271
+#: common/models.py:259
 msgid "Duration in hours"
 msgstr ""
 
-#: common/models.py:273
+#: common/models.py:261
 msgid "Comment"
 msgstr ""
 
-#: common/models.py:277
+#: common/models.py:265
 msgid "Type name"
 msgstr ""
 
-#: common/models.py:284 ical/views.py:159 ical/views.py:160
+#: common/models.py:272 ical/views.py:159 ical/views.py:160
 msgid "Exam"
 msgstr ""
 
-#: common/models.py:285 templates/exams.html:3
+#: common/models.py:273 templates/exams.html:3
 msgid "Exams"
 msgstr ""
 
-#: common/models.py:294
+#: common/models.py:282
 msgid "Week number"
 msgstr ""
 
-#: common/models.py:299
+#: common/models.py:287
 msgid "Lecture week"
 msgstr ""
 
-#: common/models.py:300
+#: common/models.py:288
 msgid "Lecture weeks"
 msgstr ""
 
-#: common/models.py:309
+#: common/models.py:297
 msgid "Lecturer"
 msgstr ""
 
-#: common/models.py:310 templates/lectures.html:18
+#: common/models.py:298 templates/lectures.html:18
 msgid "Lecturers"
 msgstr ""
 
-#: common/models.py:317 pdf/views.py:113 templates/schedule_table.html:15
+#: common/models.py:305 pdf/views.py:113 templates/schedule_table.html:15
 msgid "Monday"
 msgstr ""
 
-#: common/models.py:318 pdf/views.py:113 templates/schedule_table.html:16
+#: common/models.py:306 pdf/views.py:113 templates/schedule_table.html:16
 msgid "Tuesday"
 msgstr ""
 
-#: common/models.py:319 pdf/views.py:113 templates/schedule_table.html:17
+#: common/models.py:307 pdf/views.py:113 templates/schedule_table.html:17
 msgid "Wednesday"
 msgstr ""
 
-#: common/models.py:320 pdf/views.py:113 templates/schedule_table.html:18
+#: common/models.py:308 pdf/views.py:113 templates/schedule_table.html:18
 msgid "Thursday"
 msgstr ""
 
-#: common/models.py:321 pdf/views.py:113 templates/schedule_table.html:19
+#: common/models.py:309 pdf/views.py:113 templates/schedule_table.html:19
 msgid "Friday"
 msgstr ""
 
-#: common/models.py:328
+#: common/models.py:316
 msgid "Week day"
 msgstr ""
 
-#: common/models.py:330
+#: common/models.py:318
 msgid "Start time"
 msgstr ""
 
-#: common/models.py:331
+#: common/models.py:319
 msgid "End time"
 msgstr ""
 
-#: common/models.py:341 common/models.py:342
+#: common/models.py:329 common/models.py:330
 msgid "Lecture"
 msgstr ""
 
-#: common/models.py:382 templates/add_deadlines.html:12
-#: templates/deadlines.html:13
+#: common/models.py:370 templates/add_deadlines.html:12
+#: templates/deadlines.html:13 templates/select_deadlines.html:25
 msgid "Due date"
 msgstr ""
 
-#: common/models.py:383 templates/add_deadlines.html:13
+#: common/models.py:371 templates/add_deadlines.html:13
 #: templates/deadlines.html:14 templates/exams.html:9
-#: templates/lectures.html:14
+#: templates/lectures.html:14 templates/select_deadlines.html:26
 msgid "Time"
 msgstr ""
 
-#: common/models.py:384 templates/add_deadlines.html:10
-#: templates/deadlines.html:15
+#: common/models.py:372 templates/add_deadlines.html:10
+#: templates/deadlines.html:15 templates/select_deadlines.html:27
 msgid "Task"
 msgstr ""
 
-#: common/models.py:389
+#: common/models.py:377
 msgid "Deadline"
 msgstr ""
 
-#: common/models.py:390 templates/deadlines.html:3
+#: common/models.py:378 templates/deadlines.html:3
 msgid "Deadlines"
 msgstr ""
 
@@ -299,6 +307,59 @@ msgstr ""
 
 #: templates/add_deadlines.html:34
 msgid "Add deadline"
+msgstr ""
+
+#: templates/base_site.html:8 templates/start.html:7
+msgid "Timetable generator for NTNU students"
+msgstr ""
+
+#: templates/base_site.html:27
+msgid ""
+"\n"
+"            All lecture times and course data have been automatically "
+"retrieved from\n"
+"            <a href=\"http://.www.ntnu.no/\">NTNU</a>.\n"
+"            This data may not reflect the actual lecture times due to "
+"changes or erroneous imports.\n"
+"            The service is provided as is, please ensure that the data is "
+"correct before relying on it.\n"
+"        "
+msgstr ""
+
+#: templates/base_site.html:35
+msgid "Code and design &copy; Thomas Adamcik 2008-2009"
+msgstr ""
+
+#: templates/base_site.html:36
+msgid "Built with:"
+msgstr ""
+
+#: templates/base_site.html:46 templates/schedule_table_footer.html:7
+msgid "Course list"
+msgstr ""
+
+#: templates/base_site.html:48
+msgid "Exam dates"
+msgstr ""
+
+#: templates/base_site.html:50
+msgid "Exam rules"
+msgstr ""
+
+#: templates/base_site.html:52
+msgid "Lecture times"
+msgstr ""
+
+#: templates/base_site.html:54
+msgid "Map Dragvoll"
+msgstr ""
+
+#: templates/base_site.html:57
+msgid "Map Gløshaugen"
+msgstr ""
+
+#: templates/base_site.html:60
+msgid "Find rooms"
 msgstr ""
 
 #: templates/course_list.html:6
@@ -469,6 +530,15 @@ msgid ""
 "                "
 msgstr ""
 
+#: templates/schedule.html:48
+#, python-format
+msgid ""
+"\n"
+"                    Use <a href=\"%(advanced_url)s#groups\">change groups</"
+"a> to limit which groups/parallels you want in your schedule.\n"
+"                "
+msgstr ""
+
 #: templates/schedule_message.html:7
 #, python-format
 msgid ""
@@ -479,10 +549,6 @@ msgid ""
 "            "
 msgstr ""
 
-#: templates/schedule_table_footer.html:7
-msgid "Course list"
-msgstr ""
-
 #: templates/schedule_table_footer.html:9
 msgid "Hide advanced options"
 msgstr ""
@@ -491,7 +557,7 @@ msgstr ""
 msgid "Advanced options"
 msgstr ""
 
-#: templates/schedule_table_footer.html:13
+#: templates/schedule_table_footer.html:13 templates/tips.html:12
 msgid "Tips"
 msgstr ""
 
@@ -505,6 +571,73 @@ msgstr ""
 
 #: templates/schedule_table_footer.html:33
 msgid "Current"
+msgstr ""
+
+#: templates/select_deadlines.html:12
+msgid "Copy deadlines to"
+msgstr ""
+
+#: templates/select_deadlines.html:28
+msgid "Course name"
+msgstr ""
+
+#: templates/select_deadlines.html:29
+msgid "Source"
+msgstr ""
+
+#: templates/select_deadlines.html:47
+msgid "Copy deadlines"
+msgstr ""
+
+#: templates/select_deadlines.html:54
+#, python-format
+msgid ""
+"\n"
+"                    No deadlines found. Return to your <a href=\"%"
+"(advanced_url)s\">schedule</a>.\n"
+"                "
+msgstr ""
+
+#: templates/start.html:42
+msgid "Sorry, no semesters have been loaded yet."
+msgstr ""
+
+#: templates/start.html:52
+msgid ""
+"\n"
+"                                Please enter a short name identifying your "
+"personal\n"
+"                                timetable, ie. username, nickname etc. If "
+"the name\n"
+"                                you select is in already taken, choose "
+"another\n"
+"                                one.\n"
+"                            "
+msgstr ""
+
+#: templates/start.html:62
+msgid "Start"
+msgstr ""
+
+#: templates/start.html:67
+msgid ""
+"\n"
+"                        To retrieve your timetable simply enter the same "
+"identifier\n"
+"                        you used last time.\n"
+"                    "
+msgstr ""
+
+#: templates/start.html:77
+#, python-format
+msgid ""
+"\n"
+"                        Top %(limit)s courses %(current)s\n"
+"                    "
+msgstr ""
+
+#: templates/start.html:91
+msgid "No coures have been added to any schedules yet."
 msgstr ""
 
 #: templates/statistics.html:3
@@ -525,6 +658,143 @@ msgstr ""
 
 #: templates/statistics.html:17
 msgid "Total number of deadlines"
+msgstr ""
+
+#: templates/tips.html:16
+msgid ""
+"Multiple courses can be added at once by separating course codes with spaces."
+msgstr ""
+
+#: templates/tips.html:19
+#, python-format
+msgid ""
+"\n"
+"                For quick access to your schedule simply go to\n"
+"                <a href=\"%(shortcut_url)s\">%(host)s%(shortcut_url)s</a>\n"
+"            "
+msgstr ""
+
+#: templates/tips.html:25
+#, python-format
+msgid ""
+"\n"
+"                Did you know that you can choose to hide lectures that you "
+"don't want to be shown under\n"
+"                <a href=\"%(adavanced_url)s\">advanced options</a>?\n"
+"            "
+msgstr ""
+
+#: templates/tips.html:31
+msgid ""
+"\n"
+"                Did you know that you can select which groups (paralleller) "
+"you\n"
+"                want to attend, and than you can select more that one "
+"group?\n"
+"            "
+msgstr ""
+
+#: templates/tips.html:37
+#, python-format
+msgid ""
+"\n"
+"                Did you know that you can change which names are used for "
+"courses under\n"
+"                <a href=\"%(adavanced_url)s\">advanced options</a>?\n"
+"            "
+msgstr ""
+
+#: templates/tips.html:45
+msgid ""
+"\n"
+"                The <a href=\"{{ course_list_url}\">course list</a>\n"
+"                contains all courses for the current semester, including "
+"exam dates and\n"
+"                allows you to easily select courses to add to your "
+"schedule.\n"
+"            "
+msgstr ""
+
+#: templates/tips.html:52
+#, python-format
+msgid ""
+"\n"
+"                Calendar export:\n"
+"                <a href=\"%(ical_lectures_url)s\">lectures</a>,\n"
+"                <a href=\"%(ical_exams_url)s\">exams</a>,\n"
+"                <a href=\"%(ical_deadlines_url)s\">deadlines</a> or\n"
+"                <a href=\"%(ical_all_url)s\">all combined</a>.\n"
+"            "
+msgstr ""
+
+#: templates/tips.html:60
+msgid ""
+"Simply download or copy the link to the calendar you want and add it to any "
+"application that supports the Ical format."
+msgstr ""
+
+#: templates/tips.html:63
+#, python-format
+msgid ""
+"\n"
+"                Google calendar:\n"
+"                <a target=\"_blank\" href=\"%(google_cal_prefix)s%(host)s%"
+"(ical_lectures_url)s\">lectures</a>,\n"
+"                <a target=\"_blank\" href=\"%(google_cal_prefix)s%(host)s%"
+"(ical_exams_url)s\">exams</a>,\n"
+"                <a target=\"_blank\" href=\"%(google_cal_prefix)s%(host)s%"
+"(ical_deadlines_url)s\">deadlines</a> or\n"
+"                <a target=\"_blank\" href=\"%(google_cal_prefix)s%(host)s%"
+"(ical_all_url)s\">all combined</a>.\n"
+"            "
+msgstr ""
+
+#: templates/tips.html:71
+msgid ""
+"Simply click the calendar type you want and it will be added to Google "
+"calendar."
+msgstr ""
+
+#: templates/tips.html:74
+msgid ""
+"\n"
+"                Enter a space separated list of your friends timetables to "
+"copy\n"
+"                the deadlines they have entered for any classes you're both "
+"attending.\n"
+"            "
+msgstr ""
+
+#: templates/title.html:4
+#, python-format
+msgid ""
+"\n"
+"        %(slug)s%(ending)s\n"
+"        %(type)s\n"
+"        %(year)s schedule\n"
+"    "
+msgstr ""
+
+#: templates/title.html:11
+#, python-format
+msgid ""
+"\n"
+"            %(slug)s%(ending)s\n"
+"            %(type)s\n"
+"            %(year)s schedule\n"
+"            for week %(week)s\n"
+"        "
+msgstr ""
+
+#: templates/title.html:18
+#, python-format
+msgid ""
+"\n"
+"            %(slug)s%(ending)s\n"
+"            %(type)s\n"
+"            %(year)s schedule\n"
+"            for all weeks\n"
+"        "
 msgstr ""
 
 #: templates/admin/base_site.html:5 templates/admin/base_site.html.py:9
