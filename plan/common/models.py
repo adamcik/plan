@@ -262,6 +262,19 @@ class Semester(models.Model):
 
         return Semester.objects.get(year=current.year, type=current.type)
 
+class ExamType(models.Model):
+    code = models.CharField(_('Code'), max_length=20, unique=True)
+    name = models.CharField(_('Name'), max_length=100, blank=True, null=True)
+
+    def __unicode__(self):
+        if self.name:
+            return self.name
+        return self.code
+
+    class Meta:
+        verbose_name = _('Exam type')
+        verbose_name_plural = _('Exam types')
+
 class Exam(models.Model):
     exam_date = models.DateField(_('Exam date'), blank=True, null=True)
     exam_time = models.TimeField(_('Exam time'), blank=True, null=True)
@@ -274,9 +287,7 @@ class Exam(models.Model):
 
     comment = models.TextField(_('Comment'), blank=True)
 
-    # FIXME add exam type model
-    type = models.CharField(_('Type'), max_length=1, blank=True)
-    type_name = models.CharField(_('Type name'), max_length=100, blank=True, null=True)
+    type = models.ForeignKey(ExamType, null=True, blank=True)
 
     course = models.ForeignKey(Course)
 
