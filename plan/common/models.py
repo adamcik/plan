@@ -228,7 +228,7 @@ class Semester(models.Model):
 
     def get_last_day(self):
         if self.type == self.SPRING:
-            return datetime(self.year, 6, 30)
+            return datetime(self.year, 7, 1)
         else:
             return datetime(self.year, 12, 31)
 
