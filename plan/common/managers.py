@@ -138,8 +138,8 @@ class ExamManager(models.Manager):
             select = {}
 
         return self.get_query_set().filter(**exam_filter).select_related(
-                'course',
-                'type',
+                'course__name',
+                'course__full_name',
             ).extra(
                 select=select
             ).order_by('handout_date', 'handout_time',
@@ -161,17 +161,15 @@ class CourseManager(models.Manager):
 
         cursor.execute('''
             SELECT c.id as id, c.name, c.full_name, c.points,
-                   e.exam_date, e.exam_time, et.code, et.name,
+                   e.exam_date, e.exam_time, e.type, e.type_name,
                    e.handout_date, e.handout_time
             FROM common_course c
             JOIN common_semester s ON
                 (c.semester_id = s.id)
             LEFT OUTER JOIN common_exam e ON
                 (e.course_id = c.id)
-            LEFT OUTER JOIN common_examtype et ON
-                (e.type_id = et.id)
             WHERE s.year = %s AND s.type = %s
-            ORDER BY c.name, e.exam_date, e.exam_time, et.code;
+            ORDER BY c.name, e.exam_date, e.exam_time, e.type;
         ''', [year, semester_type])
 
         return cursor.fetchall()
