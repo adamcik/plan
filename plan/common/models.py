@@ -30,7 +30,6 @@ now = datetime.now
 
 class Student(models.Model):
     slug = models.SlugField(_('Slug'))
-    semester = models.ForeignKey('Semester')
 
     class Meta:
         verbose_name = _('Student')
