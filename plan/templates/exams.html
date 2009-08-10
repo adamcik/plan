@@ -27,10 +27,14 @@
                     </td>
                     <td align="center">{{ exam.duration|default:"-" }}</td>
                     <td>
-                        {% if exam.type_name %}
-                            {{ exam.type_name|lower|capfirst }}
+                        {% if not exam.type %}
+                            -
                         {% else %}
-                            {{ exam.type }}
+                            {% if exam.type.name %}
+                                {{ exam.type.name|lower|capfirst }}
+                            {% else %}
+                                {{ exam.type.code }}
+                            {% endif %}
                         {% endif %}
                     </td>
                     <td>{{ exam.alias|default:exam.course.name }}</td>
