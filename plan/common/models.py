@@ -36,7 +36,7 @@ class Student(models.Model):
         verbose_name_plural = _('Students')
 
     def __unicode__(self):
-        return u'%s %s' % (self.slug, self.semester)
+        return self.slug
 
 class UserSet(models.Model):
     course = models.ForeignKey('Course')
@@ -60,7 +60,7 @@ class UserSet(models.Model):
         verbose_name_plural = _('Userset')
 
     def __unicode__(self):
-        return u'%s - %s' % (self.slug, self.course)
+        return u'%s - %s' % (self.student, self.course)
 
     @staticmethod
     def get_groups(year, semester_type, slug):
