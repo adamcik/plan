@@ -134,13 +134,13 @@ def add_lectutures(lectures, semester, cal):
             'dtstart': datetime(int(semester.year),1,1)
         }
 
-        summary = l.alias or l.course.name
+        summary = l.alias or l.course.code
         rooms = ', '.join(all_rooms.get(l.id, []))
 
         if l.type:
-            desc = u'%s - %s (%s)' % (l.type.name, l.course.full_name, l.course.name)
+            desc = u'%s - %s (%s)' % (l.type.name, l.course.name, l.course.code)
         else:
-            desc = u'%s (%s)' % (l.course.full_name, l.course.name)
+            desc = u'%s (%s)' % (l.course.name, l.course.code)
 
         for d in rrule(WEEKLY, **rrule_kwargs):
             vevent = cal.add('vevent')
@@ -170,14 +170,14 @@ def add_exams(exams, semester, cal):
         if e.type and e.type.name:
             summary = u'%s - %s' % (e.type.name, e.alias or e.course.name)
             desc = u'%s (%s) - %s (%s)' % (e.type.name, e.type.code,
-                    e.course.full_name, e.course.name)
+                    e.course.name, e.course.code)
         elif e.type:
-            summary = _('Exam') + u' (%s) - %s' % (e.type, e.alias or e.course.name)
-            desc = _('Exam') + u' (%s) - %s (%s)' % (e.type.code, e.course.full_name,
-                    e.course.name)
+            summary = _('Exam') + u' (%s) - %s' % (e.type, e.alias or e.course.code)
+            desc = _('Exam') + u' (%s) - %s (%s)' % (e.type.code, e.course.name,
+                    e.course.code)
         else:
-            summary = _('Exam') + e.alias or e.course.name
-            desc = _('Exam') + u' %s (%s)' % (e.course.full_name, e.course.name)
+            summary = _('Exam') + e.alias or e.course.code
+            desc = _('Exam') + u' %s (%s)' % (e.course.name, e.course.code)
 
         vevent.add('summary').value = summary
         vevent.add('description').value = desc
@@ -220,8 +220,8 @@ def add_deadlines(deadlines, semester, cal):
             start = datetime.combine(d.date, d.time)
 
         summary = u'%s - %s' % (d.task, d.alias or d.userset.course)
-        desc = u'%s - %s (%s)' % (d.task, d.userset.course.full_name,
-                d.userset.course.name)
+        desc = u'%s - %s (%s)' % (d.task, d.userset.course.name,
+                d.userset.course.code)
 
         vevent.add('summary').value = summary
         vevent.add('description').value = desc
