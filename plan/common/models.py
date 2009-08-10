@@ -72,7 +72,7 @@ class UserSet(models.Model):
 
         return tmp
 
-class Type(models.Model):
+class LectureType(models.Model):
     name = models.CharField(_('Name'), max_length=100, unique=True)
     optional = models.BooleanField(_('Optional'))
 
@@ -333,7 +333,7 @@ class Lecture(models.Model):
     end = models.TimeField(_('End time'))
 
     rooms = models.ManyToManyField(Room, blank=True, null=True)
-    type = models.ForeignKey(Type, blank=True, null=True)
+    type = models.ForeignKey(LectureType, blank=True, null=True)
     groups = models.ManyToManyField(Group, blank=True, null=True)
     lecturers = models.ManyToManyField(Lecturer, blank=True, null=True)
 
