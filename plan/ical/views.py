@@ -31,7 +31,6 @@ from plan.common.models import Exam, Deadline, Lecture, Semester, Room, Week
 from plan.common.cache import get_realm, cache
 
 HOSTNAME = settings.ICAL_HOSTNAME
-CUSTOM_TITLE = False # FIXME decide if this should be used or remove the dead code
 
 def get_resources(selector):
     resources = [u'lectures', u'exams', u'deadlines']
@@ -62,7 +61,8 @@ def ical(request, year, semester_type, slug, selector=None):
     cache_key += '+'.join(resources)
 
     title  = reverse('schedule', args=[semester.year, semester.type, slug])
-    title += '+'.join(resources)
+    if len(resources) != 3:
+        title += '+'.join(resources)
 
     cache_realm = get_realm(semester, slug)
 
@@ -74,19 +74,18 @@ def ical(request, year, semester_type, slug, selector=None):
     cal = vobject.iCalendar()
     cal.add('method').value = 'PUBLISH'  # IE/Outlook needs this
 
-    if CUSTOM_TITLE:
-        if slug.lower().endswith('s'):
-            description = _(u"%(slug)s' %(semester)s %(year)s schedule for %(resources)s")
-        else:
-            description = _(u"%(slug)s's %(semester)s %(year)s schedule for %(resources)s")
+    if slug.lower().endswith('s'):
+        description = _(u"%(slug)s' %(semester)s %(year)s schedule for %(resources)s")
+    else:
+        description = _(u"%(slug)s's %(semester)s %(year)s schedule for %(resources)s")
 
-        cal.add('X-WR-CALNAME').value = title.strip('/')
-        cal.add('X-WR-CALDESC').value = description % {
-            'slug': slug,
-            'semester': semester.get_type_display(),
-            'year': semester.year,
-            'resources': ', '.join(resources),
-        }
+    cal.add('X-WR-CALNAME').value = title.strip('/')
+    cal.add('X-WR-CALDESC').value = description % {
+        'slug': slug,
+        'semester': semester.get_type_display(),
+        'year': semester.year,
+        'resources': ', '.join(resources),
+    }
 
     if 'lectures' in resources:
         lectures = Lecture.objects.get_lectures(year, semester.type, slug)
