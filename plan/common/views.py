@@ -314,9 +314,12 @@ def schedule(request, year, semester_type, slug, advanced=False,
         }, RequestContext(request))
 
     if cache_page:
-        if deadlines:
+        current_time = now()
+        future_deadlines = filter(lambda d: current_time < d.datetime, deadlines)
+
+        if future_deadlines:
             # time until next deadline
-            cache_time = deadlines[0].seconds
+            cache_time = future_deadlines[0].seconds
         else:
             # default cache time
             cache_time = settings.CACHE_TIME_SCHECULDE
@@ -327,6 +330,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
             cache_time = group_help
 
         cache.set(url, response, cache_time, realm=realm)
+
     return response
 
 def select_groups(request, year, semester_type, slug):
