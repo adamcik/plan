@@ -126,7 +126,9 @@ class ExamManager(models.Manager):
 
         if slug:
             exam_filter = {
-                'course__userset__slug': slug,
+                'course__userset__student__slug': slug,
+                'course__userset__student__semester__year__exact': year,
+                'course__userset__student__semester__type__exact': semester_type,
                 'course__semester__year__exact': year,
                 'course__semester__type__exact': semester_type,
             }
