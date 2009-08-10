@@ -19,7 +19,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 
 from plan.common.models import Course, Exam, Group, Lecture, Lecturer, \
-        Room, Semester, Type, Deadline, UserSet
+        Room, Semester, LectureType, Deadline, UserSet
 
 
 class CourseAdmin(admin.ModelAdmin):
@@ -49,7 +49,7 @@ class UserSetAdmin(admin.ModelAdmin):
 
     filter_horizontal = ('groups','exclude')
 
-class TypeAdmin(admin.ModelAdmin):
+class LectureTypeAdmin(admin.ModelAdmin):
     list_display = ('name', 'optional')
 
 class DeadlineAdmin(admin.ModelAdmin):
@@ -68,6 +68,6 @@ admin.site.register(Lecture, LectureAdmin)
 admin.site.register(Lecturer)
 admin.site.register(Room)
 admin.site.register(Semester)
-admin.site.register(Type, TypeAdmin)
+admin.site.register(LectureType, LectureTypeAdmin)
 admin.site.register(Deadline, DeadlineAdmin)
 admin.site.register(UserSet, UserSetAdmin)
