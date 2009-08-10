@@ -64,7 +64,9 @@ class LectureManager(models.Manager):
 
         if slug:
             filter = {
-                'course__userset__slug': slug,
+                'course__userset__student__slug': slug,
+                'course__userset__student__semester__year__exact': year,
+                'course__userset__student__semester__type__exact': semester_type,
                 'course__semester__year__exact': year,
                 'course__semester__type__exact': semester_type,
             }
@@ -81,11 +83,11 @@ class LectureManager(models.Manager):
 
         related = [
             'type__name',
-            'course__name',
+            'course__code',
         ]
 
         order = [
-            'course__name',
+            'course__code',
             'day',
             'start',
             'type__name',
