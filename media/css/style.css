@@ -121,6 +121,14 @@ p.right {
 	font-weight: bold;
 }
 
+.hidden {
+    visibility: hidden;
+}
+
+.clear {
+    clear: both;
+}
+
 .icon {
 	background-repeat: no-repeat;
   background-image: url(../gfx/sprite.png);
