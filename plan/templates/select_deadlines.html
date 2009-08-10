@@ -33,11 +33,11 @@
                     {% for d in deadlines %}
                         <tr class="course-{{ d.userset.course_id }} deadline-{{ d.id }}">
                             <td><input type="checkbox" name="deadline_id" value="{{ d.id }}" checked="checked" /></td>
-                            <td>{{ d.userset.course.name }}</td>
+                            <td>{{ d.userset.course.code }}</td>
                             <td>{{ d.date }}</td>
                             <td>{{ d.time|time:"H:i" }}</td>
                             <td>{{ d.task }}</td>
-                            <td>{{ d.userset.course.full_name }}</td>
+                            <td>{{ d.userset.course.name }}</td>
                             <td>{{ d.userset.slug }}</td>
                         </tr>
                     {% endfor %}

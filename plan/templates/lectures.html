@@ -21,11 +21,11 @@
             </thead>
             <tbody>
                 {% for l in lectures %}
-                    <tr class="course-{{ l.course_id }} lecture-{{ l.id }}{% if l.exclude %} excluded{% endif %}" title="{{ l.course.full_name }}">
+                    <tr class="course-{{ l.course_id }} lecture-{{ l.id }}{% if l.exclude %} excluded{% endif %}" title="{{ l.course.name }}">
                         {% if advanced %}
                             <td><input type="checkbox" name="exclude" value="{{ l.id }}"{% if l.exclude %} checked="checked"{% endif %} class="noprint" /></td>
                         {% endif %}
-                        <td>{{ l.alias|default:l.course.name }}</td>
+                        <td>{{ l.alias|default:l.course.code }}</td>
                         <td>{{ l.get_day_display }}</td>
                         <td>{{ l.start|time }}-{{ l.end|time }}</td>
                         <td class="small">{{ l.sql_rooms|join:", " }}</td>

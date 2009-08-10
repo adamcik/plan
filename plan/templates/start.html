@@ -28,7 +28,7 @@
 {% block extrastyle %}
     {% if stats %}
         <style type="text/css">
-            {% for count,course_id,name,full_name in stats %}
+            {% for count,course_id,code,name in stats %}
                 .course-{{ course_id }} { background-color: {% color course_id %} }
             {% endfor %}
         </style>
@@ -80,10 +80,10 @@
                 </h2>
                 {% if stats %}
                     <div id="stats">
-                        {% for count,course_id,name,full_name in stats %}
-                            <div title="{{ full_name }}" style="width: {% widthratio count stats.0.0 95 %}%" class="course-{{ course_id }}">
+                        {% for count,course_id,code,name in stats %}
+                            <div title="{{ name }}" style="width: {% widthratio count stats.0.0 95 %}%" class="course-{{ course_id }}">
                                 <span>{{ count }}</span>
-                                {{ name }}
+                                {{ code }}
                             </div>
                         {% endfor %}
                     </div>

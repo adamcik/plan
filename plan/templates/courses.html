@@ -17,7 +17,7 @@
             </thead>
             <tbody>
                 {% for course in courses %}
-                    <tr class="course-{{ course.id }}" title="{{ course.full_name }}">
+                    <tr class="course-{{ course.id }}" title="{{ course.name }}">
                         {% if advanced %}
                             <td>
                                 <input type="checkbox" name="course_remove" value="{{ course.id }}" class="noprint" />
@@ -26,10 +26,10 @@
                         <td>
                             {% if course.url %}
                                 <a href="{{ course.get_url }}">
-                                    {{ course.name }}
+                                    {{ course.code }}
                                 </a>
                             {% else %}
-                                {{ course.name }}
+                                {{ course.code }}
                             {% endif %}
                         </td>
                         <td>
@@ -40,7 +40,7 @@
                             {% endif %}
                         </td>
                         <td>
-                            {{ course.full_name }}
+                            {{ course.name }}
                         </td>
                         <td align="right">
                             {{ course.points|default:""|floatformat:"1" }}
