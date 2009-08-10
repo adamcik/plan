@@ -237,9 +237,6 @@ class Semester(models.Model):
             return Semester(year=self.year, type=self.FALL)
         return Semester(year=self.year+1, type=self.SPRING)
 
-    def get_weeks(self):
-        return xrange(0,53)
-
     @property
     def prefix(self):
         if self.type == self.SPRING:
