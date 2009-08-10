@@ -51,17 +51,17 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for id,name,full_name,points,exam_date,exam_time,type,type_name,handout_date,handout_time in course_list %}
+                    {% for id,code,name,points,exam_date,exam_time,type,type_name,handout_date,handout_time in course_list %}
                         <tr>
                             {% ifchanged id %}
-                                <td{% ifchanged name.0 %} id="{{ name.0 }}"{% endifchanged %}>
-                                    <input type="checkbox" name="course_add" value="{{ name }}" id="course_{{ id }}" />
+                                <td{% ifchanged name.0 %} id="{{ code.0 }}"{% endifchanged %}>
+                                    <input type="checkbox" name="course_add" value="{{ code }}" id="course_{{ id }}" />
                                 </td>
                                 <td>
-                                    <label for="course_{{ id }}"><b>{{ name }}</b></label>
+                                    <label for="course_{{ id }}"><b>{{ code }}</b></label>
                                 </td>
                                 <td class="small">
-                                    <label for="course_{{ id }}">{{ full_name }}</label>
+                                    <label for="course_{{ id }}">{{ name }}</label>
                                     {# FIXME add url to more info #}
                                 </td>
                                 <td align="right">

@@ -50,11 +50,11 @@
                                         {% endif %}
                                     "
                                 {% endif %}
-                                {% if c.lecture %}title="{{ c.lecture.course.full_name }}"{% endif %}
+                                {% if c.lecture %}title="{{ c.lecture.course.name }}"{% endif %}
                             {% endstripspace %}>
 
                                 {% if c.lecture %}
-                                    <div class="course">{{ c.lecture.alias|default:c.lecture.course.name }}</div>
+                                    <div class="course">{{ c.lecture.alias|default:c.lecture.course.code }}</div>
                                     <div class="room">{{ c.lecture.sql_rooms|join:", "|truncatewords:2 }}</div>
                                     <div class="type">{{ c.lecture.type|default:"" }}</div>
                                 {% endif %}

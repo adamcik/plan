@@ -8,12 +8,12 @@
         </p>
         <div id="change-groups">
             {% for course in courses %}
-                    <div class="course-{{ course.id }} groupbox" title="{{ course.full_name }}">
+                    <div class="course-{{ course.id }} groupbox" title="{{ course.name }}">
                         <p>
-                            <strong>{{ course.alias|default:course.name }}</strong>
-                            {% if course.full_name %}
+                            <strong>{{ course.alias|default:course.code }}</strong>
+                            {% if course.name %}
                                 <br />
-                                <span class="small">{{ course.full_name|truncatewords:"3" }}</span>
+                                <span class="small">{{ course.name|truncatewords:"3" }}</span>
                             {% endif %}
                         </p>
                         <div>
