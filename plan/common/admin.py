@@ -44,8 +44,8 @@ class LectureAdmin(admin.ModelAdmin):
     list_select_related = True
 
 class UserSetAdmin(admin.ModelAdmin):
-    list_display = ('slug', 'course')
-    search_fields = ('slug', 'course__code')
+    list_display = ('student', 'course')
+    search_fields = ('student__slug', 'course__code')
 
     filter_horizontal = ('groups','exclude')
 
