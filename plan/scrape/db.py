@@ -24,7 +24,7 @@ from django.db import transaction
 from django.conf import settings
 
 from plan.common.models import Course, Lecture, Lecturer, Semester, Group, \
-        Type, Week, Room
+        LectureType, Week, Room
 
 logger = logging.getLogger('scrape.db')
 
@@ -76,7 +76,7 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
     lectures = Lecture.objects.filter(course__semester=semester)
 
     if matches:
-        lectures = lectures.filter(course__name__startswith=matches)
+        lectures = lectures.filter(course__code__startswith=matches)
 
     for l in lectures:
         l.rooms.clear()
@@ -99,11 +99,11 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
             continue 
 
         # Get and or update course
-        course, created = Course.objects.get_or_create(name=code, semester=semester)
+        course, created = Course.objects.get_or_create(code=code, semester=semester)
 
         # Load or create type:
         if course_type:
-            course_type, created = Type.objects.get_or_create(name=course_type)
+            course_type, created = LectureType.objects.get_or_create(name=course_type)
 
         # Figure out day mapping
         try:
@@ -220,7 +220,7 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
             filter(course__semester=semester)
 
     if matches:
-        to_remove = to_remove.filter(course__name__startswith=matches)
+        to_remove = to_remove.filter(course__code__startswith=matches)
 
     logger.info('%d lectures in source db, %d in destination, diff %d, skipped %d',
             mysql_lecture_count, len(added_lectures), mysql_lecture_count - len(added_lectures), skipped)
@@ -266,13 +266,13 @@ def update_courses(year, semester_type, prefix=None):
             continue 
 
         try:
-            course = Course.objects.get(name=code, semester=semester,
+            course = Course.objects.get(code=code, semester=semester,
                         version=None)
             course.version = version
             created = False
 
         except Course.DoesNotExist:
-            course, created = Course.objects.get_or_create(name=code,
+            course, created = Course.objects.get_or_create(code=code,
                         semester=semester, version=version)
 
         if points:
@@ -280,12 +280,12 @@ def update_courses(year, semester_type, prefix=None):
                 points = points.replace('SP', '')
 
             course.points = Decimal(points.strip().replace(',', '.'))
-        course.full_name = name
+        course.name = name
         course.save()
 
         if created:
-            logger.info("Added course %s" % course.name)
+            logger.info("Added course %s" % course.code)
         else:
-            logger.info("Updated course %s" % course.name)
+            logger.info("Updated course %s" % course.code)
 
     db.close()

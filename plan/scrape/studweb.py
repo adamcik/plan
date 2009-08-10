@@ -131,10 +131,10 @@ def update_exams(year, semester, url=None):
             continue
 
         course, created = Course.objects.get_or_create(
-                name=course_code.nodeValue.strip(), semester=semester)
+                code=course_code.nodeValue.strip(), semester=semester)
 
-        if not course.full_name and course_name.nodeValue.strip():
-            course.full_name = course_name.nodeValue.strip()
+        if not course.name and course_name.nodeValue.strip():
+            course.name = course_name.nodeValue.strip()
             course.save()
 
         if not course.version and course_version.nodeValue.strip():
@@ -163,10 +163,10 @@ def update_exams(year, semester, url=None):
             raise e
 
         if created:
-            logger.info( "Added exam for %s - %s" % (course.name, exam.exam_date))
+            logger.info( "Added exam for %s - %s" % (course.code, exam.exam_date))
             added.append(exam.id)
         else:
-            logger.debug("Updated exam for %s - %s" %( course.name, exam.exam_date))
+            logger.debug("Updated exam for %s - %s" %( course.code, exam.exam_date))
             updated.append(exam.id)
 
         if duration:
