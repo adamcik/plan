@@ -23,19 +23,19 @@ from plan.common.models import Course, Exam, Group, Lecture, Lecturer, \
 
 
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ('name', 'points', 'full_name', 'url', 'semester')
+    list_display = ('code', 'points', 'name', 'url', 'semester')
     list_filter = ('semester',)
-    search_fields = ('name', 'full_name')
+    search_fields = ('code', 'name')
 
 class ExamAdmin(admin.ModelAdmin):
     list_display = ('course', 'exam_date', 'exam_time', 'duration', 'comment')
-    search_fields = ('course__name',)
+    search_fields = ('course__code',)
     list_filter = ['duration']
 
 class LectureAdmin(admin.ModelAdmin):
     list_display = ('course', 'day', 'start', 'end', 'type')
 
-    search_fields = ('course__name', 'type__name')
+    search_fields = ('course__code', 'type__name')
 
     filter_horizontal = ('groups', 'lecturers', 'rooms')
 
@@ -45,7 +45,7 @@ class LectureAdmin(admin.ModelAdmin):
 
 class UserSetAdmin(admin.ModelAdmin):
     list_display = ('slug', 'course')
-    search_fields = ('slug', 'course__name')
+    search_fields = ('slug', 'course__code')
 
     filter_horizontal = ('groups','exclude')
 
@@ -53,9 +53,9 @@ class LectureTypeAdmin(admin.ModelAdmin):
     list_display = ('name', 'optional')
 
 class DeadlineAdmin(admin.ModelAdmin):
-    ordering = ('userset__slug', 'userset__course__name', 'date', 'time')
+    ordering = ('userset__slug', 'userset__course__code', 'date', 'time')
 
-    search_fields = ('userset__slug', 'userset__course__name', 'task')
+    search_fields = ('userset__slug', 'userset__course__code', 'task')
 
     list_display = ('course', 'slug', 'date', 'time', 'task')
     list_display_links = ('course', 'slug')
