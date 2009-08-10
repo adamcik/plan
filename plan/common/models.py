@@ -135,9 +135,9 @@ class Course(models.Model):
 
     def __unicode__(self):
         if self.version:
-            name = u'-'.join([self.name, self.version])
+            name = u'-'.join([self.code, self.version])
         else:
-            name = self.name
+            name = self.code
 
         if self.semester:
             return u'%s - %s' % (name, self.semester)
