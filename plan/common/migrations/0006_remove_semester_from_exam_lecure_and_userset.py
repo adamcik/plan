@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # Copyright 2008, 2009 Thomas Kongevold Adamcik
 
 # This file is part of Plan.
