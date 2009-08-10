@@ -194,9 +194,11 @@ class CourseManager(models.Manager):
 class UserSetManager(models.Manager):
     def get_usersets(self, year, semester_type, slug):
         return self.get_query_set().filter(
-                slug=slug,
+                student__slug=slug,
+                student__semester__year__exact=year,
+                student__semester__type__exact=semester_type,
                 course__semester__year__exact=year,
                 course__semester__type__exact=semester_type,
             ).select_related(
-                'course__name',
-            ).order_by('slug', 'course__name')
+                'course__code',
+            ).order_by('student__slug', 'course__code')
