@@ -160,7 +160,7 @@ class CourseManager(models.Manager):
         cursor = connection.cursor()
 
         cursor.execute('''
-            SELECT c.id as id, c.name, c.full_name, c.points,
+            SELECT c.id as id, c.code, c.name, c.points,
                    e.exam_date, e.exam_time, et.code, et.name,
                    e.handout_date, e.handout_time
             FROM common_course c
@@ -177,8 +177,8 @@ class CourseManager(models.Manager):
         return cursor.fetchall()
 
     def search(self, year, semester_type, query, limit=10):
-        search_filter = build_search(query, ['name__icontains',
-                                             'full_name__icontains',
+        search_filter = build_search(query, ['code__icontains',
+                                             'name__icontains',
                                              'userset__name__exact'])
 
         qs = self.get_query_set()
@@ -186,7 +186,7 @@ class CourseManager(models.Manager):
         qs = qs.filter(semester__year__exact=year,
                        semester__type__exact=semester_type)
         qs = qs.distinct()
-        qs = qs.order_by('name')
+        qs = qs.order_by('code')
 
         return qs[:limit]
 
