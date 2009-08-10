@@ -168,14 +168,17 @@ def add_exams(exams, semester, cal):
 
         vevent = cal.add('vevent')
 
-        if e.type_name:
-            summary = '%s - %s' % (e.type_name, e.alias or e.course.name)
-            desc = '%s (%s) - %s (%s)' % (e.type_name, e.type,
+        if e.type and e.type.name:
+            summary = '%s - %s' % (e.type.name, e.alias or e.course.name)
+            desc = '%s (%s) - %s (%s)' % (e.type.name, e.type.code,
                     e.course.full_name, e.course.name)
-        else:
+        elif e.type:
             summary = _('Exam') + ' (%s) - %s' % (e.type, e.alias or e.course.name)
-            desc = _('Exam') + ' (%s) - %s (%s)' % (e.type, e.course.full_name,
+            desc = _('Exam') + ' (%s) - %s (%s)' % (e.type.code, e.course.full_name,
                     e.course.name)
+        else:
+            summary = _('Exam') + e.alias or e.course.name
+            desc = _('Exam') + ' %s (%s)' % (e.course.full_name, e.course.name)
 
         vevent.add('summary').value = summary
         vevent.add('description').value = desc
