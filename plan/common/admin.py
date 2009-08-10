@@ -28,9 +28,9 @@ class CourseAdmin(admin.ModelAdmin):
     search_fields = ('name', 'full_name')
 
 class ExamAdmin(admin.ModelAdmin):
-    list_display = ('course', 'exam_date', 'exam_time', 'duration', 'comment')
-    search_fields = ('course__name',)
-    list_filter = ['duration']
+    list_display = ('course', 'type', 'exam_date', 'exam_time', 'duration', 'comment')
+    search_fields = ('course__name', 'type')
+    list_filter = ['type', 'duration']
 
 class LectureAdmin(admin.ModelAdmin):
     list_display = ('course', 'day', 'start', 'end', 'type')
