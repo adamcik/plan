@@ -154,7 +154,7 @@ class ViewTestCase(BaseTestCase):
              'course_remove': 4},
         ]
 
-        usersets = list(UserSet.objects.filter(slug='adamcik').order_by('id').values_list())
+        usersets = list(UserSet.objects.filter(student__slug='adamcik').order_by('id').values_list())
 
         for data in post_data:
             original_response = self.client.get(original_url)
@@ -172,7 +172,7 @@ class ViewTestCase(BaseTestCase):
 
             self.clear()
 
-            new_usersets = list(UserSet.objects.filter(slug='adamcik').order_by('id').values_list())
+            new_usersets = list(UserSet.objects.filter(student__slug='adamcik').order_by('id').values_list())
             self.assert_(new_usersets != usersets)
 
             usersets = new_usersets
