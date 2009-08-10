@@ -76,9 +76,9 @@ def ical(request, year, semester_type, slug, selector=None):
 
     if CUSTOM_TITLE:
         if slug.lower().endswith('s'):
-            description = _("%(slug)s' %(semester)s %(year)s schedule for %(resources)s")
+            description = _(u"%(slug)s' %(semester)s %(year)s schedule for %(resources)s")
         else:
-            description = _("%(slug)s's %(semester)s %(year)s schedule for %(resources)s")
+            description = _(u"%(slug)s's %(semester)s %(year)s schedule for %(resources)s")
 
         cal.add('X-WR-CALNAME').value = title.strip('/')
         cal.add('X-WR-CALDESC').value = description % {
@@ -139,9 +139,9 @@ def add_lectutures(lectures, semester, cal):
         rooms = ', '.join(all_rooms.get(l.id, []))
 
         if l.type:
-            desc = '%s - %s (%s)' % (l.type.name, l.course.full_name, l.course.name)
+            desc = u'%s - %s (%s)' % (l.type.name, l.course.full_name, l.course.name)
         else:
-            desc = '%s (%s)' % (l.course.full_name, l.course.name)
+            desc = u'%s (%s)' % (l.course.full_name, l.course.name)
 
         for d in rrule(WEEKLY, **rrule_kwargs):
             vevent = cal.add('vevent')
@@ -169,16 +169,16 @@ def add_exams(exams, semester, cal):
         vevent = cal.add('vevent')
 
         if e.type and e.type.name:
-            summary = '%s - %s' % (e.type.name, e.alias or e.course.name)
-            desc = '%s (%s) - %s (%s)' % (e.type.name, e.type.code,
+            summary = u'%s - %s' % (e.type.name, e.alias or e.course.name)
+            desc = u'%s (%s) - %s (%s)' % (e.type.name, e.type.code,
                     e.course.full_name, e.course.name)
         elif e.type:
-            summary = _('Exam') + ' (%s) - %s' % (e.type, e.alias or e.course.name)
-            desc = _('Exam') + ' (%s) - %s (%s)' % (e.type.code, e.course.full_name,
+            summary = _('Exam') + u' (%s) - %s' % (e.type, e.alias or e.course.name)
+            desc = _('Exam') + u' (%s) - %s (%s)' % (e.type.code, e.course.full_name,
                     e.course.name)
         else:
             summary = _('Exam') + e.alias or e.course.name
-            desc = _('Exam') + ' %s (%s)' % (e.course.full_name, e.course.name)
+            desc = _('Exam') + u' %s (%s)' % (e.course.full_name, e.course.name)
 
         vevent.add('summary').value = summary
         vevent.add('description').value = desc
@@ -220,8 +220,8 @@ def add_deadlines(deadlines, semester, cal):
         if d.time:
             start = datetime.combine(d.date, d.time)
 
-        summary = '%s - %s' % (d.task, d.alias or d.userset.course)
-        desc = '%s - %s (%s)' % (d.task, d.userset.course.full_name,
+        summary = u'%s - %s' % (d.task, d.alias or d.userset.course)
+        desc = u'%s - %s (%s)' % (d.task, d.userset.course.full_name,
                 d.userset.course.name)
 
         vevent.add('summary').value = summary
