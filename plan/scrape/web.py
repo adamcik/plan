@@ -28,7 +28,7 @@ from django.utils.http import urlquote
 from django.conf import settings
 from django.db import connection
 
-from plan.common.models import Lecture, Lecturer, Exam, Course, Room, Type, \
+from plan.common.models import Lecture, Lecturer, Exam, Course, Room, LectureType, \
         Semester, Group, Week
 
 logger = logging.getLogger('plan.scrape.web')
@@ -68,38 +68,38 @@ def update_courses(year, semester_type):
         hovedramme.extract()
 
         for tr in table.findAll('tr'):
-            name, full_name = tr.findAll('a')
+            code, name = tr.findAll('a')
 
-            name, version = name.contents[0].split('-', 2)[:2]
-            full_name = full_name.contents[0]
+            code, version = code.contents[0].split('-', 2)[:2]
+            name = name.contents[0]
 
-            if full_name.endswith('(Nytt)'):
-                full_name = contents.rstrip('(Nytt)')
+            if name.endswith('(Nytt)'):
+                name = name.rstrip('(Nytt)')
 
-            if not re.match(settings.TIMETABLE_VALID_COURSE_NAMES, name):
-                logger.info('Skipped invalid course name: %s', name)
+            if not re.match(settings.TIMETABLE_VALID_COURSE_NAMES, code):
+                logger.info('Skipped invalid course name: %s', code)
                 continue 
 
-            courses.append((name, full_name, version))
+            courses.append((code, name, version))
             
-    for name, full_name, version in courses:
-        name = name.strip().upper()
-        full_name = full_name.strip()
+    for code, name, version in courses:
+        code = code.strip().upper()
+        name = name.strip()
         version = version.strip()
 
         if not version:
             version = None
 
         try:
-            course = Course.objects.get(name=name, semester=semester, version=None)
+            course = Course.objects.get(code=code, semester=semester, version=None)
             course.version = version
         except Course.DoesNotExist:
-            course, created = Course.objects.get_or_create(name=name, semester=semester, version=version)
+            course, created = Course.objects.get_or_create(code=code, semester=semester, version=version)
 
-        if course.full_name != full_name:
-            course.full_name = full_name
+        if course.name != name:
+            course.name = name
 
-        logger.info("Saved course %s" % course.name)
+        logger.info("Saved course %s" % course.code)
         course.save()
 
     return courses
@@ -113,14 +113,14 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
     results = []
     lectures = []
 
-    courses = Course.objects.filter(semester=semester).distinct().order_by('name')
+    courses = Course.objects.filter(semester=semester).distinct().order_by('code')
 
     if matches:
-        courses = courses.filter(name__startswith=matches)
+        courses = courses.filter(code__startswith=matches)
 
     for course in courses:
         url  = 'http://www.ntnu.no/studieinformasjon/timeplan/%s/?%s' % \
-                (prefix, urlencode({'emnekode': course.name.encode('latin1')}))
+                (prefix, urlencode({'emnekode': course.code.encode('latin1')}))
 
         if course.version:
             versions_to_try = [course.version]
@@ -137,7 +137,7 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
             html = ''.join(urlopen(final_url).readlines())
             main = BeautifulSoup(html).findAll('div', 'hovedramme')[0]
 
-            if not main.findAll('h1', text=lambda t: course.name in t):
+            if not main.findAll('h1', text=lambda t: course.code in t):
                 main.extract()
                 del html
                 del main
@@ -227,7 +227,7 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
 
         if r['type']:
             name = unicode(r['type'][0])
-            lecture_type, created = Type.objects.get_or_create(name=name)
+            lecture_type, created = LectureType.objects.get_or_create(name=name)
         else:
             lecture_type = None
 
@@ -285,7 +285,7 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
     to_delete = Lecture.objects.exclude(id__in=lectures).filter(course__semester=semester)
     
     if matches:
-        return to_delete.filter(course__name__startswith=matches)
+        return to_delete.filter(course__code__startswith=matches)
 
     return to_delete
 
