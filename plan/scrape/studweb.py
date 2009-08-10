@@ -24,7 +24,7 @@ from dateutil.parser import parse
 
 from django.db import transaction
 
-from plan.common.models import Exam, Course, Semester
+from plan.common.models import Exam, ExamType, Course, Semester
 
 logger = logging.getLogger('scrape.studweb')
 
@@ -156,11 +156,6 @@ def update_exams(year, semester, url=None):
         if handin_time:
             exam_kwargs['exam_time'] = parse(handin_time.nodeValue).time()
 
-        if typename:
-            exam_kwargs['type'] = typename.nodeValue
-        else:
-            exam_kwargs['type'] = ''
-
         try:
             exam, created = Exam.objects.get_or_create(**exam_kwargs)
         except Exam.MultipleObjectsReturned, e:
@@ -180,8 +175,15 @@ def update_exams(year, semester, url=None):
         if comment:
             exam.comment = comment.nodeValue
 
-        if long_typename:
-            exam.type_name = long_typename.nodeValue
+
+        if typename:
+            exam_type, created = ExamType.objects.get_or_create(code=typename.nodeValue)
+
+            if long_typename and not exam_type.name:
+                exam_type.name = long_typename.nodeValue
+                exam_type.save()
+
+            exam.type = exam_type
 
         exam.save()
 
