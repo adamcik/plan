@@ -30,7 +30,7 @@ from django.utils.html import escape
 from django.utils.text import truncate_words
 
 from plan.common.models import Course, Deadline, Exam, Group, \
-        Lecture, Semester, UserSet, Room, Lecturer, Week
+        Lecture, Semester, UserSet, Room, Lecturer, Week, Student
 from plan.common.forms import DeadlineForm, GroupForm, CourseNameForm, \
         ScheduleForm
 from plan.common.utils import compact_sequence, ColorMap
@@ -475,6 +475,8 @@ def select_course(request, year, semester_type, slug, add=False):
             max_group_count = 0
             to_many_usersets = False
 
+            student, created = Student.objects.get_or_create(slug=slug)
+
             for l in lookup:
                 try:
                     if len(usersets) > settings.TIMETABLE_MAX_COURSES:
@@ -486,7 +488,7 @@ def select_course(request, year, semester_type, slug, add=False):
                             semester=semester,
                         )
                     userset, created = UserSet.objects.get_or_create(
-                            slug=slug,
+                            student=student,
                             course=course,
                         )
 
@@ -503,6 +505,12 @@ def select_course(request, year, semester_type, slug, add=False):
 
                 except Course.DoesNotExist:
                     errors.append(l)
+
+            if UserSet.objects.filter(student=student, course__semester__year__exact=semester.year,
+                course__semester__type=semester.type).count() == 0:
+            
+                print 'delete'
+                student.delete()
 
             if max_group_count > 2:
                 cache.set('group-help', int(time())+settings.CACHE_TIME_HELP,
