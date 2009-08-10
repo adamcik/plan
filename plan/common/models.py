@@ -158,10 +158,10 @@ class Course(models.Model):
 
         cursor = connection.cursor()
         cursor.execute('''
-            SELECT COUNT(*) as num, c.id, c.name, c.full_name FROM
+            SELECT COUNT(*) as num, c.id, c.code, c.name FROM
                 common_userset u JOIN common_course c ON (c.id = u.course_id)
             WHERE c.semester_id = %s
-            GROUP BY c.id, c.name, c.full_name
+            GROUP BY c.id, c.code, c.name
             ORDER BY num DESC
             LIMIT %s''', [semester_id, limit])
 
