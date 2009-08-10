@@ -506,12 +506,6 @@ def select_course(request, year, semester_type, slug, add=False):
                 except Course.DoesNotExist:
                     errors.append(l)
 
-            if UserSet.objects.filter(student=student, course__semester__year__exact=semester.year,
-                course__semester__type=semester.type).count() == 0:
-            
-                print 'delete'
-                student.delete()
-
             if max_group_count > 2:
                 cache.set('group-help', int(time())+settings.CACHE_TIME_HELP,
                         settings.CACHE_TIME_HELP, realm=realm)
@@ -534,6 +528,9 @@ def select_course(request, year, semester_type, slug, add=False):
 
             UserSet.objects.get_usersets(year, semester.type, slug). \
                     filter(course__id__in=courses).delete()
+
+            if UserSet.objects.filter(student__slug=slug).count() == 0:
+                Student.objects.filter(slug=slug).delete()
 
         elif 'submit_name' in request.POST:
             usersets = UserSet.objects.get_usersets(year, semester.type, slug)
