@@ -144,13 +144,11 @@
         "fields": {
             "comment": "", 
             "handout_time": null, 
-            "type_name": "", 
             "exam_time": "09:00:00", 
             "course": 1, 
             "handout_date": null, 
             "duration": null, 
-            "exam_date": "2009-05-05", 
-            "type": ""
+            "exam_date": "2009-05-05" 
         }
     }, 
     {
@@ -159,13 +157,11 @@
         "fields": {
             "comment": "", 
             "handout_time": null, 
-            "type_name": "", 
             "exam_time": "09:00:00", 
             "course": 1, 
             "handout_date": null, 
             "duration": "3", 
-            "exam_date": "2009-05-15", 
-            "type": ""
+            "exam_date": "2009-05-15"
         }
     }, 
     {
@@ -174,13 +170,11 @@
         "fields": {
             "comment": "", 
             "handout_time": null, 
-            "type_name": "", 
             "exam_time": null, 
             "course": 1, 
             "handout_date": "2009-05-02", 
             "duration": "1", 
-            "exam_date": "2009-05-15", 
-            "type": ""
+            "exam_date": "2009-05-15" 
         }
     }, 
     {
@@ -189,13 +183,11 @@
         "fields": {
             "comment": "", 
             "handout_time": null, 
-            "type_name": "", 
             "exam_time": null, 
             "course": 1, 
             "handout_date": null, 
             "duration": "1", 
-            "exam_date": "2009-05-15", 
-            "type": ""
+            "exam_date": "2009-05-15" 
         }
     }, 
     {
@@ -204,13 +196,11 @@
         "fields": {
             "comment": "", 
             "handout_time": "09:00:00", 
-            "type_name": "Type 1", 
             "exam_time": "14:00:00", 
             "course": 2, 
             "handout_date": "2009-05-01", 
             "duration": 1, 
-            "exam_date": "2009-05-06", 
-            "type": "T"
+            "exam_date": "2009-05-06" 
         }
     }, 
     {
@@ -219,13 +209,11 @@
         "fields": {
             "comment": "", 
             "handout_time": null, 
-            "type_name": "", 
             "exam_time": "09:00:00", 
             "course": 4, 
             "handout_date": null, 
             "duration": null, 
-            "exam_date": "2009-05-03", 
-            "type": ""
+            "exam_date": "2009-05-03" 
         }
     }, 
     {
@@ -234,13 +222,11 @@
         "fields": {
             "comment": "", 
             "handout_time": null, 
-            "type_name": "Type 2", 
             "exam_time": "09:00:00", 
             "course": 4, 
             "handout_date": null, 
             "duration": 4, 
-            "exam_date": "2009-05-15", 
-            "type": "S"
+            "exam_date": "2009-05-15" 
         }
     }, 
     {
