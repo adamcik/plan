@@ -65,8 +65,6 @@ class LectureManager(models.Manager):
         if slug:
             filter = {
                 'course__userset__student__slug': slug,
-                'course__userset__student__semester__year__exact': year,
-                'course__userset__student__semester__type__exact': semester_type,
                 'course__semester__year__exact': year,
                 'course__semester__type__exact': semester_type,
             }
@@ -105,8 +103,6 @@ class DeadlineManager(models.Manager):
     def get_deadlines(self, year, semester_type, slug):
         return self.get_query_set().filter(
                 userset__student__slug=slug,
-                userset__student__semester__year__exact=year,
-                userset__student__semester__type__exact=semester_type,
                 userset__course__semester__year__exact=year,
                 userset__course__semester__type__exact=semester_type,
             ).select_related(
@@ -129,8 +125,6 @@ class ExamManager(models.Manager):
         if slug:
             exam_filter = {
                 'course__userset__student__slug': slug,
-                'course__userset__student__semester__year__exact': year,
-                'course__userset__student__semester__type__exact': semester_type,
                 'course__semester__year__exact': year,
                 'course__semester__type__exact': semester_type,
             }
@@ -155,8 +149,6 @@ class CourseManager(models.Manager):
     def get_courses(self, year, semester_type, slug):
         course_filter = {
             'userset__student__slug': slug,
-            'userset__student__semester__year__exact': year,
-            'userset__student__semester__type__exact': semester_type,
             'userset__course__semester__year__exact': year,
             'userset__course__semester__type__exact': semester_type,
         }
@@ -203,8 +195,6 @@ class UserSetManager(models.Manager):
     def get_usersets(self, year, semester_type, slug):
         return self.get_query_set().filter(
                 student__slug=slug,
-                student__semester__year__exact=year,
-                student__semester__type__exact=semester_type,
                 course__semester__year__exact=year,
                 course__semester__type__exact=semester_type,
             ).select_related(
