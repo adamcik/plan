@@ -164,9 +164,9 @@ class Course(models.Model):
         else:
             semester_id = semester
 
-        slug_count = int(UserSet.objects.filter(course__semester=semester).values('slug').distinct().count())
-        subscription_count = int(UserSet.objects.filter(course__semester=semester).count())
-        deadline_count = int(Deadline.objects.filter(userset__course__semester=semester).count())
+        slug_count = int(Student.objects.filter(semester=semester).count())
+        subscription_count = int(UserSet.objects.filter(student__semester=semester).count())
+        deadline_count = int(Deadline.objects.filter(userset__student__semester=semester).count())
         course_count = int(Course.objects.filter(userset__course__semester=semester).values('name').distinct().count())
 
         cursor = connection.cursor()
