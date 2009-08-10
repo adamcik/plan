@@ -101,8 +101,8 @@
             "url": "", 
             "points": "1", 
             "semester": 1,
-            "name": "COURSE1", 
-            "full_name": "Course 1 full name"
+            "code": "COURSE1", 
+            "name": "Course 1 full name"
         }
     }, 
     {
@@ -112,8 +112,8 @@
             "url": "", 
             "points": "1", 
             "semester": 1, 
-            "name": "COURSE2", 
-            "full_name": "Course 2 full name"
+            "code": "COURSE2", 
+            "name": "Course 2 full name"
         }
     }, 
     {
@@ -123,8 +123,8 @@
             "url": "", 
             "points": "1", 
             "semester": 1, 
-            "name": "COURSE3", 
-            "full_name": "Course 3 full name"
+            "code": "COURSE3", 
+            "name": "Course 3 full name"
         }
     }, 
     {
@@ -134,8 +134,8 @@
             "url": "", 
             "points": "1", 
             "semester": 1, 
-            "name": "COURSE4", 
-            "full_name": "Course 4 full name"
+            "code": "COURSE4", 
+            "name": "Course 4 full name"
         }
     }, 
     {
