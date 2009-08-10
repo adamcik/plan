@@ -195,7 +195,7 @@ class ViewTestCase(BaseTestCase):
              '3-groups': '2'}
         ]
 
-        groups = list(Group.objects.filter(userset__slug='adamcik').order_by('id').values_list())
+        groups = list(Group.objects.filter(userset__student__slug='adamcik').order_by('id').values_list())
 
         for data in post_data:
             original_response = self.client.get(original_url)
@@ -213,7 +213,7 @@ class ViewTestCase(BaseTestCase):
 
             self.clear()
 
-            new_groups = list(Group.objects.filter(userset__slug='adamcik').order_by('id').values_list())
+            new_groups = list(Group.objects.filter(userset__student__slug='adamcik').order_by('id').values_list())
             self.assert_(groups != new_groups)
 
             groups = new_groups
