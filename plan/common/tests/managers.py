@@ -78,7 +78,7 @@ class ManagerTestCase(BaseTestCase):
 
         self.assertEquals(set(control), set(courses))
 
-        control = Course.objects.filter(name='COURSE1')
+        control = Course.objects.filter(code='COURSE1')
         courses = Course.objects.search(2009, Semester.SPRING, 'COURSE1')
 
         self.assertEquals(set(control), set(courses))
