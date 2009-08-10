@@ -409,8 +409,6 @@ def copy_deadlines(request, year, semester_type, slug):
 
             deadlines = Deadline.objects.filter(
                     userset__student__slug__in=slugs,
-                    userset__student__semester__year__exact=year,
-                    userset__student__semester__type__exact=semester.type,
                     userset__course__in=courses,
                 ).select_related(
                     'userset__course__id'
