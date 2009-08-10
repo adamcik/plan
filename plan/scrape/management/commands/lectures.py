@@ -83,7 +83,9 @@ class Command(BaseCommand):
                 transaction.commit()
                 print 'Saving changes...'
             else:
+                transaction.rollback()
                 print 'Ignoring changes...'
-
-        finally:
+    
+        except:
             transaction.rollback()
+            raise
