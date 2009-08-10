@@ -9,7 +9,7 @@
     }, 
     {
         "pk": 1, 
-        "model": "common.type", 
+        "model": "common.lecturetype", 
         "fields": {
             "optional": false, 
             "name": "Type 1"
@@ -17,7 +17,7 @@
     }, 
     {
         "pk": 2, 
-        "model": "common.type", 
+        "model": "common.lecturetype", 
         "fields": {
             "optional": false, 
             "name": "Type 2"
@@ -25,7 +25,7 @@
     }, 
     {
         "pk": 3, 
-        "model": "common.type", 
+        "model": "common.lecturetype", 
         "fields": {
             "optional": true, 
             "name": "Type 3"
