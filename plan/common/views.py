@@ -141,9 +141,9 @@ def course_query(request, year, semester_type):
         query, limit)
 
     for course in courses:
-        name = escape(course.code)
-        full_name = escape(truncate_words(course.name, 5))
-        response.write(u'%s|%s\n' % (name, full_name or u'?'))
+        code = escape(course.code)
+        name = escape(truncate_words(course.name, 5))
+        response.write(u'%s|%s\n' % (code, name or u'?'))
 
     cache.set(cache_key, response, settings.CACHE_TIME_AJAX, prefix=True)
 
@@ -273,8 +273,8 @@ def schedule(request, year, semester_type, slug, advanced=False,
         for course in courses:
             course.group_form = group_forms.get(course.id, None)
 
-            name = course.alias or ''
-            course.name_form = CourseNameForm(initial={'name': name},
+            code = course.alias or ''
+            course.name_form = CourseNameForm(initial={'name': code},
                      prefix=course.id)
 
     next_semester = Semester.current().next()
@@ -469,7 +469,7 @@ def select_course(request, year, semester_type, slug, add=False):
                 lookup.extend(l.replace(',', '').split())
 
             usersets = set(UserSet.objects.get_usersets(semester.year,
-                semester.type, slug).values_list('course__name', flat=True))
+                semester.type, slug).values_list('course__code', flat=True))
 
             errors = []
             max_group_count = 0
@@ -482,7 +482,7 @@ def select_course(request, year, semester_type, slug, add=False):
                         break
 
                     course = Course.objects.get(
-                            name__iexact=l.strip(),
+                            code__iexact=l.strip(),
                             semester=semester,
                         )
                     userset, created = UserSet.objects.get_or_create(
@@ -490,7 +490,7 @@ def select_course(request, year, semester_type, slug, add=False):
                             course=course,
                         )
 
-                    usersets.add(course.name)
+                    usersets.add(course.code)
 
                     groups = Group.objects.filter(
                             lecture__course=course
@@ -536,7 +536,7 @@ def select_course(request, year, semester_type, slug, add=False):
                 if form.is_valid():
                     name = form.cleaned_data['name'].strip()
 
-                    if name.upper() == u.course.name.upper() or name == "":
+                    if name.upper() == u.course.code.upper() or name == "":
                         # Leave as blank if we match the current course name
                         name = ""
 
