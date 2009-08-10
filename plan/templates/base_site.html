@@ -22,43 +22,48 @@
 {% endblock %}
 
 {% block ft %}
-    <div class="yui-u first">
-      <p>
-        {% blocktrans %}
-            All lecture times and course data have been automatically retrieved from
-            <a href="http://.www.ntnu.no/">NTNU</a>.
-            This data may not reflect the actual lecture times due to changes or erroneous imports.
-            The service is provided as is, please ensure that the data is correct before relying on it.
-        {% endblocktrans %}
-      </p>
-      <p>
-          {% trans "Code and design &copy; Thomas Adamcik 2008-2009" %}<br />
-          {% trans "Built with:" %}
-          <a href="http://www.python.org/">Python</a> &bull;
-          <a href="http://www.djangoproject.org">Django</a> &bull;
-          <a href="http://developer.yahoo.com/yui/">Yahoo! UI Library</a> &bull;
-          <a href="http://www.famfamfam.com/lab/icons/silk/">Silk icons</a> &bull;
-          <a href="http://validator.w3.org/check/referer">XHTML</a>
-      </p>
-    </div>
-    <div class="yui-u" id="links">
-      <p>
-        <b>{% trans "Course list" %}</b>
-        <a href="http://www.ntnu.no/studier/emner">ntnu.no/studier/emner</a><br/>
-        <b>{% trans "Exam dates" %}</b>
-        <a href="http://www.ntnu.no/eksamen/plan/">ntnu.no/eksamen/plan/</a><br/>
-        <b>{% trans "Exam rules" %}</b>
-        <a href="http://www.ntnu.no/studier/eksamen/instruks">ntnu.no/studier/eksamen/instruks</a><br />
-        <b>{% trans "Lecture times" %}</b>
-        <a href="http://www.ntnu.no/studieinformasjon/timeplan">ntnu.no/studieinformasjon/timeplan</a><br/>
-        <b>{% trans "Map Dragvoll" %}</b>
-          <a href="http://www.ntnu.no/kart/auditorier_dragvoll.pdf">ntnu.no/kart/auditorier_dragvoll.pdf</a>
-           - <a href="{{ MEDIA_URL }}map/auditorier_dragvoll.png">png</a><br />
-        <b>{% trans "Map Gløshaugen" %}</b>
-           <a href="http://www.ntnu.no/kart/auditorier_gloshaugen.pdf">ntnu.no/kart/auditorier_gloshaugen.pdf</a>
-           - <a href="{{ MEDIA_URL }}map/auditorier_gloshaugen.png">png</a><br />
-        <b>{% trans "Find rooms" %}</b>
-           <a href="http://www.ntnu.no/studieinformasjon/rom/">ntnu.no/studieinformasjon/rom/</a>
-      </p>
+    <div class="yui-g">
+      <div class="yui-u first">
+        <p>
+          {% blocktrans %}
+              All lecture times and course data have been automatically retrieved from
+              <a href="http://.www.ntnu.no/">NTNU</a>.
+              This data may not reflect the actual lecture times due to changes or erroneous imports.
+              The service is provided as is, please ensure that the data is correct before relying on it.
+          {% endblocktrans %}
+        </p>
+        <p>
+            {% trans "Code and design &copy; Thomas Adamcik 2008-2009" %}<br />
+            <span class="small">
+              {% trans "Built using:" %}
+              <a href="http://www.python.org/">Python</a> &bull;
+              <a href="http://www.djangoproject.org">Django</a> &bull;
+              <a href="http://developer.yahoo.com/yui/">Yahoo! UI Library</a> &bull;
+              <a href="http://www.jquery.com/">jQuery</a> &bull;
+              <a href="http://www.famfamfam.com/lab/icons/silk/">Silk icons</a> &bull;
+              <a href="http://colorbrewer2.org/">ColorBrewer</a>
+            </span>
+        </p>
+      </div>
+      <div class="yui-u" id="links">
+        <p>
+          <b>{% trans "Course list" %}</b>
+          <a href="http://www.ntnu.no/studier/emner">ntnu.no/studier/emner</a><br/>
+          <b>{% trans "Exam dates" %}</b>
+          <a href="http://www.ntnu.no/eksamen/plan/">ntnu.no/eksamen/plan/</a><br/>
+          <b>{% trans "Exam rules" %}</b>
+          <a href="http://www.ntnu.no/studier/eksamen/instruks">ntnu.no/studier/eksamen/instruks</a><br />
+          <b>{% trans "Lecture times" %}</b>
+          <a href="http://www.ntnu.no/studieinformasjon/timeplan">ntnu.no/studieinformasjon/timeplan</a><br/>
+          <b>{% trans "Map Dragvoll" %}</b>
+            <a href="http://www.ntnu.no/kart/auditorier_dragvoll.pdf">ntnu.no/kart/auditorier_dragvoll.pdf</a>
+             - <a href="{{ MEDIA_URL }}map/auditorier_dragvoll.png">png</a><br />
+          <b>{% trans "Map Gløshaugen" %}</b>
+             <a href="http://www.ntnu.no/kart/auditorier_gloshaugen.pdf">ntnu.no/kart/auditorier_gloshaugen.pdf</a>
+             - <a href="{{ MEDIA_URL }}map/auditorier_gloshaugen.png">png</a><br />
+          <b>{% trans "Find rooms" %}</b>
+             <a href="http://www.ntnu.no/studieinformasjon/rom/">ntnu.no/studieinformasjon/rom/</a>
+        </p>
+      </div>
     </div>
 {% endblock %}
