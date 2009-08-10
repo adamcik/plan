@@ -141,8 +141,8 @@ def course_query(request, year, semester_type):
         query, limit)
 
     for course in courses:
-        name = escape(course.name)
-        full_name = escape(truncate_words(course.full_name, 5))
+        name = escape(course.code)
+        full_name = escape(truncate_words(course.name, 5))
         response.write(u'%s|%s\n' % (name, full_name or u'?'))
 
     cache.set(cache_key, response, settings.CACHE_TIME_AJAX, prefix=True)
