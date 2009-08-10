@@ -154,7 +154,9 @@ class ExamManager(models.Manager):
 class CourseManager(models.Manager):
     def get_courses(self, year, semester_type, slug):
         course_filter = {
-            'userset__slug': slug,
+            'userset__student__slug': slug,
+            'userset__student__semester__year__exact': year,
+            'userset__student__semester__type__exact': semester_type,
             'userset__course__semester__year__exact': year,
             'userset__course__semester__type__exact': semester_type,
         }
