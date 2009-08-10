@@ -68,7 +68,9 @@ class UserSet(models.Model):
         tmp = {}
 
         group_list = Group.objects.filter(
-                userset__slug=slug,
+                userset__student__slug=slug,
+                userset__student__semester__year__exact=year,
+                userset__student__semester__type__exact=semester_type,
                 userset__course__semester__year__exact=year,
                 userset__course__semester__type__exact=semester_type,
             ).extra(select={
