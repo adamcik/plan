@@ -408,11 +408,13 @@ def copy_deadlines(request, year, semester_type, slug):
                 color_map[c.id]
 
             deadlines = Deadline.objects.filter(
-                    userset__slug__in=slugs,
+                    userset__student__slug__in=slugs,
+                    userset__student__semester__year__exact=year,
+                    userset__student__semester__type__exact=semester.type,
                     userset__course__in=courses,
                 ).select_related(
                     'userset__course__id'
-                ).exclude(userset__slug=slug)
+                ).exclude(userset__student__slug=slug)
 
             return render_to_response('select_deadlines.html', {
                     'color_map': color_map,
