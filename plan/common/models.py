@@ -28,9 +28,18 @@ from plan.common.managers import LectureManager, DeadlineManager, \
 # To allow for overriding of the codes idea of now() for tests
 now = datetime.now
 
-class UserSet(models.Model):
+class Student(models.Model):
     slug = models.SlugField(_('Slug'))
+    semester = models.ForeignKey('Semester')
 
+    class Meta:
+        verbose_name = _('Student')
+        verbose_name_plural = _('Students')
+
+    def __unicode__(self):
+        return u'%s %s' % (self.slug, self.semester)
+
+class UserSet(models.Model):
     course = models.ForeignKey('Course')
     groups = models.ManyToManyField('Group', blank=True, null=True)
 
@@ -41,10 +50,12 @@ class UserSet(models.Model):
     exclude = models.ManyToManyField('Lecture', blank=True, null=True,
         related_name='excluded_from')
 
+    student = models.ForeignKey(Student)
+
     objects = UserSetManager()
 
     class Meta:
-        unique_together = (('slug', 'course'),)
+        unique_together = (('student', 'course'),)
 
         verbose_name = _('Userset')
         verbose_name_plural = _('Userset')

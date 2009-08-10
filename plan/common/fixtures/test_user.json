@@ -1,5 +1,29 @@
 [
     {
+        "pk": 1,
+        "model": "common.student",
+        "fields": {
+            "slug": "adamcik",
+            "semester": 1
+        }
+    },
+    {
+        "pk": 2,
+        "model": "common.student",
+        "fields": {
+            "slug": "foo",
+            "semester": 1
+        }
+    },
+    {
+        "pk": 3,
+        "model": "common.student",
+        "fields": {
+            "slug": "baz",
+            "semester": 1
+        }
+    },
+    {
         "pk": 1, 
         "model": "common.userset", 
         "fields": {
@@ -13,7 +37,7 @@
             "exclude": [
                 7
             ], 
-            "slug": "adamcik"
+            "student": "1"
         }
     }, 
     {
@@ -27,7 +51,7 @@
                 1
             ], 
             "exclude": [], 
-            "slug": "adamcik"
+            "student": "1"
         }
     }, 
     {
@@ -41,7 +65,7 @@
                 2
             ], 
             "exclude": [], 
-            "slug": "adamcik"
+            "student": "1"
         }
     },
     {
@@ -55,7 +79,7 @@
                 1
             ], 
             "exclude": [], 
-            "slug": "foo"
+            "student": "2"
         }
     }, 
     {
@@ -69,7 +93,7 @@
                 2
             ], 
             "exclude": [], 
-            "slug": "foo"
+            "student": "2"
         }
     }, 
     {
@@ -83,7 +107,7 @@
                 2
             ], 
             "exclude": [], 
-            "slug": "baz"
+            "student": "3"
         }
     }, 
     {
