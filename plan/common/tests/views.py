@@ -234,7 +234,7 @@ class ViewTestCase(BaseTestCase):
             {'exclude': ('2', '3', '8')},
         ]
 
-        lectures = list(Lecture.objects.filter(excluded_from__slug='adamcik').order_by('id').values_list())
+        lectures = list(Lecture.objects.filter(excluded_from__student__slug='adamcik').order_by('id').values_list())
 
         for data in post_data:
             original_response = self.client.get(original_url)
@@ -252,7 +252,7 @@ class ViewTestCase(BaseTestCase):
 
             self.clear()
 
-            new_lectures = list(Lecture.objects.filter(excluded_from__slug='adamcik').order_by('id').values_list())
+            new_lectures = list(Lecture.objects.filter(excluded_from__student__slug='adamcik').order_by('id').values_list())
             self.assert_(lectures != new_lectures)
 
             lectures = new_lectures
