@@ -1,0 +1,33 @@
+DEBUG = True
+TEMPLATE_DEBUG = DEBUG
+
+ADMINS = (
+    ('<Your name here>', '<your email here>'),
+)
+MANAGERS = ADMINS
+
+# Make this unique, and don't share it with anybody.
+SECRET_KEY = '<Your nice long secret key here>'
+
+DATABASE_ENGINE = 'mysql' # See Django docs...
+DATABASE_NAME = '<Your db name here>'
+DATABASE_USER = '<Your db user here>'
+DATABASE_HOST = '<Your db host here>'
+DATABASE_PASSWORD = '<Your db password here>'
+DATABASE_OPTIONS = { # Only needed for mySQL
+   "init_command": "SET storage_engine=INNODB",
+}
+
+# This extra set of settings is to connect to
+# the NTNU lecture database.
+MYSQL_NAME = ''
+MYSQL_USER = ''
+MYSQL_PASSWORD = ''
+MYSQL_HOST = ''
+
+CACHE_BACKEND = 'locmen://' # See Django docs...
+CACHE_PREFIX = '<Your prefix here>' # Should be unique per site
+
+# Web URL where Django should expect to find media files
+MEDIA_URL = '/timeplan/media/'
+ADMIN_MEDIA_PREFIX = '/timeplan/media/admin/'
