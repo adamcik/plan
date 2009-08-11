@@ -31,7 +31,7 @@ from django.utils.text import truncate_words
 
 from plan.common.models import Course, Deadline, Exam, Group, \
         Lecture, Semester, UserSet, Room, Lecturer, Week, Student
-from plan.common.forms import DeadlineForm, GroupForm, CourseNameForm, \
+from plan.common.forms import DeadlineForm, GroupForm, CourseAliasForm, \
         ScheduleForm
 from plan.common.utils import compact_sequence, ColorMap
 from plan.common.timetable import Timetable
@@ -273,8 +273,8 @@ def schedule(request, year, semester_type, slug, advanced=False,
         for course in courses:
             course.group_form = group_forms.get(course.id, None)
 
-            code = course.alias or ''
-            course.name_form = CourseNameForm(initial={'name': code},
+            alias= course.alias or ''
+            course.alias_form = CourseAliasForm(initial={'alias': alias},
                      prefix=course.id)
 
     next_semester = Semester.current().next()
@@ -536,16 +536,16 @@ def select_course(request, year, semester_type, slug, add=False):
             usersets = UserSet.objects.get_usersets(year, semester.type, slug)
 
             for u in usersets:
-                form = CourseNameForm(request.POST, prefix=u.course_id)
+                form = CourseAliasForm(request.POST, prefix=u.course_id)
 
                 if form.is_valid():
-                    name = form.cleaned_data['name'].strip()
+                    alias = form.cleaned_data['alias'].strip()
 
-                    if name.upper() == u.course.code.upper() or name == "":
+                    if alias.upper() == u.course.code.upper() or alias == "":
                         # Leave as blank if we match the current course name
-                        name = ""
+                        alias = ""
 
-                    u.name = name
+                    u.alias = alias
                     u.save()
 
     return HttpResponseRedirect(reverse('schedule-advanced',

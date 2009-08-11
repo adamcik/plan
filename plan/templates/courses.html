@@ -33,8 +33,8 @@
                             {% endif %}
                         </td>
                         <td>
-                            {% if course.name_form %}
-                                {{ course.name_form.name }}
+                            {% if course.alias_form %}
+                                {{ course.alias_form.alias}}
                             {% else %}
                                 {{ course.alias|default:"-" }}
                             {% endif %}
