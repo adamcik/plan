@@ -39,17 +39,16 @@ class Student(models.Model):
         return self.slug
 
 class UserSet(models.Model):
+    student = models.ForeignKey(Student)
     course = models.ForeignKey('Course')
-    groups = models.ManyToManyField('Group', blank=True, null=True)
 
+    # FIXME rename to alias
     name = models.CharField(_('Alias'), max_length=50, blank=True)
-
     added = models.DateTimeField(_('Added'), auto_now_add=True)
 
+    groups = models.ManyToManyField('Group', blank=True, null=True)
     exclude = models.ManyToManyField('Lecture', blank=True, null=True,
         related_name='excluded_from')
-
-    student = models.ForeignKey(Student)
 
     objects = UserSetManager()
 
@@ -117,13 +116,13 @@ class Group(models.Model):
 
 class Course(models.Model):
     code = models.CharField(_('Code'), max_length=100)
+    semester = models.ForeignKey('Semester')
+
     name = models.TextField(_('Name'), blank=True)
+    version = models.CharField(_('Version'), max_length=20, blank=True, null=True)
 
     url = models.URLField(_('URL'), verify_exists=False, blank=True)
     points = models.DecimalField(_('Points'), decimal_places=2, max_digits=5, null=True, blank=True)
-    version = models.CharField(_('Version'), max_length=20, blank=True, null=True)
-
-    semester = models.ForeignKey('Semester')
 
     objects = CourseManager()
 
@@ -287,6 +286,9 @@ class ExamType(models.Model):
         verbose_name_plural = _('Exam types')
 
 class Exam(models.Model):
+    course = models.ForeignKey(Course)
+    type = models.ForeignKey(ExamType, blank=True, null=True)
+
     exam_date = models.DateField(_('Exam date'), blank=True, null=True)
     exam_time = models.TimeField(_('Exam time'), blank=True, null=True)
 
@@ -295,12 +297,6 @@ class Exam(models.Model):
 
     duration = models.PositiveSmallIntegerField(_('Duration'), blank=True, null=True,
             help_text=_('Duration in hours'))
-
-    comment = models.TextField(_('Comment'), blank=True)
-
-    type = models.ForeignKey(ExamType, null=True, blank=True)
-
-    course = models.ForeignKey(Course)
 
     objects = ExamManager()
 
@@ -399,13 +395,11 @@ class Lecture(models.Model):
         return tmp
 
 class Deadline(models.Model):
-    DEFALULT_DATE = lambda: now().date()+timedelta(days=7)
-
     userset = models.ForeignKey('UserSet')
 
-    date = models.DateField(_('Due date'), default=DEFALULT_DATE)
-    time = models.TimeField(_('Time'), null=True, blank=True)
     task = models.CharField(_('Task'), max_length=255)
+    date = models.DateField(_('Due date'))
+    time = models.TimeField(_('Time'), null=True, blank=True)
 
     objects = DeadlineManager()
 

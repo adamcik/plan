@@ -142,7 +142,6 @@
         "pk": 1, 
         "model": "common.exam", 
         "fields": {
-            "comment": "", 
             "handout_time": null, 
             "exam_time": "09:00:00", 
             "course": 1, 
@@ -155,7 +154,6 @@
         "pk": 5, 
         "model": "common.exam", 
         "fields": {
-            "comment": "", 
             "handout_time": null, 
             "exam_time": "09:00:00", 
             "course": 1, 
@@ -168,7 +166,6 @@
         "pk": 6, 
         "model": "common.exam", 
         "fields": {
-            "comment": "", 
             "handout_time": null, 
             "exam_time": null, 
             "course": 1, 
@@ -181,7 +178,6 @@
         "pk": 7, 
         "model": "common.exam", 
         "fields": {
-            "comment": "", 
             "handout_time": null, 
             "exam_time": null, 
             "course": 1, 
@@ -194,7 +190,6 @@
         "pk": 2, 
         "model": "common.exam", 
         "fields": {
-            "comment": "", 
             "handout_time": "09:00:00", 
             "exam_time": "14:00:00", 
             "course": 2, 
@@ -207,7 +202,6 @@
         "pk": 3, 
         "model": "common.exam", 
         "fields": {
-            "comment": "", 
             "handout_time": null, 
             "exam_time": "09:00:00", 
             "course": 4, 
@@ -220,7 +214,6 @@
         "pk": 4, 
         "model": "common.exam", 
         "fields": {
-            "comment": "", 
             "handout_time": null, 
             "exam_time": "09:00:00", 
             "course": 4, 
