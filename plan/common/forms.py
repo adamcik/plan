@@ -15,11 +15,15 @@
 # You should have received a copy of the Affero GNU General Public
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
+from datetime import datetime, timedelta
+
 from django import forms
 from django.db.models import Q
 
 from plan.common.templatetags.slugify import slugify
 from plan.common.models import Deadline, Semester
+
+now = datetime.now # To allow for overriding of now in test
 
 class CourseNameForm(forms.Form):
     '''Form for changing userset names'''
@@ -57,6 +61,8 @@ class DeadlineForm(forms.models.ModelForm):
         self.fields['userset'].widget.attrs['style'] = 'width: 7em'
         self.fields['userset'].label_from_instance = lambda obj: obj.name or obj.course.name
 
+
+        self.fields['date'].default = now().date()+timedelta(days=7)
         self.fields['time'].input_formats = ['%H:%M', '%H.%M']
 
         self.fields['time'].widget.attrs['size'] = 2
