@@ -62,7 +62,7 @@ class DeadlineForm(forms.models.ModelForm):
         self.fields['userset'].label_from_instance = lambda obj: obj.alias or obj.course.code
 
 
-        self.fields['date'].default = now().date()+timedelta(days=7)
+        self.fields['date'].initial = now().date()+timedelta(days=7)
         self.fields['time'].input_formats = ['%H:%M', '%H.%M']
 
         self.fields['time'].widget.attrs['size'] = 2
