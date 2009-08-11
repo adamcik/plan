@@ -1,4 +1,6 @@
-/* Copyright 2008, 2009 Thomas Kongevold Adamcik
+/*
+ * Copyright 2008, 2009 Thomas Kongevold Adamcik
+ * 2009 IME Faculty Norwegian University of Science and Technology
  * 
  *  This file is part of Plan.
  * 
@@ -30,9 +32,9 @@ $(function() {
       var input = $(this);
 
       if (input.is(':checked')) {
-          $('.lecture-' + input.val()).addClass('hidden');
+          $('.lecture-' + input.val()).addClass('hide');
       } else {
-          $('.lecture-' + input.val()).removeClass('hidden');
+          $('.lecture-' + input.val()).removeClass('hide');
       }
   };
 
