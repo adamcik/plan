@@ -48,7 +48,7 @@ class LectureManager(models.Manager):
         ]
 
         select = {
-            'alias': 'common_userset.name',
+            'alias': 'common_userset.alias',
             'exclude': '''
                 EXISTS (SELECT 1
                  FROM common_userset_exclude WHERE
@@ -109,7 +109,7 @@ class DeadlineManager(models.Manager):
                 'userset__course',
                 'userset__name',
             ).extra(select={
-                'alias': 'common_userset.name',
+                'alias': 'common_userset.alias',
             }).order_by(
                 'date',
                 'time',
@@ -128,7 +128,7 @@ class ExamManager(models.Manager):
                 'course__semester__year__exact': year,
                 'course__semester__type__exact': semester_type,
             }
-            select = {'alias': 'common_userset.name'}
+            select = {'alias': 'common_userset.alias'}
         else:
             exam_filter = {
                 'course__name': course,
@@ -153,7 +153,7 @@ class CourseManager(models.Manager):
             'userset__course__semester__type__exact': semester_type,
         }
         return self.get_query_set().filter(**course_filter). \
-            extra(select={'alias': 'common_userset.name'}).distinct().\
+            extra(select={'alias': 'common_userset.alias'}).distinct().\
             order_by('name')
 
     def get_courses_with_exams(self, year, semester_type):
@@ -179,7 +179,7 @@ class CourseManager(models.Manager):
     def search(self, year, semester_type, query, limit=10):
         search_filter = build_search(query, ['code__icontains',
                                              'name__icontains',
-                                             'userset__name__exact'])
+                                             'userset__alias__exact'])
 
         qs = self.get_query_set()
         qs = qs.filter(search_filter)

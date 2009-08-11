@@ -42,8 +42,7 @@ class UserSet(models.Model):
     student = models.ForeignKey(Student)
     course = models.ForeignKey('Course')
 
-    # FIXME rename to alias
-    name = models.CharField(_('Alias'), max_length=50, blank=True)
+    alias = models.CharField(_('Alias'), max_length=50, blank=True)
     added = models.DateTimeField(_('Added'), auto_now_add=True)
 
     groups = models.ManyToManyField('Group', blank=True, null=True)

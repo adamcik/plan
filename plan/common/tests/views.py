@@ -146,9 +146,9 @@ class ViewTestCase(BaseTestCase):
             {'submit_add': True,
              'course_add': 'COURSE4'},
             {'submit_name': True,
-             '4-name': 'foo'},
+             '4-alias': 'foo'},
             {'submit_name': True,
-             '4-name': 'foo bar baz foo bar baz foo bar baz ' + \
+             '4-alias': 'foo bar baz foo bar baz foo bar baz ' + \
                        'foo bar baz foo bar baz foo bar baz'},
             {'submit_remove': True,
              'course_remove': 4},
