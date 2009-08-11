@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 # Copyright 2008, 2009 Thomas Kongevold Adamcik
+# 2009 IME Faculty Norwegian University of Science and Technology
 
 # This file is part of Plan.
 #
