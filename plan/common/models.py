@@ -29,7 +29,7 @@ from plan.common.managers import LectureManager, DeadlineManager, \
 now = datetime.now
 
 class Student(models.Model):
-    slug = models.SlugField(_('Slug'))
+    slug = models.SlugField(_('Slug'), unique=True)
 
     class Meta:
         verbose_name = _('Student')
@@ -129,6 +129,8 @@ class Course(models.Model):
         verbose_name = _('Course')
         verbose_name_plural = _('Courses')
 
+        unique_together = [('code', 'semester', 'version')]
+
     def get_url(self):
         values = self.__dict__
         for key in values.keys():
@@ -215,10 +217,10 @@ class Semester(models.Model):
     type = models.CharField(_('Type'), max_length=10, choices=SEMESTER_TYPES)
 
     class Meta:
-        unique_together = [('year', 'type'),]
-
         verbose_name = _('Semester')
         verbose_name_plural = _('Semesters')
+
+        unique_together = [('year', 'type'),]
 
     def __init__(self, *args, **kwargs):
         super(Semester, self).__init__(*args, **kwargs)
@@ -322,7 +324,7 @@ class Week(models.Model):
         return u'%s week %d' % (self.lecture, self.number)
 
 class Lecturer(models.Model):
-    name = models.CharField(_('Name'), max_length=200)
+    name = models.CharField(_('Name'), max_length=200, unique=True)
 
     class Meta:
         verbose_name = _('Lecturer')
