@@ -121,7 +121,6 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.contenttypes',
-    'django.contrib.databrowse',
     'django.contrib.contenttypes',
     'compress',
     'plan.common',

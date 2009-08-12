@@ -18,17 +18,10 @@
 
 from django.conf.urls.defaults import *
 from django.conf import settings
-from django.contrib import databrowse
-
-from plan.common.models import Course, Group, Lecture, Lecturer, Room, \
-        Semester, LectureType, Exam, ExamType, Week
 
 from plan.common.admin import admin
 
 handler500 = 'plan.common.utils.server_error'
-
-for model in [Course, Group, Lecture, Lecturer, Room, Semester, LectureType, Exam, ExamType, Week]:
-    databrowse.site.register(model)
 
 if settings.DEBUG:
     urlpatterns = patterns('',
@@ -41,7 +34,6 @@ else:
 
 urlpatterns += patterns('',
     (r'^admin/(.*)', admin.site.root),
-    (r'^data/(.*)', databrowse.site.root),
 
     (r'^', include('plan.common.urls')),
     (r'^', include('plan.ical.urls')),
