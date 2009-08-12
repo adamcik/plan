@@ -72,7 +72,7 @@ class UserSet(models.Model):
             ).extra(select={
                 'userset_id': 'common_userset.id',
                 'group_id': 'common_group.id',
-            }).values_list('userset_id', 'group_id').distinct()
+            }).values_list('userset_id', 'group_id').distinct().order_by('name')
 
         for userset, group in group_list:
             if userset not in tmp:
