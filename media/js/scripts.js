@@ -19,6 +19,8 @@
  */
 
 $(function() {
+  try { autocomplete_url } catch (e) { autocomplete_url = "" }
+
   $('#course').autocomplete(autocomplete_url, {
     max: 100,
     minChars: 3,
