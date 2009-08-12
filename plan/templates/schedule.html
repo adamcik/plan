@@ -40,18 +40,8 @@
             {% include "add_courses.html" %}
         </div>
     {% endif %}
+
     {% include "schedule_message.html" %}
-
-    {% if group_help %}
-        <div id="help">
-            <p>
-                {% blocktrans %}
-                    Use <a href="{{ advanced_url }}#groups">change groups</a> to limit which groups/parallels you want in your schedule.
-                {% endblocktrans%}
-            </p>
-        </div>
-    {%  endif %}
-
     {% include "schedule_table.html" %}
     {% include "schedule_table_footer.html" %}
 
@@ -72,9 +62,11 @@
                 {% endif %}
 
                 {% include "add_courses.html" %}
-                {% include "groups.html" %}
-                {% include "add_deadlines.html" %}
-                {% include "import_deadlines.html" %}
+                {% if advanced %}
+                    {% include "groups.html" %}
+                    {% include "add_deadlines.html" %}
+                    {% include "import_deadlines.html" %}
+                {% endif %}
             </div>
         </div>
     {% endif %}

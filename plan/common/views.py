@@ -293,8 +293,6 @@ def schedule(request, year, semester_type, slug, advanced=False,
         next_message = UserSet.objects.get_usersets(next_semester.year, next_semester.type, slug).count()
         next_message = next_message == 0
 
-    group_help = cache.get('group-help', 0, realm=realm)
-
     response = render_to_response('schedule.html', {
             'advanced': advanced,
             'all': all,
@@ -305,7 +303,6 @@ def schedule(request, year, semester_type, slug, advanced=False,
             'deadline_form': deadline_form,
             'deadlines': deadlines,
             'exams': exams,
-            'group_help': group_help,
             'next_message': next_message,
             'lectures': lectures,
             'semester': semester,
@@ -329,25 +326,18 @@ def schedule(request, year, semester_type, slug, advanced=False,
             # default cache time
             cache_time = settings.CACHE_TIME_SCHECULDE
 
-        group_help -= time()
-
-        if group_help > 0 and group_help < cache_time:
-            cache_time = group_help
-
         cache.set(url, response, cache_time, realm=realm)
 
     return response
 
-def select_groups(request, year, semester_type, slug):
+def select_groups(request, year, semester_type, slug, new_courses=None):
     '''Form handler for selecting groups to use in schedule'''
 
     semester = Semester(year=year, type=semester_type)
+    courses = Course.objects.get_courses(year, semester.type, slug)
+    course_groups = Course.get_groups(year, semester.type, [c.id for c in courses])
 
-    if request.method == 'POST':
-        courses = Course.objects.get_courses(year, semester.type, slug)
-
-        course_groups = Course.get_groups(year, semester.type, [c.id for c in courses])
-
+    if request.method == 'POST' and new_courses is None:
         for c in courses:
             try:
                 groups = course_groups[c.id]
@@ -364,8 +354,37 @@ def select_groups(request, year, semester_type, slug):
 
         clear_cache(semester, slug)
 
-    return HttpResponseRedirect(reverse('schedule-advanced',
-            args=[semester.year,semester.type,slug]))
+        return HttpResponseRedirect(reverse('schedule-advanced',
+                args=[semester.year,semester.type,slug]))
+
+    if new_courses is None:
+        new_courses = []
+
+    color_map = ColorMap(hex=True)
+    userset_groups = UserSet.get_groups(year, semester.type, slug)
+
+    for c in courses:
+        color_map[c.id]
+        userset_id = c.userset_set.get(student__slug=slug).pk
+
+        try:
+            groups = course_groups[c.id]
+        except KeyError: # Skip courses without groups
+            continue
+
+        if c in new_courses:
+            initial_groups = []
+        else:
+            initial_groups = userset_groups.get(userset_id, [])
+
+        c.group_form = GroupForm(groups, prefix=c.id, initial={'groups': initial_groups})
+
+    return render_to_response('select_groups.html', {
+            'semester': semester,
+            'slug': slug,
+            'courses': courses,
+            'color_map': color_map,
+        }, RequestContext(request))
 
 def new_deadline(request, year, semester_type, slug):
     '''Handels addition of tasks, reshows schedule view if form does not
@@ -477,6 +496,7 @@ def select_course(request, year, semester_type, slug, add=False):
                 semester.type, slug).values_list('course__code', flat=True))
 
             errors = []
+            new_courses = []
             max_group_count = 0
             to_many_usersets = False
 
@@ -497,6 +517,9 @@ def select_course(request, year, semester_type, slug, add=False):
                             course=course,
                         )
 
+                    if created:
+                        new_courses.append(course)
+
                     usersets.add(course.code)
 
                     groups = Group.objects.filter(
@@ -512,8 +535,7 @@ def select_course(request, year, semester_type, slug, add=False):
                     errors.append(l)
 
             if max_group_count > 2:
-                cache.set('group-help', int(time())+settings.CACHE_TIME_HELP,
-                        settings.CACHE_TIME_HELP, realm=realm)
+                return select_groups(request, year, semester_type, slug, new_courses=new_courses)
 
             if errors or to_many_usersets:
                 return render_to_response('error.html', {
