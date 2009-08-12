@@ -330,14 +330,14 @@ def schedule(request, year, semester_type, slug, advanced=False,
 
     return response
 
-def select_groups(request, year, semester_type, slug, new_courses=None):
+def select_groups(request, year, semester_type, slug):
     '''Form handler for selecting groups to use in schedule'''
 
     semester = Semester(year=year, type=semester_type)
     courses = Course.objects.get_courses(year, semester.type, slug)
     course_groups = Course.get_groups(year, semester.type, [c.id for c in courses])
 
-    if request.method == 'POST' and new_courses is None:
+    if request.method == 'POST':
         for c in courses:
             try:
                 groups = course_groups[c.id]
@@ -357,9 +357,6 @@ def select_groups(request, year, semester_type, slug, new_courses=None):
         return HttpResponseRedirect(reverse('schedule-advanced',
                 args=[semester.year,semester.type,slug]))
 
-    if new_courses is None:
-        new_courses = []
-
     color_map = ColorMap(hex=True)
     userset_groups = UserSet.get_groups(year, semester.type, slug)
 
@@ -372,10 +369,7 @@ def select_groups(request, year, semester_type, slug, new_courses=None):
         except KeyError: # Skip courses without groups
             continue
 
-        if c in new_courses:
-            initial_groups = []
-        else:
-            initial_groups = userset_groups.get(userset_id, [])
+        initial_groups = userset_groups.get(userset_id, [])
 
         c.group_form = GroupForm(groups, prefix=c.id, initial={'groups': initial_groups})
 
@@ -496,8 +490,6 @@ def select_course(request, year, semester_type, slug, add=False):
                 semester.type, slug).values_list('course__code', flat=True))
 
             errors = []
-            new_courses = []
-            max_group_count = 0
             to_many_usersets = False
 
             student, created = Student.objects.get_or_create(slug=slug)
@@ -512,30 +504,16 @@ def select_course(request, year, semester_type, slug, add=False):
                             code__iexact=l.strip(),
                             semester=semester,
                         )
+
                     userset, created = UserSet.objects.get_or_create(
                             student=student,
                             course=course,
                         )
 
-                    if created:
-                        new_courses.append(course)
-
                     usersets.add(course.code)
-
-                    groups = Group.objects.filter(
-                            lecture__course=course
-                        ).distinct()
-
-                    userset.groups = groups
-
-                    if len(groups) > max_group_count:
-                        max_group_count = len(groups)
 
                 except Course.DoesNotExist:
                     errors.append(l)
-
-            if max_group_count > 2:
-                return select_groups(request, year, semester_type, slug, new_courses=new_courses)
 
             if errors or to_many_usersets:
                 return render_to_response('error.html', {
@@ -546,6 +524,8 @@ def select_course(request, year, semester_type, slug, add=False):
                         'type': semester.get_type_display(),
                         'to_many_usersets': to_many_usersets,
                     }, RequestContext(request))
+
+            return HttpResponseRedirect(reverse('change-groups', args=[semester.year, semester.type, slug]))
 
         elif 'submit_remove' in request.POST:
             courses = []
