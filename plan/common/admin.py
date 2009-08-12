@@ -48,7 +48,7 @@ class UserSetAdmin(admin.ModelAdmin):
     search_fields = ('student__slug', 'course__code')
 
 class StudentAdmin(admin.ModelAdmin):
-    pass
+    ordering = ('slug',)
 
 class LectureTypeAdmin(admin.ModelAdmin):
     list_display = ('name', 'optional')
