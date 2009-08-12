@@ -21,6 +21,13 @@
         }
     },
     {
+        "pk": 4,
+        "model": "common.student",
+        "fields": {
+            "slug": "bar"
+        }
+    },
+    {
         "pk": 1, 
         "model": "common.userset", 
         "fields": {
@@ -105,6 +112,19 @@
             ], 
             "exclude": [], 
             "student": "3"
+        }
+    }, 
+    {
+        "pk": 7, 
+        "model": "common.userset", 
+        "fields": {
+            "added": "2009-01-03 13:42:14", 
+            "alias": "", 
+            "course": 5, 
+            "groups": [
+            ], 
+            "exclude": [], 
+            "student": "4"
         }
     }, 
     {
