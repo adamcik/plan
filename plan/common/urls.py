@@ -24,9 +24,8 @@ urlpatterns = patterns('plan.common.views',
 
     url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/\+$', 'course_query', name='course-query'),
 
-    url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/(?P<slug>[a-z0-9-_]+)/$', 'schedule', name='schedule'),
+    url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/(?P<slug>[a-z0-9-_]+)/$', 'schedule', {'all': True}, name='schedule'),
     url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/(?P<slug>[a-z0-9-_]+)/\+$', 'schedule', {'advanced': True}, name='schedule-advanced'),
-    url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/(?P<slug>[a-z0-9-_]+)/all/$', 'schedule', {'all': True}, name='schedule-all'),
     url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/(?P<slug>[a-z0-9-_]+)/current/$', 'schedule_current', name='schedule-current'),
     url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/(?P<slug>[a-z0-9-_]+)/(?P<week>\d{1,2})/$', 'schedule', name='schedule-week'),
 

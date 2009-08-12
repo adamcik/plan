@@ -61,8 +61,7 @@ def shortcut(request, slug):
         except Semester.DoesNotExist:
             raise Http404
 
-    return HttpResponseRedirect(reverse('schedule',
-            args = [semester.year, semester.type, slug]))
+    return schedule_current(request, semester.year, semester.type, slug)
 
 def getting_started(request, year=None, semester_type=None):
     '''Intial top level page that greets users'''
@@ -83,8 +82,7 @@ def getting_started(request, year=None, semester_type=None):
             slug = schedule_form.cleaned_data['slug']
             semester = schedule_form.cleaned_data['semester'] or semester
 
-            response = HttpResponseRedirect(reverse('schedule', args=[
-                semester.year, semester.type, slug]))
+            response = schedule_current(request, semester.year, semester.type, slug)
 
             # Store last timetable visited in a cookie so that we can populate
             # the field with a default value next time.
@@ -218,10 +216,6 @@ def schedule(request, year, semester_type, slug, advanced=False,
 
     if schedule_weeks:
         schedule_weeks = range(schedule_weeks[0], schedule_weeks[-1]+1)
-
-    if current_week not in schedule_weeks and not week and not all and not advanced:
-        return HttpResponseRedirect(reverse('schedule-all',
-                args=[semester.year,semester.type,slug]))
 
     try:
         next_week = schedule_weeks[schedule_weeks.index(week)+1]
