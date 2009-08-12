@@ -232,9 +232,14 @@ def schedule(request, year, semester_type, slug, advanced=False,
 
     # Create Timetable
     table = Timetable(lectures, rooms)
+
+    if week:
+        table.set_week(semester.year, week)
+
     if lectures:
         table.place_lectures()
         table.do_expansion()
+
     table.add_last_marker()
     table.insert_times()
 
