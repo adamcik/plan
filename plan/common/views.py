@@ -217,17 +217,14 @@ def schedule(request, year, semester_type, slug, advanced=False,
     if schedule_weeks:
         schedule_weeks = range(schedule_weeks[0], schedule_weeks[-1]+1)
 
-    try:
-        next_week = schedule_weeks[schedule_weeks.index(week)+1]
-    except (IndexError, ValueError):
-        next_week = None
-    try:
-        if schedule_weeks.index(week) != 0:
-            prev_week = schedule_weeks[schedule_weeks.index(week)-1]
-        else:
-            prev_week = None
-    except (IndexError, ValueError):
-        prev_week = None
+    next_week = None
+    prev_week = None
+
+    if week and week < 53:
+        next_week = week+1
+
+    if week and week > 1:
+        prev_week = week-1
 
     # Init colors in predictable maner
     for c in courses:
