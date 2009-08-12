@@ -165,7 +165,6 @@ class ViewTestCase(BaseTestCase):
             response = self.client.post(url, data)
 
             self.assertEquals(response.status_code, 302)
-            self.assert_(response['Location'].endswith(original_url))
 
             cache_response = self.get(original_url)
             self.assertEquals(cache_response, None)
