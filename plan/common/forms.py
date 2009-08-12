@@ -46,6 +46,16 @@ class GroupForm(forms.Form):
     def __init__(self, choices, *args, **kwargs):
         super(GroupForm, self).__init__(*args, **kwargs)
 
+        i = 0
+        initial_groups = self.initial.get('groups', [])
+
+        for id, name in choices:
+            if id in initial_groups:
+                choices.remove((id, name))
+                choices.insert(i, (id, name))
+
+                i += 1
+
         self.fields['groups'].choices = choices
         self.fields['groups'].widget.attrs['size'] = 5
 
