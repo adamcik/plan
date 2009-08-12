@@ -48,7 +48,7 @@ class BaseTestCase(TestCase):
     def url_basic(self, name):
         return reverse(name)
 
-    def clear(self, ):
+    def clear(self):
         clear_cache(self.semester, 'adamcik')
 
     def get(self, key):
