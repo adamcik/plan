@@ -24,12 +24,12 @@ class Migration:
     no_dry_run = True
     
     def forwards(self, orm):
-        orm.Semester.objects.filter(type=0).update(type='spring')
-        orm.Semester.objects.filter(type=1).update(type='fall')
+        orm.Semester.objects.filter(type='0').update(type='spring')
+        orm.Semester.objects.filter(type='1').update(type='fall')
     
     def backwards(self, orm):
-        orm.Semester.objects.filter(type='spring').update(type=0)
-        orm.Semester.objects.filter(type='fall').update(type=1)
+        orm.Semester.objects.filter(type='spring').update(type='0')
+        orm.Semester.objects.filter(type='fall').update(type='1')
     
     models = {
         'common.course': {
