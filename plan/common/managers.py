@@ -107,8 +107,7 @@ class DeadlineManager(models.Manager):
                 userset__course__semester__year__exact=year,
                 userset__course__semester__type__exact=semester_type,
             ).select_related(
-                'userset__course',
-                'userset__name',
+                'userset',
             ).extra(select={
                 'alias': 'common_userset.alias',
             }).order_by(
@@ -155,7 +154,7 @@ class CourseManager(models.Manager):
         }
         return self.get_query_set().filter(**course_filter). \
             extra(select={'alias': 'common_userset.alias'}).distinct().\
-            order_by('name')
+            order_by('code')
 
     def get_courses_with_exams(self, year, semester_type):
         cursor = connection.cursor()
@@ -172,7 +171,7 @@ class CourseManager(models.Manager):
             LEFT OUTER JOIN common_examtype et ON
                 (e.type_id = et.id)
             WHERE s.year = %s AND s.type = %s
-            ORDER BY c.name, e.exam_date, e.exam_time, et.code;
+            ORDER BY c.code, e.exam_date, e.exam_time, et.code;
         ''', [year, semester_type])
 
         return cursor.fetchall()
