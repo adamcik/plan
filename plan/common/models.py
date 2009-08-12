@@ -196,7 +196,7 @@ class Course(models.Model):
             ).extra(select={
                 'course_id': 'common_lecture.course_id',
                 'group_id': 'common_group.id',
-            }).values_list('course_id', 'group_id', 'name').distinct()
+            }).values_list('course_id', 'group_id', 'name').distinct().order_by('name')
 
         for course, group, name in group_list:
             if course not in tmp:
