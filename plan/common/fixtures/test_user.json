@@ -128,16 +128,6 @@
         }
     }, 
     {
-        "pk": 3, 
-        "model": "common.deadline", 
-        "fields": {
-            "date": "2009-03-09", 
-            "task": "Task 1", 
-            "userset": 4, 
-            "time": null
-        }
-    }, 
-    {
         "pk": 1, 
         "model": "common.deadline", 
         "fields": {
@@ -156,5 +146,25 @@
             "userset": 1, 
             "time": null
         }
-    }
+    },
+    {
+        "pk": 3, 
+        "model": "common.deadline", 
+        "fields": {
+            "date": "2009-03-09", 
+            "task": "Task 1", 
+            "userset": 4, 
+            "time": null
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "common.deadline", 
+        "fields": {
+            "date": "2009-03-09", 
+            "task": "Task 1", 
+            "userset": 7, 
+            "time": null
+        }
+    } 
 ]
