@@ -127,7 +127,7 @@ def course_query(request, year, semester_type):
     if limit > settings.TIMETABLE_AJAX_LIMIT:
         limit = settings.TIMETABLE_AJAX_LIMIT
 
-    cache_key = ':'.join([request.path, slugify(query), limit])
+    cache_key = ':'.join([request.path, slugify(query), '%d' % limit])
     cache_key = cache_key.lower()
 
     response = cache.get(cache_key, prefix=True)
