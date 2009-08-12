@@ -71,7 +71,9 @@ class ViewTestCase(BaseTestCase):
 
     def test_shortcut(self):
         response = self.client.get(self.url('shortcut', 'adamcik'))
-        self.assertRedirects(response, self.url('schedule'))
+        url = reverse('schedule-week', args=[2009, Semester.SPRING, 'adamcik', 1])
+
+        self.assertRedirects(response, url)
 
     def test_schedule(self):
         # FIXME add group help testing
