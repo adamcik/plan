@@ -339,12 +339,16 @@ td.error input, td.error select {
 #schedule .time {
   text-align: center;
   vertical-align: middle;
-	font-size: 77%;
+  font-size: 77%;
   width: 7%;
-	white-space: nowrap;
+  white-space: nowrap;
 }
 #schedule td.time {
 	border-left: 1px solid #666;
+}
+#schedule .date {
+    float: right;
+	font-size: 77%;  /* 10px */
 }
 
 #schedule td.lecture {
