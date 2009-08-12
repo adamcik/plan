@@ -34,5 +34,4 @@ def title(semester, slug, week=None):
         'type': semester.get_type_display(),
         'year': semester.year,
         'week': week,
-        'no_week': week is None,
     }
