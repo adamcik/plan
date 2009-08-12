@@ -159,6 +159,22 @@
     }, 
     {
         "pk": 1, 
+        "model": "common.examtype", 
+        "fields": {
+            "code": "E",
+            "name": "Written exam"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "common.examtype", 
+        "fields": {
+            "code": "H",
+            "name": "Home exam"
+        }
+    }, 
+    {
+        "pk": 1, 
         "model": "common.exam", 
         "fields": {
             "handout_time": null, 
@@ -166,6 +182,7 @@
             "course": 1, 
             "handout_date": null, 
             "duration": null, 
+            "type": 1,
             "exam_date": "2009-05-05" 
         }
     }, 
@@ -178,6 +195,7 @@
             "course": 1, 
             "handout_date": null, 
             "duration": "3", 
+            "type": 1,
             "exam_date": "2009-05-15"
         }
     }, 
@@ -190,6 +208,7 @@
             "course": 1, 
             "handout_date": "2009-05-02", 
             "duration": "1", 
+            "type": 1,
             "exam_date": "2009-05-15" 
         }
     }, 
@@ -202,6 +221,7 @@
             "course": 1, 
             "handout_date": null, 
             "duration": "1", 
+            "type": 1,
             "exam_date": "2009-05-15" 
         }
     }, 
@@ -214,6 +234,7 @@
             "course": 2, 
             "handout_date": "2009-05-01", 
             "duration": 1, 
+            "type": 1,
             "exam_date": "2009-05-06" 
         }
     }, 
@@ -226,6 +247,7 @@
             "course": 4, 
             "handout_date": null, 
             "duration": null, 
+            "type": 1,
             "exam_date": "2009-05-03" 
         }
     }, 
@@ -238,6 +260,7 @@
             "course": 4, 
             "handout_date": null, 
             "duration": 4, 
+            "type": 2,
             "exam_date": "2009-05-15" 
         }
     }, 
