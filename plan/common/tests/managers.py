@@ -58,7 +58,7 @@ class ManagerTestCase(BaseTestCase):
 
     def test_get_courses(self):
         courses = Course.objects.get_courses(2009, Semester.SPRING, 'adamcik')
-        self.assertEquals(set(courses), set(Course.objects.exclude(id=4)))
+        self.assertEquals(set(Course.objects.exclude(id__in=[4,5])), set(courses))
 
     def test_get_courses_with_exams(self):
         courses = Course.objects.get_courses_with_exams(2009, Semester.SPRING)
@@ -74,7 +74,7 @@ class ManagerTestCase(BaseTestCase):
         self.assertEquals(set(control), set(usersets))
 
     def test_search(self):
-        control = Course.objects.all()
+        control = Course.objects.exclude(id=5)
         courses = Course.objects.search(2009, Semester.SPRING, 'COURSE')
 
         self.assertEquals(set(control), set(courses))
