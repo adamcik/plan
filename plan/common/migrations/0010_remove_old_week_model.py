@@ -118,10 +118,6 @@ class Migration:
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '50', 'blank': 'True'}),
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '50', 'db_index': 'True'})
-        },
-        'common.week': {
-            'id': 'django.db.models.fields.AutoField(primary_key=True)',
-            'number': 'django.db.models.fields.PositiveIntegerField(unique=True)'
         }
     }
     
