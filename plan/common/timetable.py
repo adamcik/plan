@@ -16,6 +16,9 @@
 # You should have received a copy of the Affero GNU General Public
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
+from datetime import date
+from dateutil.rrule import rrule, MO, TU, WE, TH, FR, DAILY
+
 from plan.common.models import Lecture
 
 class Timetable:
@@ -26,8 +29,13 @@ class Timetable:
         self.lectures = []
         self.table = [[[{}] for a in Lecture.DAYS] for b in range(self.slots)]
         self.span = [1] * 5
+        self.date = [] * 5
 
         self.rooms = rooms
+
+    def set_week(self, year, week):
+        self.date = map(lambda d: d.date(), rrule(DAILY, count=5,
+                byweekday=(MO,TU,WE,TH,FR), byweekno=week, dtstart=date(year, 1, 1)))
 
     def place_lectures(self):
         '''Add basics to datastructure'''

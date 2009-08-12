@@ -12,11 +12,11 @@
     <thead>
         <tr>
             <th class="time"></th>
-            <th colspan="{{ timetable.span.0 }}">{% trans "Monday" %}</th>
-            <th colspan="{{ timetable.span.1 }}">{% trans "Tuesday" %}</th>
-            <th colspan="{{ timetable.span.2 }}">{% trans "Wednesday" %}</th>
-            <th colspan="{{ timetable.span.3 }}">{% trans "Thursday" %}</th>
-            <th colspan="{{ timetable.span.4 }}">{% trans "Friday" %}</th>
+            <th colspan="{{ timetable.span.0 }}"><span class="date">{{ timetable.date.0|date:"j M."|lower }}</span> {% trans "Monday" %}</th>
+            <th colspan="{{ timetable.span.1 }}"><span class="date">{{ timetable.date.1|date:"j M."|lower }}</span> {% trans "Tuesday" %}</th>
+            <th colspan="{{ timetable.span.2 }}"><span class="date">{{ timetable.date.2|date:"j M."|lower }}</span> {% trans "Wednesday" %}</th>
+            <th colspan="{{ timetable.span.3 }}"><span class="date">{{ timetable.date.3|date:"j M."|lower }}</span> {% trans "Thursday" %}</th>
+            <th colspan="{{ timetable.span.4 }}"><span class="date">{{ timetable.date.4|date:"j M."|lower }}</span> {% trans "Friday" %}</th>
         </tr>
     </thead>
     <tbody>
