@@ -46,6 +46,9 @@ from plan.common.templatetags.slugify import slugify
 # To allow for overriding of the codes idea of now() for tests
 now = datetime.now
 
+# Start new week on saturdays
+get_current_week = lambda: (now() + timedelta(days=2)).isocalendar()[1]
+
 def shortcut(request, slug):
     '''Redirect users to their timetable for the current semester'''
 
@@ -150,6 +153,12 @@ def course_query(request, year, semester_type):
 
     return response
 
+def schedule_current(request, year, semester_type, slug):
+    current_week = get_current_week()
+
+    return HttpResponseRedirect(reverse('schedule-week',
+        args=[year, semester_type, slug, current_week]))
+
 def schedule(request, year, semester_type, slug, advanced=False,
         week=None, all=False, deadline_form=None, cache_page=True):
     '''Page that handels showing schedules'''
@@ -158,8 +167,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
     semester = Semester(year=year, type=semester_type)
     current = Semester.current()
 
-    # Start new week on saturdays
-    current_week = (now() + timedelta(days=2)).isocalendar()[1]
+    current_week = get_current_week()
 
     # FIXME refactor to get_current_week...
     if semester.year != current.year and semester.type != current.type:
