@@ -55,8 +55,8 @@ class UserSet(models.Model):
     class Meta:
         unique_together = (('student', 'course'),)
 
-        verbose_name = _('Userset')
-        verbose_name_plural = _('Userset')
+        verbose_name = _('Subscription')
+        verbose_name_plural = _('Subscriptions')
 
     def __unicode__(self):
         return u'%s - %s' % (self.student, self.course)
