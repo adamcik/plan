@@ -66,6 +66,8 @@ class UserSetAdmin(admin.ModelAdmin):
     list_display = ('student', 'course')
     search_fields = ('student__slug', 'course__code')
 
+    filter_horizontal = ('groups', 'exclude')
+
     def get_form(self, request, obj=None, **kwargs):
         form = super(UserSetAdmin, self).get_form(request, obj, **kwargs)
 
@@ -100,12 +102,22 @@ class LectureTypeAdmin(admin.ModelAdmin):
     list_display = ('name', 'optional')
 
 class DeadlineAdmin(admin.ModelAdmin):
-    ordering = ('userset__slug', 'userset__course__code', 'date', 'time')
+    ordering = ('userset__student__slug', 'userset__course__code', 'date', 'time')
 
-    search_fields = ('userset__slug', 'userset__course__code', 'task')
+    search_fields = ('userset__student__slug', 'userset__course__code', 'task')
 
     list_display = ('course', 'slug', 'date', 'time', 'task')
     list_display_links = ('course', 'slug')
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super(DeadlineAdmin, self).get_form(request, obj, **kwargs)
+
+        userset = form.base_fields['userset'].queryset
+        userset = userset.select_related('course__semester', 'student')
+
+        form.base_fields['userset'].queryset = userset
+
+        return form
 
 admin.site.register(User)
 admin.site.register(Course, CourseAdmin)
