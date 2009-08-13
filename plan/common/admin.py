@@ -51,7 +51,16 @@ class LectureAdmin(admin.ModelAdmin):
 
     list_per_page = 50
     list_filter = ['day', 'start', 'end', 'rooms']
-    list_select_related = True
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super(LectureAdmin, self).get_form(request, obj, **kwargs)
+
+        course = form.base_fields['course'].queryset
+        course = course.select_related('semester')
+
+        form.base_fields['course'].queryset = course
+
+        return form
 
 class UserSetAdmin(admin.ModelAdmin):
     list_display = ('student', 'course')
