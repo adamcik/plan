@@ -47,6 +47,33 @@ class UserSetAdmin(admin.ModelAdmin):
     list_display = ('student', 'course')
     search_fields = ('student__slug', 'course__code')
 
+    def get_form(self, request, obj=None, **kwargs):
+        form = super(UserSetAdmin, self).get_form(request, obj, **kwargs)
+
+        course = form.base_fields['course'].queryset
+        groups = form.base_fields['groups'].queryset
+        exclude = form.base_fields['exclude'].queryset
+
+        course = course.select_related('semester')
+
+        if obj:
+            groups = groups.filter(lecture__course__userset=obj)
+            groups = groups.order_by('name')
+            groups = groups.distinct()
+            exclude = exclude.filter(course__userset=obj)
+            exclude = exclude.select_related('course__semester')
+        else:
+            groups = groups.none()
+            exclude = exclude.none()
+
+        form.base_fields['course'].queryset = course
+        form.base_fields['groups'].queryset = groups
+        form.base_fields['exclude'].queryset = exclude
+
+        form.base_fields['exclude'].label_from_instance = lambda o: o.short_name
+
+        return form
+
 class StudentAdmin(admin.ModelAdmin):
     ordering = ('slug',)
 
