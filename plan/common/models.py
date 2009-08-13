@@ -366,10 +366,18 @@ class Lecture(models.Model):
     def __unicode__(self):
         return u'%4d %10s %s-%s on %3s' % (
             self.id,
-            self.course,
+            self.course.name,
             time_filter(self.start),
             time_filter(self.end),
             self.get_day_display()[:3])
+
+    @property
+    def short_name(self):
+        return u'%s-%s on %s' % (
+                time_filter(self.start),
+                time_filter(self.end),
+                self.get_day_display()
+            )
 
     @staticmethod
     def get_related(model, lectures, field='name', use_extra=True):
