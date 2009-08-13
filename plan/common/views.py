@@ -31,7 +31,7 @@ from django.utils.html import escape
 from django.utils.text import truncate_words
 
 from plan.common.models import Course, Deadline, Exam, Group, \
-        Lecture, Semester, UserSet, Room, Lecturer, Week, Student
+        Lecture, Semester, Subscription, Room, Lecturer, Week, Student
 from plan.common.forms import DeadlineForm, GroupForm, CourseAliasForm, \
         ScheduleForm
 from plan.common.utils import compact_sequence, ColorMap
@@ -253,21 +253,21 @@ def schedule(request, year, semester_type, slug, advanced=False,
         lecture.sql_rooms = rooms.get(lecture.id, [])
 
     if advanced:
-        usersets = UserSet.objects.get_usersets(year, semester.type, slug)
+        subscriptions = Subscription.objects.get_subscriptions(year, semester.type, slug)
 
         # Set up deadline form
         if not deadline_form:
-            deadline_form = DeadlineForm(usersets)
+            deadline_form = DeadlineForm(subscriptions)
 
         if courses:
-            course_groups = Course.get_groups(year, semester.type, [u.course_id for u in usersets])
-            selected_groups = UserSet.get_groups(year, semester.type, slug)
+            course_groups = Course.get_groups(year, semester.type, [u.course_id for u in subscriptions])
+            selected_groups = Subscription.get_groups(year, semester.type, slug)
 
-            for u in usersets:
-                userset_groups = list(course_groups.get(u.course_id, []))
+            for u in subscriptions:
+                subscription_groups = list(course_groups.get(u.course_id, []))
                 initial_groups = list(selected_groups.get(u.id, []))
 
-                if not userset_groups:
+                if not subscription_groups:
                     continue
 
                 group_forms[u.course_id] = GroupForm(course_groups[u.course_id],
@@ -290,7 +290,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
     elif not Semester.objects.filter(year=next_semester.year, type=next_semester.type).count():
         next_message = False
     else:
-        next_message = UserSet.objects.get_usersets(next_semester.year, next_semester.type, slug).count()
+        next_message = Subscription.objects.get_subscriptions(next_semester.year, next_semester.type, slug).count()
         next_message = next_message == 0
 
     response = render_to_response('schedule.html', {
@@ -347,10 +347,10 @@ def select_groups(request, year, semester_type, slug):
             group_form = GroupForm(groups, request.POST, prefix=c.id)
 
             if group_form.is_valid():
-                userset = UserSet.objects.get_usersets(year,
+                subscription = Subscription.objects.get_subscriptions(year,
                         semester.type, slug).get(course=c)
 
-                userset.groups = group_form.cleaned_data['groups']
+                subscription.groups = group_form.cleaned_data['groups']
 
         clear_cache(semester, slug)
 
@@ -358,18 +358,18 @@ def select_groups(request, year, semester_type, slug):
                 args=[semester.year,semester.type,slug]))
 
     color_map = ColorMap(hex=True)
-    userset_groups = UserSet.get_groups(year, semester.type, slug)
+    subscription_groups = Subscription.get_groups(year, semester.type, slug)
 
     for c in courses:
         color_map[c.id]
-        userset_id = c.userset_set.get(student__slug=slug).pk
+        subscription_id = c.subscription_set.get(student__slug=slug).pk
 
         try:
             groups = course_groups[c.id]
         except KeyError: # Skip courses without groups
             continue
 
-        initial_groups = userset_groups.get(userset_id, [])
+        initial_groups = subscription_groups.get(subscription_id, [])
 
         c.group_form = GroupForm(groups, prefix=c.id, initial={'groups': initial_groups})
 
@@ -389,8 +389,8 @@ def new_deadline(request, year, semester_type, slug):
         clear_cache(semester, slug)
 
         if 'submit_add' in request.POST:
-            usersets = UserSet.objects.get_usersets(year, semester.type, slug)
-            deadline_form = DeadlineForm(usersets, request.POST)
+            subscriptions = Subscription.objects.get_subscriptions(year, semester.type, slug)
+            deadline_form = DeadlineForm(subscriptions, request.POST)
 
             if deadline_form.is_valid():
                 deadline_form.save()
@@ -426,11 +426,11 @@ def copy_deadlines(request, year, semester_type, slug):
                 color_map[c.id]
 
             deadlines = Deadline.objects.filter(
-                    userset__student__slug__in=slugs,
-                    userset__course__in=courses,
+                    subscription__student__slug__in=slugs,
+                    subscription__course__in=courses,
                 ).select_related(
-                    'userset__course__id'
-                ).exclude(userset__student__slug=slug)
+                    'subscription__course__id'
+                ).exclude(subscription__student__slug=slug)
 
             return render_to_response('select_deadlines.html', {
                     'color_map': color_map,
@@ -443,16 +443,16 @@ def copy_deadlines(request, year, semester_type, slug):
             deadline_ids = request.POST.getlist('deadline_id')
             deadlines = Deadline.objects.filter(
                     id__in=deadline_ids,
-                    userset__course__semester__year__exact=year,
-                    userset__course__semester__type__exact=semester.type,
+                    subscription__course__semester__year__exact=year,
+                    subscription__course__semester__type__exact=semester.type,
                 )
 
             for d in deadlines:
-                userset = UserSet.objects.get_usersets(year, semester.type,
-                    slug).get(course=d.userset.course)
+                subscription = Subscription.objects.get_subscriptions(year, semester.type,
+                    slug).get(course=d.subscription.course)
 
                 Deadline.objects.get_or_create(
-                        userset=userset,
+                        subscription=subscription,
                         date=d.date,
                         time=d.time,
                         task=d.task
@@ -486,18 +486,18 @@ def select_course(request, year, semester_type, slug, add=False):
             for l in request.POST.getlist('course_add'):
                 lookup.extend(l.replace(',', '').split())
 
-            usersets = set(UserSet.objects.get_usersets(semester.year,
+            subscriptions = set(Subscription.objects.get_subscriptions(semester.year,
                 semester.type, slug).values_list('course__code', flat=True))
 
             errors = []
-            to_many_usersets = False
+            to_many_subscriptions = False
 
             student, created = Student.objects.get_or_create(slug=slug)
 
             for l in lookup:
                 try:
-                    if len(usersets) > settings.TIMETABLE_MAX_COURSES:
-                        to_many_usersets = True
+                    if len(subscriptions) > settings.TIMETABLE_MAX_COURSES:
+                        to_many_subscriptions = True
                         break
 
                     course = Course.objects.get(
@@ -505,24 +505,24 @@ def select_course(request, year, semester_type, slug, add=False):
                             semester=semester,
                         )
 
-                    userset, created = UserSet.objects.get_or_create(
+                    subscription, created = Subscription.objects.get_or_create(
                             student=student,
                             course=course,
                         )
 
-                    usersets.add(course.code)
+                    subscriptions.add(course.code)
 
                 except Course.DoesNotExist:
                     errors.append(l)
 
-            if errors or to_many_usersets:
+            if errors or to_many_subscriptions:
                 return render_to_response('error.html', {
                         'courses': errors,
                         'max': settings.TIMETABLE_MAX_COURSES,
                         'slug': slug,
                         'year': year,
                         'type': semester.get_type_display(),
-                        'to_many_usersets': to_many_usersets,
+                        'to_many_subscriptions': to_many_subscriptions,
                     }, RequestContext(request))
 
             return HttpResponseRedirect(reverse('change-groups', args=[semester.year, semester.type, slug]))
@@ -533,16 +533,16 @@ def select_course(request, year, semester_type, slug, add=False):
                 if c.strip():
                     courses.append(c.strip())
 
-            UserSet.objects.get_usersets(year, semester.type, slug). \
+            Subscription.objects.get_subscriptions(year, semester.type, slug). \
                     filter(course__id__in=courses).delete()
 
-            if UserSet.objects.filter(student__slug=slug).count() == 0:
+            if Subscription.objects.filter(student__slug=slug).count() == 0:
                 Student.objects.filter(slug=slug).delete()
 
         elif 'submit_name' in request.POST:
-            usersets = UserSet.objects.get_usersets(year, semester.type, slug)
+            subscriptions = Subscription.objects.get_subscriptions(year, semester.type, slug)
 
-            for u in usersets:
+            for u in subscriptions:
                 form = CourseAliasForm(request.POST, prefix=u.course_id)
 
                 if form.is_valid():
@@ -565,13 +565,13 @@ def select_lectures(request, year, semester_type, slug):
     if request.method == 'POST':
         excludes = request.POST.getlist('exclude')
 
-        usersets = UserSet.objects.get_usersets(year, semester.type, slug)
+        subscriptions = Subscription.objects.get_subscriptions(year, semester.type, slug)
 
-        for userset in usersets:
+        for subscription in subscriptions:
             if excludes:
-                userset.exclude = userset.course.lecture_set.filter(id__in=excludes)
+                subscription.exclude = subscription.course.lecture_set.filter(id__in=excludes)
             else:
-                userset.exclude.clear()
+                subscription.exclude.clear()
 
         clear_cache(semester, slug)
 

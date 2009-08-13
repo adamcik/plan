@@ -24,7 +24,7 @@ from plan.common.utils import build_search
 class LectureManager(models.Manager):
     def get_lectures(self, year, semester_type, slug=None, week=None, course=None):
         """
-            Get all lectures for userset during given period.
+            Get all lectures for subscription during given period.
 
             To do this we need to pull in a bunch of extra tables and manualy join them
             in the where cluase. The first element in the custom where is the important
@@ -37,24 +37,24 @@ class LectureManager(models.Manager):
             raise Exception('Invalid invocation of get_lectures')
 
         where = [
-            'common_userset_groups.group_id = common_group.id',
-            'common_userset_groups.userset_id = common_userset.id',
+            'common_subscription_groups.group_id = common_group.id',
+            'common_subscription_groups.subscription_id = common_subscription.id',
             'common_group.id = common_lecture_groups.group_id',
             'common_lecture_groups.lecture_id = common_lecture.id'
         ]
         tables = [
-            'common_userset_groups',
+            'common_subscription_groups',
             'common_group',
             'common_lecture_groups'
         ]
 
         select = {
-            'alias': 'common_userset.alias',
+            'alias': 'common_subscription.alias',
             'exclude': '''
                 EXISTS (SELECT 1
-                 FROM common_userset_exclude WHERE
-                 common_userset_exclude.userset_id = common_userset.id AND
-                 common_userset_exclude.lecture_id = common_lecture.id)''',
+                 FROM common_subscription_exclude WHERE
+                 common_subscription_exclude.subscription_id = common_subscription.id AND
+                 common_subscription_exclude.lecture_id = common_lecture.id)''',
             'show_week': '%s',
         }
 
@@ -65,7 +65,7 @@ class LectureManager(models.Manager):
 
         if slug:
             filter = {
-                'course__userset__student__slug': slug,
+                'course__subscription__student__slug': slug,
                 'course__semester__year__exact': year,
                 'course__semester__type__exact': semester_type,
             }
@@ -103,13 +103,13 @@ class LectureManager(models.Manager):
 class DeadlineManager(models.Manager):
     def get_deadlines(self, year, semester_type, slug):
         return self.get_query_set().filter(
-                userset__student__slug=slug,
-                userset__course__semester__year__exact=year,
-                userset__course__semester__type__exact=semester_type,
+                subscription__student__slug=slug,
+                subscription__course__semester__year__exact=year,
+                subscription__course__semester__type__exact=semester_type,
             ).select_related(
-                'userset',
+                'subscription',
             ).extra(select={
-                'alias': 'common_userset.alias',
+                'alias': 'common_subscription.alias',
             }).order_by(
                 'date',
                 'time',
@@ -124,11 +124,11 @@ class ExamManager(models.Manager):
 
         if slug:
             exam_filter = {
-                'course__userset__student__slug': slug,
+                'course__subscription__student__slug': slug,
                 'course__semester__year__exact': year,
                 'course__semester__type__exact': semester_type,
             }
-            select = {'alias': 'common_userset.alias'}
+            select = {'alias': 'common_subscription.alias'}
         else:
             exam_filter = {
                 'course__name': course,
@@ -148,12 +148,12 @@ class ExamManager(models.Manager):
 class CourseManager(models.Manager):
     def get_courses(self, year, semester_type, slug):
         course_filter = {
-            'userset__student__slug': slug,
-            'userset__course__semester__year__exact': year,
-            'userset__course__semester__type__exact': semester_type,
+            'subscription__student__slug': slug,
+            'subscription__course__semester__year__exact': year,
+            'subscription__course__semester__type__exact': semester_type,
         }
         return self.get_query_set().filter(**course_filter). \
-            extra(select={'alias': 'common_userset.alias'}).distinct().\
+            extra(select={'alias': 'common_subscription.alias'}).distinct().\
             order_by('code')
 
     def get_courses_with_exams(self, year, semester_type):
@@ -179,7 +179,7 @@ class CourseManager(models.Manager):
     def search(self, year, semester_type, query, limit=10):
         search_filter = build_search(query, ['code__icontains',
                                              'name__icontains',
-                                             'userset__alias__exact'])
+                                             'subscription__alias__exact'])
 
         qs = self.get_query_set()
         qs = qs.filter(search_filter)
@@ -191,8 +191,8 @@ class CourseManager(models.Manager):
         return qs[:limit]
 
 
-class UserSetManager(models.Manager):
-    def get_usersets(self, year, semester_type, slug):
+class SubscriptionManager(models.Manager):
+    def get_subscriptions(self, year, semester_type, slug):
         return self.get_query_set().filter(
                 student__slug=slug,
                 course__semester__year__exact=year,

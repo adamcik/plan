@@ -24,7 +24,7 @@ from django.template.defaultfilters import time as time_filter
 from django.utils.translation import ugettext_lazy as _
 
 from plan.common.managers import LectureManager, DeadlineManager, \
-        ExamManager, CourseManager, UserSetManager
+        ExamManager, CourseManager, SubscriptionManager
 
 # To allow for overriding of the codes idea of now() for tests
 now = datetime.now
@@ -39,7 +39,7 @@ class Student(models.Model):
     def __unicode__(self):
         return self.slug
 
-class UserSet(models.Model):
+class Subscription(models.Model):
     student = models.ForeignKey(Student)
     course = models.ForeignKey('Course')
 
@@ -50,7 +50,7 @@ class UserSet(models.Model):
     exclude = models.ManyToManyField('Lecture', blank=True, null=True,
         related_name='excluded_from')
 
-    objects = UserSetManager()
+    objects = SubscriptionManager()
 
     class Meta:
         unique_together = (('student', 'course'),)
@@ -66,18 +66,18 @@ class UserSet(models.Model):
         tmp = {}
 
         group_list = Group.objects.filter(
-                userset__student__slug=slug,
-                userset__course__semester__year__exact=year,
-                userset__course__semester__type__exact=semester_type,
+                subscription__student__slug=slug,
+                subscription__course__semester__year__exact=year,
+                subscription__course__semester__type__exact=semester_type,
             ).extra(select={
-                'userset_id': 'common_userset.id',
+                'subscription_id': 'common_subscription.id',
                 'group_id': 'common_group.id',
-            }).values_list('userset_id', 'group_id').distinct().order_by('name')
+            }).values_list('subscription_id', 'group_id').distinct().order_by('name')
 
-        for userset, group in group_list:
-            if userset not in tmp:
-                tmp[userset] = []
-            tmp[userset].append(group)
+        for subscription, group in group_list:
+            if subscription not in tmp:
+                tmp[subscription] = []
+            tmp[subscription].append(group)
 
         return tmp
 
@@ -162,15 +162,15 @@ class Course(models.Model):
         else:
             semester_id = semester
 
-        slug_count = int(Student.objects.filter(userset__course__semester=semester).distinct().count())
-        subscription_count = int(UserSet.objects.filter(course__semester=semester).count())
-        deadline_count = int(Deadline.objects.filter(userset__course__semester=semester).count())
-        course_count = int(Course.objects.filter(userset__course__semester=semester).values('name').distinct().count())
+        slug_count = int(Student.objects.filter(subscription__course__semester=semester).distinct().count())
+        subscription_count = int(Subscription.objects.filter(course__semester=semester).count())
+        deadline_count = int(Deadline.objects.filter(subscription__course__semester=semester).count())
+        course_count = int(Course.objects.filter(subscription__course__semester=semester).values('name').distinct().count())
 
         cursor = connection.cursor()
         cursor.execute('''
             SELECT COUNT(*) as num, c.id, c.code, c.name FROM
-                common_userset u JOIN common_course c ON (c.id = u.course_id)
+                common_subscription u JOIN common_course c ON (c.id = u.course_id)
             WHERE c.semester_id = %s
             GROUP BY c.id, c.code, c.name
             ORDER BY num DESC
@@ -405,7 +405,7 @@ class Lecture(models.Model):
         return tmp
 
 class Deadline(models.Model):
-    userset = models.ForeignKey('UserSet')
+    subscription = models.ForeignKey('Subscription')
 
     task = models.CharField(_('Task'), max_length=255)
     date = models.DateField(_('Due date'))
@@ -419,10 +419,10 @@ class Deadline(models.Model):
 
     def __unicode__(self):
         if self.time:
-            return u'%s %s- %s %s' % (self.userset, self.userset.student.slug,
+            return u'%s %s- %s %s' % (self.subscription, self.subscription.student.slug,
                                      self.date, self.time)
         else:
-            return u'%s %s- %s' % (self.userset, self.userset.student.slug, self.date)
+            return u'%s %s- %s' % (self.subscription, self.subscription.student.slug, self.date)
 
     @property
     def datetime(self):
@@ -446,8 +446,8 @@ class Deadline(models.Model):
 
     @property
     def slug(self):
-        return self.userset.student.slug
+        return self.subscription.student.slug
 
     @property
     def course(self):
-        return self.userset.course
+        return self.subscription.course

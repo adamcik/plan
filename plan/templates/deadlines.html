@@ -17,11 +17,11 @@
             </thead>
             <tbody>
                 {% for d in deadlines %}
-                    <tr class="course-{{ d.userset.course_id }} deadline-{{ d.id }}{% if d.expired %} expired{% endif %}">
+                    <tr class="course-{{ d.subscription.course_id }} deadline-{{ d.id }}{% if d.expired %} expired{% endif %}">
                         {% if advanced %}
                             <td><input type="checkbox" name="deadline_remove" value="{{ d.id }}" class="noprint" /></td>
                         {% endif %}
-                        <td>{{ d.userset.alias|default:d.userset.course.code }}</td>
+                        <td>{{ d.subscription.alias|default:d.subscription.course.code }}</td>
                         <td align="center">{{ d.date }}</td>
                         <td align="center">{{ d.time|time }}</td>
                         <td>{{ d.task }}</td>

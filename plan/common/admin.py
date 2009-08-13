@@ -20,7 +20,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 
 from plan.common.models import Course, Exam, Group, Lecture, Lecturer, \
-        Room, Semester, LectureType, Deadline, UserSet, Student
+        Room, Semester, LectureType, Deadline, Subscription, Student
 
 class CourseAdmin(admin.ModelAdmin):
     list_display = ('code', 'points', 'name', 'url', 'semester')
@@ -62,14 +62,14 @@ class LectureAdmin(admin.ModelAdmin):
 
         return form
 
-class UserSetAdmin(admin.ModelAdmin):
+class SubscriptionAdmin(admin.ModelAdmin):
     list_display = ('student', 'course')
     search_fields = ('student__slug', 'course__code')
 
     filter_horizontal = ('groups', 'exclude')
 
     def get_form(self, request, obj=None, **kwargs):
-        form = super(UserSetAdmin, self).get_form(request, obj, **kwargs)
+        form = super(SubscriptionAdmin, self).get_form(request, obj, **kwargs)
 
         course = form.base_fields['course'].queryset
         groups = form.base_fields['groups'].queryset
@@ -78,10 +78,10 @@ class UserSetAdmin(admin.ModelAdmin):
         course = course.select_related('semester')
 
         if obj:
-            groups = groups.filter(lecture__course__userset=obj)
+            groups = groups.filter(lecture__course__subscription=obj)
             groups = groups.order_by('name')
             groups = groups.distinct()
-            exclude = exclude.filter(course__userset=obj)
+            exclude = exclude.filter(course__subscription=obj)
             exclude = exclude.select_related('course__semester')
         else:
             groups = groups.none()
@@ -102,9 +102,9 @@ class LectureTypeAdmin(admin.ModelAdmin):
     list_display = ('name', 'optional')
 
 class DeadlineAdmin(admin.ModelAdmin):
-    ordering = ('userset__student__slug', 'userset__course__code', 'date', 'time')
+    ordering = ('subscription__student__slug', 'subscription__course__code', 'date', 'time')
 
-    search_fields = ('userset__student__slug', 'userset__course__code', 'task')
+    search_fields = ('subscription__student__slug', 'subscription__course__code', 'task')
 
     list_display = ('course', 'slug', 'date', 'time', 'task')
     list_display_links = ('course', 'slug')
@@ -112,10 +112,10 @@ class DeadlineAdmin(admin.ModelAdmin):
     def get_form(self, request, obj=None, **kwargs):
         form = super(DeadlineAdmin, self).get_form(request, obj, **kwargs)
 
-        userset = form.base_fields['userset'].queryset
-        userset = userset.select_related('course__semester', 'student')
+        subscription = form.base_fields['subscription'].queryset
+        subscription = subscription.select_related('course__semester', 'student')
 
-        form.base_fields['userset'].queryset = userset
+        form.base_fields['subscription'].queryset = subscription
 
         return form
 
@@ -129,4 +129,4 @@ admin.site.register(Semester)
 admin.site.register(LectureType, LectureTypeAdmin)
 admin.site.register(Deadline, DeadlineAdmin)
 admin.site.register(Student, StudentAdmin)
-admin.site.register(UserSet, UserSetAdmin)
+admin.site.register(Subscription, SubscriptionAdmin)

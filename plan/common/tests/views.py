@@ -21,7 +21,7 @@ from django.core.urlresolvers import reverse
 
 from plan.common.tests.base import BaseTestCase
 from plan.common.cache import get_realm, cache
-from plan.common.models import Semester, Group, UserSet, Lecture, Deadline
+from plan.common.models import Semester, Group, Subscription, Lecture, Deadline
 
 class EmptyViewTestCase(BaseTestCase):
     def test_index(self):
@@ -157,7 +157,7 @@ class ViewTestCase(BaseTestCase):
              'course_remove': 4},
         ]
 
-        usersets = list(UserSet.objects.filter(student__slug='adamcik').order_by('id').values_list())
+        subscriptions = list(Subscription.objects.filter(student__slug='adamcik').order_by('id').values_list())
 
         for data in post_data:
             original_response = self.client.get(original_url)
@@ -174,10 +174,10 @@ class ViewTestCase(BaseTestCase):
 
             self.clear()
 
-            new_usersets = list(UserSet.objects.filter(student__slug='adamcik').order_by('id').values_list())
-            self.assert_(new_usersets != usersets)
+            new_subscriptions = list(Subscription.objects.filter(student__slug='adamcik').order_by('id').values_list())
+            self.assert_(new_subscriptions != subscriptions)
 
-            usersets = new_usersets
+            subscriptions = new_subscriptions
 
     def test_change_groups(self):
         # FIXME test for courses without groups
@@ -197,7 +197,7 @@ class ViewTestCase(BaseTestCase):
              '3-groups': '2'}
         ]
 
-        groups = list(Group.objects.filter(userset__student__slug='adamcik').order_by('id').values_list())
+        groups = list(Group.objects.filter(subscription__student__slug='adamcik').order_by('id').values_list())
 
         for data in post_data:
             original_response = self.client.get(original_url)
@@ -215,7 +215,7 @@ class ViewTestCase(BaseTestCase):
 
             self.clear()
 
-            new_groups = list(Group.objects.filter(userset__student__slug='adamcik').order_by('id').values_list())
+            new_groups = list(Group.objects.filter(subscription__student__slug='adamcik').order_by('id').values_list())
             self.assert_(groups != new_groups)
 
             groups = new_groups
@@ -267,14 +267,14 @@ class ViewTestCase(BaseTestCase):
         # Add deadline
         responese = self.client.post(url, {'submit_add': '',
                                            'task': u'foo',
-                                           'userset': 1,
+                                           'subscription': 1,
                                            'date': u'2009-08-08',
                                            'time': u''})
 
         self.assertRedirects(responese, self.url('schedule-advanced'))
         self.assertEquals(deadlines+1, Deadline.objects.all().count())
 
-        deadline = Deadline.objects.get(userset=1, task='foo')
+        deadline = Deadline.objects.get(subscription=1, task='foo')
 
         # Remove deadline
         responese = self.client.post(url, {'submit_remove': '',
@@ -286,7 +286,7 @@ class ViewTestCase(BaseTestCase):
         # Add deadline to wrong user
         responese = self.client.post(url, {'submit_add': '',
                                            'task': u'foo',
-                                           'userset': 4,
+                                           'subscription': 4,
                                            'date': u'2009-08-08',
                                            'time': u''})
 

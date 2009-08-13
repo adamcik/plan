@@ -27,7 +27,7 @@ from plan.common.models import Deadline, Semester
 now = datetime.now # To allow for overriding of now in test
 
 class CourseAliasForm(forms.Form):
-    '''Form for changing userset names'''
+    '''Form for changing subscription names'''
     alias = forms.CharField(widget=forms.TextInput(attrs={'size':8}),
                            required=False)
 
@@ -68,9 +68,9 @@ class DeadlineForm(forms.models.ModelForm):
     def __init__(self, queryset, *args, **kwargs):
         super(DeadlineForm, self).__init__(*args, **kwargs)
 
-        self.fields['userset'].queryset = queryset
-        self.fields['userset'].widget.attrs['style'] = 'width: 7em'
-        self.fields['userset'].label_from_instance = lambda obj: obj.alias or obj.course.code
+        self.fields['subscription'].queryset = queryset
+        self.fields['subscription'].widget.attrs['style'] = 'width: 7em'
+        self.fields['subscription'].label_from_instance = lambda obj: obj.alias or obj.course.code
 
 
         self.fields['date'].initial = now().date()+timedelta(days=7)
