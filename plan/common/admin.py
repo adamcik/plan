@@ -32,6 +32,16 @@ class ExamAdmin(admin.ModelAdmin):
     search_fields = ('course__code',)
     list_filter = ['duration']
 
+    def get_form(self, request, obj=None, **kwargs):
+        form = super(ExamAdmin, self).get_form(request, obj, **kwargs)
+
+        course = form.base_fields['course'].queryset
+        course = course.select_related('semester')
+
+        form.base_fields['course'].queryset = course
+
+        return form
+
 class LectureAdmin(admin.ModelAdmin):
     list_display = ('course', 'day', 'start', 'end', 'type')
 
