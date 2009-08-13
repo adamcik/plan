@@ -54,7 +54,7 @@
                     {% for id,code,name,points,exam_date,exam_time,type,type_name,handout_date,handout_time in course_list %}
                         <tr>
                             {% ifchanged id %}
-                                <td{% ifchanged name.0 %} id="{{ code.0 }}"{% endifchanged %}>
+                                <td{% ifchanged code.0 %} id="{{ code.0 }}"{% endifchanged %}>
                                     <input type="checkbox" name="course_add" value="{{ code }}" id="course_{{ id }}" />
                                 </td>
                                 <td>
