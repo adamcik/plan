@@ -419,10 +419,10 @@ class Deadline(models.Model):
 
     def __unicode__(self):
         if self.time:
-            return u'%s %s- %s %s' % (self.userset, self.userset.slug,
+            return u'%s %s- %s %s' % (self.userset, self.userset.student.slug,
                                      self.date, self.time)
         else:
-            return u'%s %s- %s' % (self.userset, self.userset.slug, self.date)
+            return u'%s %s- %s' % (self.userset, self.userset.student.slug, self.date)
 
     @property
     def datetime(self):
@@ -446,7 +446,7 @@ class Deadline(models.Model):
 
     @property
     def slug(self):
-        return self.userset.slug
+        return self.userset.student.slug
 
     @property
     def course(self):
