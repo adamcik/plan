@@ -131,8 +131,10 @@ INSTALLED_APPS = (
 
 COMPRESS = True
 COMPRESS_VERSION = True
+COMPRESS_AUTO = False
 COMPRESS_CSS_FILTERS = None
 COMPRESS_JS_FILTERS = None
+
 COMPRESS_CSS = {
     'screen': {
         'source_filenames': ('css/reset-fonts-grids.css',
