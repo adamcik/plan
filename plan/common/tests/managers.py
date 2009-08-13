@@ -17,7 +17,7 @@
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
 from plan.common.tests.base import BaseTestCase
-from plan.common.models import Lecture, Semester, Deadline, Exam, Course, UserSet
+from plan.common.models import Lecture, Semester, Deadline, Exam, Course, Subscription
 
 class ManagerTestCase(BaseTestCase):
     fixtures = ['test_data.json', 'test_user.json']
@@ -68,10 +68,10 @@ class ManagerTestCase(BaseTestCase):
         # multiple exams on time per exam
         self.assertEquals(courses, [1, 1, 1, 1, 2, 3, 4, 4])
 
-    def test_get_usersets(self):
-        control = UserSet.objects.filter(id__in=[1,2,3])
-        usersets = UserSet.objects.get_usersets(2009, Semester.SPRING, 'adamcik')
-        self.assertEquals(set(control), set(usersets))
+    def test_get_subscriptions(self):
+        control = Subscription.objects.filter(id__in=[1,2,3])
+        subscriptions = Subscription.objects.get_subscriptions(2009, Semester.SPRING, 'adamcik')
+        self.assertEquals(set(control), set(subscriptions))
 
     def test_search(self):
         control = Course.objects.exclude(id=5)

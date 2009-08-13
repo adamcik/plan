@@ -220,9 +220,9 @@ def add_deadlines(deadlines, semester, cal):
         if d.time:
             start = datetime.combine(d.date, d.time)
 
-        summary = u'%s - %s' % (d.task, d.alias or d.userset.course)
-        desc = u'%s - %s (%s)' % (d.task, d.userset.course.name,
-                d.userset.course.code)
+        summary = u'%s - %s' % (d.task, d.alias or d.subscription.course)
+        desc = u'%s - %s (%s)' % (d.task, d.subscription.course.name,
+                d.subscription.course.code)
 
         vevent.add('summary').value = summary
         vevent.add('description').value = desc
