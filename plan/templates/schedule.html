@@ -6,8 +6,7 @@
 {% block extrastyle %}
     {% if courses %}
         <style type="text/css">
-          {% for course in courses %}
-            .course-{{ course.id }} { background-color: {% color course.id %} }
+          {% for course in courses %}.course-{{ course.id }} { background-color: {% color course.id %} }
           {% endfor %}
         </style>
     {% endif %}
