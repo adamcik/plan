@@ -119,7 +119,6 @@ class DeadlineAdmin(admin.ModelAdmin):
 
         return form
 
-admin.site.register(User)
 admin.site.register(Course, CourseAdmin)
 admin.site.register(Exam, ExamAdmin)
 admin.site.register(Group)

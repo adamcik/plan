@@ -1,9 +1,4 @@
 # Copyright 2008, 2009 Thomas Kongevold Adamcik
-# 2009 IME Faculty Norwegian University of Science and Technology
-
-# This file is part of Plan.
-#
-# Plan is free software: you can redistribute it and/or modify
 # it under the terms of the Affero GNU General Public License as 
 # published by the Free Software Foundation, either version 3 of
 # the License, or (at your option) any later version.
@@ -18,8 +13,13 @@
 
 from django.conf.urls.defaults import *
 from django.conf import settings
+from django.contrib import admin
+from django.contrib.auth.models import Group
+from django.contrib.sites.models import Site
 
-from plan.common.admin import admin
+admin.autodiscover()
+admin.site.unregister(Group)
+admin.site.unregister(Site)
 
 handler500 = 'plan.common.utils.server_error'
 
