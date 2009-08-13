@@ -113,6 +113,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.i18n',
     'django.core.context_processors.media',
     'django.core.context_processors.request',
+    'plan.common.context_processors.source_url',
 )
 
 INSTALLED_APPS = (
@@ -181,3 +182,6 @@ CACHE_TIME_AJAX      = 60*60*24*7   #  1w
 # Hostname to be used in UID of ical events, should be a constant service-name
 # as UID changes will trigger email notices for new events in some cases.
 ICAL_HOSTNAME = socket.getfqdn()
+
+# Where the software can be downloaded.
+SOURCE_URL = 'https://trac.ime.ntnu.no/timeplan'
