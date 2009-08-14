@@ -1,6 +1,7 @@
 {% load i18n %}
 {% load nbsp %}
 {% load strip %}
+{% load get %}
 
 {% if prev_week %}
     <a href="{% url schedule-week semester.year,semester.type,slug,prev_week %}" id="previous">«</a>
@@ -55,7 +56,7 @@
 
                                 {% if c.lecture %}
                                     <div class="course">{{ c.lecture.alias|default:c.lecture.course.code }}</div>
-                                    <div class="room">{{ c.lecture.sql_rooms|join:", "|truncatewords:2 }}</div>
+                                    <div class="room">{{ rooms|get:c.lecture.id|join:", "|truncatewords:2 }}</div>
                                     <div class="type">{{ c.lecture.type|default:"" }}</div>
                                 {% endif %}
                                 {{ c.time|escape|nbsp|default:"" }}

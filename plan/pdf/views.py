@@ -111,7 +111,7 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
     for course in courses:
         color_map[course.id]
 
-    timetable = Timetable(lectures, rooms)
+    timetable = Timetable(lectures)
     if lectures:
         timetable.place_lectures()
         timetable.do_expansion()
@@ -153,9 +153,9 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
                     paragraph_style.leading = 8
 
                     if lecture.type:
-                        content += [Paragraph('<font size=6>%s</font>' % lecture.type.name.replace('/', ' / '), paragraph_style)]
+                        content += [Paragraph(u'<font size=6>%s</font>' % lecture.type.name.replace('/', ' / '), paragraph_style)]
 
-                    content += [Paragraph('<font size=6>%s</font>' % ', '.join(lecture.sql_rooms), paragraph_style)]
+                    content += [Paragraph(u'<font size=6>%s</font>' % u', '.join(rooms.get(lecture.id, [])), paragraph_style)]
 
                     paragraph_style.leading = 12
                     paragraph_style.fontName = 'Helvetica-Bold'
