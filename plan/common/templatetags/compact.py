@@ -23,5 +23,32 @@ from plan.common.utils import compact_sequence
 register = template.Library()
 
 @register.filter
-def compact(list):
-    return compact_sequence(list)
+def compact(sequence):
+    '''Compact sequences of numbers into array of strings [i, j, k-l, n-m]'''
+    if not sequence:
+        return []
+
+    sequence.sort()
+
+    compact = []
+    first = sequence[0]
+    last = sequence[0] - 1
+
+    for item in sequence:
+        if last == item - 1:
+            last = item
+        else:
+            if first != last:
+                compact.append('%d-%d' % (first, last))
+            else:
+                compact.append('%d' % first)
+
+            first = item
+            last = item
+
+    if first != last:
+        compact.append('%d-%d' % (first, last))
+    else:
+        compact.append('%d' % first)
+
+    return compact
