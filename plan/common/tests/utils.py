@@ -19,7 +19,8 @@
 from django.conf import settings
 
 from plan.common.tests.base import BaseTestCase
-from plan.common.utils import ColorMap, compact_sequence
+from plan.common.utils import ColorMap
+from plan.common.templatetags.compact import compact
 
 class UtilTestCase(BaseTestCase):
     fixtures = ['test_data.json']
@@ -39,14 +40,14 @@ class UtilTestCase(BaseTestCase):
 
     def test_compact_sequence(self):
 
-        seq = compact_sequence([1, 2, 3, 5, 6, 7, 8, 12, 13, 15, 17, 19])
+        seq = compact([1, 2, 3, 5, 6, 7, 8, 12, 13, 15, 17, 19])
         self.assertEquals(seq, ['1-3', '5-8', '12-13', '15', '17', '19'])
 
-        seq = compact_sequence([1, 2, 3])
+        seq = compact([1, 2, 3])
         self.assertEquals(seq, ['1-3'])
 
-        seq = compact_sequence([1, 3])
+        seq = compact([1, 3])
         self.assertEquals(seq, ['1', '3'])
 
-        seq = compact_sequence([])
+        seq = compact([])
         self.assertEquals(seq, [])
