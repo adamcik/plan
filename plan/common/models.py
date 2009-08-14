@@ -22,6 +22,7 @@ from django.db import models, connection
 from django.http import Http404
 from django.template.defaultfilters import time as time_filter
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth.models import User
 
 from plan.common.managers import LectureManager, DeadlineManager, \
         ExamManager, CourseManager, SubscriptionManager
@@ -31,6 +32,7 @@ now = datetime.now
 
 class Student(models.Model):
     slug = models.SlugField(_('Slug'), unique=True)
+    user = models.ForeignKey(User, null=True, blank=True)
 
     class Meta:
         verbose_name = _('Student')
