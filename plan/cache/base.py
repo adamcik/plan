@@ -101,5 +101,3 @@ class CacheClass(BaseCache):
         key, kwargs = self._prefix(key, **kwargs)
         logger.debug('Checking key: %s' % key)
         return django_cache.has_key(key, *args, **kwargs)
-
-cache = CacheClass()

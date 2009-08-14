@@ -42,30 +42,6 @@ class UserBasedExceptionMiddleware(object):
         if request.user.is_superuser:
             return technical_500_response(request, *sys.exc_info())
 
-class CacheMiddleware(object):
-    '''Attaches either a real or dummy cache instance to our request, cache
-       instance should only be used for retrival'''
-
-    def __init__(self):
-        self.logger = logging.getLogger('plan.middleware.cache')
-
-    def process_request(self, request):
-        request.use_cache = True
-
-        if self._ignore_cache(request):
-            self.logger.debug('Ignoring cache')
-            request.use_cache = False
-
-        return None
-
-    def _ignore_cache(self, request):
-        return (
-            (request.user.is_authenticated() and
-             request.META.get('HTTP_CACHE_CONTROL', '').lower() == 'no-cache') or
-            'no-cache' in request.GET or
-            'no-cache' in request.COOKIES
-        )
-
 class PlainContentMiddleware(object):
     def __init__(self):
         self.logger = logging.getLogger('plan.middleware.plain')

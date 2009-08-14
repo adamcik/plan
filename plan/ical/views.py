@@ -29,7 +29,7 @@ from django.conf import settings
 from django.utils.translation import ugettext as _
 
 from plan.common.models import Exam, Deadline, Lecture, Semester, Room, Week
-from plan.common.cache import get_realm, cache
+from plan.cache import get_realm, cache
 
 HOSTNAME = settings.ICAL_HOSTNAME
 

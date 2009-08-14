@@ -16,21 +16,6 @@
 # You should have received a copy of the Affero GNU General Public
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
-from django.test import TestCase
-from django.conf import settings
+from plan.cache.base import CacheClass, get_realm, clear_cache
 
-from plan.common.cache import cache
-
-class NotUsingDummyCache(TestCase):
-    def testNotUsingDummyCache(self):
-        self.assertEquals(False, 'dummy' in settings.CACHE_BACKEND)
-
-        self.assertEquals(None, cache.get('test-value'))
-
-        cache.set('test-value', 'foo')
-
-        self.assertEquals('foo', cache.get('test-value'))
-
-        cache.delete('test-value')
-
-        self.assertEquals(None, cache.get('test-value'))
+cache = CacheClass()
