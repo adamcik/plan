@@ -50,6 +50,8 @@ class Subscription(models.Model):
     exclude = models.ManyToManyField('Lecture', blank=True, null=True,
         related_name='excluded_from')
 
+    color = models.CharField(_('Color'), max_length=6, blank=True)
+
     objects = SubscriptionManager()
 
     class Meta:
