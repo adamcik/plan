@@ -43,7 +43,7 @@
             {% if advanced %}
                 <button type="submit"><span class="icon hide">{% trans "Hide selected lectures" %}</span></button>
             {% else %}
-                {% url schedule-advanced semester.year,semester.get_type_display,slug as advanced_url %}
+                {% url schedule-advanced semester.year,semester.type,slug as advanced_url %}
                 {% blocktrans %}
                     Go to <a href="{{ advanced_url }}#lectures">advanced options</a>
                     to toggle which lectures to hide.

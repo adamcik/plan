@@ -87,7 +87,7 @@ class ViewTestCase(BaseTestCase):
 
         week = 1
         for name in ['schedule', 'schedule-advanced', 'schedule-week', 'schedule-week', 'schedule-all']:
-            args = [s.year, s.get_type_display(), 'adamcik']
+            args = [s.year, s.type, 'adamcik']
 
             if name.endswith('week'):
                 args.append(week)
@@ -121,7 +121,7 @@ class ViewTestCase(BaseTestCase):
 
         s = Semester.current()
         url = self.url('course-list')
-        key = '/'.join([str(s.year), s.get_type_display(), 'courses'])
+        key = '/'.join([str(s.year), s.type, 'courses'])
 
         response = self.client.get(url)
         self.failUnlessEqual(response.status_code, 200)
@@ -310,7 +310,7 @@ class ViewTestCase(BaseTestCase):
 
     def test_course_query(self):
         url = reverse('course-query', args=[self.semester.year,
-                self.semester.get_type_display()])
+                self.semester.type])
 
         response = self.client.get(url)
 
