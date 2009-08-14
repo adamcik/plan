@@ -81,7 +81,7 @@ class DeadlineForm(forms.models.ModelForm):
         self.fields['task'].widget.attrs['size'] = 20
 
 class ScheduleForm(forms.Form):
-    slug = forms.CharField()
+    slug = forms.CharField(max_length=50)
     semester = forms.ModelChoiceField(Semester.objects.all(), empty_label=None)
 
     def __init__(self, *args, **kwargs):
