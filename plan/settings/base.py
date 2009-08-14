@@ -128,6 +128,7 @@ INSTALLED_APPS = (
     'plan.scrape',
     'plan.ical',
     'plan.pdf',
+    'plan.google',
 )
 
 COMPRESS = True
