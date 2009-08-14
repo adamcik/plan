@@ -159,6 +159,12 @@ class Course(models.Model):
 
         return name
 
+    @property
+    def short_name(self):
+        if self.version:
+            return u'-'.join([self.code, self.version])
+        return self.code
+
     @staticmethod
     def get_stats(semester=None, limit=15):
         if hasattr(semester, 'pk'):
@@ -370,7 +376,7 @@ class Lecture(models.Model):
     def __unicode__(self):
         return u'%4d %10s %s-%s on %3s' % (
             self.id,
-            self.course.name,
+            self.course.short_name,
             time_filter(self.start),
             time_filter(self.end),
             self.get_day_display()[:3])
