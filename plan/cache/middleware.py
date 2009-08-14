@@ -16,12 +16,29 @@
 # You should have received a copy of the Affero GNU General Public
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
-from plan.common.tests.managers import *
-from plan.common.tests.middleware import *
-from plan.common.tests.models import *
-from plan.common.tests.timetable import *
-from plan.common.tests.utils import *
-from plan.common.tests.views import *
+import logging
 
-# FIXME test that api limits things to one semester
-# FIXME test get_stats
+class CacheMiddleware(object):
+    '''Attaches either a real or dummy cache instance to our request, cache
+       instance should only be used for retrival'''
+
+    def __init__(self):
+        self.logger = logging.getLogger('plan.middleware.cache')
+
+    def process_request(self, request):
+        request.use_cache = True
+
+        if self._ignore_cache(request):
+            self.logger.debug('Ignoring cache')
+            request.use_cache = False
+
+        return None
+
+    def _ignore_cache(self, request):
+        return (
+            (request.user.is_authenticated() and
+             request.META.get('HTTP_CACHE_CONTROL', '').lower() == 'no-cache') or
+            'no-cache' in request.GET or
+            'no-cache' in request.COOKIES
+        )
+

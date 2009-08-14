@@ -22,7 +22,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 from plan.common.models import Semester
-from plan.common.cache import get_realm, clear_cache, cache
+from plan.cache import get_realm, clear_cache, cache
 
 class BaseTestCase(TestCase):
     def setUp(self):

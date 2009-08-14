@@ -1,4 +1,4 @@
-# Copyright 2008, 2009 Thomas Kongevold Adamcik
+# Copyright 2009 Thomas Kongevold Adamcik
 # 2009 IME Faculty Norwegian University of Science and Technology
 
 # This file is part of Plan.
@@ -16,30 +16,21 @@
 # You should have received a copy of the Affero GNU General Public
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
+from django.test import TestCase
+from django.conf import settings
 
-from plan.settings.base import *
-from plan.settings.local import *
+from plan.cache import cache
 
-TEST_RUNNER = 'plan.common.test_runner.test_runner_with_coverage'
+class NotUsingDummyCache(TestCase):
+    def testNotUsingDummyCache(self):
+        self.assertEquals(False, 'dummy' in settings.CACHE_BACKEND)
 
-COVERAGE_MODULES = (
-    'plan.common.admin',
-    'plan.common.forms',
-    'plan.common.logger',
-    'plan.common.managers',
-    'plan.common.middleware',
-    'plan.common.models',
-    'plan.common.timetable',
-    'plan.common.urls',
-    'plan.common.utils',
-    'plan.common.views',
-    'plan.scrape.db',
-    'plan.scrape.studweb',
-    'plan.ical.urls',
-    'plan.ical.views',
-    'plan.pdf.urls',
-    'plan.pdf.views',
-    'plan.google.templatetags',
-    'plan.cache.base',
-    'plan.cache.middleware',
-)
+        self.assertEquals(None, cache.get('test-value'))
+
+        cache.set('test-value', 'foo')
+
+        self.assertEquals('foo', cache.get('test-value'))
+
+        cache.delete('test-value')
+
+        self.assertEquals(None, cache.get('test-value'))

@@ -20,7 +20,7 @@ from django.utils.datastructures import MultiValueDict
 from django.core.urlresolvers import reverse
 
 from plan.common.tests.base import BaseTestCase
-from plan.common.cache import get_realm, cache
+from plan.cache import get_realm, cache
 from plan.common.models import Semester, Group, Subscription, Lecture, Deadline
 
 class EmptyViewTestCase(BaseTestCase):

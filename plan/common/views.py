@@ -36,7 +36,7 @@ from plan.common.forms import DeadlineForm, GroupForm, CourseAliasForm, \
         ScheduleForm
 from plan.common.utils import ColorMap
 from plan.common.timetable import Timetable
-from plan.common.cache import clear_cache, get_realm, cache
+from plan.cache import clear_cache, get_realm, cache
 from plan.common.templatetags.slugify import slugify
 
 # FIXME split into frontpage/semester, course, deadline, schedule files

@@ -93,7 +93,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'plan.common.middleware.CacheMiddleware',
+    'plan.cache.middleware.CacheMiddleware',
     'plan.common.middleware.UserBasedExceptionMiddleware',
     'plan.common.middleware.PlainContentMiddleware',
 )
@@ -128,6 +128,7 @@ INSTALLED_APPS = (
     'plan.scrape',
     'plan.ical',
     'plan.pdf',
+    'plan.cache',
     'plan.google',
 )
 

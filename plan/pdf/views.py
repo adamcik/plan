@@ -38,7 +38,7 @@ from django.utils.translation import ugettext as _
 from plan.common.models import Lecture, Semester, Room, Course
 from plan.common.timetable import Timetable
 from plan.common.utils import ColorMap
-from plan.common.cache import get_realm, cache
+from plan.cache import get_realm, cache
 
 outer_border = HexColor('#666666')
 inner_border = HexColor('#CCCCCC')
