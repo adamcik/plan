@@ -24,14 +24,12 @@ from plan.common.models import Lecture
 class Timetable:
     slots = 12
 
-    def __init__(self, lectures, rooms={}):
+    def __init__(self, lectures):
         self.lecture_queryset = lectures
         self.lectures = []
         self.table = [[[{}] for a in Lecture.DAYS] for b in range(self.slots)]
         self.span = [1] * 5
         self.date = [] * 5
-
-        self.rooms = rooms
 
     def set_week(self, year, week):
         self.date = map(lambda d: d.date(), rrule(DAILY, count=5,
@@ -107,11 +105,6 @@ class Timetable:
             height = lecture['height']
 
             expand_by = 1
-
-            # Add rooms
-            r = self.rooms.get(self.table[i][j][k]['lecture'].id, [])
-
-            self.table[i][j][k]['lecture'].sql_rooms = r
 
             # Find safe expansion of colspan
             safe = True

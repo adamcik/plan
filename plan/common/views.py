@@ -34,7 +34,7 @@ from plan.common.models import Course, Deadline, Exam, Group, \
         Lecture, Semester, Subscription, Room, Lecturer, Week, Student
 from plan.common.forms import DeadlineForm, GroupForm, CourseAliasForm, \
         ScheduleForm
-from plan.common.utils import compact_sequence, ColorMap
+from plan.common.utils import ColorMap
 from plan.common.timetable import Timetable
 from plan.common.cache import clear_cache, get_realm, cache
 from plan.common.templatetags.slugify import slugify
@@ -231,7 +231,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
         color_map[c.id]
 
     # Create Timetable
-    table = Timetable(lectures, rooms)
+    table = Timetable(lectures)
 
     if week:
         table.set_week(semester.year, week)
@@ -242,15 +242,6 @@ def schedule(request, year, semester_type, slug, advanced=False,
 
     table.add_last_marker()
     table.insert_times()
-
-    # Add extra info to lectures
-    for lecture in lectures:
-        compact_weeks = compact_sequence(weeks.get(lecture.id, []))
-
-        lecture.sql_weeks = compact_weeks
-        lecture.sql_groups = groups.get(lecture.id, [])
-        lecture.sql_lecturers = lecturers.get(lecture.id, [])
-        lecture.sql_rooms = rooms.get(lecture.id, [])
 
     if advanced:
         subscriptions = Subscription.objects.get_subscriptions(year, semester.type, slug)
@@ -312,7 +303,11 @@ def schedule(request, year, semester_type, slug, advanced=False,
             'week': week,
             'next_week': next_week,
             'prev_week': prev_week,
+            'rooms': rooms,
             'weeks': schedule_weeks,
+            'groups': groups,
+            'lecturers': lecturers,
+            'lecture_weeks': weeks,
         }, RequestContext(request))
 
     if cache_page:
