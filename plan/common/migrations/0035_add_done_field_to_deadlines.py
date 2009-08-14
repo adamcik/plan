@@ -4,7 +4,7 @@
 # This file is part of Plan.
 #
 # Plan is free software: you can redistribute it and/or modify
-# it under the terms of the Affero GNU General Public License as 
+# it under the terms of the Affero GNU General Public License as
 # published by the Free Software Foundation, either version 3 of
 # the License, or (at your option) any later version.
 #
@@ -24,11 +24,11 @@ class Migration:
     def forwards(self, orm):
         # Adding field 'Deadline.done'
         db.add_column('common_deadline', 'done', orm['common.deadline:done'])
-    
+
     def backwards(self, orm):
         # Deleting field 'Deadline.done'
         db.delete_column('common_deadline', 'done')
-    
+
     models = {
         'auth.group': {
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -154,5 +154,5 @@ class Migration:
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         }
     }
-    
+
     complete_apps = ['common']

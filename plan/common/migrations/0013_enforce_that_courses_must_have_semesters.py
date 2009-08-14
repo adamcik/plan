@@ -4,7 +4,7 @@
 # This file is part of Plan.
 #
 # Plan is free software: you can redistribute it and/or modify
-# it under the terms of the Affero GNU General Public License as 
+# it under the terms of the Affero GNU General Public License as
 # published by the Free Software Foundation, either version 3 of
 # the License, or (at your option) any later version.
 #
@@ -21,18 +21,18 @@ from django.db import models
 from plan.common.models import *
 
 class Migration:
-    
+
     def forwards(self, orm):
         # Changing field 'Course.semester'
         # (to signature: django.db.models.fields.related.ForeignKey(to=orm['common.Semester']))
         db.alter_column('common_course', 'semester_id', orm['common.course:semester'])
-    
+
     def backwards(self, orm):
-        
+
         # Changing field 'Course.semester'
         # (to signature: django.db.models.fields.related.ForeignKey(to=orm['common.Semester'], null=True, blank=True))
         db.alter_column('common_course', 'semester_id', orm['common.course:semester'])
-    
+
     models = {
         'common.course': {
             'full_name': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
@@ -113,5 +113,5 @@ class Migration:
             'number': ('django.db.models.fields.PositiveIntegerField', [], {})
         }
     }
-    
+
     complete_apps = ['common']

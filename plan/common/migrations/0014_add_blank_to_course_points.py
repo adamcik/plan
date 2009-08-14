@@ -4,7 +4,7 @@
 # This file is part of Plan.
 #
 # Plan is free software: you can redistribute it and/or modify
-# it under the terms of the Affero GNU General Public License as 
+# it under the terms of the Affero GNU General Public License as
 # published by the Free Software Foundation, either version 3 of
 # the License, or (at your option) any later version.
 #
@@ -25,14 +25,14 @@ class Migration:
         # Changing field 'Course.points'
         # (to signature: django.db.models.fields.DecimalField(null=True, max_digits=5, decimal_places=2, blank=True))
         db.alter_column('common_course', 'points', orm['common.course:points'])
-        
-    
-    
+
+
+
     def backwards(self, orm):
         # Changing field 'Course.points'
         # (to signature: django.db.models.fields.DecimalField(null=True, max_digits=5, decimal_places=2))
         db.alter_column('common_course', 'points', orm['common.course:points'])
-    
+
     models = {
         'common.course': {
             'full_name': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
@@ -113,5 +113,5 @@ class Migration:
             'number': ('django.db.models.fields.PositiveIntegerField', [], {})
         }
     }
-    
+
     complete_apps = ['common']

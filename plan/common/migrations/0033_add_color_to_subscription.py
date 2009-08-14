@@ -4,7 +4,7 @@
 # This file is part of Plan.
 #
 # Plan is free software: you can redistribute it and/or modify
-# it under the terms of the Affero GNU General Public License as 
+# it under the terms of the Affero GNU General Public License as
 # published by the Free Software Foundation, either version 3 of
 # the License, or (at your option) any later version.
 #
@@ -24,11 +24,11 @@ class Migration:
     def forwards(self, orm):
         # Adding field 'Subscription.color'
         db.add_column('common_subscription', 'color', orm['common.subscription:color'])
-    
+
     def backwards(self, orm):
         # Deleting field 'Subscription.color'
         db.delete_column('common_subscription', 'color')
-    
+
     models = {
         'common.course': {
             'Meta': {'unique_together': "[('code', 'semester', 'version')]"},
@@ -118,5 +118,5 @@ class Migration:
             'number': ('django.db.models.fields.PositiveIntegerField', [], {})
         }
     }
-    
+
     complete_apps = ['common']

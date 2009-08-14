@@ -4,7 +4,7 @@
 # This file is part of Plan.
 #
 # Plan is free software: you can redistribute it and/or modify
-# it under the terms of the Affero GNU General Public License as 
+# it under the terms of the Affero GNU General Public License as
 # published by the Free Software Foundation, either version 3 of
 # the License, or (at your option) any later version.
 #
@@ -97,7 +97,7 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
 
         if not re.match(settings.TIMETABLE_VALID_COURSE_NAMES, code):
             logging.info('Skipped %s', code)
-            continue 
+            continue
 
         # Get and or update course
         course, created = Course.objects.get_or_create(code=code, semester=semester)
@@ -248,7 +248,7 @@ def update_courses(year, semester_type, prefix=None):
 
     for code, name, points in c.fetchall():
         code = code.strip().upper()
-    
+
         if not code:
             continue
 
@@ -264,7 +264,7 @@ def update_courses(year, semester_type, prefix=None):
 
         if not re.match(settings.TIMETABLE_VALID_COURSE_NAMES, code):
             logger.info('Skipped invalid course name: %s', code)
-            continue 
+            continue
 
         try:
             course = Course.objects.get(code=code, semester=semester,

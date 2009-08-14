@@ -4,7 +4,7 @@
 # This file is part of Plan.
 #
 # Plan is free software: you can redistribute it and/or modify
-# it under the terms of the Affero GNU General Public License as 
+# it under the terms of the Affero GNU General Public License as
 # published by the Free Software Foundation, either version 3 of
 # the License, or (at your option) any later version.
 #
@@ -21,11 +21,11 @@ from django.db import models
 from plan.common.models import *
 
 class Migration:
-    
+
     def forwards(self, orm):
         db.delete_table('common_lecture_weeks')
         db.delete_table('common_week')
-    
+
     def backwards(self, orm):
         db.create_table('common_week', (
             ('id', orm['common.lecture:id']),
@@ -39,7 +39,7 @@ class Migration:
         ))
 
         db.send_create_signal('common', ['week'])
-    
+
     models = {
         'common.course': {
             'full_name': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
@@ -120,5 +120,5 @@ class Migration:
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '50', 'db_index': 'True'})
         }
     }
-    
+
     complete_apps = ['common']

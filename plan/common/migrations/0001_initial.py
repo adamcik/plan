@@ -4,7 +4,7 @@
 # This file is part of Plan.
 #
 # Plan is free software: you can redistribute it and/or modify
-# it under the terms of the Affero GNU General Public License as 
+# it under the terms of the Affero GNU General Public License as
 # published by the Free Software Foundation, either version 3 of
 # the License, or (at your option) any later version.
 #
@@ -21,9 +21,9 @@ from django.db import models
 from plan.common.models import *
 
 class Migration:
-    
+
     def forwards(self, orm):
-        
+
         # Adding model 'Type'
         db.create_table('common_type', (
             ('id', orm['common.Type:id']),
@@ -31,7 +31,7 @@ class Migration:
             ('optional', orm['common.Type:optional']),
         ))
         db.send_create_signal('common', ['Type'])
-        
+
         # Adding model 'Course'
         db.create_table('common_course', (
             ('id', orm['common.Course:id']),
@@ -41,7 +41,7 @@ class Migration:
             ('points', orm['common.Course:points']),
         ))
         db.send_create_signal('common', ['Course'])
-        
+
         # Adding model 'Semester'
         db.create_table('common_semester', (
             ('id', orm['common.Semester:id']),
@@ -49,21 +49,21 @@ class Migration:
             ('type', orm['common.Semester:type']),
         ))
         db.send_create_signal('common', ['Semester'])
-        
+
         # Adding model 'Lecturer'
         db.create_table('common_lecturer', (
             ('id', orm['common.Lecturer:id']),
             ('name', orm['common.Lecturer:name']),
         ))
         db.send_create_signal('common', ['Lecturer'])
-        
+
         # Adding model 'Group'
         db.create_table('common_group', (
             ('id', orm['common.Group:id']),
             ('name', orm['common.Group:name']),
         ))
         db.send_create_signal('common', ['Group'])
-        
+
         # Adding model 'Deadline'
         db.create_table('common_deadline', (
             ('id', orm['common.Deadline:id']),
@@ -73,21 +73,21 @@ class Migration:
             ('task', orm['common.Deadline:task']),
         ))
         db.send_create_signal('common', ['Deadline'])
-        
+
         # Adding model 'Week'
         db.create_table('common_week', (
             ('id', orm['common.Week:id']),
             ('number', orm['common.Week:number']),
         ))
         db.send_create_signal('common', ['Week'])
-        
+
         # Adding model 'Room'
         db.create_table('common_room', (
             ('id', orm['common.Room:id']),
             ('name', orm['common.Room:name']),
         ))
         db.send_create_signal('common', ['Room'])
-        
+
         # Adding model 'UserSet'
         db.create_table('common_userset', (
             ('id', orm['common.UserSet:id']),
@@ -98,7 +98,7 @@ class Migration:
             ('added', orm['common.UserSet:added']),
         ))
         db.send_create_signal('common', ['UserSet'])
-        
+
         # Adding model 'Exam'
         db.create_table('common_exam', (
             ('id', orm['common.Exam:id']),
@@ -114,7 +114,7 @@ class Migration:
             ('semester', orm['common.Exam:semester']),
         ))
         db.send_create_signal('common', ['Exam'])
-        
+
         # Adding model 'Lecture'
         db.create_table('common_lecture', (
             ('id', orm['common.Lecture:id']),
@@ -126,128 +126,128 @@ class Migration:
             ('type', orm['common.Lecture:type']),
         ))
         db.send_create_signal('common', ['Lecture'])
-        
+
         # Adding ManyToManyField 'Lecture.weeks'
         db.create_table('common_lecture_weeks', (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
             ('lecture', models.ForeignKey(orm.Lecture, null=False)),
             ('week', models.ForeignKey(orm.Week, null=False))
         ))
-        
+
         # Adding ManyToManyField 'Lecture.rooms'
         db.create_table('common_lecture_rooms', (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
             ('lecture', models.ForeignKey(orm.Lecture, null=False)),
             ('room', models.ForeignKey(orm.Room, null=False))
         ))
-        
+
         # Adding ManyToManyField 'Lecture.groups'
         db.create_table('common_lecture_groups', (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
             ('lecture', models.ForeignKey(orm.Lecture, null=False)),
             ('group', models.ForeignKey(orm.Group, null=False))
         ))
-        
+
         # Adding ManyToManyField 'Lecture.lecturers'
         db.create_table('common_lecture_lecturers', (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
             ('lecture', models.ForeignKey(orm.Lecture, null=False)),
             ('lecturer', models.ForeignKey(orm.Lecturer, null=False))
         ))
-        
+
         # Adding ManyToManyField 'UserSet.exclude'
         db.create_table('common_userset_exclude', (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
             ('userset', models.ForeignKey(orm.UserSet, null=False)),
             ('lecture', models.ForeignKey(orm.Lecture, null=False))
         ))
-        
+
         # Adding ManyToManyField 'Course.semesters'
         db.create_table('common_course_semesters', (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
             ('course', models.ForeignKey(orm.Course, null=False)),
             ('semester', models.ForeignKey(orm.Semester, null=False))
         ))
-        
+
         # Adding ManyToManyField 'UserSet.groups'
         db.create_table('common_userset_groups', (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
             ('userset', models.ForeignKey(orm.UserSet, null=False)),
             ('group', models.ForeignKey(orm.Group, null=False))
         ))
-        
+
         # Creating unique_together for [year, type] on Semester.
         db.create_unique('common_semester', ['year', 'type'])
-        
+
         # Creating unique_together for [slug, course, semester] on UserSet.
         db.create_unique('common_userset', ['slug', 'course_id', 'semester_id'])
-        
-    
-    
+
+
+
     def backwards(self, orm):
-        
+
         # Deleting model 'Type'
         db.delete_table('common_type')
-        
+
         # Deleting model 'Course'
         db.delete_table('common_course')
-        
+
         # Deleting model 'Semester'
         db.delete_table('common_semester')
-        
+
         # Deleting model 'Lecturer'
         db.delete_table('common_lecturer')
-        
+
         # Deleting model 'Group'
         db.delete_table('common_group')
-        
+
         # Deleting model 'Deadline'
         db.delete_table('common_deadline')
-        
+
         # Deleting model 'Week'
         db.delete_table('common_week')
-        
+
         # Deleting model 'Room'
         db.delete_table('common_room')
-        
+
         # Deleting model 'UserSet'
         db.delete_table('common_userset')
-        
+
         # Deleting model 'Exam'
         db.delete_table('common_exam')
-        
+
         # Deleting model 'Lecture'
         db.delete_table('common_lecture')
-        
+
         # Dropping ManyToManyField 'Lecture.weeks'
         db.delete_table('common_lecture_weeks')
-        
+
         # Dropping ManyToManyField 'Lecture.rooms'
         db.delete_table('common_lecture_rooms')
-        
+
         # Dropping ManyToManyField 'Lecture.groups'
         db.delete_table('common_lecture_groups')
-        
+
         # Dropping ManyToManyField 'Lecture.lecturers'
         db.delete_table('common_lecture_lecturers')
-        
+
         # Dropping ManyToManyField 'UserSet.exclude'
         db.delete_table('common_userset_exclude')
-        
+
         # Dropping ManyToManyField 'Course.semesters'
         db.delete_table('common_course_semesters')
-        
+
         # Dropping ManyToManyField 'UserSet.groups'
         db.delete_table('common_userset_groups')
-        
+
         # Deleting unique_together for [year, type] on Semester.
         db.delete_unique('common_semester', ['year', 'type'])
-        
+
         # Deleting unique_together for [slug, course, semester] on UserSet.
         db.delete_unique('common_userset', ['slug', 'course_id', 'semester_id'])
-        
-    
-    
+
+
+
     models = {
         'common.course': {
             'full_name': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
@@ -329,5 +329,5 @@ class Migration:
             'number': ('django.db.models.fields.PositiveIntegerField', [], {'unique': 'True'})
         }
     }
-    
+
     complete_apps = ['common']

@@ -4,7 +4,7 @@
 # This file is part of Plan.
 #
 # Plan is free software: you can redistribute it and/or modify
-# it under the terms of the Affero GNU General Public License as 
+# it under the terms of the Affero GNU General Public License as
 # published by the Free Software Foundation, either version 3 of
 # the License, or (at your option) any later version.
 #
@@ -24,7 +24,7 @@ from plan.common.models import *
 
 class Migration:
     no_dry_run = True
-    
+
     def forwards(self, orm):
         "Write your forwards migration here"
 
@@ -39,7 +39,7 @@ class Migration:
                 orm.Lecture.objects.filter(course=course, semester=semester).update(course=new_course)
                 orm.UserSet.objects.filter(course=course, semester=semester).update(course=new_course)
 
-    
+
     def backwards(self, orm):
         "Write your backwards migration here"
 
@@ -58,7 +58,7 @@ class Migration:
                     usersets.update(course=course)
 
         orm.Course.objects.exclude(semester=None).delete()
-    
+
     models = {
         'common.course': {
             'full_name': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
@@ -142,5 +142,5 @@ class Migration:
             'number': ('django.db.models.fields.PositiveIntegerField', [], {'unique': 'True'})
         }
     }
-    
+
     complete_apps = ['common']

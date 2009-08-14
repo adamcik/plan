@@ -4,7 +4,7 @@
 # This file is part of Plan.
 #
 # Plan is free software: you can redistribute it and/or modify
-# it under the terms of the Affero GNU General Public License as 
+# it under the terms of the Affero GNU General Public License as
 # published by the Free Software Foundation, either version 3 of
 # the License, or (at your option) any later version.
 #
@@ -21,33 +21,33 @@ from django.db import models
 from plan.common.models import *
 
 class Migration:
-    
+
     def forwards(self, orm):
-        
+
         # Creating unique_together for [code, semester, version] on Course.
         db.create_unique('common_course', ['code', 'semester_id', 'version'])
-        
+
         # Creating unique_together for [slug] on Student.
         db.create_unique('common_student', ['slug'])
-        
+
         # Creating unique_together for [name] on Lecturer.
         db.create_unique('common_lecturer', ['name'])
-        
-    
-    
+
+
+
     def backwards(self, orm):
-        
+
         # Deleting unique_together for [code, semester, version] on Course.
         db.delete_unique('common_course', ['code', 'semester_id', 'version'])
-        
+
         # Deleting unique_together for [slug] on Student.
         db.delete_unique('common_student', ['slug'])
-        
+
         # Deleting unique_together for [name] on Lecturer.
         db.delete_unique('common_lecturer', ['name'])
-        
-    
-    
+
+
+
     models = {
         'common.course': {
             'Meta': {'unique_together': "[('code', 'semester', 'version')]"},
@@ -136,5 +136,5 @@ class Migration:
             'number': ('django.db.models.fields.PositiveIntegerField', [], {})
         }
     }
-    
+
     complete_apps = ['common']

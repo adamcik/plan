@@ -4,7 +4,7 @@
 # This file is part of Plan.
 #
 # Plan is free software: you can redistribute it and/or modify
-# it under the terms of the Affero GNU General Public License as 
+# it under the terms of the Affero GNU General Public License as
 # published by the Free Software Foundation, either version 3 of
 # the License, or (at your option) any later version.
 #
@@ -21,29 +21,29 @@ from django.db import models
 from plan.common.models import *
 
 class Migration:
-    
+
     def forwards(self, orm):
-        
+
         # Deleting field 'Exam.comment'
         db.delete_column('common_exam', 'comment')
-        
+
         # Changing field 'Deadline.date'
         # (to signature: django.db.models.fields.DateField())
         db.alter_column('common_deadline', 'date', orm['common.deadline:date'])
-        
-    
-    
+
+
+
     def backwards(self, orm):
-        
+
         # Adding field 'Exam.comment'
         db.add_column('common_exam', 'comment', orm['common.exam:comment'])
-        
+
         # Changing field 'Deadline.date'
         # (to signature: django.db.models.fields.DateField(default=datetime.date(2009, 8, 17)))
         db.alter_column('common_deadline', 'date', orm['common.deadline:date'])
-        
-    
-    
+
+
+
     models = {
         'common.course': {
             'code': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
@@ -131,5 +131,5 @@ class Migration:
             'number': ('django.db.models.fields.PositiveIntegerField', [], {})
         }
     }
-    
+
     complete_apps = ['common']
