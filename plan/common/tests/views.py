@@ -40,6 +40,7 @@ class ViewTestCase(BaseTestCase):
     fixtures = ['test_data.json', 'test_user.json']
 
     # FIXME check what happens when we do GET against change functions
+    # FIXME test adding course that does not exist for a given semester
 
     def test_index(self):
         # Load page
