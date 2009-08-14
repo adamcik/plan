@@ -421,6 +421,8 @@ class Deadline(models.Model):
     date = models.DateField(_('Due date'))
     time = models.TimeField(_('Time'), null=True, blank=True)
 
+    done = models.DateTimeField(_('Done'), null=True, blank=True)
+
     objects = DeadlineManager()
 
     class Meta:
