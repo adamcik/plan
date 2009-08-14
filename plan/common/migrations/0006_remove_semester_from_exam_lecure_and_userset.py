@@ -4,7 +4,7 @@
 # This file is part of Plan.
 #
 # Plan is free software: you can redistribute it and/or modify
-# it under the terms of the Affero GNU General Public License as 
+# it under the terms of the Affero GNU General Public License as
 # published by the Free Software Foundation, either version 3 of
 # the License, or (at your option) any later version.
 #
@@ -21,7 +21,7 @@ from django.db import models
 from plan.common.models import *
 
 class Migration:
-    
+
     def forwards(self, orm):
         db.delete_unique('common_userset', ['slug', 'course_id', 'semester_id'])
         db.create_unique('common_userset', ['slug', 'course_id'])
@@ -29,15 +29,15 @@ class Migration:
         db.delete_column('common_lecture', 'semester_id')
         db.delete_column('common_exam', 'semester_id')
         db.delete_column('common_userset', 'semester_id')
-    
+
     def backwards(self, orm):
         db.add_column('common_lecture', 'semester', orm['common.lecture:semester'])
         db.add_column('common_exam', 'semester', orm['common.exam:semester'])
         db.add_column('common_userset', 'semester', orm['common.userset:semester'])
-        
+
         db.delete_unique('common_userset', ['slug', 'course_id'])
         db.create_unique('common_userset', ['slug', 'course_id', 'semester_id'])
-    
+
     models = {
         'common.course': {
             'full_name': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
@@ -118,5 +118,5 @@ class Migration:
             'number': ('django.db.models.fields.PositiveIntegerField', [], {'unique': 'True'})
         }
     }
-    
+
     complete_apps = ['common']

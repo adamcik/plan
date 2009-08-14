@@ -4,7 +4,7 @@
 # This file is part of Plan.
 #
 # Plan is free software: you can redistribute it and/or modify
-# it under the terms of the Affero GNU General Public License as 
+# it under the terms of the Affero GNU General Public License as
 # published by the Free Software Foundation, either version 3 of
 # the License, or (at your option) any later version.
 #
@@ -104,7 +104,7 @@ class ViewTestCase(BaseTestCase):
             self.assertEquals(response.status_code, 200)
             self.assertTemplateUsed(response, 'schedule.html')
 
-            # Check twice to test cache code 
+            # Check twice to test cache code
             response = self.client.get(url)
             self.assertEquals(response.status_code, 200)
 
@@ -280,7 +280,7 @@ class ViewTestCase(BaseTestCase):
         # Remove deadline
         responese = self.client.post(url, {'submit_remove': '',
                                            'deadline_remove': [deadline.id]})
-        
+
         self.assertRedirects(responese, self.url('schedule-advanced'))
         self.assertEquals(deadlines, Deadline.objects.all().count())
 
@@ -302,7 +302,7 @@ class ViewTestCase(BaseTestCase):
         self.assertContains(responese, 'Task 1', status_code=200)
 
         deadlines = Deadline.objects.all().count()
-    
+
         responese = self.client.post(url, {'deadline_id': ['3']})
 
         self.assertRedirects(responese, self.url('schedule-advanced'))

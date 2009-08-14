@@ -6,7 +6,7 @@
 # This file is part of Plan.
 #
 # Plan is free software: you can redistribute it and/or modify
-# it under the terms of the Affero GNU General Public License as 
+# it under the terms of the Affero GNU General Public License as
 # published by the Free Software Foundation, either version 3 of
 # the License, or (at your option) any later version.
 #
@@ -79,10 +79,10 @@ def update_courses(year, semester_type):
 
             if not re.match(settings.TIMETABLE_VALID_COURSE_NAMES, code):
                 logger.info('Skipped invalid course name: %s', code)
-                continue 
+                continue
 
             courses.append((code, name, version))
-            
+
     for code, name, version in courses:
         code = code.strip().upper()
         name = name.strip()
@@ -284,7 +284,7 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
         del r
 
     to_delete = Lecture.objects.exclude(id__in=lectures).filter(course__semester=semester)
-    
+
     if matches:
         return to_delete.filter(course__code__startswith=matches)
 

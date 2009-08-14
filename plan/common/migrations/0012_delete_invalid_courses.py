@@ -4,7 +4,7 @@
 # This file is part of Plan.
 #
 # Plan is free software: you can redistribute it and/or modify
-# it under the terms of the Affero GNU General Public License as 
+# it under the terms of the Affero GNU General Public License as
 # published by the Free Software Foundation, either version 3 of
 # the License, or (at your option) any later version.
 #
@@ -23,15 +23,15 @@ from plan.common.models import *
 
 class Migration:
     no_dry_run = True
-    
+
     def forwards(self, orm):
         orm.Course.objects.exclude(name__regex=settings.TIMETABLE_VALID_COURSE_NAMES).delete()
         orm.Course.objects.filter(semester=None).delete()
-    
+
     def backwards(self, orm):
         pass
-    
-    
+
+
     models = {
         'common.course': {
             'full_name': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
@@ -112,5 +112,5 @@ class Migration:
             'number': ('django.db.models.fields.PositiveIntegerField', [], {})
         }
     }
-    
+
     complete_apps = ['common']

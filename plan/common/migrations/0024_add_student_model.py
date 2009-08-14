@@ -4,7 +4,7 @@
 # This file is part of Plan.
 #
 # Plan is free software: you can redistribute it and/or modify
-# it under the terms of the Affero GNU General Public License as 
+# it under the terms of the Affero GNU General Public License as
 # published by the Free Software Foundation, either version 3 of
 # the License, or (at your option) any later version.
 #
@@ -21,9 +21,9 @@ from django.db import models
 from plan.common.models import *
 
 class Migration:
-    
+
     def forwards(self, orm):
-        
+
         # Adding model 'Student'
         db.create_table('common_student', (
             ('id', orm['common.student:id']),
@@ -31,22 +31,22 @@ class Migration:
             ('semester', orm['common.student:semester']),
         ))
         db.send_create_signal('common', ['Student'])
-        
+
         # Adding field 'UserSet.student'
         db.add_column('common_userset', 'student', orm['common.userset:student'])
-        
-    
-    
+
+
+
     def backwards(self, orm):
-        
+
         # Deleting model 'Student'
         db.delete_table('common_student')
-        
+
         # Deleting field 'UserSet.student'
         db.delete_column('common_userset', 'student_id')
-        
-    
-    
+
+
+
     models = {
         'common.course': {
             'code': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
@@ -137,5 +137,5 @@ class Migration:
             'number': ('django.db.models.fields.PositiveIntegerField', [], {})
         }
     }
-    
+
     complete_apps = ['common']

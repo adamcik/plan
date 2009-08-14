@@ -4,7 +4,7 @@
 # This file is part of Plan.
 #
 # Plan is free software: you can redistribute it and/or modify
-# it under the terms of the Affero GNU General Public License as 
+# it under the terms of the Affero GNU General Public License as
 # published by the Free Software Foundation, either version 3 of
 # the License, or (at your option) any later version.
 #
@@ -400,7 +400,7 @@ class Lecture(models.Model):
 
         objects = model.objects.filter(lecture__in=lectures)
 
-        if use_extra: 
+        if use_extra:
             objects = objects.extra(select={
                     'lecture_id': 'common_lecture_%ss.lecture_id' % name,
                 }).values_list('lecture_id', field)

@@ -4,7 +4,7 @@
 # This file is part of Plan.
 #
 # Plan is free software: you can redistribute it and/or modify
-# it under the terms of the Affero GNU General Public License as 
+# it under the terms of the Affero GNU General Public License as
 # published by the Free Software Foundation, either version 3 of
 # the License, or (at your option) any later version.
 #
@@ -21,9 +21,9 @@ from django.db import models
 from plan.common.models import *
 
 class Migration:
-    
+
     def forwards(self, orm):
-        
+
         # Adding model 'NewWeek'
         db.create_table('common_newweek', (
             ('id', orm['common.newweek:id']),
@@ -31,22 +31,22 @@ class Migration:
             ('number', orm['common.newweek:number']),
         ))
         db.send_create_signal('common', ['NewWeek'])
-        
+
         # Creating unique_together for [lecture, number] on NewWeek.
         db.create_unique('common_newweek', ['lecture_id', 'number'])
-        
-    
-    
+
+
+
     def backwards(self, orm):
-        
+
         # Deleting model 'NewWeek'
         db.delete_table('common_newweek')
-        
+
         # Deleting unique_together for [lecture, number] on NewWeek.
         db.delete_unique('common_newweek', ['lecture_id', 'number'])
-        
-    
-    
+
+
+
     models = {
         'common.course': {
             'full_name': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
@@ -132,5 +132,5 @@ class Migration:
             'number': ('django.db.models.fields.PositiveIntegerField', [], {'unique': 'True'})
         }
     }
-    
+
     complete_apps = ['common']

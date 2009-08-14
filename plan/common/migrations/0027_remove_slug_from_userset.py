@@ -4,7 +4,7 @@
 # This file is part of Plan.
 #
 # Plan is free software: you can redistribute it and/or modify
-# it under the terms of the Affero GNU General Public License as 
+# it under the terms of the Affero GNU General Public License as
 # published by the Free Software Foundation, either version 3 of
 # the License, or (at your option) any later version.
 #
@@ -21,29 +21,29 @@ from django.db import models
 from plan.common.models import *
 
 class Migration:
-    
+
     def forwards(self, orm):
         # Deleting unique_together for [slug, course] on userset.
         db.delete_unique('common_userset', ['slug', 'course_id'])
-        
+
         # Deleting field 'UserSet.slug'
         db.delete_column('common_userset', 'slug')
-        
+
         # Creating unique_together for [student, course] on UserSet.
         db.create_unique('common_userset', ['student_id', 'course_id'])
-    
+
     def backwards(self, orm):
         # Adding field 'UserSet.slug'
         db.add_column('common_userset', 'slug', orm['common.userset:slug'])
-        
+
         # Deleting unique_together for [student, course] on UserSet.
         db.delete_unique('common_userset', ['student_id', 'course_id'])
-        
+
         # Creating unique_together for [slug, course] on userset.
         db.create_unique('common_userset', ['slug', 'course_id'])
-        
-    
-    
+
+
+
     models = {
         'common.course': {
             'code': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
@@ -133,5 +133,5 @@ class Migration:
             'number': ('django.db.models.fields.PositiveIntegerField', [], {})
         }
     }
-    
+
     complete_apps = ['common']
