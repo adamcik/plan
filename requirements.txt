@@ -1,15 +1,13 @@
-yolk                   # Util to list installed packages
-ipython                # Better interactive python shell
+ipython          # Better interactive python shell
 
-Django == 1.0.3        # Django webframework
-psycopg2               # Postgres database adapter
-python-memcached       # Memcache client library
+Django           # Django webframework
+psycopg2         # Postgres database adapter
+python-memcached # Memcache client library
 
-vobject                # Ical generation
-                       # PDF generation
-http://www.reportlab.org/ftp/ReportLab_2_2.tgz
+vobject          # Ical generation
+ReportLab        # PDF generation
 
-django-compress        # CSS and JS compression
-south                  # Database migrations
+django-compress  # CSS and JS compression
+south            # Database migrations
 
-BeautifulSoup          # Web scraping of data
+BeautifulSoup    # Web scraping of data
