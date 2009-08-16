@@ -23,6 +23,7 @@ from plan.common.models import *
 class Migration:
 
     def forwards(self, orm):
+        db.delete_index('common_student', ['slug'])
 
         # Creating unique_together for [code, semester, version] on Course.
         db.create_unique('common_course', ['code', 'semester_id', 'version'])

@@ -23,20 +23,14 @@ from plan.common.models import *
 class Migration:
 
     def forwards(self, orm):
-
         # Changing field 'UserSet.student'
         # (to signature: django.db.models.fields.related.ForeignKey(to=orm['common.Student']))
         db.alter_column('common_userset', 'student_id', orm['common.userset:student'])
 
-
-
     def backwards(self, orm):
-
         # Changing field 'UserSet.student'
         # (to signature: django.db.models.fields.related.ForeignKey(to=orm['common.Student'], null=True))
         db.alter_column('common_userset', 'student_id', orm['common.userset:student'])
-
-
 
     models = {
         'common.course': {
@@ -107,7 +101,6 @@ class Migration:
         },
         'common.student': {
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'semester': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['common.Semester']"}),
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '50', 'db_index': 'True'})
         },
         'common.userset': {
