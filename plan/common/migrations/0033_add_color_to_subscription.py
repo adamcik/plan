@@ -23,7 +23,7 @@ from plan.common.models import *
 class Migration:
     def forwards(self, orm):
         # Adding field 'Subscription.color'
-        db.add_column('common_subscription', 'color', orm['common.subscription:color'])
+        db.add_column('common_subscription', 'color', orm['common.subscription:color'], keep_default=False)
 
     def backwards(self, orm):
         # Deleting field 'Subscription.color'
@@ -104,7 +104,7 @@ class Migration:
             'Meta': {'unique_together': "(('student', 'course'),)"},
             'added': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'alias': ('django.db.models.fields.CharField', [], {'max_length': '50', 'blank': 'True'}),
-            'color': ('django.db.models.fields.CharField', [], {'max_length': '6', 'blank': 'True'}),
+            'color': ('django.db.models.fields.CharField', [], {'max_length': '6', 'blank': 'True', 'default': "''"}),
             'course': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['common.Course']"}),
             'exclude': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['common.Lecture']", 'null': 'True', 'blank': 'True'}),
             'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['common.Group']", 'null': 'True', 'blank': 'True'}),

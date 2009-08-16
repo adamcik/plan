@@ -25,7 +25,7 @@ class Migration:
 
     def forwards(self, orm):
         for userset in orm.Userset.objects.select_related('course'):
-            student, created = orm.Student.objects.get_or_create(slug=userset.slug, semester=userset.course.semester)
+            student, created = orm.Student.objects.get_or_create(slug=userset.slug)
             userset.student = student
             userset.save()
 
@@ -102,7 +102,6 @@ class Migration:
         },
         'common.student': {
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'semester': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['common.Semester']"}),
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '50', 'db_index': 'True'})
         },
         'common.userset': {

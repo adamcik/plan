@@ -28,7 +28,6 @@ class Migration:
         db.create_table('common_student', (
             ('id', orm['common.student:id']),
             ('slug', orm['common.student:slug']),
-            ('semester', orm['common.student:semester']),
         ))
         db.send_create_signal('common', ['Student'])
 
@@ -116,7 +115,6 @@ class Migration:
         },
         'common.student': {
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'semester': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['common.Semester']"}),
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '50', 'db_index': 'True'})
         },
         'common.userset': {
