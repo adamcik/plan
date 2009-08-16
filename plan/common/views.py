@@ -120,7 +120,7 @@ def getting_started(request, year=None, semester_type=None):
 
 def course_query(request, year, semester_type):
     limit = request.GET.get('limit', '10')
-    query = request.GET.get('q', '').strip()
+    query = request.GET.get('q', '').strip()[:100]
 
     if limit > settings.TIMETABLE_AJAX_LIMIT:
         limit = settings.TIMETABLE_AJAX_LIMIT
