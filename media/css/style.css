@@ -35,6 +35,13 @@ h2 {
 	margin-top: 0;
 }
 
+hr {
+	color: #D3D7CF;
+	background: #D3D7CF;
+	border: 0;
+	height: 1px;
+}
+
 /* Tables */
 table {
 	width: 100%;
@@ -197,7 +204,6 @@ td.error input, td.error select {
 	padding: 1em 0.5em 0;
 	color: #2E3436;
 	margin-bottom: 1em;
-	border-bottom: 1px solid #D3D7CF;
 	border-top: 1px solid #D3D7CF;
 }
 
