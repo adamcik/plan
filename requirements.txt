@@ -7,7 +7,9 @@ python-memcached # Memcache client library
 vobject          # Ical generation
 ReportLab        # PDF generation
 
-django-compress  # CSS and JS compression
+#django-compress  # CSS and JS compression
+# Use github version to get COMPRESS_VERSION_REMOVE_OLD support
+-e  git://github.com/bryanchow/django-compress.git#egg=compress
 south            # Database migrations
 
 BeautifulSoup    # Web scraping of data
