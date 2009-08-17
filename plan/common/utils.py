@@ -17,6 +17,8 @@
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
 from operator import and_, or_
+from dateutil.rrule import rrule, WEEKLY, MO
+from datetime import date
 
 from django.conf import settings
 from django.http import HttpResponseServerError
@@ -118,3 +120,9 @@ class ColorMap(dict):
             else:
                 self[k] = 'color%d' % (self.index % self.max)
             return super(ColorMap, self).__getitem__(k)
+
+def max_number_of_weeks(year):
+    if list(rrule(WEEKLY, count=1, byweekno=53, byweekday=MO, dtstart=date(year, 1,1)))[0].year == year:
+        return 53
+    return 52
+

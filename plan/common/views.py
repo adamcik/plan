@@ -34,7 +34,7 @@ from plan.common.models import Course, Deadline, Exam, Group, \
         Lecture, Semester, Subscription, Room, Lecturer, Week, Student
 from plan.common.forms import DeadlineForm, GroupForm, CourseAliasForm, \
         ScheduleForm
-from plan.common.utils import ColorMap
+from plan.common.utils import ColorMap, max_number_of_weeks
 from plan.common.timetable import Timetable
 from plan.cache import clear_cache, get_realm, cache
 from plan.common.templatetags.slugify import slugify
@@ -177,9 +177,11 @@ def schedule(request, year, semester_type, slug, advanced=False,
 
     if week:
         week = int(week)
+        max_week = max_number_of_weeks(semester.year)
 
-    if week is not None and (week <= 0 or week > 53):
-        raise Http404
+    if week is not None:
+        if (week <= 0 or week > max_week):
+            raise Http404
 
     realm = get_realm(semester, slug)
     response = cache.get(url, realm=realm)
@@ -220,7 +222,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
     next_week = None
     prev_week = None
 
-    if week and week < 53:
+    if week and week < max_week:
         next_week = week+1
 
     if week and week > 1:
