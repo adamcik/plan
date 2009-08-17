@@ -1,0 +1,5 @@
+*.pyc
+*.sqlite
+plan/settings/local.py
+pip-log.txt
+env
