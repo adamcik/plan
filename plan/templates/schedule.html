@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load title %}
 {% load color %}
+{% load compressed %}
 
 {% block extrastyle %}
     {% if courses %}
@@ -17,7 +18,10 @@
 {% endblock %}
 
 {% block extrascript %}
-    <script type="text/javascript">var autocomplete_url = "{% url course-query semester.year,semester.type %}";</script>
+    {% if advanced or not courses %}
+        <script type="text/javascript">var autocomplete_url = "{% url course-query semester.year,semester.type %}";</script>
+        {% compressed_js 'all' %}
+    {% endif %}
     {{ block.super }}
 {% endblock %}
 
