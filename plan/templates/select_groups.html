@@ -2,6 +2,7 @@
 
 {% load i18n %}
 {% load color %}
+{% load compressed %}
 
 {% block extrastyle %}
     {% if courses %}
@@ -25,6 +26,11 @@
           }
         </style>
     {% endif %}
+{% endblock %}
+
+{% block extrascript %}
+    {% compressed_js 'all' %}
+    {{ block.super }}
 {% endblock %}
 
 {% block title %}
