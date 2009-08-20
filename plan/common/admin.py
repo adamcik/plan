@@ -24,7 +24,7 @@ from plan.common.models import Course, Exam, Group, Lecture, Lecturer, \
 
 class CourseAdmin(admin.ModelAdmin):
     list_display = ('code', 'points', 'name', 'url', 'semester')
-    list_filter = ('semester',)
+    list_filter = ('semester', 'points')
     search_fields = ('code', 'name')
 
 class ExamAdmin(admin.ModelAdmin):
