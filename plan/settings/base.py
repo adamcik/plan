@@ -151,6 +151,7 @@ COMPRESS_JS = {
         'source_filenames': ('js/jquery-1.3.1.min.js',
                              'js/jquery.autocomplete.min.js',
                              'js/autocomplete.js',
+                             'js/navigation.js',
                              'js/advanced.js'),
         'output_filename': 'compressed/all.r?.js',
     },
