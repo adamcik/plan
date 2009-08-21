@@ -18,11 +18,8 @@
 {% endblock %}
 
 {% block extrascript %}
-    {% if advanced or not courses %}
-        <script type="text/javascript">var autocomplete_url = "{% url course-query semester.year,semester.type %}";</script>
-        {% compressed_js 'all' %}
-    {% endif %}
-    {{ block.super }}
+    <script type="text/javascript">var autocomplete_url = "{% url course-query semester.year,semester.type %}";</script>
+    {% compressed_js 'all' %}
 {% endblock %}
 
 {% block title %}
