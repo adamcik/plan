@@ -12,9 +12,9 @@ $(document).keyup(function(event) {
   }
 
   var url = null;
-  if (event.keyCode == 74) { // j
+  if (event.keyCode == 74 || event.keyCode == 37) { // j or ←
     url = $('#previous').attr('href');
-  } else if (event.keyCode == 75) { // k
+  } else if (event.keyCode == 75 || event.keyCode == 39) { // k or →
     url = $('#next').attr('href');
   }
 
