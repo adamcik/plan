@@ -11,10 +11,12 @@ $(document).keyup(function(event) {
     return true;
   }
 
+  var scroll = $(window).width() < $(document).width();
   var url = null;
-  if (event.keyCode == 74 || event.keyCode == 37) { // j or ←
+
+  if (event.keyCode == 74 || (!scroll && event.keyCode == 37)) { // j or ←
     url = $('#previous').attr('href');
-  } else if (event.keyCode == 75 || event.keyCode == 39) { // k or →
+  } else if (event.keyCode == 75 || (!scroll && event.keyCode == 39)) { // k or →
     url = $('#next').attr('href');
   }
 
