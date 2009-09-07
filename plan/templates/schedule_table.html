@@ -51,7 +51,7 @@
                                         {% endif %}
                                     "
                                 {% endif %}
-                                {% if c.lecture %}title="{{ c.lecture.course.name }}"{% endif %}
+                                {% if c.lecture %}title="{{ c.lecture.course.name }} {{ c.lecture.start|time }}-{{ c.lecture.end|time }}"{% endif %}
                             {% endstripspace %}>
 
                                 {% if c.lecture %}
