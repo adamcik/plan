@@ -231,9 +231,13 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
             lecture_type, created = LectureType.objects.get_or_create(name=name)
         else:
             lecture_type = None
-
-        day = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag']. \
-                index(r['time'][0][0])
+        # Figure out day mapping
+        try:
+	    day = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag']. \
+	        index(r['time'][0][0])
+        except ValueError:
+            logger.warning("Could not add %s - %s on %s for %s" % (start, end, day, course))
+            continue
 
         start = parse(r['time'][0][1]).time()
         end = parse(r['time'][0][2]).time()
