@@ -1,7 +1,7 @@
 {% load i18n %}
 
 <form action="{% url change-course semester.year,semester.type,slug %}" method="post">
-    <h2>Courses</h2>
+    <h2>{% trans "Courses" %}</h2>
     {% if courses %}
         <table id="courses">
             <thead>
