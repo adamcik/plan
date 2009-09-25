@@ -20,6 +20,7 @@ from os.path import realpath, join, dirname
 import socket
 
 # Dummy translation fuction as we can't import real one
+# http://docs.djangoproject.com/en/1.0/topics/i18n/#id2
 ugettext = lambda s: s
 
 BASE_PATH = realpath(join(dirname(__file__), '..', '..'))
@@ -94,6 +95,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'plan.cache.middleware.CacheMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'plan.common.middleware.UserBasedExceptionMiddleware',
     'plan.common.middleware.PlainContentMiddleware',
 )
