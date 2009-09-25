@@ -3,18 +3,19 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: Timeplan\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-14 12:46+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"POT-Creation-Date: 2009-09-25 13:44+0200\n"
+"PO-Revision-Date: 2009-09-25 13:58+0100\n"
+"Last-Translator: Rune M. Andersen <webmaster@ime.ntnu.no>\n"
+"Language-Team:  <webmaster@ime.ntnu.no>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Norwegian Bokmal\n"
+"X-Poedit-Country: NORWAY\n"
 
 #: common/models.py:34
 msgid "Slug"
@@ -22,447 +23,515 @@ msgstr ""
 
 #: common/models.py:38
 msgid "Student"
-msgstr ""
+msgstr "Student"
 
 #: common/models.py:39
 msgid "Students"
-msgstr ""
+msgstr "Studenter"
 
-#: common/models.py:48 templates/courses.html:13
+#: common/models.py:48
+#: templates/courses.html:13
 msgid "Alias"
-msgstr ""
+msgstr "Alias"
 
 #: common/models.py:49
 msgid "Added"
-msgstr ""
+msgstr "Lagt til"
 
 #: common/models.py:55
 msgid "Color"
-msgstr ""
+msgstr "Farge"
 
 #: common/models.py:62
 msgid "Subscription"
-msgstr ""
+msgstr "Abonnement"
 
 #: common/models.py:63
 msgid "Subscriptions"
-msgstr ""
+msgstr "Abonnementer"
 
-#: common/models.py:89 common/models.py:100 common/models.py:112
-#: common/models.py:125 common/models.py:289 common/models.py:338
+#: common/models.py:89
+#: common/models.py:100
+#: common/models.py:112
+#: common/models.py:125
+#: common/models.py:289
+#: common/models.py:338
 #: templates/course_list.html:46
 msgid "Name"
-msgstr ""
+msgstr "Navn"
 
 #: common/models.py:90
 msgid "Optional"
-msgstr ""
+msgstr "Valgfritt"
 
 #: common/models.py:96
 msgid "Lecture type"
-msgstr ""
+msgstr "Forelesningstype"
 
 #: common/models.py:97
 msgid "Lecture types"
-msgstr ""
+msgstr "Forelesningstyper"
 
 #: common/models.py:106
 msgid "Room"
-msgstr ""
+msgstr "Rom"
 
-#: common/models.py:107 templates/lectures.html:15
+#: common/models.py:107
+#: templates/lectures.html:17
 msgid "Rooms"
-msgstr ""
+msgstr "Rom"
 
 #: common/models.py:118
 msgid "Group"
-msgstr ""
+msgstr "Gruppe"
 
-#: common/models.py:119 templates/lectures.html:17
+#: common/models.py:119
+#: templates/lectures.html:19
 msgid "Groups"
-msgstr ""
+msgstr "Grupper"
 
-#: common/models.py:122 common/models.py:288
+#: common/models.py:122
+#: common/models.py:288
 msgid "Code"
-msgstr ""
+msgstr "Kode"
 
 #: common/models.py:126
 msgid "Version"
-msgstr ""
+msgstr "Versjon"
 
 #: common/models.py:128
 msgid "URL"
-msgstr ""
+msgstr "URL"
 
 #: common/models.py:129
 msgid "Points"
-msgstr ""
+msgstr "Studiepoeng"
 
-#: common/models.py:134 templates/add_deadlines.html:11
-#: templates/course_list.html:45 templates/courses.html:12
-#: templates/deadlines.html:12 templates/exams.html:12
-#: templates/lectures.html:12 templates/select_deadlines.html:24
+#: common/models.py:134
+#: templates/add_deadlines.html:11
+#: templates/course_list.html:45
+#: templates/courses.html:12
+#: templates/deadlines.html:12
+#: templates/exams.html:12
+#: templates/lectures.html:14
+#: templates/select_deadlines.html:24
 msgid "Course"
-msgstr ""
+msgstr "Emne"
 
 #: common/models.py:135
+#: templates/courses.html:4
 msgid "Courses"
-msgstr ""
+msgstr "Emner"
 
 #: common/models.py:223
 msgid "spring"
-msgstr ""
+msgstr "våren"
 
 #: common/models.py:224
 msgid "fall"
-msgstr ""
+msgstr "høsten"
 
 #: common/models.py:227
 msgid "Year"
-msgstr ""
+msgstr "År"
 
-#: common/models.py:228 templates/exams.html:11 templates/lectures.html:16
+#: common/models.py:228
+#: templates/exams.html:11
+#: templates/lectures.html:18
 msgid "Type"
-msgstr ""
+msgstr "Type"
 
 #: common/models.py:231
 msgid "Semester"
-msgstr ""
+msgstr "Semester"
 
 #: common/models.py:232
 msgid "Semesters"
-msgstr ""
+msgstr "Semestre"
 
 #: common/models.py:297
 msgid "Exam type"
-msgstr ""
+msgstr "Eksamensform"
 
 #: common/models.py:298
 msgid "Exam types"
-msgstr ""
+msgstr "Eksamensformer"
 
 #: common/models.py:304
 msgid "Exam date"
-msgstr ""
+msgstr "Eksamensdato"
 
-#: common/models.py:305 templates/course_list.html:48
+#: common/models.py:305
+#: templates/course_list.html:48
 msgid "Exam time"
-msgstr ""
+msgstr "Eksamenstid"
 
 #: common/models.py:307
 msgid "Handout date"
-msgstr ""
+msgstr "Utleveringsdato"
 
-#: common/models.py:308 templates/course_list.html:50
+#: common/models.py:308
+#: templates/course_list.html:50
 msgid "Handout time"
-msgstr ""
+msgstr "Utleveringstid"
 
 #: common/models.py:310
 msgid "Duration"
-msgstr ""
+msgstr "Varighet"
 
 #: common/models.py:311
 msgid "Duration in hours"
-msgstr ""
+msgstr "Varighet i timer"
 
-#: common/models.py:316 ical/views.py:176 ical/views.py:177 ical/views.py:180
+#: common/models.py:316
+#: ical/views.py:176
+#: ical/views.py:177
+#: ical/views.py:180
 #: ical/views.py:181
 msgid "Exam"
-msgstr ""
+msgstr "Eksamen"
 
-#: common/models.py:317 templates/exams.html:3
+#: common/models.py:317
+#: templates/exams.html:3
 msgid "Exams"
-msgstr ""
+msgstr "Eksamener"
 
 #: common/models.py:326
 msgid "Week number"
-msgstr ""
+msgstr "Ukenummer"
 
 #: common/models.py:331
 msgid "Lecture week"
-msgstr ""
+msgstr "Forelesningsuke"
 
 #: common/models.py:332
 msgid "Lecture weeks"
-msgstr ""
+msgstr "Forelesningsuker"
 
 #: common/models.py:341
 msgid "Lecturer"
-msgstr ""
+msgstr "Foreleser"
 
-#: common/models.py:342 templates/lectures.html:18
+#: common/models.py:342
+#: templates/lectures.html:20
 msgid "Lecturers"
-msgstr ""
+msgstr "Forelesere"
 
-#: common/models.py:349 pdf/views.py:131 templates/schedule_table.html:15
+#: common/models.py:349
+#: pdf/views.py:131
+#: templates/schedule_table.html:16
 msgid "Monday"
-msgstr ""
+msgstr "Mandag"
 
-#: common/models.py:350 pdf/views.py:131 templates/schedule_table.html:16
+#: common/models.py:350
+#: pdf/views.py:131
+#: templates/schedule_table.html:17
 msgid "Tuesday"
-msgstr ""
+msgstr "Tirsdag"
 
-#: common/models.py:351 pdf/views.py:131 templates/schedule_table.html:17
+#: common/models.py:351
+#: pdf/views.py:131
+#: templates/schedule_table.html:18
 msgid "Wednesday"
-msgstr ""
+msgstr "Onsdag"
 
-#: common/models.py:352 pdf/views.py:131 templates/schedule_table.html:18
+#: common/models.py:352
+#: pdf/views.py:131
+#: templates/schedule_table.html:19
 msgid "Thursday"
-msgstr ""
+msgstr "Torsdag"
 
-#: common/models.py:353 pdf/views.py:131 templates/schedule_table.html:19
+#: common/models.py:353
+#: pdf/views.py:131
+#: templates/schedule_table.html:20
 msgid "Friday"
-msgstr ""
+msgstr "Fredag"
 
 #: common/models.py:360
 msgid "Week day"
-msgstr ""
+msgstr "Ukedag"
 
 #: common/models.py:362
 msgid "Start time"
-msgstr ""
+msgstr "Starter"
 
 #: common/models.py:363
 msgid "End time"
-msgstr ""
+msgstr "Slutter"
 
-#: common/models.py:373 common/models.py:374
+#: common/models.py:373
+#: common/models.py:374
 msgid "Lecture"
-msgstr ""
+msgstr "Forelesning"
 
-#: common/models.py:420 templates/add_deadlines.html:10
-#: templates/deadlines.html:15 templates/select_deadlines.html:27
+#: common/models.py:420
+#: templates/add_deadlines.html:10
+#: templates/deadlines.html:15
+#: templates/select_deadlines.html:27
 msgid "Task"
-msgstr ""
+msgstr "Oppgave"
 
-#: common/models.py:421 templates/add_deadlines.html:12
-#: templates/deadlines.html:13 templates/select_deadlines.html:25
+#: common/models.py:421
+#: templates/add_deadlines.html:12
+#: templates/deadlines.html:13
+#: templates/select_deadlines.html:25
 msgid "Due date"
-msgstr ""
+msgstr "Forfallsdato"
 
-#: common/models.py:422 templates/add_deadlines.html:13
-#: templates/deadlines.html:14 templates/exams.html:9
-#: templates/lectures.html:14 templates/select_deadlines.html:26
+#: common/models.py:422
+#: templates/add_deadlines.html:13
+#: templates/deadlines.html:14
+#: templates/exams.html:9
+#: templates/lectures.html:16
+#: templates/select_deadlines.html:26
 msgid "Time"
-msgstr ""
+msgstr "Tid"
 
-#: common/models.py:427
+#: common/models.py:424
+msgid "Done"
+msgstr "Ferdig"
+
+#: common/models.py:429
 msgid "Deadline"
-msgstr ""
+msgstr "Frist"
 
-#: common/models.py:428 templates/deadlines.html:3
+#: common/models.py:430
+#: templates/deadlines.html:3
 msgid "Deadlines"
-msgstr ""
+msgstr "Frister"
 
 #: ical/views.py:79
 #, python-format
 msgid "%(slug)s' %(semester)s %(year)s schedule for %(resources)s"
-msgstr ""
+msgstr "%(slug)s' timeplan for %(semester)s %(year)s, %(resources)s"
 
 #: ical/views.py:81
 #, python-format
 msgid "%(slug)s's %(semester)s %(year)s schedule for %(resources)s"
-msgstr ""
+msgstr "%(slug)ss timeplan for %(semester)s %(year)s, %(resources)s"
 
 #: pdf/views.py:233
 msgid "Week"
-msgstr ""
+msgstr "Uke"
 
 #: pdf/views.py:235
 msgid "All weeks"
-msgstr ""
+msgstr "Alle uker"
 
 #: settings/base.py:62
 msgid "Norwegian"
-msgstr ""
+msgstr "Norsk"
 
 #: settings/base.py:63
 msgid "English"
-msgstr ""
+msgstr "Engelsk"
 
-#: templates/404.html:6 templates/404.html.py:10
+#: templates/404.html:6
+#: templates/404.html.py:10
 msgid "Page not found"
-msgstr ""
+msgstr "Siden ble ikke funnet"
 
 #: templates/404.html:17
 #, python-format
 msgid ""
 "\n"
 "                <code>%(path)s</code> could not be found. Try going back or\n"
-"                starting over from the <a href=\"%(frontpage_url)s"
-"\">frontpage</a>.\n"
+"                starting over from the <a href=\"%(frontpage_url)s\">frontpage</a>.\n"
 "            "
 msgstr ""
+"\n"
+"                <code>%(path)s</code> ble ikke funnet. Gå tilbake eller \n"
+"                prøv på nytt fra <a href=\"%(frontpage_url)s\">hovedsiden</a>.\n"
+"            "
 
-#: templates/500.html:6 templates/500.html.py:10
+#: templates/500.html:6
+#: templates/500.html.py:10
 msgid "Server error"
-msgstr ""
+msgstr "Serverfeil"
 
 #: templates/500.html:16
 msgid "An error has occurred, sorry about the inconvenience."
-msgstr ""
+msgstr "En feil oppstod, beklager bryderiet."
 
 #: templates/500.html:19
 msgid "The server administrator has all ready been notified of this error."
-msgstr ""
+msgstr "Serveradministrator er varslet om feilen."
 
 #: templates/add_courses.html:6
 msgid "Add courses"
-msgstr ""
+msgstr "Legg til emne"
 
 #: templates/add_courses.html:9
 msgid "Please enter the codes for the courses you want to attend"
-msgstr ""
+msgstr "Oppgi emnekoder for emner du ønsker å vise"
 
 #: templates/add_courses.html:11
 msgid "Add course"
-msgstr ""
+msgstr "Legg til emne"
 
 #: templates/add_deadlines.html:6
 msgid "Add deadlines"
-msgstr ""
+msgstr "Legg til frister"
 
 #: templates/add_deadlines.html:34
 msgid "Add deadline"
-msgstr ""
+msgstr "Legg til frist"
 
-#: templates/base_site.html:8 templates/start.html:7
+#: templates/base_site.html:8
+#: templates/start.html:7
 msgid "Timetable generator for NTNU students"
-msgstr ""
+msgstr "Timeplangenerator for NTNU-studenter"
 
-#: templates/base_site.html:28
+#: templates/base_site.html:27
 msgid ""
 "\n"
-"              All lecture times and course data have been automatically "
-"retrieved from\n"
-"              <a href=\"http://.www.ntnu.no/\">NTNU</a>.\n"
-"              This data may not reflect the actual lecture times due to "
-"changes or erroneous imports.\n"
-"              The service is provided as is, please ensure that the data is "
-"correct before relying on it.\n"
+"              All lecture times and course data have been automatically retrieved from\n"
+"              <a href=\"http://www.ntnu.no/\">NTNU</a>.\n"
+"              This data may not reflect the actual lecture times due to changes or erroneous imports.\n"
+"              The service is provided as is, please ensure that the data is correct before relying on it.\n"
 "          "
 msgstr ""
+"\n"
+"              Alle datoer og tider er hentet automatisk fra \n"
+"              <a href=\"http://www.ntnu.no/\">NTNUs nettsider</a>.\n"
+"              Dette vil ikke alltid gjenspeile virkeligheten, grunnet endringer og/eller feilaktig dataimport.\n"
+"              Tjenesten tilbys uten garantier, forviss deg om at dataene er riktige før du stoler på dem.\n"
+"          "
+
+#: templates/base_site.html:35
+msgid "Code and design &copy; 2008, 2009 Thomas Adamcik."
+msgstr "Kildekode og design &copy; 2008, 2009 Thomas Adamcik."
 
 #: templates/base_site.html:36
-msgid "Code and design &copy; Thomas Adamcik 2008-2009"
-msgstr ""
+msgid "Further work commissioned by IME Faculty NTNU 2009."
+msgstr "Noe arbeid utført på bestilling fra IME-fakultetet, NTNU, 2009."
 
-#: templates/base_site.html:37
-msgid "IME-Faculty NTNU 2009"
-msgstr ""
+#: templates/base_site.html:43
+#: templates/schedule_table_footer.html:7
+msgid "Course list"
+msgstr "Emneliste"
 
-#: templates/base_site.html:39
-msgid "Built using:"
-msgstr ""
+#: templates/base_site.html:45
+msgid "Exam dates"
+msgstr "Eksamensdatoer"
+
+#: templates/base_site.html:47
+msgid "Exam rules"
+msgstr "Eksamensregler"
 
 #: templates/base_site.html:49
+msgid "Lecture times"
+msgstr "Forelesningstider"
+
+#: templates/base_site.html:51
+msgid "Map Dragvoll"
+msgstr "Kart: Dragvoll"
+
+#: templates/base_site.html:54
+msgid "Map Gløshaugen"
+msgstr "Kart: Gløshaugen"
+
+#: templates/base_site.html:57
+msgid "Find rooms"
+msgstr "Søk etter rom"
+
+#: templates/base_site.html:66
 #, python-format
 msgid ""
 "\n"
-"            The source code is freely available under the\n"
-"            <a href=\"http://www.gnu.org/licenses/agpl-3.0.html\">Affero "
-"General Public License</a>\n"
-"            at <a href=\"%(SOURCE_URL)s\">%(SOURCE_URL)s</a>.\n"
-"          "
+"        The source code is freely available under the\n"
+"        <a href=\"http://www.gnu.org/licenses/agpl-3.0.html\">Affero General Public License</a>\n"
+"        at <a href=\"%(SOURCE_URL)s\">%(SOURCE_URL)s</a>.\n"
+"      "
 msgstr ""
+"\n"
+"        Kildekoden deles under \n"
+"        <a href=\"http://www.gnu.org/licenses/agpl-3.0.html\">Affero General Public License</a>\n"
+"        på <a href=\"%(SOURCE_URL)s\">%(SOURCE_URL)s</a>.\n"
+"      "
 
-#: templates/base_site.html:57 templates/schedule_table_footer.html:7
-msgid "Course list"
-msgstr ""
-
-#: templates/base_site.html:59
-msgid "Exam dates"
-msgstr ""
-
-#: templates/base_site.html:61
-msgid "Exam rules"
-msgstr ""
-
-#: templates/base_site.html:63
-msgid "Lecture times"
-msgstr ""
-
-#: templates/base_site.html:65
-msgid "Map Dragvoll"
-msgstr ""
-
-#: templates/base_site.html:68
-msgid "Map Gløshaugen"
-msgstr ""
-
-#: templates/base_site.html:71
-msgid "Find rooms"
-msgstr ""
+#: templates/base_site.html:73
+msgid "Built using:"
+msgstr "Bygget ved hjelp av:"
 
 #: templates/course_list.html:6
 msgid "List of all courses"
-msgstr ""
+msgstr "Liste over alle emner"
 
 #: templates/course_list.html:11
 #, python-format
 msgid "All courses during %(semester)s semester"
-msgstr ""
+msgstr "Alle emner, %(semester)s"
 
 #: templates/course_list.html:22
-msgid ""
-"No courses to show for this semester. Back to <a href='..'>your</a> schedule."
-msgstr ""
+msgid "No courses to show for this semester. Back to <a href='..'>your</a> schedule."
+msgstr "Ingen emner for dette semesteret. Tilbake til <a href='..'>timeplanen</a>."
 
-#: templates/course_list.html:29 templates/course_list.html.py:109
+#: templates/course_list.html:29
+#: templates/course_list.html.py:109
 msgid "Jump to:"
-msgstr ""
+msgstr "Hopp til:"
 
-#: templates/course_list.html:37 templates/course_list.html.py:117
+#: templates/course_list.html:37
+#: templates/course_list.html.py:117
 msgid "Add coures to schedule"
-msgstr ""
+msgstr "Legg til timeplanen"
 
-#: templates/course_list.html:47 templates/courses.html:15
+#: templates/course_list.html:47
+#: templates/courses.html:15
 msgid "Credits"
-msgstr ""
+msgstr "Studiepoeng"
 
 #: templates/course_list.html:49
 msgid "Exam Type"
-msgstr ""
+msgstr "Eksamensform"
 
 #: templates/courses.html:14
 msgid "Description"
-msgstr ""
+msgstr "Beskrivelse"
 
-#: templates/courses.html:58 templates/courses.html.py:62
+#: templates/courses.html:58
+#: templates/courses.html.py:62
 msgid "Update names"
-msgstr ""
+msgstr "Oppdater navn"
 
-#: templates/courses.html:59 templates/courses.html.py:63
+#: templates/courses.html:59
+#: templates/courses.html.py:63
 #: templates/deadlines.html:34
 msgid "Remove selected"
-msgstr ""
+msgstr "Slett valgte"
 
 #: templates/courses.html:69
 #, python-format
 msgid ""
 "\n"
-"                Go to <a href=\"%(advanced_url)s#courses\">advanced options</"
-"a>\n"
+"                Go to <a href=\"%(advanced_url)s#courses\">advanced options</a>\n"
 "                to add and remove courses.\n"
 "            "
 msgstr ""
+"\n"
+"                Gå til <a href=\"%(advanced_url)s#courses\">avanserte innstillinger</a>\n"
+"                for å legge til eller fjerne emner.\n"
+"            "
 
 #: templates/deadlines.html:42
 #, python-format
 msgid ""
 "\n"
-"            Go to <a href=\"%(advanced_url)s#deadlines\">advanced options</"
-"a> to add and remove deadlines.\n"
+"            Go to <a href=\"%(advanced_url)s#deadlines\">advanced options</a> to add and remove deadlines.\n"
 "        "
 msgstr ""
+"\n"
+"            Gå til <a href=\"%(advanced_url)s#deadlines\">avanserte innstillinger</a> for å legge til eller slette frister.\n"
+"        "
 
 #: templates/deadlines.html:49
 msgid "No deadlines to show, feel free to add some."
-msgstr ""
+msgstr "Ingen frister å vise, legg gjerne til noen."
 
 #: templates/error.html:6
 msgid "Couldn't add one or more courses"
-msgstr ""
+msgstr "Kunne ikke legge til ett eller flere emner"
 
 #: templates/error.html:13
 #, python-format
@@ -472,10 +541,14 @@ msgid ""
 "                    timetables to %(max)s courses.\n"
 "                "
 msgstr ""
+"\n"
+"                    Systemet kan dessverre ikke håndtere mer enn \n"
+"                    %(max)s emner pr. timeplan.\n"
+"                "
 
 #: templates/error.html:21
 msgid "Adding the following courses failed:"
-msgstr ""
+msgstr "Følgende emner ble ikke lagt inn:"
 
 #: templates/error.html:31
 #, python-format
@@ -484,48 +557,64 @@ msgid ""
 "                Back to your <a href=\"%(adavanced_url)s\">schedule</a>.\n"
 "            "
 msgstr ""
+"\n"
+"                Tilbake til <a href=\"%(adavanced_url)s\">timeplanen</a>.\n"
+"            "
 
 #: templates/error.html:37
 msgid ""
 "\n"
 "            Please check that the courses that failed can be found at\n"
-"            <a href=\"http://www.ntnu.no/studieinformasjon/timeplan\">http://"
-"www.ntnu.no/studieinformasjon/timeplan</a>\n"
+"            <a href=\"http://www.ntnu.no/studieinformasjon/timeplan\">http://www.ntnu.no/studieinformasjon/timeplan</a>\n"
 "            for this semster.\n"
 "        "
 msgstr ""
+"\n"
+"            Kontroller om emnene som feilet finnes på \n"
+"            <a href=\"http://www.ntnu.no/studieinformasjon/timeplan\">http://www.ntnu.no/studieinformasjon/timeplan</a>\n"
+"            for dette semesteret.\n"
+"        "
 
 #: templates/exams.html:8
 msgid "Date"
-msgstr ""
+msgstr "Dato"
 
 #: templates/exams.html:10
 msgid "Dur."
-msgstr ""
+msgstr "Var."
 
 #: templates/exams.html:13
 msgid "Handout"
-msgstr ""
+msgstr "Utlevering"
 
 #: templates/exams.html:58
 msgid "Didn't find any exams for selected courses."
-msgstr ""
+msgstr "Fant ingen eksamener for valgte emner."
 
 #: templates/exams.html:60
 msgid "You need to add at least one course before exams will be shown."
-msgstr ""
+msgstr "Du må legge til minst ett emne før eksamener vises. "
+
+#: templates/groups.html:5
+msgid "Change groups"
+msgstr "Endre grupper"
 
 #: templates/groups.html:8
 msgid "Please choose the course variants you belong to."
-msgstr ""
+msgstr "Velg din parallell."
+
+#: templates/groups.html:25
+msgid "No groups"
+msgstr "Ingen grupper"
 
 #: templates/groups.html:36
 msgid "Save groups"
-msgstr ""
+msgstr "Lagre grupper"
 
-#: templates/import_deadlines.html:5 templates/import_deadlines.html.py:15
+#: templates/import_deadlines.html:5
+#: templates/import_deadlines.html.py:15
 msgid "Import deadlines"
-msgstr ""
+msgstr "Importer frister"
 
 #: templates/import_deadlines.html:7
 msgid ""
@@ -535,32 +624,38 @@ msgid ""
 "                import their deadlines.\n"
 "            "
 msgstr ""
+"\n"
+"                Om du oppgir en timeplan som deler felles emner med deg, vil tidsfrister for emnene bli importert til din kalender.\n"
+"            "
 
-#: templates/lectures.html:4
+#: templates/lectures.html:6
 msgid "Lecture list"
-msgstr ""
+msgstr "Forelesningsliste"
 
-#: templates/lectures.html:13
+#: templates/lectures.html:15
 msgid "Day"
-msgstr ""
+msgstr "Dag"
 
-#: templates/lectures.html:19
+#: templates/lectures.html:21
 msgid "Weeks"
-msgstr ""
+msgstr "Uker"
 
-#: templates/lectures.html:42
+#: templates/lectures.html:44
 msgid "Hide selected lectures"
-msgstr ""
+msgstr "Skjul valgte forelesninger"
 
-#: templates/lectures.html:45
+#: templates/lectures.html:47
 #, python-format
 msgid ""
 "\n"
-"                    Go to <a href=\"%(advanced_url)s#lectures\">advanced "
-"options</a>\n"
+"                    Go to <a href=\"%(advanced_url)s#lectures\">advanced options</a>\n"
 "                    to toggle which lectures to hide.\n"
 "                "
 msgstr ""
+"\n"
+"                    Gå til <a href=\"%(advanced_url)s#lectures\">avanserte innstillinger</a>\n"
+"                    for å vise eller skjule forelesninger.\n"
+"                "
 
 #: templates/schedule_message.html:7
 #, python-format
@@ -571,89 +666,106 @@ msgid ""
 "                to start adding your courses.\n"
 "            "
 msgstr ""
+"\n"
+"                Neste semesters forelesninger er nå klare. \n"
+"                Gå til <a href=\"%(next_semester_url)s\">%(next_semester_url)s</a>\n"
+"                for å sette opp en timeplan.\n"
+"            "
 
 #: templates/schedule_table_footer.html:9
 msgid "Hide advanced options"
-msgstr ""
+msgstr "Skjul avanserte innstillinger"
 
 #: templates/schedule_table_footer.html:11
 msgid "Advanced options"
-msgstr ""
+msgstr "Avanserte innstillinger"
 
-#: templates/schedule_table_footer.html:13 templates/tips.html:12
+#: templates/schedule_table_footer.html:13
+#: templates/tips.html:12
 msgid "Tips"
-msgstr ""
+msgstr "Tips"
 
 #: templates/schedule_table_footer.html:31
 msgid "Weeks:"
-msgstr ""
+msgstr "Uker: "
 
 #: templates/schedule_table_footer.html:32
 msgid "All"
-msgstr ""
+msgstr "Alle"
 
 #: templates/schedule_table_footer.html:33
 msgid "Current"
-msgstr ""
+msgstr "Inneværende"
 
 #: templates/select_deadlines.html:12
 msgid "Copy deadlines to"
-msgstr ""
+msgstr "Kopier frister til"
 
 #: templates/select_deadlines.html:28
 msgid "Course name"
-msgstr ""
+msgstr "Emnenavn"
 
 #: templates/select_deadlines.html:29
 msgid "Source"
-msgstr ""
+msgstr "Kilde"
 
 #: templates/select_deadlines.html:47
 msgid "Copy deadlines"
-msgstr ""
+msgstr "Kopier frister"
 
 #: templates/select_deadlines.html:54
 #, python-format
 msgid ""
 "\n"
-"                    No deadlines found. Return to your <a href=\"%"
-"(advanced_url)s\">schedule</a>.\n"
+"                    No deadlines found. Return to your <a href=\"%(advanced_url)s\">schedule</a>.\n"
 "                "
 msgstr ""
+"\n"
+"                    Ingen frister funnet. Gå tilbake til <a href=\"%(advanced_url)s\">timeplanen</a>.\n"
+"                "
 
-#: templates/select_groups.html:31 templates/select_groups.html.py:36
+#: templates/select_groups.html:37
+#: templates/select_groups.html.py:42
 msgid "Select groups for your courses"
-msgstr ""
+msgstr "Velg parallell"
 
 #: templates/start.html:41
 msgid "Sorry, no semesters have been loaded yet."
-msgstr ""
+msgstr "Beklager, ingen semester er klartgjort enda."
+
+#: templates/start.html:47
+msgid "Getting started"
+msgstr "Kom i gang"
 
 #: templates/start.html:51
 msgid ""
 "\n"
-"                                Please enter a short name identifying your "
-"personal\n"
-"                                timetable, ie. username, nickname etc. If "
-"the name\n"
-"                                you select is in already taken, choose "
-"another\n"
+"                                Please enter a short name identifying your personal\n"
+"                                timetable, ie. username, nickname etc. If the name\n"
+"                                you select is in already taken, choose another\n"
 "                                one.\n"
 "                            "
 msgstr ""
+"\n"
+"                                Oppgi et kort navn for timeplanen din\n"
+"                                (f.eks. et brukernavn eller kallenavn). \n"
+"                                Finn på et annet om det allerede er tatt.\n"
+"                                                            "
 
 #: templates/start.html:61
 msgid "Start"
-msgstr ""
+msgstr "Start"
 
 #: templates/start.html:66
 msgid ""
 "\n"
-"                        To retrieve your timetable simply enter the same "
-"identifier\n"
+"                        To retrieve your timetable simply enter the same identifier\n"
 "                        you used last time.\n"
 "                    "
 msgstr ""
+"\n"
+"                        Hent en timeplan ved å oppgi samme navnet som da du opprettet den.\n"
+"                    "
 
 #: templates/start.html:76
 #, python-format
@@ -662,10 +774,13 @@ msgid ""
 "                        Top %(limit)s courses %(current)s\n"
 "                    "
 msgstr ""
+"\n"
+"                        Topp %(limit)s emner for %(current)s\n"
+"                    "
 
 #: templates/start.html:90
 msgid "No coures have been added to any schedules yet."
-msgstr ""
+msgstr "Ingen timeplaner er opprettet enda."
 
 #: templates/statistics.html:3
 #, python-format
@@ -674,23 +789,25 @@ msgid ""
 "        Statistics %(current)s\n"
 "    "
 msgstr ""
+"\n"
+"        Statistikk for %(current)s\n"
+"    "
 
 #: templates/statistics.html:9
 msgid "Total number of unique timetables"
-msgstr ""
+msgstr "Antall unike timeplaner"
 
 #: templates/statistics.html:13
 msgid "Total number of unique courses added"
-msgstr ""
+msgstr "Antall unike emner lagt til"
 
 #: templates/statistics.html:17
 msgid "Total number of deadlines"
-msgstr ""
+msgstr "Antall frister"
 
 #: templates/tips.html:16
-msgid ""
-"Multiple courses can be added at once by separating course codes with spaces."
-msgstr ""
+msgid "Multiple courses can be added at once by separating course codes with spaces."
+msgstr "Legg til flere emner samtidig ved å skrive inn emnekoder adskilt med mellomrom."
 
 #: templates/tips.html:19
 #, python-format
@@ -700,48 +817,63 @@ msgid ""
 "                <a href=\"%(shortcut_url)s\">%(host)s%(shortcut_url)s</a>\n"
 "            "
 msgstr ""
+"\n"
+"                Visste du at du alltid finner timeplanen din på: \n"
+"                <a href=\"%(shortcut_url)s\">%(host)s%(shortcut_url)s</a>\n"
+"            "
 
 #: templates/tips.html:25
 #, python-format
 msgid ""
 "\n"
-"                Did you know that you can choose to hide lectures that you "
-"don't want to be shown under\n"
+"                Did you know that you can choose to hide lectures that you don't want to be shown under\n"
 "                <a href=\"%(adavanced_url)s\">advanced options</a>?\n"
 "            "
 msgstr ""
+"\n"
+"                Visste du at du kan skjule forelesninger under\n"
+"                <a href=\"%(adavanced_url)s\">avanserte innstillinger</a>?\n"
+"            "
 
 #: templates/tips.html:31
 msgid ""
 "\n"
-"                Did you know that you can select which groups (paralleller) "
-"you\n"
-"                want to attend, and than you can select more that one "
-"group?\n"
+"                Did you know that you can select which groups (paralleller) you\n"
+"                want to attend, and than you can select more than one group?\n"
 "            "
 msgstr ""
+"\n"
+"                Visste du at du kan velge hvilken parallell du tilhører,\n"
+"                og at du kan velge mer enn én?\n"
+"            "
 
 #: templates/tips.html:37
 #, python-format
 msgid ""
 "\n"
-"                Did you know that you can change which names are used for "
-"courses under\n"
+"                Did you know that you can change which names are used for courses under\n"
 "                <a href=\"%(adavanced_url)s\">advanced options</a>?\n"
 "            "
 msgstr ""
+"\n"
+"                Visste du at du kan endre visningsnavn på emner under\n"
+"                <a href=\"%(adavanced_url)s\">avanserte innstillinger</a>?\n"
+"            "
 
 #: templates/tips.html:45
 #, python-format
 msgid ""
 "\n"
 "                The <a href=\"%(course_list_url)s\">course list</a>\n"
-"                contains all courses for the current semester, including "
-"exam dates and\n"
-"                allows you to easily select courses to add to your "
-"schedule.\n"
+"                contains all courses for the current semester, including exam dates and\n"
+"                allows you to easily select courses to add to your schedule.\n"
 "            "
 msgstr ""
+"\n"
+"                <a href=\"%(course_list_url)s\">Emnelisten</a>\n"
+"                viser alle emnene for inneværende semester (inkludert eksamensdatoer) \n"
+"                og lar deg enkelt legge dem til timeplanen.\n"
+"            "
 
 #: templates/tips.html:52
 #, python-format
@@ -754,44 +886,52 @@ msgid ""
 "                <a href=\"%(ical_all_url)s\">all combined</a>.\n"
 "            "
 msgstr ""
+"\n"
+"                Eksporter kalenderfil:\n"
+"                <a href=\"%(ical_lectures_url)s\">forelesninger</a>,\n"
+"                <a href=\"%(ical_exams_url)s\">eksamener</a>,\n"
+"                <a href=\"%(ical_deadlines_url)s\">frister</a> eller\n"
+"                <a href=\"%(ical_all_url)s\">alle tre</a>.\n"
+"            "
 
 #: templates/tips.html:60
-msgid ""
-"Simply download or copy the link to the calendar you want and add it to any "
-"application that supports the Ical format."
-msgstr ""
+msgid "Simply download or copy the link to the calendar you want and add it to any application that supports the Ical format."
+msgstr "Last ned eller bruk lenken i valgfritt kalendersystem. (Må støtte ical-formatet)."
 
 #: templates/tips.html:63
 #, python-format
 msgid ""
 "\n"
 "                Google calendar:\n"
-"                <a target=\"_blank\" href=\"%(google_cal_prefix)s%(host)s%"
-"(ical_lectures_url)s\">lectures</a>,\n"
-"                <a target=\"_blank\" href=\"%(google_cal_prefix)s%(host)s%"
-"(ical_exams_url)s\">exams</a>,\n"
-"                <a target=\"_blank\" href=\"%(google_cal_prefix)s%(host)s%"
-"(ical_deadlines_url)s\">deadlines</a> or\n"
-"                <a target=\"_blank\" href=\"%(google_cal_prefix)s%(host)s%"
-"(ical_all_url)s\">all combined</a>.\n"
+"                <a target=\"_blank\" href=\"%(google_cal_prefix)s%(host)s%(ical_lectures_url)s\">lectures</a>,\n"
+"                <a target=\"_blank\" href=\"%(google_cal_prefix)s%(host)s%(ical_exams_url)s\">exams</a>,\n"
+"                <a target=\"_blank\" href=\"%(google_cal_prefix)s%(host)s%(ical_deadlines_url)s\">deadlines</a> or\n"
+"                <a target=\"_blank\" href=\"%(google_cal_prefix)s%(host)s%(ical_all_url)s\">all combined</a>.\n"
 "            "
 msgstr ""
+"\n"
+"                Google Calendar:\n"
+"                <a target=\"_blank\" href=\"%(google_cal_prefix)s%(host)s%(ical_lectures_url)s\">forelesninger</a>,\n"
+"                <a target=\"_blank\" href=\"%(google_cal_prefix)s%(host)s%(ical_exams_url)s\">eksamener</a>,\n"
+"                <a target=\"_blank\" href=\"%(google_cal_prefix)s%(host)s%(ical_deadlines_url)s\">frister</a> eller\n"
+"                <a target=\"_blank\" href=\"%(google_cal_prefix)s%(host)s%(ical_all_url)s\">alle tre</a>.\n"
+"            "
 
 #: templates/tips.html:71
-msgid ""
-"Simply click the calendar type you want and it will be added to Google "
-"calendar."
-msgstr ""
+msgid "Simply click the calendar type you want and it will be added to Google calendar."
+msgstr "Klikk lenken for å legge til i din Google Calendar."
 
 #: templates/tips.html:74
 msgid ""
 "\n"
-"                Enter a space separated list of your friends timetables to "
-"copy\n"
-"                the deadlines they have entered for any classes you're both "
-"attending.\n"
+"                Enter a space separated list of your friends timetables to copy\n"
+"                the deadlines they have entered for any classes you're both attending.\n"
 "            "
 msgstr ""
+"\n"
+"                Du kan oppgi ett eller flere timeplannavn (adskilt med mellomrom) for å kopiere\n"
+"                frister for emner dere har felles.\n"
+"            "
 
 #: templates/title.html:4
 #, python-format
@@ -803,6 +943,8 @@ msgid ""
 "        for week %(week)s\n"
 "    "
 msgstr ""
+"\n"
+"        %(slug)s%(ending)s timeplan for %(type)s %(year)s, uke %(week)s"
 
 #: templates/title.html:11
 #, python-format
@@ -813,7 +955,11 @@ msgid ""
 "        %(year)s schedule\n"
 "    "
 msgstr ""
+"\n"
+"        %(slug)s%(ending)s timeplan for %(type)s %(year)s"
 
-#: templates/admin/base_site.html:5 templates/admin/base_site.html.py:9
+#: templates/admin/base_site.html:5
+#: templates/admin/base_site.html.py:9
 msgid "ntnu timetable admin"
-msgstr ""
+msgstr "NTNU timeplanadministrator"
+
