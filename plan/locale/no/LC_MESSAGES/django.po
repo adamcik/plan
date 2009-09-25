@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Timeplan\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-09-25 13:44+0200\n"
-"PO-Revision-Date: 2009-09-25 13:58+0100\n"
+"PO-Revision-Date: 2009-09-25 15:15+0100\n"
 "Last-Translator: Rune M. Andersen <webmaster@ime.ntnu.no>\n"
 "Language-Team:  <webmaster@ime.ntnu.no>\n"
 "MIME-Version: 1.0\n"
@@ -83,12 +83,12 @@ msgstr "Rom"
 
 #: common/models.py:118
 msgid "Group"
-msgstr "Gruppe"
+msgstr "Parallell"
 
 #: common/models.py:119
 #: templates/lectures.html:19
 msgid "Groups"
-msgstr "Grupper"
+msgstr "Paralleller"
 
 #: common/models.py:122
 #: common/models.py:288
@@ -394,7 +394,7 @@ msgstr ""
 "\n"
 "              Alle datoer og tider er hentet automatisk fra \n"
 "              <a href=\"http://www.ntnu.no/\">NTNUs nettsider</a>.\n"
-"              Dette vil ikke alltid gjenspeile virkeligheten, grunnet endringer og/eller feilaktig dataimport.\n"
+"              Disse vil ikke alltid gjenspeile virkeligheten, grunnet endringer eller feilaktig dataimport.\n"
 "              Tjenesten tilbys uten garantier, forviss deg om at dataene er riktige før du stoler på dem.\n"
 "          "
 
@@ -597,7 +597,7 @@ msgstr "Du må legge til minst ett emne før eksamener vises. "
 
 #: templates/groups.html:5
 msgid "Change groups"
-msgstr "Endre grupper"
+msgstr "Endre paralleller"
 
 #: templates/groups.html:8
 msgid "Please choose the course variants you belong to."
@@ -605,11 +605,11 @@ msgstr "Velg din parallell."
 
 #: templates/groups.html:25
 msgid "No groups"
-msgstr "Ingen grupper"
+msgstr "Ingen paralleller"
 
 #: templates/groups.html:36
 msgid "Save groups"
-msgstr "Lagre grupper"
+msgstr "Lagre paralleller"
 
 #: templates/import_deadlines.html:5
 #: templates/import_deadlines.html.py:15
