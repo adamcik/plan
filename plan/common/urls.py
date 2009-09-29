@@ -39,4 +39,5 @@ urlpatterns = patterns('plan.common.views',
     url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/(?P<slug>[a-z0-9-_]{1,50})/deadlines/copy/$', 'copy_deadlines', name='copy-deadlines'),
 
     url(r'^(?P<slug>[a-z0-9-_]{1,50})/$', 'shortcut', name='shortcut'),
+    (r'^i18n/', include('django.conf.urls.i18n')),
 )

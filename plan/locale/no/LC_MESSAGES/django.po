@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Timeplan\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-09-25 13:44+0200\n"
-"PO-Revision-Date: 2009-09-28 08:23+0100\n"
+"POT-Creation-Date: 2009-09-29 14:45+0200\n"
+"PO-Revision-Date: 2009-09-29 14:46+0100\n"
 "Last-Translator: Rune M. Andersen <webmaster@ime.ntnu.no>\n"
 "Language-Team:  <webmaster@ime.ntnu.no>\n"
 "MIME-Version: 1.0\n"
@@ -19,7 +19,7 @@ msgstr ""
 
 #: common/models.py:34
 msgid "Slug"
-msgstr ""
+msgstr "Timeplannavn"
 
 #: common/models.py:38
 msgid "Student"
@@ -318,11 +318,11 @@ msgstr "Uke"
 msgid "All weeks"
 msgstr "Alle uker"
 
-#: settings/base.py:62
+#: settings/base.py:63
 msgid "Norwegian"
 msgstr "Norsk"
 
-#: settings/base.py:63
+#: settings/base.py:64
 msgid "English"
 msgstr "Engelsk"
 
@@ -729,15 +729,23 @@ msgstr ""
 msgid "Select groups for your courses"
 msgstr "Velg parallell"
 
-#: templates/start.html:41
+#: templates/setlang.html:5
+msgid "Language"
+msgstr "Språk"
+
+#: templates/setlang.html:11
+msgid "Update"
+msgstr "Oppdater"
+
+#: templates/start.html:42
 msgid "Sorry, no semesters have been loaded yet."
 msgstr "Beklager, ingen semester er klartgjort enda."
 
-#: templates/start.html:47
+#: templates/start.html:48
 msgid "Getting started"
 msgstr "Kom i gang"
 
-#: templates/start.html:51
+#: templates/start.html:52
 msgid ""
 "\n"
 "                                Please enter a short name identifying your personal\n"
@@ -752,11 +760,11 @@ msgstr ""
 "                                Finn på et annet om det allerede er tatt.\n"
 "                                                            "
 
-#: templates/start.html:61
+#: templates/start.html:62
 msgid "Start"
 msgstr "Start"
 
-#: templates/start.html:66
+#: templates/start.html:67
 msgid ""
 "\n"
 "                        To retrieve your timetable simply enter the same identifier\n"
@@ -767,7 +775,7 @@ msgstr ""
 "                        Hent en timeplan ved å oppgi samme navnet som da du opprettet den.\n"
 "                    "
 
-#: templates/start.html:76
+#: templates/start.html:77
 #, python-format
 msgid ""
 "\n"
@@ -778,7 +786,7 @@ msgstr ""
 "                        Topp %(limit)s emner for %(current)s\n"
 "                    "
 
-#: templates/start.html:90
+#: templates/start.html:91
 msgid "No coures have been added to any schedules yet."
 msgstr "Ingen timeplaner er opprettet enda."
 
