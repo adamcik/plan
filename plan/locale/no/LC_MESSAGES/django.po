@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Timeplan\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-09-25 13:44+0200\n"
-"PO-Revision-Date: 2009-09-25 15:15+0100\n"
+"PO-Revision-Date: 2009-09-28 08:23+0100\n"
 "Last-Translator: Rune M. Andersen <webmaster@ime.ntnu.no>\n"
 "Language-Team:  <webmaster@ime.ntnu.no>\n"
 "MIME-Version: 1.0\n"
@@ -404,7 +404,7 @@ msgstr "Kildekode og design &copy; 2008, 2009 Thomas Adamcik."
 
 #: templates/base_site.html:36
 msgid "Further work commissioned by IME Faculty NTNU 2009."
-msgstr "Noe arbeid utført på bestilling fra IME-fakultetet, NTNU, 2009."
+msgstr "Videre utvikling utført på bestilling fra IME-fakultetet, NTNU, 2009."
 
 #: templates/base_site.html:43
 #: templates/schedule_table_footer.html:7
