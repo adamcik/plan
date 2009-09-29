@@ -5,7 +5,7 @@
 	<label for="language"><h2>{% trans "Language" %}</h2></label>
 	<select name="language" id="language">
 		{% for lang in LANGUAGES %}
-			<option value="{{ lang.0 }}" {% ifequal request.LANGUAGE_CODE lang.0 %} selected="selected" {% endifequal %}>{{ lang.1 }}</option>
+			<option value="{{ lang.0 }}" {% ifequal request.LANGUAGE_CODE lang.0 %} selected="selected" {% endifequal %}>{% trans lang.1 %}</option>
 		{% endfor %}
 	</select>
 	<input type="submit" value="{% trans "Update" %}" />
