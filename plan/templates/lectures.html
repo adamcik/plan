@@ -30,7 +30,16 @@
                         <td>{{ l.alias|default:l.course.code }}</td>
                         <td>{{ l.get_day_display }}</td>
                         <td>{{ l.start|time }}-{{ l.end|time }}</td>
-                        <td class="small">{{ rooms|get:l.id|join:", " }}</td>
+                        <td class="small">
+                            {% for room in rooms|get:l.id %}
+                                {% if room.url %}
+                                    <a href="{{ room.url }}">
+                                        {{ room.name }}</a>{% if not forloop.last %},{% endif %}
+                                {% else %}
+                                    {{ room.name }}</a>{% if not forloop.last %},{% endif %}
+                                {% endif %}
+                            {% endfor %}
+                        </td>
                         <td class="small">{{ l.type|default:"" }}</td>
                         <td class="small">{{ groups|get:l.id|join:", " }}</td>
                         <td>{{ lecturers|get:l.id|join:", " }}</td>

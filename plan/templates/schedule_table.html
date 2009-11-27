@@ -56,7 +56,16 @@
 
                                 {% if c.lecture %}
                                     <div class="course">{{ c.lecture.alias|default:c.lecture.course.code }}</div>
-                                    <div class="room">{{ rooms|get:c.lecture.id|join:", "|truncatewords:2 }}</div>
+                                    <div class="room">
+                                        {% for room in rooms|get:c.lecture.id|slice:":2" %}
+                                            {% if room.url %}
+                                                <a href="{{ room.url }}">
+                                                    {{ room.name }}</a>{% if not forloop.last %},{% endif %}
+                                            {% else %}
+                                                {{ room.name }}</a>{% if not forloop.last %},{% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
                                     <div class="type">{{ c.lecture.type|default:"" }}</div>
                                 {% endif %}
                                 {{ c.time|escape|nbsp|default:"" }}
