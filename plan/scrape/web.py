@@ -70,8 +70,11 @@ def update_courses(year, semester_type):
 
         for tr in table.findAll('tr'):
             code, name = tr.findAll('a')
+            
+            pattern = 'emnekode=(.+?[0-9\-]+)'
+            code = re.compile(pattern, re.I|re.L).search(code['href']).group().strip('emnekode=')
 
-            code, version = code.contents[0].split('-', 2)[:2]
+            code, version = code.split('-', 2)[:2]
             name = name.contents[0]
 
             if name.endswith('(Nytt)'):
