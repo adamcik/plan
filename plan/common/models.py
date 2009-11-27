@@ -384,7 +384,7 @@ class Lecture(models.Model):
             )
 
     @staticmethod
-    def get_related(model, lectures, field='name', use_extra=True):
+    def get_related(model, lectures, fields=['name'], use_extra=True):
         tmp = {}
 
         if not lectures:
@@ -397,14 +397,19 @@ class Lecture(models.Model):
         if use_extra:
             objects = objects.extra(select={
                     'lecture_id': 'common_lecture_%ss.lecture_id' % name,
-                }).values_list('lecture_id', field)
+                })
+        object_list = objects.values_list('lecture_id', *fields)
 
-        object_list = objects.values_list('lecture_id', field)
+        for object in object_list:
+            lecture = object[0]
 
-        for lecture, name in object_list:
             if lecture not in tmp:
                 tmp[lecture] = []
-            tmp[lecture].append(name)
+
+            if len(fields) == 1:
+                tmp[lecture].append(object[1])
+            else:
+                tmp[lecture].append(dict(map(lambda x,y: (x,y), fields, object[1:])))
 
         return tmp
 
