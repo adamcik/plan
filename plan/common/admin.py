@@ -119,12 +119,19 @@ class DeadlineAdmin(admin.ModelAdmin):
 
         return form
 
+class RoomAdmin(admin.ModelAdmin):
+    ordering = ('name',)
+
+    search_fields = ('name',)
+
+    list_display = ('name', 'url')
+
 admin.site.register(Course, CourseAdmin)
 admin.site.register(Exam, ExamAdmin)
 admin.site.register(Group)
 admin.site.register(Lecture, LectureAdmin)
 admin.site.register(Lecturer)
-admin.site.register(Room)
+admin.site.register(Room, RoomAdmin)
 admin.site.register(Semester)
 admin.site.register(LectureType, LectureTypeAdmin)
 admin.site.register(Deadline, DeadlineAdmin)
