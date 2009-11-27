@@ -152,11 +152,7 @@ def course_query(request, year, semester_type):
     return response
 
 def schedule_current(request, year, semester_type, slug):
-    semester = Semester(year=year, type=semester_type)
-    first = semester.get_first_day()
-    last = semester.get_last_day()
-
-    if now().year == int(year) and now() >= first and now() <= last:
+    if Semester(year=year, type=semester_type).is_current:
         current_week = get_current_week()
 
         return HttpResponseRedirect(reverse('schedule-week',

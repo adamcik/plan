@@ -260,6 +260,11 @@ class Semester(models.Model):
         return Semester(year=self.year+1, type=self.SPRING)
 
     @property
+    def is_current(self):
+        t = now()
+        return t >= self.get_first_day() and t <= self.get_last_day()
+
+    @property
     def prefix(self):
         if self.type == self.SPRING:
             return 'v%s' % str(self.year)[-2:]
