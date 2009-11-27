@@ -76,6 +76,18 @@ class ViewTestCase(BaseTestCase):
 
         self.assertRedirects(response, url)
 
+    def test_schedule_current(self):
+        response = self.client.get(self.url('schedule-current'))
+
+        self.assertRedirects(response, reverse('schedule-week',
+            args=[self.semester.year, self.semester.type, 'adamcik', '1']))
+
+        response = self.client.get(reverse('schedule-current',
+            args=[2009, Semester.FALL, 'adamcik']))
+
+        self.assertRedirects(response, reverse('schedule',
+            args=[2009, Semester.FALL, 'adamcik']))
+
     def test_schedule(self):
         # FIXME add group help testing
         # FIXME courses without lectures
