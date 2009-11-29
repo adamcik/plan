@@ -16,6 +16,6 @@
 # You should have received a copy of the Affero GNU General Public
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
-from plan.cache.base import CacheClass, get_realm, clear_cache
+from plan.cache.base import CacheClass, get_realm, clear_cache, compress, decompress
 
 cache = CacheClass()

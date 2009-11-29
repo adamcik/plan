@@ -17,6 +17,8 @@
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+import zlib
+import base64
 from uuid import uuid4
 
 from django.conf import settings
@@ -36,6 +38,12 @@ def get_realm(semester, slug=None):
 def clear_cache(semester, slug):
     django_cache.delete(':'.join([settings.CACHE_PREFIX, get_realm(semester, slug)]))
     django_cache.delete(':'.join([settings.CACHE_PREFIX, get_realm(semester)]))
+
+def compress(value):
+    return base64.b64encode(zlib.compress(value))
+
+def decompress(value):
+    return zlib.decompress(base64.b64decode(value))
 
 class CacheClass(BaseCache):
     def __init__(self, *args, **kwargs):
