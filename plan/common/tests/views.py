@@ -20,7 +20,7 @@ from django.utils.datastructures import MultiValueDict
 from django.core.urlresolvers import reverse
 
 from plan.common.tests.base import BaseTestCase
-from plan.cache import get_realm, cache
+from plan.cache import get_realm, cache, decompress
 from plan.common.models import Semester, Group, Subscription, Lecture, Deadline
 
 class EmptyViewTestCase(BaseTestCase):
@@ -139,13 +139,12 @@ class ViewTestCase(BaseTestCase):
         self.failUnlessEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'course_list.html')
 
-        cache_response = cache.get(key, prefix=True)
-        self.assertEquals(response.content, cache_response.content)
+        cache_content = decompress(cache.get(key, prefix=True))
+        self.assertEquals(response.content, cache_content)
 
         self.clear()
-        cache_response = cache.get(key, prefix=True)
-
-        self.assertEquals(response.content, cache_response.content)
+        cache_content = decompress(cache.get(key, prefix=True))
+        self.assertEquals(response.content, cache_content)
 
     def test_change_course(self):
         # FIXME test semester does not exist
