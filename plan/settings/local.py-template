@@ -25,7 +25,7 @@ MYSQL_USER = ''
 MYSQL_PASSWORD = ''
 MYSQL_HOST = ''
 
-CACHE_BACKEND = 'locmen://' # See Django docs...
+CACHE_BACKEND = 'locmem://' # See Django docs...
 CACHE_PREFIX = '<Your prefix here>' # Should be unique per site
 
 # Web URL where Django should expect to find media files
