@@ -53,9 +53,8 @@ class CacheClass(BaseCache):
     def _realm(self, key, **kwargs):
         realm = kwargs.pop('realm', None)
 
-        logger.debug('Getting realm: %s' % realm)
-
         if realm:
+            logger.debug('Getting realm: %s' % realm)
             realm = ':'.join([settings.CACHE_PREFIX, realm])
             prefix = django_cache.get(realm)
 
