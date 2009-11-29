@@ -26,6 +26,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
+from django.template.defaultfilters import filesizeformat
 from django.views.generic.list_detail import object_list
 from django.utils.html import escape
 from django.utils.text import truncate_words
@@ -36,7 +37,7 @@ from plan.common.forms import DeadlineForm, GroupForm, CourseAliasForm, \
         ScheduleForm
 from plan.common.utils import ColorMap, max_number_of_weeks
 from plan.common.timetable import Timetable
-from plan.cache import clear_cache, get_realm, cache
+from plan.cache import clear_cache, get_realm, cache, compress, decompress
 from plan.common.templatetags.slugify import slugify
 
 # FIXME split into frontpage/semester, course, deadline, schedule files
@@ -588,9 +589,9 @@ def list_courses(request, year, semester_type, slug):
     semester = Semester(year=year, type=semester_type)
 
     key = '/'.join([str(semester.year), semester.type, 'courses'])
-    response = cache.get(key, prefix=True)
+    content = cache.get(key, prefix=True)
 
-    if not response or not getattr(request, 'use_cache', True):
+    if not content or not getattr(request, 'use_cache', True):
 
         courses = Course.objects.get_courses_with_exams(year, semester.type)
 
@@ -599,6 +600,9 @@ def list_courses(request, year, semester_type, slug):
                 'course_list': courses,
             }, RequestContext(request))
 
-        cache.set(key, response, prefix=True)
+        cache.set(key, compress(response.content), prefix=True)
+
+    else:
+        response = HttpResponse(decompress(content))
 
     return response
