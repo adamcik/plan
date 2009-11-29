@@ -600,7 +600,7 @@ def list_courses(request, year, semester_type, slug):
                 'course_list': courses,
             }, RequestContext(request))
 
-        cache.set(key, compress(response.content), prefix=True)
+        cache.set(key, compress(response.content), settings.CACHE_TIME_SCHECULDE, prefix=True)
 
     else:
         response = HttpResponse(decompress(content))
