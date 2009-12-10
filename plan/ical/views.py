@@ -216,9 +216,11 @@ def add_deadlines(deadlines, semester, cal):
     for d in deadlines:
         vevent = cal.add('vevent')
 
-        start = d.date
         if d.time:
             start = datetime.combine(d.date, d.time)
+            start = start.replace(tzinfo=tzlocal())
+        else:
+            start = d.date
 
         summary = u'%s - %s' % (d.task, d.alias or d.subscription.course)
         desc = u'%s - %s (%s)' % (d.task, d.subscription.course.name,
