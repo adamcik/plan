@@ -60,7 +60,8 @@ def server_error(request, template_name='500.html'):
     # You need to create a 500.html template.
     t = loader.get_template(template_name)
 
-    context = Context({'MEDIA_URL': settings.MEDIA_URL})
+    context = Context({'MEDIA_URL': settings.MEDIA_URL,
+                       'SOURCE_URL': settings.SOURCE_URL})
 
     return HttpResponseServerError(t.render(context))
 
