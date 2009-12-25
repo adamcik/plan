@@ -26,6 +26,8 @@ from django.utils.http import int_to_base36
 from django.core.cache import cache as django_cache
 from django.core.cache.backends.base import  BaseCache
 
+from plan.common.templatetags.slugify import slugify
+
 logger = logging.getLogger('plan.common.cache')
 
 def get_realm(semester, slug=None):
@@ -33,7 +35,7 @@ def get_realm(semester, slug=None):
     if slug:
         args.append(slug)
 
-    return ':'.join([str(a) for a in args])
+    return ':'.join([slugify(a) for a in args])
 
 def clear_cache(semester, slug):
     django_cache.delete(':'.join([settings.CACHE_PREFIX, get_realm(semester, slug)]))
