@@ -1,0 +1,9 @@
+{% load i18n %}
+
+<p class="noprint">
+    {% url schedule-advanced semester.year,semester.type,slug as advanced_url %}
+    {% blocktrans %}
+        Go to <a href="{{ advanced_url }}#features">advanced options</a>
+        to enable deadlines.
+    {% endblocktrans %}
+</p>
