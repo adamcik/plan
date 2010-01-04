@@ -34,6 +34,8 @@ class Student(models.Model):
     slug = models.SlugField(_('Slug'), unique=True)
     user = models.ForeignKey(User, null=True, blank=True)
 
+    show_deadlines = models.BooleanField(_('Show deadlines'), default=False)
+
     class Meta:
         verbose_name = _('Student')
         verbose_name_plural = _('Students')
