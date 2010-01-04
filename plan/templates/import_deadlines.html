@@ -2,7 +2,7 @@
 
 {% if courses and advanced %}
     <form method="post" action="{% url copy-deadlines semester.year,semester.type,slug %}" class="noprint">
-        <h2>{% trans "Import deadlines" %}</h2>
+        <h3>{% trans "Import deadlines" %}</h3>
         <p>
             {% blocktrans %}
                 If you enter the idenfiers for other timetables with the

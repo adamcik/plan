@@ -3,7 +3,7 @@
 {% if advanced or not courses %}
     <form action="{% url change-course semester.year,semester.type,slug %}" method="post" class="noprint">
         {% if courses %}
-            <h2>{% trans "Add courses" %}</h2>
+            <h3>{% trans "Add courses" %}</h3>
         {% endif %}
         <p>
             <span class="large">{% trans "Please enter the codes for the courses you want to attend" %}</span>
