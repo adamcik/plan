@@ -71,9 +71,11 @@ def getting_started(request, year=None, semester_type=None):
     if year and semester_type:
         semester = Semester(year=year, type=semester_type)
         qs = Semester.objects.filter(year=semester.year, type=semester.type)
+        cache_key = 'frontpage-semester'
     else:
         semester = Semester.current(early=True)
         qs = None
+        cache_key = 'frontpage'
 
     # Redirect user to their timetable
     if request.method == 'POST' and 'slug' in request.POST:
@@ -91,7 +93,7 @@ def getting_started(request, year=None, semester_type=None):
             return response
 
     realm = get_realm(semester)
-    response = cache.get('frontpage', realm=realm)
+    response = cache.get(cache_key, realm=realm)
 
     if response and getattr(request, 'use_cache', True):
         return response
@@ -115,7 +117,7 @@ def getting_started(request, year=None, semester_type=None):
 
     response = render_to_response('start.html', context, RequestContext(request))
 
-    cache.set('frontpage', response, settings.CACHE_TIME_FRONTPAGE, realm=realm)
+    cache.set(cache_key, response, settings.CACHE_TIME_FRONTPAGE, realm=realm)
 
     return response
 
