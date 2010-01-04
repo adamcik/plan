@@ -16,6 +16,14 @@
         }
     }, 
     {
+        "pk": 3, 
+        "model": "common.semester", 
+        "fields": {
+            "type": "spring", 
+            "year": 2010
+        }
+    }, 
+    {
         "pk": 1, 
         "model": "common.lecturetype", 
         "fields": {
