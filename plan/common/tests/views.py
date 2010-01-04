@@ -61,14 +61,18 @@ class ViewTestCase(BaseTestCase):
 
         self.assertEquals(cached_response, None)
 
-        semester = self.semester
-        args = [semester.year, semester.type]
-        response = self.client.get(self.url('frontpage-semester', *args))
-        self.failUnlessEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'start.html')
-
         # FIXME test posting to index
         # FIXME test missing code 76
+
+    def test_index_semester_cache(self):
+        '''Tests that frontpage and semester cache aren't intertwined (regresion test)'''
+
+        response = self.client.get(reverse('frontpage'))
+        self.assertContains(response, '<select name="semester"')
+
+        response = self.client.get(self.url('frontpage-semester',
+            self.semester.year, self.semester.type))
+        self.assertNotContains(response, '<select name="semester"')
 
     def test_shortcut(self):
         response = self.client.get(self.url('shortcut', 'adamcik'))
