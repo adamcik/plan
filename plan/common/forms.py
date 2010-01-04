@@ -92,12 +92,12 @@ class ScheduleForm(forms.Form):
         super(ScheduleForm, self).__init__(*args, **kwargs)
 
         current = Semester.current()
-
-        semester_test = Q(year__exact=current.year, type__gte=current.type) | \
-            Q(year__gte=current.year)
+        next = current.next()
 
         if not qs:
-            qs = self.fields['semester'].queryset.filter(semester_test)
+            qs = self.fields['semester'].queryset
+            qs = qs.filter(Q(year__exact=current.year, type=current.type) | 
+                           Q(year__exact=next.year, type=next.type))
 
         if len(qs) == 1:
             self.fields['semester'].widget = forms.HiddenInput()
