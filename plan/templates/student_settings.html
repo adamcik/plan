@@ -1,0 +1,17 @@
+{% load i18n %}
+
+<h3>{% trans "Features" %}</h3>
+
+<form method="POST" action="{% url change-student semester.year,semester.type,slug %}">
+    <p>
+        <label>
+            {{ student_form.show_deadlines }}
+            {% trans "Enable deadlines feature?" %}
+        </label>
+    <p>
+    <p>
+        <button type="submit">
+            <span class="icon save">{%trans "Save changes" %}</span>
+        </button>
+    </p>
+</form>
