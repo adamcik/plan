@@ -203,6 +203,11 @@ def schedule(request, year, semester_type, slug, advanced=False,
 
     semester = get_object_or_404(Semester, year=semester.year, type=semester.type)
 
+    try:
+        student = Student.objects.distinct().get(slug=slug, subscription__course__semester=semester)
+    except Student.DoesNotExist:
+        student = None
+
     # Start setting up queries
     courses = Course.objects.get_courses(year, semester.type, slug)
     deadlines = Deadline.objects.get_deadlines(year, semester.type, slug)
@@ -317,6 +322,8 @@ def schedule(request, year, semester_type, slug, advanced=False,
             'groups': groups,
             'lecturers': lecturers,
             'lecture_weeks': weeks,
+            'student': student,
+            'student_form': StudentForm(instance=student),
         }, RequestContext(request))
 
     if cache_page:
