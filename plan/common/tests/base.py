@@ -26,9 +26,7 @@ from plan.cache import get_realm, clear_cache, cache
 
 class BaseTestCase(TestCase):
     def setUp(self):
-        from plan.common import models, views
-        models.now = lambda: datetime(2009, 1, 1)
-        views.now = lambda: datetime(2009, 1, 1)
+        self.set_now_to(2009, 1, 1)
 
         self.semester = Semester.current()
 
@@ -38,6 +36,11 @@ class BaseTestCase(TestCase):
                 self.semester.type,
                 'adamcik'
             ]
+
+    def set_now_to(self, year, month, day):
+        from plan.common import models, views
+        models.now = lambda: datetime(year, month, day)
+        views.now = lambda: datetime(year, month, day)
 
     def url(self, name, *args):
         if args:
