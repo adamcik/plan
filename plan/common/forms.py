@@ -22,7 +22,7 @@ from django import forms
 from django.db.models import Q
 
 from plan.common.templatetags.slugify import slugify
-from plan.common.models import Deadline, Semester
+from plan.common.models import Deadline, Semester, Student
 
 now = datetime.now # To allow for overriding of now in test
 
@@ -114,3 +114,10 @@ class ScheduleForm(forms.Form):
             raise forms.ValidationError('Invalid value.')
 
         return slug
+
+class StudentForm(forms.ModelForm):
+    class Meta:
+        model = Student
+        exclude = ('slug', 'user')
+        
+            
