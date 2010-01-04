@@ -17,7 +17,6 @@
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
 from plan.settings.base import *
-from plan.settings.local import *
 
 DATABASE_ENGINE = 'sqlite3'
 
