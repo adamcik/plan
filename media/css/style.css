@@ -210,17 +210,17 @@ td.error input, td.error select {
 	margin-right: 0.5em;
 	margin-bottom: 0.5em;
 	border: 1px solid #666;
-	width: 30%;
-	height: 8em;
+	width: 15%;
+	height: 20em;
 }
 #change-groups p {
 	overflow: hidden;
-	height: 30%;
+	height: 20%;
 	margin-bottom: 0.25em;
 }
 #change-groups div div {
 	overflow: auto;
-	height: 63%;
+	height: 75%;
 	width: 100%;
 	margin: 0;
 	padding: 0;
