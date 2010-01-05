@@ -378,7 +378,7 @@ def select_groups(request, year, semester_type, slug):
             'color_map': color_map,
         }, RequestContext(request))
 
-def student_settings(request, year, semester_type, slug):
+def toggle_deadlines(request, year, semester_type, slug):
     semester = Semester(year=year, type=semester_type)
     student = Student.objects.distinct().get(slug=slug,
         subscription__course__semester__year__exact=year,
