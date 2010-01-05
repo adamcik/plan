@@ -75,12 +75,12 @@
                 {% endif %}
                 {% include "add_courses.html" %}
                 {% if advanced %}
-                    {% include "groups.html" %}
+                    {% include "groups_link.html" %}
+                    {% include "deadlines_enable.html" %}
                     {% if student.show_deadlines %}
                         {% include "add_deadlines.html" %}
                         {% include "import_deadlines.html" %}
                     {% endif %}
-                    {% include "student_settings.html" %}
                 {% endif %}
             </div>
         </div>
