@@ -1,8 +1,7 @@
 {% load i18n %}
 
-<h3 id="features">{% trans "Features" %}</h3>
-
-<form method="POST" action="{% url change-student semester.year,semester.type,slug %}">
+<form method="POST" action="{% url change-student semester.year,semester.type,slug %}" class="noprint">
+    <h3 id="features">{% trans "Deadline settings" %}</h3>
     <p>
         <label>
             {{ student_form.show_deadlines }}
