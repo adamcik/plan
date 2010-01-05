@@ -264,25 +264,8 @@ def schedule(request, year, semester_type, slug, advanced=False,
         if not deadline_form:
             deadline_form = DeadlineForm(subscriptions)
 
-        if courses:
-            course_groups = Course.get_groups(year, semester.type, [u.course_id for u in subscriptions])
-            selected_groups = Subscription.get_groups(year, semester.type, slug)
-
-            for u in subscriptions:
-                subscription_groups = list(course_groups.get(u.course_id, []))
-                initial_groups = list(selected_groups.get(u.id, []))
-
-                if not subscription_groups:
-                    continue
-
-                group_forms[u.course_id] = GroupForm(course_groups[u.course_id],
-                        initial={'groups': initial_groups},
-                        prefix=u.course_id)
-
-        # Set up group forms and course name forms
+        # Set up and course name forms
         for course in courses:
-            course.group_form = group_forms.get(course.id, None)
-
             alias= course.alias or ''
             course.alias_form = CourseAliasForm(initial={'alias': alias},
                      prefix=course.id)
