@@ -353,6 +353,11 @@ def select_groups(request, year, semester_type, slug):
 
     color_map = ColorMap(hex=True)
     subscription_groups = Subscription.get_groups(year, semester.type, slug)
+    all_subscripted_groups = set()
+
+    for groups in subscription_groups.values():
+        for group in groups:
+            all_subscripted_groups.add(group)
 
     for c in courses:
         color_map[c.id]
@@ -363,7 +368,7 @@ def select_groups(request, year, semester_type, slug):
         except KeyError: # Skip courses without groups
             continue
 
-        initial_groups = subscription_groups.get(subscription_id, [])
+        initial_groups = subscription_groups.get(subscription_id, all_subscripted_groups)
 
         c.group_form = GroupForm(groups, prefix=c.id, initial={'groups': initial_groups})
 
