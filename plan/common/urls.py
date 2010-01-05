@@ -38,7 +38,7 @@ urlpatterns = patterns('plan.common.views',
     url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/(?P<slug>[a-z0-9-_]{1,50})/deadlines/$', 'new_deadline', name='new-deadline'),
     url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/(?P<slug>[a-z0-9-_]{1,50})/deadlines/copy/$', 'copy_deadlines', name='copy-deadlines'),
 
-    url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/(?P<slug>[a-z0-9-_]{1,50})/settings/$', 'student_settings', name='change-student'),
+    url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/(?P<slug>[a-z0-9-_]{1,50})/deadlines/toggle/$', 'toggle_deadlines', name='toggle-deadlines'),
 
     url(r'^(?P<slug>[a-z0-9-_]{1,50})/$', 'shortcut', name='shortcut'),
 )

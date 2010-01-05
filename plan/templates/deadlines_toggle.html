@@ -1,6 +1,6 @@
 {% load i18n %}
 
-<form method="POST" action="{% url change-student semester.year,semester.type,slug %}" class="noprint">
+<form method="POST" action="{% url toggle-deadlines semester.year,semester.type,slug %}" class="noprint">
     <h3 id="features">{% trans "Deadlines" %}</h3>
     <p>
         {% trans "Click here to" %}
