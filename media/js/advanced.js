@@ -39,15 +39,22 @@
 
   function add_toggle() {
     var div = $(this);
-    var a = $('<a class="tiny">Toggle</a>');
+    var all = $('<a>All</a>');
+    var none = $('<a>None</a>');
+    var wrapper = $('<div class="tiny"></div>')
 
-    div.css('position', 'relative')
-    a.css({position: 'absolute', top: 0, right: 2, cursor: 'pointer'});
+    wrapper.css('text-align', 'right');
+    all.css('cursor', 'pointer')
+    none.css('cursor', 'pointer')
 
-    a.toggle(function() { div.find(':checkbox').removeAttr('checked'); return false; },
-             function() { div.find(':checkbox').attr('checked', 'checked'); return false; });
+    none.click(function() { div.find(':checkbox').removeAttr('checked'); return false; });
+    all.click(function() { div.find(':checkbox').attr('checked', 'checked'); return false; });
 
-    div.prepend(a);
+    wrapper.append(all);
+    wrapper.append(' - ');
+    wrapper.append(none);
+
+    div.append(wrapper);
   }
 
   $(function() {
