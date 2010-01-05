@@ -91,6 +91,17 @@ button .icon {
 	/* Pulls background up */
 	padding-top: 1px;
 }
+button.link {
+	background: none;
+	margin: 0;
+	padding: 0;
+	border: none;
+	cursor: pointer;
+	text-decoration: underline;
+	color: #204A87;
+	display: inline;
+}
+
 input {
 	padding: 0.15em;
 }
