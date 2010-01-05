@@ -34,7 +34,7 @@ from django.utils.text import truncate_words
 from plan.common.models import Course, Deadline, Exam, Group, \
         Lecture, Semester, Subscription, Room, Lecturer, Week, Student
 from plan.common.forms import DeadlineForm, GroupForm, CourseAliasForm, \
-        ScheduleForm, StudentForm
+        ScheduleForm
 from plan.common.utils import ColorMap, max_number_of_weeks
 from plan.common.timetable import Timetable
 from plan.cache import clear_cache, get_realm, cache, compress, decompress
@@ -306,7 +306,6 @@ def schedule(request, year, semester_type, slug, advanced=False,
             'lecturers': lecturers,
             'lecture_weeks': weeks,
             'student': student,
-            'student_form': StudentForm(instance=student),
         }, RequestContext(request))
 
     if cache_page:
@@ -386,11 +385,9 @@ def student_settings(request, year, semester_type, slug):
         subscription__course__semester__type=semester_type)
 
     if request.method == 'POST':
-        form = StudentForm(request.POST, instance=student)
-
-        if form.is_valid():
-            form.save()
-            clear_cache(semester, slug)
+        student.show_deadlines = not student.show_deadlines
+        student.save()
+        clear_cache(semester, slug)
 
     return HttpResponseRedirect(reverse('schedule-advanced',
             args=[semester.year, semester.type, slug]))

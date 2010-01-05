@@ -1,16 +1,16 @@
 {% load i18n %}
 
 <form method="POST" action="{% url change-student semester.year,semester.type,slug %}" class="noprint">
-    <h3 id="features">{% trans "Deadline settings" %}</h3>
+    <h3 id="features">{% trans "Deadlines" %}</h3>
     <p>
-        <label>
-            {{ student_form.show_deadlines }}
-            {% trans "Enable deadlines feature?" %}
-        </label>
-    <p>
-    <p>
-        <button type="submit">
-            <span class="icon save">{%trans "Save changes" %}</span>
+        {% trans "Click here to" %}
+        <button type="submit" class="link">
+            {% if student.show_deadlines %}
+                {%trans "disable" %}
+            {% else %}
+                {%trans "enable" %}
+            {% endif %}
         </button>
+        {% trans "showing of deadlines." %}
     </p>
 </form>

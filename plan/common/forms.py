@@ -114,10 +114,3 @@ class ScheduleForm(forms.Form):
             raise forms.ValidationError('Invalid value.')
 
         return slug
-
-class StudentForm(forms.ModelForm):
-    class Meta:
-        model = Student
-        exclude = ('slug', 'user')
-        
-            
