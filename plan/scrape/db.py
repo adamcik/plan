@@ -202,11 +202,9 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
 
             added_lectures.append(lecture.id)
 
-            # Simply set data since we are saving new lecture
-            lecture.groups = groups
-            lecture.rooms = rooms
-            lecture.lecturers = lecturers
-
+        lecture.rooms = rooms
+        lecture.lecturers = lecturers
+        lecture.groups = list(groups)
         lecture.start = start
         lecture.end = end
         lecture.save()
