@@ -174,9 +174,14 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
             del lecture_kwargs['type']
 
         lectures = Lecture.objects.filter(**lecture_kwargs)
-        lectures = lectures.exclude(id__in=added_lectures)
+        lectures = list(lectures.exclude(id__in=added_lectures))
 
         added = False
+
+        if len(lectures) == 1:
+            lecture = lectures.pop()
+            added_lectures.append(lecture.id)
+            added = True
 
         for lecture in lectures:
             psql_set = set(lecture.groups.values_list('id', flat=True))
