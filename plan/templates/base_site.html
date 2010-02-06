@@ -16,10 +16,6 @@
     <link rel="icon" type="image/png" href="{{ MEDIA_URL }}gfx/time.png" />
 {% endblock %}
 
-{% block extrascript %}
-    {% googleanalytics %}
-{% endblock %}
-
 {% block ft %}
     <div class="yui-g">
       <div class="yui-u first">
@@ -77,4 +73,6 @@
         <a href="http://colorbrewer2.org/">ColorBrewer</a>
       </span>
     </p>
+
+    {% googleanalytics %}
 {% endblock %}
