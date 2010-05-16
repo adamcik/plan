@@ -1,4 +1,4 @@
-# Copyright 2008, 2009 Thomas Kongevold Adamcik,
+# Copyright 2008, 2009, 2010 Thomas Kongevold Adamcik,
 # 2009 IME Faculty Norwegian University of Science and Technology
 
 # This file is part of Plan.
@@ -37,7 +37,7 @@ from plan.common.forms import DeadlineForm, GroupForm, CourseAliasForm, \
         ScheduleForm
 from plan.common.utils import ColorMap, max_number_of_weeks
 from plan.common.timetable import Timetable
-from plan.cache import clear_cache, get_realm, cache, compress, decompress
+from plan.cache import clear_cache, get_realm, compress, decompress
 from plan.common.templatetags.slugify import slugify
 
 # FIXME split into frontpage/semester, course, deadline, schedule files
@@ -93,9 +93,9 @@ def getting_started(request, year=None, semester_type=None):
             return response
 
     realm = get_realm(semester)
-    response = cache.get(cache_key, realm=realm)
+    response = request.cache.get(cache_key, realm=realm)
 
-    if response and getattr(request, 'use_cache', True):
+    if response:
         return response
 
     try:
@@ -117,7 +117,7 @@ def getting_started(request, year=None, semester_type=None):
 
     response = render_to_response('start.html', context, RequestContext(request))
 
-    cache.set(cache_key, response, settings.CACHE_TIME_FRONTPAGE, realm=realm)
+    request.cache.set(cache_key, response, settings.CACHE_TIME_FRONTPAGE, realm=realm)
 
     return response
 
@@ -131,9 +131,9 @@ def course_query(request, year, semester_type):
     cache_key = ':'.join([request.path, slugify(query), '%d' % limit])
     cache_key = cache_key.lower()
 
-    response = cache.get(cache_key, prefix=True)
+    response = request.cache.get(cache_key, prefix=True)
 
-    if response and getattr(request, 'use_cache', True):
+    if response:
         return response
 
     response = HttpResponse(mimetype='text/plain; charset=utf-8')
@@ -150,7 +150,7 @@ def course_query(request, year, semester_type):
         name = escape(truncate_words(course.name, 5))
         response.write(u'%s|%s\n' % (code, name or u'?'))
 
-    cache.set(cache_key, response, settings.CACHE_TIME_AJAX, prefix=True)
+    request.cache.set(cache_key, response, settings.CACHE_TIME_AJAX, prefix=True)
 
     return response
 
@@ -191,9 +191,9 @@ def schedule(request, year, semester_type, slug, advanced=False,
             raise Http404
 
     realm = get_realm(semester, slug)
-    response = cache.get(url, realm=realm)
+    response = request.cache.get(url, realm=realm)
 
-    if response and getattr(request, 'use_cache', True):
+    if response:
         return response
 
     # Color mapping for the courses
@@ -319,7 +319,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
             # default cache time
             cache_time = settings.CACHE_TIME_SCHECULDE
 
-        cache.set(url, response, cache_time, realm=realm)
+        request.cache.set(url, response, cache_time, realm=realm)
 
     return response
 
@@ -599,10 +599,9 @@ def list_courses(request, year, semester_type, slug):
     semester = Semester(year=year, type=semester_type)
 
     key = '/'.join([str(semester.year), semester.type, 'courses'])
-    content = cache.get(key, prefix=True)
+    content = request.cache.get(key, prefix=True)
 
-    if not content or not getattr(request, 'use_cache', True):
-
+    if not content:
         courses = Course.objects.get_courses_with_exams(year, semester.type)
 
         response = render_to_response('course_list.html', {
@@ -610,7 +609,7 @@ def list_courses(request, year, semester_type, slug):
                 'course_list': courses,
             }, RequestContext(request))
 
-        cache.set(key, compress(response.content), settings.CACHE_TIME_SCHECULDE, prefix=True)
+        request.cache.set(key, compress(response.content), settings.CACHE_TIME_SCHECULDE, prefix=True)
 
     else:
         response = HttpResponse(decompress(content))

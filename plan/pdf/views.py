@@ -1,4 +1,4 @@
-# Copyright 2008, 2009 Thomas Kongevold Adamcik
+# Copyright 2008, 2009, 2010 Thomas Kongevold Adamcik
 # 2009 IME Faculty Norwegian University of Science and Technology
 
 # This file is part of Plan.
@@ -38,7 +38,7 @@ from django.utils.translation import ugettext as _
 from plan.common.models import Lecture, Semester, Room, Course
 from plan.common.timetable import Timetable
 from plan.common.utils import ColorMap
-from plan.cache import get_realm, cache
+from plan.cache import get_realm
 
 outer_border = HexColor('#666666')
 inner_border = HexColor('#CCCCCC')
@@ -80,9 +80,9 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
     semester = Semester(year=year, type=semester_type)
 
     cache_realm = get_realm(semester, slug)
-    response = cache.get(request.path, realm=cache_realm)
+    response = request.cache.get(request.path, realm=cache_realm)
 
-    if response and getattr(request, 'use_cache', True):
+    if response:
         return response
 
     color_map = ColorMap(hex=True)
@@ -241,6 +241,6 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
     page.showPage()
     page.save()
 
-    cache.set(request.path, response, realm=cache_realm)
+    request.cache.set(request.path, response, realm=cache_realm)
 
     return response

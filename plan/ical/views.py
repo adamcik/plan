@@ -1,4 +1,4 @@
-# Copyright 2008, 2009 Thomas Kongevold Adamcik
+# Copyright 2008, 2009, 2010 Thomas Kongevold Adamcik
 # 2009 IME Faculty Norwegian University of Science and Technology
 
 # This file is part of Plan.
@@ -29,7 +29,7 @@ from django.conf import settings
 from django.utils.translation import ugettext as _
 
 from plan.common.models import Exam, Deadline, Lecture, Semester, Room, Week
-from plan.cache import get_realm, cache
+from plan.cache import get_realm
 
 HOSTNAME = settings.ICAL_HOSTNAME
 
@@ -67,9 +67,9 @@ def ical(request, year, semester_type, slug, selector=None):
 
     cache_realm = get_realm(semester, slug)
 
-    response = cache.get(cache_key, realm=cache_realm)
+    response = request.cache.get(cache_key, realm=cache_realm)
 
-    if response and getattr(request, 'use_cache', True):
+    if response:
         return response
 
     cal = vobject.iCalendar()
@@ -109,7 +109,7 @@ def ical(request, year, semester_type, slug, selector=None):
     response['Filename'] = filename  # IE needs this
     response['Content-Disposition'] = 'attachment; filename=%s' % filename
 
-    cache.set(cache_key, response, realm=cache_realm)
+    request.cache.set(cache_key, response, realm=cache_realm)
 
     return response
 
