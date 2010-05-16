@@ -1,4 +1,4 @@
-# Copyright 2009 Thomas Kongevold Adamcik
+# Copyright 2009, 2010 Thomas Kongevold Adamcik
 # 2009 IME Faculty Norwegian University of Science and Technology
 
 # This file is part of Plan.
@@ -18,6 +18,9 @@
 
 import logging
 
+from django.core.cache.backends.dummy import CacheClass as DummyCacheClass
+from plan.cache import CacheClass
+
 class CacheMiddleware(object):
     '''Attaches either a real or dummy cache instance to our request, cache
        instance should only be used for retrival'''
@@ -26,11 +29,13 @@ class CacheMiddleware(object):
         self.logger = logging.getLogger('plan.middleware.cache')
 
     def process_request(self, request):
-        request.use_cache = True
-
         if self._ignore_cache(request):
             self.logger.debug('Ignoring cache')
-            request.use_cache = False
+            # FIXME strictly speaking the old behaviour was to ignore get but
+            # not set.
+            request.cache = DummyCacheClass()
+        else:
+            request.cache = CacheClass(language=request.LANGUAGE_CODE)
 
         return None
 

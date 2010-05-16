@@ -1,4 +1,4 @@
-# Copyright 2008, 2009 Thomas Kongevold Adamcik
+# Copyright 2008, 2009, 2010 Thomas Kongevold Adamcik
 # 2009 IME Faculty Norwegian University of Science and Technology
 
 # This file is part of Plan.
@@ -94,8 +94,8 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'plan.cache.middleware.CacheMiddleware',
     'django.middleware.locale.LocaleMiddleware',
+    'plan.cache.middleware.CacheMiddleware',
     'plan.common.middleware.UserBasedExceptionMiddleware',
     'plan.common.middleware.PlainContentMiddleware',
 )

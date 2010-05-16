@@ -1,4 +1,4 @@
-# Copyright 2008, 2009 Thomas Kongevold Adamcik
+# Copyright 2008, 2009, 2010 Thomas Kongevold Adamcik
 # 2009 IME Faculty Norwegian University of Science and Technology
 
 # This file is part of Plan.
@@ -51,6 +51,7 @@ class CacheClass(BaseCache):
     def __init__(self, *args, **kwargs):
         if hasattr(django_cache, 'close'):
             self.close = django_cache.close
+        self.language = kwargs.pop('language', None)
 
     def _realm(self, key, **kwargs):
         realm = kwargs.pop('realm', None)
@@ -71,7 +72,10 @@ class CacheClass(BaseCache):
 
     def _prefix(self, key, **kwargs):
         if kwargs.pop('prefix', False):
-            key = ':'.join([settings.CACHE_PREFIX, key])
+            key = '%s:%s' % (settings.CACHE_PREFIX, key)
+
+        if self.language:
+            key = '%s:%s' % (key, self.language)
 
         return (key, kwargs)
 

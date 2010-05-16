@@ -1,4 +1,4 @@
-# Copyright 2009 Thomas Kongevold Adamcik
+# Copyright 2009, 2010 Thomas Kongevold Adamcik
 # 2009 IME Faculty Norwegian University of Science and Technology
 
 # This file is part of Plan.
@@ -16,6 +16,7 @@
 # You should have received a copy of the Affero GNU General Public
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
-from plan.cache.base import CacheClass, get_realm, clear_cache, compress, decompress
+from plan.cache.base import (CacheClass, get_realm, clear_cache, compress,
+    decompress)
 
 cache = CacheClass()
