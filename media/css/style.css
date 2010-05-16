@@ -15,7 +15,6 @@ h1 {
 	padding-left: 0.6em;
 	font-size: 167%;
 	margin-bottom: -0.25em;
-	float: left;
 }
 h2 {
 	border-bottom: 1px solid #D3D7CF;
@@ -387,28 +386,28 @@ td.error input, td.error select {
 		text-decoration: none;
 	}
 }
+
 /* Language selector */
-#setlang {
+#setlang  {
 	float: right;
-	margin-top: 1.4em;
 }
 
-#setlang h2 {
-	float: left;
+#setlang button {
 	border: 0;
-	margin: .2em 1em;
-	font-size: 1em;
+	background: transparent;
+	text-decoration: underline;
 }
 
-#setlang>select option {
-	background-position: 2px 50%;
-	background-repeat: no-repeat;
-	padding-left: 1.6em;
+#setlang span {
+	padding-left: 20px;
+	background: no-repeat left center;
 }
-
-#setlang>select option[value="no"] { background-image: url(../gfx/no.png) }
-#setlang>select option[value="en"] { background-image: url(../gfx/gb.png) }
-
+#setlang .lang-no {
+	background-image: url(../gfx/no.png);
+}
+#setlang .lang-en {
+	background-image: url(../gfx/en.png);
+}
 
 /* From http://bassistance.de/jquery-plugins/jquery-plugin-autocomplete
  * Version: 1.0.2

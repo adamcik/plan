@@ -34,9 +34,11 @@ else:
 
 urlpatterns += patterns('',
     (r'^admin/(.*)', admin.site.root),
+    url(r'^i18n/', 'django.views.i18n.set_language', name='setlang'),
 
     (r'^', include('plan.common.urls')),
     (r'^', include('plan.ical.urls')),
     (r'^', include('plan.pdf.urls')),
+
 )
 
