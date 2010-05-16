@@ -1,4 +1,4 @@
-# Copyright 2008, 2009 Thomas Kongevold Adamcik
+# Copyright 2008, 2009, 2010 Thomas Kongevold Adamcik
 # 2009 IME Faculty Norwegian University of Science and Technology
 
 # This file is part of Plan.
@@ -20,8 +20,10 @@ from django.utils.datastructures import MultiValueDict
 from django.core.urlresolvers import reverse
 
 from plan.common.tests.base import BaseTestCase
-from plan.cache import get_realm, cache, decompress
+from plan.cache import get_realm, CacheClass, decompress
 from plan.common.models import Semester, Group, Subscription, Lecture, Deadline
+
+cache = CacheClass(language='en')
 
 class EmptyViewTestCase(BaseTestCase):
     def test_index(self):

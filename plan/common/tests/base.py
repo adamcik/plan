@@ -1,4 +1,4 @@
-# Copyright 2008, 2009 Thomas Kongevold Adamcik
+# Copyright 2008, 2009, 2010 Thomas Kongevold Adamcik
 # 2009 IME Faculty Norwegian University of Science and Technology
 
 # This file is part of Plan.
@@ -22,7 +22,9 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 from plan.common.models import Semester
-from plan.cache import get_realm, clear_cache, cache
+from plan.cache import get_realm, clear_cache, CacheClass
+
+cache = CacheClass(language='en')
 
 class BaseTestCase(TestCase):
     def setUp(self):
