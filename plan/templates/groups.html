@@ -2,7 +2,7 @@
 
 <form action="{% url change-groups semester.year,semester.type,slug %}" method="post" class="noprint">
     {% if advanced %}
-        <h3 id="groups">Change groups</h3>
+        <h2 id="groups">{% trans "Change groups" %}</h2>
     {% endif %}
     <p>
         {% trans "Please choose the course variants you belong to." %}
@@ -22,7 +22,7 @@
                             {{ course.group_form.groups }}
                         {% else %}
                             <ul>
-                                <li>No groups</li>
+                                <li>{% trans "No groups" %}</li>
                             </ul>
                         {% endif %}
                     </div>

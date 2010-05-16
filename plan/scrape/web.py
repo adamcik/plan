@@ -70,8 +70,11 @@ def update_courses(year, semester_type):
 
         for tr in table.findAll('tr'):
             code, name = tr.findAll('a')
+            
+            pattern = 'emnekode=(.+?[0-9\-]+)'
+            code = re.compile(pattern, re.I|re.L).search(code['href']).group().strip('emnekode=')
 
-            code, version = code.contents[0].split('-', 2)[:2]
+            code, version = code.split('-', 2)[:2]
             name = name.contents[0]
 
             if name.endswith('(Nytt)'):
@@ -231,9 +234,13 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
             lecture_type, created = LectureType.objects.get_or_create(name=name)
         else:
             lecture_type = None
-
-        day = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag']. \
-                index(r['time'][0][0])
+        # Figure out day mapping
+        try:
+	    day = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag']. \
+	        index(r['time'][0][0])
+        except ValueError:
+            logger.warning("Could not add %s - %s on %s for %s" % (start, end, day, course))
+            continue
 
         start = parse(r['time'][0][1]).time()
         end = parse(r['time'][0][2]).time()
