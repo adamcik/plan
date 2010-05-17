@@ -1,5 +1,5 @@
 /*
- * Copyright 2008, 2009 Thomas Kongevold Adamcik
+ * Copyright 2008, 2009, 2010 Thomas Kongevold Adamcik
  * 2009 IME Faculty Norwegian University of Science and Technology
  *
  * Code licensed under the Affero GNU General Public License:
@@ -7,6 +7,24 @@
 */
 
 (function() {
+  try {
+    language = language;
+  } catch (error) {
+    language = 'en';
+  }
+
+  var catalog = {
+    'All': 'Alle',
+    'None': 'Ingen'
+  };
+
+  function gettext(msgid) {
+      if (language == 'en') {
+        return msgid;
+      }
+      return catalog[msgid];
+  }
+  
   function add_hidden_to_lectures() {
       var input = $(this);
 
@@ -39,8 +57,8 @@
 
   function add_toggle() {
     var div = $(this);
-    var all = $('<a>All</a>');
-    var none = $('<a>None</a>');
+    var all = $('<a></a>').text(gettext('All'));
+    var none = $('<a></a>').text(gettext('None'));
     var wrapper = $('<div class="tiny"></div>')
 
     wrapper.css('text-align', 'right');
