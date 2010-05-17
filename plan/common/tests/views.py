@@ -20,10 +20,8 @@ from django.utils.datastructures import MultiValueDict
 from django.core.urlresolvers import reverse
 
 from plan.common.tests.base import BaseTestCase
-from plan.cache import get_realm, CacheClass, decompress
+from plan.cache import decompress
 from plan.common.models import Semester, Group, Subscription, Lecture, Deadline
-
-cache = CacheClass(language='en')
 
 class EmptyViewTestCase(BaseTestCase):
     def test_index(self):
@@ -51,15 +49,14 @@ class ViewTestCase(BaseTestCase):
         self.assertTemplateUsed(response, 'start.html')
 
         # Check that cache gets set
-        realm = get_realm(self.semester)
-        cached_response = cache.get('frontpage', realm=realm)
+        cached_response = self.cache_no_slug.get('frontpage')
 
         self.assertEquals(True, cached_response is not None)
         self.assertEquals(response.content, cached_response.content)
 
         # Check that cache gets cleared
         self.clear()
-        cached_response = cache.get('frontpage', realm=realm)
+        cached_response = self.cache_no_slug.get('frontpage')
 
         self.assertEquals(cached_response, None)
 
@@ -145,11 +142,11 @@ class ViewTestCase(BaseTestCase):
         self.failUnlessEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'course_list.html')
 
-        cache_content = decompress(cache.get(key, prefix=True))
+        cache_content = decompress(self.cache.get(key, realm=False))
         self.assertEquals(response.content, cache_content)
 
         self.clear()
-        cache_content = decompress(cache.get(key, prefix=True))
+        cache_content = decompress(self.cache.get(key, realm=False))
         self.assertEquals(response.content, cache_content)
 
     def test_change_course(self):

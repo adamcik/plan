@@ -24,20 +24,20 @@ from django.test import TestCase
 from plan.common.models import Semester
 from plan.cache import get_realm, clear_cache, CacheClass
 
-cache = CacheClass(language='en')
-
 class BaseTestCase(TestCase):
     def setUp(self):
         self.set_now_to(2009, 1, 1)
 
         self.semester = Semester.current()
-
-        self.realm = get_realm(self.semester, 'adamcik')
         self.default_args = [
                 self.semester.year,
                 self.semester.type,
                 'adamcik'
             ]
+        realm = get_realm(self.semester, 'adamcik')
+        realm_no_slug = get_realm(self.semester)
+        self.cache = CacheClass(language='en', realm=realm)
+        self.cache_no_slug = CacheClass(language='en', realm=realm_no_slug)
 
     def set_now_to(self, year, month, day):
         from plan.common import models, views
@@ -57,4 +57,4 @@ class BaseTestCase(TestCase):
         clear_cache(self.semester, 'adamcik')
 
     def get(self, key):
-        return cache.get(key, realm=self.realm)
+        return self.cache.get(key)
