@@ -175,7 +175,9 @@ class ViewTestCase(BaseTestCase):
              'course_remove': 4},
         ]
 
-        subscriptions = list(Subscription.objects.filter(student__slug='adamcik').order_by('id').values_list())
+        subscriptions = Subscription.objects.filter(student__slug='adamcik')
+        subscriptions = subscriptions.order_by('id').values_list()
+        subscriptions = list(subscriptions)
 
         for data in post_data:
             original_response = self.client.get(original_url)
