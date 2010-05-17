@@ -31,15 +31,16 @@ from plan.common.templatetags.slugify import slugify
 logger = logging.getLogger('plan.common.cache')
 
 def get_realm(semester, slug=None):
-    args = [semester.year, semester.type]
+    args = [settings.CACHE_PREFIX, semester.year, semester.type]
     if slug:
         args.append(slug)
 
     return ':'.join([slugify(a) for a in args])
 
 def clear_cache(semester, slug):
-    django_cache.delete(':'.join([settings.CACHE_PREFIX, get_realm(semester, slug)]))
-    django_cache.delete(':'.join([settings.CACHE_PREFIX, get_realm(semester)]))
+    logger.debug('Clearing cache for %s %s', semester, slug)
+    django_cache.delete(get_realm(semester, slug))
+    django_cache.delete(get_realm(semester))
 
 def compress(value):
     return base64.b64encode(zlib.compress(value))
@@ -72,7 +73,6 @@ class CacheClass(BaseCache):
 
     def _get_realm_prefix(self, realm):
         logger.debug('Getting realm: %s' % realm)
-        realm = ':'.join([settings.CACHE_PREFIX, realm])
         prefix = django_cache.get(realm)
 
         if prefix:
