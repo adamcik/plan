@@ -8,6 +8,7 @@ software new features where added based on personal needs and suggestions from
 other students.
 
 Today the software provides the following:
+------------------------------------------
 
 - Simple interface for adding courses.
 - Customizable view of your timetable.
