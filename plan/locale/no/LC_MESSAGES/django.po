@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Timeplan\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-17 00:21+0200\n"
+"POT-Creation-Date: 2010-05-17 17:32+0200\n"
 "PO-Revision-Date: 2009-09-29 14:46+0100\n"
 "Last-Translator: Thomas Adamcik <timeplan@adamcik.no>\n"
 "Language-Team:  <timeplan@adamcik.no>\n"
@@ -171,8 +171,8 @@ msgstr "Varighet"
 msgid "Duration in hours"
 msgstr "Varighet i timer"
 
-#: common/models.py:312 ical/views.py:176 ical/views.py:177 ical/views.py:180
-#: ical/views.py:181
+#: common/models.py:312 ical/views.py:173 ical/views.py:174 ical/views.py:177
+#: ical/views.py:178
 msgid "Exam"
 msgstr "Eksamen"
 
@@ -200,23 +200,23 @@ msgstr "Foreleser"
 msgid "Lecturers"
 msgstr "Forelesere"
 
-#: common/models.py:345 pdf/views.py:131 templates/schedule_table.html:16
+#: common/models.py:345 pdf/views.py:129 templates/schedule_table.html:16
 msgid "Monday"
 msgstr "Mandag"
 
-#: common/models.py:346 pdf/views.py:131 templates/schedule_table.html:17
+#: common/models.py:346 pdf/views.py:129 templates/schedule_table.html:17
 msgid "Tuesday"
 msgstr "Tirsdag"
 
-#: common/models.py:347 pdf/views.py:131 templates/schedule_table.html:18
+#: common/models.py:347 pdf/views.py:129 templates/schedule_table.html:18
 msgid "Wednesday"
 msgstr "Onsdag"
 
-#: common/models.py:348 pdf/views.py:131 templates/schedule_table.html:19
+#: common/models.py:348 pdf/views.py:129 templates/schedule_table.html:19
 msgid "Thursday"
 msgstr "Torsdag"
 
-#: common/models.py:349 pdf/views.py:131 templates/schedule_table.html:20
+#: common/models.py:349 pdf/views.py:129 templates/schedule_table.html:20
 msgid "Friday"
 msgstr "Fredag"
 
@@ -265,21 +265,21 @@ msgstr "Frist"
 msgid "Deadlines"
 msgstr "Frister"
 
-#: ical/views.py:79
+#: ical/views.py:76
 #, python-format
 msgid "%(slug)s' %(semester)s %(year)s schedule for %(resources)s"
 msgstr "%(slug)s' timeplan for %(semester)s %(year)s, %(resources)s"
 
-#: ical/views.py:81
+#: ical/views.py:78
 #, python-format
 msgid "%(slug)s's %(semester)s %(year)s schedule for %(resources)s"
 msgstr "%(slug)ss timeplan for %(semester)s %(year)s, %(resources)s"
 
-#: pdf/views.py:233
+#: pdf/views.py:231
 msgid "Week"
 msgstr "Uke"
 
-#: pdf/views.py:235
+#: pdf/views.py:233
 msgid "All weeks"
 msgstr "Alle uker"
 
@@ -346,7 +346,7 @@ msgstr "Legg til frist"
 msgid "Timetable generator for NTNU students"
 msgstr "Timeplangenerator for NTNU-studenter"
 
-#: templates/base_site.html:27
+#: templates/base_site.html:28
 msgid ""
 "\n"
 "              All lecture times and course data have been automatically "
@@ -367,43 +367,43 @@ msgstr ""
 "riktige før du stoler på dem.\n"
 "          "
 
-#: templates/base_site.html:35
+#: templates/base_site.html:36
 msgid "Code and design &copy; 2008-2010 Thomas Adamcik."
 msgstr "Kildekode og design &copy; 2008-2010 Thomas Adamcik."
 
-#: templates/base_site.html:36
+#: templates/base_site.html:37
 msgid "Further work commissioned by IME Faculty NTNU 2009."
 msgstr "Videre utvikling utført på bestilling fra IME-fakultetet, NTNU, 2009."
 
-#: templates/base_site.html:41 templates/schedule_table_footer.html:7
+#: templates/base_site.html:42 templates/schedule_table_footer.html:7
 msgid "Course list"
 msgstr "Emneliste"
 
-#: templates/base_site.html:43
+#: templates/base_site.html:44
 msgid "Exam dates"
 msgstr "Eksamensdatoer"
 
-#: templates/base_site.html:45
+#: templates/base_site.html:46
 msgid "Exam rules"
 msgstr "Eksamensregler"
 
-#: templates/base_site.html:47
+#: templates/base_site.html:48
 msgid "Lecture times"
 msgstr "Forelesningstider"
 
-#: templates/base_site.html:49
+#: templates/base_site.html:50
 msgid "Map Dragvoll"
 msgstr "Kart: Dragvoll"
 
-#: templates/base_site.html:52
+#: templates/base_site.html:53
 msgid "Map Gløshaugen"
 msgstr "Kart: Gløshaugen"
 
-#: templates/base_site.html:55
+#: templates/base_site.html:56
 msgid "Find rooms"
 msgstr "Søk etter rom"
 
-#: templates/base_site.html:64
+#: templates/base_site.html:65
 #, python-format
 msgid ""
 "\n"
@@ -420,7 +420,7 @@ msgstr ""
 "        på <a href=\"%(SOURCE_URL)s\">%(SOURCE_URL)s</a>.\n"
 "      "
 
-#: templates/base_site.html:71
+#: templates/base_site.html:72
 msgid "Built using:"
 msgstr "Bygget ved hjelp av:"
 
@@ -1015,6 +1015,9 @@ msgstr ""
 #: templates/admin/base_site.html:5 templates/admin/base_site.html.py:9
 msgid "ntnu timetable admin"
 msgstr "NTNU timeplanadministrator"
+
+#~ msgid "Change language to:"
+#~ msgstr "Bytt til:"
 
 #~ msgid "Language"
 #~ msgstr "Språk"

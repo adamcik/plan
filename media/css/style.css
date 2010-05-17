@@ -15,6 +15,7 @@ h1 {
 	padding-left: 0.6em;
 	font-size: 167%;
 	margin-bottom: -0.25em;
+	clear: left;
 }
 h2 {
 	border-bottom: 1px solid #D3D7CF;
@@ -391,22 +392,8 @@ td.error input, td.error select {
 #setlang  {
 	float: right;
 }
-
-#setlang button {
-	border: 0;
-	background: transparent;
-	text-decoration: underline;
-}
-
-#setlang span {
-	padding-left: 20px;
-	background: no-repeat left center;
-}
-#setlang .lang-no {
-	background-image: url(../gfx/no.png);
-}
-#setlang .lang-en {
-	background-image: url(../gfx/en.png);
+#setlang img {
+	vertical-align: -17%;
 }
 
 /* From http://bassistance.de/jquery-plugins/jquery-plugin-autocomplete

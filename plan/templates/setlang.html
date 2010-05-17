@@ -2,11 +2,14 @@
 
 <form id="setlang" action="{% url django.views.i18n.set_language %}" method="post">
     <input type="hidden" name="next" value="{{ request.get_full_path }}" />
-    {% for code, name in LANGUAGES %}
-        {% ifnotequal request.LANGUAGE_CODE code %}
-        <button type="submit" class="link" name="language" value="{{ code }}">
-            <span class="lang-{{ code }}">{% trans name %}</span>
-        </button>
-        {% endifnotequal %}
-    {% endfor %}
+    <p>
+        {% for code, name in LANGUAGES %}
+            {% ifnotequal request.LANGUAGE_CODE code %}
+            <button type="submit" class="link" name="language" value="{{ code }}">
+                Switch language to: {# Not translated on purpose #}
+                <img alt="{% trans name %}" title="{% trans name %}" src="{{ MEDIA_URL }}gfx/{{ code }}.png" />
+            </button>
+            {% endifnotequal %}
+        {% endfor %}
+    </p>
 </form>
