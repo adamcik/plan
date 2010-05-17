@@ -1,4 +1,4 @@
-# Copyright 2009 Thomas Kongevold Adamcik
+# Copyright 2009, 2010 Thomas Kongevold Adamcik
 # 2009 IME Faculty Norwegian University of Science and Technology
 
 # This file is part of Plan.
@@ -16,17 +16,19 @@
 # You should have received a copy of the Affero GNU General Public
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
+import re
+
 from django import template
 from django.conf import settings
 
 register = template.Library()
 
 @register.inclusion_tag('title.html')
-def title(semester, slug, week=None):
-    if slug.endswith('s'):
-        ending = "'"
+def title(semester, slug, language, week=None):
+    if language in ['no', 'nb', 'nn']:
+        ending = norwegian(slug)
     else:
-        ending = "'s"
+        ending = english(slug)
 
     return {
         'slug': slug,
@@ -35,3 +37,13 @@ def title(semester, slug, week=None):
         'year': semester.year,
         'week': week,
     }
+
+def english(slug):
+    if slug.endswith('s'):
+        return "'"
+    return "'s"
+
+def norwegian(slug):
+    if re.search(r'(z|s|x|sch|sh)$', slug):
+        return "'"
+    return "s"

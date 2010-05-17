@@ -23,12 +23,12 @@
 {% endblock %}
 
 {% block title %}
-    {% title semester slug week %}
+    {% title semester slug request.LANGUAGE_CODE week %}
 {% endblock %}
 
 {% block hd %}
     <h1>
-        {% title semester slug week %}
+        {% title semester slug request.LANGUAGE_CODE week %}
     </h1>
 {% endblock %}
 
