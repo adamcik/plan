@@ -92,8 +92,7 @@ def getting_started(request, year=None, semester_type=None):
             response.set_cookie('last', slug, settings.TIMETABLE_COOKIE_AGE)
             return response
 
-    realm = get_realm(semester)
-    response = request.cache.get(cache_key, realm=realm)
+    response = request.cache.get(cache_key)
 
     if response:
         return response
@@ -117,7 +116,7 @@ def getting_started(request, year=None, semester_type=None):
 
     response = render_to_response('start.html', context, RequestContext(request))
 
-    request.cache.set(cache_key, response, settings.CACHE_TIME_FRONTPAGE, realm=realm)
+    request.cache.set(cache_key, response, settings.CACHE_TIME_FRONTPAGE)
 
     return response
 
@@ -131,17 +130,17 @@ def course_query(request, year, semester_type):
     cache_key = ':'.join([request.path, slugify(query), '%d' % limit])
     cache_key = cache_key.lower()
 
-    response = request.cache.get(cache_key, prefix=True)
+    response = request.cache.get(cache_key, realm=False)
 
     if response:
         return response
 
     response = HttpResponse(mimetype='text/plain; charset=utf-8')
-    semester = Semester(year=year, type=semester_type)
 
     if not query:
         return response
 
+    semester = Semester(year=year, type=semester_type)
     courses = Course.objects.search(semester.year, semester.type,
         query, limit)
 
@@ -150,7 +149,8 @@ def course_query(request, year, semester_type):
         name = escape(truncate_words(course.name, 5))
         response.write(u'%s|%s\n' % (code, name or u'?'))
 
-    request.cache.set(cache_key, response, settings.CACHE_TIME_AJAX, prefix=True)
+    request.cache.set(cache_key, response, settings.CACHE_TIME_AJAX,
+        realm=False)
 
     return response
 
@@ -190,8 +190,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
         if (week <= 0 or week > max_week):
             raise Http404
 
-    realm = get_realm(semester, slug)
-    response = request.cache.get(url, realm=realm)
+    response = request.cache.get(url)
 
     if response:
         return response
@@ -319,7 +318,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
             # default cache time
             cache_time = settings.CACHE_TIME_SCHECULDE
 
-        request.cache.set(url, response, cache_time, realm=realm)
+        request.cache.set(url, response, cache_time)
 
     return response
 
@@ -481,7 +480,6 @@ def select_course(request, year, semester_type, slug, add=False):
     # FIXME split ut three sub functions into seperate functions?
 
     semester = Semester(year=year, type=semester_type)
-    realm = get_realm(semester, slug)
 
     try:
         semester = Semester.objects.get(year=year, type=semester.type)
@@ -591,15 +589,14 @@ def select_lectures(request, year, semester_type, slug):
             args=[semester.year, semester.type, slug]))
 
 def list_courses(request, year, semester_type, slug):
-    '''Display a list of courses based on when exam is'''
+    '''Display a list of courses'''
 
     if request.method == 'POST':
         return select_course(request, year, semester_type, slug, add=True)
 
     semester = Semester(year=year, type=semester_type)
-
-    key = '/'.join([str(semester.year), semester.type, 'courses'])
-    content = request.cache.get(key, prefix=True)
+    cache_key = '/'.join([year, semester_type, 'courses'])
+    content = request.cache.get(cache_key, realm=False)
 
     if not content:
         courses = Course.objects.get_courses_with_exams(year, semester.type)
@@ -609,7 +606,8 @@ def list_courses(request, year, semester_type, slug):
                 'course_list': courses,
             }, RequestContext(request))
 
-        request.cache.set(key, compress(response.content), settings.CACHE_TIME_SCHECULDE, prefix=True)
+        request.cache.set(cache_key, compress(response.content),
+            settings.CACHE_TIME_SCHECULDE, realm=False)
 
     else:
         response = HttpResponse(decompress(content))
