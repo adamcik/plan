@@ -1,6 +1,6 @@
 {% load i18n %}
 
-<form id="setlang" action="{% url setlang %}" method="post">
+<form id="setlang" action="{% url django.views.i18n.set_language %}" method="post">
     <input type="hidden" name="next" value="{{ request.get_full_path }}" />
     {% for code, name in LANGUAGES %}
         {% ifnotequal request.LANGUAGE_CODE code %}

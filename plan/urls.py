@@ -34,7 +34,7 @@ else:
 
 urlpatterns += patterns('',
     (r'^admin/(.*)', admin.site.root),
-    url(r'^i18n/', 'django.views.i18n.set_language', name='setlang'),
+    (r'^i18n/', include('django.conf.urls.i18n')),
 
     (r'^', include('plan.common.urls')),
     (r'^', include('plan.ical.urls')),
