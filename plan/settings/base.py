@@ -190,4 +190,4 @@ CACHE_TIME_AJAX      = 60*60*24*7   #  1w
 ICAL_HOSTNAME = socket.getfqdn()
 
 # Where the software can be downloaded.
-SOURCE_URL = 'https://trac.ime.ntnu.no/timeplan'
+SOURCE_URL = 'http://www.github.com/adamcik/plan/'
