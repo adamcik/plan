@@ -94,11 +94,11 @@ class LectureManager(models.Manager):
 
         params = [week or True]
 
-        return  self.get_query_set().filter(**filter).\
-                    distinct().\
-                    select_related(*related).\
-                    extra(where=where, tables=tables, select=select, select_params=params).\
-                    order_by(*order)
+        return list(self.get_query_set().filter(**filter)
+                    .distinct()
+                    .select_related(*related)
+                    .extra(where=where, tables=tables, select=select, select_params=params)
+                    .order_by(*order))
 
 class DeadlineManager(models.Manager):
     def get_deadlines(self, year, semester_type, slug):
