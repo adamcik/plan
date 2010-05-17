@@ -696,7 +696,7 @@ msgstr ""
 
 #: templates/schedule_table_footer.html:9
 msgid "Hide advanced options"
-msgstr "Skjul avanserte innstillinger"
+msgstr "Skjul innstillinger"
 
 #: templates/schedule_table_footer.html:11
 msgid "Advanced options"
