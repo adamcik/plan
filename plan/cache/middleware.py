@@ -19,7 +19,9 @@
 import logging
 
 from django.core.cache.backends.dummy import CacheClass as DummyCacheClass
-from plan.cache import CacheClass
+
+from plan.common.models import Semester
+from plan.cache import CacheClass, get_realm
 
 class CacheMiddleware(object):
     '''Attaches either a real or dummy cache instance to our request, cache
@@ -28,16 +30,22 @@ class CacheMiddleware(object):
     def __init__(self):
         self.logger = logging.getLogger('plan.middleware.cache')
 
-    def process_request(self, request):
+    def process_view(self, request, view_func, view_args, view_kwargs):
         if self._ignore_cache(request):
             self.logger.debug('Ignoring cache')
             # FIXME strictly speaking the old behaviour was to ignore get but
             # not set.
             request.cache = DummyCacheClass()
         else:
-            request.cache = CacheClass(language=request.LANGUAGE_CODE)
-
-        return None
+            lang = request.LANGUAGE_CODE
+            if 'year' in view_kwargs and 'semester_type' in view_kwargs:
+                semester = Semester(year=view_kwargs['year'],
+                    type=view_kwargs['semester_type'])
+            else:
+                semester = Semester.current()
+            slug = view_kwargs.get('slug', None)
+            realm = get_realm(semester, slug)
+            request.cache = CacheClass(language=lang, realm=realm)
 
     def _ignore_cache(self, request):
         return (

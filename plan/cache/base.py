@@ -52,65 +52,66 @@ class CacheClass(BaseCache):
         if hasattr(django_cache, 'close'):
             self.close = django_cache.close
         self.language = kwargs.pop('language', None)
+        self.realm  = kwargs.pop('realm', None)
 
-    def _realm(self, key, **kwargs):
-        realm = kwargs.pop('realm', None)
+    def _get_key(self, key, realm_enabled):
+        args = []
 
-        if realm:
-            logger.debug('Getting realm: %s' % realm)
-            realm = ':'.join([settings.CACHE_PREFIX, realm])
-            prefix = django_cache.get(realm)
+        if settings.CACHE_PREFIX:
+            args.append(settings.CACHE_PREFIX)
 
-            if not prefix:
-                prefix = int_to_base36(uuid4().int)
-                django_cache.set(realm, prefix, settings.CACHE_TIME_REALM)
-                logger.debug('Setting realm: %s' % realm)
+        if realm_enabled and self.realm:
+            args.append(self._get_realm_prefix(self.realm))
 
-            key = ':'.join([settings.CACHE_PREFIX, prefix, key])
-
-        return (key, kwargs)
-
-    def _prefix(self, key, **kwargs):
-        if kwargs.pop('prefix', False):
-            key = '%s:%s' % (settings.CACHE_PREFIX, key)
+        args.append(key)
 
         if self.language:
-            key = '%s:%s' % (key, self.language)
+            args.append(self.language)
 
-        return (key, kwargs)
+        return ':'.join(args)
+
+    def _get_realm_prefix(self, realm):
+        logger.debug('Getting realm: %s' % realm)
+        realm = ':'.join([settings.CACHE_PREFIX, realm])
+        prefix = django_cache.get(realm)
+
+        if prefix:
+            return prefix
+
+        prefix = int_to_base36(uuid4().int)
+        django_cache.set(realm, prefix, settings.CACHE_TIME_REALM)
+        logger.debug('Setting realm: %s' % realm)
+
+        return prefix
 
     def add(self, key, *args, **kwargs):
-        key, kwargs = self._realm(key, **kwargs)
-        key, kwargs = self._prefix(key, **kwargs)
+        key = self._get_key(key, kwargs.pop('realm', True))
         logger.debug('Adding key: %s' % key)
         return django_cache.add(key, *args, **kwargs)
 
     def get(self, key, *args, **kwargs):
-        key, kwargs = self._realm(key, **kwargs)
-        key, kwargs = self._prefix(key, **kwargs)
+        key = self._get_key(key, kwargs.pop('realm', True))
         logger.debug('Getting key: %s' % key)
         return django_cache.get(key, *args, **kwargs)
 
     def set(self, key, *args, **kwargs):
-        key, kwargs = self._realm(key, **kwargs)
-        key, kwargs = self._prefix(key, **kwargs)
+        key = self._get_key(key, kwargs.pop('realm', True))
         logger.debug('Setting key: %s' % key)
         return django_cache.set(key, *args, **kwargs)
 
     def delete(self, key, *args, **kwargs):
-        key, kwargs = self._realm(key, **kwargs)
-        key, kwargs = self._prefix(key, **kwargs)
+        key = self._get_key(key, kwargs.pop('realm', True))
         logger.debug('Deleting key: %s' % key)
         return django_cache.delete(key, *args, **kwargs)
 
     def get_many(self, keys, *args, **kwargs):
-        key, kwargs = self._realm(key, **kwargs)
-        key, kwargs = self._prefix(key, **kwargs)
+        realm = kwargs.pop('realm', True)
+        for i, key in enumerate(keys):
+            keys[i] = self._get_key(key, realm)
         logger.debug('Gettings keys: %s' % keys)
         return django_cache.get_many(keys, *args, **kwargs)
 
     def has_key(self, key, *args, **kwargs):
-        key, kwargs = self._realm(key, **kwargs)
-        key, kwargs = self._prefix(key, **kwargs)
+        key = self._get_key(key, kwargs.pop('realm', True))
         logger.debug('Checking key: %s' % key)
         return django_cache.has_key(key, *args, **kwargs)
