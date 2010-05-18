@@ -22,6 +22,7 @@ import base64
 from uuid import uuid4
 
 from django.conf import settings
+from django.utils.translation import get_language
 from django.utils.http import int_to_base36
 from django.core.cache import cache as django_cache
 from django.core.cache.backends.base import  BaseCache
@@ -52,22 +53,16 @@ class CacheClass(BaseCache):
     def __init__(self, *args, **kwargs):
         if hasattr(django_cache, 'close'):
             self.close = django_cache.close
-        self.language = kwargs.pop('language', None)
         self.realm  = kwargs.pop('realm', None)
 
     def _get_key(self, key, realm_enabled):
-        args = []
-
-        if settings.CACHE_PREFIX:
-            args.append(settings.CACHE_PREFIX)
+        args = [key, get_language()]
 
         if realm_enabled and self.realm:
-            args.append(self._get_realm_prefix(self.realm))
+            args.insert(0, self._get_realm_prefix(self.realm))
 
-        args.append(key)
-
-        if self.language:
-            args.append(self.language)
+        if settings.CACHE_PREFIX:
+            args.insert(0, settings.CACHE_PREFIX)
 
         return ':'.join(args)
 
