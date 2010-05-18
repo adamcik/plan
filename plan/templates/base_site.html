@@ -14,7 +14,8 @@
 
 {% block extrahead %}
     <link rel="icon" type="image/png" href="{{ MEDIA_URL }}gfx/time.png" />
-    <script type="text/javascript">language = '{{ request.LANGUAGE_CODE }}'</script>
+    {% get_current_language as LANGUAGE_CODE %}
+    <script type="text/javascript">language = '{{ LANGUAGE_CODE }}'</script>
 {% endblock %}
 
 {% block lang %}
