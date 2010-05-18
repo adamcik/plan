@@ -80,11 +80,6 @@ class CacheClass(BaseCache):
 
         return prefix
 
-    def add(self, key, *args, **kwargs):
-        key = self._get_key(key, kwargs.pop('realm', True))
-        logger.debug('Adding key: %s' % key)
-        return django_cache.add(key, *args, **kwargs)
-
     def get(self, key, *args, **kwargs):
         key = self._get_key(key, kwargs.pop('realm', True))
         if self.bypass:
@@ -102,18 +97,3 @@ class CacheClass(BaseCache):
         key = self._get_key(key, kwargs.pop('realm', True))
         logger.debug('Deleting key: %s' % key)
         return django_cache.delete(key, *args, **kwargs)
-
-    def get_many(self, keys, *args, **kwargs):
-        realm = kwargs.pop('realm', True)
-        for i, key in enumerate(keys):
-            keys[i] = self._get_key(key, realm)
-        if self.bypass:
-            logger.debug('Bypassing get for: %s' % keys)
-            return
-        logger.debug('Gettings keys: %s' % keys)
-        return django_cache.get_many(keys, *args, **kwargs)
-
-    def has_key(self, key, *args, **kwargs):
-        key = self._get_key(key, kwargs.pop('realm', True))
-        logger.debug('Checking key: %s' % key)
-        return django_cache.has_key(key, *args, **kwargs)
