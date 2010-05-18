@@ -31,20 +31,16 @@ class CacheMiddleware(object):
         self.logger = logging.getLogger('plan.middleware.cache')
 
     def process_view(self, request, view_func, view_args, view_kwargs):
-        if self._ignore_cache(request):
-            self.logger.debug('Ignoring cache')
-            # FIXME strictly speaking the old behaviour was to ignore get but
-            # not set.
-            request.cache = DummyCacheClass()
+        if 'year' in view_kwargs and 'semester_type' in view_kwargs:
+            semester = Semester(year=view_kwargs['year'],
+                type=view_kwargs['semester_type'])
         else:
-            if 'year' in view_kwargs and 'semester_type' in view_kwargs:
-                semester = Semester(year=view_kwargs['year'],
-                    type=view_kwargs['semester_type'])
-            else:
-                semester = Semester.current()
-            slug = view_kwargs.get('slug', None)
-            realm = get_realm(semester, slug)
-            request.cache = CacheClass(realm=realm)
+            semester = Semester.current()
+
+        slug = view_kwargs.get('slug', None)
+        realm = get_realm(semester, slug)
+        bypass = self._ignore_cache(request)
+        request.cache = CacheClass(realm=realm, bypass=bypass)
 
     def _ignore_cache(self, request):
         return (

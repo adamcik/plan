@@ -54,6 +54,7 @@ class CacheClass(BaseCache):
         if hasattr(django_cache, 'close'):
             self.close = django_cache.close
         self.realm  = kwargs.pop('realm', None)
+        self.bypass  = kwargs.pop('bypass', False)
 
     def _get_key(self, key, realm_enabled):
         args = [key, get_language()]
@@ -86,6 +87,9 @@ class CacheClass(BaseCache):
 
     def get(self, key, *args, **kwargs):
         key = self._get_key(key, kwargs.pop('realm', True))
+        if self.bypass:
+            logger.debug('Bypassing get for: %s' % key)
+            return
         logger.debug('Getting key: %s' % key)
         return django_cache.get(key, *args, **kwargs)
 
@@ -103,6 +107,9 @@ class CacheClass(BaseCache):
         realm = kwargs.pop('realm', True)
         for i, key in enumerate(keys):
             keys[i] = self._get_key(key, realm)
+        if self.bypass:
+            logger.debug('Bypassing get for: %s' % keys)
+            return
         logger.debug('Gettings keys: %s' % keys)
         return django_cache.get_many(keys, *args, **kwargs)
 
