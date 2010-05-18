@@ -4,13 +4,13 @@
 {% load i18n %}
 
 {% block title %}
-    {% title semester slug request.LANGUAGE_CODE %} {{ block.super }}
+    {% title semester slug %} {{ block.super }}
 {% endblock %}
 
 {% block hd %}
     <h1>
         {% trans "Copy deadlines to" %}
-        {% title semester slug request.LANGUAGE_CODE %}
+        {% title semester slug %}
     </h1>
 {% endblock %}
 

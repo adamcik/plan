@@ -20,12 +20,13 @@ import re
 
 from django import template
 from django.conf import settings
+from django.utils.translation import get_language
 
 register = template.Library()
 
 @register.inclusion_tag('title.html')
-def title(semester, slug, language, week=None):
-    if language in ['no', 'nb', 'nn']:
+def title(semester, slug, week=None):
+    if get_language() in ['no', 'nb', 'nn']:
         ending = norwegian(slug)
     else:
         ending = english(slug)
