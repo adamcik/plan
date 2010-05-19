@@ -171,16 +171,9 @@ def schedule(request, year, semester_type, slug, advanced=False,
     # Don't do any db stuff until after the cache lines further down
     semester = Semester(year=year, type=semester_type)
     current = Semester.current()
+    response = None
 
     current_week = get_current_week()
-
-    # FIXME refactor to get_current_week...
-    if semester.year != current.year and semester.type != current.type:
-        url = request.path
-    elif not all and not week and not advanced:
-        url = reverse('schedule-week', args=[semester.year, semester.type, slug, current_week])
-    else:
-        url = request.path
 
     if week:
         week = int(week)
@@ -190,7 +183,8 @@ def schedule(request, year, semester_type, slug, advanced=False,
         if (week <= 0 or week > max_week):
             raise Http404
 
-    response = request.cache.get(url)
+    if cache_page:
+        response = request.cache.get(request.path)
 
     if response:
         return response
@@ -318,7 +312,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
             # default cache time
             cache_time = settings.CACHE_TIME_SCHECULDE
 
-        request.cache.set(url, response, cache_time)
+        request.cache.set(request.path, response, cache_time)
 
     return response
 
