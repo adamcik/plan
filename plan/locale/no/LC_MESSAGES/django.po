@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Timeplan\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-17 17:32+0200\n"
+"POT-Creation-Date: 2010-05-18 23:15+0200\n"
 "PO-Revision-Date: 2009-09-29 14:46+0100\n"
 "Last-Translator: Thomas Adamcik <timeplan@adamcik.no>\n"
 "Language-Team:  <timeplan@adamcik.no>\n"
@@ -346,7 +346,7 @@ msgstr "Legg til frist"
 msgid "Timetable generator for NTNU students"
 msgstr "Timeplangenerator for NTNU-studenter"
 
-#: templates/base_site.html:28
+#: templates/base_site.html:29
 msgid ""
 "\n"
 "              All lecture times and course data have been automatically "
@@ -367,43 +367,47 @@ msgstr ""
 "riktige før du stoler på dem.\n"
 "          "
 
-#: templates/base_site.html:36
+#: templates/base_site.html:37
 msgid "Code and design &copy; 2008-2010 Thomas Adamcik."
 msgstr "Kildekode og design &copy; 2008-2010 Thomas Adamcik."
 
-#: templates/base_site.html:37
+#: templates/base_site.html:38
 msgid "Further work commissioned by IME Faculty NTNU 2009."
 msgstr "Videre utvikling utført på bestilling fra IME-fakultetet, NTNU, 2009."
 
-#: templates/base_site.html:42 templates/schedule_table_footer.html:7
+#: templates/base_site.html:43 templates/schedule_table_footer.html:7
 msgid "Course list"
 msgstr "Emneliste"
 
-#: templates/base_site.html:44
+#: templates/base_site.html:45
+msgid "Study Guide"
+msgstr "Studiehåndbok"
+
+#: templates/base_site.html:47
 msgid "Exam dates"
 msgstr "Eksamensdatoer"
 
-#: templates/base_site.html:46
+#: templates/base_site.html:49
 msgid "Exam rules"
 msgstr "Eksamensregler"
 
-#: templates/base_site.html:48
+#: templates/base_site.html:51
 msgid "Lecture times"
 msgstr "Forelesningstider"
 
-#: templates/base_site.html:50
+#: templates/base_site.html:53
 msgid "Map Dragvoll"
 msgstr "Kart: Dragvoll"
 
-#: templates/base_site.html:53
+#: templates/base_site.html:56
 msgid "Map Gløshaugen"
 msgstr "Kart: Gløshaugen"
 
-#: templates/base_site.html:56
+#: templates/base_site.html:59
 msgid "Find rooms"
 msgstr "Søk etter rom"
 
-#: templates/base_site.html:65
+#: templates/base_site.html:68
 #, python-format
 msgid ""
 "\n"
@@ -420,7 +424,7 @@ msgstr ""
 "        på <a href=\"%(SOURCE_URL)s\">%(SOURCE_URL)s</a>.\n"
 "      "
 
-#: templates/base_site.html:72
+#: templates/base_site.html:75
 msgid "Built using:"
 msgstr "Bygget ved hjelp av:"
 
