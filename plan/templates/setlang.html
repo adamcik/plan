@@ -11,8 +11,8 @@
         {% for code, name in LANGUAGES %}
             {% ifnotequal LANGUAGE_CODE code %}
             <button type="submit" class="link" name="language" value="{{ code }}">
-                Switch language to: {# Not translated on purpose #}
-                <img alt="{% trans name %}" title="{% trans name %}" src="{{ MEDIA_URL }}gfx/{{ code }}.png" />
+                {% trans "Switch to" %} {{ name }}
+                <img alt="" src="{{ MEDIA_URL }}gfx/{{ code }}.png" />
             </button>
             {% endifnotequal %}
         {% endfor %}

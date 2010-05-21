@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Timeplan\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-18 23:15+0200\n"
+"POT-Creation-Date: 2010-05-21 22:37+0200\n"
 "PO-Revision-Date: 2009-09-29 14:46+0100\n"
 "Last-Translator: Thomas Adamcik <timeplan@adamcik.no>\n"
 "Language-Team:  <timeplan@adamcik.no>\n"
@@ -53,8 +53,8 @@ msgstr "Abonnement"
 msgid "Subscriptions"
 msgstr "Abonnementer"
 
-#: common/models.py:91 common/models.py:102 common/models.py:115
-#: common/models.py:128 common/models.py:285 common/models.py:334
+#: common/models.py:91 common/models.py:102 common/models.py:116
+#: common/models.py:129 common/models.py:286 common/models.py:335
 #: templates/course_list.html:46
 msgid "Name"
 msgstr "Navn"
@@ -71,7 +71,7 @@ msgstr "Forelesningstype"
 msgid "Lecture types"
 msgstr "Forelesningstyper"
 
-#: common/models.py:103 common/models.py:131
+#: common/models.py:103 common/models.py:132
 msgid "URL"
 msgstr "URL"
 
@@ -83,184 +83,184 @@ msgstr "Rom"
 msgid "Rooms"
 msgstr "Rom"
 
-#: common/models.py:121
+#: common/models.py:122
 msgid "Group"
 msgstr "Parallell"
 
-#: common/models.py:122 templates/groups_link.html:3
+#: common/models.py:123 templates/groups_link.html:3
 #: templates/lectures.html:19
 msgid "Groups"
 msgstr "Paralleller"
 
-#: common/models.py:125 common/models.py:284
+#: common/models.py:126 common/models.py:285
 msgid "Code"
 msgstr "Kode"
 
-#: common/models.py:129
+#: common/models.py:130
 msgid "Version"
 msgstr "Versjon"
 
-#: common/models.py:132
+#: common/models.py:133
 msgid "Points"
 msgstr "Studiepoeng"
 
-#: common/models.py:137 templates/add_deadlines.html:11
+#: common/models.py:138 templates/add_deadlines.html:11
 #: templates/course_list.html:45 templates/courses.html:12
 #: templates/deadlines.html:12 templates/exams.html:12
 #: templates/lectures.html:14 templates/select_deadlines.html:24
 msgid "Course"
 msgstr "Emne"
 
-#: common/models.py:138 templates/courses.html:4
+#: common/models.py:139 templates/courses.html:4
 msgid "Courses"
 msgstr "Emner"
 
-#: common/models.py:214
+#: common/models.py:215
 msgid "spring"
 msgstr "våren"
 
-#: common/models.py:215
+#: common/models.py:216
 msgid "fall"
 msgstr "høsten"
 
-#: common/models.py:218
+#: common/models.py:219
 msgid "Year"
 msgstr "År"
 
-#: common/models.py:219 templates/exams.html:11 templates/lectures.html:18
+#: common/models.py:220 templates/exams.html:11 templates/lectures.html:18
 msgid "Type"
 msgstr "Type"
 
-#: common/models.py:222
+#: common/models.py:223
 msgid "Semester"
 msgstr "Semester"
 
-#: common/models.py:223
+#: common/models.py:224
 msgid "Semesters"
 msgstr "Semestre"
 
-#: common/models.py:293
+#: common/models.py:294
 msgid "Exam type"
 msgstr "Eksamensform"
 
-#: common/models.py:294
+#: common/models.py:295
 msgid "Exam types"
 msgstr "Eksamensformer"
 
-#: common/models.py:300
+#: common/models.py:301
 msgid "Exam date"
 msgstr "Eksamensdato"
 
-#: common/models.py:301 templates/course_list.html:48
+#: common/models.py:302 templates/course_list.html:48
 msgid "Exam time"
 msgstr "Eksamenstid"
 
-#: common/models.py:303
+#: common/models.py:304
 msgid "Handout date"
 msgstr "Utleveringsdato"
 
-#: common/models.py:304 templates/course_list.html:50
+#: common/models.py:305 templates/course_list.html:50
 msgid "Handout time"
 msgstr "Utleveringstid"
 
-#: common/models.py:306
+#: common/models.py:307
 msgid "Duration"
 msgstr "Varighet"
 
-#: common/models.py:307
+#: common/models.py:308
 msgid "Duration in hours"
 msgstr "Varighet i timer"
 
-#: common/models.py:312 ical/views.py:173 ical/views.py:174 ical/views.py:177
+#: common/models.py:313 ical/views.py:173 ical/views.py:174 ical/views.py:177
 #: ical/views.py:178
 msgid "Exam"
 msgstr "Eksamen"
 
-#: common/models.py:313 templates/exams.html:3
+#: common/models.py:314 templates/exams.html:3
 msgid "Exams"
 msgstr "Eksamener"
 
-#: common/models.py:322
+#: common/models.py:323
 msgid "Week number"
 msgstr "Ukenummer"
 
-#: common/models.py:327
+#: common/models.py:328
 msgid "Lecture week"
 msgstr "Forelesningsuke"
 
-#: common/models.py:328
+#: common/models.py:329
 msgid "Lecture weeks"
 msgstr "Forelesningsuker"
 
-#: common/models.py:337
+#: common/models.py:338
 msgid "Lecturer"
 msgstr "Foreleser"
 
-#: common/models.py:338 templates/lectures.html:20
+#: common/models.py:339 templates/lectures.html:20
 msgid "Lecturers"
 msgstr "Forelesere"
 
-#: common/models.py:345 pdf/views.py:129 templates/schedule_table.html:16
+#: common/models.py:346 pdf/views.py:129 templates/schedule_table.html:16
 msgid "Monday"
 msgstr "Mandag"
 
-#: common/models.py:346 pdf/views.py:129 templates/schedule_table.html:17
+#: common/models.py:347 pdf/views.py:129 templates/schedule_table.html:17
 msgid "Tuesday"
 msgstr "Tirsdag"
 
-#: common/models.py:347 pdf/views.py:129 templates/schedule_table.html:18
+#: common/models.py:348 pdf/views.py:129 templates/schedule_table.html:18
 msgid "Wednesday"
 msgstr "Onsdag"
 
-#: common/models.py:348 pdf/views.py:129 templates/schedule_table.html:19
+#: common/models.py:349 pdf/views.py:129 templates/schedule_table.html:19
 msgid "Thursday"
 msgstr "Torsdag"
 
-#: common/models.py:349 pdf/views.py:129 templates/schedule_table.html:20
+#: common/models.py:350 pdf/views.py:129 templates/schedule_table.html:20
 msgid "Friday"
 msgstr "Fredag"
 
-#: common/models.py:356
+#: common/models.py:357
 msgid "Week day"
 msgstr "Ukedag"
 
-#: common/models.py:358
+#: common/models.py:359
 msgid "Start time"
 msgstr "Starter"
 
-#: common/models.py:359
+#: common/models.py:360
 msgid "End time"
 msgstr "Slutter"
 
-#: common/models.py:369 common/models.py:370
+#: common/models.py:370 common/models.py:371
 msgid "Lecture"
 msgstr "Forelesning"
 
-#: common/models.py:421 templates/add_deadlines.html:10
+#: common/models.py:422 templates/add_deadlines.html:10
 #: templates/deadlines.html:15 templates/select_deadlines.html:27
 msgid "Task"
 msgstr "Oppgave"
 
-#: common/models.py:422 templates/add_deadlines.html:12
+#: common/models.py:423 templates/add_deadlines.html:12
 #: templates/deadlines.html:13 templates/select_deadlines.html:25
 msgid "Due date"
 msgstr "Forfallsdato"
 
-#: common/models.py:423 templates/add_deadlines.html:13
+#: common/models.py:424 templates/add_deadlines.html:13
 #: templates/deadlines.html:14 templates/exams.html:9
 #: templates/lectures.html:16 templates/select_deadlines.html:26
 msgid "Time"
 msgstr "Tid"
 
-#: common/models.py:425
+#: common/models.py:426
 msgid "Done"
 msgstr "Ferdig"
 
-#: common/models.py:430
+#: common/models.py:431
 msgid "Deadline"
 msgstr "Frist"
 
-#: common/models.py:431 templates/deadlines.html:3
+#: common/models.py:432 templates/deadlines.html:3
 #: templates/deadlines_toggle.html:4
 msgid "Deadlines"
 msgstr "Frister"
@@ -754,6 +754,10 @@ msgstr ""
 #: templates/select_groups.html:23 templates/select_groups.html.py:28
 msgid "Select groups for your courses"
 msgstr "Velg parallell"
+
+#: templates/setlang.html:14
+msgid "Switch to"
+msgstr "Bytt til"
 
 #: templates/start.html:41
 msgid "Sorry, no semesters have been loaded yet."
