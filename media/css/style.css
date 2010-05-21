@@ -44,6 +44,9 @@ table {
 table a {
 	color: #000;
 }
+tr {
+	vertical-align: top;
+}
 td, th {
 	border: 0;
 }
