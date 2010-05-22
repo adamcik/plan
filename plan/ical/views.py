@@ -17,6 +17,7 @@
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
 import vobject
+import math
 
 from copy import copy
 from datetime import datetime, timedelta
@@ -205,7 +206,10 @@ def add_exams(exams, semester, cal):
             vevent.add('dtstart').value = start
 
             if e.duration and e.exam_time:
-                vevent.add('dtend').value = start + timedelta(hours=e.duration)
+                hours = int(math.floor(e.duration))
+                minutes = int((e.duration % 1) * 60)
+                vevent.add('dtend').value = start + timedelta(hours=hours,
+                    minutes=minutes)
             else:
                 vevent.add('dtend').value = start
 
