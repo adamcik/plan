@@ -289,7 +289,7 @@ msgstr "Norsk"
 
 #: settings/base.py:64
 msgid "English"
-msgstr "Engelsk"
+msgstr "engelsk"
 
 #: templates/404.html:6 templates/404.html.py:10
 msgid "Page not found"
