@@ -71,7 +71,7 @@ class Command(BaseCommand):
                 print '---------------------'
 
                 if options['delete'] or raw_input('Delete? [y/N] ').lower() == 'y':
-                    to_delete.delete()
+                    Exam.objects.filter(id__in=to_delete).delete()
 
             if raw_input('Save changes? [y/N] ').lower() == 'y':
                 transaction.commit()

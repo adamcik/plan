@@ -190,8 +190,9 @@ def update_exams(year, semester, url=None):
 
         n.unlink()
 
-    to_delete = Exam.objects.exclude(id__in=added+updated). \
-            filter(course__semester=semester)
+    seen_exams = added+updated
+    to_delete = list(Exam.objects.filter(course__semester=semester))
+    to_delete = filter(lambda e: e.id not in seen_exams, to_delete)
 
     logger.info('Added %d exams' % len(added))
     logger.info('Updated %d exams' % len(updated))
