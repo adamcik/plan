@@ -303,8 +303,8 @@ class Exam(models.Model):
     handout_date = models.DateField(_('Handout date'), blank=True, null=True)
     handout_time = models.TimeField(_('Handout time'), blank=True, null=True)
 
-    duration = models.PositiveSmallIntegerField(_('Duration'), blank=True, null=True,
-            help_text=_('Duration in hours'))
+    duration = models.DecimalField(_('Duration'), blank=True, null=True,
+            max_digits=5, decimal_places=2, help_text=_('Duration in hours'))
 
     objects = ExamManager()
 
