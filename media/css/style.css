@@ -56,8 +56,8 @@ th {
 	font-size: 93%;
 }
 td {
-  border-top: 1px solid #666;
-  border-bottom: 1px solid #666;
+	border-top: 1px solid #666;
+	border-bottom: 1px solid #666;
 }
 table#munin {
 	width: auto;
@@ -128,7 +128,7 @@ label {
 }
 
 .odd {
-  background: #fafafa;
+	background: #fafafa;
 }
 p.right {
 	text-align: right;
@@ -139,16 +139,16 @@ p.right {
 }
 
 .hidden {
-    visibility: hidden;
+	visibility: hidden;
 }
 
 .clear {
-    clear: both;
+	clear: both;
 }
 
 .icon {
 	background-repeat: no-repeat;
-  background-image: url(../gfx/sprite.png);
+	background-image: url(../gfx/sprite.png);
 	background-position: left top;
 	padding-left: 18px;
 }
@@ -319,7 +319,7 @@ td.error input, td.error select {
 }
 #schedule .room {
 	font-size: 77%;
-  float: right;
+	float: right;
 	margin-left: 0.5em;
 }
 #schedule .type {
@@ -340,29 +340,29 @@ td.error input, td.error select {
 
 #schedule td {
 	border-color: #CCC;
-  padding: 0.1em 0.2em;
-  vertical-align: top;
-  height: 2em;
+	padding: 0.1em 0.2em;
+	vertical-align: top;
+	height: 2em;
 }
 #schedule th {
-  width: 18.6%;
-  font-variant: small-caps;
+	width: 18.6%;
+	font-variant: small-caps;
 	font-weight: normal;
 }
 
 /* time col */
 #schedule .time {
-  text-align: center;
-  vertical-align: middle;
-  font-size: 77%;
-  width: 7%;
-  white-space: nowrap;
+	text-align: center;
+	vertical-align: middle;
+	font-size: 77%;
+	width: 7%;
+	white-space: nowrap;
 }
 #schedule td.time {
 	border-left: 1px solid #666;
 }
 #schedule .date {
-    float: right;
+	float: right;
 	font-size: 77%;  /* 10px */
 }
 
