@@ -24,7 +24,7 @@
       }
       return catalog[msgid];
   }
-  
+
   function add_hidden_to_lectures() {
       var input = $(this);
 

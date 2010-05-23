@@ -60,6 +60,6 @@ def update_urls(year, semester_type):
 
             course.url = url
             course.save()
-        
+
         except HTTPError:
             pass

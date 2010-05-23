@@ -70,7 +70,7 @@ def update_courses(year, semester_type):
 
         for tr in table.findAll('tr'):
             code, name = tr.findAll('a')
-            
+
             pattern = 'emnekode=(.+?[0-9\-]+)'
             code = re.compile(pattern, re.I|re.L).search(code['href']).group().strip('emnekode=')
 

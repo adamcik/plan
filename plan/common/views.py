@@ -26,7 +26,6 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
-from django.template.defaultfilters import filesizeformat
 from django.views.generic.list_detail import object_list
 from django.utils.html import escape
 from django.utils.text import truncate_words
