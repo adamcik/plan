@@ -16,7 +16,7 @@
 # You should have received a copy of the Affero GNU General Public
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
-from django.conf.urls.defaults import *
+from django.conf.urls.defaults import patterns, url
 
 urlpatterns = patterns('plan.common.views',
     url(r'^$', 'getting_started', name='frontpage'),

@@ -23,8 +23,6 @@ from urllib2 import urlopen, HTTPError
 from xml.dom import minidom
 from dateutil.parser import parse
 
-from django.db import transaction
-
 from plan.common.models import Exam, ExamType, Course, Semester
 
 logger = logging.getLogger('scrape.studweb')

@@ -17,13 +17,10 @@
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
-import re
 import logging
-from time import time
 
 from django.conf import settings
 from django.views.debug import technical_500_response
-from django.http import HttpResponseServerError
 
 class InternalIpMiddleware(object):
     '''Middleware that adds IP to INTERNAL ips if user is superuser'''

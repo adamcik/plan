@@ -17,7 +17,6 @@
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
 from django.db import models, connection
-from django.db.models import Q
 
 from plan.common.utils import build_search
 
@@ -64,13 +63,13 @@ class LectureManager(models.Manager):
                     w.lecture_id = common_lecture.id AND w.number = %s)'''
 
         if slug:
-            filter = {
+            filter_kwargs = {
                 'course__subscription__student__slug': slug,
                 'course__semester__year__exact': year,
                 'course__semester__type__exact': semester_type,
             }
         else:
-            filter = {
+            filter_kwargs = {
                 'course__name': course,
                 'course__semester__year__exact': year,
                 'course__semester__type__exact': semester_type,
@@ -94,7 +93,7 @@ class LectureManager(models.Manager):
 
         params = [week or True]
 
-        return list(self.get_query_set().filter(**filter)
+        return list(self.get_query_set().filter(**filter_kwargs)
                     .distinct()
                     .select_related(*related)
                     .extra(where=where, tables=tables, select=select, select_params=params)

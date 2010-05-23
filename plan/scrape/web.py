@@ -25,11 +25,10 @@ from urllib import urlopen, URLopener, urlencode
 from BeautifulSoup import BeautifulSoup, NavigableString
 from dateutil.parser import parse
 
-from django.utils.http import urlquote
 from django.conf import settings
 from django.db import connection
 
-from plan.common.models import Lecture, Lecturer, Exam, Course, Room, LectureType, \
+from plan.common.models import Lecture, Lecturer, Course, Room, LectureType, \
         Semester, Group, Week
 
 logger = logging.getLogger('plan.scrape.web')
@@ -236,8 +235,8 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
             lecture_type = None
         # Figure out day mapping
         try:
-	    day = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag']. \
-	        index(r['time'][0][0])
+            day = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag']. \
+                index(r['time'][0][0])
         except ValueError:
             logger.warning("Could not add %s - %s on %s for %s" % (start, end, day, course))
             continue

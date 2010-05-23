@@ -16,7 +16,7 @@
 # You should have received a copy of the Affero GNU General Public
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
-from operator import and_, or_
+from operator import and_
 from dateutil.rrule import rrule, WEEKLY, MO
 from datetime import date
 
@@ -41,8 +41,8 @@ def build_search(searchstring, filters, max_query_length=4, combine=and_):
             break
 
         local_filter = Q()
-        for filter in filters:
-            local_filter |= Q(**{filter: word})
+        for f in filters:
+            local_filter |= Q(**{f: word})
 
         search_filter = combine(search_filter, local_filter)
         count += 1
@@ -123,7 +123,8 @@ class ColorMap(dict):
             return super(ColorMap, self).__getitem__(k)
 
 def max_number_of_weeks(year):
-    if list(rrule(WEEKLY, count=1, byweekno=53, byweekday=MO, dtstart=date(year, 1,1)))[0].year == year:
+    if list(rrule(WEEKLY, count=1, byweekno=53, byweekday=MO,
+            dtstart=date(year, 1, 1)))[0].year == year:
         return 53
     return 52
 

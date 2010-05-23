@@ -24,7 +24,7 @@ class ManagerTestCase(BaseTestCase):
 
     def test_get_lectures(self):
         # Exclude lectures connected to other courses and excluded from userset
-        control = Lecture.objects.exclude(id__in=[6,7])
+        control = Lecture.objects.exclude(id__in=[6, 7])
 
         # Try showing all lectures
         lectures = Lecture.objects.get_lectures(2009, Semester.SPRING, 'adamcik')
@@ -47,18 +47,18 @@ class ManagerTestCase(BaseTestCase):
         self.assertEquals(set(lectures), set())
 
     def test_get_deadlines(self):
-        control = Deadline.objects.filter(id__in=[1,2])
+        control = Deadline.objects.filter(id__in=[1, 2])
 
         deadlines = Deadline.objects.get_deadlines(2009, Semester.SPRING, 'adamcik')
         self.assertEquals(set(deadlines), set(control))
 
     def test_get_exams(self):
         exams = Exam.objects.get_exams(2009, Semester.SPRING, 'adamcik')
-        self.assertEquals(set(exams), set(Exam.objects.exclude(id__in=[3,4])))
+        self.assertEquals(set(exams), set(Exam.objects.exclude(id__in=[3, 4])))
 
     def test_get_courses(self):
         courses = Course.objects.get_courses(2009, Semester.SPRING, 'adamcik')
-        self.assertEquals(set(Course.objects.exclude(id__in=[4,5])), set(courses))
+        self.assertEquals(set(Course.objects.exclude(id__in=[4, 5])), set(courses))
 
     def test_get_courses_with_exams(self):
         courses = Course.objects.get_courses_with_exams(2009, Semester.SPRING)
@@ -69,7 +69,7 @@ class ManagerTestCase(BaseTestCase):
         self.assertEquals(courses, [1, 1, 1, 1, 2, 3, 4, 4])
 
     def test_get_subscriptions(self):
-        control = Subscription.objects.filter(id__in=[1,2,3])
+        control = Subscription.objects.filter(id__in=[1, 2, 3])
         subscriptions = Subscription.objects.get_subscriptions(2009, Semester.SPRING, 'adamcik')
         self.assertEquals(set(control), set(subscriptions))
 

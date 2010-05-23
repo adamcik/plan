@@ -77,5 +77,5 @@ class TimetableTestCase(BaseTestCase):
         rows.append([[{},       {},       {}],       [lecture9], [{}], [{}], [{}]])
         rows.append([[{},       {},       {}],       [lecture9], [lecture11], [{}], [{}]])
 
-        for t,r in zip(timetable.table, rows):
-            self.assertEquals(t,r)
+        for t, r in zip(timetable.table, rows):
+            self.assertEquals(t, r)

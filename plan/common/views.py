@@ -17,16 +17,13 @@
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-from time import time
 from datetime import datetime, timedelta
 
-from django.db.models import Q
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
-from django.views.generic.list_detail import object_list
 from django.utils.html import escape
 from django.utils.text import truncate_words
 
@@ -36,7 +33,7 @@ from plan.common.forms import DeadlineForm, GroupForm, CourseAliasForm, \
         ScheduleForm
 from plan.common.utils import ColorMap, max_number_of_weeks
 from plan.common.timetable import Timetable
-from plan.cache import clear_cache, get_realm, compress, decompress
+from plan.cache import clear_cache, compress, decompress
 from plan.common.templatetags.slugify import slugify
 
 # FIXME split into frontpage/semester, course, deadline, schedule files
@@ -169,7 +166,6 @@ def schedule(request, year, semester_type, slug, advanced=False,
 
     # Don't do any db stuff until after the cache lines further down
     semester = Semester(year=year, type=semester_type)
-    current = Semester.current()
     response = None
 
     current_week = get_current_week()
@@ -190,8 +186,6 @@ def schedule(request, year, semester_type, slug, advanced=False,
 
     # Color mapping for the courses
     color_map = ColorMap(hex=True)
-
-    group_forms = {}
 
     semester = get_object_or_404(Semester, year=semester.year, type=semester.type)
 
@@ -258,7 +252,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
 
         # Set up and course name forms
         for course in courses:
-            alias= course.alias or ''
+            alias = course.alias or ''
             course.alias_form = CourseAliasForm(initial={'alias': alias},
                      prefix=course.id)
 
@@ -508,11 +502,10 @@ def select_course(request, year, semester_type, slug, add=False):
                             semester=semester,
                         )
 
-                    subscription, created = Subscription.objects.get_or_create(
+                    Subscription.objects.get_or_create(
                             student=student,
                             course=course,
                         )
-
                     subscriptions.add(course.code)
 
                 except Course.DoesNotExist:

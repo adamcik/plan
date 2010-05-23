@@ -16,12 +16,8 @@
 # You should have received a copy of the Affero GNU General Public
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
-import logging
-
-from datetime import datetime
-
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import landscape, A4, A5, A6
+from reportlab.lib.pagesizes import landscape, A4, A5
 from reportlab.platypus import Paragraph, KeepInFrame
 from reportlab.platypus.tables import Table, TableStyle
 from reportlab.lib.colors import HexColor
@@ -30,7 +26,6 @@ from reportlab.lib.styles import getSampleStyleSheet
 
 styles = getSampleStyleSheet()
 
-from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404
 from django.utils.html import escape
 from django.utils.translation import ugettext as _
@@ -126,12 +121,13 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
 
     # Add days
     # FIXME move to timetable
-    for i,day in enumerate([_('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'), _('Friday')]):
+    for i, day in enumerate([_('Monday'), _('Tuesday'), _('Wednesday'),
+            _('Thursday'), _('Friday')]):
         data[0].append(day)
         if timetable.span[i] > 1:
             extra = timetable.span[i] - 1
 
-            table_style.add('SPAN', (len(data[0])-1,0), (len(data[0])-1+extra,0))
+            table_style.add('SPAN', (len(data[0])-1, 0), (len(data[0])-1+extra, 0))
             data[0].extend([''] * extra)
 
     # Convert to "simple" datastruct
@@ -146,7 +142,7 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
                     if lecture.type and lecture.type.optional:
                         paragraph_style.fontName = 'Helvetica'
 
-                    code= lecture.alias or lecture.course.code
+                    code = lecture.alias or lecture.course.code
                     content = [Paragraph(escape(code), paragraph_style)]
                     paragraph_style.leading = 8
 
@@ -174,7 +170,7 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
     col_widths = [time_width]
     for w in timetable.span:
         x = len(col_widths)
-        table_style.add('LINEBEFORE', (x,1),  (x,-1),  1, outer_border)
+        table_style.add('LINEBEFORE', (x, 1),  (x, -1),  1, outer_border)
 
         col_widths.extend([float(day_width)/w] * w)
 
@@ -194,8 +190,8 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
         x2 = x1 + lecture['width'] - 1
         y2 = y1 + lecture['height'] - 1
 
-        table_style.add('SPAN', (x1,y1), (x2,y2))
-        table_style.add('BACKGROUND', (x1,y1), (x2,y2),
+        table_style.add('SPAN', (x1, y1), (x2, y2))
+        table_style.add('BACKGROUND', (x1, y1), (x2, y2),
                 HexColor(color_map[lecture['l'].course_id]))
 
         content = data[y1][x1]
@@ -219,7 +215,7 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
             style=table_style)
 
     table.wrapOn(page, width, height)
-    table.drawOn(page, 0,-height)
+    table.drawOn(page, 0, -height)
 
     note = request.META.get('HTTP_HOST', '').split(':')[0]
 

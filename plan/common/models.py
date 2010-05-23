@@ -19,7 +19,6 @@
 from datetime import datetime, timedelta, time
 
 from django.db import models, connection
-from django.http import Http404
 from django.template.defaultfilters import time as time_filter
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
@@ -222,7 +221,7 @@ class Semester(models.Model):
         verbose_name = _('Semester')
         verbose_name_plural = _('Semesters')
 
-        unique_together = [('year', 'type'),]
+        unique_together = [('year', 'type')]
 
     def __init__(self, *args, **kwargs):
         super(Semester, self).__init__(*args, **kwargs)
@@ -386,11 +385,14 @@ class Lecture(models.Model):
             )
 
     @staticmethod
-    def get_related(model, lectures, fields=['name'], use_extra=True):
+    def get_related(model, lectures, fields=None, use_extra=True):
         tmp = {}
 
         if not lectures:
             return tmp
+
+        if fields is None:
+            fields = ['name']
 
         name = model._meta.object_name.lower()
 
@@ -402,16 +404,16 @@ class Lecture(models.Model):
                 })
         object_list = objects.values_list('lecture_id', *fields)
 
-        for object in object_list:
-            lecture = object[0]
+        for obj in object_list:
+            lecture = obj[0]
 
             if lecture not in tmp:
                 tmp[lecture] = []
 
             if len(fields) == 1:
-                tmp[lecture].append(object[1])
+                tmp[lecture].append(obj[1])
             else:
-                tmp[lecture].append(dict(map(lambda x,y: (x,y), fields, object[1:])))
+                tmp[lecture].append(dict(map(lambda x, y: (x, y), fields, obj[1:])))
 
         return tmp
 

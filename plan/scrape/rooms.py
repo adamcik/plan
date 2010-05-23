@@ -15,14 +15,10 @@
 # You should have received a copy of the Affero GNU General Public
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
-import re
 import logging
 
-from urllib import urlopen, URLopener, urlencode
-from BeautifulSoup import BeautifulSoup, NavigableString
-
-from django.utils.http import urlquote
-from django.conf import settings
+from urllib import URLopener, urlencode
+from BeautifulSoup import BeautifulSoup
 
 from plan.common.models import Room
 

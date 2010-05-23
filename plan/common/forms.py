@@ -22,7 +22,7 @@ from django import forms
 from django.db.models import Q
 
 from plan.common.templatetags.slugify import slugify
-from plan.common.models import Deadline, Semester, Student
+from plan.common.models import Deadline, Semester
 
 now = datetime.now # To allow for overriding of now in test
 

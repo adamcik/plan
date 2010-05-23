@@ -16,7 +16,7 @@
 # You should have received a copy of the Affero GNU General Public
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
-from django.conf.urls.defaults import *
+from django.conf.urls.defaults import patterns, url
 
 urlpatterns = patterns('plan.ical.views',
     url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/(?P<slug>[a-z0-9-_]{1,50})/ical/(?:(?P<selector>\w+[+\w]*)/)?$', 'ical', name='schedule-ical'),
