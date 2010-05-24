@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-# Copyright 2008, 2009 Thomas Kongevold Adamcik
+# Copyright 2008, 2009, 2010 Thomas Kongevold Adamcik
 # 2009 IME Faculty Norwegian University of Science and Technology
 
 # This file is part of Plan.
@@ -57,7 +57,7 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
     c = db.cursor()
 
     query = """
-            SELECT emnekode,typenavn,dag,start,slutt,uke,romnavn,larer,studentset
+            SELECT emnekode,typenavn,dag,start,slutt,uke,romnavn,larer,aktkode
             FROM %s_timeplan WHERE emnekode NOT LIKE '#%%'
         """ % prefix
 
@@ -82,7 +82,7 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
         lectures = lectures.filter(course__code__startswith=matches)
 
     for row in c.fetchall():
-        code, lecture_type, day, start, end, week, room, lecturer, studentset = row
+        code, lecture_type, day, start, end, week, room, lecturer, groupcode = row
         if not code.strip():
             continue
 
@@ -123,14 +123,16 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
 
         # Groups:
         groups = set()
-        for group in studentset.split('#'):
-            match = re.match(u'^([A-ZÆØÅ]+)', group)
-
-            if not match:
-                continue
-
-            group, created = Group.objects.get_or_create(name=match.group(1))
-            groups.add(group)
+        c2 = db.cursor()
+        c2.execute("""
+                SELECT DISTINCT asp.studieprogramkode
+                FROM %s_akt_studieprogram asp,studieprogram sp
+                WHERE asp.studieprogramkode=sp.studieprogram_kode
+                AND asp.aktkode = %%s
+            """ % prefix, groupcode)
+        for group in c2.fetchall():
+            group, created = Group.objects.get_or_create(name=group[0])
+            groups.set(group)
 
         if not groups:
             group, created = Group.objects.get_or_create(name=Group.DEFAULT)
