@@ -87,7 +87,7 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
         Week.objects.filter(lecture=l).delete()
 
     for row in c.fetchall():
-        code, course_type, day, start, end, week, room, lecturer, studentset = row
+        code, lecture_type, day, start, end, week, room, lecturer, studentset = row
         if not code.strip():
             continue
 
@@ -105,8 +105,8 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
         course, created = Course.objects.get_or_create(code=code, semester=semester)
 
         # Load or create type:
-        if course_type:
-            course_type, created = LectureType.objects.get_or_create(name=course_type)
+        if lecture_type:
+            lecture_type, created = LectureType.objects.get_or_create(name=lecture_type)
 
         # Figure out day mapping
         try:
@@ -167,10 +167,10 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
             'day': day,
             'start': start,
             'end': end,
-            'type': course_type,
+            'type': lecture_type,
         }
 
-        if not course_type:
+        if not lecture_type:
             del lecture_kwargs['type']
 
         lectures = Lecture.objects.filter(**lecture_kwargs)
