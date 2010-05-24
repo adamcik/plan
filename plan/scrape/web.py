@@ -250,6 +250,8 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
         start = parse(r['time'][0][1]).time()
         end = parse(r['time'][0][2]).time()
 
+        # FIXME this is not good enough, rooms and/or weeks need to be taken
+        # into account for this to work with real data
         lecture, created = Lecture.objects.get_or_create(
             course=r['course'],
             day=day,

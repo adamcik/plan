@@ -81,6 +81,8 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
     if matches:
         lectures = lectures.filter(course__code__startswith=matches)
 
+    # FIXME this can't be done as we need this info to identify some tricky
+    # lectures
     for l in lectures:
         l.rooms.clear()
         l.lecturers.clear()
@@ -95,13 +97,14 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
         skipped += 1
 
         # Remove -1 etc. from course code
-        code = '-'.join(code.split('-')[:-1]).upper()
+        code = code.rsplit('-', 1)[0].upper()
 
         if not re.match(settings.TIMETABLE_VALID_COURSE_NAMES, code):
             logging.info('Skipped %s', code)
             continue
 
         # Get and or update course
+        # FIXME scraping courses should not introduce new courses!
         course, created = Course.objects.get_or_create(code=code, semester=semester)
 
         # Load or create type:
@@ -141,7 +144,6 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
             groups = [group]
 
         # Weeks
-        # FIXME seriosuly this generates way to many db queries...
         weeks = []
         for w in re.split(r',? ', week):
             if '-' in w:
@@ -212,7 +214,6 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
         for week in weeks:
             Week.objects.create(lecture=lecture, number=week)
 
-        # FIXME this is backward
         if added:
             logger.debug('%s saved', Lecture.objects.get(pk=lecture.pk))
         else:
