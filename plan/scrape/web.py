@@ -35,6 +35,12 @@ logger = logging.getLogger('plan.scrape.web')
 
 is_text = lambda text: isinstance(text, NavigableString)
 
+def to_unicode(value):
+    '''Forces NavigableString to unicode'''
+    if not isinstance(value, NavigableString):
+        return value
+    return value.encode('utf-8').decode('utf-8')
+
 def update_courses(year, semester_type):
     '''Scrape the NTNU website to retrive all available courses'''
 
@@ -215,12 +221,12 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
             if lecture:
                 results.append({
                     'course': course,
-                    'type': lecture_type,
-                    'time': course_time,
-                    'weeks': weeks,
-                    'room': room,
-                    'lecturer': lecturer,
-                    'groups': groups,
+                    'type': map(to_unicode, lecture_type),
+                    'time': map(lambda t: map(to_unicode, t),  course_time),
+                    'weeks': map(to_unicode, weeks),
+                    'room': map(to_unicode, room),
+                    'lecturer': map(to_unicode, lecturer),
+                    'groups': map(to_unicode, groups),
                 })
 
         del table
@@ -229,7 +235,7 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
         connection.queries = connection.queries[-5:]
 
         if r['type']:
-            name = unicode(r['type'][0])
+            name = r['type'][0]
             lecture_type, created = LectureType.objects.get_or_create(name=name)
         else:
             lecture_type = None
@@ -259,26 +265,23 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
 
         if r['room']:
             for room in r['room']:
-                name = unicode(room)
-                room, created = Room.objects.get_or_create(name=name)
+                room, created = Room.objects.get_or_create(name=room)
                 lecture.rooms.add(room)
 
         if r['groups']:
-            for g in r['groups']:
-                name = unicode(g)
-                group, created = Group.objects.get_or_create(name=name)
+            for group in r['groups']:
+                group, created = Group.objects.get_or_create(name=group)
                 lecture.groups.add(group)
         else:
             group, created = Group.objects.get_or_create(name=Group.DEFAULT)
             lecture.groups.add(group)
 
-        for w in  r['weeks']:
+        for w in r['weeks']:
             Week.objects.create(lecture=lecture, number=w)
 
         for l in r['lecturer']:
             if l.strip():
-                name = unicode(l)
-                lecturer, created = Lecturer.objects.get_or_create(name=name)
+                lecturer, created = Lecturer.objects.get_or_create(name=l)
                 lecture.lecturers.add(lecturer)
 
         lecture.save()
