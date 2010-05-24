@@ -64,10 +64,10 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
 
         query  = query.replace('%', '%%')
         query += ' AND emnekode LIKE %s'
-        query += ' ORDER BY emnekode, dag, start, slutt, uke, romnavn'
+        query += ' ORDER BY emnekode, dag, start, slutt, uke, romnavn, aktkode'
         c.execute(query, (matches + '%',))
     else:
-        query += ' ORDER BY emnekode, dag, start, slutt, uke, romnavn'
+        query += ' ORDER BY emnekode, dag, start, slutt, uke, romnavn, aktkode'
         c.execute(query)
 
     data = []

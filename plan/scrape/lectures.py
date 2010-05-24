@@ -85,7 +85,7 @@ def process_lectures(data):
         if not lecture_type:
             del lecture_kwargs['type']
 
-        lectures = Lecture.objects.filter(**lecture_kwargs)
+        lectures = Lecture.objects.filter(**lecture_kwargs).order_by('id')
         lectures = list(lectures.exclude(id__in=added_lectures))
         other_set = set(map(lambda g: g.id, groups))
 
