@@ -81,13 +81,6 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
     if matches:
         lectures = lectures.filter(course__code__startswith=matches)
 
-    # FIXME this can't be done as we need this info to identify some tricky
-    # lectures
-    for l in lectures:
-        l.rooms.clear()
-        l.lecturers.clear()
-        Week.objects.filter(lecture=l).delete()
-
     for row in c.fetchall():
         code, lecture_type, day, start, end, week, room, lecturer, studentset = row
         if not code.strip():
@@ -186,14 +179,14 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
             added = True
 
         for lecture in lectures:
+            # FIXME this handling does strictly speaking work, but it is not
+            # stable. ie. which dupe ends up with which room/lecturer/week is
+            # somewhat random
             psql_set = set(lecture.groups.values_list('id', flat=True))
             mysql_set = set(map(lambda g: g.id, groups))
 
             if psql_set == mysql_set:
                 # FIXME need extra check against weeks and rooms
-                lecture.rooms = rooms
-                lecture.lecturers = lecturers
-
                 added_lectures.append(lecture.id)
                 added = True
                 break
@@ -211,6 +204,7 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
         lecture.end = end
         lecture.save()
 
+        Week.objects.filter(lecture=lecture).delete()
         for week in weeks:
             Week.objects.create(lecture=lecture, number=week)
 
