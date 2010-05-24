@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-# Copyright 2008, 2009 Thomas Kongevold Adamcik
+# Copyright 2008, 2009, 2010 Thomas Kongevold Adamcik
 # 2009 IME Faculty Norwegian University of Science and Technology
 
 # This file is part of Plan.
@@ -23,13 +23,12 @@ import logging
 
 from urllib import urlopen, URLopener, urlencode
 from BeautifulSoup import BeautifulSoup, NavigableString
-from dateutil.parser import parse
 
 from django.conf import settings
-from django.db import connection
 
-from plan.common.models import Lecture, Lecturer, Course, Room, LectureType, \
-        Semester, Group, Week
+from plan.common.models import Lecture, Course, Semester
+from plan.scrape.lectures import (get_day_of_week, get_time, get_weeks,
+    process_lectures)
 
 logger = logging.getLogger('plan.scrape.web')
 
@@ -40,6 +39,9 @@ def to_unicode(value):
     if not isinstance(value, NavigableString):
         return value
     return value.encode('utf-8').decode('utf-8')
+
+def clean(value):
+    return value.replace('&nbsp;', '').strip()
 
 def update_courses(year, semester_type):
     '''Scrape the NTNU website to retrive all available courses'''
@@ -119,7 +121,7 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
     semester, created = Semester.objects.get_or_create(year=year, type=semester_type)
 
     prefix = prefix or semester.prefix
-    results = []
+    data = []
     lectures = []
 
     courses = Course.objects.filter(semester=semester).distinct().order_by('code')
@@ -167,134 +169,62 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
 
         lecture_type = None
         for tr in table.findAll('tr')[1:-1]:
-            course_time, weeks, room, lecturer, groups  = [], [], [], [], []
+            weeks, rooms, lecturers, groups  = [], [], [], []
+            day, start, end = None, None, None
             lecture = True
             tr.extract()
 
             for i, td in enumerate(tr.findAll('td')):
-                # Break td loose from rest of table so that any refrences we miss
-                # don't cause to big memory problems
-                td.extract()
-
-                # Loop over our td's basing our action on the td's index in the tr
-                # element.
                 if i == 0:
                     if td.get('colspan') == '4':
-                        lecture_type = td.findAll(text=is_text)
+                        lecture_type = clean(td.findAll(text=is_text)[0])
                         lecture = False
                     else:
-                        for t in td.findAll('b')[0].findAll(text=is_text):
-                            t.extract()
+                        time = td.findAll('b')[0].findAll(text=is_text)[0]
+                        day, period = time.split(' ', 1)
+                        start, end = period.split('-')
 
-                            day, period = t.split(' ', 1)
-                            start, end = [x.strip() for x in period.split('-')]
-                            course_time.append([day, start, end])
+                        day = get_day_of_week(day)
+                        start = get_time(start)
+                        end = get_time(end)
 
                         for week in td.findAll(text=re.compile('^Uke:')):
-                            week.extract()
-                            for w in week.replace('Uke:', '', 1).split(','):
-                                if '-' in w:
-                                    x, y = w.split('-')
-                                    weeks.extend(range(int(x), int(y)+1))
-                                else:
-                                    weeks.append(int(w.replace(',', '')))
+                            week = week.replace('Uke:', '', 1).split(',')
+                            weeks.extend(get_weeks(week))
                 elif i == 1:
                     for a in td.findAll('a'):
-                        room.extend(a.findAll(text=is_text))
-                    for r in room:
-                        r.extract()
+                        for room in a.findAll(text=is_text):
+                            rooms.append(clean(room))
                 elif i == 2:
-                    for l in td.findAll(text=is_text):
-                        l.extract()
-
-                        lecturer.append(l.replace('&nbsp;', ''))
+                    for lecturer in td.findAll(text=is_text):
+                        lecturers.append(clean(lecturer))
                 elif i == 3:
-                    for g in td.findAll(text=is_text):
-                        if g.replace('&nbsp;','').strip():
-                            g.extract()
-
-                            groups.append(g)
-
-                del td
-            del tr
+                    for group in td.findAll(text=is_text):
+                        groups.append(clean(group))
 
             if lecture:
-                results.append({
+                if day is None or not start or not end:
+                    logger.waring('Lecture time is wrong for %s: day %s start %s end %s', course, day, start, end)
+                    continue
+
+                data.append({
                     'course': course,
-                    'type': map(to_unicode, lecture_type),
-                    'time': map(lambda t: map(to_unicode, t),  course_time),
-                    'weeks': map(to_unicode, weeks),
-                    'room': map(to_unicode, room),
-                    'lecturer': map(to_unicode, lecturer),
-                    'groups': map(to_unicode, groups),
+                    'type': clean(lecture_type),
+                    'day': day,
+                    'start': start,
+                    'end': end,
+                    'weeks': filter(bool, weeks),
+                    'rooms': filter(bool, map(to_unicode, rooms)),
+                    'lecturers': filter(bool, map(to_unicode, lecturers)),
+                    'groups': filter(bool, map(to_unicode, groups)),
                 })
 
+            del tr
         del table
 
-    for r in results:
-        connection.queries = connection.queries[-5:]
-
-        if r['type']:
-            name = r['type'][0]
-            lecture_type, created = LectureType.objects.get_or_create(name=name)
-        else:
-            lecture_type = None
-        # Figure out day mapping
-        try:
-            day = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag']. \
-                index(r['time'][0][0])
-        except ValueError:
-            logger.warning("Could not add %s - %s on %s for %s" % (start, end, day, course))
-            continue
-
-        start = parse(r['time'][0][1]).time()
-        end = parse(r['time'][0][2]).time()
-
-        # FIXME this is not good enough, rooms and/or weeks need to be taken
-        # into account for this to work with real data
-        lecture, created = Lecture.objects.get_or_create(
-            course=r['course'],
-            day=day,
-            start=start,
-            end=end,
-            type = lecture_type,
-        )
-
-        if not created:
-            lecture.rooms.clear()
-            lecture.lecturers.clear()
-            Week.objects.filter(lecture=lecture).delete()
-
-        if r['room']:
-            for room in r['room']:
-                room, created = Room.objects.get_or_create(name=room)
-                lecture.rooms.add(room)
-
-        if r['groups']:
-            for group in r['groups']:
-                group, created = Group.objects.get_or_create(name=group)
-                lecture.groups.add(group)
-        else:
-            group, created = Group.objects.get_or_create(name=Group.DEFAULT)
-            lecture.groups.add(group)
-
-        for w in r['weeks']:
-            Week.objects.create(lecture=lecture, number=w)
-
-        for l in r['lecturer']:
-            if l.strip():
-                lecturer, created = Lecturer.objects.get_or_create(name=l)
-                lecture.lecturers.add(lecturer)
-
-        lecture.save()
-        lectures.append(lecture.id)
-
-        logger.info(u'Saved %s' % lecture)
-
-        del lecture
-        del r
-
-    to_delete = Lecture.objects.exclude(id__in=lectures).filter(course__semester=semester)
+    added_lectures = process_lectures(data)
+    to_delete = Lecture.objects.exclude(id__in=added_lectures)
+    to_delete = to_delete.filter(course__semester=semester)
 
     if matches:
         return to_delete.filter(course__code__startswith=matches)
