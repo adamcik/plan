@@ -204,7 +204,7 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
 
             if lecture:
                 if day is None or not start or not end:
-                    logger.waring('Lecture time is wrong for %s: day %s start %s end %s', course, day, start, end)
+                    logger.warning("Could not add %s - %s on %s for %s" % (start, end, day, course))
                     continue
 
                 data.append({

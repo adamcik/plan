@@ -21,13 +21,11 @@
 import logging
 import re
 from decimal import Decimal
-from dateutil.parser import parse
 
-from django.db import transaction
 from django.conf import settings
 
-from plan.common.models import Course, Lecture, Lecturer, Semester, Group, \
-        LectureType, Week, Room
+from plan.common.models import Course, Lecture, Semester
+from plan.scrape.lectures import get_day_of_week, process_lectures, get_time, get_weeks
 
 logger = logging.getLogger('scrape.db')
 
@@ -72,6 +70,7 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
         query += ' ORDER BY emnekode, dag, start, slutt, uke, romnavn'
         c.execute(query)
 
+    data = []
     added_lectures = []
     mysql_lecture_count = 0
     skipped = 0
@@ -87,41 +86,30 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
             continue
 
         mysql_lecture_count += 1
-        skipped += 1
 
-        # Remove -1 etc. from course code
         code = code.rsplit('-', 1)[0].upper()
 
         if not re.match(settings.TIMETABLE_VALID_COURSE_NAMES, code):
             logging.info('Skipped %s', code)
+            skipped += 1
             continue
 
-        # Get and or update course
-        # FIXME scraping courses should not introduce new courses!
-        course, created = Course.objects.get_or_create(code=code, semester=semester)
+        # Get course
+        course = Course.objects.get(code=code, semester=semester)
 
-        # Load or create type:
-        if lecture_type:
-            lecture_type, created = LectureType.objects.get_or_create(name=lecture_type)
+        day = get_day_of_week(day)
+        start = get_time(start)
+        end = get_time(end)
 
-        # Figure out day mapping
-        try:
-            day = ['mandag', 'tirsdag', 'onsdag', 'torsdag', 'fredag'].index(day)
-        except ValueError:
+        if day is None or start is None or end is None:
             logger.warning("Could not add %s - %s on %s for %s" % (start, end, day, course))
+            skipped += 1
             continue
 
-        start = parse(start).time()
-        end = parse(end).time()
+        rooms = room.split('#')
+        weeks = get_weeks(re.split(r',? ', week))
+        lecturers = lecturer.split('#')
 
-        # Rooms:
-        rooms = []
-        for r in room.split('#'):
-            if r.strip():
-                r, created = Room.objects.get_or_create(name=r)
-                rooms.append(r)
-
-        # Groups:
         groups = set()
         c2 = db.cursor()
         c2.execute("""
@@ -131,104 +119,33 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
                 AND asp.aktkode = %%s
             """ % prefix, groupcode)
         for group in c2.fetchall():
-            group, created = Group.objects.get_or_create(name=group[0])
-            groups.set(group)
+            groups.add(group)
 
-        if not groups:
-            group, created = Group.objects.get_or_create(name=Group.DEFAULT)
-            groups = [group]
-
-        # Weeks
-        weeks = []
-        for w in re.split(r',? ', week):
-            if '-' in w:
-                x, y = w.split('-')
-                weeks.extend(range(int(x), int(y)+1))
-
-            elif w.isdigit():
-                weeks.append(w)
-
-            else:
-                logger.warning("Messed up week '%s' for %s" % (w, course))
-
-        # Lecturer:
-        lecturers = []
-        for l in lecturer.split('#'):
-            if l.strip():
-                lecturer, created = Lecturer.objects.get_or_create(
-                        name=l.strip())
-                lecturers.append(lecturer)
-
-        lecture_kwargs = {
+        data.append({
             'course': course,
+            'type': lecture_type,
             'day': day,
             'start': start,
             'end': end,
-            'type': lecture_type,
-        }
+            'weeks': filter(bool, weeks),
+            'rooms': filter(bool, rooms),
+            'lecturers': filter(bool, lecturers),
+            'groups': filter(bool, groups),
+        })
 
-        if not lecture_type:
-            del lecture_kwargs['type']
+    db.close()
 
-        lectures = Lecture.objects.filter(**lecture_kwargs)
-        lectures = list(lectures.exclude(id__in=added_lectures))
-
-        added = False
-
-        if len(lectures) == 1:
-            lecture = lectures.pop()
-            added_lectures.append(lecture.id)
-            added = True
-
-        for lecture in lectures:
-            # FIXME this handling does strictly speaking work, but it is not
-            # stable. ie. which dupe ends up with which room/lecturer/week is
-            # somewhat random
-            psql_set = set(lecture.groups.values_list('id', flat=True))
-            mysql_set = set(map(lambda g: g.id, groups))
-
-            if psql_set == mysql_set:
-                # FIXME need extra check against weeks and rooms
-                added_lectures.append(lecture.id)
-                added = True
-                break
-
-        if not added:
-            lecture = Lecture(**lecture_kwargs)
-            lecture.save()
-
-            added_lectures.append(lecture.id)
-
-        lecture.rooms = rooms
-        lecture.lecturers = lecturers
-        lecture.groups = list(groups)
-        lecture.start = start
-        lecture.end = end
-        lecture.save()
-
-        Week.objects.filter(lecture=lecture).delete()
-        for week in weeks:
-            Week.objects.create(lecture=lecture, number=week)
-
-        if added:
-            logger.debug('%s saved', Lecture.objects.get(pk=lecture.pk))
-        else:
-            logger.debug('%s added', Lecture.objects.get(pk=lecture.pk))
-
-        skipped -= 1
-
-    to_remove =  Lecture.objects.exclude(id__in=added_lectures). \
-            filter(course__semester=semester)
+    added_lectures = process_lectures(data)
+    to_delete = Lecture.objects.exclude(id__in=added_lectures)
+    to_delete = to_delete.filter(course__semester=semester)
 
     if matches:
-        to_remove = to_remove.filter(course__code__startswith=matches)
+        return to_delete.filter(course__code__startswith=matches)
 
     logger.info('%d lectures in source db, %d in destination, diff %d, skipped %d',
             mysql_lecture_count, len(added_lectures), mysql_lecture_count - len(added_lectures), skipped)
 
-    db.close()
-
-    return to_remove
+    return to_delete
 
 def update_courses(year, semester_type, prefix=None):
     semester, created = Semester.objects.get_or_create(year=year, type=semester_type)
