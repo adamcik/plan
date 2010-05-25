@@ -1,6 +1,12 @@
 Development
 ===========
 
+.. seealso::
+  `General Django documentation <http://docs.djangoproject.com/en/dev/>`_
+
+Quickstart
+----------
+
 The following recipe should have you up and running with a local development
 instance of the site in no time.
 
@@ -13,14 +19,6 @@ instance of the site in no time.
 #. ``> ./manage.py lectures -w``
 #. ``> ./manage.py runserver``
 #. http://localhost:8000
-
-Django Compress
----------------
-
-Media CSS and JS files are only updated when ``./manage.py synccompress`` is
-run, to change this update :file:`plan/settings/local.py` with the `Django
-Compress settings <http://code.google.com/p/django-compress/wiki/Configuration>`_
-you want.
 
 Datamodel
 ---------
@@ -57,8 +55,5 @@ user setup does not have these rights running the test with the following
 command will run the tests with an in-memory SQLite3 database: ``./manage.py
 test --settings=settings.test``
 
-For more info see `<http://docs.djangoproject.com/en/dev/topics/testing/>`_
-
-See also
---------
-* `General Django documentation <http://docs.djangoproject.com/en/1.0/>`_
+.. seealso::
+  `<http://docs.djangoproject.com/en/dev/topics/testing/>`_
