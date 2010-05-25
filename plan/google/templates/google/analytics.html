@@ -1,4 +1,4 @@
-{% if not code %}
+{% if not code and debug %}
     <!-- Goggle Analytics not included because you haven't set the settings.GOOGLE_ANALYTICS_CODE variable. -->
 {% else %}
     <script type="text/javascript" src="{% if secure %}https://ssl.{% else%}http://www.{% endif %}google-analytics.com/ga.js"></script>

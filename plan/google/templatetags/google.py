@@ -1,4 +1,4 @@
-# Copyright 2009 Thomas Kongevold Adamcik
+# Copyright 2009, 2010 Thomas Kongevold Adamcik
 # 2009 IME Faculty Norwegian University of Science and Technology
 
 # This file is part of Plan.
@@ -25,5 +25,6 @@ register = template.Library()
 def googleanalytics(context):
     return {
         'code': getattr(settings, 'GOOGLE_ANALYTICS_CODE', False),
+        'debug': getattr(settings, 'DEBUG', False),
         'secure': 'request' in context and context['request'].is_secure(),
     }
