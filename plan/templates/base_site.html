@@ -14,8 +14,10 @@
 
 {% block extrahead %}
     <link rel="icon" type="image/png" href="{{ MEDIA_URL }}gfx/time.png" />
-    {% get_current_language as LANGUAGE_CODE %}
-    <script type="text/javascript">language = '{{ LANGUAGE_CODE }}'</script>
+{% endblock %}
+
+{% block extrascript %}
+    {% googleanalytics %}
 {% endblock %}
 
 {% block lang %}
@@ -81,6 +83,4 @@
         <a href="http://colorbrewer2.org/">ColorBrewer</a>
       </span>
     </p>
-
-    {% googleanalytics %}
 {% endblock %}
