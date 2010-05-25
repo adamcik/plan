@@ -26,7 +26,7 @@ Datamodel
 ---------
 
 .. image:: images/data.png
-   :target: ../images/data.png
+   :target: ../_images/data.png
    :width: 300px
 
 Running tests
