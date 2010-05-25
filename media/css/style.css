@@ -182,7 +182,7 @@ p.right {
 /* error classes */
 .errorlist {
 	color: #A00000;
-	text-size: 85%;
+	font-size: 85%;
 }
 .error {
 	margin: 0;
