@@ -65,7 +65,7 @@ suffice for upgrading to a newer version:
 #. Run ``./manage.py migrate`` to perform any database migrations.
 #. Run ``./manage.py synccompress`` to compress any new JS and/or CSS.
 #. Run ``touch ../wsgi/plan.wsgi`` to reload the application or restart Apache.
-#. Run ``./manage.py flushreakns`` to flush the cache or whatever is appropriate
+#. Run ``./manage.py flushrealms`` to flush the cache or whatever is appropriate
    for the cache backend you have setup.
 
 .. important::
