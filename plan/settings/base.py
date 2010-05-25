@@ -125,6 +125,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.contenttypes',
     'django.contrib.contenttypes',
+    'south',
     'compress',
     'plan.common',
     'plan.scrape',
