@@ -1,4 +1,4 @@
-# Copyright 2008, 2009 Thomas Kongevold Adamcik
+# Copyright 2008, 2009, 2010 Thomas Kongevold Adamcik
 # 2009 IME Faculty Norwegian University of Science and Technology
 
 # This file is part of Plan.
@@ -19,8 +19,8 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
 
-from plan.common.models import Course, Exam, Group, Lecture, Lecturer, \
-        Room, Semester, LectureType, Deadline, Subscription, Student
+from plan.common.models import (Course, Exam, ExamType, Group, Lecture,
+    Lecturer, Room, Semester, LectureType, Deadline, Subscription, Student)
 
 class CourseAdmin(admin.ModelAdmin):
     list_display = ('code', 'points', 'name', 'url', 'semester')
@@ -128,6 +128,7 @@ class RoomAdmin(admin.ModelAdmin):
 
 admin.site.register(Course, CourseAdmin)
 admin.site.register(Exam, ExamAdmin)
+admin.site.register(ExamType)
 admin.site.register(Group)
 admin.site.register(Lecture, LectureAdmin)
 admin.site.register(Lecturer)
