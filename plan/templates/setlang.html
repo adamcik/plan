@@ -4,10 +4,10 @@
 {% get_available_languages as LANGUAGES %}
 
 <form id="setlang" action="{% url django.views.i18n.set_language %}" method="post">
-    {% if request %}
-        <input type="hidden" name="next" value="{{ request.get_full_path }}" />
-    {% endif %}
     <p>
+        {% if request %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}" />
+        {% endif %}
         {% for code, name in LANGUAGES %}
             {% ifnotequal LANGUAGE_CODE code %}
             <button type="submit" class="link" name="language" value="{{ code }}">

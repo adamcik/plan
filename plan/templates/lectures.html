@@ -36,7 +36,7 @@
                                     <a href="{{ room.url }}">
                                         {{ room.name }}</a>{% if not forloop.last %},{% endif %}
                                 {% else %}
-                                    {{ room.name }}</a>{% if not forloop.last %},{% endif %}
+                                    {{ room.name }}{% if not forloop.last %},{% endif %}
                                 {% endif %}
                             {% endfor %}
                         </td>
