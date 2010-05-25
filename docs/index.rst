@@ -26,6 +26,5 @@ Contents
 
    screenshots
    data
-   config
    deployment
    development
