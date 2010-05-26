@@ -41,7 +41,7 @@ def to_unicode(value):
     return value.encode('utf-8').decode('utf-8')
 
 def clean(value):
-    return value.replace('&nbsp;', '').strip()
+    return re.sub(r'\s+', ' ', value.replace('&nbsp;', ' ')).strip()
 
 def update_courses(year, semester_type):
     '''Scrape the NTNU website to retrive all available courses'''
