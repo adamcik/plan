@@ -14,8 +14,10 @@ h1,h2,h3 {
 h1 {
 	padding-left: 0.6em;
 	font-size: 167%;
+	margin-top: 0;
 	margin-bottom: -0.25em;
-	clear: left;
+	float: left;
+	clear: none;
 }
 h2 {
 	border-bottom: 1px solid #D3D7CF;
@@ -200,6 +202,7 @@ td.error input, td.error select {
 
 /* header/body/footer */
 #hd {
+	margin-top: 0.5em;
 	border-bottom: 2px solid #D3D7CF;
 	margin-bottom: 1em;
 }
