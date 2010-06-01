@@ -10,10 +10,12 @@
         {% endif %}
         {% for code, name in LANGUAGES %}
             {% ifnotequal LANGUAGE_CODE code %}
-            <button type="submit" class="link" name="language" value="{{ code }}">
-                {% trans "Switch to" %} {{ name }}
-                <img alt="" src="{{ MEDIA_URL }}gfx/{{ code }}.png" />
-            </button>
+                {% language code %}
+                    <button type="submit" class="link" name="language" value="{{ code }}">
+                        {% trans "Switch to English" %}
+                        <img alt="" src="{{ MEDIA_URL }}gfx/{{ code }}.png" />
+                    </button>
+                {% endlanguage %}
             {% endifnotequal %}
         {% endfor %}
     </p>
