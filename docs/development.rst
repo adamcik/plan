@@ -27,6 +27,19 @@ Datamodel
    :target: ../_images/data.png
    :width: 300px
 
+Translations
+------------
+
+Note that :mod:`plan.translation` provides the i18n templatetags for this
+project. Ie. use ``{% load translation %}`` instead of ``{% load i18n %}``
+in templates.
+
+This package provides the same tags as i18n, and the ``{% language %}`` tag
+in addition.
+
+.. seealso::
+   `<http://docs.djangoproject.com/en/dev/topics/i18n/localization/#topics-i18n-localization>`_
+
 Running tests
 -------------
 
