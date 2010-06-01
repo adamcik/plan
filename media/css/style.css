@@ -386,7 +386,7 @@ td.error input, td.error select {
 
 @media print {
 	/* FIXME dont like noprint :( */
-	#ft, #django_log, .noprint {
+	#ft, .noprint {
 		display: none;
 	}
 	table a {
