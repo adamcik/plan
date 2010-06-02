@@ -24,7 +24,7 @@ from django.db import transaction
 
 from plan.scrape.db import update_courses as update_courses_from_db
 from plan.scrape.web import update_courses as update_courses_from_web
-from plan.common.models import Semester
+from plan.common.models import Semester, Course
 from plan.common.logger import init_console
 
 init_console()
@@ -59,6 +59,11 @@ class Command(BaseCommand):
                 update_courses_from_web(semester.year, semester.type)
             else:
                 update_courses_from_db(semester.year, semester.type)
+
+            for course in Course.objects.filter(semester__year__exact=semester.year,
+                    semester__type=semester.type):
+                course.url = 'http://www.ntnu.no/studier/emner/%s' % course.code
+                course.save()
 
             if raw_input('Save changes? [y/N] ').lower() == 'y':
                 transaction.commit()
