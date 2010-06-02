@@ -317,6 +317,9 @@ td.error input, td.error select {
 /* schedule styling */
 
 /* cell contents */
+#schedule .course, #schedule .room, #schedule .type {
+	overflow: hidden;
+}
 #schedule .course {
 	float: left;
 }
