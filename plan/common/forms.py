@@ -96,12 +96,15 @@ class ScheduleForm(forms.Form):
 
         if not qs:
             qs = self.fields['semester'].queryset
-            qs = qs.filter(Q(year__exact=current.year, type=current.type) | 
+            qs = qs.filter(Q(year__exact=current.year, type=current.type) |
                            Q(year__exact=next.year, type=next.type))
+        qs = qs.order_by('-id')
 
         if len(qs) == 1:
             self.fields['semester'].widget = forms.HiddenInput()
 
+        if qs:
+            self.fields['semester'].initial = list(qs)[-1]
         self.fields['semester'].queryset = qs
 
         self.fields['slug'].widget.attrs['size'] = 12

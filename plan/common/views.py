@@ -101,7 +101,7 @@ def getting_started(request, year=None, semester_type=None):
         return HttpResponseRedirect(reverse('frontpage'))
 
     if not schedule_form:
-        schedule_form = ScheduleForm(initial={'semester': semester.id}, queryset=qs)
+        schedule_form = ScheduleForm(queryset=qs)
 
     context = Course.get_stats(semester=semester)
     context.update({
