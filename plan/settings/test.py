@@ -20,5 +20,9 @@ from plan.settings.base import *
 
 DATABASE_ENGINE = 'sqlite3'
 
+INSTALLED_APPS = list(INSTALLED_APPS)
+if 'south' in INSTALLED_APPS:
+    INSTALLED_APPS.remove('south')
+
 CACHE_BACKEND = 'locmem://'
 CACHE_PREFIX = 'test'
