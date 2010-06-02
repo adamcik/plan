@@ -10,7 +10,7 @@ class Migration(DataMigration):
         for exam in orm.Exam.objects.filter(type__code=''):
             exam.type = orm.ExamType.objects.exclude(code='').get(name=exam.type.name)
             exam.save()
-        orm.ExamType.objects.get(code='').delete()
+        orm.ExamType.objects.filter(code='').delete()
 
     def backwards(self, orm):
         pass
