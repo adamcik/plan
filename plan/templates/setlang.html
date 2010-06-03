@@ -4,7 +4,7 @@
 {% get_available_languages as LANGUAGES %}
 
 <form id="setlang" action="{% url django.views.i18n.set_language %}" method="post">
-    <p>
+    <p class="large">
         {% if request %}
             <input type="hidden" name="next" value="{{ request.get_full_path }}" />
         {% endif %}
@@ -12,8 +12,7 @@
             {% ifnotequal LANGUAGE_CODE code %}
                 {% language code %}
                     <button type="submit" class="link" name="language" value="{{ code }}">
-                        {% trans "Switch to English" %}
-                        <img alt="" src="{{ MEDIA_URL }}gfx/{{ code }}.png" />
+                        <span class="icon {{ code }}-flag">{% trans "Switch to English" %}</span>
                     </button>
                 {% endlanguage %}
             {% endifnotequal %}
