@@ -104,7 +104,7 @@ class ScheduleForm(forms.Form):
             self.fields['semester'].widget = forms.HiddenInput()
 
         if qs:
-            self.fields['semester'].initial = list(qs)[-1]
+            self.fields['semester'].initial = list(qs)[-1].id
         self.fields['semester'].queryset = qs
 
         self.fields['slug'].widget.attrs['size'] = 12
