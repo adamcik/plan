@@ -33,6 +33,7 @@ from django.utils.translation import ugettext as _
 from plan.common.models import Lecture, Semester, Room, Course
 from plan.common.timetable import Timetable
 from plan.common.utils import ColorMap
+from plan.common.templatetags.title import render_title
 
 outer_border = HexColor('#666666')
 inner_border = HexColor('#CCCCCC')
@@ -41,8 +42,9 @@ backgrounds = [HexColor('#FFFFFF'), HexColor('#FAFAFA')]
 def _tablestyle():
     table_style = TableStyle([
         ('FONT',     (0,0),  (-1,-1),'Helvetica-Bold'),
-        ('FONTSIZE', (0,0),  (-1,0),  10),
-        ('FONTSIZE', (0,0),  (0,-1),  8),
+        ('FONTSIZE', (0,0),  (-1,0),  10), # title
+        ('FONTSIZE', (0,1),  (0,-1),  8),  # days
+        ('FONTSIZE', (0,1),  (-1,1),  8),  # times
 
         ('TOPPADDING',    (0,0),  (-1,-1), 1),
         ('TOPPADDING',    (0,0),  (0,-1),  5),
@@ -55,14 +57,14 @@ def _tablestyle():
         ('ALIGN',  (1,0),  (-1,-1), 'LEFT'),
         ('VALIGN', (1,0),  (-1,-1), 'TOP'),
 
-        ('LINEABOVE',  (0,1),  (-1,1),  1, outer_border),
+        ('LINEABOVE',  (0,2),  (-1,2),  1, outer_border),
         ('LINEBELOW',  (0,-1), (-1,-1), 1, outer_border),
-        ('LINEBEFORE', (0,1),  (0,-1),  1, outer_border),
-        ('LINEAFTER',  (-1,1), (-1,-1), 1, outer_border),
+        ('LINEBEFORE', (0,2),  (0,-1),  1, outer_border),
+        ('LINEAFTER',  (-1,2), (-1,-1), 1, outer_border),
 
         ('LINEBELOW',  (0,1), (-1,-2), 0.7, inner_border),
 
-        ('ROWBACKGROUNDS', (0,0), (-1,-1), backgrounds),
+        ('ROWBACKGROUNDS', (0,1), (-1,-1), backgrounds),
     ])
 
     return table_style
@@ -117,18 +119,21 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
 
     table_style = _tablestyle()
 
-    data = [['']]
+    data = [[render_title(semester, slug, week)]]
+    data[-1].extend([''] * sum(timetable.span))
+    table_style.add('SPAN', (0,0), (-1, 0))
 
     # Add days
     # FIXME move to timetable
+    data.append([''])
     for i, day in enumerate([_('Monday'), _('Tuesday'), _('Wednesday'),
             _('Thursday'), _('Friday')]):
-        data[0].append(day)
+        data[-1].append(day)
         if timetable.span[i] > 1:
             extra = timetable.span[i] - 1
 
-            table_style.add('SPAN', (len(data[0])-1, 0), (len(data[0])-1+extra, 0))
-            data[0].extend([''] * extra)
+            table_style.add('SPAN', (len(data[-1])-1, 2), (len(data[-1])-1+extra, 2))
+            data[-1].extend([''] * extra)
 
     # Convert to "simple" datastruct
     for row in timetable.table:
@@ -170,13 +175,13 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
     col_widths = [time_width]
     for w in timetable.span:
         x = len(col_widths)
-        table_style.add('LINEBEFORE', (x, 1),  (x, -1),  1, outer_border)
+        table_style.add('LINEBEFORE', (x, 2),  (x, -1),  1, outer_border)
 
         col_widths.extend([float(day_width)/w] * w)
 
     # Set row heights
-    row_heights  = [12]
-    row_heights += [(height-8) / (len(data)-1)] * (len(data)-1)
+    row_heights  = [16, 12]
+    row_heights += [(height-(8*2)) / (len(data)-2)] * (len(data)-2)
 
     # Create spans, setup backgrounds and put content in KeepInFrame
     for lecture in timetable.lectures:
@@ -185,7 +190,7 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
             offset += o
 
         x1 = offset + lecture['k'] + 1
-        y1 = lecture['i']+1
+        y1 = lecture['i']+2
 
         x2 = x1 + lecture['width'] - 1
         y2 = y1 + lecture['height'] - 1
@@ -196,7 +201,7 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
 
         content = data[y1][x1]
         data[y1][x1] =  KeepInFrame(col_widths[x1]*lecture['width'],
-                                    row_heights[1]*lecture['height'],
+                                    row_heights[2]*lecture['height'],
                                     content, mode='shrink')
 
     page = canvas.Canvas(response, A4)
