@@ -223,15 +223,6 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
     page.setFillColor(HexColor('#666666'))
     page.drawString(width - page.stringWidth(note) - 2, -height+2, note)
 
-    if week:
-        week_text = _('Week') + ' %s' % week
-    else:
-        week_text = _('All weeks')
-
-    page.setFont('Helvetica', 8)
-    page.setFillColor(HexColor('#000000'))
-    page.drawString(0, -6, week_text)
-
     page.showPage()
     page.save()
 
