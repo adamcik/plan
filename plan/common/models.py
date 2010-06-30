@@ -266,7 +266,7 @@ class Semester(models.Model):
         current_time = now()
 
         if early:
-            current_time += timedelta(weeks=2)
+            current_time += timedelta(weeks=2) # FIXME to low for summer
 
         # Default to current semester
         if current_time.month <= 6:
