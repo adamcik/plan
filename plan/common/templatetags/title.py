@@ -38,6 +38,14 @@ def title(semester, slug, week=None):
         'week': week,
     }
 
+def render_title(semester, slug, week=None):
+    title_template = template.loader.get_template('title.html')
+    context = template.Context(title(semester, slug, week))
+    rendered = title_template.render(context)
+    rendered = rendered.replace('\n', ' ')
+    rendered = re.sub('\s+', ' ', rendered)
+    return rendered.strip()
+
 def english(slug):
     if slug.endswith('s'):
         return "'"
