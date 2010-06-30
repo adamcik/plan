@@ -1,13 +1,13 @@
 ipython          # Better interactive python shell
 
-Django           # Django webframework
+Django >= 1.0    # Django webframework
 psycopg2         # Postgres database adapter
 python-memcached # Memcache client library
 
 vobject          # Ical generation
 ReportLab        # PDF generation
 
-south            # Database migrations
+south >= 0.7     # Database migrations
 BeautifulSoup    # Web scraping of data
 sphinx           # To build docs
 
