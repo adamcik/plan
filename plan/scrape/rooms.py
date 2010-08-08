@@ -16,51 +16,80 @@
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+import re
 
-from urllib import URLopener, urlencode
+from urllib import urlopen, urlencode
 from BeautifulSoup import BeautifulSoup
 
-from plan.common.models import Room
+from plan.common.models import Room, Course
 
 logger = logging.getLogger('plan.scrape.rooms')
 
 def update_rooms():
-    opener = URLopener()
-    opener.addheader('Accept', '*/*')
+    room_links = {}
 
-    rooms = list(Room.objects.all())
-
-    for i, room in enumerate(rooms):
-        url = 'http://www.ntnu.no/ntnukart/undervisningsrom/sokeresultat.php?%s' % \
-            urlencode({'soketekst': room.name.encode('latin1')})
+    for room in Room.objects.all():
+        url = 'http://www.ntnu.no/kart/no_cache/soek/?%s' % \
+            urlencode({'tx_indexedsearch[sword]': room.name.encode('latin1')})
 
         logger.info('Retrieving %s', url)
 
         try:
-            html = ''.join(opener.open(url).readlines())
+            html = urlopen(url).read()
         except IOError, e:
             logger.error('Loading falied')
             continue
 
         soup = BeautifulSoup(html)
 
-        hovedramme = soup.findAll('div', {'class': 'hovedramme'})[0]
+        for span in soup.findAll('span', {'class': 'tx-indexedsearch-path path'}):
+            link = span.findAll('a')[0]['href']
 
-        links = []
+            if 'plantegning' in link:
+                continue
 
-        for link in hovedramme.findAll('a'):
-            if link.parent.name == 'h2':
-                links.append([link.contents[0], 'http://www.ntnu.no/ntnukart/undervisningsrom/' + link['href']])
+            if room not in room_links:
+                room_links[room] = []
 
-            link.extract()
+            room_links[room].append(link.rstrip('?0='))
 
-        del hovedramme
-        del soup
+    for room, links in room_links.items():
+        choice = get_choice(room, links)
 
-        if len(links) == 1:
-            logger.info('Setting url for %s to %s', room, links[0][0])
-
-            room.url = links[0][1]
+        if choice:
+            room.url = 'http://www.ntnu.no/kart/' + choice
             room.save()
-        else:
-            logger.warning('Skipping %s', room)
+
+def get_course_codes(room):
+    codes = Course.objects.filter(lecture__rooms=room)
+    codes = codes.values_list('code', flat=True).distinct()
+    return set([re.match(r'^([^0-9]+)[0-9]+$', c).group(1) for c in codes])
+
+def get_choice(room, links):
+    if not links:
+        return ''
+
+    if len(links) == 1:
+        return links[0]
+
+    codes = get_course_codes(room)
+    print '\n%s: %s' % (room.name, ', '.join(sorted(codes)))
+
+    for i, link in enumerate(sorted(links)):
+        print '%d) %s' % (i+1, link)
+
+    while True:
+        choice = raw_input()
+        if choice == '':
+            return ''
+
+        if not choice.isdigit():
+            continue
+        choice = int(choice)
+
+        if choice < 1 or choice > len(links):
+            continue
+
+        break
+
+    return links[choice-1]
