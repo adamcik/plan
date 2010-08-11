@@ -13,11 +13,11 @@
     <thead>
         <tr>
             <th class="time"></th>
-            <th colspan="{{ timetable.span.0 }}"><span class="date">{{ timetable.date.0|date:"j M."|lower }}</span> {% trans "Monday" %}</th>
-            <th colspan="{{ timetable.span.1 }}"><span class="date">{{ timetable.date.1|date:"j M."|lower }}</span> {% trans "Tuesday" %}</th>
-            <th colspan="{{ timetable.span.2 }}"><span class="date">{{ timetable.date.2|date:"j M."|lower }}</span> {% trans "Wednesday" %}</th>
-            <th colspan="{{ timetable.span.3 }}"><span class="date">{{ timetable.date.3|date:"j M."|lower }}</span> {% trans "Thursday" %}</th>
-            <th colspan="{{ timetable.span.4 }}"><span class="date">{{ timetable.date.4|date:"j M."|lower }}</span> {% trans "Friday" %}</th>
+            <th colspan="{{ timetable.span.0 }}" class="day-1"><span class="date">{{ timetable.date.0|date:"j M."|lower }}</span> {% trans "Monday" %}</th>
+            <th colspan="{{ timetable.span.1 }}" class="day-2"><span class="date">{{ timetable.date.1|date:"j M."|lower }}</span> {% trans "Tuesday" %}</th>
+            <th colspan="{{ timetable.span.2 }}" class="day-3"><span class="date">{{ timetable.date.2|date:"j M."|lower }}</span> {% trans "Wednesday" %}</th>
+            <th colspan="{{ timetable.span.3 }}" class="day-4"><span class="date">{{ timetable.date.3|date:"j M."|lower }}</span> {% trans "Thursday" %}</th>
+            <th colspan="{{ timetable.span.4 }}" class="day-5"><span class="date">{{ timetable.date.4|date:"j M."|lower }}</span> {% trans "Friday" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -48,6 +48,8 @@
                                         {% endif %}
                                         {% if c.time %}
                                             time
+                                        {% else %}
+                                            day-{{ forloop.parentloop.counter0 }}
                                         {% endif %}
                                     "
                                 {% endif %}
