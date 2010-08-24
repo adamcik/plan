@@ -22,12 +22,17 @@ from plan.common.models import (Lecture, Lecturer, Room, LectureType,
     Group, Week)
 
 logger = logging.getLogger('plan.scrape.lectures')
-days_of_week = ['mandag', 'tirsdag', 'onsdag', 'torsdag', 'fredag']
+days_of_week_no = ['mandag', 'tirsdag', 'onsdag', 'torsdag', 'fredag']
+days_of_week_en = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
 
 def get_day_of_week(value):
-    try:
-        return days_of_week.index(value.lower().strip())
-    except ValueError:
+    value = value.lower().strip()
+
+    if value in days_of_week_no:
+        return days_of_week_no.index(value)
+    elif value in days_of_week_en:
+        return days_of_week_en.index(value)
+    else:
         return None
 
 def get_time(value):
