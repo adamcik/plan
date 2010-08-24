@@ -76,6 +76,7 @@ class Command(BaseCommand):
                     print ' | '.join(buffer)
 
                 print '---------------------'
+                print '%d lectures' % len(to_delete)
 
                 if options['delete'] or raw_input('Delete? [y/N] ').lower() == 'y':
                     to_delete.delete()

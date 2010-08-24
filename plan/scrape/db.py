@@ -81,7 +81,7 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
         lectures = lectures.filter(course__code__startswith=matches)
 
     for row in c.fetchall():
-        code, lecture_type, day, start, end, week, room, lecturer, groupcode = row
+        code, lecture_type, db_day, db_start, db_end, week, room, lecturer, groupcode = row
         if not code.strip():
             continue
 
@@ -97,12 +97,12 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
         # Get course
         course = Course.objects.get(code=code, semester=semester)
 
-        day = get_day_of_week(day)
-        start = get_time(start)
-        end = get_time(end)
+        day = get_day_of_week(db_day)
+        start = get_time(db_start)
+        end = get_time(db_end)
 
         if day is None or start is None or end is None:
-            logger.warning("Could not add %s - %s on %s for %s" % (start, end, day, course))
+            logger.warning("Could not add %s - %s on %s for %s" % (db_start, db_end, db_day, course))
             skipped += 1
             continue
 
