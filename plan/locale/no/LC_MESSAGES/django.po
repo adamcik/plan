@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Timeplan\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-30 14:57+0200\n"
+"POT-Creation-Date: 2010-08-24 23:06+0200\n"
 "PO-Revision-Date: 2009-09-29 14:46+0100\n"
 "Last-Translator: Thomas Adamcik <timeplan@adamcik.no>\n"
 "Language-Team:  <timeplan@adamcik.no>\n"
@@ -200,23 +200,23 @@ msgstr "Foreleser"
 msgid "Lecturers"
 msgstr "Forelesere"
 
-#: common/models.py:344 pdf/views.py:124 templates/schedule_table.html:16
+#: common/models.py:344 pdf/views.py:129 templates/schedule_table.html:16
 msgid "Monday"
 msgstr "Mandag"
 
-#: common/models.py:345 pdf/views.py:124 templates/schedule_table.html:17
+#: common/models.py:345 pdf/views.py:129 templates/schedule_table.html:17
 msgid "Tuesday"
 msgstr "Tirsdag"
 
-#: common/models.py:346 pdf/views.py:124 templates/schedule_table.html:18
+#: common/models.py:346 pdf/views.py:129 templates/schedule_table.html:18
 msgid "Wednesday"
 msgstr "Onsdag"
 
-#: common/models.py:347 pdf/views.py:125 templates/schedule_table.html:19
+#: common/models.py:347 pdf/views.py:130 templates/schedule_table.html:19
 msgid "Thursday"
 msgstr "Torsdag"
 
-#: common/models.py:348 pdf/views.py:125 templates/schedule_table.html:20
+#: common/models.py:348 pdf/views.py:130 templates/schedule_table.html:20
 msgid "Friday"
 msgstr "Fredag"
 
@@ -274,14 +274,6 @@ msgstr "%(slug)s' timeplan for %(semester)s %(year)s, %(resources)s"
 #, python-format
 msgid "%(slug)s's %(semester)s %(year)s schedule for %(resources)s"
 msgstr "%(slug)ss timeplan for %(semester)s %(year)s, %(resources)s"
-
-#: pdf/views.py:227
-msgid "Week"
-msgstr "Uke"
-
-#: pdf/views.py:229
-msgid "All weeks"
-msgstr "Alle uker"
 
 #: settings/base.py:63
 msgid "Norwegian"
@@ -368,46 +360,42 @@ msgstr ""
 "          "
 
 #: templates/base_site.html:39
-msgid "Code and design &copy; 2008-2010 Thomas Adamcik."
-msgstr "Kildekode og design &copy; 2008-2010 Thomas Adamcik."
+msgid "Code and design &copy; 2008-2010 <b>Thomas Adamcik</b>."
+msgstr "Kildekode og design &copy; 2008-2010 <b>Thomas Adamcik</b>."
 
-#: templates/base_site.html:40
-msgid "Further work commissioned by IME Faculty NTNU 2009."
-msgstr "Videre utvikling utført på bestilling fra IME-fakultetet, NTNU, 2009."
-
-#: templates/base_site.html:45 templates/schedule_table_footer.html:7
+#: templates/base_site.html:44 templates/schedule_table_footer.html:7
 msgid "Course list"
 msgstr "Emneliste"
 
-#: templates/base_site.html:47
+#: templates/base_site.html:46
 msgid "Study Guide"
 msgstr "Studiehåndbok"
 
-#: templates/base_site.html:49
+#: templates/base_site.html:48
 msgid "Exam dates"
 msgstr "Eksamensdatoer"
 
-#: templates/base_site.html:51
+#: templates/base_site.html:50
 msgid "Exam rules"
 msgstr "Eksamensregler"
 
-#: templates/base_site.html:53
+#: templates/base_site.html:52
 msgid "Lecture times"
 msgstr "Forelesningstider"
 
-#: templates/base_site.html:55
+#: templates/base_site.html:54
 msgid "Map Dragvoll"
 msgstr "Kart: Dragvoll"
 
-#: templates/base_site.html:58
+#: templates/base_site.html:57
 msgid "Map Gløshaugen"
 msgstr "Kart: Gløshaugen"
 
-#: templates/base_site.html:61
+#: templates/base_site.html:60
 msgid "Find rooms"
 msgstr "Søk etter rom"
 
-#: templates/base_site.html:70
+#: templates/base_site.html:69
 #, python-format
 msgid ""
 "\n"
@@ -424,7 +412,7 @@ msgstr ""
 "        på <a href=\"%(SOURCE_URL)s\">%(SOURCE_URL)s</a>.\n"
 "      "
 
-#: templates/base_site.html:77
+#: templates/base_site.html:76
 msgid "Built using:"
 msgstr "Bygget ved hjelp av:"
 
@@ -678,7 +666,7 @@ msgstr ""
 "                    for å vise eller skjule forelesninger.\n"
 "                "
 
-#: templates/schedule.html:79
+#: templates/schedule.html:80
 msgid "Settings"
 msgstr "Instillinger"
 
@@ -1023,6 +1011,16 @@ msgstr ""
 #: templates/admin/base_site.html:5 templates/admin/base_site.html.py:9
 msgid "ntnu timetable admin"
 msgstr "NTNU timeplanadministrator"
+
+#~ msgid "Week"
+#~ msgstr "Uke"
+
+#~ msgid "All weeks"
+#~ msgstr "Alle uker"
+
+#~ msgid "Further work commissioned by IME Faculty NTNU 2009."
+#~ msgstr ""
+#~ "Videre utvikling utført på bestilling fra IME-fakultetet, NTNU, 2009."
 
 #~ msgid "Change language to:"
 #~ msgstr "Bytt til:"
