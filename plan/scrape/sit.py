@@ -17,7 +17,7 @@
 
 import logging
 import urllib
-from BeautifulSoup import BeautifulSoup
+from lxml.html import parse
 
 from plan.common.models import Course, Semester
 
@@ -43,15 +43,12 @@ def update_syllabus(year, semester, match=None):
         logger.info('Trying %s', url)
 
         try:
-            html = urllib.urlopen(url).read()
+            root = parse(url).getroot()
         except IOError, e:
-            logger.warning('Urlopen failed for %s: %s', course.code, e)
+            logger.warning('Parse failed for %s: %s', course.code, e)
             continue
 
-        soup = BeautifulSoup(html)
-        syllabus = soup.find(id="pensumliste")
-
-        if not syllabus.find('table'):
+        if not root.cssselect('#pensumliste .produkt_wrapper'):
             logger.warning("Didn't find any tables in results for %s", course.code)
             continue
 
