@@ -13,6 +13,7 @@
                     <th>{% trans "Alias" %}</th>
                     <th>{% trans "Description" %}</th>
                     <th style="width: 10%">{% trans "Credits" %}</th>
+                    <th>{% trans "Syllabus" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -44,6 +45,13 @@
                         </td>
                         <td align="right">
                             {{ course.points|default:""|floatformat:"1" }}
+                        </td>
+                        <td align="center">
+                            {% if course.syllabus %}
+                                <a href="{{ course.syllabus }}">Tapir</a>
+                            {% else %}
+                                -
+                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}
