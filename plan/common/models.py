@@ -128,6 +128,7 @@ class Course(models.Model):
     version = models.CharField(_('Version'), max_length=20, blank=True, null=True)
 
     url = models.URLField(_('URL'), verify_exists=False, blank=True)
+    syllabus = models.URLField(_('URL'), verify_exists=False, blank=True)
     points = models.DecimalField(_('Points'), decimal_places=2, max_digits=5, null=True, blank=True)
 
     objects = CourseManager()
