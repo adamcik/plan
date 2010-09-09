@@ -9,6 +9,7 @@ ReportLab        # PDF generation
 
 south >= 0.7     # Database migrations
 BeautifulSoup    # Web scraping of data
+lxml             # Web scraping of data
 sphinx           # To build docs
 
 #django-compress  # CSS and JS compression
