@@ -20,9 +20,8 @@
 
 import re
 import logging
-
-from urllib import urlopen, URLopener, urlencode
-from BeautifulSoup import BeautifulSoup, NavigableString
+from urllib import urlencode
+from lxml.html import parse
 
 from django.conf import settings
 
@@ -32,24 +31,10 @@ from plan.scrape.lectures import (get_day_of_week, get_time, get_weeks,
 
 logger = logging.getLogger('plan.scrape.web')
 
-is_text = lambda text: isinstance(text, NavigableString)
-
-def to_unicode(value):
-    '''Forces NavigableString to unicode'''
-    if not isinstance(value, NavigableString):
-        return value
-    return value.encode('utf-8').decode('utf-8')
-
-def clean(value):
-    return re.sub(r'\s+', ' ', value.replace('&nbsp;', ' ')).strip()
-
 def update_courses(year, semester_type):
     '''Scrape the NTNU website to retrive all available courses'''
 
     semester, created = Semester.objects.get_or_create(year=year, type=semester_type)
-
-    opener = URLopener()
-    opener.addheader('Accept', '*/*')
 
     courses = []
 
@@ -60,32 +45,24 @@ def update_courses(year, semester_type):
         logger.info('Retrieving %s', url)
 
         try:
-            html = ''.join(opener.open(url).readlines())
+            root = parse(url).getroot()
         except IOError, e:
             logger.error('Loading falied')
             continue
 
-        soup = BeautifulSoup(html)
-
-        hovedramme = soup.findAll('div', {'class': 'hovedramme'})[0]
-
-        table = hovedramme.findAll('table', recursive=False)[0]
-        table = table.findAll('table')[0]
-
-        table.extract()
-        hovedramme.extract()
-
-        for tr in table.findAll('tr'):
-            code, name = tr.findAll('a')
+        for tr in root.cssselect('.hovedramme table table tr'):
+            code, name = tr.cssselect('a')
 
             pattern = 'emnekode=(.+?[0-9\-]+)'
-            code = re.compile(pattern, re.I|re.L).search(code['href']).group().strip('emnekode=')
+            code = re.compile(pattern, re.I|re.L).search(code.attrib['href']).group(1)
 
             code, version = code.split('-', 2)[:2]
-            name = name.contents[0]
+            name = name.text_content()
 
             if name.endswith('(Nytt)'):
                 name = name.rstrip('(Nytt)')
+
+            print [code, version, name]
 
             if not re.match(settings.TIMETABLE_VALID_COURSE_NAMES, code):
                 logger.info('Skipped invalid course name: %s', code)
