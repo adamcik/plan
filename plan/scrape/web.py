@@ -62,8 +62,6 @@ def update_courses(year, semester_type):
             if name.endswith('(Nytt)'):
                 name = name.rstrip('(Nytt)')
 
-            print [code, version, name]
-
             if not re.match(settings.TIMETABLE_VALID_COURSE_NAMES, code):
                 logger.info('Skipped invalid course name: %s', code)
                 continue
@@ -115,49 +113,35 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
         else:
             versions_to_try = [1, 2, 3, 4]
 
-        table = None
-
         for number in versions_to_try:
             final_url = '%s-%s' % (url, number)
 
             logger.info('Retrieving %s', final_url)
 
-            html = ''.join(urlopen(final_url).readlines())
-            main = BeautifulSoup(html).findAll('div', 'hovedramme')[0]
+            root = parse(final_url).getroot()
 
-            if not main.findAll('h1', text=lambda t: course.code in t):
-                main.extract()
-                del html
-                del main
-                continue
+            for h1 in root.cssselect(u'.hovedramme h1'):
+                if course.code in h1.text_content():
+                    table = root.cssselect('.hovedramme table')[1];
+                    break
 
-            table = main.findAll('table')[1]
-
-            # Try and get rid of stuff we don't need.
-            table.extract()
-            main.extract()
-            del html
-            del main
-
-            break
-
-        if not table:
+        if table is None:
+            logger.warning("Couldn't load any lecture info for %s", course.code)
             continue
 
         lecture_type = None
-        for tr in table.findAll('tr')[1:-1]:
+        for tr in table.cssselect('tr')[1:-1]:
             weeks, rooms, lecturers, groups  = [], [], [], []
             day, start, end = None, None, None
             lecture = True
-            tr.extract()
 
-            for i, td in enumerate(tr.findAll('td')):
+            for i, td in enumerate(tr.cssselect('td')):
                 if i == 0:
-                    if td.get('colspan') == '4':
-                        lecture_type = clean(td.findAll(text=is_text)[0])
+                    if td.attrib.get('colspan', 1) == '4':
+                        lecture_type = td.text_content().strip()
                         lecture = False
                     else:
-                        time = td.findAll('b')[0].findAll(text=is_text)[0]
+                        time = td.cssselect('b')[0].text_content().strip()
                         day, period = time.split(' ', 1)
                         start, end = period.split('-')
 
@@ -165,40 +149,35 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
                         start = get_time(start)
                         end = get_time(end)
 
-                        for week in td.findAll(text=re.compile('^Uke:')):
-                            week = week.replace('Uke:', '', 1).split(',')
-                            weeks.extend(get_weeks(week))
+                        week = re.match('.*Uke: (.+)', td.text_content()).group(1).split(',')
+                        weeks.extend(get_weeks(week))
                 elif i == 1:
-                    for a in td.findAll('a'):
-                        for room in a.findAll(text=is_text):
-                            rooms.append(clean(room))
+                    for a in td.cssselect('a'):
+                        rooms.append(a.text_content().strip())
                 elif i == 2:
-                    for lecturer in td.findAll(text=is_text):
-                        lecturers.append(clean(lecturer))
+                    lecturers.append(td.text.strip())
+                    for br in td:
+                        lecturers.append(br.tail.strip())
                 elif i == 3:
-                    for group in td.findAll(text=is_text):
-                        groups.append(clean(group))
+                    for group in td.cssselect('span'):
+                        groups.append(group.text_content().strip())
 
             if lecture:
                 if day is None or not start or not end:
-                    # FIXME better error for saturday etc?
                     logger.warning("Could not add %s - %s on %s for %s" % (start, end, day, course))
                     continue
 
                 data.append({
                     'course': course,
-                    'type': clean(lecture_type),
+                    'type': lecture_type,
                     'day': day,
                     'start': start,
                     'end': end,
                     'weeks': filter(bool, weeks),
-                    'rooms': filter(bool, map(to_unicode, rooms)),
-                    'lecturers': filter(bool, map(to_unicode, lecturers)),
-                    'groups': filter(bool, map(to_unicode, groups)),
+                    'rooms': filter(bool, rooms),
+                    'lecturers': filter(bool, lecturers),
+                    'groups': filter(bool, groups),
                 })
-
-            del tr
-        del table
 
     added_lectures = process_lectures(data)
     to_delete = Lecture.objects.exclude(id__in=added_lectures)
