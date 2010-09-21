@@ -19,7 +19,7 @@ import logging
 import re
 
 from urllib import urlopen, urlencode
-from BeautifulSoup import BeautifulSoup
+from lxml.html import parse
 
 from plan.common.models import Room, Course
 
@@ -35,16 +35,15 @@ def update_rooms():
         logger.info('Retrieving %s', url)
 
         try:
-            html = urlopen(url).read()
+            root = parse(url).getroot()
         except IOError, e:
             logger.error('Loading falied')
             continue
 
-        soup = BeautifulSoup(html)
+        for a in root.cssselect('span.tx-indexedsearch-path a'):
+            link = a.attrib['href']
 
-        for span in soup.findAll('span', {'class': 'tx-indexedsearch-path path'}):
-            link = span.findAll('a')[0]['href']
-
+            # FIXME blacklist check?
             if 'plantegning' in link:
                 continue
 
