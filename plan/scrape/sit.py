@@ -48,7 +48,7 @@ def update_syllabus(year, semester, match=None):
             logger.warning('Parse failed for %s: %s', course.code, e)
             continue
 
-        if not root.cssselect('#pensumliste .produkt_wrapper'):
+        if not root.cssselect('#pensumliste .produkter_wrapper'):
             logger.warning("Didn't find any tables in results for %s", course.code)
             continue
 
