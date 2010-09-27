@@ -26,6 +26,8 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
 from django.utils.html import escape
 from django.utils.text import truncate_words
+from django.db import connection
+from django.utils.simplejson import dumps
 
 from plan.common.models import Course, Deadline, Exam, Group, \
         Lecture, Semester, Subscription, Room, Lecturer, Week, Student
@@ -599,3 +601,23 @@ def list_courses(request, year, semester_type, slug):
         response = HttpResponse(decompress(content))
 
     return response
+
+def about(request):
+    cursor = connection.cursor()
+    cursor.execute('''
+        SELECT COUNT(*), date, semester_id FROM (
+            SELECT EXTRACT(EPOCH FROM date_trunc('day', min(s.added))) AS date,
+                s.student_id, c.semester_id
+            FROM common_subscription s
+            JOIN common_course c ON (c.id = s.course_id)
+            GROUP BY s.student_id, c.semester_id
+        ) AS foo GROUP BY date, semester_id ORDER by date;
+        ''')
+
+    data = {}
+    for count, date, semester in cursor.fetchall():
+        if semester not in data:
+            data[semester] = []
+        data[semester].append(map(int, [date, count]))
+
+    return HttpResponse(dumps(data.values()))
