@@ -602,6 +602,9 @@ def list_courses(request, year, semester_type, slug):
     return response
 
 def about(request):
+    response = request.cache.get('about', realm=False)
+    if response:
+        return response
     cursor = connection.cursor()
     cursor.execute('''
         SELECT COUNT(*), date, semester_id FROM (
@@ -621,7 +624,12 @@ def about(request):
             data.append([])
         data[-1].append(map(int, [date, count]))
 
-    return render_to_response('about.html', {
+    response = render_to_response('about.html', {
             'stats': data,
             'color_map': ColorMap(hex=True),
         }, RequestContext(request))
+
+    request.cache.set('about', response,
+        settings.CACHE_TIME_ABOUT, realm=False)
+
+    return response
