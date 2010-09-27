@@ -102,7 +102,7 @@ msgstr "Versjon"
 
 #: common/models.py:132
 msgid "Points"
-msgstr "Studiepoeng"
+msgstr "Poeng"
 
 #: common/models.py:137 templates/add_deadlines.html:11
 #: templates/course_list.html:45 templates/courses.html:12
@@ -451,7 +451,7 @@ msgstr "Legg til timeplanen"
 
 #: templates/course_list.html:47 templates/courses.html:15
 msgid "Credits"
-msgstr "Studiepoeng"
+msgstr "Poeng"
 
 #: templates/course_list.html:49
 msgid "Exam Type"
