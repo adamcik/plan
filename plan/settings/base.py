@@ -161,6 +161,12 @@ COMPRESS_JS = {
                              'js/advanced.js'),
         'output_filename': 'compressed/all.r?.js',
     },
+
+    'graph': {
+        'source_filenames': ('js/jquery-1.3.1.min.js',
+                             'js/jquery.flot.min.js',),
+        'output_filename': 'compressed/graph.r?.js',
+    },
 }
 
 TIMETABLE_COLORS = [
