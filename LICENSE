@@ -24,6 +24,7 @@ See COPYING for full license.
 The following license information covers the external libraries directly
 included in this distrubtion:
 
+
 ColorBrewer
 -----------
 
@@ -44,6 +45,7 @@ License: Apache 2.0
     CONDITIONS OF ANY KIND, either express or implied. See the License for the
     specific language governing permissions and limitations under the License.
 
+
 jQuery
 ------
 
@@ -52,6 +54,7 @@ Copyright (c) 2009 John Resig
 http://www.jquery.com/
 
 License: MIT/GPL
+
 
 jQuery Autocomplete Plugin
 --------------------------
@@ -62,6 +65,27 @@ http://bassistance.de/jquery-plugins/jquery-plugin-autocomplete/
 
 License: MIT/GPL
 
+
+flot
+----
+
+Copyright (c) 2007-2009 IOLA and Ole Laursen
+
+http://code.google.com/p/flot
+
+License: MIT
+
+
+ExplorerCanvas
+--------------
+
+Copyright 2006 Google Inc.
+
+http://code.google.com/p/explorercanvas
+
+License: Apache 2.0
+
+
 Silk Icons
 ----------
 
@@ -70,6 +94,7 @@ Mark James
 http://www.famfamfam.com/lab/icons/silk/
 
 License: Creative Commons Attribution 2.5
+
 
 YUI CSS-framwork
 ----------------
@@ -85,7 +110,7 @@ License: BSD
 
         1. Redistributions of source code must retain the above copyright notice, 
            this list of conditions and the following disclaimer.
-        
+
         2. Redistributions in binary form must reproduce the above copyright 
            notice, this list of conditions and the following disclaimer in the
            documentation and/or other materials provided with the distribution.
