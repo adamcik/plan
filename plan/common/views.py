@@ -27,7 +27,6 @@ from django.template.context import RequestContext
 from django.utils.html import escape
 from django.utils.text import truncate_words
 from django.db import connection
-from django.utils.simplejson import dumps
 
 from plan.common.models import Course, Deadline, Exam, Group, \
         Lecture, Semester, Subscription, Room, Lecturer, Week, Student
@@ -611,13 +610,18 @@ def about(request):
             FROM common_subscription s
             JOIN common_course c ON (c.id = s.course_id)
             GROUP BY s.student_id, c.semester_id
-        ) AS foo GROUP BY date, semester_id ORDER by date;
+        ) AS foo GROUP BY date, semester_id ORDER by semester_id, date;
         ''')
 
-    data = {}
+    last_semester = None
+    data = []
     for count, date, semester in cursor.fetchall():
-        if semester not in data:
-            data[semester] = []
-        data[semester].append(map(int, [date, count]))
+        if last_semester != semester:
+            last_semester = semester
+            data.append([])
+        data[-1].append(map(int, [date, count]))
 
-    return HttpResponse(dumps(data.values()))
+    return render_to_response('about.html', {
+            'stats': data,
+            'color_map': ColorMap(hex=True),
+        }, RequestContext(request))

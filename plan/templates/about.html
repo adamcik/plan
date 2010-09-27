@@ -1,0 +1,59 @@
+{% extends "base_site.html" %}
+{% load translation %}
+{% load compressed %}
+{% load json %}
+{% load color %}
+
+{% block hd %}
+    <h1>{% trans "About the Timetable generator for NTNU students" %}</h1>
+{% endblock %}
+
+{% block bd %}
+    <div id="graph">
+    </div>
+{% endblock %}
+
+{% block extrascript %}
+    <!--[if IE]><script language="javascript" type="text/javascript" src="{{ MEDIA_URL }js/excanvas.min.js"></script><![endif]-->
+
+    {% compressed_js 'graph' %}
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            var color = [];
+            {% for a in stats %}
+            color.push("{% color forloop.counter %}");{% endfor %}
+
+            var data = {{ stats|json }};
+            var max_x = 0;
+            var series = [];
+            var options = {
+                xaxis: { mode: "time" },
+                yaxais: { min: 0 },
+                selection: { mode: "x" },
+                colors: color
+            };
+
+            for (var key in data) {
+                var x = data[key][0][0]*1000 - 60*60*24*1000;
+                var y = 0;
+                var tmp = [[x, y]];
+
+                for (var i = 0; i < data[key].length; i++) {
+                    x  = data[key][i][0] * 1000;
+                    y += data[key][i][1];
+
+                    tmp.push([x, y]);
+                    max_x = x > max_x ? x : max_x;
+                }
+                series.push({data: tmp, lines: { show: true, fill: 0.65}});
+            }
+
+            for (var i = 0; i < series.length; i++) {
+                series[i].data.push([max_x, series[i].data[series[i].data.length-1][1]]);
+            }
+
+            $.plot($('#graph'), series, options);
+        });
+    </script>
+{% endblock %}
