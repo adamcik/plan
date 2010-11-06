@@ -95,7 +95,12 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
             continue
 
         # Get course
-        course = Course.objects.get(code=code, semester=semester)
+        try:
+            course = Course.objects.get(code=code, semester=semester)
+        except Course.DoesNotExist:
+            logger.warning("Cout not add %s - %s on %s for %s as course does"
+                " not exist for this semester", db_start, db_end, db_day, code)
+            continue
 
         day = get_day_of_week(db_day)
         start = get_time(db_start)
