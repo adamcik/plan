@@ -517,7 +517,7 @@ def select_course(request, year, semester_type, slug, add=False):
                         'max': settings.TIMETABLE_MAX_COURSES,
                         'slug': slug,
                         'year': year,
-                        'type': semester.get_type_display(),
+                        'type': semester_type,
                         'to_many_subscriptions': to_many_subscriptions,
                     }, RequestContext(request))
 
