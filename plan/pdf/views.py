@@ -119,7 +119,7 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
 
     table_style = _tablestyle()
 
-    data = [[render_title(semester, slug, week)]]
+    data = [[Paragraph(render_title(semester, slug, week), paragraph_style)]]
     data[-1].extend([''] * sum(timetable.span))
     table_style.add('SPAN', (0,0), (-1, 0))
 
