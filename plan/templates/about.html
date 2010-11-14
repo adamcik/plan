@@ -18,39 +18,45 @@
 {% endblock %}
 
 {% block extrascript %}
-    <!--[if IE]><script language="javascript" type="text/javascript" src="{{ MEDIA_URL }js/excanvas.min.js"></script><![endif]-->
+    <!--[if IE]><script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}js/excanvas.min.js"></script><![endif]-->
 
     {% compressed_js 'graph' %}
 
     <script type="text/javascript">
         $(document).ready(function() {
-            var color = [];
+            var fills = [];
             {% for a in stats %}
-            color.push("{% color forloop.counter %}");{% endfor %}
+            fills.push("{% color forloop.counter %}");{% endfor %}
 
-            var data = {{ stats|json }};
+            var stats = {{ stats|json }};
             var max_x = 0;
             var series = [];
             var options = {
                 xaxis: { mode: "time" },
                 yaxais: { min: 0 },
-                selection: { mode: "x" },
-                colors: color
             };
+            var color = "#333";
 
-            for (var key in data) {
-                var x = data[key][0][0]*1000 - 60*60*24*1000;
+            for (var i = 0; i < stats.length; i++) {
+                var x = stats[i][0][0]*1000 - 60*60*24*1000;
                 var y = 0;
-                var tmp = [[x, y]];
+                var data = [[x, y]];
+                var fill = $.color.parse(fills[i]).scale('a', 0.5);
+                var lines = {
+                    show: true,
+                    lineWidth: 1,
+                    fill: true,
+                    fillColor: fill.toString(),
+                }
 
-                for (var i = 0; i < data[key].length; i++) {
-                    x  = data[key][i][0] * 1000;
-                    y += data[key][i][1];
+                for (var j = 0; j < stats[i].length; j++) {
+                    x  = stats[i][j][0] * 1000;
+                    y += stats[i][j][1];
 
-                    tmp.push([x, y]);
+                    data .push([x, y]);
                     max_x = x > max_x ? x : max_x;
                 }
-                series.push({data: tmp, lines: { show: true, fill: 0.65}});
+                series.push({data: data, lines: lines, color: color.toString()});
             }
 
             for (var i = 0; i < series.length; i++) {
