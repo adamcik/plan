@@ -1,6 +1,6 @@
 ipython          # Better interactive python shell
 
-Django >= 1.0    # Django webframework
+Django >= 1.2    # Django webframework
 psycopg2         # Postgres database adapter
 python-memcached # Memcache client library
 
