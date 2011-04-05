@@ -73,19 +73,19 @@ LOCALE_PATHS = [join(BASE_PATH, 'plan', 'locale')]
 TIME_FORMAT = "H:i"
 DATE_FORMAT = "Y-m-d"
 
-# Absolute path to the directory that holds media.
-# Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = BASE_PATH + '/media'
+STATIC_ROOT = BASE_PATH + '/static'
+STATIC_URL = '/static/'
 
-# URL that handles the media served from MEDIA_ROOT. Make sure to use a
-# trailing slash if there is a path component (optional in other cases).
-# Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = '/media/'
+COMPRESS_URL = STATIC_URL
+COMPRESS_ROOT = STATIC_ROOT
 
-# URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
-# trailing slash.
-# Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/media/admin/'
+ADMIN_MEDIA_PREFIX = STATIC_URL + "admin/"
+
+STATICFILES_FINDERS = (
+    'staticfiles.finders.AppDirectoriesFinder',
+    'staticfiles.finders.FileSystemFinder',
+    'staticfiles.finders.LegacyAppDirectoriesFinder',
+)
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -130,6 +130,7 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'south',
     'compress',
+    'staticfiles',
     'plan.common',
     'plan.scrape',
     'plan.ical',
