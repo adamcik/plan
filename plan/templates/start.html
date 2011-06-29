@@ -1,5 +1,6 @@
 {% extends "base_site.html" %}
 {% load color %}
+{% load compress %}
 {% load strip %}
 {% load translation %}
 
@@ -27,10 +28,15 @@
 
 {% block extrastyle %}
     {% if stats %}
-        <style type="text/css">
-            {% for count,course_id,code,name in stats %}.course-{{ course_id }} { background-color: {% color course_id %} }
-            {% endfor %}
-        </style>
+        {% compress css inline %}
+            <style type="text/css">
+                {% for count,course_id,code,name in stats %}
+                    .course-{{ course_id }} {
+                        background-color: {% color course_id %};
+                    }
+                {% endfor %}
+            </style>
+        {% endcompress %}
     {% endif %}
 {% endblock %}
 

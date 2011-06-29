@@ -1,21 +1,31 @@
 {% extends "base_site.html" %}
 
-{% load translation %}
 {% load color %}
-{% load compressed %}
+{% load compress %}
+{% load translation %}
 
 {% block extrastyle %}
     {% if courses %}
-        <style type="text/css">
-          {% for course in courses %}
-            .course-{{ course.id }} { background-color: {% color course.id %} }
-          {% endfor %}
-        </style>
+        {% compress css inline %}
+            <style type="text/css">
+              {% for course in courses %}
+                .course-{{ course.id }} {
+                    background-color: {% color course.id %};
+                }
+              {% endfor %}
+            </style>
+        {% endcompress %}
     {% endif %}
 {% endblock %}
 
 {% block extrascript %}
-    {% compressed_js 'all' %}
+    {% compress js %}
+        <script type="text/javascript" src="{{ STATIC_URL}}js/jquery-1.3.1.min.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL}}js/jquery.autocomplete.min.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL}}js/autocomplete.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL}}js/navigation.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL}}js/advanced.js"></script>
+    {% endcompress %}
     {{ block.super }}
 {% endblock %}
 

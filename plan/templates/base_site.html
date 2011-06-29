@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% load translation %}
-{% load compressed %}
+{% load compress %}
 {% load google %}
 
 {% block title %}
@@ -9,7 +9,11 @@
 {% endblock %}
 
 {% block style %}
-    {% compressed_css 'screen' %}
+    {% compress css %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/reset-fonts-grids.css" />
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/base-min.css" />
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/style.css" />
+    {% endcompress %}
 {% endblock %}
 
 {% block extrahead %}
