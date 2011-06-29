@@ -155,14 +155,14 @@ p.right {
 	padding-left: 18px;
 }
 
-.icon.start, .icon.en-flag, .icon.no-flag {
+.icon.start, .icon.en-flag, .icon.nb-flag {
 	padding-left: 0;
 	padding-right: 18px;
 }
 
 .icon.start   {	background-position: right -650px;  } .large .icon.start   {	background-position: right -649px; }
 .icon.en-flag { background-position: right -1979px; } .large .icon.en-flag { background-position: right -1978px; }
-.icon.no-flag { background-position: right -2090px; } .large .icon.no-flag { background-position: right -2089px; }
+.icon.nb-flag { background-position: right -2090px; } .large .icon.nb-flag { background-position: right -2089px; }
 
 .icon.copy     { background-position: 0 -95px;   } .large .icon.copy     { background-position: 0 -94px;   }
 .icon.warning  { background-position: 0 -206px;  } .large .icon.warning  { background-position: 0 -205px;  }

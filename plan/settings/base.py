@@ -31,8 +31,12 @@ TEMPLATE_DEBUG = DEBUG
 LOGGING_OUTPUT_ENABLED = DEBUG
 LOGGING_LOG_SQL = DEBUG
 
-DATABASE_ENGINE = 'sqlite3'
-DATABASE_NAME = join(BASE_PATH, 'plan.sqlite')
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': join(BASE_PATH, 'plan.sqlite'),
+    },
+}
 
 USE_ETAGS = True
 
@@ -60,7 +64,7 @@ SITE_ID = 1
 USE_I18N = True
 
 LANGUAGES = (
-  ('no', ugettext('Norwegian')),
+  ('nb', ugettext('Norwegian')),
   ('en', ugettext('English')),
 )
 
@@ -69,25 +73,24 @@ LOCALE_PATHS = [join(BASE_PATH, 'plan', 'locale')]
 TIME_FORMAT = "H:i"
 DATE_FORMAT = "Y-m-d"
 
-# Absolute path to the directory that holds media.
-# Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = BASE_PATH + '/media'
+STATIC_ROOT = BASE_PATH + '/static'
+STATIC_URL = '/static/'
 
-# URL that handles the media served from MEDIA_ROOT. Make sure to use a
-# trailing slash if there is a path component (optional in other cases).
-# Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = '/media/'
+COMPRESS_URL = STATIC_URL
+COMPRESS_ROOT = STATIC_ROOT
 
-# URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
-# trailing slash.
-# Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/media/admin/'
+ADMIN_MEDIA_PREFIX = STATIC_URL + "admin/"
+
+STATICFILES_FINDERS = (
+    'staticfiles.finders.AppDirectoriesFinder',
+    'staticfiles.finders.FileSystemFinder',
+    'staticfiles.finders.LegacyAppDirectoriesFinder',
+)
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.load_template_source',
-    'django.template.loaders.app_directories.load_template_source',
-#     'django.template.loaders.eggs.load_template_source',
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -110,11 +113,12 @@ TEMPLATE_DIRS = (
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.core.context_processors.auth',
+    'django.contrib.auth.context_processors.auth',
     'django.core.context_processors.debug',
     'django.core.context_processors.i18n',
     'django.core.context_processors.media',
     'django.core.context_processors.request',
+    'staticfiles.context_processors.static',
     'plan.common.context_processors.source_url',
 )
 
@@ -127,6 +131,7 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'south',
     'compress',
+    'staticfiles',
     'plan.common',
     'plan.scrape',
     'plan.ical',

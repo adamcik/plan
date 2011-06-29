@@ -61,6 +61,7 @@ def server_error(request, template_name='500.html'):
     t = loader.get_template(template_name)
 
     context = Context({'MEDIA_URL': settings.MEDIA_URL,
+                       'STATIC_URL': settings.STATIC_URL,
                        'SOURCE_URL': settings.SOURCE_URL})
 
     return HttpResponseServerError(t.render(context))

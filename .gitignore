@@ -3,3 +3,8 @@
 plan/settings/local.py
 pip-log.txt
 env
+bin
+distribute-*.tar.gz
+include
+lib
+src

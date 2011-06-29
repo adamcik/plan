@@ -46,7 +46,7 @@ def get_weeks(values):
         if '-' in week:
             x, y = week.split('-')
             weeks.extend(range(int(x), int(y)+1))
-        else:
+        elif week.strip():
             weeks.append(int(week.replace(',', '')))
     return weeks
 

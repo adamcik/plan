@@ -1,6 +1,6 @@
 ipython          # Better interactive python shell
 
-Django >= 1.0    # Django webframework
+Django >= 1.2    # Django webframework
 psycopg2         # Postgres database adapter
 python-memcached # Memcache client library
 
@@ -11,6 +11,8 @@ south >= 0.7     # Database migrations
 lxml             # Web scraping of data
 sphinx           # To build docs
 
+django-staticfiles # Better handling of static media for django apps
+
 #django-compress  # CSS and JS compression
 # Use github version to get COMPRESS_VERSION_REMOVE_OLD support
--e  git://github.com/bryanchow/django-compress.git#egg=compress
+-e git://github.com/cyberdelia/django-compress.git#egg=compress
