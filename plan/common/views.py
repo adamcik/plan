@@ -608,7 +608,7 @@ def about(request):
     cursor = connection.cursor()
     cursor.execute('''
         SELECT COUNT(*), date, semester_id FROM (
-            SELECT EXTRACT(EPOCH FROM date_trunc('day', min(s.added))) AS date,
+            SELECT EXTRACT(EPOCH FROM date_trunc('day', min(s.added))) * 1000 AS date,
                 s.student_id, c.semester_id
             FROM common_subscription s
             JOIN common_course c ON (c.id = s.course_id)
@@ -618,16 +618,31 @@ def about(request):
 
     last_semester = None
     data = []
+    x = 0
+    y = 0
+    max_x = 0
+
     for count, date, semester in cursor.fetchall():
         if last_semester != semester:
             last_semester = semester
-            data.append([])
-        data[-1].append(map(int, [date, count]))
+            x = date - 60*60*24*1000
+            y = 0
+            data.append([(x,y)])
 
-    response = render_to_response('about.html', {
-            'stats': data,
-            'color_map': ColorMap(hex=True),
-        }, RequestContext(request))
+        x  = date
+        y += count
+
+        data[-1].append((x, y))
+
+        if x > max_x:
+            max_x = x
+
+    for d in data:
+        d.append((max_x, d[-1][1]))
+
+    response = render_to_response('about.html',
+        {'data': data, 'color_map': ColorMap(hex=True)},
+        RequestContext(request))
 
     request.cache.set('about', response,
         settings.CACHE_TIME_ABOUT, realm=False)
