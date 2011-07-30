@@ -26,6 +26,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
 from django.utils.html import escape
 from django.utils.text import truncate_words
+from django.db import connection
 
 from plan.common.models import Course, Deadline, Exam, Group, \
         Lecture, Semester, Subscription, Room, Lecturer, Week, Student
@@ -597,5 +598,53 @@ def list_courses(request, year, semester_type, slug):
 
     else:
         response = HttpResponse(decompress(content))
+
+    return response
+
+def about(request):
+    response = request.cache.get('about', realm=False)
+    if response:
+        return response
+    cursor = connection.cursor()
+    cursor.execute('''
+        SELECT COUNT(*), date, semester_id FROM (
+            SELECT EXTRACT(EPOCH FROM date_trunc('day', min(s.added))) * 1000 AS date,
+                s.student_id, c.semester_id
+            FROM common_subscription s
+            JOIN common_course c ON (c.id = s.course_id)
+            GROUP BY s.student_id, c.semester_id
+        ) AS foo GROUP BY date, semester_id ORDER by semester_id, date;
+        ''')
+
+    last_semester = None
+    data = []
+    x = 0
+    y = 0
+    max_x = 0
+
+    for count, date, semester in cursor.fetchall():
+        if last_semester != semester:
+            last_semester = semester
+            x = date - 60*60*24*1000
+            y = 0
+            data.append([(x,y)])
+
+        x  = date
+        y += count
+
+        data[-1].append((x, y))
+
+        if x > max_x:
+            max_x = x
+
+    for d in data:
+        d.append((max_x, d[-1][1]))
+
+    response = render_to_response('about.html',
+        {'data': data, 'color_map': ColorMap(hex=True)},
+        RequestContext(request))
+
+    request.cache.set('about', response,
+        settings.CACHE_TIME_ABOUT, realm=False)
 
     return response

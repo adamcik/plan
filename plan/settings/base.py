@@ -181,6 +181,7 @@ CACHE_TIME_SCHECULDE = 60*60*24*7   #  1w
 CACHE_TIME_FRONTPAGE = 10*60        # 10m
 CACHE_TIME_HELP      = 2*60         #  2m
 CACHE_TIME_AJAX      = 60*60*24*7   #  1w
+CACHE_TIME_ABOUT     = 60*60*24*7   #  1w
 
 # Hostname to be used in UID of ical events, should be a constant service-name
 # as UID changes will trigger email notices for new events in some cases.
