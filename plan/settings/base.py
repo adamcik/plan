@@ -73,11 +73,9 @@ LOCALE_PATHS = [join(BASE_PATH, 'plan', 'locale')]
 TIME_FORMAT = "H:i"
 DATE_FORMAT = "Y-m-d"
 
-STATIC_ROOT = BASE_PATH + '/static'
+MEDIA_ROOT = join(BASE_PATH, 'media')
+STATIC_ROOT = join(BASE_PATH, 'static')
 STATIC_URL = '/static/'
-
-COMPRESS_URL = STATIC_URL
-COMPRESS_ROOT = STATIC_ROOT
 
 ADMIN_MEDIA_PREFIX = STATIC_URL + "admin/"
 
@@ -85,6 +83,21 @@ STATICFILES_FINDERS = (
     'staticfiles.finders.AppDirectoriesFinder',
     'staticfiles.finders.FileSystemFinder',
     'staticfiles.finders.LegacyAppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
+)
+
+STATICFILES_DIRS = (MEDIA_ROOT,)
+
+COMPRESS = True
+
+COMPRESS_OFFLINE = True
+
+if DEBUG:
+    COMPRESS_DEBUG_TOGGLE = 'no-cache'
+
+COMPRESS_CSS_FILTERS = (
+    'compressor.filters.css_default.CssAbsoluteFilter',
+    'compressor.filters.cssmin.CSSMinFilter',
 )
 
 # List of callables that know how to import templates from various sources.
@@ -129,9 +142,6 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.contenttypes',
     'django.contrib.contenttypes',
-    'south',
-    'compress',
-    'staticfiles',
     'plan.common',
     'plan.scrape',
     'plan.ical',
@@ -139,40 +149,12 @@ INSTALLED_APPS = (
     'plan.cache',
     'plan.translation',
     'plan.google',
+    'south',
+    'compressor',
+    'staticfiles',
 )
 
 SKIP_SOUTH_TESTS = True
-
-COMPRESS = True
-COMPRESS_VERSION = True
-COMPRESS_VERSION_REMOVE_OLD = False
-COMPRESS_AUTO = False
-COMPRESS_CSS_FILTERS = None
-
-COMPRESS_CSS = {
-    'screen': {
-        'source_filenames': ('css/reset-fonts-grids.css',
-                             'css/base-min.css',
-                             'css/style.css',),
-        'output_filename': 'compressed/screen.r?.css',
-    },
-}
-COMPRESS_JS = {
-    'all': {
-        'source_filenames': ('js/jquery-1.3.1.min.js',
-                             'js/jquery.autocomplete.min.js',
-                             'js/autocomplete.js',
-                             'js/navigation.js',
-                             'js/advanced.js'),
-        'output_filename': 'compressed/all.r?.js',
-    },
-
-    'graph': {
-        'source_filenames': ('js/jquery-1.3.1.min.js',
-                             'js/jquery.flot.min.js',),
-        'output_filename': 'compressed/graph.r?.js',
-    },
-}
 
 TIMETABLE_COLORS = [
     '#B3E2CD',
