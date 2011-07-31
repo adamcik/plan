@@ -12,4 +12,4 @@ lxml             # Web scraping of data
 sphinx           # To build docs
 
 django-staticfiles # Better handling of static media for django apps
-django_compressor  # Sane handling of compressing js/css
+django-compressor  # Sane handling of compressing js/css
