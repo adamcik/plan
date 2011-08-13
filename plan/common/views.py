@@ -629,7 +629,7 @@ def about(request):
             y = 0
             data.append([(x,y)])
 
-        x  = date
+        x  = int(date)
         y += count
 
         data[-1].append((x, y))
