@@ -16,17 +16,10 @@
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-import urllib
-from lxml.html import parse
 
 from plan.common.models import Course, Semester
 
 logger = logging.getLogger('scrape.sit')
-
-semester_mapping = {
-    Semester.FALL: 'Autumn',
-    Semester.SPRING: 'Spring',
-}
 
 def update_syllabus(year, semester, match=None):
     courses = Course.objects.filter(semester__type=semester,
@@ -35,22 +28,10 @@ def update_syllabus(year, semester, match=None):
     if match:
         courses = courses.filter(code__startswith=match)
 
+    base_url = 'http://sittapir.sit.no/sok.aspx?q=%s'
+
     for course in courses.filter(syllabus=''):
-        url = 'http://sittapir.sit.no/pensum/NTNU/%s/%s/%s' % (
-            year, semester_mapping[semester],
-            urllib.quote(course.code.encode('utf-8')))
-
-        logger.info('Trying %s', url)
-
-        try:
-            root = parse(url).getroot()
-        except IOError, e:
-            logger.warning('Parse failed for %s: %s', course.code, e)
-            continue
-
-        if not root.cssselect('#pensumliste .produkter_wrapper'):
-            logger.warning("Didn't find any tables in results for %s", course.code)
-            continue
-
-        course.syllabus = url
+        course.syllabus = base_url % course.code
         course.save()
+
+        logger.info(course.syllabus)
