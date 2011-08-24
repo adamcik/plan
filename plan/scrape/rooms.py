@@ -48,6 +48,10 @@ def update_rooms():
             # FIXME blacklist check?
             if 'plantegning' in link:
                 continue
+            if 'ntnu.edu' in link:
+                continue
+            if not link.startswith('http'):
+                continue
 
             if room not in room_links:
                 room_links[room] = []
