@@ -75,8 +75,13 @@ class Command(BaseCommand):
                 if buffer:
                     print ' | '.join(buffer)
 
+                lecutre_count = Lecture.objects.filter(
+                    course__semester__year__exact=semester.year,
+                    course__semester__type=semester.type).count()
+
                 print '---------------------'
-                print '%d lectures' % len(to_delete)
+                print 'Lectures left %d' % (lecutre_count - len(to_delete))
+                print 'Going to delete %d lectures' % len(to_delete)
 
                 if options['delete'] or raw_input('Delete? [y/N] ').lower() == 'y':
                     to_delete.delete()
