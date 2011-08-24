@@ -18,6 +18,8 @@
 import logging
 from dateutil.parser import parse
 
+from django.utils.functional import memoize
+
 from plan.common.models import (Lecture, Lecturer, Room, LectureType,
     Group, Week)
 
@@ -50,6 +52,23 @@ def get_weeks(values):
             weeks.append(int(week.replace(',', '')))
     return weeks
 
+def get_or_create_lecture_type(name):
+    return LectureType.objects.get_or_create(name=name)[0]
+
+def get_or_create_room(name):
+    return Room.objects.get_or_create(name=name)[0]
+
+def get_or_create_lecturer(name):
+    return Lecturer.objects.get_or_create(name=name)[0]
+
+def get_or_create_group(name):
+    return Group.objects.get_or_create(name=name)[0]
+
+get_or_create_lecture_type= memoize(get_or_create_lecture_type, {}, 1)
+get_or_create_room = memoize(get_or_create_room, {}, 1)
+get_or_create_lecturer = memoize(get_or_create_lecturer, {}, 1)
+get_or_create_group = memoize(get_or_create_group, {}, 1)
+
 def process_lectures(data):
     added_lectures = []
 
@@ -62,21 +81,21 @@ def process_lectures(data):
         groups = set()
 
         if row['type']:
-            lecture_type, created = LectureType.objects.get_or_create(name=row['type'])
+            lecture_type = get_or_create_lecture_type(row['type'])
 
-        for room in row['rooms']:
-            room, created = Room.objects.get_or_create(name=room)
+        for name in row['rooms']:
+            room = get_or_create_room(name)
             rooms.add(room)
 
-        for lecturer in row['lecturers']:
-            lecturer, created = Lecturer.objects.get_or_create(name=lecturer)
+        for name in row['lecturers']:
+            lecturer = get_or_create_lecturer(name)
             lecturers.add(lecturer)
 
-        for group in row['groups']:
-            group, created = Group.objects.get_or_create(name=group)
+        for name in row['groups']:
+            group = get_or_create_group(name)
             groups.add(group)
         if not groups:
-            group, created = Group.objects.get_or_create(name=Group.DEFAULT)
+            group = get_or_create_group(Group.DEFAULT)
             groups = [group]
 
         lecture_kwargs = {
@@ -92,7 +111,7 @@ def process_lectures(data):
 
         lectures = Lecture.objects.filter(**lecture_kwargs).order_by('id')
         lectures = list(lectures.exclude(id__in=added_lectures))
-        other_set = set(map(lambda g: g.id, groups))
+        other_set = set([g.id for g in groups])
 
         for lecture in lectures:
             # FIXME this handling does strictly speaking work, but it is not
