@@ -23,24 +23,12 @@ import re
 from decimal import Decimal
 
 from django.conf import settings
+from django.db import connections
 
 from plan.common.models import Course, Lecture, Semester
 from plan.scrape.lectures import get_day_of_week, process_lectures, get_time, get_weeks
 
 logger = logging.getLogger('scrape.db')
-
-def _connection():
-    import MySQLdb
-
-    mysql_setings = {
-        'db': settings.MYSQL_NAME,
-        'host': settings.MYSQL_HOST,
-        'user': settings.MYSQL_USER,
-        'passwd': settings.MYSQL_PASSWORD,
-        'use_unicode': True,
-    }
-
-    return MySQLdb.connect(**mysql_setings)
 
 def update_lectures(year, semester_type, prefix=None, matches=None):
     '''Retrive all lectures for a given course'''
@@ -51,8 +39,7 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
 
     logger.debug('Using prefix: %s', prefix)
 
-    db = _connection()
-    c = db.cursor()
+    c = connections['ntnu'].cursor()
 
     query = """
             SELECT emnekode,typenavn,dag,start,slutt,uke,romnavn,larer,aktkode
@@ -116,15 +103,15 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
         lecturers = lecturer.split('#')
 
         groups = set()
-        c2 = db.cursor()
+        c2 = connections['ntnu'].cursor()
         c2.execute("""
                 SELECT DISTINCT asp.studieprogramkode
                 FROM %s_akt_studieprogram asp,studieprogram sp
                 WHERE asp.studieprogramkode=sp.studieprogram_kode
                 AND asp.aktkode = %%s
             """ % prefix, groupcode)
-        for group in c2.fetchall():
-            groups.add(group)
+        for row in c2.fetchall():
+            groups.add(row[0])
 
         data.append({
             'course': course,
@@ -137,8 +124,6 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
             'lecturers': filter(bool, lecturers),
             'groups': filter(bool, groups),
         })
-
-    db.close()
 
     added_lectures = process_lectures(data)
     to_delete = Lecture.objects.exclude(id__in=added_lectures)
@@ -157,8 +142,7 @@ def update_courses(year, semester_type, prefix=None):
 
     prefix = prefix or semester.prefix
 
-    db = _connection()
-    c = db.cursor()
+    c = connections['ntnu'].cursor()
 
     if year > 2009 or (year == 2009 and semester_type == Semester.FALL):
         vekt = 'en_navn'
@@ -210,5 +194,3 @@ def update_courses(year, semester_type, prefix=None):
             logger.info("Added course %s" % course.code)
         else:
             logger.info("Updated course %s" % course.code)
-
-    db.close()
