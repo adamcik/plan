@@ -155,7 +155,7 @@ def update_courses(year, semester_type, prefix=None):
     for code, name, points in c.fetchall():
         code = code.strip().upper()
 
-        if not code:
+        if not code or '-' not in code:
             continue
 
         code, version = code.split('-', 2)[:2]
