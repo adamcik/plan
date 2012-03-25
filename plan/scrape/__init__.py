@@ -15,21 +15,17 @@
 # You should have received a copy of the Affero GNU General Public
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
 import urllib
 
 from django.conf import settings
-from django.core.cache import get_cache
-
-cache = get_cache(
-    'file://%s' % os.path.join(settings.BASE_PATH, 'cache'))
+from django.core import cache
 
 def fetch_url(url):
-    data = cache.get(url)
+    """Act as "proxy" for scraped pages, using cache when possible."""
+    scrape_cache = cache.get_cache('webscraper')
 
-    if data:
-        return data
-
-    data = urllib.urlopen(url).read()
-    cache.set(url, data, 3600*31)
+    data = scrape_cache.get(url)
+    if not data:
+        data = urllib.urlopen(url).read()
+        scrape_cache.set(url, data)
     return data

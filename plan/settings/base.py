@@ -175,7 +175,12 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'KEY_PREFIX': '',
-    }
+    },
+    'webscraper': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': join(BASE_PATH, 'cache'),
+        'TIMEOUT': 60*60*24,
+    },
 }
 
 CACHE_TIME_REALM     = 60*60*24*7*4 #  4w
