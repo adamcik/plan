@@ -77,12 +77,9 @@ MEDIA_ROOT = join(BASE_PATH, 'media')
 STATIC_ROOT = join(BASE_PATH, 'static')
 STATIC_URL = '/static/'
 
-ADMIN_MEDIA_PREFIX = STATIC_URL + "admin/"
-
 STATICFILES_FINDERS = (
-    'staticfiles.finders.AppDirectoriesFinder',
-    'staticfiles.finders.FileSystemFinder',
-    'staticfiles.finders.LegacyAppDirectoriesFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'django.contrib.staticfiles.finders.FileSystemFinder',
     'compressor.finders.CompressorFinder',
 )
 
@@ -138,10 +135,10 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
+    'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
-    'django.contrib.contenttypes',
-    'django.contrib.contenttypes',
+    'django.contrib.staticfiles',
     'plan.common',
     'plan.scrape',
     'plan.ical',
@@ -151,7 +148,6 @@ INSTALLED_APPS = (
     'plan.google',
     'south',
     'compressor',
-    'staticfiles',
 )
 
 # Don't run any south tests, and don't use south for migration in tests.

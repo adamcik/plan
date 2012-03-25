@@ -11,5 +11,4 @@ south >= 0.7     # Database migrations
 lxml             # Web scraping of data
 sphinx           # To build docs
 
-django-staticfiles # Better handling of static media for django apps
 django-compressor  # Sane handling of compressing js/css
