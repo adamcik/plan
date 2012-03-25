@@ -2,9 +2,11 @@
 {% load get %}
 {% load i18n %}
 
+{% load url from future %}
+
 {% if lectures %}
     <h2>{% trans "Lecture list" %}</h2>
-    <form action="{% url change-lectures semester.year,semester.type,slug %}" method="post">
+    <form action="{% url 'change-lectures' semester.year semester.type slug %}" method="post">
         <table id="lectures">
             <thead>
                 <tr>
@@ -53,7 +55,7 @@
             {% if advanced %}
                 <button type="submit"><span class="icon hide">{% trans "Hide selected lectures" %}</span></button>
             {% else %}
-                {% url schedule-advanced semester.year,semester.type,slug as advanced_url %}
+                {% url 'schedule-advanced' semester.year semester.type slug as advanced_url %}
                 {% blocktrans %}
                     Go to <a href="{{ advanced_url }}#lectures">advanced options</a>
                     to toggle which lectures to hide.

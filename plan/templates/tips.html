@@ -1,13 +1,15 @@
 {% load i18n %}
 
-{% url shortcut slug as shortcut_url %}
-{% url course-list semester.year,semester.type,slug as course_list_url %}
-{% url schedule-advanced semester.year,semester.type,slug as adavanced_url %}
+{% load url from future %}
 
-{% url schedule-ical semester.year,semester.type,slug,"lectures" as ical_lectures_url%}
-{% url schedule-ical semester.year,semester.type,slug,"exams" as ical_exams_url %}
-{% url schedule-ical semester.year,semester.type,slug,"deadlines" as ical_deadlines_url %}
-{% url schedule-ical semester.year,semester.type,slug as ical_all_url %}
+{% url 'shortcut' slug as shortcut_url %}
+{% url 'course-list' semester.year semester.type slug as course_list_url %}
+{% url 'schedule-advanced' semester.year semester.type slug as adavanced_url %}
+
+{% url 'schedule-ical' semester.year semester.type slug "lectures" as ical_lectures_url%}
+{% url 'schedule-ical' semester.year semester.type slug "exams" as ical_exams_url %}
+{% url 'schedule-ical' semester.year semester.type slug "deadlines" as ical_deadlines_url %}
+{% url 'schedule-ical' semester.year semester.type slug as ical_all_url %}
 
 <h2 id="tips" class="noprint">{% trans "Tips" %}</h2>
 <div class="yui-g noprint">

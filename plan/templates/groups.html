@@ -1,6 +1,8 @@
 {% load i18n %}
 
-<form action="{% url change-groups semester.year,semester.type,slug %}" method="post" class="noprint">
+{% load url from future %}
+
+<form action="{% url 'change-groups' semester.year semester.type slug %}" method="post" class="noprint">
     {% if advanced %}
         <h2 id="groups">{% trans "Change groups" %}</h2>
     {% endif %}

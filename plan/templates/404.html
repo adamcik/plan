@@ -2,6 +2,8 @@
 
 {% load i18n %}
 
+{% load url from future %}
+
 {% block title %}
     {{ block.super }} - {% trans "Page not found" %}
 {% endblock %}
@@ -13,7 +15,7 @@
 {% block bd %}
     <div id="help">
         <p class="large">
-            {% url frontpage as frontpage_url %}
+            {% url 'frontpage' as frontpage_url %}
             {% blocktrans with request_path|default:"-" as path %}
                 <code>{{ path }}</code> could not be found. Try going back or
                 starting over from the <a href="{{ frontpage_url }}">frontpage</a>.
