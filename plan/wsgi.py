@@ -1,10 +1,19 @@
-import os, sys
+import os
+import sys
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
+"""WSGI config for plan project.
 
-if 'DJANGO_SETTINGS_MODULE' not in os.environ:
-    os.environ['DJANGO_SETTINGS_MODULE'] = 'plan.settings'
+This module contains the WSGI application used by Django's development server
+and any production WSGI deployments. It should expose a module-level variable
+named ``application``. Django's ``runserver`` and ``runfcgi`` commands discover
+this application via the ``WSGI_APPLICATION`` setting.
+"""
 
-import django.core.handlers.wsgi
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "plan.settings")
 
-application = django.core.handlers.wsgi.WSGIHandler()
+project_dir = os.path.dirname(os.path.abspath(__file__)) + '/..'
+if project_dir not in sys.path:
+    sys.path.append(project_dir)
+
+from django.core.wsgi import get_wsgi_application
+application = get_wsgi_application()
