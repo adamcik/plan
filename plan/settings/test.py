@@ -19,5 +19,10 @@
 from plan.settings.base import *
 
 DATABASE_ENGINE = 'sqlite3'
-CACHE_BACKEND = 'locmem://'
-CACHE_PREFIX = 'test'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'KEY_PREFIX': 'test',
+    }
+}

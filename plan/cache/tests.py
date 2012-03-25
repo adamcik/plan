@@ -23,7 +23,7 @@ from plan.cache import cache
 
 class NotUsingDummyCache(TestCase):
     def testNotUsingDummyCache(self):
-        self.assertEquals(False, 'dummy' in settings.CACHE_BACKEND)
+        self.assertEquals(False, 'dummy' in settings.CACHES['default']['BACKEND'])
 
         self.assertEquals(None, cache.get('test-value'))
 

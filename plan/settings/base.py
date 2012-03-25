@@ -171,8 +171,12 @@ TIMETABLE_MAX_COURSES = 20
 # Assume course codes must end with digits
 TIMETABLE_VALID_COURSE_NAMES = r'^[^0-9]+[0-9]+$'
 
-CACHE_BACKEND = 'locmem://'
-CACHE_PREFIX = ''
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'KEY_PREFIX': '',
+    }
+}
 
 CACHE_TIME_REALM     = 60*60*24*7*4 #  4w
 CACHE_TIME_SCHECULDE = 60*60*24*7   #  1w

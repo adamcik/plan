@@ -33,7 +33,7 @@ from plan.common.templatetags.slugify import slugify
 logger = logging.getLogger('plan.common.cache')
 
 def get_realm(semester, slug=None):
-    args = [settings.CACHE_PREFIX, semester.year, semester.type]
+    args = [semester.year, semester.type]
     if slug:
         args.append(slug)
 
@@ -62,9 +62,6 @@ class CacheClass(base_cache.BaseCache):
 
         if realm_enabled and self.realm:
             args.insert(0, self._get_realm_prefix(self.realm))
-
-        if settings.CACHE_PREFIX:
-            args.insert(0, settings.CACHE_PREFIX)
 
         return ':'.join(args)
 
