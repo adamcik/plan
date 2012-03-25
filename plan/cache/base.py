@@ -16,16 +16,17 @@
 # You should have received a copy of the Affero GNU General Public
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
-import logging
-import zlib
 import base64
-from uuid import uuid4
+import logging
+import time
+import zlib
 
 from django.conf import settings
-from django.utils.translation import get_language
-from django.utils.http import int_to_base36
+from django.utils import http
+from django.utils import translation
+
 from django.core.cache import cache as django_cache
-from django.core.cache.backends.base import  BaseCache
+from django.core.cache.backends import base as base_cache
 
 from plan.common.templatetags.slugify import slugify
 
@@ -49,7 +50,7 @@ def compress(value):
 def decompress(value):
     return zlib.decompress(base64.b64decode(value))
 
-class CacheClass(BaseCache):
+class CacheClass(base_cache.BaseCache):
     def __init__(self, *args, **kwargs):
         if hasattr(django_cache, 'close'):
             self.close = django_cache.close
@@ -57,7 +58,7 @@ class CacheClass(BaseCache):
         self.bypass  = kwargs.pop('bypass', False)
 
     def _get_key(self, key, realm_enabled):
-        args = [key, get_language()]
+        args = [key, translation.get_language()]
 
         if realm_enabled and self.realm:
             args.insert(0, self._get_realm_prefix(self.realm))
@@ -74,7 +75,7 @@ class CacheClass(BaseCache):
         if prefix:
             return prefix
 
-        prefix = int_to_base36(uuid4().int)
+        prefix = http.int_to_base36(int(time.time() * 1000))
         django_cache.set(realm, prefix, settings.CACHE_TIME_REALM)
         logger.debug('Setting realm: %s' % realm)
 
