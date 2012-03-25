@@ -68,7 +68,7 @@ LANGUAGES = (
   ('en', ugettext('English')),
 )
 
-LOCALE_PATHS = [join(BASE_PATH, 'plan', 'locale')]
+LOCALE_PATHS = [join(BASE_PATH, 'locale')]
 
 TIME_FORMAT = "H:i"
 DATE_FORMAT = "Y-m-d"
