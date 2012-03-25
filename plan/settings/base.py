@@ -154,7 +154,9 @@ INSTALLED_APPS = (
     'staticfiles',
 )
 
+# Don't run any south tests, and don't use south for migration in tests.
 SKIP_SOUTH_TESTS = True
+SOUTH_TESTS_MIGRATE = False
 
 TIMETABLE_COLORS = [
     '#B3E2CD',
