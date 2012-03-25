@@ -1,6 +1,7 @@
 {% extends "base_site.html" %}
 
 {% load i18n %}
+{% load static %}
 
 {% load url from future %}
 
@@ -19,7 +20,7 @@
             </p>
         {% endif %}
         {% if courses %}
-            <p class="large"><img alt="" src="{{ STATIC_URL }}gfx/error.png" />
+            <p class="large"><img alt="" src="{% static 'gfx/error.png' %}" />
                 {% trans "Adding the following courses failed:" %}
             </p>
             <ul>

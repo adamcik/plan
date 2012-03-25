@@ -3,6 +3,7 @@
 {% load color %}
 {% load compress %}
 {% load i18n %}
+{% load static %}
 {% load title %}
 
 {% load url from future %}
@@ -33,11 +34,11 @@
         var autocomplete_url = "{% url 'course-query' semester.year semester.type %}";
     </script>
     {% compress js %}
-        <script type="text/javascript" src="{{ STATIC_URL}}js/jquery-1.3.1.min.js"></script>
-        <script type="text/javascript" src="{{ STATIC_URL}}js/jquery.autocomplete.min.js"></script>
-        <script type="text/javascript" src="{{ STATIC_URL}}js/autocomplete.js"></script>
-        <script type="text/javascript" src="{{ STATIC_URL}}js/navigation.js"></script>
-        <script type="text/javascript" src="{{ STATIC_URL}}js/advanced.js"></script>
+        <script type="text/javascript" src="{% static 'js/jquery-1.3.1.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/jquery.autocomplete.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/autocomplete.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/navigation.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/advanced.js' %}"></script>
     {% endcompress %}
     {{ block.super }}
 {% endblock %}

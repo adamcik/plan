@@ -3,6 +3,7 @@
 {% load compress %}
 {% load google %}
 {% load i18n %}
+{% load static %}
 
 {% block title %}
     {% trans "Timetable generator for NTNU students" %}
@@ -10,14 +11,14 @@
 
 {% block style %}
     {% compress css %}
-        <link rel="stylesheet" href="{{ STATIC_URL }}css/reset-fonts-grids.css" />
-        <link rel="stylesheet" href="{{ STATIC_URL }}css/base-min.css" />
-        <link rel="stylesheet" href="{{ STATIC_URL }}css/style.css" />
+        <link rel="stylesheet" href="{% static 'css/reset-fonts-grids.css' %}" />
+        <link rel="stylesheet" href="{% static 'css/base-min.css' %}" />
+        <link rel="stylesheet" href="{% static 'css/style.css' %}" />
     {% endcompress %}
 {% endblock %}
 
 {% block extrahead %}
-    <link rel="icon" type="image/png" href="{{ STATIC_URL }}gfx/time.png" />
+    <link rel="icon" type="image/png" href="{% static 'gfx/time.png' %}" />
 {% endblock %}
 
 {% block extrascript %}
