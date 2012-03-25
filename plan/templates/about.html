@@ -6,7 +6,7 @@
 
 {% block title %}
     {# {% trans "About the Timetable generator for NTNU students" %} #}
-    {% trans "Number of timetables over time" %}
+    {% trans "Number of timetables" %}
 {% endblock %}
 
 {% block hd %}
@@ -66,14 +66,15 @@ consectetur adipiscing elit.
         <script type="text/javascript" src="{{ STATIC_URL}}js/jquery-1.3.1.min.js"></script>
         <script type="text/javascript" src="{{ STATIC_URL}}js/jquery.flot.min.js"></script>
     {% endcompress %}
+    <script type="text/javascript">
+        var data = {{ data|json }};
+        var fills = [];
+        {% for a in data %}
+        fills.push("{% color forloop.counter %}");{% endfor %}
+    </script>
     {% compress js inline %}
         <script type="text/javascript">
             $(document).ready(function() {
-                var fills = [];
-                {% for a in data %}
-                fills.push("{% color forloop.counter %}");{% endfor %}
-
-                var data = {{ data|json }};
                 var series = [];
                 var options = {
                     xaxis: { mode: "time" },
