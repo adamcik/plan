@@ -23,14 +23,23 @@ import socket
 # http://docs.djangoproject.com/en/1.0/topics/i18n/#id2
 ugettext = lambda s: s
 
+# -- Base settings:
 BASE_PATH = realpath(join(dirname(__file__), '..', '..'))
+SITE_ID = 1
 
+# -- Debug settings:
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-LOGGING_OUTPUT_ENABLED = DEBUG
-LOGGING_LOG_SQL = DEBUG
+# -- Admin settings:
+ADMINS = (
+    # ('Your Name', 'your_email@domain.com'),
+)
 
+# -- Url settings:
+ROOT_URLCONF = 'plan.urls'
+
+# -- Database settings:
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -38,30 +47,16 @@ DATABASES = {
     },
 }
 
-USE_ETAGS = True
-
-ADMINS = (
-    # ('Your Name', 'your_email@domain.com'),
-)
-
-MANAGERS = ADMINS
-
-# Local time zone for this installation. Choices can be found here:
-# http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
-# although not all choices may be avilable on all operating systems.
-# If running in a Windows environment this must be set to the same as your
-# system time zone.
+# -- Time settings:
 TIME_ZONE = 'Europe/Oslo'
 
-# Language code for this installation. All choices can be found here:
-# http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'en'
+TIME_FORMAT = "H:i"
+DATE_FORMAT = "Y-m-d"
 
-SITE_ID = 1
-
-# If you set this to False, Django will make some optimizations so as not
-# to load the internationalization machinery.
+# -- Internationalization settings:
 USE_I18N = True
+
+LANGUAGE_CODE = 'en'
 
 LANGUAGES = (
   ('nb', ugettext('Norwegian')),
@@ -70,39 +65,7 @@ LANGUAGES = (
 
 LOCALE_PATHS = [join(BASE_PATH, 'locale')]
 
-TIME_FORMAT = "H:i"
-DATE_FORMAT = "Y-m-d"
-
-MEDIA_ROOT = join(BASE_PATH, 'media')
-STATIC_ROOT = join(BASE_PATH, 'static')
-STATIC_URL = '/static/'
-
-STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'compressor.finders.CompressorFinder',
-)
-
-STATICFILES_DIRS = (MEDIA_ROOT,)
-
-COMPRESS = True
-
-COMPRESS_OFFLINE = True
-
-if DEBUG:
-    COMPRESS_DEBUG_TOGGLE = 'no-cache'
-
-COMPRESS_CSS_FILTERS = (
-    'compressor.filters.css_default.CssAbsoluteFilter',
-    'compressor.filters.cssmin.CSSMinFilter',
-)
-
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-)
-
+# -- App and midleware settings:
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -111,21 +74,6 @@ MIDDLEWARE_CLASSES = (
     'plan.cache.middleware.CacheMiddleware',
     'plan.common.middleware.UserBasedExceptionMiddleware',
     'plan.common.middleware.PlainContentMiddleware',
-)
-
-ROOT_URLCONF = 'plan.urls'
-
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or
-    # "C:/www/django/templates".  Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    BASE_PATH + '/plan/templates',
-)
-
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.contrib.auth.context_processors.auth',
-    'django.core.context_processors.request',
-    'plan.common.context_processors.source_url',
 )
 
 INSTALLED_APPS = (
@@ -145,10 +93,70 @@ INSTALLED_APPS = (
     'compressor',
 )
 
-# Don't run any south tests, and don't use south for migration in tests.
-SKIP_SOUTH_TESTS = True
-SOUTH_TESTS_MIGRATE = False
+# -- Template settings:
+# List of callables that know how to import templates from various sources.
+TEMPLATE_LOADERS = (
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
+)
 
+TEMPLATE_DIRS = (
+    # Put strings here, like "/home/html/django_templates" or
+    # "C:/www/django/templates".  Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
+    BASE_PATH + '/plan/templates',
+)
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.request',
+    'plan.common.context_processors.source_url',
+)
+
+# -- Cache settings:
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'KEY_PREFIX': '',
+    },
+    'webscraper': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': join(BASE_PATH, 'cache'),
+        'TIMEOUT': 60*60*24,
+    },
+}
+
+# -- Statifiles settings:
+MEDIA_ROOT = join(BASE_PATH, 'media')
+STATIC_ROOT = join(BASE_PATH, 'static')
+STATIC_URL = '/static/'
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'compressor.finders.CompressorFinder',
+)
+
+STATICFILES_DIRS = (MEDIA_ROOT,)
+
+# -- Django compress settings:
+COMPRESS = True
+
+COMPRESS_OFFLINE = True
+
+if DEBUG:
+    COMPRESS_DEBUG_TOGGLE = 'no-cache'
+
+COMPRESS_CSS_FILTERS = (
+    'compressor.filters.css_default.CssAbsoluteFilter',
+    'compressor.filters.cssmin.CSSMinFilter',
+)
+
+# -- South settings:
+SKIP_SOUTH_TESTS = True      # Ignore south tests
+SOUTH_TESTS_MIGRATE = False  # Don't use south migrations during tests.
+
+# -- plan specific settings:
 TIMETABLE_COLORS = [
     '#B3E2CD',
     '#FDCDAC',
@@ -165,18 +173,6 @@ TIMETABLE_MAX_COURSES = 20
 
 # Assume course codes must end with digits
 TIMETABLE_VALID_COURSE_NAMES = r'^[^0-9]+[0-9]+$'
-
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'KEY_PREFIX': '',
-    },
-    'webscraper': {
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': join(BASE_PATH, 'cache'),
-        'TIMEOUT': 60*60*24,
-    },
-}
 
 CACHE_TIME_REALM     = 60*60*24*7*4 #  4w
 CACHE_TIME_SCHECULDE = 60*60*24*7   #  1w
