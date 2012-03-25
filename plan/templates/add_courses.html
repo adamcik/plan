@@ -1,4 +1,4 @@
-{% load translation %}
+{% load i18n %}
 
 {% if advanced or not courses %}
     <form action="{% url change-course semester.year,semester.type,slug %}" method="post" class="noprint">

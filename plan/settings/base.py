@@ -144,7 +144,6 @@ INSTALLED_APPS = (
     'plan.ical',
     'plan.pdf',
     'plan.cache',
-    'plan.translation',
     'plan.google',
     'south',
     'compressor',

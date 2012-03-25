@@ -1,9 +1,11 @@
-{% load translation %}
+{% load i18n %}
+
 <h2>
     {% blocktrans %}
         Statistics {{ current }}
     {% endblocktrans %}
 </h2>
+
 <table class="small" id="munin">
     <tr>
         <td>{% trans "Total number of unique timetables" %}</td>
