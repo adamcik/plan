@@ -185,8 +185,8 @@ def update_courses(year, semester_type, prefix=None):
         if points:
             if vekt == 'en_navn':
                 points = points.replace('SP', '')
-
-            course.points = Decimal(points.strip().replace(',', '.'))
+            points = points.strip('-\n\r\t ')
+            course.points = Decimal(points.replace(',', '.'))
         course.name = name
         course.save()
 
