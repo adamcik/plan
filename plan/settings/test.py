@@ -18,6 +18,8 @@
 
 from plan.settings.base import *
 
+SECRET_KEY = 'test'
+
 DATABASE_ENGINE = 'sqlite3'
 
 CACHES = {
