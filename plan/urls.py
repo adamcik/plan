@@ -32,7 +32,7 @@ else:
     urlpatterns = patterns('')
 
 urlpatterns += patterns('',
-    (r'^admin/(.*)', admin.site.root),
+    (r'^admin/(.*)', include(admin.site.urls)),
     (r'^i18n/', include('django.conf.urls.i18n')),
 
     (r'^', include('plan.common.urls')),
