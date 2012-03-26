@@ -17,7 +17,7 @@
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-from datetime import datetime, timedelta
+import datetime
 
 from django.conf import settings
 from django.http import HttpResponse, Http404
@@ -40,10 +40,10 @@ from plan.common.templatetags.slugify import slugify
 # that call the top one.
 
 # To allow for overriding of the codes idea of now() for tests
-now = datetime.now
+now = datetime.datetime.now
 
 # Start new week on saturdays
-get_current_week = lambda: (now() + timedelta(days=2)).isocalendar()[1]
+get_current_week = lambda: (now() + datetime.timedelta(days=2)).isocalendar()[1]
 
 def shortcut(request, slug):
     '''Redirect users to their timetable for the current semester'''
