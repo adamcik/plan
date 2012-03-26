@@ -6,82 +6,82 @@
 {% load url from future %}
 
 {% if prev_week %}
-    <a href="{% url 'schedule-week' semester.year semester.type slug prev_week %}" id="previous" class="noprint">«</a>
+  <a href="{% url 'schedule-week' semester.year semester.type slug prev_week %}" id="previous" class="noprint">«</a>
 {% endif %}
 {% if next_week %}
-    <a href="{% url 'schedule-week' semester.year semester.type slug next_week %}" id="next" class="noprint">»</a>
+  <a href="{% url 'schedule-week' semester.year semester.type slug next_week %}" id="next" class="noprint">»</a>
 {% endif %}
 <table id="schedule">
-    <thead>
-        <tr>
-            <th class="time"></th>
-            <th colspan="{{ timetable.span.0 }}" class="day-1"><span class="date">{{ timetable.date.0|date:"j M."|lower }}</span> {% trans "Monday" %}</th>
-            <th colspan="{{ timetable.span.1 }}" class="day-2"><span class="date">{{ timetable.date.1|date:"j M."|lower }}</span> {% trans "Tuesday" %}</th>
-            <th colspan="{{ timetable.span.2 }}" class="day-3"><span class="date">{{ timetable.date.2|date:"j M."|lower }}</span> {% trans "Wednesday" %}</th>
-            <th colspan="{{ timetable.span.3 }}" class="day-4"><span class="date">{{ timetable.date.3|date:"j M."|lower }}</span> {% trans "Thursday" %}</th>
-            <th colspan="{{ timetable.span.4 }}" class="day-5"><span class="date">{{ timetable.date.4|date:"j M."|lower }}</span> {% trans "Friday" %}</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for row in timetable.table %}
-        <tr class="{% cycle odd,even %}{% if forloop.last %} last{% endif %}{% if forloop.first %} first{% endif %}">
-            {% for cells in row %}
-                {% if cells %}
-                    {% for c in cells %}
-                        {% if not c.remove %}
-                            <td {% stripspace %}
-                                colspan="{{ c.colspan|default:"1" }}"
-                                rowspan="{{ c.rowspan|default:"1" }}"
-                                {% if c.lecture or c.time or forloop.last  %}
-                                    class="
-                                        {% if c.lecture %}
-                                            lecture
-                                            lecture-{{ c.lecture.id }}
-                                            course-{{ c.lecture.course_id }}
-                                        {% endif %}
-                                        {% if c.lecture.optional %}
-                                            optional
-                                        {% endif %}
-                                        {% ifequal c.rowspan 1 %}
-                                            single
-                                        {% endifequal %}
-                                        {% if c.last %}
-                                            last
-                                        {% endif %}
-                                        {% if c.time %}
-                                            time
-                                        {% else %}
-                                            day-{{ forloop.parentloop.counter0 }}
-                                        {% endif %}
-                                    "
-                                {% endif %}
-                                {% if c.lecture %}title="{{ c.lecture.course.name }} {{ c.lecture.start|time }}-{{ c.lecture.end|time }}"{% endif %}
-                            {% endstripspace %}>
-
-                                {% if c.lecture %}
-                                    <div class="course">{{ c.lecture.alias|default:c.lecture.course.code }}</div>
-                                    <div class="room">
-                                        {% for room in rooms|get:c.lecture.id|slice:":2" %}
-                                            {% if room.url %}
-                                                <a href="{{ room.url }}">
-                                                    {{ room.name }}</a>{% if not forloop.last %},{% endif %}
-                                            {% else %}
-                                                {{ room.name }}{% if not forloop.last %},{% endif %}
-                                            {% endif %}
-                                        {% endfor %}
-                                    </div>
-                                    <div class="type">{{ c.lecture.type|default:"" }}</div>
-                                {% endif %}
-                                {{ c.time|escape|nbsp|default:"" }}
-                            </td>
-                        {% endif %}
-                    {% endfor %}
-                {% else %}
-                    <td></td>
+  <thead>
+    <tr>
+      <th class="time"></th>
+      <th colspan="{{ timetable.span.0 }}" class="day-1"><span class="date">{{ timetable.date.0|date:"j M."|lower }}</span> {% trans "Monday" %}</th>
+      <th colspan="{{ timetable.span.1 }}" class="day-2"><span class="date">{{ timetable.date.1|date:"j M."|lower }}</span> {% trans "Tuesday" %}</th>
+      <th colspan="{{ timetable.span.2 }}" class="day-3"><span class="date">{{ timetable.date.2|date:"j M."|lower }}</span> {% trans "Wednesday" %}</th>
+      <th colspan="{{ timetable.span.3 }}" class="day-4"><span class="date">{{ timetable.date.3|date:"j M."|lower }}</span> {% trans "Thursday" %}</th>
+      <th colspan="{{ timetable.span.4 }}" class="day-5"><span class="date">{{ timetable.date.4|date:"j M."|lower }}</span> {% trans "Friday" %}</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for row in timetable.table %}
+    <tr class="{% cycle odd,even %}{% if forloop.last %} last{% endif %}{% if forloop.first %} first{% endif %}">
+      {% for cells in row %}
+        {% if cells %}
+          {% for c in cells %}
+            {% if not c.remove %}
+              <td {% stripspace %}
+                colspan="{{ c.colspan|default:"1" }}"
+                rowspan="{{ c.rowspan|default:"1" }}"
+                {% if c.lecture or c.time or forloop.last  %}
+                  class="
+                    {% if c.lecture %}
+                      lecture
+                      lecture-{{ c.lecture.id }}
+                      course-{{ c.lecture.course_id }}
+                    {% endif %}
+                    {% if c.lecture.optional %}
+                      optional
+                    {% endif %}
+                    {% ifequal c.rowspan 1 %}
+                      single
+                    {% endifequal %}
+                    {% if c.last %}
+                      last
+                    {% endif %}
+                    {% if c.time %}
+                      time
+                    {% else %}
+                      day-{{ forloop.parentloop.counter0 }}
+                    {% endif %}
+                  "
                 {% endif %}
-            {% endfor %}
-        </tr>
-    {% endfor %}
+                {% if c.lecture %}title="{{ c.lecture.course.name }} {{ c.lecture.start|time }}-{{ c.lecture.end|time }}"{% endif %}
+              {% endstripspace %}>
 
-    </tbody>
+                {% if c.lecture %}
+                  <div class="course">{{ c.lecture.alias|default:c.lecture.course.code }}</div>
+                  <div class="room">
+                    {% for room in rooms|get:c.lecture.id|slice:":2" %}
+                      {% if room.url %}
+                        <a href="{{ room.url }}">
+                          {{ room.name }}</a>{% if not forloop.last %},{% endif %}
+                      {% else %}
+                        {{ room.name }}{% if not forloop.last %},{% endif %}
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                  <div class="type">{{ c.lecture.type|default:"" }}</div>
+                {% endif %}
+                {{ c.time|escape|nbsp|default:"" }}
+              </td>
+            {% endif %}
+          {% endfor %}
+        {% else %}
+          <td></td>
+        {% endif %}
+      {% endfor %}
+    </tr>
+  {% endfor %}
+
+  </tbody>
 </table>

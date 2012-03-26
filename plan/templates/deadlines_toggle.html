@@ -3,16 +3,16 @@
 {% load url from future %}
 
 <form method="post" action="{% url 'toggle-deadlines' semester.year semester.type slug %}" class="noprint">
-    <h3 id="features">{% trans "Deadlines" %}</h3>
-    <p>
-        {% trans "Click here to" %}
-        <button type="submit" class="link">
-            {% if student.show_deadlines %}
-                {%trans "disable" %}
-            {% else %}
-                {%trans "enable" %}
-            {% endif %}
-        </button>
-        {% trans "showing of deadlines." %}
-    </p>
+  <h3 id="features">{% trans "Deadlines" %}</h3>
+  <p>
+    {% trans "Click here to" %}
+    <button type="submit" class="link">
+      {% if student.show_deadlines %}
+        {%trans "disable" %}
+      {% else %}
+        {%trans "enable" %}
+      {% endif %}
+    </button>
+    {% trans "showing of deadlines." %}
+  </p>
 </form>

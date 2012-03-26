@@ -3,42 +3,42 @@
 {% load url from future %}
 
 {% if courses %}
-    <div class="yui-g noprint">
-        <div class="yui-u first">
-            <p class="large">
-                <a href="{% url 'course-list' semester.year semester.type slug %}" class="icon list">{% trans "Course list" %}</a>
-                {% if advanced %}
-                    - <a href="{% url 'schedule' semester.year semester.type slug %}" class="icon advanced">{% trans "Hide advanced options" %}</a>
-                {% else %}
-                    - <a href="{% url 'schedule-advanced' semester.year semester.type slug %}" class="icon advanced">{% trans "Advanced options" %}</a>
-                {% endif %}
-                - <a href="#tips" class="icon tips">{% trans "Tips" %}</a>
-                    - <span class="icon pdf">
-                        {% if week %}
-                            <a href="{% url 'schedule-pdf' semester.year semester.type slug "A4" week %}">A4</a>
-                            <a href="{% url 'schedule-pdf' semester.year semester.type slug "A5" week %}">A5</a>
-                            <a href="{% url 'schedule-pdf' semester.year semester.type slug "A6" week %}">A6</a>
-                            <a href="{% url 'schedule-pdf' semester.year semester.type slug "A7" week %}">A7</a>
-                        {% else %}
-                            <a href="{% url 'schedule-pdf' semester.year semester.type slug "A4" %}">A4</a>
-                            <a href="{% url 'schedule-pdf' semester.year semester.type slug "A5" %}">A5</a>
-                            <a href="{% url 'schedule-pdf' semester.year semester.type slug "A6" %}">A6</a>
-                            <a href="{% url 'schedule-pdf' semester.year semester.type slug "A7" %}">A7</a>
-                        {% endif %}
-                    </span>
-            </p>
-        </div>
-        <div class="yui-u">
-            <p class="right">
-                <span class="icon week">{% trans "Weeks:" %}</span>
-                <a href="{% url 'schedule' semester.year semester.type slug %}"{% if all %} class="current"{% endif %}>{% trans "All" %}</a>
-                {% if semester.is_current %}
-                    <a href="{% url 'schedule-current' semester.year semester.type slug %}">{% trans "Current" %}</a>
-                {% endif %}
-                {% for w in weeks %}
-                    <a href="{% url 'schedule-week' semester.year semester.type slug w %}"{% ifequal w week %} class="current"{% endifequal %}>{{ w }}</a>
-                {% endfor %}
-            </p>
-        </div>
+  <div class="yui-g noprint">
+    <div class="yui-u first">
+      <p class="large">
+        <a href="{% url 'course-list' semester.year semester.type slug %}" class="icon list">{% trans "Course list" %}</a>
+        {% if advanced %}
+          - <a href="{% url 'schedule' semester.year semester.type slug %}" class="icon advanced">{% trans "Hide advanced options" %}</a>
+        {% else %}
+          - <a href="{% url 'schedule-advanced' semester.year semester.type slug %}" class="icon advanced">{% trans "Advanced options" %}</a>
+        {% endif %}
+        - <a href="#tips" class="icon tips">{% trans "Tips" %}</a>
+          - <span class="icon pdf">
+            {% if week %}
+              <a href="{% url 'schedule-pdf' semester.year semester.type slug "A4" week %}">A4</a>
+              <a href="{% url 'schedule-pdf' semester.year semester.type slug "A5" week %}">A5</a>
+              <a href="{% url 'schedule-pdf' semester.year semester.type slug "A6" week %}">A6</a>
+              <a href="{% url 'schedule-pdf' semester.year semester.type slug "A7" week %}">A7</a>
+            {% else %}
+              <a href="{% url 'schedule-pdf' semester.year semester.type slug "A4" %}">A4</a>
+              <a href="{% url 'schedule-pdf' semester.year semester.type slug "A5" %}">A5</a>
+              <a href="{% url 'schedule-pdf' semester.year semester.type slug "A6" %}">A6</a>
+              <a href="{% url 'schedule-pdf' semester.year semester.type slug "A7" %}">A7</a>
+            {% endif %}
+          </span>
+      </p>
     </div>
+    <div class="yui-u">
+      <p class="right">
+        <span class="icon week">{% trans "Weeks:" %}</span>
+        <a href="{% url 'schedule' semester.year semester.type slug %}"{% if all %} class="current"{% endif %}>{% trans "All" %}</a>
+        {% if semester.is_current %}
+          <a href="{% url 'schedule-current' semester.year semester.type slug %}">{% trans "Current" %}</a>
+        {% endif %}
+        {% for w in weeks %}
+          <a href="{% url 'schedule-week' semester.year semester.type slug w %}"{% ifequal w week %} class="current"{% endifequal %}>{{ w }}</a>
+        {% endfor %}
+      </p>
+    </div>
+  </div>
 {% endif %}

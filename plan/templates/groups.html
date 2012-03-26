@@ -3,38 +3,38 @@
 {% load url from future %}
 
 <form action="{% url 'change-groups' semester.year semester.type slug %}" method="post" class="noprint">
-    {% if advanced %}
-        <h2 id="groups">{% trans "Change groups" %}</h2>
-    {% endif %}
-    <p>
-        {% trans "Please choose the course variants you belong to." %}
-    </p>
-    <div id="change-groups">
-        {% for course in courses %}
-                <div class="course-{{ course.id }} groupbox" title="{{ course.name }}">
-                    <p>
-                        <strong>{{ course.alias|default:course.code }}</strong>
-                        {% if course.name %}
-                            <br />
-                            <span class="small">{{ course.name|truncatewords:"3" }}</span>
-                        {% endif %}
-                    </p>
-                    <div>
-                        {% if course.group_form %}
-                            {{ course.group_form.groups }}
-                        {% else %}
-                            <ul>
-                                <li>{% trans "No groups" %}</li>
-                            </ul>
-                        {% endif %}
-                    </div>
-                </div>
-                {% if advanced %}
-                    {% cycle "" "" "<hr class='clear hidden' />" %}
-                {% endif %}
-        {% endfor %}
-    </div>
-    <p class="clear">
-        <button type="submit"><span class="icon save">{% trans "Save groups" %}</span></button>
-    </p>
+  {% if advanced %}
+    <h2 id="groups">{% trans "Change groups" %}</h2>
+  {% endif %}
+  <p>
+    {% trans "Please choose the course variants you belong to." %}
+  </p>
+  <div id="change-groups">
+    {% for course in courses %}
+        <div class="course-{{ course.id }} groupbox" title="{{ course.name }}">
+          <p>
+            <strong>{{ course.alias|default:course.code }}</strong>
+            {% if course.name %}
+              <br />
+              <span class="small">{{ course.name|truncatewords:"3" }}</span>
+            {% endif %}
+          </p>
+          <div>
+            {% if course.group_form %}
+              {{ course.group_form.groups }}
+            {% else %}
+              <ul>
+                <li>{% trans "No groups" %}</li>
+              </ul>
+            {% endif %}
+          </div>
+        </div>
+        {% if advanced %}
+          {% cycle "" "" "<hr class='clear hidden' />" %}
+        {% endif %}
+    {% endfor %}
+  </div>
+  <p class="clear">
+    <button type="submit"><span class="icon save">{% trans "Save groups" %}</span></button>
+  </p>
 </form>

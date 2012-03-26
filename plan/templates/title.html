@@ -1,16 +1,16 @@
 {% load i18n %}
 
 {% if week %}
-    {% blocktrans %}
-        {{ slug }}{{ ending }}
-        {{ type }}
-        {{ year }} schedule
-        for week {{ week }}
-    {% endblocktrans %}
+  {% blocktrans %}
+    {{ slug }}{{ ending }}
+    {{ type }}
+    {{ year }} schedule
+    for week {{ week }}
+  {% endblocktrans %}
 {% else %}
-    {% blocktrans %}
-        {{ slug }}{{ ending }}
-        {{ type }}
-        {{ year }} schedule
-    {% endblocktrans %}
+  {% blocktrans %}
+    {{ slug }}{{ ending }}
+    {{ type }}
+    {{ year }} schedule
+  {% endblocktrans %}
 {% endif %}

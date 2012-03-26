@@ -9,104 +9,104 @@
 {% load url from future %}
 
 {% block extrastyle %}
-    {% if courses %}
-        {% compress css inline %}
-            <style type="text/css">
-              {% for course in courses %}
-                .course-{{ course.id }} {
-                    background-color: {% color course.id %};
-                }
-              {% endfor %}
-            </style>
-        {% endcompress %}
-    {% endif %}
+  {% if courses %}
+    {% compress css inline %}
+      <style type="text/css">
+        {% for course in courses %}
+        .course-{{ course.id }} {
+          background-color: {% color course.id %};
+        }
+        {% endfor %}
+      </style>
+    {% endcompress %}
+  {% endif %}
 {% endblock %}
 
 {% block extrahead %}
-    {{ block.super }}
-    <meta name="robots" content="noindex, nofollow, noarchive" />
+  {{ block.super }}
+  <meta name="robots" content="noindex, nofollow, noarchive" />
 {% endblock %}
 
 {% block extrascript %}
-    {% get_current_language as LANGUAGE_CODE %}
-    <script type="text/javascript">
-        var language = '{{ LANGUAGE_CODE }}';
-        var autocomplete_url = "{% url 'course-query' semester.year semester.type %}";
-    </script>
-    {% compress js %}
-        <script type="text/javascript" src="{% static 'js/jquery-1.3.1.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/jquery.autocomplete.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/autocomplete.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/navigation.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/advanced.js' %}"></script>
-    {% endcompress %}
-    {{ block.super }}
+  {% get_current_language as LANGUAGE_CODE %}
+  <script type="text/javascript">
+    var language = '{{ LANGUAGE_CODE }}';
+    var autocomplete_url = "{% url 'course-query' semester.year semester.type %}";
+  </script>
+  {% compress js %}
+    <script type="text/javascript" src="{% static 'js/jquery-1.3.1.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery.autocomplete.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/autocomplete.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/navigation.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/advanced.js' %}"></script>
+  {% endcompress %}
+  {{ block.super }}
 {% endblock %}
 
 {% block title %}
-    {% title semester slug week %}
+  {% title semester slug week %}
 {% endblock %}
 
 {% block hd %}
-    {% include "notice.html" %}
-    <h1>
-        {% title semester slug week %}
-    </h1>
+  {% include "notice.html" %}
+  <h1>
+    {% title semester slug week %}
+  </h1>
 {% endblock %}
 
 {% block bd %}
-    {% url 'schedule-advanced' semester.year semester.type slug as advanced_url %}
+  {% url 'schedule-advanced' semester.year semester.type slug as advanced_url %}
 
-    {% if not courses %}
-        <div id="help">
-            {% include "add_courses.html" %}
-        </div>
-    {% endif %}
+  {% if not courses %}
+    <div id="help">
+      {% include "add_courses.html" %}
+    </div>
+  {% endif %}
 
-    {% include "schedule_message.html" %}
-    {% include "schedule_table.html" %}
-    {% include "schedule_table_footer.html" %}
+  {% include "schedule_message.html" %}
+  {% include "schedule_table.html" %}
+  {% include "schedule_table_footer.html" %}
 
-    {% if courses %}
-        <div class="yui-g">
-            <div class="yui-u first">
-                {% include "courses.html" %}
-                {% if student.show_deadlines or advanced %}
-                    {% include "exams.html" %}
-                {% endif %}
+  {% if courses %}
+    <div class="yui-g">
+      <div class="yui-u first">
+        {% include "courses.html" %}
+        {% if student.show_deadlines or advanced %}
+          {% include "exams.html" %}
+        {% endif %}
 
-                {% if advanced %}
-                    {% if student.show_deadlines %}
-                        {% include "deadlines.html" %}
-                    {% endif %}
-                {% endif %}
-            </div>
-            <div class="yui-u">
-                {% if not advanced %}
-                    {% if student.show_deadlines %}
-                        {% include "deadlines.html" %}
-                    {% else %}
-                        {% include "exams.html" %}
-                        {% include "deadlines_link.html" %}
-                    {% endif %}
-                {% endif %}
+        {% if advanced %}
+          {% if student.show_deadlines %}
+            {% include "deadlines.html" %}
+          {% endif %}
+        {% endif %}
+      </div>
+      <div class="yui-u">
+        {% if not advanced %}
+          {% if student.show_deadlines %}
+            {% include "deadlines.html" %}
+          {% else %}
+            {% include "exams.html" %}
+            {% include "deadlines_link.html" %}
+          {% endif %}
+        {% endif %}
 
-                {% if advanced %}
-                    <h2>{% trans "Settings" %}</h2>
-                {% endif %}
-                {% include "add_courses.html" %}
-                {% if advanced %}
-                    {% include "groups_link.html" %}
-                    {% include "deadlines_toggle.html" %}
-                    {% if student.show_deadlines %}
-                        {% include "add_deadlines.html" %}
-                        {% include "import_deadlines.html" %}
-                    {% endif %}
-                {% endif %}
-            </div>
-        </div>
-    {% endif %}
+        {% if advanced %}
+          <h2>{% trans "Settings" %}</h2>
+        {% endif %}
+        {% include "add_courses.html" %}
+        {% if advanced %}
+          {% include "groups_link.html" %}
+          {% include "deadlines_toggle.html" %}
+          {% if student.show_deadlines %}
+            {% include "add_deadlines.html" %}
+            {% include "import_deadlines.html" %}
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
 
-    {% include "lectures.html" %}
-    {% include "tips.html" %}
+  {% include "lectures.html" %}
+  {% include "tips.html" %}
 {% endblock %}

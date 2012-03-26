@@ -6,40 +6,40 @@
 {% load static %}
 
 {% block extrastyle %}
-    {% if courses %}
-        {% compress css inline %}
-            <style type="text/css">
-              {% for course in courses %}
-                .course-{{ course.id }} {
-                    background-color: {% color course.id %};
-                }
-              {% endfor %}
-            </style>
-        {% endcompress %}
-    {% endif %}
+  {% if courses %}
+    {% compress css inline %}
+      <style type="text/css">
+        {% for course in courses %}
+        .course-{{ course.id }} {
+          background-color: {% color course.id %};
+        }
+        {% endfor %}
+      </style>
+    {% endcompress %}
+  {% endif %}
 {% endblock %}
 
 {% block extrascript %}
-    {% compress js %}
-        <script type="text/javascript" src="{% static 'js/jquery-1.3.1.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/jquery.autocomplete.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/autocomplete.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/navigation.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/advanced.js' %}"></script>
-    {% endcompress %}
-    {{ block.super }}
+  {% compress js %}
+    <script type="text/javascript" src="{% static 'js/jquery-1.3.1.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery.autocomplete.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/autocomplete.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/navigation.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/advanced.js' %}"></script>
+  {% endcompress %}
+  {{ block.super }}
 {% endblock %}
 
 {% block title %}
-    {% trans "Select groups for your courses" %}
+  {% trans "Select groups for your courses" %}
 {% endblock %}
 
 {% block hd %}
-    <h1>
-        {% trans "Select groups for your courses" %}
-    </h1>
+  <h1>
+    {% trans "Select groups for your courses" %}
+  </h1>
 {% endblock %}
 
 {% block bd %}
-    {% include "groups.html" %}
+  {% include "groups.html" %}
 {% endblock %}

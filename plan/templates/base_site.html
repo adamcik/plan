@@ -6,86 +6,86 @@
 {% load static %}
 
 {% block title %}
-    {% trans "Timetable generator for NTNU students" %}
+  {% trans "Timetable generator for NTNU students" %}
 {% endblock %}
 
 {% block style %}
-    {% compress css %}
-        <link rel="stylesheet" href="{% static 'css/reset-fonts-grids.css' %}" />
-        <link rel="stylesheet" href="{% static 'css/base-min.css' %}" />
-        <link rel="stylesheet" href="{% static 'css/style.css' %}" />
-    {% endcompress %}
+  {% compress css %}
+    <link rel="stylesheet" href="{% static 'css/reset-fonts-grids.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/base-min.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  {% endcompress %}
 {% endblock %}
 
 {% block extrahead %}
-    <link rel="icon" type="image/png" href="{% static 'gfx/time.png' %}" />
+  <link rel="icon" type="image/png" href="{% static 'gfx/time.png' %}" />
 {% endblock %}
 
 {% block extrascript %}
-    {% googleanalytics %}
+  {% googleanalytics %}
 {% endblock %}
 
 {% block lang %}
-    {% include "setlang.html" %}
+  {% include "setlang.html" %}
 {% endblock %}
 
 {% block ft %}
-    <div class="yui-g">
-      <div class="yui-u first">
-        <p>
-          {% blocktrans %}
-              All lecture times and course data have been automatically retrieved from
-              <a href="http://www.ntnu.no/">NTNU</a>.
-              This data may not reflect the actual lecture times due to changes or erroneous imports.
-              The service is provided as is, please ensure that the data is correct before relying on it.
-          {% endblocktrans %}
-        </p>
-        <p>
-          {% blocktrans %}
-            Code and design &copy; 2008-2012 <b>Thomas Adamcik</b>.
-            This site has no official affiliation with NTNU, and is hosted and run by Thomas Adamcik.
-          {% endblocktrans %}
-        </p>
-      </div>
-      <div class="yui-u" id="links">
-        <p>
-          <b>{% trans "Course list" %}</b>
-          <a href="http://www.ntnu.no/studier/emner">ntnu.no/studier/emner</a><br/>
-          <b>{% trans "Study Guide" %}</b>
-          <a href="http://www.ntnu.no/studier/studiehandbok/">ntnu.no/studier/studiehandbok</a><br/>
-          <b>{% trans "Exam dates" %}</b>
-          <a href="http://www.ntnu.no/eksamen/plan/">ntnu.no/eksamen/plan/</a><br/>
-          <b>{% trans "Exam rules" %}</b>
-          <a href="http://www.ntnu.no/studier/eksamen/instruks">ntnu.no/studier/eksamen/instruks</a><br />
-          <b>{% trans "Lecture times" %}</b>
-          <a href="http://www.ntnu.no/studieinformasjon/timeplan">ntnu.no/studieinformasjon/timeplan</a><br/>
-          <b>{% trans "Map Dragvoll" %}</b>
-          <a href="http://www.ntnu.no/kart/kart-over-ntnu/dragvoll/">ntnu.no/kart/kart-over-ntnu/dragvoll</a><br/>
-          <b>{% trans "Map Gløshaugen" %}</b>
-          <a href="http://www.ntnu.no/kart/kart-over-ntnu/gloeshaugen/">ntnu.no/kart/kart-over-ntnu/gloeshaugen</a><br/>
-          <b>{% trans "Find rooms" %}</b>
-          <a href="http://www.ntnu.no/studieinformasjon/rom/">ntnu.no/studieinformasjon/rom/</a>
-        </p>
-      </div>
-    </div>
-
-    <hr />
-
-    <p style="text-align: center">
+  <div class="yui-g">
+    <div class="yui-u first">
+    <p>
       {% blocktrans %}
-        The source code is freely available under the
-        <a href="http://www.gnu.org/licenses/agpl-3.0.html">Affero General Public License</a>
-        at <a href="{{ SOURCE_URL }}">{{ SOURCE_URL }}</a>.
+        All lecture times and course data have been automatically retrieved from
+        <a href="http://www.ntnu.no/">NTNU</a>.
+        This data may not reflect the actual lecture times due to changes or erroneous imports.
+        The service is provided as is, please ensure that the data is correct before relying on it.
       {% endblocktrans %}
-      <br />
-      <span class="small">
-        {% trans "Built using:" %}
-        <a href="http://www.python.org/">Python</a> &bull;
-        <a href="http://www.djangoproject.org">Django</a> &bull;
-        <a href="http://developer.yahoo.com/yui/">Yahoo! UI Library</a> &bull;
-        <a href="http://www.jquery.com/">jQuery</a> &bull;
-        <a href="http://www.famfamfam.com/lab/icons/silk/">Silk icons</a> &bull;
-        <a href="http://colorbrewer2.org/">ColorBrewer</a>
-      </span>
     </p>
+    <p>
+      {% blocktrans %}
+      Code and design &copy; 2008-2012 <b>Thomas Adamcik</b>.
+      This site has no official affiliation with NTNU, and is hosted and run by Thomas Adamcik.
+      {% endblocktrans %}
+    </p>
+    </div>
+    <div class="yui-u" id="links">
+    <p>
+      <b>{% trans "Course list" %}</b>
+      <a href="http://www.ntnu.no/studier/emner">ntnu.no/studier/emner</a><br/>
+      <b>{% trans "Study Guide" %}</b>
+      <a href="http://www.ntnu.no/studier/studiehandbok/">ntnu.no/studier/studiehandbok</a><br/>
+      <b>{% trans "Exam dates" %}</b>
+      <a href="http://www.ntnu.no/eksamen/plan/">ntnu.no/eksamen/plan/</a><br/>
+      <b>{% trans "Exam rules" %}</b>
+      <a href="http://www.ntnu.no/studier/eksamen/instruks">ntnu.no/studier/eksamen/instruks</a><br />
+      <b>{% trans "Lecture times" %}</b>
+      <a href="http://www.ntnu.no/studieinformasjon/timeplan">ntnu.no/studieinformasjon/timeplan</a><br/>
+      <b>{% trans "Map Dragvoll" %}</b>
+      <a href="http://www.ntnu.no/kart/kart-over-ntnu/dragvoll/">ntnu.no/kart/kart-over-ntnu/dragvoll</a><br/>
+      <b>{% trans "Map Gløshaugen" %}</b>
+      <a href="http://www.ntnu.no/kart/kart-over-ntnu/gloeshaugen/">ntnu.no/kart/kart-over-ntnu/gloeshaugen</a><br/>
+      <b>{% trans "Find rooms" %}</b>
+      <a href="http://www.ntnu.no/studieinformasjon/rom/">ntnu.no/studieinformasjon/rom/</a>
+    </p>
+    </div>
+  </div>
+
+  <hr />
+
+  <p style="text-align: center">
+    {% blocktrans %}
+    The source code is freely available under the
+    <a href="http://www.gnu.org/licenses/agpl-3.0.html">Affero General Public License</a>
+    at <a href="{{ SOURCE_URL }}">{{ SOURCE_URL }}</a>.
+    {% endblocktrans %}
+    <br />
+    <span class="small">
+    {% trans "Built using:" %}
+    <a href="http://www.python.org/">Python</a> &bull;
+    <a href="http://www.djangoproject.org">Django</a> &bull;
+    <a href="http://developer.yahoo.com/yui/">Yahoo! UI Library</a> &bull;
+    <a href="http://www.jquery.com/">jQuery</a> &bull;
+    <a href="http://www.famfamfam.com/lab/icons/silk/">Silk icons</a> &bull;
+    <a href="http://colorbrewer2.org/">ColorBrewer</a>
+    </span>
+  </p>
 {% endblock %}

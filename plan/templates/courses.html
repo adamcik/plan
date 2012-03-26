@@ -3,83 +3,83 @@
 {% load url from future %}
 
 <form action="{% url 'change-course' semester.year semester.type slug %}" method="post">
-    <h2>{% trans "Courses" %}</h2>
-    {% if courses %}
-        <table id="courses">
-            <thead>
-                <tr>
-                    {% if advanced %}
-                        <th style="width:  5%"></th>
-                    {% endif %}
-                    <th style="width: 18%">{% trans "Course" %}</th>
-                    <th>{% trans "Alias" %}</th>
-                    <th>{% trans "Description" %}</th>
-                    <th style="width: 10%">{% trans "Credits" %}</th>
-                    <th>{% trans "Syllabus" %}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for course in courses %}
-                    <tr class="course-{{ course.id }}" title="{{ course.name }}">
-                        {% if advanced %}
-                            <td>
-                                <input type="checkbox" name="course_remove" value="{{ course.id }}" class="noprint" />
-                            </td>
-                        {% endif %}
-                        <td>
-                            {% if course.url %}
-                                <a href="{{ course.url }}">
-                                    {{ course.code }}
-                                </a>
-                            {% else %}
-                                {{ course.code }}
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if course.alias_form %}
-                                {{ course.alias_form.alias}}
-                            {% else %}
-                                {{ course.alias|default:"-" }}
-                            {% endif %}
-                        </td>
-                        <td>
-                            {{ course.name }}
-                        </td>
-                        <td align="right">
-                            {{ course.points|default:""|floatformat:"1" }}
-                        </td>
-                        <td align="center">
-                            {% if course.syllabus %}
-                                <a href="{{ course.syllabus }}">Tapir</a>
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% endif %}
+  <h2>{% trans "Courses" %}</h2>
+  {% if courses %}
+    <table id="courses">
+      <thead>
+        <tr>
+          {% if advanced %}
+            <th style="width:  5%"></th>
+          {% endif %}
+          <th style="width: 18%">{% trans "Course" %}</th>
+          <th>{% trans "Alias" %}</th>
+          <th>{% trans "Description" %}</th>
+          <th style="width: 10%">{% trans "Credits" %}</th>
+          <th>{% trans "Syllabus" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for course in courses %}
+          <tr class="course-{{ course.id }}" title="{{ course.name }}">
+            {% if advanced %}
+              <td>
+                <input type="checkbox" name="course_remove" value="{{ course.id }}" class="noprint" />
+              </td>
+            {% endif %}
+            <td>
+              {% if course.url %}
+                <a href="{{ course.url }}">
+                  {{ course.code }}
+                </a>
+              {% else %}
+                {{ course.code }}
+              {% endif %}
+            </td>
+            <td>
+              {% if course.alias_form %}
+                {{ course.alias_form.alias}}
+              {% else %}
+                {{ course.alias|default:"-" }}
+              {% endif %}
+            </td>
+            <td>
+              {{ course.name }}
+            </td>
+            <td align="right">
+              {{ course.points|default:""|floatformat:"1" }}
+            </td>
+            <td align="center">
+              {% if course.syllabus %}
+                <a href="{{ course.syllabus }}">Tapir</a>
+              {% else %}
+                -
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
 
 
-    {% if courses and advanced %}
-        <p class="noprint">
-            <!--[if lte IE 6]>
-                <input name="submit_name" type="submit" value="{% trans "Update names" %}" class="icon name"  style="width: 9em; height: 1.8em;" />
-                <input name="submit_remove" type="submit" value="{% trans "Remove selected" %}" class="icon remove" style="width: 10em; height: 1.8em" />
-            <![endif]-->
-            <!--[if gt IE 6]><!-->
-                <button name="submit_name" type="submit"><span class="icon name">{% trans "Update names" %}</span></button>
-                <button name="submit_remove" type="submit"><span class="icon remove">{% trans "Remove selected" %}</span></button>
-            <!--<![endif]-->
-        </p>
-    {% else %}
-        <p class="noprint">
-            {% url 'schedule-advanced' semester.year semester.type slug as advanced_url %}
-            {% blocktrans %}
-                Go to <a href="{{ advanced_url }}#courses">advanced options</a>
-                to add and remove courses.
-            {% endblocktrans %}
-        </p>
-    {% endif %}
+  {% if courses and advanced %}
+    <p class="noprint">
+      <!--[if lte IE 6]>
+        <input name="submit_name" type="submit" value="{% trans "Update names" %}" class="icon name"  style="width: 9em; height: 1.8em;" />
+        <input name="submit_remove" type="submit" value="{% trans "Remove selected" %}" class="icon remove" style="width: 10em; height: 1.8em" />
+      <![endif]-->
+      <!--[if gt IE 6]><!-->
+        <button name="submit_name" type="submit"><span class="icon name">{% trans "Update names" %}</span></button>
+        <button name="submit_remove" type="submit"><span class="icon remove">{% trans "Remove selected" %}</span></button>
+      <!--<![endif]-->
+    </p>
+  {% else %}
+    <p class="noprint">
+      {% url 'schedule-advanced' semester.year semester.type slug as advanced_url %}
+      {% blocktrans %}
+        Go to <a href="{{ advanced_url }}#courses">advanced options</a>
+        to add and remove courses.
+      {% endblocktrans %}
+    </p>
+  {% endif %}
 </form>

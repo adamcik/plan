@@ -3,20 +3,20 @@
 {% load i18n %}
 
 {% block title %}
-    {{ block.super }} - {% trans "Server error" %}
+  {{ block.super }} - {% trans "Server error" %}
 {% endblock %}
 
 {% block hd %}
-    <h1>{% trans "Server error" %}</h1>
+  <h1>{% trans "Server error" %}</h1>
 {% endblock %}
 
 {% block bd %}
-    <div id="help">
-        <p class="icon error large">
-            {% trans "An error has occurred, sorry about the inconvenience." %}
-        </p>
-        <ul>
-            <li>{% trans "The server administrator has all ready been notified of this error." %}</li>
-        </ul>
-    </div>
+  <div id="help">
+    <p class="icon error large">
+      {% trans "An error has occurred, sorry about the inconvenience." %}
+    </p>
+    <ul>
+      <li>{% trans "The server administrator has all ready been notified of this error." %}</li>
+    </ul>
+  </div>
 {% endblock %}

@@ -6,41 +6,41 @@
 {% load url from future %}
 
 {% block hd %}
-    <h1>{% trans "Couldn't add one or more courses" %}</h1>
+  <h1>{% trans "Couldn't add one or more courses" %}</h1>
 {% endblock %}
 
 {% block bd %}
-    <div id="help">
-        {% if to_many_subscriptions %}
-            <p class="large icon error">
-                {% blocktrans %}
-                    Sorry, but the generator has been set up to limit
-                    timetables to {{ max }} courses.
-                {% endblocktrans %}
-            </p>
-        {% endif %}
-        {% if courses %}
-            <p class="large"><img alt="" src="{% static 'gfx/error.png' %}" />
-                {% trans "Adding the following courses failed:" %}
-            </p>
-            <ul>
-                {% for c in courses %}
-                    <li>{{ c }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-        <p class="large right">
-            {% url 'schedule-advanced' year type slug as adavanced_url %}
-            {% blocktrans %}
-                Back to your <a href="{{ adavanced_url }}">schedule</a>.
-            {% endblocktrans %}
-        </p>
-    </div>
-    <p>
+  <div id="help">
+    {% if to_many_subscriptions %}
+      <p class="large icon error">
         {% blocktrans %}
-            Please check that the courses that failed can be found at
-            <a href="http://www.ntnu.no/studieinformasjon/timeplan">http://www.ntnu.no/studieinformasjon/timeplan</a>
-            for this semster.
+          Sorry, but the generator has been set up to limit
+          timetables to {{ max }} courses.
         {% endblocktrans %}
+      </p>
+    {% endif %}
+    {% if courses %}
+      <p class="large"><img alt="" src="{% static 'gfx/error.png' %}" />
+        {% trans "Adding the following courses failed:" %}
+      </p>
+      <ul>
+        {% for c in courses %}
+          <li>{{ c }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    <p class="large right">
+      {% url 'schedule-advanced' year type slug as adavanced_url %}
+      {% blocktrans %}
+        Back to your <a href="{{ adavanced_url }}">schedule</a>.
+      {% endblocktrans %}
     </p>
+  </div>
+  <p>
+    {% blocktrans %}
+      Please check that the courses that failed can be found at
+      <a href="http://www.ntnu.no/studieinformasjon/timeplan">http://www.ntnu.no/studieinformasjon/timeplan</a>
+      for this semster.
+    {% endblocktrans %}
+  </p>
 {% endblock %}

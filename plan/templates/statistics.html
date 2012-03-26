@@ -1,22 +1,22 @@
 {% load i18n %}
 
 <h2>
-    {% blocktrans %}
-        Statistics {{ current }}
-    {% endblocktrans %}
+  {% blocktrans %}
+    Statistics {{ current }}
+  {% endblocktrans %}
 </h2>
 
 <table class="small" id="munin">
-    <tr>
-        <td>{% trans "Total number of unique timetables" %}</td>
-        <td align="right">{{ slug_count }}</td>
-    </tr>
-    <tr>
-        <td>{% trans "Total number of unique courses added" %}</td>
-        <td align="right">{{ course_count }}</td>
-    </tr>
-    <tr>
-        <td>{% trans "Total number of deadlines" %}</td>
-        <td align="right">{{ deadline_count }}</td>
-    </tr>
+  <tr>
+    <td>{% trans "Total number of unique timetables" %}</td>
+    <td align="right">{{ slug_count }}</td>
+  </tr>
+  <tr>
+    <td>{% trans "Total number of unique courses added" %}</td>
+    <td align="right">{{ course_count }}</td>
+  </tr>
+  <tr>
+    <td>{% trans "Total number of deadlines" %}</td>
+    <td align="right">{{ deadline_count }}</td>
+  </tr>
 </table>

@@ -7,99 +7,99 @@
 {% load static %}
 
 {% block title %}
-    {# {% trans "About the Timetable generator for NTNU students" %} #}
-    {% trans "Number of timetables" %}
+  {# {% trans "About the Timetable generator for NTNU students" %} #}
+  {% trans "Number of timetables" %}
 {% endblock %}
 
 {% block hd %}
-    <h1>
-        {# {% trans "About the Timetable generator for NTNU students" %} #}
-        {% trans "Number of timetables over time" %}
-    </h1>
+  <h1>
+    {# {% trans "About the Timetable generator for NTNU students" %} #}
+    {% trans "Number of timetables over time" %}
+  </h1>
 {% endblock %}
 
 {% block bd %}
 {% comment %}
-    <div class="yui-gb">
-        <div class="yui-u first">
-            <h2>Fall 2008</h2>
-            <p>
+  <div class="yui-gb">
+    <div class="yui-u first">
+      <h2>Fall 2008</h2>
+      <p>
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque nec sapien
 sem. Nam pretium consectetur leo, ut semper diam blandit et. Pellentesque eget
 diam et enim laoreet sodales. Donec tempor feugiat laoreet. Mauris nec felis
 orci. Aenean blandit augue et orci dignissim condimentum at sed libero.
 Pellentesque ac mi consectetur purus rhoncus sollicitudin at non felis. Etiam
 consectetur odio in augue auctor iaculis.
-            </p>
-        </div>
-        <div class="yui-u">
-            <h2>Summer 2009</h2>
-            <p>
+      </p>
+    </div>
+    <div class="yui-u">
+      <h2>Summer 2009</h2>
+      <p>
 Morbi nec lorem ipsum, in accumsan mi. Aliquam iaculis ultricies mauris id
 ultricies. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ut
 faucibus elit. Donec fringilla interdum nunc eget porttitor. Quisque tristique
 viverra nunc in faucibus. Nulla dignissim porta nisl in semper. Morbi
 pellentesque, libero vitae facilisis pretium, turpis eros hendrerit arcu, eget
 fermentum diam sem in lorem.
-            </p>
-        </div>
-        <div class="yui-u">
-            <h2>2010&hellip;</h2>
-            <p>
+      </p>
+    </div>
+    <div class="yui-u">
+      <h2>2010&hellip;</h2>
+      <p>
 Maecenas eget arcu ut sapien pharetra feugiat eget sed enim. Maecenas elementum
 dictum tincidunt. Praesent molestie orci nec odio egestas dapibus. Praesent
 laoreet mauris vel velit ullamcorper vitae pretium purus suscipit. Phasellus a
 auctor dui. Phasellus in sodales purus. Mauris eget nibh tellus. Quisque auctor
 porta pharetra. Donec nec volutpat magna. Lorem ipsum dolor sit amet,
 consectetur adipiscing elit.
-            </p>
-        </div>
+      </p>
     </div>
+  </div>
 {% endcomment %}
 
-    {# <h2>Timetables per semester</h2> #}
-    <div id="graph" style="width: 100%; height: 25em">
-    </div>
+  {# <h2>Timetables per semester</h2> #}
+  <div id="graph" style="width: 100%; height: 25em">
+  </div>
 {% endblock %}
 
 {% block extrascript %}
-    <!--[if IE]><script language="javascript" type="text/javascript" src="{% static 'js/excanvas.min.js' %}"></script><![endif]-->
-    {% compress js %}
-        <script type="text/javascript" src="{% static 'js/jquery-1.3.1.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/jquery.flot.min.js' %}"></script>
-    {% endcompress %}
+  <!--[if IE]><script language="javascript" type="text/javascript" src="{% static 'js/excanvas.min.js' %}"></script><![endif]-->
+  {% compress js %}
+    <script type="text/javascript" src="{% static 'js/jquery-1.3.1.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery.flot.min.js' %}"></script>
+  {% endcompress %}
+  <script type="text/javascript">
+    var data = {{ data|json }};
+    var fills = [];
+    {% for a in data %}
+    fills.push("{% color forloop.counter %}");{% endfor %}
+  </script>
+  {% compress js inline %}
     <script type="text/javascript">
-        var data = {{ data|json }};
-        var fills = [];
-        {% for a in data %}
-        fills.push("{% color forloop.counter %}");{% endfor %}
+      $(document).ready(function() {
+        var series = [];
+        var options = {
+          xaxis: { mode: "time" },
+          yaxis: { min: 0 }
+        };
+        var fill;
+
+        for (var i = 0; i < data.length; i++) {
+          fill = $.color.parse(fills[i]).scale('a', 0.5);
+          series.push({
+            data: data[i],
+            lines: {
+              show: true,
+              lineWidth: 1,
+              fill: true,
+              fillColor: fill.toString()
+            },
+            color: "#333"
+          });
+        }
+
+        $.plot($('#graph'), series, options);
+      });
     </script>
-    {% compress js inline %}
-        <script type="text/javascript">
-            $(document).ready(function() {
-                var series = [];
-                var options = {
-                    xaxis: { mode: "time" },
-                    yaxis: { min: 0 }
-                };
-                var fill;
-
-                for (var i = 0; i < data.length; i++) {
-                    fill = $.color.parse(fills[i]).scale('a', 0.5);
-                    series.push({
-                        data: data[i],
-                        lines: {
-                            show: true,
-                            lineWidth: 1,
-                            fill: true,
-                            fillColor: fill.toString()
-                        },
-                        color: "#333"
-                    });
-                }
-
-                $.plot($('#graph'), series, options);
-            });
-        </script>
-    {% endcompress %}
+  {% endcompress %}
 {% endblock %}

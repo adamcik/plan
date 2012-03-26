@@ -5,62 +5,62 @@
 {% load url from future %}
 
 {% if lectures %}
-    <h2>{% trans "Lecture list" %}</h2>
-    <form action="{% url 'change-lectures' semester.year semester.type slug %}" method="post">
-        <table id="lectures">
-            <thead>
-                <tr>
-                    {% if advanced %}
-                        <th style="width: 1em"></th>
-                    {% endif %}
-                    <th>{% trans "Course" %}</th>
-                    <th style="width: 7em">{% trans "Day" %}</th>
-                    <th style="width: 7em">{% trans "Time" %}</th>
-                    <th>{% trans "Rooms" %}</th>
-                    <th>{% trans "Type" %}</th>
-                    <th>{% trans "Groups" %}</th>
-                    <th>{% trans "Lecturers" %}</th>
-                    <th>{% trans "Weeks" %}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for l in lectures %}
-                    <tr class="course-{{ l.course_id }} lecture-{{ l.id }}{% if l.exclude %} excluded{% endif %}" title="{{ l.course.name }}">
-                        {% if advanced %}
-                            <td><input type="checkbox" name="exclude" value="{{ l.id }}"{% if l.exclude %} checked="checked"{% endif %} class="noprint" /></td>
-                        {% endif %}
-                        <td>{{ l.alias|default:l.course.code }}</td>
-                        <td>{{ l.get_day_display }}</td>
-                        <td>{{ l.start|time }}-{{ l.end|time }}</td>
-                        <td class="small">
-                            {% for room in rooms|get:l.id %}
-                                {% if room.url %}
-                                    <a href="{{ room.url }}">
-                                        {{ room.name }}</a>{% if not forloop.last %},{% endif %}
-                                {% else %}
-                                    {{ room.name }}{% if not forloop.last %},{% endif %}
-                                {% endif %}
-                            {% endfor %}
-                            {% if not rooms|get:l.id %}&nbsp;{% endif %}
-                        </td>
-                        <td class="small">{{ l.type|default:"" }}</td>
-                        <td class="small">{{ groups|get:l.id|join:", " }}</td>
-                        <td class="small">{{ lecturers|get:l.id|join:", "|default:"&nbsp;" }}</td>
-                        <td class="small">{{ lecture_weeks|get:l.id|compact|join:", " }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <p class="noprint">
+  <h2>{% trans "Lecture list" %}</h2>
+  <form action="{% url 'change-lectures' semester.year semester.type slug %}" method="post">
+    <table id="lectures">
+      <thead>
+        <tr>
+          {% if advanced %}
+            <th style="width: 1em"></th>
+          {% endif %}
+          <th>{% trans "Course" %}</th>
+          <th style="width: 7em">{% trans "Day" %}</th>
+          <th style="width: 7em">{% trans "Time" %}</th>
+          <th>{% trans "Rooms" %}</th>
+          <th>{% trans "Type" %}</th>
+          <th>{% trans "Groups" %}</th>
+          <th>{% trans "Lecturers" %}</th>
+          <th>{% trans "Weeks" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for l in lectures %}
+          <tr class="course-{{ l.course_id }} lecture-{{ l.id }}{% if l.exclude %} excluded{% endif %}" title="{{ l.course.name }}">
             {% if advanced %}
-                <button type="submit"><span class="icon hide">{% trans "Hide selected lectures" %}</span></button>
-            {% else %}
-                {% url 'schedule-advanced' semester.year semester.type slug as advanced_url %}
-                {% blocktrans %}
-                    Go to <a href="{{ advanced_url }}#lectures">advanced options</a>
-                    to toggle which lectures to hide.
-                {% endblocktrans %}
+              <td><input type="checkbox" name="exclude" value="{{ l.id }}"{% if l.exclude %} checked="checked"{% endif %} class="noprint" /></td>
             {% endif %}
-        </p>
-    </form>
+            <td>{{ l.alias|default:l.course.code }}</td>
+            <td>{{ l.get_day_display }}</td>
+            <td>{{ l.start|time }}-{{ l.end|time }}</td>
+            <td class="small">
+              {% for room in rooms|get:l.id %}
+                {% if room.url %}
+                  <a href="{{ room.url }}">
+                    {{ room.name }}</a>{% if not forloop.last %},{% endif %}
+                {% else %}
+                  {{ room.name }}{% if not forloop.last %},{% endif %}
+                {% endif %}
+              {% endfor %}
+              {% if not rooms|get:l.id %}&nbsp;{% endif %}
+            </td>
+            <td class="small">{{ l.type|default:"" }}</td>
+            <td class="small">{{ groups|get:l.id|join:", " }}</td>
+            <td class="small">{{ lecturers|get:l.id|join:", "|default:"&nbsp;" }}</td>
+            <td class="small">{{ lecture_weeks|get:l.id|compact|join:", " }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p class="noprint">
+      {% if advanced %}
+        <button type="submit"><span class="icon hide">{% trans "Hide selected lectures" %}</span></button>
+      {% else %}
+        {% url 'schedule-advanced' semester.year semester.type slug as advanced_url %}
+        {% blocktrans %}
+          Go to <a href="{{ advanced_url }}#lectures">advanced options</a>
+          to toggle which lectures to hide.
+        {% endblocktrans %}
+      {% endif %}
+    </p>
+  </form>
 {% endif %}
