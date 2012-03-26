@@ -20,12 +20,10 @@ import logging
 from datetime import datetime, timedelta
 
 from django.conf import settings
-from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404
 from django import shortcuts
-from django.template.context import RequestContext
-from django.utils.html import escape
-from django.utils.text import truncate_words
+from django.utils import html as html_utils
+from django.utils import text
 from django.db import connection
 
 from plan.common.models import Course, Deadline, Exam, Group, \
@@ -142,8 +140,8 @@ def course_query(request, year, semester_type):
         query, limit)
 
     for course in courses:
-        code = escape(course.code)
-        name = escape(truncate_words(course.name, 5))
+        code = html_utils.escape(course.code)
+        name = html_utils.escape(text.truncate_words(course.name, 5))
         response.write(u'%s|%s\n' % (code, name or u'?'))
 
     request.cache.set(cache_key, response, settings.CACHE_TIME_AJAX,
