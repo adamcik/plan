@@ -26,8 +26,9 @@ from django.db import connection
 from django.utils import html
 from django.utils import text
 
-from plan.common.models import Course, Deadline, Exam, Group, \
-        Lecture, Semester, Subscription, Room, Lecturer, Week, Student
+from plan.common.models import (Course, Deadline, Exam, Group, Lecture,
+    Semester, Subscription, Room, Lecturer, Week, Student)
+
 from plan import cache as cache_utils
 from plan.common import forms
 from plan.common import timetable
