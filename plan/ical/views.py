@@ -16,22 +16,21 @@
 # You should have received a copy of the Affero GNU General Public
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
-import vobject
+import copy
+import datetime
 import math
+import vobject
 
-from copy import copy
-from datetime import datetime, timedelta
-from dateutil.rrule import rrule, WEEKLY
-from dateutil.tz import tzlocal
+from dateutil import rrule
+from dateutil import tz
 
-from django.http import HttpResponse, Http404
-from django.core.urlresolvers import reverse
+from django import http
 from django.conf import settings
-from django.utils.translation import ugettext as _
+from django.core import urlresolvers
 
+from django.utils.translation import ugettext as _
 from plan.common.models import Exam, Deadline, Lecture, Semester, Room, Week
 
-HOSTNAME = settings.ICAL_HOSTNAME
 
 def get_resources(selector):
     resources = [u'lectures', u'exams', u'deadlines']
@@ -39,7 +38,7 @@ def get_resources(selector):
     if selector:
         parts = selector.split('+')
 
-        for resource in copy(resources):
+        for resource in copy.copy(resources):
             if resource in parts:
                 parts.remove(resource)
             else:
@@ -54,14 +53,16 @@ def ical(request, year, semester_type, slug, selector=None):
     resources = get_resources(selector)
 
     if not resources: # Invalid selectors
-        raise Http404
+        raise http.Http404
 
     semester = Semester(year=year, type=semester_type)
 
-    cache_key  = reverse('schedule-ical', args=[semester.year, semester.type, slug])
+    cache_key  = urlresolvers.reverse(
+        'schedule-ical', args=[semester.year, semester.type, slug])
     cache_key += '+'.join(resources)
 
-    title  = reverse('schedule', args=[semester.year, semester.type, slug])
+    title  = urlresolvers.reverse(
+        'schedule', args=[semester.year, semester.type, slug])
     if len(resources) != 3:
         title += '+'.join(resources)
 
@@ -102,7 +103,7 @@ def ical(request, year, semester_type, slug, selector=None):
 
     filename = '%s.ics' % '-'.join([str(semester.year), semester.type, slug] + resources)
 
-    response = HttpResponse(icalstream, mimetype='text/calendar')
+    response = http.HttpResponse(icalstream, mimetype='text/calendar')
     response['Content-Type'] = 'text/calendar; charset=utf-8'
     response['Filename'] = filename  # IE needs this
     response['Content-Disposition'] = 'attachment; filename=%s' % filename
@@ -130,7 +131,7 @@ def add_lectutures(lectures, semester, cal):
             'byweekno': weeks,
             'count': len(weeks),
             'byweekday': l.day,
-            'dtstart': datetime(int(semester.year),1,1)
+            'dtstart': datetime.datetime(int(semester.year),1,1)
         }
 
         summary = l.alias or l.course.code
@@ -141,22 +142,22 @@ def add_lectutures(lectures, semester, cal):
         else:
             desc = u'%s (%s)' % (l.course.name, l.course.code)
 
-        for d in rrule(WEEKLY, **rrule_kwargs):
+        for d in rrule.rrule(rrule.WEEKLY, **rrule_kwargs):
             vevent = cal.add('vevent')
             vevent.add('summary').value = summary
             vevent.add('location').value = rooms
             vevent.add('description').value = desc
 
             vevent.add('dtstart').value = d.replace(hour=l.start.hour,
-                    minute=l.start.minute, tzinfo=tzlocal())
+                    minute=l.start.minute, tzinfo=tz.tzlocal())
 
             vevent.add('dtend').value = d.replace(hour=l.end.hour,
-                    minute=l.end.minute, tzinfo=tzlocal())
+                    minute=l.end.minute, tzinfo=tz.tzlocal())
 
-            vevent.add('dtstamp').value = datetime.now(tzlocal())
+            vevent.add('dtstamp').value = datetime.datetime.now(tz.tzlocal())
 
             vevent.add('uid').value = 'lecture-%d-%s@%s' % \
-                    (l.id, d.strftime('%Y%m%d'), HOSTNAME)
+                    (l.id, d.strftime('%Y%m%d'), settings.ICAL_HOSTNAME)
 
             if l.type and l.type.optional:
                 vevent.add('transp').value = 'TRANSPARENT'
@@ -180,26 +181,26 @@ def add_exams(exams, semester, cal):
 
         vevent.add('summary').value = summary
         vevent.add('description').value = desc
-        vevent.add('dtstamp').value = datetime.now(tzlocal())
+        vevent.add('dtstamp').value = datetime.datetime.now(tz.tzlocal())
 
-        vevent.add('uid').value = 'exam-%d@%s' % (e.id, HOSTNAME)
+        vevent.add('uid').value = 'exam-%d@%s' % (e.id, settings.ICAL_HOSTNAME)
 
         if e.handout_date:
             if e.handout_time:
-                vevent.add('dtstart').value = datetime.combine(e.handout_date,
-                        e.handout_time).replace(tzinfo=tzlocal())
+                vevent.add('dtstart').value = datetime.datetime.combine(
+                    e.handout_date, e.handout_time).replace(tzinfo=tz.tzlocal())
             else:
                 vevent.add('dtstart').value = e.handout_date
 
             if e.exam_time:
-                vevent.add('dtend').value = datetime.combine(e.exam_date,
-                        e.exam_time).replace(tzinfo=tzlocal())
+                vevent.add('dtend').value = datetime.datetime.combine(
+                    e.exam_date, e.exam_time).replace(tzinfo=tz.tzlocal())
             else:
                 vevent.add('dtend').value = e.exam_date
         else:
             if e.exam_time:
-                start = datetime.combine(e.exam_date,
-                        e.exam_time).replace(tzinfo=tzlocal())
+                start = datetime.datetime.combine(
+                    e.exam_date, e.exam_time).replace(tzinfo=tz.tzlocal())
             else:
                 start = e.exam_date
 
@@ -208,8 +209,8 @@ def add_exams(exams, semester, cal):
             if e.duration and e.exam_time:
                 hours = int(math.floor(e.duration))
                 minutes = int((e.duration % 1) * 60)
-                vevent.add('dtend').value = start + timedelta(hours=hours,
-                    minutes=minutes)
+                vevent.add('dtend').value = start + datetime.timedelta(
+                    hours=hours, minutes=minutes)
             else:
                 vevent.add('dtend').value = start
 
@@ -218,8 +219,8 @@ def add_deadlines(deadlines, semester, cal):
         vevent = cal.add('vevent')
 
         if d.time:
-            start = datetime.combine(d.date, d.time)
-            start = start.replace(tzinfo=tzlocal())
+            start = datetime.datetime.combine(d.date, d.time)
+            start = start.replace(tzinfo=tz.tzlocal())
         else:
             start = d.date
 
@@ -229,6 +230,6 @@ def add_deadlines(deadlines, semester, cal):
 
         vevent.add('summary').value = summary
         vevent.add('description').value = desc
-        vevent.add('dtstamp').value = datetime.now(tzlocal())
-        vevent.add('uid').value = 'deadline-%d@%s' % (d.id, HOSTNAME)
+        vevent.add('dtstamp').value = datetime.datetime.now(tz.tzlocal())
+        vevent.add('uid').value = 'deadline-%d@%s' % (d.id, settings.ICAL_HOSTNAME)
         vevent.add('dtstart').value = start

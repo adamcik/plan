@@ -16,12 +16,13 @@
 # You should have received a copy of the Affero GNU General Public
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
-from plan.common.tests import BaseTestCase
+from plan.common import tests
+from plan.ical.views import get_resources
 
-class EmptyViewTestCase(BaseTestCase):
+
+class EmptyViewTestCase(tests.BaseTestCase):
 
     def test_ical(self):
-        from plan.ical.views import get_resources
 
         args = [
             '',
@@ -97,6 +98,7 @@ class EmptyViewTestCase(BaseTestCase):
         url = self.url('schedule-ical')
         response = self.client.get(url, {'plain': True})
         self.assertEquals(response.status_code, 200)
+
 
 class ViewTestCase(EmptyViewTestCase):
     fixtures = ['test_data.json', 'test_user.json']
