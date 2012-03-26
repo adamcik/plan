@@ -22,6 +22,7 @@ import logging
 from django.conf import settings
 from django.views.debug import technical_500_response
 
+
 class InternalIpMiddleware(object):
     '''Middleware that adds IP to INTERNAL ips if user is superuser'''
 
@@ -32,12 +33,14 @@ class InternalIpMiddleware(object):
                 settings.INTERNAL_IPS = list(settings.INTERNAL_IPS) + [request.META.get('REMOTE_ADDR')]
         return None
 
+
 class UserBasedExceptionMiddleware(object):
     '''Exception middleware that gives super users technical_500_response'''
 
     def process_exception(self, request, exception):
         if request.user.is_superuser:
             return technical_500_response(request, *sys.exc_info())
+
 
 class PlainContentMiddleware(object):
     def __init__(self):

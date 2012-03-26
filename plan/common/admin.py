@@ -22,10 +22,12 @@ from django.contrib.auth.models import User
 from plan.common.models import (Course, Exam, ExamType, Group, Lecture,
     Lecturer, Room, Semester, LectureType, Deadline, Subscription, Student)
 
+
 class CourseAdmin(admin.ModelAdmin):
     list_display = ('code', 'points', 'name', 'url', 'semester')
     list_filter = ('semester', 'points')
     search_fields = ('code', 'name')
+
 
 class ExamAdmin(admin.ModelAdmin):
     list_display = ('course', 'exam_date', 'exam_time', 'duration')
@@ -41,6 +43,7 @@ class ExamAdmin(admin.ModelAdmin):
         form.base_fields['course'].queryset = course
 
         return form
+
 
 class LectureAdmin(admin.ModelAdmin):
     list_display = ('course', 'day', 'start', 'end', 'type')
@@ -61,6 +64,7 @@ class LectureAdmin(admin.ModelAdmin):
         form.base_fields['course'].queryset = course
 
         return form
+
 
 class SubscriptionAdmin(admin.ModelAdmin):
     list_display = ('student', 'course')
@@ -95,11 +99,14 @@ class SubscriptionAdmin(admin.ModelAdmin):
 
         return form
 
+
 class StudentAdmin(admin.ModelAdmin):
     ordering = ('slug',)
 
+
 class LectureTypeAdmin(admin.ModelAdmin):
     list_display = ('name', 'optional')
+
 
 class DeadlineAdmin(admin.ModelAdmin):
     ordering = ('subscription__student__slug', 'subscription__course__code', 'date', 'time')
@@ -118,6 +125,7 @@ class DeadlineAdmin(admin.ModelAdmin):
         form.base_fields['subscription'].queryset = subscription
 
         return form
+
 
 class RoomAdmin(admin.ModelAdmin):
     ordering = ('name',)

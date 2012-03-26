@@ -21,6 +21,7 @@ import coverage
 from django.test.simple import run_tests as django_test_runner
 from django.conf import settings
 
+
 def test_runner_with_coverage(test_labels, verbosity=1, interactive=True,
     extra_tests=[]):
     """Custom test runner. Follows the django.test.simple.run_tests()

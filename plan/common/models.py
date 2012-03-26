@@ -29,6 +29,7 @@ from plan.common.managers import LectureManager, DeadlineManager, \
 # To allow for overriding of the codes idea of now() for tests
 now = datetime.now
 
+
 class Student(models.Model):
     slug = models.SlugField(_('Slug'), unique=True)
     user = models.ForeignKey(User, null=True, blank=True)
@@ -41,6 +42,7 @@ class Student(models.Model):
 
     def __unicode__(self):
         return self.slug
+
 
 class Subscription(models.Model):
     student = models.ForeignKey(Student)
@@ -84,6 +86,7 @@ class Subscription(models.Model):
 
         return tmp
 
+
 class LectureType(models.Model):
     name = models.CharField(_('Name'), max_length=100, unique=True)
     optional = models.BooleanField(_('Optional'))
@@ -94,6 +97,7 @@ class LectureType(models.Model):
     class Meta:
         verbose_name = _('Lecture type')
         verbose_name_plural = _('Lecture types')
+
 
 class Room(models.Model):
     name = models.CharField(_('Name'), max_length=100, unique=True)
@@ -106,6 +110,7 @@ class Room(models.Model):
         verbose_name = _('Room')
         verbose_name_plural = _('Rooms')
 
+
 class Group(models.Model):
     DEFAULT = 'Other'
 
@@ -117,6 +122,7 @@ class Group(models.Model):
     class Meta:
         verbose_name = _('Group')
         verbose_name_plural = _('Groups')
+
 
 class Course(models.Model):
     code = models.CharField(_('Code'), max_length=100)
@@ -204,6 +210,7 @@ class Course(models.Model):
 
         return tmp
 
+
 class Semester(models.Model):
     SPRING = 'spring'
     FALL = 'fall'
@@ -278,6 +285,7 @@ class Semester(models.Model):
 
         return Semester.objects.get(year=current.year, type=current.type)
 
+
 class ExamType(models.Model):
     code = models.CharField(_('Code'), max_length=20, unique=True)
     name = models.CharField(_('Name'), max_length=100, blank=True, null=True)
@@ -290,6 +298,7 @@ class ExamType(models.Model):
     class Meta:
         verbose_name = _('Exam type')
         verbose_name_plural = _('Exam types')
+
 
 class Exam(models.Model):
     course = models.ForeignKey(Course)
@@ -313,6 +322,7 @@ class Exam(models.Model):
     def __unicode__(self):
         return  u'%s (%s)' % (self.course, self.type)
 
+
 class Week(models.Model):
     NUMBER_CHOICES = [(x, x) for x in range(1, 53)]
 
@@ -328,6 +338,7 @@ class Week(models.Model):
     def __unicode__(self):
         return u'%s week %d' % (self.lecture, self.number)
 
+
 class Lecturer(models.Model):
     name = models.CharField(_('Name'), max_length=200, unique=True)
 
@@ -337,6 +348,7 @@ class Lecturer(models.Model):
 
     def __unicode__(self):
         return self.name
+
 
 class Lecture(models.Model):
     DAYS = (
@@ -415,6 +427,7 @@ class Lecture(models.Model):
                 tmp[lecture].append(dict(map(lambda x, y: (x, y), fields, obj[1:])))
 
         return tmp
+
 
 class Deadline(models.Model):
     subscription = models.ForeignKey('Subscription')

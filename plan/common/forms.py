@@ -26,6 +26,7 @@ from plan.common.models import Deadline, Semester
 
 now = datetime.now # To allow for overriding of now in test
 
+
 class CourseAliasForm(forms.Form):
     '''Form for changing subscription names'''
     alias = forms.CharField(widget=forms.TextInput(attrs={'size':8}),
@@ -38,6 +39,7 @@ class CourseAliasForm(forms.Form):
             alias = '%s...' % alias[:40]
 
         return alias
+
 
 class GroupForm(forms.Form):
     '''Form for selecting groups for a course'''
@@ -59,6 +61,7 @@ class GroupForm(forms.Form):
         self.fields['groups'].choices = choices
         self.fields['groups'].widget.attrs['size'] = 5
 
+
 class DeadlineForm(forms.models.ModelForm):
     '''Form for adding deadlines'''
 
@@ -79,6 +82,7 @@ class DeadlineForm(forms.models.ModelForm):
         self.fields['time'].widget.attrs['size'] = 2
         self.fields['date'].widget.attrs['size'] = 7
         self.fields['task'].widget.attrs['size'] = 20
+
 
 class ScheduleForm(forms.Form):
     slug = forms.CharField(max_length=50)

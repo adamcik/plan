@@ -21,6 +21,7 @@ from dateutil.rrule import rrule, MO, TU, WE, TH, FR, DAILY
 
 from plan.common.models import Lecture
 
+
 class Timetable:
     slots = 12
 

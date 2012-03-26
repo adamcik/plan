@@ -20,6 +20,7 @@ from django.db import models, connection
 
 from plan.common.utils import build_search
 
+
 class LectureManager(models.Manager):
     def get_lectures(self, year, semester_type, slug=None, week=None, course=None):
         """
@@ -99,6 +100,7 @@ class LectureManager(models.Manager):
                     .extra(where=where, tables=tables, select=select, select_params=params)
                     .order_by(*order))
 
+
 class DeadlineManager(models.Manager):
     def get_deadlines(self, year, semester_type, slug):
         return self.get_query_set().filter(
@@ -113,6 +115,7 @@ class DeadlineManager(models.Manager):
                 'date',
                 'time',
             )
+
 
 class ExamManager(models.Manager):
     def get_exams(self, year, semester_type, slug=None, course=None):
@@ -143,6 +146,7 @@ class ExamManager(models.Manager):
                 select=select
             ).order_by('handout_date', 'handout_time',
                     'exam_date', 'exam_time')
+
 
 class CourseManager(models.Manager):
     def get_courses(self, year, semester_type, slug):

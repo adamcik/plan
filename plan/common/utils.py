@@ -26,6 +26,7 @@ from django.template import Context, loader
 from django.db.models import Q
 from django.utils.text import smart_split
 
+
 def build_search(searchstring, filters, max_query_length=4, combine=and_):
     count = 0
     search_filter = Q()
@@ -66,6 +67,7 @@ def server_error(request, template_name='500.html'):
 
     return HttpResponseServerError(t.render(context))
 
+
 def compact_sequence(sequence):
     '''Compact sequences of numbers into array of strings [i, j, k-l, n-m]'''
     if not sequence:
@@ -96,6 +98,7 @@ def compact_sequence(sequence):
 
     return compact
 
+
 class ColorMap(dict):
     """Magic dict that assigns colors"""
 
@@ -122,6 +125,7 @@ class ColorMap(dict):
             else:
                 self[k] = 'color%d' % (self.index % self.max)
             return super(ColorMap, self).__getitem__(k)
+
 
 def max_number_of_weeks(year):
     if list(rrule(WEEKLY, count=1, byweekno=53, byweekday=MO,
