@@ -9,25 +9,29 @@ MANAGERS = ADMINS
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '<Your nice long secret key here>'
 
-DATABASE_ENGINE = 'mysql' # See Django docs...
-DATABASE_NAME = '<Your db name here>'
-DATABASE_USER = '<Your db user here>'
-DATABASE_HOST = '<Your db host here>'
-DATABASE_PASSWORD = '<Your db password here>'
-DATABASE_OPTIONS = { # Only needed for mySQL
-   "init_command": "SET storage_engine=INNODB",
+DATABASES = {
+    'default': {
+        'NAME': '...',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'USER': '...',
+        'PASSWORD': '...',
+        'HOST': '...',
+    },
+    'ntnu': {
+        'NAME': '...',
+        'ENGINE': 'django.db.backends.mysql',
+        'USER': '...',
+        'PASSWORD': '...',
+        'HOST': '...'',
+    }
 }
 
-# This extra set of settings is to connect to
-# the NTNU lecture database.
-MYSQL_NAME = ''
-MYSQL_USER = ''
-MYSQL_PASSWORD = ''
-MYSQL_HOST = ''
-
-CACHE_BACKEND = 'locmem://' # See Django docs...
-CACHE_PREFIX = '<Your prefix here>' # Should be unique per site
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'KEY_PREFIX': '...',
+    }
+}
 
 # Web URL where Django should expect to find media files
-MEDIA_URL = '/timeplan/media/'
-ADMIN_MEDIA_PREFIX = '/timeplan/media/admin/'
+STATIC_URL = '/timeplan/media/'
