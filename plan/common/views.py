@@ -28,8 +28,7 @@ from django.utils import text
 
 from plan.common.models import Course, Deadline, Exam, Group, \
         Lecture, Semester, Subscription, Room, Lecturer, Week, Student
-from plan.common.forms import DeadlineForm, GroupForm, CourseAliasForm, \
-        ScheduleForm
+from plan.common import forms
 from plan.common.utils import ColorMap, max_number_of_weeks
 from plan.common.timetable import Timetable
 from plan.cache import clear_cache, compress, decompress
@@ -74,7 +73,7 @@ def getting_started(request, year=None, semester_type=None):
 
     # Redirect user to their timetable
     if request.method == 'POST' and 'slug' in request.POST:
-        schedule_form = ScheduleForm(request.POST, queryset=qs)
+        schedule_form = forms.ScheduleForm(request.POST, queryset=qs)
 
         if schedule_form.is_valid():
             slug = schedule_form.cleaned_data['slug']
@@ -100,7 +99,7 @@ def getting_started(request, year=None, semester_type=None):
         return shortcuts.redirect('frontpage')
 
     if not schedule_form:
-        schedule_form = ScheduleForm(queryset=qs)
+        schedule_form = forms.ScheduleForm(queryset=qs)
 
     context = Course.get_stats(semester=semester)
     context.update({
@@ -248,13 +247,13 @@ def schedule(request, year, semester_type, slug, advanced=False,
 
         # Set up deadline form
         if not deadline_form:
-            deadline_form = DeadlineForm(subscriptions)
+            deadline_form = forms.DeadlineForm(subscriptions)
 
         # Set up and course name forms
         for course in courses:
             alias = course.alias or ''
-            course.alias_form = CourseAliasForm(initial={'alias': alias},
-                     prefix=course.id)
+            course.alias_form = forms.CourseAliasForm(
+                initial={'alias': alias}, prefix=course.id)
 
     next_semester = Semester.current().next()
 
@@ -323,7 +322,7 @@ def select_groups(request, year, semester_type, slug):
             except KeyError: # Skip courses without groups
                 continue
 
-            group_form = GroupForm(groups, request.POST, prefix=c.id)
+            group_form = forms.GroupForm(groups, request.POST, prefix=c.id)
 
             if group_form.is_valid():
                 subscription = Subscription.objects.get_subscriptions(year,
@@ -355,7 +354,7 @@ def select_groups(request, year, semester_type, slug):
 
         initial_groups = subscription_groups.get(subscription_id, all_subscripted_groups)
 
-        c.group_form = GroupForm(groups, prefix=c.id, initial={'groups': initial_groups})
+        c.group_form = forms.GroupForm(groups, prefix=c.id, initial={'groups': initial_groups})
 
     return shortcuts.render(request, 'select_groups.html', {
             'semester': semester,
@@ -388,7 +387,7 @@ def new_deadline(request, year, semester_type, slug):
 
         if 'submit_add' in request.POST:
             subscriptions = Subscription.objects.get_subscriptions(year, semester.type, slug)
-            deadline_form = DeadlineForm(subscriptions, request.POST)
+            deadline_form = forms.DeadlineForm(subscriptions, request.POST)
 
             if deadline_form.is_valid():
                 deadline_form.save()
@@ -539,7 +538,7 @@ def select_course(request, year, semester_type, slug, add=False):
             subscriptions = Subscription.objects.get_subscriptions(year, semester.type, slug)
 
             for u in subscriptions:
-                form = CourseAliasForm(request.POST, prefix=u.course_id)
+                form = forms.CourseAliasForm(request.POST, prefix=u.course_id)
 
                 if form.is_valid():
                     alias = form.cleaned_data['alias'].strip()
