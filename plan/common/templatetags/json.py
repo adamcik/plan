@@ -16,12 +16,12 @@
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
 from django import template
-from django.template.defaultfilters import stringfilter
-from django.utils.simplejson import dumps
+from django.utils import simplejson as json
 
 register = template.Library()
 
+
 @register.filter(name='json')
-def json(value):
-    return dumps(value)
+def dump_json(value):
+    return json.dumps(value)
 json.is_safe = True

@@ -21,6 +21,7 @@ from django.conf import settings
 
 register = template.Library()
 
+
 @register.inclusion_tag('google/analytics.html', takes_context=True)
 def googleanalytics(context):
     return {

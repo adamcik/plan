@@ -19,13 +19,15 @@
 import re
 
 from django import template
-from django.utils.translation import get_language
+from django.utils import translation
 
 register = template.Library()
 
+
 @register.inclusion_tag('title.html')
 def title(semester, slug, week=None):
-    if get_language() in ['no', 'nb', 'nn']:
+    # TODO(adamcik): feels wrong hardcoding this here.
+    if translation.get_language() in ['no', 'nb', 'nn']:
         ending = norwegian(slug)
     else:
         ending = english(slug)
@@ -38,6 +40,7 @@ def title(semester, slug, week=None):
         'week': week,
     }
 
+
 def render_title(semester, slug, week=None):
     title_template = template.loader.get_template('title.html')
     context = template.Context(title(semester, slug, week))
@@ -46,10 +49,12 @@ def render_title(semester, slug, week=None):
     rendered = re.sub('\s+', ' ', rendered)
     return rendered.strip()
 
+
 def english(slug):
     if slug.endswith('s'):
         return "'"
     return "'s"
+
 
 def norwegian(slug):
     if re.search(r'(z|s|x|sch|sh)$', slug):

@@ -17,12 +17,14 @@
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
 from django import template
-from django.utils.safestring import mark_safe
-from django.utils.html import conditional_escape
+from django.utils import safestring
+from django.utils import html
 
 register = template.Library()
 
+
 @register.filter
 def nbsp(string):
-    return mark_safe(conditional_escape(string).replace(' ', '&nbsp;'))
+    return safestring.mark_safe(
+        html.conditional_escape(string).replace(' ', '&nbsp;'))
 nbsp.is_safe = True

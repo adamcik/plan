@@ -18,8 +18,8 @@
 # You should have received a copy of the Affero GNU General Public
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
-from django.template.defaultfilters import slugify as django_slugify, stringfilter
 from django import template
+from django.template import defaultfilters
 
 register = template.Library()
 
@@ -34,11 +34,9 @@ REPLACE_MAP = (
 
 
 @register.filter
-@stringfilter
+@defaultfilters.stringfilter
 def slugify(text):
     for old, new in REPLACE_MAP:
         text = text.replace(old, new)
-
-    return django_slugify(text)
-
+    return defaultfilters.slugify(text)
 slugify.is_safe = True
