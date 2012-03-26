@@ -32,6 +32,7 @@ from plan.common.templatetags.slugify import slugify
 
 logger = logging.getLogger('plan.common.cache')
 
+
 def get_realm(semester, slug=None):
     args = [semester.year, semester.type]
     if slug:
@@ -39,16 +40,20 @@ def get_realm(semester, slug=None):
 
     return ':'.join([slugify(a) for a in args])
 
+
 def clear_cache(semester, slug):
     logger.debug('Clearing cache for %s %s', semester, slug)
     django_cache.delete(get_realm(semester, slug))
     django_cache.delete(get_realm(semester))
 
+
 def compress(value):
     return base64.b64encode(zlib.compress(value))
 
+
 def decompress(value):
     return zlib.decompress(base64.b64decode(value))
+
 
 class CacheClass(base_cache.BaseCache):
     def __init__(self, *args, **kwargs):

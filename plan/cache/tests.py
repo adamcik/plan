@@ -16,12 +16,13 @@
 # You should have received a copy of the Affero GNU General Public
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
-from django.test import TestCase
+from django import test
 from django.conf import settings
 
 from plan.cache import cache
 
-class NotUsingDummyCache(TestCase):
+
+class NotUsingDummyCache(test.TestCase):
     def testNotUsingDummyCache(self):
         self.assertEquals(False, 'dummy' in settings.CACHES['default']['BACKEND'])
 

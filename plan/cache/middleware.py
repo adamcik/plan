@@ -20,8 +20,9 @@ import logging
 
 from django.core.cache.backends.dummy import CacheClass as DummyCacheClass
 
+from plan import cache
 from plan.common.models import Semester
-from plan.cache import CacheClass, get_realm
+
 
 class CacheMiddleware(object):
     '''Attaches either a real or dummy cache instance to our request, cache
@@ -38,9 +39,9 @@ class CacheMiddleware(object):
             semester = Semester.current()
 
         slug = view_kwargs.get('slug', None)
-        realm = get_realm(semester, slug)
+        realm = cache.get_realm(semester, slug)
         bypass = self._ignore_cache(request)
-        request.cache = CacheClass(realm=realm, bypass=bypass)
+        request.cache = cache.CacheClass(realm=realm, bypass=bypass)
 
     def _ignore_cache(self, request):
         return (
