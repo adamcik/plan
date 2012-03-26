@@ -45,6 +45,7 @@ now = datetime.datetime.now
 # Start new week on saturdays
 get_current_week = lambda: (now() + datetime.timedelta(days=2)).isocalendar()[1]
 
+
 def shortcut(request, slug):
     '''Redirect users to their timetable for the current semester'''
 
@@ -58,6 +59,7 @@ def shortcut(request, slug):
             raise http.Http404
 
     return schedule_current(request, semester.year, semester.type, slug)
+
 
 def getting_started(request, year=None, semester_type=None):
     '''Intial top level page that greets users'''
@@ -115,6 +117,7 @@ def getting_started(request, year=None, semester_type=None):
 
     return response
 
+
 def course_query(request, year, semester_type):
     limit = request.GET.get('limit', '10')
     query = request.GET.get('q', '').strip()[:100]
@@ -149,6 +152,7 @@ def course_query(request, year, semester_type):
 
     return response
 
+
 def schedule_current(request, year, semester_type, slug):
     if Semester(year=year, type=semester_type).is_current:
         current_week = get_current_week()
@@ -157,6 +161,7 @@ def schedule_current(request, year, semester_type, slug):
             'schedule-week', year, semester_type, slug, current_week)
 
     return shortcuts.redirect('schedule', year, semester_type, slug)
+
 
 def schedule(request, year, semester_type, slug, advanced=False,
         week=None, all=False, deadline_form=None, cache_page=True):
@@ -309,6 +314,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
 
     return response
 
+
 def select_groups(request, year, semester_type, slug):
     '''Form handler for selecting groups to use in schedule'''
 
@@ -364,6 +370,7 @@ def select_groups(request, year, semester_type, slug):
             'color_map': color_map,
         })
 
+
 def toggle_deadlines(request, year, semester_type, slug):
     semester = Semester(year=year, type=semester_type)
     student = Student.objects.distinct().get(slug=slug,
@@ -377,6 +384,7 @@ def toggle_deadlines(request, year, semester_type, slug):
 
     return shortcuts.redirect(
         'schedule-advanced', semester.year, semester.type, slug)
+
 
 def new_deadline(request, year, semester_type, slug):
     '''Handels addition of tasks, reshows schedule view if form does not
@@ -404,6 +412,7 @@ def new_deadline(request, year, semester_type, slug):
 
     return shortcuts.redirect(
         'schedule-advanced', semester.year, semester.type, slug)
+
 
 def copy_deadlines(request, year, semester_type, slug):
     '''Handles importing of deadlines'''
@@ -459,6 +468,7 @@ def copy_deadlines(request, year, semester_type, slug):
 
     return shortcuts.redirect(
         'schedule-advanced', semester.year, semester.type, slug)
+
 
 def select_course(request, year, semester_type, slug, add=False):
     '''Handle selecting of courses from course list, change of names and
@@ -554,6 +564,7 @@ def select_course(request, year, semester_type, slug, add=False):
     return shortcuts.redirect(
         'schedule-advanced', semester.year, semester.type, slug)
 
+
 def select_lectures(request, year, semester_type, slug):
     '''Handle selection of lectures to hide'''
     semester = Semester(year=year, type=semester_type)
@@ -573,6 +584,7 @@ def select_lectures(request, year, semester_type, slug):
 
     return shortcuts.redirect(
         'schedule-advanced', semester.year, semester.type, slug)
+
 
 def list_courses(request, year, semester_type, slug):
     '''Display a list of courses'''
@@ -599,6 +611,7 @@ def list_courses(request, year, semester_type, slug):
         response = http.HttpResponse(cache_utils.decompress(content))
 
     return response
+
 
 def about(request):
     response = request.cache.get('about', realm=False)
