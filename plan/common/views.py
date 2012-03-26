@@ -21,7 +21,7 @@ from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.http import HttpResponse, Http404
 from django import shortcuts
 from django.template.context import RequestContext
 from django.utils.html import escape
@@ -99,7 +99,7 @@ def getting_started(request, year=None, semester_type=None):
     except Semester.DoesNotExist:
         if not year and not semester_type:
             return shortcuts.render(request, 'start.html', {'missing': True})
-        return HttpResponseRedirect(reverse('frontpage'))
+        return shortcuts.redirect('frontpage')
 
     if not schedule_form:
         schedule_form = ScheduleForm(queryset=qs)
@@ -155,11 +155,10 @@ def schedule_current(request, year, semester_type, slug):
     if Semester(year=year, type=semester_type).is_current:
         current_week = get_current_week()
 
-        return HttpResponseRedirect(reverse('schedule-week',
-            args=[year, semester_type, slug, current_week]))
+        return shortcuts.redirect(
+            'schedule-week', year, semester_type, slug, current_week)
 
-    return HttpResponseRedirect(reverse('schedule',
-        args=[year, semester_type, slug]))
+    return shortcuts.redirect('schedule', year, semester_type, slug)
 
 def schedule(request, year, semester_type, slug, advanced=False,
         week=None, all=False, deadline_form=None, cache_page=True):
@@ -336,8 +335,8 @@ def select_groups(request, year, semester_type, slug):
 
         clear_cache(semester, slug)
 
-        return HttpResponseRedirect(reverse('schedule-advanced',
-                args=[semester.year,semester.type,slug]))
+        return shortcuts.redirect(
+            'schedule-advanced', semester.year, semester.type,slug)
 
     color_map = ColorMap(hex=True)
     subscription_groups = Subscription.get_groups(year, semester.type, slug)
@@ -378,8 +377,8 @@ def toggle_deadlines(request, year, semester_type, slug):
         student.save()
         clear_cache(semester, slug)
 
-    return HttpResponseRedirect(reverse('schedule-advanced',
-            args=[semester.year, semester.type, slug]))
+    return shortcuts.redirect(
+        'schedule-advanced', semester.year, semester.type, slug)
 
 def new_deadline(request, year, semester_type, slug):
     '''Handels addition of tasks, reshows schedule view if form does not
@@ -405,8 +404,8 @@ def new_deadline(request, year, semester_type, slug):
                     id__in=request.POST.getlist('deadline_remove')
                 ).delete()
 
-    return HttpResponseRedirect(reverse('schedule-advanced',
-            args = [semester.year,semester.type,slug]))
+    return shortcuts.redirect(
+        'schedule-advanced', semester.year, semester.type, slug)
 
 def copy_deadlines(request, year, semester_type, slug):
     '''Handles importing of deadlines'''
@@ -460,8 +459,8 @@ def copy_deadlines(request, year, semester_type, slug):
                 )
             clear_cache(semester, slug)
 
-    return HttpResponseRedirect(reverse('schedule-advanced',
-            args=[semester.year,semester.type,slug]))
+    return shortcuts.redirect(
+        'schedule-advanced', semester.year, semester.type, slug)
 
 def select_course(request, year, semester_type, slug, add=False):
     '''Handle selecting of courses from course list, change of names and
@@ -474,8 +473,7 @@ def select_course(request, year, semester_type, slug, add=False):
     try:
         semester = Semester.objects.get(year=year, type=semester.type)
     except Semester.DoesNotExist:
-        return HttpResponseRedirect(reverse('schedule', args=
-                [year,semester.type,slug]))
+        return shortcuts.redirect('schedule', year, semester.type, slug)
 
     if request.method == 'POST':
         clear_cache(semester, slug)
@@ -524,7 +522,8 @@ def select_course(request, year, semester_type, slug, add=False):
                         'to_many_subscriptions': to_many_subscriptions,
                     })
 
-            return HttpResponseRedirect(reverse('change-groups', args=[semester.year, semester.type, slug]))
+            return shortcuts.redirect(
+                'change-groups', semester.year, semester.type, slug)
 
         elif 'submit_remove' in request.POST:
             courses = []
@@ -554,8 +553,8 @@ def select_course(request, year, semester_type, slug, add=False):
                     u.alias = alias
                     u.save()
 
-    return HttpResponseRedirect(reverse('schedule-advanced',
-            args=[semester.year, semester.type, slug]))
+    return shortcuts.redirect(
+        'schedule-advanced', semester.year, semester.type, slug)
 
 def select_lectures(request, year, semester_type, slug):
     '''Handle selection of lectures to hide'''
@@ -574,8 +573,8 @@ def select_lectures(request, year, semester_type, slug):
 
         clear_cache(semester, slug)
 
-    return HttpResponseRedirect(reverse('schedule-advanced',
-            args=[semester.year, semester.type, slug]))
+    return shortcuts.redirect(
+        'schedule-advanced', semester.year, semester.type, slug)
 
 def list_courses(request, year, semester_type, slug):
     '''Display a list of courses'''
