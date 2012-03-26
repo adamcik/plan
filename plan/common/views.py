@@ -22,7 +22,7 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse, Http404
-from django.shortcuts import render_to_response, get_object_or_404
+from django import shortcuts
 from django.template.context import RequestContext
 from django.utils.html import escape
 from django.utils.text import truncate_words
@@ -98,7 +98,7 @@ def getting_started(request, year=None, semester_type=None):
         semester = Semester.objects.get(year=semester.year, type=semester.type)
     except Semester.DoesNotExist:
         if not year and not semester_type:
-            return render_to_response('start.html', {'missing': True}, RequestContext(request))
+            return shortcuts.render(request, 'start.html', {'missing': True})
         return HttpResponseRedirect(reverse('frontpage'))
 
     if not schedule_form:
@@ -111,7 +111,7 @@ def getting_started(request, year=None, semester_type=None):
         'schedule_form': schedule_form,
     })
 
-    response = render_to_response('start.html', context, RequestContext(request))
+    response = shortcuts.render(request, 'start.html', context)
 
     request.cache.set(cache_key, response, settings.CACHE_TIME_FRONTPAGE)
 
@@ -188,7 +188,9 @@ def schedule(request, year, semester_type, slug, advanced=False,
     # Color mapping for the courses
     color_map = ColorMap(hex=True)
 
-    semester = get_object_or_404(Semester, year=semester.year, type=semester.type)
+    semester = shortcuts.get_object_or_404(Semester,
+                                           year=semester.year,
+                                           type=semester.type)
 
     try:
         student = Student.objects.distinct().get(slug=slug, subscription__course__semester=semester)
@@ -268,7 +270,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
         next_message = Subscription.objects.get_subscriptions(next_semester.year, next_semester.type, slug).count()
         next_message = next_message == 0
 
-    response = render_to_response('schedule.html', {
+    response = shortcuts.render(request, 'schedule.html', {
             'advanced': advanced,
             'all': all,
             'color_map': color_map,
@@ -293,7 +295,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
             'lecturers': lecturers,
             'lecture_weeks': weeks,
             'student': student,
-        }, RequestContext(request))
+        })
 
     if cache_page:
         current_time = now()
@@ -358,12 +360,12 @@ def select_groups(request, year, semester_type, slug):
 
         c.group_form = GroupForm(groups, prefix=c.id, initial={'groups': initial_groups})
 
-    return render_to_response('select_groups.html', {
+    return shortcuts.render(request, 'select_groups.html', {
             'semester': semester,
             'slug': slug,
             'courses': courses,
             'color_map': color_map,
-        }, RequestContext(request))
+        })
 
 def toggle_deadlines(request, year, semester_type, slug):
     semester = Semester(year=year, type=semester_type)
@@ -431,12 +433,12 @@ def copy_deadlines(request, year, semester_type, slug):
                     'subscription__course__id'
                 ).exclude(subscription__student__slug=slug)
 
-            return render_to_response('select_deadlines.html', {
+            return shortcuts.render(request, 'select_deadlines.html', {
                     'color_map': color_map,
                     'deadlines': deadlines,
                     'semester': semester,
                     'slug': slug,
-                }, RequestContext(request))
+                })
 
         elif 'deadline_id' in request.POST:
             deadline_ids = request.POST.getlist('deadline_id')
@@ -513,14 +515,14 @@ def select_course(request, year, semester_type, slug, add=False):
                     errors.append(l)
 
             if errors or to_many_subscriptions:
-                return render_to_response('error.html', {
+                return shortcuts.render(request, 'error.html', {
                         'courses': errors,
                         'max': settings.TIMETABLE_MAX_COURSES,
                         'slug': slug,
                         'year': year,
                         'type': semester_type,
                         'to_many_subscriptions': to_many_subscriptions,
-                    }, RequestContext(request))
+                    })
 
             return HttpResponseRedirect(reverse('change-groups', args=[semester.year, semester.type, slug]))
 
@@ -588,10 +590,10 @@ def list_courses(request, year, semester_type, slug):
     if not content:
         courses = Course.objects.get_courses_with_exams(year, semester.type)
 
-        response = render_to_response('course_list.html', {
+        response = shortcuts.render(request, 'course_list.html', {
                 'semester': semester,
                 'course_list': courses,
-            }, RequestContext(request))
+            })
 
         request.cache.set(cache_key, compress(response.content),
             settings.CACHE_TIME_SCHECULDE, realm=False)
@@ -640,9 +642,10 @@ def about(request):
     for d in data:
         d.append((max_x, d[-1][1]))
 
-    response = render_to_response('about.html',
-        {'data': data, 'color_map': ColorMap(hex=True)},
-        RequestContext(request))
+    response = shortcuts.render(request, 'about.html', {
+            'data': data,
+            'color_map': ColorMap(hex=True)
+        })
 
     request.cache.set('about', response,
         settings.CACHE_TIME_ABOUT, realm=False)
