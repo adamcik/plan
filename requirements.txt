@@ -11,4 +11,4 @@ south >= 0.7     # Database migrations
 lxml             # Web scraping of data
 sphinx           # To build docs
 
-django-compressor  # Sane handling of compressing js/css
+django-compressor >= 1.1

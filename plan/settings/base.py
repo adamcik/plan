@@ -140,10 +140,6 @@ STATICFILES_FINDERS = (
 STATICFILES_DIRS = (MEDIA_ROOT,)
 
 # -- Django compress settings:
-COMPRESS = True
-
-COMPRESS_OFFLINE = True
-
 if DEBUG:
     COMPRESS_DEBUG_TOGGLE = 'no-cache'
 
