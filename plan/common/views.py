@@ -28,11 +28,11 @@ from django.utils import text
 
 from plan.common.models import Course, Deadline, Exam, Group, \
         Lecture, Semester, Subscription, Room, Lecturer, Week, Student
+from plan import cache as cache_utils
 from plan.common import forms
-from plan.common.utils import ColorMap, max_number_of_weeks
-from plan.common.timetable import Timetable
-from plan.cache import clear_cache, compress, decompress
-from plan.common.templatetags.slugify import slugify
+from plan.common import timetable
+from plan.common import utils
+from plan.common.templatetags import slugify
 
 # FIXME split into frontpage/semester, course, deadline, schedule files
 # FIXME Split views that do multiple form handling tasks into seperate views
@@ -103,7 +103,7 @@ def getting_started(request, year=None, semester_type=None):
 
     context = Course.get_stats(semester=semester)
     context.update({
-        'color_map': ColorMap(hex=True),
+        'color_map': utils.ColorMap(hex=True),
         'current': semester,
         'schedule_form': schedule_form,
     })
@@ -121,7 +121,7 @@ def course_query(request, year, semester_type):
     if limit > settings.TIMETABLE_AJAX_LIMIT:
         limit = settings.TIMETABLE_AJAX_LIMIT
 
-    cache_key = ':'.join([request.path, slugify(query), '%d' % limit])
+    cache_key = ':'.join([request.path, slugify.slugify(query), '%d' % limit])
     cache_key = cache_key.lower()
 
     response = request.cache.get(cache_key, realm=False)
@@ -169,7 +169,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
 
     if week:
         week = int(week)
-        max_week = max_number_of_weeks(semester.year)
+        max_week = utils.max_number_of_weeks(semester.year)
 
     if week is not None:
         if (week <= 0 or week > max_week):
@@ -182,7 +182,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
         return response
 
     # Color mapping for the courses
-    color_map = ColorMap(hex=True)
+    color_map = utils.ColorMap(hex=True)
 
     semester = shortcuts.get_object_or_404(Semester,
                                            year=semester.year,
@@ -230,7 +230,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
         color_map[c.id]
 
     # Create Timetable
-    table = Timetable(lectures)
+    table = timetable.Timetable(lectures)
 
     if week:
         table.set_week(semester.year, week)
@@ -330,12 +330,12 @@ def select_groups(request, year, semester_type, slug):
 
                 subscription.groups = group_form.cleaned_data['groups']
 
-        clear_cache(semester, slug)
+        cache_utils.clear_cache(semester, slug)
 
         return shortcuts.redirect(
             'schedule-advanced', semester.year, semester.type,slug)
 
-    color_map = ColorMap(hex=True)
+    color_map = utils.ColorMap(hex=True)
     subscription_groups = Subscription.get_groups(year, semester.type, slug)
     all_subscripted_groups = set()
 
@@ -372,7 +372,7 @@ def toggle_deadlines(request, year, semester_type, slug):
     if request.method == 'POST':
         student.show_deadlines = not student.show_deadlines
         student.save()
-        clear_cache(semester, slug)
+        cache_utils.clear_cache(semester, slug)
 
     return shortcuts.redirect(
         'schedule-advanced', semester.year, semester.type, slug)
@@ -383,7 +383,7 @@ def new_deadline(request, year, semester_type, slug):
     semester = Semester(year=year, type=semester_type)
 
     if request.method == 'POST':
-        clear_cache(semester, slug)
+        cache_utils.clear_cache(semester, slug)
 
         if 'submit_add' in request.POST:
             subscriptions = Subscription.objects.get_subscriptions(year, semester.type, slug)
@@ -413,7 +413,7 @@ def copy_deadlines(request, year, semester_type, slug):
         if 'slugs' in request.POST:
             slugs = request.POST['slugs'].replace(',', ' ').split()
 
-            color_map = ColorMap()
+            color_map = utils.ColorMap()
 
             courses = Course.objects.get_courses(year, semester.type, slug). \
                     distinct()
@@ -454,7 +454,7 @@ def copy_deadlines(request, year, semester_type, slug):
                         time=d.time,
                         task=d.task
                 )
-            clear_cache(semester, slug)
+            cache_utils.clear_cache(semester, slug)
 
     return shortcuts.redirect(
         'schedule-advanced', semester.year, semester.type, slug)
@@ -473,7 +473,7 @@ def select_course(request, year, semester_type, slug, add=False):
         return shortcuts.redirect('schedule', year, semester.type, slug)
 
     if request.method == 'POST':
-        clear_cache(semester, slug)
+        cache_utils.clear_cache(semester, slug)
 
         if 'submit_add' in request.POST or add:
             lookup = []
@@ -568,7 +568,7 @@ def select_lectures(request, year, semester_type, slug):
             else:
                 subscription.exclude.clear()
 
-        clear_cache(semester, slug)
+        cache_utils.clear_cache(semester, slug)
 
     return shortcuts.redirect(
         'schedule-advanced', semester.year, semester.type, slug)
@@ -591,11 +591,11 @@ def list_courses(request, year, semester_type, slug):
                 'course_list': courses,
             })
 
-        request.cache.set(cache_key, compress(response.content),
+        request.cache.set(cache_key, cache_utils.compress(response.content),
             settings.CACHE_TIME_SCHECULDE, realm=False)
 
     else:
-        response = http.HttpResponse(decompress(content))
+        response = http.HttpResponse(cache_utils.decompress(content))
 
     return response
 
@@ -640,7 +640,7 @@ def about(request):
 
     response = shortcuts.render(request, 'about.html', {
             'data': data,
-            'color_map': ColorMap(hex=True)
+            'color_map': utils.ColorMap(hex=True)
         })
 
     request.cache.set('about', response,
