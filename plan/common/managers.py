@@ -16,7 +16,8 @@
 # You should have received a copy of the Affero GNU General Public
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
-from django.db import models, connection
+from django.db import connection
+from django.db import models
 
 from plan.common.utils import build_search
 

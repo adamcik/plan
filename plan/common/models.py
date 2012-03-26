@@ -16,10 +16,11 @@
 # You should have received a copy of the Affero GNU General Public
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
-from datetime import datetime, timedelta, time
+import datetime
 
-from django.db import models, connection
-from django.template.defaultfilters import time as time_filter
+from django.db import models
+from django.db import connection
+from django.template import defaultfilters as filters
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
 
@@ -27,7 +28,7 @@ from plan.common.managers import LectureManager, DeadlineManager, \
         ExamManager, CourseManager, SubscriptionManager
 
 # To allow for overriding of the codes idea of now() for tests
-now = datetime.now
+now = datetime.datetime.now
 
 
 class Student(models.Model):
@@ -240,15 +241,15 @@ class Semester(models.Model):
 
     def get_first_day(self):
         if self.type == self.SPRING:
-            return datetime(self.year, 1, 1)
+            return datetime.datetime(self.year, 1, 1)
         else:
-            return datetime(self.year, 6, 30)
+            return datetime.datetime(self.year, 6, 30)
 
     def get_last_day(self):
         if self.type == self.SPRING:
-            return datetime(self.year, 7, 1)
+            return datetime.datetime(self.year, 7, 1)
         else:
-            return datetime(self.year, 12, 31)
+            return datetime.datetime(self.year, 12, 31)
 
     def next(self):
         if self.type == self.SPRING:
@@ -272,7 +273,7 @@ class Semester(models.Model):
         current_time = now()
 
         if early:
-            current_time += timedelta(weeks=2) # FIXME to low for summer
+            current_time += datetime.timedelta(weeks=2) # FIXME to low for summer
 
         # Default to current semester
         if current_time.month <= 6:
@@ -383,15 +384,15 @@ class Lecture(models.Model):
         return u'%4d %10s %s-%s on %3s' % (
             self.id,
             self.course.short_name,
-            time_filter(self.start),
-            time_filter(self.end),
+            filters.time(self.start),
+            filters.time(self.end),
             self.get_day_display()[:3])
 
     @property
     def short_name(self):
         return u'%s-%s on %s' % (
-                time_filter(self.start),
-                time_filter(self.end),
+                filters.time(self.start),
+                filters.time(self.end),
                 self.get_day_display()
             )
 
@@ -454,9 +455,9 @@ class Deadline(models.Model):
     @property
     def datetime(self):
         if self.time:
-            return datetime.combine(self.date, self.time)
+            return datetime.datetime.combine(self.date, self.time)
         else:
-            return datetime.combine(self.date, time())
+            return datetime.datetime.combine(self.date, datetime.time())
 
     @property
     def seconds(self):
@@ -467,7 +468,7 @@ class Deadline(models.Model):
     @property
     def expired(self):
         if self.time:
-            return datetime.combine(self.date, self.time) < now()
+            return datetime.datetime.combine(self.date, self.time) < now()
         else:
             return self.date <= now().date()
 

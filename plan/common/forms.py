@@ -16,15 +16,16 @@
 # You should have received a copy of the Affero GNU General Public
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
-from datetime import datetime, timedelta
+import datetime
 
 from django import forms
-from django.db.models import Q
+from django.db import models
 
-from plan.common.templatetags.slugify import slugify
 from plan.common.models import Deadline, Semester
 
-now = datetime.now # To allow for overriding of now in test
+from plan.common.templatetags import slugify
+
+now = datetime.datetime.now # To allow for overriding of now in test
 
 
 class CourseAliasForm(forms.Form):
@@ -76,7 +77,7 @@ class DeadlineForm(forms.models.ModelForm):
         self.fields['subscription'].label_from_instance = lambda obj: obj.alias or obj.course.code
 
 
-        self.fields['date'].initial = now().date()+timedelta(days=7)
+        self.fields['date'].initial = now().date()+datetime.timedelta(days=7)
         self.fields['time'].input_formats = ['%H:%M', '%H.%M']
 
         self.fields['time'].widget.attrs['size'] = 2
@@ -100,8 +101,8 @@ class ScheduleForm(forms.Form):
 
         if not qs:
             qs = self.fields['semester'].queryset
-            qs = qs.filter(Q(year__exact=current.year, type=current.type) |
-                           Q(year__exact=next.year, type=next.type))
+            qs = qs.filter(models.Q(year__exact=current.year, type=current.type) |
+                           models.Q(year__exact=next.year, type=next.type))
         qs = qs.order_by('-id')
 
         if len(qs) == 1:
@@ -115,7 +116,7 @@ class ScheduleForm(forms.Form):
         self.fields['slug'].widget.attrs['id'] = 's'
 
     def clean_slug(self):
-        slug = slugify(self.cleaned_data['slug'])
+        slug = slugify.slugify(self.cleaned_data['slug'])
 
         if not slug:
             raise forms.ValidationError('Invalid value.')

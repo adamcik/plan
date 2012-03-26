@@ -16,22 +16,23 @@
 # You should have received a copy of the Affero GNU General Public
 # License along with Plan.  If not, see <http://www.gnu.org/licenses/>.
 
-from operator import and_
-from dateutil.rrule import rrule, WEEKLY, MO
-from datetime import date
+import datetime
+import operator
+from dateutil import rrule
 
+from django import http
+from django import template
 from django.conf import settings
-from django.http import HttpResponseServerError
-from django.template import Context, loader
-from django.db.models import Q
-from django.utils.text import smart_split
+from django.db import models
+from django.utils import text as text_utils
 
 
-def build_search(searchstring, filters, max_query_length=4, combine=and_):
+def build_search(searchstring, filters, max_query_length=4,
+                 combine=operator.and_):
     count = 0
-    search_filter = Q()
+    search_filter = models.Q()
 
-    for word in smart_split(searchstring):
+    for word in text_utils.smart_split(searchstring):
         if word[0] in ['"', "'"]:
             if word[0] == word[-1]:
                 word = word[1:-1]
@@ -41,9 +42,9 @@ def build_search(searchstring, filters, max_query_length=4, combine=and_):
         if count > max_query_length:
             break
 
-        local_filter = Q()
+        local_filter = models.Q()
         for f in filters:
-            local_filter |= Q(**{f: word})
+            local_filter |= models.Q(**{f: word})
 
         search_filter = combine(search_filter, local_filter)
         count += 1
@@ -59,13 +60,13 @@ def server_error(request, template_name='500.html'):
     Context: None
     """
     # You need to create a 500.html template.
-    t = loader.get_template(template_name)
+    t = template.loader.get_template(template_name)
 
-    context = Context({'MEDIA_URL': settings.MEDIA_URL,
-                       'STATIC_URL': settings.STATIC_URL,
-                       'SOURCE_URL': settings.SOURCE_URL})
+    context = template.Context({'MEDIA_URL': settings.MEDIA_URL,
+                                'STATIC_URL': settings.STATIC_URL,
+                                'SOURCE_URL': settings.SOURCE_URL})
 
-    return HttpResponseServerError(t.render(context))
+    return http.HttpResponseServerError(t.render(context))
 
 
 def compact_sequence(sequence):
@@ -128,8 +129,8 @@ class ColorMap(dict):
 
 
 def max_number_of_weeks(year):
-    if list(rrule(WEEKLY, count=1, byweekno=53, byweekday=MO,
-            dtstart=date(year, 1, 1)))[0].year == year:
+    if list(rrule.rrule(rrule.WEEKLY, count=1, byweekno=53, byweekday=rrule.MO,
+            dtstart=datetime.date(year, 1, 1)))[0].year == year:
         return 53
     return 52
 

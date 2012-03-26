@@ -20,7 +20,7 @@ import sys
 import logging
 
 from django.conf import settings
-from django.views.debug import technical_500_response
+from django.views import debug
 
 
 class InternalIpMiddleware(object):
@@ -39,7 +39,7 @@ class UserBasedExceptionMiddleware(object):
 
     def process_exception(self, request, exception):
         if request.user.is_superuser:
-            return technical_500_response(request, *sys.exc_info())
+            return debug.technical_500_response(request, *sys.exc_info())
 
 
 class PlainContentMiddleware(object):
