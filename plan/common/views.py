@@ -19,12 +19,12 @@
 import logging
 import datetime
 
-from django.conf import settings
-from django.http import HttpResponse, Http404
+from django import http
 from django import shortcuts
-from django.utils import html as html_utils
-from django.utils import text
+from django.conf import settings
 from django.db import connection
+from django.utils import html
+from django.utils import text
 
 from plan.common.models import Course, Deadline, Exam, Group, \
         Lecture, Semester, Subscription, Room, Lecturer, Week, Student
@@ -55,7 +55,7 @@ def shortcut(request, slug):
         try:
             semester = Semester.current(from_db=True)
         except Semester.DoesNotExist:
-            raise Http404
+            raise http.Http404
 
     return schedule_current(request, semester.year, semester.type, slug)
 
@@ -130,7 +130,7 @@ def course_query(request, year, semester_type):
     if response:
         return response
 
-    response = HttpResponse(mimetype='text/plain; charset=utf-8')
+    response = http.HttpResponse(mimetype='text/plain; charset=utf-8')
 
     if not query:
         return response
@@ -140,8 +140,8 @@ def course_query(request, year, semester_type):
         query, limit)
 
     for course in courses:
-        code = html_utils.escape(course.code)
-        name = html_utils.escape(text.truncate_words(course.name, 5))
+        code = html.escape(course.code)
+        name = html.escape(text.truncate_words(course.name, 5))
         response.write(u'%s|%s\n' % (code, name or u'?'))
 
     request.cache.set(cache_key, response, settings.CACHE_TIME_AJAX,
@@ -174,7 +174,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
 
     if week is not None:
         if (week <= 0 or week > max_week):
-            raise Http404
+            raise http.Http404
 
     if cache_page:
         response = request.cache.get(request.path)
@@ -596,7 +596,7 @@ def list_courses(request, year, semester_type, slug):
             settings.CACHE_TIME_SCHECULDE, realm=False)
 
     else:
-        response = HttpResponse(decompress(content))
+        response = http.HttpResponse(decompress(content))
 
     return response
 
