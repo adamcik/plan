@@ -63,48 +63,29 @@ def shortcut(request, slug):
         raise http.Http404
 
 
-def getting_started(request, year=None, semester_type=None):
+def getting_started(request, year, semester_type):
     '''Intial top level page that greets users'''
-    schedule_form = None
-
-    if year and semester_type:
-        semester = Semester(year=year, type=semester_type)
-        qs = Semester.objects.filter(year=semester.year, type=semester.type)
-        cache_key = 'frontpage-semester'
-    else:
-        semester = Semester.current(early=True)
-        qs = None
-        cache_key = 'frontpage'
+    semester = Semester.objects.get(year=year, type=semester_type)
 
     # Redirect user to their timetable
-    if request.method == 'POST' and 'slug' in request.POST:
-        schedule_form = forms.ScheduleForm(request.POST, queryset=qs)
+    if request.method == 'POST':
+        schedule_form = forms.ScheduleForm(request.POST)
 
         if schedule_form.is_valid():
             slug = schedule_form.cleaned_data['slug']
-            semester = schedule_form.cleaned_data['semester'] or semester
-
             response = schedule_current(request, semester.year, semester.type, slug)
 
             # Store last timetable visited in a cookie so that we can populate
             # the field with a default value next time.
             response.set_cookie('last', slug, settings.TIMETABLE_COOKIE_AGE)
             return response
+    else:
+        schedule_form = forms.ScheduleForm()
 
-    response = request.cache.get(cache_key)
+    response = request.cache.get('semester')
 
     if response:
         return response
-
-    try:
-        semester = Semester.objects.get(year=semester.year, type=semester.type)
-    except Semester.DoesNotExist:
-        if not year and not semester_type:
-            return shortcuts.render(request, 'start.html', {'missing': True})
-        return shortcuts.redirect('frontpage')
-
-    if not schedule_form:
-        schedule_form = forms.ScheduleForm(queryset=qs)
 
     context = Course.get_stats(semester=semester)
     context.update({
@@ -114,9 +95,7 @@ def getting_started(request, year=None, semester_type=None):
     })
 
     response = shortcuts.render(request, 'start.html', context)
-
-    request.cache.set(cache_key, response, settings.CACHE_TIME_FRONTPAGE)
-
+    request.cache.set('semester', response, settings.CACHE_TIME_SEMESTER)
     return response
 
 

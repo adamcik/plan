@@ -87,38 +87,14 @@ class DeadlineForm(forms.models.ModelForm):
 
 class ScheduleForm(forms.Form):
     slug = forms.CharField(max_length=50)
-    semester = forms.ModelChoiceField(Semester.objects.all(), empty_label=None)
 
     def __init__(self, *args, **kwargs):
-        '''Display form for choosing schedule. If only one semester is
-           available hide to field.'''
-        qs = kwargs.pop('queryset', None)
-
         super(ScheduleForm, self).__init__(*args, **kwargs)
-
-        current = Semester.current()
-        next = current.next()
-
-        if not qs:
-            qs = self.fields['semester'].queryset
-            qs = qs.filter(models.Q(year__exact=current.year, type=current.type) |
-                           models.Q(year__exact=next.year, type=next.type))
-        qs = qs.order_by('-id')
-
-        if len(qs) == 1:
-            self.fields['semester'].widget = forms.HiddenInput()
-
-        if qs:
-            self.fields['semester'].initial = list(qs)[-1].id
-        self.fields['semester'].queryset = qs
-
         self.fields['slug'].widget.attrs['size'] = 12
         self.fields['slug'].widget.attrs['id'] = 's'
 
     def clean_slug(self):
         slug = slugify.slugify(self.cleaned_data['slug'])
-
         if not slug:
             raise forms.ValidationError('Invalid value.')
-
         return slug
