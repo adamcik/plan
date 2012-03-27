@@ -27,8 +27,8 @@ class EmptyViewTestCase(BaseTestCase):
     def test_index(self):
         response = self.client.get(self.url_basic('frontpage'))
 
-        self.failUnlessEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'start.html')
+        self.failUnlessEqual(response.status_code, 404)
+        self.assertTemplateUsed(response, '404.html')
 
     def test_shortcut(self):
         response = self.client.get(self.url('shortcut', 'adamcik'))
@@ -43,40 +43,13 @@ class ViewTestCase(BaseTestCase):
     # FIXME test adding course that does not exist for a given semester
 
     def test_index(self):
-        # Load page
-        response = self.client.get(self.url_basic('frontpage'))
-        self.failUnlessEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'start.html')
-
-        # Check that cache gets set
-        cached_response = self.cache_no_slug.get('frontpage')
-
-        self.assertEquals(True, cached_response is not None)
-        self.assertEquals(response.content, cached_response.content)
-
-        # Check that cache gets cleared
-        self.clear()
-        cached_response = self.cache_no_slug.get('frontpage')
-
-        self.assertEquals(cached_response, None)
-
-        # FIXME test posting to index
-        # FIXME test missing code 76
-
-    def test_index_semester_cache(self):
-        '''Tests that frontpage and semester cache aren't intertwined (regresion test)'''
-
         response = self.client.get(reverse('frontpage'))
-        self.assertContains(response, '<select name="semester"')
-
-        response = self.client.get(self.url('frontpage-semester',
-            self.semester.year, self.semester.type))
-        self.assertNotContains(response, '<select name="semester"')
+        url = reverse('semester', args=[2010, Semester.SPRING])
+        self.assertRedirects(response, url)
 
     def test_shortcut(self):
         response = self.client.get(self.url('shortcut', 'adamcik'))
-        url = reverse('schedule-week', args=[2009, Semester.SPRING, 'adamcik', 1])
-
+        url = reverse('schedule', args=[2010, Semester.SPRING, 'adamcik'])
         self.assertRedirects(response, url)
 
     def test_schedule_current(self):
