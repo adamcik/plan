@@ -47,23 +47,20 @@ get_current_week = lambda: (now() + datetime.timedelta(days=2)).isocalendar()[1]
 
 
 def frontpage(self):
-    current = Semester.current()
-    return shortcuts.redirect('semester', current.year, current.type)
+    try:
+        semester = Semester.objects.current()
+        return shortcuts.redirect('semester', semester.year, semester.type)
+    except Semester.DoesNotExist:
+        raise http.Http404
 
 
 def shortcut(request, slug):
     '''Redirect users to their timetable for the current semester'''
-
-    # FIXME this logic should be hidden by current()
     try:
-        semester = Semester.current(from_db=True, early=True)
+        semester = Semester.objects.current()
+        return schedule_current(request, semester.year, semester.type, slug)
     except Semester.DoesNotExist:
-        try:
-            semester = Semester.current(from_db=True)
-        except Semester.DoesNotExist:
-            raise http.Http404
-
-    return schedule_current(request, semester.year, semester.type, slug)
+        raise http.Http404
 
 
 def getting_started(request, year=None, semester_type=None):

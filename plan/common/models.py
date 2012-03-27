@@ -25,7 +25,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
 
 from plan.common.managers import LectureManager, DeadlineManager, \
-        ExamManager, CourseManager, SubscriptionManager
+        ExamManager, CourseManager, SubscriptionManager, SemesterManager
 
 # To allow for overriding of the codes idea of now() for tests
 now = datetime.datetime.now
@@ -224,6 +224,8 @@ class Semester(models.Model):
     year = models.PositiveSmallIntegerField(_('Year'))
     type = models.CharField(_('Type'), max_length=10, choices=SEMESTER_TYPES)
 
+    objects = SemesterManager()
+
     class Meta:
         verbose_name = _('Semester')
         verbose_name_plural = _('Semesters')
@@ -261,6 +263,7 @@ class Semester(models.Model):
         t = now()
         return t >= self.get_first_day() and t <= self.get_last_day()
 
+    # TODO(adamcik): this is scraper specific...
     @property
     def prefix(self):
         if self.type == self.SPRING:

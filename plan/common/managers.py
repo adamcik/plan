@@ -204,3 +204,8 @@ class SubscriptionManager(models.Manager):
             ).select_related(
                 'course__code',
             ).order_by('student__slug', 'course__code')
+
+
+class SemesterManager(models.Manager):
+    def current(self):
+        return self.get_query_set().order_by('-year', 'type')[0:1].get()
