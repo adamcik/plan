@@ -46,6 +46,11 @@ now = datetime.datetime.now
 get_current_week = lambda: (now() + datetime.timedelta(days=2)).isocalendar()[1]
 
 
+def frontpage(self):
+    current = Semester.current()
+    return shortcuts.redirect('semester', current.year, current.type)
+
+
 def shortcut(request, slug):
     '''Redirect users to their timetable for the current semester'''
 

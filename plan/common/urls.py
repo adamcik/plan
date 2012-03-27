@@ -19,8 +19,8 @@
 from django.conf.urls.defaults import patterns, url
 
 urlpatterns = patterns('plan.common.views',
-    url(r'^$', 'getting_started', name='frontpage'),
-    url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/$', 'getting_started', name='frontpage-semester'),
+    url(r'^$', 'frontpage', name='frontpage'),
+    url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/$', 'getting_started', name='semester'),
 
     url(r'^(?P<year>\d{4})/(?P<semester_type>\w+)/\+$', 'course_query', name='course-query'),
 
