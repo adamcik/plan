@@ -70,7 +70,6 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'plan.cache.middleware.CacheMiddleware',
-    'plan.common.middleware.PlainContentMiddleware',
 )
 
 INSTALLED_APPS = (
