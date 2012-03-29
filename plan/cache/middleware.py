@@ -44,10 +44,5 @@ class CacheMiddleware(object):
         request.cache = cache.CacheClass(realm=realm, bypass=bypass)
 
     def _ignore_cache(self, request):
-        return (
-            (request.user.is_authenticated() and
-             request.META.get('HTTP_CACHE_CONTROL', '').lower() == 'no-cache') or
-            'no-cache' in request.GET or
-            'no-cache' in request.COOKIES
-        )
-
+        return (request.META.get('HTTP_CACHE_CONTROL', '').lower() == 'no-cache' or
+                'no-cache' in request.GET)

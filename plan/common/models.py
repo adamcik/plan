@@ -33,8 +33,6 @@ now = datetime.datetime.now
 
 class Student(models.Model):
     slug = models.SlugField(_('Slug'), unique=True)
-    user = models.ForeignKey(User, null=True, blank=True)
-
     show_deadlines = models.BooleanField(_('Show deadlines'), default=False)
 
     class Meta:

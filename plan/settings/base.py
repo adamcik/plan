@@ -68,20 +68,12 @@ LOCALE_PATHS = [join(BASE_PATH, 'locale')]
 # -- App and midleware settings:
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'plan.cache.middleware.CacheMiddleware',
-    'plan.common.middleware.UserBasedExceptionMiddleware',
     'plan.common.middleware.PlainContentMiddleware',
 )
 
 INSTALLED_APPS = (
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.sites',
     'django.contrib.staticfiles',
     'plan.common',
     'plan.scrape',
@@ -110,7 +102,6 @@ TEMPLATE_DIRS = (
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.contrib.auth.context_processors.auth',
     'django.core.context_processors.request',
     'plan.common.context_processors.source_url',
 )

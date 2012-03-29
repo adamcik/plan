@@ -13,13 +13,6 @@
 
 from django.conf.urls.defaults import *
 from django.conf import settings
-from django.contrib import admin
-from django.contrib.auth.models import Group
-from django.contrib.sites.models import Site
-
-admin.autodiscover()
-admin.site.unregister(Group)
-admin.site.unregister(Site)
 
 handler500 = 'plan.common.utils.server_error'
 
@@ -32,7 +25,6 @@ else:
     urlpatterns = patterns('')
 
 urlpatterns += patterns('',
-    (r'^admin/(.*)', include(admin.site.urls)),
     (r'^i18n/', include('django.conf.urls.i18n')),
 
     (r'^', include('plan.common.urls')),

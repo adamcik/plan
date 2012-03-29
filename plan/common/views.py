@@ -119,8 +119,8 @@ def course_query(request, year, semester_type):
     if not query:
         return response
 
-    courses = Course.objects.search(i
-        year, semesterr_type, query, limit)
+    courses = Course.objects.search(
+        year, semester_type, query, limit)
 
     for course in courses:
         code = html.escape(course.code)
