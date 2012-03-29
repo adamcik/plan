@@ -1,3 +1,5 @@
+# This file is part of the plan timetable generator, see LICENSE for details.
+
 import os
 import sys
 
