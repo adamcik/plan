@@ -37,17 +37,9 @@ class EmptyViewTestCase(BaseTestCase):
             else:
                 self.assertEquals(response.status_code, 200)
 
-            # Repeat to excerise cache code
             response = self.client.get(url)
             self.assertEquals(response.status_code, 200)
 
-            cached_response = self.get(url)
-            self.assertEquals(response.content, cached_response.content)
-
-            self.clear()
-
-            cached_response = self.get(url)
-            self.assertEquals(cached_response, None)
 
 class ViewTestCase(EmptyViewTestCase):
     fixtures = ['test_data.json', 'test_user.json']

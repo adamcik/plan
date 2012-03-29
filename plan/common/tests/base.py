@@ -22,8 +22,9 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 from plan.common.models import Semester
-from plan.cache import get_realm, clear_cache, CacheClass
 
+
+# TODO(adamcik): switch to proper mock lib.
 class BaseTestCase(TestCase):
     def setUp(self):
         self.set_now_to(2009, 1, 1)
@@ -34,10 +35,6 @@ class BaseTestCase(TestCase):
                 self.semester.type,
                 'adamcik'
             ]
-        realm = get_realm(self.semester, 'adamcik')
-        realm_no_slug = get_realm(self.semester)
-        self.cache = CacheClass(language='en', realm=realm)
-        self.cache_no_slug = CacheClass(language='en', realm=realm_no_slug)
 
     def set_now_to(self, year, month, day):
         from plan.common import models, views
@@ -52,9 +49,3 @@ class BaseTestCase(TestCase):
 
     def url_basic(self, name):
         return reverse(name)
-
-    def clear(self):
-        clear_cache(self.semester, 'adamcik')
-
-    def get(self, key):
-        return self.cache.get(key)

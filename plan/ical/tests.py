@@ -59,24 +59,9 @@ class EmptyViewTestCase(tests.BaseTestCase):
                 url_args = list(self.default_args)
 
             url = self.url('schedule-ical', *url_args)
-            cache_url  = self.url('schedule-ical')
-            cache_url += '+'.join(get_resources(arg))
 
             response = self.client.get(url)
             self.assertEquals(response.status_code, 200)
-
-            cached_response = self.get(cache_url)
-
-            self.assertEquals(True, cached_response is not None)
-            self.assertEquals(response.content, cached_response.content)
-
-            # Repeat to trim cache code
-            response = self.client.get(url)
-            self.assertEquals(response.status_code, 200)
-
-            self.clear()
-            cached_response = self.get(cache_url)
-            self.assertEquals(cached_response, None)
 
         args = [
             'exams+exams',
@@ -96,7 +81,7 @@ class EmptyViewTestCase(tests.BaseTestCase):
             self.assertEquals(response.status_code, 404)
 
         url = self.url('schedule-ical')
-        response = self.client.get(url, {'plain': True})
+        response = self.client.get(url)
         self.assertEquals(response.status_code, 200)
 
 

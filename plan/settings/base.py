@@ -69,7 +69,6 @@ LOCALE_PATHS = [join(BASE_PATH, 'locale')]
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.middleware.locale.LocaleMiddleware',
-    'plan.cache.middleware.CacheMiddleware',
 )
 
 INSTALLED_APPS = (
@@ -78,7 +77,6 @@ INSTALLED_APPS = (
     'plan.scrape',
     'plan.ical',
     'plan.pdf',
-    'plan.cache',
     'plan.google',
     'south',
     'compressor',
@@ -161,13 +159,6 @@ TIMETABLE_MAX_COURSES = 20
 
 # Assume course codes must end with digits
 TIMETABLE_VALID_COURSE_NAMES = r'^[^0-9]+[0-9]+$'
-
-CACHE_TIME_REALM     = 60*60*24*7*4 #  4w
-CACHE_TIME_SCHECULDE = 60*60*24*7   #  1w
-CACHE_TIME_SEMESTER  = 10*60        # 10m
-CACHE_TIME_HELP      = 2*60         #  2m
-CACHE_TIME_AJAX      = 60*60*24*7   #  1w
-CACHE_TIME_ABOUT     = 60*60*24*7   #  1w
 
 # Hostname to be used in UID of ical events, should be a constant service-name
 # as UID changes will trigger email notices for new events in some cases.

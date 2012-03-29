@@ -20,7 +20,6 @@ from django.utils.datastructures import MultiValueDict
 from django.core.urlresolvers import reverse
 
 from plan.common.tests.base import BaseTestCase
-from plan.cache import decompress
 from plan.common.models import Semester, Group, Subscription, Lecture, Deadline
 
 class EmptyViewTestCase(BaseTestCase):
@@ -68,7 +67,6 @@ class ViewTestCase(BaseTestCase):
         # FIXME add group help testing
         # FIXME courses without lectures
         # FIXME test next semester message
-        # FIXME test cache time for deadlines etc
         # FIXME test group-help message
 
         s = self.semester
@@ -92,18 +90,6 @@ class ViewTestCase(BaseTestCase):
             self.assertEquals(response.status_code, 200)
             self.assertTemplateUsed(response, 'schedule.html')
 
-            # Check twice to test cache code
-            response = self.client.get(url)
-            self.assertEquals(response.status_code, 200)
-
-            cache_response = self.get(url)
-            self.assertEquals(response.content, cache_response.content)
-
-            self.clear()
-            cache_response = self.get(url)
-
-            self.assertEquals(cache_response, None)
-
     def test_course_list(self):
         # FIXME test POST
 
@@ -114,13 +100,6 @@ class ViewTestCase(BaseTestCase):
         response = self.client.get(url)
         self.failUnlessEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'course_list.html')
-
-        cache_content = decompress(self.cache.get(key, realm=False))
-        self.assertEquals(response.content, cache_content)
-
-        self.clear()
-        cache_content = decompress(self.cache.get(key, realm=False))
-        self.assertEquals(response.content, cache_content)
 
     def test_change_course(self):
         # FIXME test semester does not exist
@@ -156,14 +135,6 @@ class ViewTestCase(BaseTestCase):
 
             self.assertEquals(response.status_code, 302)
 
-            cache_response = self.get(original_url)
-            self.assertEquals(cache_response, None)
-
-            response = self.client.get(original_url)
-            self.assert_(original_response.content != response.content)
-
-            self.clear()
-
             new_subscriptions = list(Subscription.objects.filter(student__slug='adamcik').order_by('id').values_list())
             self.assert_(new_subscriptions != subscriptions)
 
@@ -197,14 +168,6 @@ class ViewTestCase(BaseTestCase):
             self.assert_(response['Location'].endswith(original_url))
             self.assertEquals(response.status_code, 302)
 
-            cache_response = self.get(original_url)
-            self.assertEquals(cache_response, None)
-
-            response = self.client.get(original_url)
-            self.assert_(original_response.content != response.content)
-
-            self.clear()
-
             new_groups = list(Group.objects.filter(subscription__student__slug='adamcik').order_by('id').values_list())
             self.assert_(groups != new_groups)
 
@@ -235,14 +198,6 @@ class ViewTestCase(BaseTestCase):
 
             self.assert_(response['Location'].endswith(original_url))
             self.assertEquals(response.status_code, 302)
-
-            cache_response = self.get(original_url)
-            self.assertEquals(cache_response, None)
-
-            response = self.client.get(original_url)
-            self.assert_(original_response.content != response.content)
-
-            self.clear()
 
             new_lectures = list(Lecture.objects.filter(excluded_from__student__slug='adamcik').order_by('id').values_list())
             self.assert_(lectures != new_lectures)

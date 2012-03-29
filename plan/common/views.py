@@ -29,7 +29,6 @@ from django.utils import text
 from plan.common.models import (Course, Deadline, Exam, Group, Lecture,
     Semester, Subscription, Room, Lecturer, Week, Student)
 
-from plan import cache as cache_utils
 from plan.common import forms
 from plan.common import timetable
 from plan.common import utils
@@ -49,18 +48,18 @@ get_current_week = lambda: (now() + datetime.timedelta(days=2)).isocalendar()[1]
 def frontpage(self):
     try:
         semester = Semester.objects.current()
-        return shortcuts.redirect('semester', semester.year, semester.type)
     except Semester.DoesNotExist:
         raise http.Http404
+    return shortcuts.redirect('semester', semester.year, semester.type)
 
 
 def shortcut(request, slug):
     '''Redirect users to their timetable for the current semester'''
     try:
         semester = Semester.objects.current()
-        return schedule_current(request, semester.year, semester.type, slug)
     except Semester.DoesNotExist:
         raise http.Http404
+    return schedule_current(request, semester.year, semester.type, slug)
 
 
 def getting_started(request, year, semester_type):
@@ -82,53 +81,29 @@ def getting_started(request, year, semester_type):
     else:
         schedule_form = forms.ScheduleForm()
 
-    response = request.cache.get('semester')
-
-    if response:
-        return response
-
     context = Course.get_stats(semester=semester)
     context.update({
         'color_map': utils.ColorMap(hex=True),
         'current': semester,
         'schedule_form': schedule_form,
     })
-
-    response = shortcuts.render(request, 'start.html', context)
-    request.cache.set('semester', response, settings.CACHE_TIME_SEMESTER)
-    return response
+    return shortcuts.render(request, 'start.html', context)
 
 
 def course_query(request, year, semester_type):
-    limit = request.GET.get('limit', '10')
+    limit = min(request.GET.get('limit', '10'), settings.TIMETABLE_AJAX_LIMIT)
     query = request.GET.get('q', '').strip()[:100]
 
-    if limit > settings.TIMETABLE_AJAX_LIMIT:
-        limit = settings.TIMETABLE_AJAX_LIMIT
-
-    cache_key = ':'.join([request.path, slugify.slugify(query), '%d' % limit])
-    cache_key = cache_key.lower()
-
-    response = request.cache.get(cache_key, realm=False)
-
-    if response:
-        return response
-
     response = http.HttpResponse(mimetype='text/plain; charset=utf-8')
-
     if not query:
         return response
 
-    courses = Course.objects.search(
-        year, semester_type, query, limit)
+    courses = Course.objects.search(year, semester_type, query, limit)
 
     for course in courses:
         code = html.escape(course.code)
         name = html.escape(text.truncate_words(course.name, 5))
         response.write(u'%s|%s\n' % (code, name or u'?'))
-
-    request.cache.set(cache_key, response, settings.CACHE_TIME_AJAX,
-        realm=False)
 
     return response
 
@@ -144,35 +119,24 @@ def schedule_current(request, year, semester_type, slug):
 
 
 def schedule(request, year, semester_type, slug, advanced=False,
-        week=None, all=False, deadline_form=None, cache_page=True):
+             week=None, all=False, deadline_form=None):
     '''Page that handels showing schedules'''
 
-    # Don't do any db stuff until after the cache lines further down
-    semester = Semester(year=year, type=semester_type)
-    response = None
-
     current_week = get_current_week()
-
     if week:
         week = int(week)
-        max_week = utils.max_number_of_weeks(semester.year)
-
+        max_week = utils.max_number_of_weeks(year)
     if week is not None:
         if (week <= 0 or week > max_week):
             raise http.Http404
 
-    if cache_page:
-        response = request.cache.get(request.path)
-
-    if response:
-        return response
-
     # Color mapping for the courses
     color_map = utils.ColorMap(hex=True)
 
-    semester = shortcuts.get_object_or_404(Semester,
-                                           year=semester.year,
-                                           type=semester.type)
+    try:  # TODO(adamcik): lookup up to two semesters larger than given ones instead.
+        semester = Semester.objects.get(year=year, type=semester_type)
+    except Semester.DoesNotExist:
+        raise http.Http404
 
     try:
         student = Student.objects.distinct().get(slug=slug, subscription__course__semester=semester)
@@ -242,7 +206,6 @@ def schedule(request, year, semester_type, slug, advanced=False,
                 initial={'alias': alias}, prefix=course.id)
 
     next_semester = Semester.current().next()
-
     if next_semester.year == semester.year and \
             next_semester.type == semester.type:
         next_message = False
@@ -252,7 +215,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
         next_message = Subscription.objects.get_subscriptions(next_semester.year, next_semester.type, slug).count()
         next_message = next_message == 0
 
-    response = shortcuts.render(request, 'schedule.html', {
+    return shortcuts.render(request, 'schedule.html', {
             'advanced': advanced,
             'all': all,
             'color_map': color_map,
@@ -279,28 +242,11 @@ def schedule(request, year, semester_type, slug, advanced=False,
             'student': student,
         })
 
-    if cache_page:
-        current_time = now()
-        future_deadlines = filter(lambda d: current_time < d.datetime, deadlines)
-
-        if future_deadlines:
-            # time until next deadline
-            cache_time = future_deadlines[0].seconds
-        else:
-            # default cache time
-            cache_time = settings.CACHE_TIME_SCHECULDE
-
-        request.cache.set(request.path, response, cache_time)
-
-    return response
-
 
 def select_groups(request, year, semester_type, slug):
     '''Form handler for selecting groups to use in schedule'''
-
-    semester = Semester(year=year, type=semester_type)
-    courses = Course.objects.get_courses(year, semester.type, slug)
-    course_groups = Course.get_groups(year, semester.type, [c.id for c in courses])
+    courses = Course.objects.get_courses(year, semester_type, slug)
+    course_groups = Course.get_groups(year, semester_type, [c.id for c in courses])
 
     if request.method == 'POST':
         for c in courses:
@@ -313,17 +259,14 @@ def select_groups(request, year, semester_type, slug):
 
             if group_form.is_valid():
                 subscription = Subscription.objects.get_subscriptions(year,
-                        semester.type, slug).get(course=c)
+                        semester_type, slug).get(course=c)
 
                 subscription.groups = group_form.cleaned_data['groups']
 
-        cache_utils.clear_cache(semester, slug)
-
-        return shortcuts.redirect(
-            'schedule-advanced', semester.year, semester.type,slug)
+        return shortcuts.redirect('schedule-advanced', year, semester_type, slug)
 
     color_map = utils.ColorMap(hex=True)
-    subscription_groups = Subscription.get_groups(year, semester.type, slug)
+    subscription_groups = Subscription.get_groups(year, semester_type, slug)
     all_subscripted_groups = set()
 
     for groups in subscription_groups.values():
@@ -344,7 +287,7 @@ def select_groups(request, year, semester_type, slug):
         c.group_form = forms.GroupForm(groups, prefix=c.id, initial={'groups': initial_groups})
 
     return shortcuts.render(request, 'select_groups.html', {
-            'semester': semester,
+            'semester': Semester(year=year, type=semester_type),
             'slug': slug,
             'courses': courses,
             'color_map': color_map,
@@ -352,7 +295,7 @@ def select_groups(request, year, semester_type, slug):
 
 
 def toggle_deadlines(request, year, semester_type, slug):
-    semester = Semester(year=year, type=semester_type)
+    # TODO(adamcik): create helper for this lookup.
     student = Student.objects.distinct().get(slug=slug,
         subscription__course__semester__year__exact=year,
         subscription__course__semester__type=semester_type)
@@ -360,44 +303,36 @@ def toggle_deadlines(request, year, semester_type, slug):
     if request.method == 'POST':
         student.show_deadlines = not student.show_deadlines
         student.save()
-        cache_utils.clear_cache(semester, slug)
 
-    return shortcuts.redirect(
-        'schedule-advanced', semester.year, semester.type, slug)
+    return shortcuts.redirect('schedule-advanced', year, semester_type, slug)
 
 
 def new_deadline(request, year, semester_type, slug):
     '''Handels addition of tasks, reshows schedule view if form does not
        validate'''
-    semester = Semester(year=year, type=semester_type)
 
     if request.method == 'POST':
-        cache_utils.clear_cache(semester, slug)
-
         if 'submit_add' in request.POST:
-            subscriptions = Subscription.objects.get_subscriptions(year, semester.type, slug)
+            subscriptions = Subscription.objects.get_subscriptions(year, semester_type, slug)
             deadline_form = forms.DeadlineForm(subscriptions, request.POST)
 
             if deadline_form.is_valid():
                 deadline_form.save()
             else:
                 return schedule(request, year, semester_type, slug, advanced=True,
-                        deadline_form=deadline_form, cache_page=False)
+                        deadline_form=deadline_form)
 
         elif 'submit_remove' in request.POST:
             logging.debug(request.POST.getlist('deadline_remove'))
-            Deadline.objects.get_deadlines(year, semester.type, slug).filter(
+            Deadline.objects.get_deadlines(year, semester_type, slug).filter(
                     id__in=request.POST.getlist('deadline_remove')
                 ).delete()
 
-    return shortcuts.redirect(
-        'schedule-advanced', semester.year, semester.type, slug)
+    return shortcuts.redirect('schedule-advanced', year, semester_type, slug)
 
 
 def copy_deadlines(request, year, semester_type, slug):
     '''Handles importing of deadlines'''
-
-    semester = Semester(year=year, type=semester_type)
 
     if request.method == 'POST':
         if 'slugs' in request.POST:
@@ -405,7 +340,7 @@ def copy_deadlines(request, year, semester_type, slug):
 
             color_map = utils.ColorMap()
 
-            courses = Course.objects.get_courses(year, semester.type, slug). \
+            courses = Course.objects.get_courses(year, semester_type, slug). \
                     distinct()
 
             # Init color map
@@ -422,7 +357,7 @@ def copy_deadlines(request, year, semester_type, slug):
             return shortcuts.render(request, 'select_deadlines.html', {
                     'color_map': color_map,
                     'deadlines': deadlines,
-                    'semester': semester,
+                    'semester': Semester(year=year, type=semester_type),
                     'slug': slug,
                 })
 
@@ -431,11 +366,11 @@ def copy_deadlines(request, year, semester_type, slug):
             deadlines = Deadline.objects.filter(
                     id__in=deadline_ids,
                     subscription__course__semester__year__exact=year,
-                    subscription__course__semester__type__exact=semester.type,
+                    subscription__course__semester__type__exact=semester_type,
                 )
 
             for d in deadlines:
-                subscription = Subscription.objects.get_subscriptions(year, semester.type,
+                subscription = Subscription.objects.get_subscriptions(year, semester_type,
                     slug).get(course=d.subscription.course)
 
                 Deadline.objects.get_or_create(
@@ -444,10 +379,8 @@ def copy_deadlines(request, year, semester_type, slug):
                         time=d.time,
                         task=d.task
                 )
-            cache_utils.clear_cache(semester, slug)
 
-    return shortcuts.redirect(
-        'schedule-advanced', semester.year, semester.type, slug)
+    return shortcuts.redirect('schedule-advanced', year, semester_type, slug)
 
 
 def select_course(request, year, semester_type, slug, add=False):
@@ -456,24 +389,20 @@ def select_course(request, year, semester_type, slug, add=False):
 
     # FIXME split ut three sub functions into seperate functions?
 
-    semester = Semester(year=year, type=semester_type)
-
     try:
-        semester = Semester.objects.get(year=year, type=semester.type)
+        semester = Semester.objects.get(year=year, type=semester_type)
     except Semester.DoesNotExist:
-        return shortcuts.redirect('schedule', year, semester.type, slug)
+        return shortcuts.redirect('schedule', year, semester_type, slug)
 
     if request.method == 'POST':
-        cache_utils.clear_cache(semester, slug)
-
         if 'submit_add' in request.POST or add:
             lookup = []
 
             for l in request.POST.getlist('course_add'):
                 lookup.extend(l.replace(',', '').split())
 
-            subscriptions = set(Subscription.objects.get_subscriptions(semester.year,
-                semester.type, slug).values_list('course__code', flat=True))
+            subscriptions = set(Subscription.objects.get_subscriptions(year,
+                semester_type, slug).values_list('course__code', flat=True))
 
             errors = []
             to_many_subscriptions = False
@@ -488,7 +417,8 @@ def select_course(request, year, semester_type, slug, add=False):
 
                     course = Course.objects.get(
                             code__iexact=l.strip(),
-                            semester=semester,
+                            semester__year__exact=year,
+                            semester__type__exact=semester_type,
                         )
 
                     Subscription.objects.get_or_create(
@@ -510,8 +440,7 @@ def select_course(request, year, semester_type, slug, add=False):
                         'to_many_subscriptions': to_many_subscriptions,
                     })
 
-            return shortcuts.redirect(
-                'change-groups', semester.year, semester.type, slug)
+            return shortcuts.redirect('change-groups', year, semester_type, slug)
 
         elif 'submit_remove' in request.POST:
             courses = []
@@ -519,14 +448,14 @@ def select_course(request, year, semester_type, slug, add=False):
                 if c.strip():
                     courses.append(c.strip())
 
-            Subscription.objects.get_subscriptions(year, semester.type, slug). \
+            Subscription.objects.get_subscriptions(year, semester_type, slug). \
                     filter(course__id__in=courses).delete()
 
             if Subscription.objects.filter(student__slug=slug).count() == 0:
                 Student.objects.filter(slug=slug).delete()
 
         elif 'submit_name' in request.POST:
-            subscriptions = Subscription.objects.get_subscriptions(year, semester.type, slug)
+            subscriptions = Subscription.objects.get_subscriptions(year, semester_type, slug)
 
             for u in subscriptions:
                 form = forms.CourseAliasForm(request.POST, prefix=u.course_id)
@@ -541,18 +470,16 @@ def select_course(request, year, semester_type, slug, add=False):
                     u.alias = alias
                     u.save()
 
-    return shortcuts.redirect(
-        'schedule-advanced', semester.year, semester.type, slug)
+    return shortcuts.redirect('schedule-advanced', year, semester_type, slug)
 
 
 def select_lectures(request, year, semester_type, slug):
     '''Handle selection of lectures to hide'''
-    semester = Semester(year=year, type=semester_type)
 
     if request.method == 'POST':
         excludes = request.POST.getlist('exclude')
 
-        subscriptions = Subscription.objects.get_subscriptions(year, semester.type, slug)
+        subscriptions = Subscription.objects.get_subscriptions(year, semester_type, slug)
 
         for subscription in subscriptions:
             if excludes:
@@ -560,10 +487,7 @@ def select_lectures(request, year, semester_type, slug):
             else:
                 subscription.exclude.clear()
 
-        cache_utils.clear_cache(semester, slug)
-
-    return shortcuts.redirect(
-        'schedule-advanced', semester.year, semester.type, slug)
+    return shortcuts.redirect('schedule-advanced', year, semester_type, slug)
 
 
 def list_courses(request, year, semester_type, slug):
@@ -572,31 +496,14 @@ def list_courses(request, year, semester_type, slug):
     if request.method == 'POST':
         return select_course(request, year, semester_type, slug, add=True)
 
-    semester = Semester(year=year, type=semester_type)
-    cache_key = '/'.join([year, semester_type, 'courses'])
-    content = request.cache.get(cache_key, realm=False)
-
-    if not content:
-        courses = Course.objects.get_courses_with_exams(year, semester.type)
-
-        response = shortcuts.render(request, 'course_list.html', {
-                'semester': semester,
-                'course_list': courses,
-            })
-
-        request.cache.set(cache_key, cache_utils.compress(response.content),
-            settings.CACHE_TIME_SCHECULDE, realm=False)
-
-    else:
-        response = http.HttpResponse(cache_utils.decompress(content))
-
-    return response
+    courses = Course.objects.get_courses_with_exams(year, semester_type)
+    return shortcuts.render(request, 'course_list.html', {
+            'semester': Semester(year=year, type=semester_type),
+            'course_list': courses,
+        })
 
 
 def about(request):
-    response = request.cache.get('about', realm=False)
-    if response:
-        return response
     cursor = connection.cursor()
     cursor.execute('''
         SELECT COUNT(*), date, semester_id FROM (
@@ -632,12 +539,7 @@ def about(request):
     for d in data:
         d.append((max_x, d[-1][1]))
 
-    response = shortcuts.render(request, 'about.html', {
+    return shortcuts.render(request, 'about.html', {
             'data': data,
             'color_map': utils.ColorMap(hex=True)
         })
-
-    request.cache.set('about', response,
-        settings.CACHE_TIME_ABOUT, realm=False)
-
-    return response

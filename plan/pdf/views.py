@@ -75,11 +75,6 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
 
     semester = Semester(year=year, type=semester_type)
 
-    response = request.cache.get(request.path)
-
-    if response:
-        return response
-
     color_map = ColorMap(hex=True)
 
     margin = 0.5*cm
@@ -230,7 +225,5 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
 
     page.showPage()
     page.save()
-
-    request.cache.set(request.path, response)
 
     return response

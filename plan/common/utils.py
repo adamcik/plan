@@ -130,7 +130,7 @@ class ColorMap(dict):
 
 def max_number_of_weeks(year):
     if list(rrule.rrule(rrule.WEEKLY, count=1, byweekno=53, byweekday=rrule.MO,
-            dtstart=datetime.date(year, 1, 1)))[0].year == year:
+            dtstart=datetime.date(int(year), 1, 1)))[0].year == year:
         return 53
     return 52
 

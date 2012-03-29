@@ -55,21 +55,11 @@ def ical(request, year, semester_type, slug, selector=None):
     if not resources: # Invalid selectors
         raise http.Http404
 
+    title  = urlresolvers.reverse('schedule', args=[year, semester_type, slug])
     semester = Semester(year=year, type=semester_type)
 
-    cache_key  = urlresolvers.reverse(
-        'schedule-ical', args=[semester.year, semester.type, slug])
-    cache_key += '+'.join(resources)
-
-    title  = urlresolvers.reverse(
-        'schedule', args=[semester.year, semester.type, slug])
     if len(resources) != 3:
         title += '+'.join(resources)
-
-    response = request.cache.get(cache_key)
-
-    if response:
-        return response
 
     cal = vobject.iCalendar()
     cal.add('method').value = 'PUBLISH'  # IE/Outlook needs this
@@ -89,15 +79,15 @@ def ical(request, year, semester_type, slug, selector=None):
 
     if 'lectures' in resources:
         lectures = Lecture.objects.get_lectures(year, semester.type, slug)
-        add_lectutures(lectures, semester, cal)
+        add_lectutures(lectures, semester.year, cal)
 
     if 'exams' in resources:
         exams = Exam.objects.get_exams(year, semester.type, slug)
-        add_exams(exams, semester, cal)
+        add_exams(exams, cal)
 
     if 'deadlines' in resources:
         deadlines = Deadline.objects.get_deadlines(year, semester.type, slug)
-        add_deadlines(deadlines, semester, cal)
+        add_deadlines(deadlines, cal)
 
     icalstream = cal.serialize()
 
@@ -107,12 +97,10 @@ def ical(request, year, semester_type, slug, selector=None):
     response['Content-Type'] = 'text/calendar; charset=utf-8'
     response['Filename'] = filename  # IE needs this
     response['Content-Disposition'] = 'attachment; filename=%s' % filename
-
-    request.cache.set(cache_key, response)
-
     return response
 
-def add_lectutures(lectures, semester, cal):
+
+def add_lectutures(lectures, year, cal):
     '''Adds lectures to cal object for current semester'''
 
     all_rooms = Lecture.get_related(Room, lectures)
@@ -131,7 +119,7 @@ def add_lectutures(lectures, semester, cal):
             'byweekno': weeks,
             'count': len(weeks),
             'byweekday': l.day,
-            'dtstart': datetime.datetime(int(semester.year),1,1)
+            'dtstart': datetime.datetime(int(year),1,1)
         }
 
         summary = l.alias or l.course.code
@@ -162,7 +150,7 @@ def add_lectutures(lectures, semester, cal):
             if l.type and l.type.optional:
                 vevent.add('transp').value = 'TRANSPARENT'
 
-def add_exams(exams, semester, cal):
+def add_exams(exams, cal):
     for e in exams:
 
         vevent = cal.add('vevent')
@@ -214,7 +202,7 @@ def add_exams(exams, semester, cal):
             else:
                 vevent.add('dtend').value = start
 
-def add_deadlines(deadlines, semester, cal):
+def add_deadlines(deadlines, cal):
     for d in deadlines:
         vevent = cal.add('vevent')
 
