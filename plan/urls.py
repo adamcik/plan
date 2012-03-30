@@ -1,6 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from django.conf.urls.defaults import *
+from django.conf.urls import *
 from django.conf import settings
 
 handler500 = 'plan.common.utils.server_error'
@@ -21,4 +21,3 @@ urlpatterns += patterns('',
     (r'^', include('plan.pdf.urls')),
 
 )
-

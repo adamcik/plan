@@ -7,8 +7,21 @@ from dateutil import rrule
 from django import http
 from django import template
 from django.conf import settings
+from django.conf import urls
 from django.db import models
 from django.utils import text as text_utils
+
+# Collection of capture groups used in urls.
+url_aliases = {'year': r'(?P<year>\d{4})',
+               'semester': r'(?P<semester_type>\w+)',
+               'slug': r'(?P<slug>[a-z0-9-_]{1,50})',
+               'week': r'(?P<week>\d{1,2})',
+               'size': r'(?P<size>A\d)',
+               'selector': r'(?P<selector>\w+[+\w]*)'}
+
+def url(regexp, *args, **kwargs):
+    """Helper that inserts our url aliases using string formating."""
+    return urls.url(regexp.format(**url_aliases), *args, **kwargs)
 
 
 def build_search(searchstring, filters, max_query_length=4,
