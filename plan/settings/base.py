@@ -1,6 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from os.path import realpath, join, dirname
+import os.path
 import socket
 
 # Dummy translation fuction as we can't import real one
@@ -8,8 +8,7 @@ import socket
 ugettext = lambda s: s
 
 # -- Base settings:
-BASE_PATH = realpath(join(dirname(__file__), '..', '..'))
-SITE_ID = 1
+BASE_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 # -- Debug settings:
 DEBUG = True
@@ -27,7 +26,7 @@ ROOT_URLCONF = 'plan.urls'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': join(BASE_PATH, 'plan.sqlite'),
+        'NAME': os.path.join(BASE_PATH, 'plan.sqlite'),
     },
 }
 
@@ -47,7 +46,7 @@ LANGUAGES = (
   ('en', ugettext('English')),
 )
 
-LOCALE_PATHS = [join(BASE_PATH, 'locale')]
+LOCALE_PATHS = [os.path.join(BASE_PATH, 'locale')]
 
 # -- App and midleware settings:
 MIDDLEWARE_CLASSES = (
@@ -95,14 +94,14 @@ CACHES = {
     },
     'webscraper': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': join(BASE_PATH, 'cache'),
+        'LOCATION': os.path.join(BASE_PATH, 'cache'),
         'TIMEOUT': 60*60*24,
     },
 }
 
 # -- Statifiles settings:
-MEDIA_ROOT = join(BASE_PATH, 'media')
-STATIC_ROOT = join(BASE_PATH, 'static')
+MEDIA_ROOT = os.path.join(BASE_PATH, 'media')
+STATIC_ROOT = os.path.join(BASE_PATH, 'static')
 STATIC_URL = '/static/'
 
 STATICFILES_FINDERS = (
