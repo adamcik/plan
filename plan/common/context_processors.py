@@ -4,5 +4,4 @@ from django.conf import settings
 
 
 def source_url(request):
-    return {'SOURCE_URL': settings.SOURCE_URL}
-
+    return {'SOURCE_URL': settings.TIMETABLE_SOURCE_URL}

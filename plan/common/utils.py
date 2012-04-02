@@ -61,7 +61,7 @@ def server_error(request, template_name='500.html'):
 
     context = template.Context({'MEDIA_URL': settings.MEDIA_URL,
                                 'STATIC_URL': settings.STATIC_URL,
-                                'SOURCE_URL': settings.SOURCE_URL})
+                                'SOURCE_URL': settings.TIMETABLE_SOURCE_URL})
 
     return http.HttpResponseServerError(t.render(context))
 

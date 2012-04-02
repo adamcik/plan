@@ -129,7 +129,7 @@ def add_lectutures(lectures, year, cal):
             vevent.add('dtstamp').value = datetime.datetime.now(tz.tzlocal())
 
             vevent.add('uid').value = 'lecture-%d-%s@%s' % \
-                    (l.id, d.strftime('%Y%m%d'), settings.ICAL_HOSTNAME)
+                    (l.id, d.strftime('%Y%m%d'), settings.TIMETABLE_ICAL_HOSTNAME)
 
             if l.type and l.type.optional:
                 vevent.add('transp').value = 'TRANSPARENT'
@@ -155,7 +155,7 @@ def add_exams(exams, cal):
         vevent.add('description').value = desc
         vevent.add('dtstamp').value = datetime.datetime.now(tz.tzlocal())
 
-        vevent.add('uid').value = 'exam-%d@%s' % (e.id, settings.ICAL_HOSTNAME)
+        vevent.add('uid').value = 'exam-%d@%s' % (e.id, settings.TIMETABLE_ICAL_HOSTNAME)
 
         if e.handout_date:
             if e.handout_time:
@@ -203,5 +203,5 @@ def add_deadlines(deadlines, cal):
         vevent.add('summary').value = summary
         vevent.add('description').value = desc
         vevent.add('dtstamp').value = datetime.datetime.now(tz.tzlocal())
-        vevent.add('uid').value = 'deadline-%d@%s' % (d.id, settings.ICAL_HOSTNAME)
+        vevent.add('uid').value = 'deadline-%d@%s' % (d.id, settings.TIMETABLE_ICAL_HOSTNAME)
         vevent.add('dtstart').value = start
