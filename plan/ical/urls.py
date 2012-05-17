@@ -4,5 +4,5 @@ from django.conf.urls import patterns
 from plan.common.utils import url
 
 urlpatterns = patterns('plan.ical.views',
-    url(r'^{year}/{semester}/{slug}/ical/(?:{selector}/)?$', 'ical', name='schedule-ical'),
+    url(r'^{year}/{semester}/{slug}/ical/(?:{ical}/)?$', 'ical', name='schedule-ical'),
 )

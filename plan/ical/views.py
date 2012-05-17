@@ -11,43 +11,27 @@ from dateutil import tz
 from django import http
 from django.conf import settings
 from django.core import urlresolvers
+from django.utils import translation
 
-from django.utils.translation import ugettext as _
 from plan.common.models import Exam, Deadline, Lecture, Semester, Room, Week
 
+_ = translation.ugettext
 
-def get_resources(selector):
+
+def ical(request, year, semester_type, slug, ical_type=None):
     resources = [u'lectures', u'exams', u'deadlines']
-
-    if selector:
-        parts = selector.split('+')
-
-        for resource in copy.copy(resources):
-            if resource in parts:
-                parts.remove(resource)
-            else:
-                resources.remove(resource)
-
-        if parts:
-            return []
-
-    return resources
-
-def ical(request, year, semester_type, slug, selector=None):
-    resources = get_resources(selector)
-
-    if not resources: # Invalid selectors
+    if ical_type and ical_type not in resources:
         raise http.Http404
+    elif ical_type:
+        resources = [ical_type]
 
     title  = urlresolvers.reverse('schedule', args=[year, semester_type, slug])
     semester = Semester(year=year, type=semester_type)
 
-    if len(resources) != 3:
-        title += '+'.join(resources)
-
     cal = vobject.iCalendar()
     cal.add('method').value = 'PUBLISH'  # IE/Outlook needs this
 
+    # TODO(adamcik): use same logic as in common.templatetags.title
     if slug.lower().endswith('s'):
         description = _(u"%(slug)s' %(semester)s %(year)s schedule for %(resources)s")
     else:
@@ -134,6 +118,7 @@ def add_lectutures(lectures, year, cal):
             if l.type and l.type.optional:
                 vevent.add('transp').value = 'TRANSPARENT'
 
+
 def add_exams(exams, cal):
     for e in exams:
 
@@ -185,6 +170,7 @@ def add_exams(exams, cal):
                     hours=hours, minutes=minutes)
             else:
                 vevent.add('dtend').value = start
+
 
 def add_deadlines(deadlines, cal):
     for d in deadlines:

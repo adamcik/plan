@@ -17,7 +17,8 @@ url_aliases = {'year': r'(?P<year>\d{4})',
                'slug': r'(?P<slug>[a-z0-9-_]{1,50})',
                'week': r'(?P<week>\d{1,2})',
                'size': r'(?P<size>A\d)',
-               'selector': r'(?P<selector>\w+[+\w]*)'}
+               'ical': r'(?P<ical_type>\w+)'}
+
 
 def url(regexp, *args, **kwargs):
     """Helper that inserts our url aliases using string formating."""
