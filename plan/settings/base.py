@@ -146,9 +146,6 @@ TIMETABLE_COOKIE_AGE = 60*60*24*7*4
 # Max number of courses per timetable.
 TIMETABLE_MAX_COURSES = 20
 
-# Assume course codes must end with digits
-TIMETABLE_VALID_COURSE_NAMES = r'^[^0-9]+[0-9]+$'
-
 # Hostname to be used in UID of ical events, should be a constant service-name
 # as UID changes will trigger email notices for new events in google calendar etc.
 TIMETABLE_ICAL_HOSTNAME = socket.getfqdn()

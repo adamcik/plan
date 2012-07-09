@@ -25,7 +25,7 @@ class Migration:
     no_dry_run = True
 
     def forwards(self, orm):
-        orm.Course.objects.exclude(name__regex=settings.TIMETABLE_VALID_COURSE_NAMES).delete()
+        orm.Course.objects.exclude(name__regex=r'^[^0-9]+[0-9]+$').delete()
         orm.Course.objects.filter(semester=None).delete()
 
     def backwards(self, orm):

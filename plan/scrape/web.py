@@ -10,8 +10,8 @@ from lxml.html import parse
 from django.conf import settings
 
 from plan.common.models import Lecture, Course, Semester
-from plan.scrape.lectures import (get_day_of_week, get_time, get_weeks,
-    process_lectures)
+from plan.scrape import utils
+from plan.scrape.lectures import process_lectures
 
 logger = logging.getLogger('plan.scrape.web')
 
@@ -23,11 +23,12 @@ def update_courses(year, semester_type):
     courses = []
 
     for letter in u'ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ':
-        url = 'http://www.ntnu.no/studieinformasjon/timeplan/%s/?%s' % (
+        url = 'http://www.ntnu.no/studieinformasjon/timeplan/{0}/?{1}'.format(
             semester.prefix, urlencode({'bokst': letter.encode('latin1')}))
 
         logger.info('Retrieving %s', url)
 
+        # TODO(adamcik): cache protected urlopen
         try:
             root = parse(url).getroot()
         except IOError, e:
@@ -35,42 +36,37 @@ def update_courses(year, semester_type):
             continue
 
         for tr in root.cssselect('.hovedramme table table tr'):
-            code, name = tr.cssselect('a')
+            code_link, name_link = tr.cssselect('a')
 
-            pattern = 'emnekode=(.+?[0-9\-]+)'
-            code = re.compile(pattern, re.I|re.L).search(code.attrib['href']).group(1)
+            code_href = code_link.attrib['href']
+            code_re = re.compile('emnekode=([^&]+)', re.I|re.L)
+            raw_code = code_re.search(code_href).group(1)
 
-            code, version = code.split('-', 2)[:2]
-            name = name.text_content()
-
-            if name.endswith('(Nytt)'):
-                name = name.rstrip('(Nytt)')
-
-            if not re.match(settings.TIMETABLE_VALID_COURSE_NAMES, code):
+            code, version = utils.parse_course_code(raw_code)
+            if not code:
                 logger.info('Skipped invalid course name: %s', code)
                 continue
 
-            courses.append((code, name, version))
+            # Strip out noise in course name.
+            name = re.search(r'(.*)(\(Nytt\))?', name_link.text_content()).group(1)
 
-    for code, name, version in courses:
-        code = code.strip().upper()
-        name = name.strip()
-        version = version.strip()
+            courses.append({'code': code,
+                            'name': name.strip(),
+                            'version': version,
+                            'points': None})
 
-        if not version:
-            version = None
-
+    # TODO(adamcik): convert this to generic course handling code.
+    for data in courses:
         try:
-            course = Course.objects.get(code=code, semester=semester, version=None)
-            course.version = version
+            course = Course.objects.get(code=data['code'], semester=semester, version=None)
+            course.version = data['version']
         except Course.DoesNotExist:
-            course, created = Course.objects.get_or_create(code=code, semester=semester, version=version)
-
-        if course.name != name:
-            course.name = name
+            course, created = Course.objects.get_or_create(
+                code=data['code'], semester=semester, version=data['version'])
+        course.name = data['name']
+        course.save()
 
         logger.info("Saved course %s" % course.code)
-        course.save()
 
     return courses
 
@@ -89,19 +85,21 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
         courses = courses.filter(code__startswith=matches)
 
     for course in courses:
-        url  = 'http://www.ntnu.no/studieinformasjon/timeplan/%s/?%s' % \
-                (prefix, urlencode({'emnekode': course.code.encode('latin1')}))
+        url = 'http://www.ntnu.no/studieinformasjon/timeplan/{0}/?{1}'.format(
+            prefix, urlencode({'emnekode': course.code.encode('latin1')}))
 
         if course.version:
             versions_to_try = [course.version]
         else:
             versions_to_try = [1, 2, 3, 4]
 
+        table = None
         for number in versions_to_try:
             final_url = '%s-%s' % (url, number)
 
             logger.info('Retrieving %s', final_url)
 
+            # TODO(adamcik): use caching urlopen.
             root = parse(final_url).getroot()
 
             for h1 in root.cssselect(u'.hovedramme h1'):
@@ -126,22 +124,22 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
                         lecture = False
                     else:
                         time = td.cssselect('b')[0].text_content().strip()
-                        day, period = time.split(' ', 1)
-                        start, end = period.split('-')
+                        raw_day, period = time.split(' ', 1)
+                        raw_start, raw_end = period.split('-')
 
-                        day = get_day_of_week(day)
-                        start = get_time(start)
-                        end = get_time(end)
+                        day = utils.parse_day_of_week(raw_day)
+                        start = utils.parse_time(raw_start)
+                        end = utils.parse_time(raw_end)
 
-                        week = re.match('.*Uke: (.+)', td.text_content()).group(1).split(',')
-                        weeks.extend(get_weeks(week))
+                        raw_weeks = re.match('.*Uke: (.+)', td.text_content()).group(1)
+                        weeks.extend(utils.parse_weeks(raw_weeks))
                 elif i == 1:
                     for a in td.cssselect('a'):
                         rooms.append(a.text_content().strip())
                 elif i == 2:
                     lecturers.append(td.text.strip())
-                    for br in td:
-                        lecturers.append(br.tail.strip())
+                    for nl in td:
+                        lecturers.append(nl.tail.strip())
                 elif i == 3:
                     for group in td.cssselect('span'):
                         groups.append(group.text_content().strip())

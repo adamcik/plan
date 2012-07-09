@@ -10,7 +10,8 @@ from django.conf import settings
 from django.db import connections
 
 from plan.common.models import Course, Lecture, Semester
-from plan.scrape.lectures import get_day_of_week, process_lectures, get_time, get_weeks
+from plan.scrape import utils
+from plan.scrape.lectures import process_lectures
 
 logger = logging.getLogger('scrape.db')
 
@@ -18,6 +19,7 @@ logger = logging.getLogger('scrape.db')
 #                code to use instead of flags.
 
 # TODO(adamcik): switch to passing in semester
+# TODO(adamcik): switch to passing in lectures that match our filter.
 # TODO(adamcik): prefix should be contained to ntnu code, i.e. remove it from
 #                this interface.
 def update_lectures(year, semester_type, prefix=None, matches=None):
@@ -49,53 +51,41 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
     mysql_lecture_count = 0
     skipped = 0
 
-    lectures = Lecture.objects.filter(course__semester=semester)
-
-    if matches:
-        lectures = lectures.filter(course__code__startswith=matches)
-
     for row in c.fetchall():
-        (code, lecture_type, db_day, db_start,
-         db_end, week, room,lecturer, groupcode) = row
+        (raw_code, raw_type, raw_day, raw_start, raw_end,
+         raw_weeks, raw_rooms, raw_lecturers, raw_group) = row
 
-        # TODO(adamcik): replace this with regexp to extract code. current
-        #                regexp in settings should probably be replaced with a
-        #                hardcoded helper in the ntnu module.
-        if not (code and code.strip() and '-' in code):
+        code, version = utils.parse_course_code(raw_code)
+
+        if not code:
+            logging.info('Skipped %s', raw_code)
+            skipped += 1
             continue
 
         mysql_lecture_count += 1
 
-        code = code.rsplit('-', 1)[0].upper()
-
-        if not re.match(settings.TIMETABLE_VALID_COURSE_NAMES, code):
-            logging.info('Skipped %s', code)
-            skipped += 1
-            continue
-
-        # Get course
-        # TODO(adamcik): simply put course code in data
+        # TODO(adamcik): simply put course code in data?
         try:
             course = Course.objects.get(code=code, semester=semester)
         except Course.DoesNotExist:
-            logger.warning("Cout not add %s - %s on %s for %s as course does"
-                " not exist for this semester", db_start, db_end, db_day, code)
+            logger.warning(
+                "Cout not add %s - %s on %s for %s as course does not exist "
+                "for this semester", raw_start, raw_end, raw_day, code)
             continue
 
-        # TODO(adamciK): move these helpers to common scrape code or to a ntnu
-        #                module.
-        day = get_day_of_week(db_day)
-        start = get_time(db_start)
-        end = get_time(db_end)
+        day = utils.parse_day_of_week(raw_day)
+        start = utils.parse_time(raw_start)
+        end = utils.parse_time(raw_end)
 
         if day is None or start is None or end is None:
-            logger.warning("Could not add %s - %s on %s for %s" % (db_start, db_end, db_day, course))
+            logger.warning("Could not add %s - %s on %s for %s",
+                           raw_start, raw_end, raw_day, course)
             skipped += 1
             continue
 
-        rooms = room.split('#')
-        weeks = get_weeks(re.split(r',? ', week))
-        lecturers = lecturer.split('#')
+        rooms = raw_rooms.split('#')
+        weeks = utils.parse_weeks(raw_weeks)
+        lecturers = raw_lecturers.split('#')
 
         groups = set()
 
@@ -106,13 +96,14 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
                  "AND asp.aktkode = %s").format(prefix)
 
         c2 = connections['ntnu'].cursor()
-        c2.execute(query, groupcode.encode('utf8'))
+        c2.execute(query, raw_group.encode('utf8'))
         for row in c2.fetchall():
             groups.add(row[0])
 
+        # TODO(adamcik): figure out if we can get rid of the filter hack.
         data.append({
             'course': course,
-            'type': lecture_type,
+            'type': raw_type,
             'day': day,
             'start': start,
             'end': end,
@@ -140,58 +131,28 @@ def update_courses(year, semester_type, prefix=None):
 
     prefix = prefix or semester.prefix
 
-    c = connections['ntnu'].cursor()
+    # TODO(adamcik): create cursor() helper in module.
+    cursor = connections['ntnu'].cursor()
+    cursor.execute("SELECT emnekode, emnenavn FROM {0}_fs_emne".format(prefix))
 
-    # Handle changes in database over time:
-    if year > 2009 or (year == 2009 and semester_type == Semester.FALL):
-        vekt = 'en_navn'
-    else:
-        vekt = 'vekt'
+    # TODO(adamcik): figure out how to get course credits.
+    for raw_code, raw_name in cursor.fetchall():
+        code, version = utils.parse_course_code(raw_code)
 
-    query = ("SELECT emnekode, emnenavn, {0} as vekt "
-             "FROM {1}_fs_emne").format(vekt, prefix)
-    c.execute(query)
-
-    for code, name, points in c.fetchall():
-        code = code.strip().upper()
-
-        if not code or '-' not in code:
+        if not code:
+            logger.info('Skipped invalid course name: %s', raw_code)
             continue
 
-        code, version = code.split('-', 2)[:2]
-        code = code.strip()
-        version = version.strip()
-
-        if not version:
-            version = None
-
-        if name[0] in ['"', "'"] and name[0] == name[-1]:
-            name = name[1:-1]
-
-        if not re.match(settings.TIMETABLE_VALID_COURSE_NAMES, code):
-            logger.info('Skipped invalid course name: %s', code)
-            continue
-
-        # TODO(adamcik): I think this is a hack to remove courses that are
-        #                missing version, can probably be removed.
-        try:
-            course = Course.objects.get(code=code, semester=semester,
-                        version=None)
-            course.version = version
-            created = False
-        except Course.DoesNotExist:
-            course, created = Course.objects.get_or_create(code=code,
-                        semester=semester, version=version)
-
-        if points:
-            if vekt == 'en_navn':
-                points = points.replace('SP', '')
-            points = points.strip('-\n\r\t ')
-            course.points = Decimal(points.replace(',', '.'))
-        course.name = name
+        # TODO(adamcik): add constraint for code+semester to prevent multiple
+        #                versions by mistake
+        course, created = Course.objects.get_or_create(
+            code=code, semester=semester, version=version)
+        course.name = raw_name
         course.save()
 
         if created:
             logger.info("Added course %s", course.code)
         else:
             logger.info("Updated course %s", course.code)
+
+    # TODO(adamcik): return data with course code and name.

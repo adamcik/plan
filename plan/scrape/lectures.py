@@ -1,7 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import logging
-from dateutil.parser import parse
 
 from django.utils.functional import memoize
 
@@ -9,33 +8,6 @@ from plan.common.models import (Lecture, Lecturer, Room, LectureType,
     Group, Week)
 
 logger = logging.getLogger('plan.scrape.lectures')
-days_of_week_no = ['mandag', 'tirsdag', 'onsdag', 'torsdag', 'fredag']
-days_of_week_en = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
-
-def get_day_of_week(value):
-    value = value.lower().strip()
-
-    if value in days_of_week_no:
-        return days_of_week_no.index(value)
-    elif value in days_of_week_en:
-        return days_of_week_en.index(value)
-    else:
-        return None
-
-def get_time(value):
-    if not value.strip():
-        return None
-    return parse(value.strip()).time()
-
-def get_weeks(values):
-    weeks = []
-    for week in values:
-        if '-' in week:
-            x, y = week.split('-')
-            weeks.extend(range(int(x), int(y)+1))
-        elif week.strip():
-            weeks.append(int(week.replace(',', '')))
-    return weeks
 
 def get_or_create_lecture_type(name):
     return LectureType.objects.get_or_create(name=name)[0]
