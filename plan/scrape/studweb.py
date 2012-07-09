@@ -4,8 +4,6 @@
 
 import logging
 from xml.dom import minidom
-# TODO(adamcik): create parse_datetime helper?
-from dateutil.parser import parse
 
 from plan.common.models import Exam, ExamType, Course, Semester
 from plan.scrape import utils
@@ -80,10 +78,10 @@ def update_exams(year, semester, url=None):
         exam_kwargs = {}
 
         if exam_date:
-            exam_kwargs['exam_date'] = parse(exam_date).date()
+            exam_kwargs['exam_date'] = utils.parse_date(exam_date)
 
         if handin_date:
-            exam_kwargs['exam_date'] = parse(handin_date).date()
+            exam_kwargs['exam_date'] = utils.parse_date(handin_date)
 
         if 'exam_date' not in exam_kwargs:
             logger.warning("%s's exam does not have a date.", course_code)
@@ -110,15 +108,15 @@ def update_exams(year, semester, url=None):
         exam_kwargs['course'] = course
 
         if exam_time:
-            exam_kwargs['exam_time'] = parse(exam_time).time()
+            exam_kwargs['exam_time'] = utils.parse_time(exam_time)
 
         if handout_date:
-            exam_kwargs['handout_date'] = parse(handout_date).date()
+            exam_kwargs['handout_date'] = utils.parse_date(handout_date)
         if handout_time:
-            exam_kwargs['handout_time'] = parse(handout_time).time()
+            exam_kwargs['handout_time'] = utils.parse_time(handout_time)
 
         if handin_time:
-            exam_kwargs['exam_time'] = parse(handin_time).time()
+            exam_kwargs['exam_time'] = utils.parse_time(handin_time)
 
         try:
             exam, created = Exam.objects.get_or_create(**exam_kwargs)

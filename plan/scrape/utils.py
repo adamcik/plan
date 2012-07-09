@@ -62,6 +62,13 @@ def parse_time(value):
     return dateutil.parser.parse(value.strip()).time()
 
 
+def parse_date(value):
+    """Convert a textual date to a datetime.date instance."""
+    if not value.strip():
+        return None
+    return dateutil.parser.parse(value.strip()).date()
+
+
 def parse_weeks(value):
     """Expand a list of weeks written in shortform."""
     weeks = []
