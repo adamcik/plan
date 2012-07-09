@@ -21,6 +21,10 @@ for lang, name in settings.LANGUAGES:
 
 scraper_cache = cache.get_cache('webscraper')
 
+# TODO(adamcik): provide helper that does url+'?'+urllib.urlencode(..>)
+#                and lxml conversion before returning?
+
+# TODO(adamcik): store status code as well, set low cache time for non 200.
 def cached_urlopen(url):
     """Gets cached HTTP response from urlopen."""
     data = scraper_cache.get(url)

@@ -1,9 +1,9 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import logging
+import lxml.html
 import re
 import urllib
-from lxml import html
 
 from plan.common.models import Room, Course
 from plan.scrape import utils
@@ -17,10 +17,10 @@ def update_rooms():
         query = {'tx_indexedsearch[sword]': room.name.encode('latin1')}
         url = 'http://www.ntnu.no/kart/no_cache/soek/?{0}'.format(
             urllib.urlencode(query))
-        logger.info('Retrieving %s', url)
 
+        logger.info('Retrieving %s', url)
         try:
-            root = html.fromstring(utils.cached_urlopen(url))
+            root = lxml.html.fromstring(utils.cached_urlopen(url))
         except IOError, e:
             logger.error('Loading falied')
             continue

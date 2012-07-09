@@ -1,14 +1,20 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import logging
+import lxml.html
 import urllib
 
-from lxml.html import fromstring
-
 from plan.common.models import Course, Semester
-from plan.scrape import fetch_url
+from plan.scrape import utils
 
 logger = logging.getLogger('scrape.sit')
+
+SEMESTER_NAMES = {Semester.FALL: 'Autumn',
+                  Semester.SPRING: 'Spring'}
+
+
+# TODO(adamcik): this is broken since tapir merged.
+
 
 def update_syllabus(year, semester, match=None):
     courses = Course.objects.filter(semester__type=semester,
@@ -19,12 +25,12 @@ def update_syllabus(year, semester, match=None):
 
     for course in courses.all():
         url = 'http://sittapir.sit.no/pensum/NTNU/%s/%s/%s' % (
-            year, semester_mapping[semester],
+            year, SEMESTER_NAMES[semester],
             urllib.quote(course.code.encode('utf-8')))
 
+        logger.info('Retrieving %s', url)
         try:
-            html = fetch_url(url)
-            root = fromstring(html)
+            root = lxml.html.fromstring(utils.cached_urlopen(url))
         except IOError, e:
             logger.warning('Parse failed for %s: %s', course.code, e)
             continue

@@ -2,10 +2,10 @@
 
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-import re
 import logging
-from urllib import urlencode
-from lxml.html import parse
+import lxml.html
+import re
+import urllib
 
 from django.conf import settings
 
@@ -23,14 +23,13 @@ def update_courses(year, semester_type):
     courses = []
 
     for letter in u'ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ':
+        query = {'bokst': letter.encode('latin1')}
         url = 'http://www.ntnu.no/studieinformasjon/timeplan/{0}/?{1}'.format(
-            semester.prefix, urlencode({'bokst': letter.encode('latin1')}))
+            semester.prefix, urllib.urlencode(query))
 
         logger.info('Retrieving %s', url)
-
-        # TODO(adamcik): cache protected urlopen
         try:
-            root = parse(url).getroot()
+            root = lxml.html.fromstring(utils.cached_urlopen(url))
         except IOError, e:
             logger.error('Loading falied')
             continue
@@ -85,8 +84,9 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
         courses = courses.filter(code__startswith=matches)
 
     for course in courses:
+        query = {'emnekode': course.code.encode('latin1')}
         url = 'http://www.ntnu.no/studieinformasjon/timeplan/{0}/?{1}'.format(
-            prefix, urlencode({'emnekode': course.code.encode('latin1')}))
+            prefix, urllib.urlencode(query))
 
         if course.version:
             versions_to_try = [course.version]
@@ -98,9 +98,10 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
             final_url = '%s-%s' % (url, number)
 
             logger.info('Retrieving %s', final_url)
-
-            # TODO(adamcik): use caching urlopen.
-            root = parse(final_url).getroot()
+            try:
+                root = lxml.html.fromstring(utils.cached_urlopen(final_url))
+            except IOError:
+                continue
 
             for h1 in root.cssselect(u'.hovedramme h1'):
                 if course.code in h1.text_content():
