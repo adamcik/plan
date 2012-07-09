@@ -14,6 +14,12 @@ from plan.scrape.lectures import get_day_of_week, process_lectures, get_time, ge
 
 logger = logging.getLogger('scrape.db')
 
+# TODO(adamcik): scapring in general, switch to config that determines which
+#                code to use instead of flags.
+
+# TODO(adamcik): switch to passing in semester
+# TODO(adamcik): prefix should be contained to ntnu code, i.e. remove it from
+#                this interface.
 def update_lectures(year, semester_type, prefix=None, matches=None):
     '''Retrive all lectures for a given course'''
 
@@ -25,21 +31,18 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
 
     c = connections['ntnu'].cursor()
 
-    query = """
-            SELECT emnekode,typenavn,dag,start,slutt,uke,romnavn,larer,aktkode
-            FROM %s_timeplan WHERE emnekode NOT LIKE '#%%'
-        """ % prefix
+    query = ("SELECT emnekode, typenavn, dag, start, slutt, uke, "
+             "romnavn, larer, aktkode FROM {0}_timeplan").format(prefix)
+    params = []
 
     if matches:
         logger.info('Limiting to %s*', matches)
 
-        query  = query.replace('%', '%%')
         query += ' AND emnekode LIKE %s'
-        query += ' ORDER BY emnekode, dag, start, slutt, uke, romnavn, aktkode'
-        c.execute(query, (matches + '%',))
-    else:
-        query += ' ORDER BY emnekode, dag, start, slutt, uke, romnavn, aktkode'
-        c.execute(query)
+        params.append(matches + '%')
+
+    query += ' ORDER BY emnekode, dag, start, slutt, uke, romnavn, aktkode'
+    c.execute(query, *params)
 
     data = []
     added_lectures = []
@@ -52,8 +55,13 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
         lectures = lectures.filter(course__code__startswith=matches)
 
     for row in c.fetchall():
-        code, lecture_type, db_day, db_start, db_end, week, room, lecturer, groupcode = row
-        if not code.strip():
+        (code, lecture_type, db_day, db_start,
+         db_end, week, room,lecturer, groupcode) = row
+
+        # TODO(adamcik): replace this with regexp to extract code. current
+        #                regexp in settings should probably be replaced with a
+        #                hardcoded helper in the ntnu module.
+        if not (code and code.strip() and '-' in code):
             continue
 
         mysql_lecture_count += 1
@@ -66,6 +74,7 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
             continue
 
         # Get course
+        # TODO(adamcik): simply put course code in data
         try:
             course = Course.objects.get(code=code, semester=semester)
         except Course.DoesNotExist:
@@ -73,6 +82,8 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
                 " not exist for this semester", db_start, db_end, db_day, code)
             continue
 
+        # TODO(adamciK): move these helpers to common scrape code or to a ntnu
+        #                module.
         day = get_day_of_week(db_day)
         start = get_time(db_start)
         end = get_time(db_end)
@@ -87,13 +98,15 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
         lecturers = lecturer.split('#')
 
         groups = set()
+
+        # TODO(adamcik): memoize this fetch?
+        query = ("SELECT DISTINCT asp.studieprogramkode "
+                 "FROM {0}_akt_studieprogram asp, studieprogram sp "
+                 "WHERE asp.studieprogramkode=sp.studieprogram_kode "
+                 "AND asp.aktkode = %s").format(prefix)
+
         c2 = connections['ntnu'].cursor()
-        c2.execute("""
-                SELECT DISTINCT asp.studieprogramkode
-                FROM %s_akt_studieprogram asp,studieprogram sp
-                WHERE asp.studieprogramkode=sp.studieprogram_kode
-                AND asp.aktkode = %%s
-            """ % prefix, groupcode)
+        c2.execute(query, groupcode.encode('utf8'))
         for row in c2.fetchall():
             groups.add(row[0])
 
@@ -109,6 +122,7 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
             'groups': filter(bool, groups),
         })
 
+    # TODO(adamcik): we should be returning data - i.e. time to invert control
     added_lectures = process_lectures(data)
     to_delete = Lecture.objects.exclude(id__in=added_lectures)
     to_delete = to_delete.filter(course__semester=semester)
@@ -128,13 +142,15 @@ def update_courses(year, semester_type, prefix=None):
 
     c = connections['ntnu'].cursor()
 
+    # Handle changes in database over time:
     if year > 2009 or (year == 2009 and semester_type == Semester.FALL):
         vekt = 'en_navn'
     else:
         vekt = 'vekt'
 
-    c.execute("""SELECT emnekode,emnenavn,%s as vekt FROM %s_fs_emne WHERE
-            emnekode NOT LIKE '#%%' AND emnekode NOT LIKE '"%%'""" % (vekt, prefix))
+    query = ("SELECT emnekode, emnenavn, {0} as vekt "
+             "FROM {1}_fs_emne").format(vekt, prefix)
+    c.execute(query)
 
     for code, name, points in c.fetchall():
         code = code.strip().upper()
@@ -156,12 +172,13 @@ def update_courses(year, semester_type, prefix=None):
             logger.info('Skipped invalid course name: %s', code)
             continue
 
+        # TODO(adamcik): I think this is a hack to remove courses that are
+        #                missing version, can probably be removed.
         try:
             course = Course.objects.get(code=code, semester=semester,
                         version=None)
             course.version = version
             created = False
-
         except Course.DoesNotExist:
             course, created = Course.objects.get_or_create(code=code,
                         semester=semester, version=version)
@@ -175,6 +192,6 @@ def update_courses(year, semester_type, prefix=None):
         course.save()
 
         if created:
-            logger.info("Added course %s" % course.code)
+            logger.info("Added course %s", course.code)
         else:
-            logger.info("Updated course %s" % course.code)
+            logger.info("Updated course %s", course.code)
