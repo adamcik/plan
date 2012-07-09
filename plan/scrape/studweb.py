@@ -20,6 +20,12 @@ def _url(semester):
         return 'http://www.ntnu.no/eksamen/plan/%sh/dato.XML' \
             % str(semester.year)[-2:]
 
+def get_element_value(node, tagname):
+    child = node.getElementsByTagName(tagname)[0].firstChild
+    if child:
+        return child.nodeValue
+    return None
+
 def update_exams(year, semester, url=None):
     added, updated = [], []
     semester = Semester.objects.get(year=year, type=semester)
@@ -36,101 +42,83 @@ def update_exams(year, semester, url=None):
         return
 
     for n in dom.getElementsByTagName('dato_row'):
-        course_code = n.getElementsByTagName('emnekode')[0].firstChild
-        course_name = n.getElementsByTagName('emne_emnenavn_bokmal')[0].firstChild
-        course_version = n.getElementsByTagName('versjonskode')[0].firstChild
+        comment = get_element_value(n, 'kommentar_eksamen')
+        course_code = get_element_value(n, 'emnekode')
+        course_name = get_element_value(n, 'emne_emnenavn_bokmal')
+        course_version = get_element_value(n, 'versjonskode')
+        duration = get_element_value(n, 'varighettimer')
+        exam_date = get_element_value(n, 'dato_eksamen')
+        exam_semester = get_element_value(n, 'terminkode_gjelder_i')
+        exam_time = get_element_value(n, 'klokkeslett_fremmote_tid')
+        exam_year = get_element_value(n, 'arstall_gjelder_i')
+        handin_date = get_element_value(n, 'dato_innlevering')
+        handin_time = get_element_value(n, 'klokkeslett_innlevering')
+        handout_date = get_element_value(n, 'dato_uttak')
+        handout_time = get_element_value(n, 'klokkeslett_uttak')
+        long_typename = get_element_value(n, 'vurderingskombinasjon_vurdkombnavn_bokmal')
+        status_code = get_element_value(n, 'vurdstatuskode')
+        typename = get_element_value(n, 'vurderingsformkode')
 
-        exam_year = n.getElementsByTagName('arstall_gjelder_i')[0].firstChild
+        n.unlink()
 
-        if not utils.parse_course_code(course_code.nodeValue+'-'+course_version.nodeValue)[0]:
-            logger.warning("Bad course code: %s", course_code.nodeValue)
-            n.unlink()
+        if not utils.parse_course_code(course_code+'-'+course_version)[0]:
+            logger.warning("Bad course code: %s", course_code)
             continue
 
-        if str(year) != exam_year.nodeValue:
-            logger.warning("Wrong year for %s: %s", course_code.nodeValue, exam_year.nodeValue)
-            n.unlink()
+        if str(year) != exam_year:
+            logger.warning("Wrong year for %s: %s", course_code, exam_year)
             continue
 
-        exam_semester = n.getElementsByTagName('terminkode_gjelder_i')[0].firstChild
-
-        if semester.type == Semester.SPRING and exam_semester.nodeValue != u'VÅR':
-            logger.warning("Wrong semester for %s: %s", course_code.nodeValue, exam_semester.nodeValue)
-            n.unlink()
+        if semester.type == Semester.SPRING and exam_semester != u'VÅR':
+            logger.warning("Wrong semester for %s: %s", course_code, exam_semester)
             continue
 
-        if semester.type == Semester.FALL and exam_semester.nodeValue != u'HØST':
-            logger.warning("Wrong semester for %s: %s", course_code.nodeValue, exam_semester.nodeValue)
-            n.unlink()
+        if semester.type == Semester.FALL and exam_semester != u'HØST':
+            logger.warning("Wrong semester for %s: %s", course_code, exam_semester)
             continue
 
         exam_kwargs = {}
 
-        exam_date = n.getElementsByTagName('dato_eksamen')[0].firstChild
         if exam_date:
-            exam_kwargs['exam_date'] = parse(exam_date.nodeValue).date()
+            exam_kwargs['exam_date'] = parse(exam_date).date()
 
-        handin_date = n.getElementsByTagName('dato_innlevering')[0].firstChild
         if handin_date:
-            exam_kwargs['exam_date'] = parse(handin_date.nodeValue).date()
+            exam_kwargs['exam_date'] = parse(handin_date).date()
 
         if 'exam_date' not in exam_kwargs:
-            logger.warning("%s's exam does not have a date.", course_code.nodeValue)
-            n.unlink()
+            logger.warning("%s's exam does not have a date.", course_code)
             continue
 
         if exam_kwargs['exam_date'] < first_day:
-            logger.warning("%s's exam is in the past - %s", course_code.nodeValue, exam_kwargs['exam_date'])
-            n.unlink()
+            logger.warning("%s's exam is in the past - %s", course_code, exam_kwargs['exam_date'])
             continue
 
-        # TODO(adamcik): add mini heler lambda e, n: e.getElementsByTagName(n)[0].firstChild
-        exam_time = n.getElementsByTagName('klokkeslett_fremmote_tid')[0].firstChild
-
-        handout_date = n.getElementsByTagName('dato_uttak')[0].firstChild
-        handout_time = n.getElementsByTagName('klokkeslett_uttak')[0].firstChild
-        handin_time = n.getElementsByTagName('klokkeslett_innlevering')[0].firstChild
-
-        duration = n.getElementsByTagName('varighettimer')[0].firstChild
-
-        long_typename_key = 'vurderingskombinasjon_vurdkombnavn_bokmal'
-        long_typename = n.getElementsByTagName(long_typename_key)[0].firstChild
-        typename = n.getElementsByTagName('vurderingsformkode')[0].firstChild
-
-        status_code = n.getElementsByTagName('vurdstatuskode')[0].firstChild
-
-        comment = n.getElementsByTagName('kommentar_eksamen')[0].firstChild
-
-        if not status_code or status_code.nodeValue != 'ORD':
-            n.unlink()
-            continue
-
-        if not course_code.nodeValue.strip():
+        if status_code != 'ORD':
             continue
 
         course, created = Course.objects.get_or_create(
-                code=course_code.nodeValue.strip(), semester=semester)
+                code=course_code.strip(), semester=semester)
 
-        if not course.name and course_name.nodeValue.strip():
-            course.name = course_name.nodeValue.strip()
+        if not course.name and course_name.strip():
+            course.name = course_name.strip()
             course.save()
 
-        if not course.version and course_version.nodeValue.strip():
-            course.version = course_version.nodeValue.strip()
+        if not course.version and course_version.strip():
+            course.version = course_version.strip()
             course.save()
 
         exam_kwargs['course'] = course
 
         if exam_time:
-            exam_kwargs['exam_time'] = parse(exam_time.nodeValue).time()
+            exam_kwargs['exam_time'] = parse(exam_time).time()
 
         if handout_date:
-            exam_kwargs['handout_date'] = parse(handout_date.nodeValue).date()
+            exam_kwargs['handout_date'] = parse(handout_date).date()
         if handout_time:
-            exam_kwargs['handout_time'] = parse(handout_time.nodeValue).time()
+            exam_kwargs['handout_time'] = parse(handout_time).time()
 
         if handin_time:
-            exam_kwargs['exam_time'] = parse(handin_time.nodeValue).time()
+            exam_kwargs['exam_time'] = parse(handin_time).time()
 
         try:
             exam, created = Exam.objects.get_or_create(**exam_kwargs)
@@ -139,37 +127,34 @@ def update_exams(year, semester, url=None):
             raise e
 
         if created:
-            logger.info( "Added exam for %s - %s" % (course.code, exam.exam_date))
+            logger.info( "Added exam for %s - %s", course.code, exam.exam_date)
             added.append(exam.id)
         else:
-            logger.debug("Updated exam for %s - %s" %( course.code, exam.exam_date))
+            logger.info("Updated exam for %s - %s", course.code, exam.exam_date)
             updated.append(exam.id)
 
         if duration:
-            exam.duration = duration.nodeValue
+            exam.duration = duration
 
         if comment:
-            exam.comment = comment.nodeValue
-
+            exam.comment = comment
 
         if typename:
-            exam_type, created = ExamType.objects.get_or_create(code=typename.nodeValue)
+            exam_type, created = ExamType.objects.get_or_create(code=typename)
 
             if long_typename and not exam_type.name:
-                exam_type.name = long_typename.nodeValue
+                exam_type.name = long_typename
                 exam_type.save()
 
             exam.type = exam_type
 
         exam.save()
 
-        n.unlink()
-
     seen_exams = added+updated
     to_delete = list(Exam.objects.filter(course__semester=semester))
     to_delete = filter(lambda e: e.id not in seen_exams, to_delete)
 
-    logger.info('Added %d exams' % len(added))
-    logger.info('Updated %d exams' % len(updated))
+    logger.info('Added %d exams', len(added))
+    logger.info('Updated %d exams', len(updated))
 
     return to_delete
