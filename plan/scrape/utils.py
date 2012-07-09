@@ -24,13 +24,15 @@ scraper_cache = cache.get_cache('webscraper')
 # TODO(adamcik): provide helper that does url+'?'+urllib.urlencode(..>)
 #                and lxml conversion before returning?
 
-# TODO(adamcik): store status code as well, set low cache time for non 200.
 def cached_urlopen(url):
     """Gets cached HTTP response from urlopen."""
     data = scraper_cache.get(url)
     if not data:
-        data = urllib.urlopen(url).read()
-        scraper_cache.set(url, data)
+        response = urllib.urlopen(url)
+        data = response.read()
+        # TODO(adamcik): not sure if this is smart.
+        if response.getcode() == 200:
+            scraper_cache.set(url, data)
     return data
 
 
