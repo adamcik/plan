@@ -2,10 +2,12 @@
 
 import re
 import dateutil.parser
+import urllib
 
+from django.conf import settings
+from django.core import cache
 from django.utils import dates
 from django.utils import translation
-from django.conf import settings
 
 # Regexp to use to pull out course code and version.
 COURSE_RE = re.compile(r'^([^0-9]+[0-9]+)-(\d+)$')
@@ -16,6 +18,16 @@ for lang, name in settings.LANGUAGES:
     with translation.override(lang):
         for i in xrange(5):
             WEEKDAYS[dates.WEEKDAYS[i].lower()] = i
+
+scraper_cache = cache.get_cache('webscraper')
+
+def cached_urlopen(url):
+    """Gets cached HTTP response from urlopen."""
+    data = scraper_cache.get(url)
+    if not data:
+        data = urllib.urlopen(url).read()
+        scraper_cache.set(url, data)
+    return data
 
 
 def parse_day_of_week(value):

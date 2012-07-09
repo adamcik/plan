@@ -2,12 +2,11 @@
 
 import logging
 import re
-
-from urllib import urlencode
-from lxml.html import fromstring
+import urllib
+from lxml import html
 
 from plan.common.models import Room, Course
-from plan.scrape import fetch_url
+from plan.scrape import utils
 
 logger = logging.getLogger('plan.scrape.rooms')
 
@@ -15,14 +14,13 @@ def update_rooms():
     room_links = {}
 
     for room in Room.objects.all():
-        url = 'http://www.ntnu.no/kart/no_cache/soek/?%s' % \
-            urlencode({'tx_indexedsearch[sword]': room.name.encode('latin1')})
-
+        query = {'tx_indexedsearch[sword]': room.name.encode('latin1')}
+        url = 'http://www.ntnu.no/kart/no_cache/soek/?{0}'.format(
+            urllib.urlencode(query))
         logger.info('Retrieving %s', url)
 
         try:
-            html = fetch_url(url)
-            root = fromstring(html)
+            root = html.fromstring(utils.cached_urlopen(url))
         except IOError, e:
             logger.error('Loading falied')
             continue
@@ -52,8 +50,7 @@ def update_rooms():
 
 def get_course_codes(room):
     codes = Course.objects.filter(lecture__rooms=room)
-    codes = codes.values_list('code', flat=True).distinct()
-    return set([re.match(r'^([^0-9]+)[0-9]+$', c).group(1) for c in codes])
+    return codes.values_list('code', flat=True).distinct()
 
 def get_choice(room, links):
     if not links:
