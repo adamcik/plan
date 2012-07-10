@@ -2,7 +2,6 @@
 
 import datetime
 import operator
-from dateutil import rrule
 
 from django import http
 from django import template
@@ -127,8 +126,5 @@ class ColorMap(dict):
 
 
 def max_number_of_weeks(year):
-    if list(rrule.rrule(rrule.WEEKLY, count=1, byweekno=53, byweekday=rrule.MO,
-            dtstart=datetime.date(int(year), 1, 1)))[0].year == year:
-        return 53
-    return 52
-
+    # dec. 28 is always on the last week if the year.
+    return datetime.date(int(year), 12, 28).isocalendar()[1]
