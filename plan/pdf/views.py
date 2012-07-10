@@ -1,31 +1,33 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from reportlab.lib import colors
+from reportlab.lib import pagesizes
+from reportlab.lib import styles
+from reportlab.lib import units
+from reportlab import platypus
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import landscape, A4, A5
-from reportlab.platypus import Paragraph, KeepInFrame
-from reportlab.platypus.tables import Table, TableStyle
-from reportlab.lib.colors import HexColor
-from reportlab.lib.units import cm
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import tables
 
-styles = getSampleStyleSheet()
-
-from django.http import HttpResponse, Http404
+from django import http
 from django.utils import dates
-from django.utils.html import escape
-from django.utils.translation import ugettext as _
+from django.utils import html
+from django.utils import translation
 
 from plan.common.models import Lecture, Semester, Room, Course
 from plan.common.timetable import Timetable
 from plan.common.utils import ColorMap
 from plan.common.templatetags.title import render_title
 
-outer_border = HexColor('#666666')
-inner_border = HexColor('#CCCCCC')
-backgrounds = [HexColor('#FFFFFF'), HexColor('#FAFAFA')]
+_ = translation.ugettext
+
+outer_border = colors.HexColor('#666666')
+inner_border = colors.HexColor('#CCCCCC')
+backgrounds = [colors.HexColor('#FFFFFF'), colors.HexColor('#FAFAFA')]
+
+default_styles = styles.getSampleStyleSheet()
 
 def _tablestyle():
-    table_style = TableStyle([
+    table_style = tables.TableStyle([
         ('FONT',     (0,0),  (-1,-1),'Helvetica-Bold'),
         ('FONTSIZE', (0,0),  (-1,0),  10), # title
         ('FONTSIZE', (0,1),  (0,-1),  8),  # days
@@ -56,14 +58,14 @@ def _tablestyle():
 
 def pdf(request, year, semester_type, slug, size=None, week=None):
     if size is not None and size not in ['A4', 'A5', 'A6', 'A7']:
-        raise Http404
+        raise http.Http404
 
     semester = Semester(year=year, type=semester_type)
 
     color_map = ColorMap(hex=True)
 
-    margin = 0.5*cm
-    width, height = landscape(A5)
+    margin = 0.5*units.cm
+    width, height = pagesizes.landscape(pagesizes.A5)
 
     width -= 2*margin
     height -= 2*margin
@@ -76,7 +78,7 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
     if week:
         filename += '-%s' % week
 
-    response = HttpResponse(mimetype='application/pdf')
+    response = http.HttpResponse(mimetype='application/pdf')
     response['Content-Disposition'] = 'attachment; filename=%s.pdf' % filename
 
     lectures = Lecture.objects.get_lectures(year, semester.type, slug, week)
@@ -92,14 +94,14 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
         timetable.do_expansion()
     timetable.insert_times()
 
-    paragraph_style = styles['Normal']
+    paragraph_style = default_styles['Normal']
     paragraph_style.fontName = 'Helvetica-Bold'
     paragraph_style.fontSize = 10
     paragraph_style.leading = 12
 
     table_style = _tablestyle()
 
-    data = [[Paragraph(render_title(semester, slug, week), paragraph_style)]]
+    data = [[platypus.Paragraph(render_title(semester, slug, week), paragraph_style)]]
     data[-1].extend([''] * sum(timetable.span))
     table_style.add('SPAN', (0,0), (-1, 0))
 
@@ -127,13 +129,13 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
                         paragraph_style.fontName = 'Helvetica'
 
                     code = lecture.alias or lecture.course.code
-                    content = [Paragraph(escape(code), paragraph_style)]
+                    content = [platypus.Paragraph(html.escape(code), paragraph_style)]
                     paragraph_style.leading = 8
 
                     if lecture.type:
-                        content += [Paragraph(u'<font size=6>%s</font>' % lecture.type.name.replace('/', ' / '), paragraph_style)]
+                        content += [platypus.Paragraph(u'<font size=6>%s</font>' % lecture.type.name.replace('/', ' / '), paragraph_style)]
 
-                    content += [Paragraph(u'<font size=6>%s</font>' % u', '.join(rooms.get(lecture.id, [])), paragraph_style)]
+                    content += [platypus.Paragraph(u'<font size=6>%s</font>' % u', '.join(rooms.get(lecture.id, [])), paragraph_style)]
 
                     paragraph_style.leading = 12
                     paragraph_style.fontName = 'Helvetica-Bold'
@@ -176,18 +178,18 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
 
         table_style.add('SPAN', (x1, y1), (x2, y2))
         table_style.add('BACKGROUND', (x1, y1), (x2, y2),
-                HexColor(color_map[lecture['l'].course_id]))
+                colors.HexColor(color_map[lecture['l'].course_id]))
 
         content = data[y1][x1]
-        data[y1][x1] =  KeepInFrame(col_widths[x1]*lecture['width'],
-                                    row_heights[2]*lecture['height'],
-                                    content, mode='shrink')
+        data[y1][x1] = platypus.KeepInFrame(col_widths[x1]*lecture['width'],
+                                            row_heights[2]*lecture['height'],
+                                            content, mode='shrink')
 
-    page = canvas.Canvas(response, A4)
-    page.translate(margin, A4[1]-margin)
+    page = canvas.Canvas(response, pagesizes.A4)
+    page.translate(margin, pagesizes.A4[1]-margin)
 
     if 'A4' == size:
-        page.translate(0.5*margin, 2.5*margin-A4[1])
+        page.translate(0.5*margin, 2.5*margin-pagesizes.A4[1])
         page.scale(1.414, 1.414)
         page.rotate(90)
     elif 'A6' == size:
@@ -195,8 +197,8 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
     elif 'A7' == size:
         page.scale(0.5, 0.5)
 
-    table = Table(data, colWidths=col_widths, rowHeights=row_heights,
-                  style=table_style)
+    table = tables.Table(data, colWidths=col_widths, rowHeights=row_heights,
+                         style=table_style)
 
     table.wrapOn(page, width, height)
     table.drawOn(page, 0, -height)
@@ -204,7 +206,7 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
     note = request.META.get('HTTP_HOST', '').split(':')[0]
 
     page.setFont('Helvetica', 10)
-    page.setFillColor(HexColor('#666666'))
+    page.setFillColor(colors.HexColor('#666666'))
     page.drawString(width - page.stringWidth(note) - 2, -height+2, note)
 
     page.showPage()
