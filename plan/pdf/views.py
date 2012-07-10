@@ -11,6 +11,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 styles = getSampleStyleSheet()
 
 from django.http import HttpResponse, Http404
+from django.utils import dates
 from django.utils.html import escape
 from django.utils.translation import ugettext as _
 
@@ -105,9 +106,8 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
     # Add days
     # FIXME move to timetable
     data.append([''])
-    for i, day in enumerate([_('Monday'), _('Tuesday'), _('Wednesday'),
-            _('Thursday'), _('Friday')]):
-        data[-1].append(day)
+    for i in range(5):
+        data[-1].append(unicode(dates.WEEKDAYS[i]))
         if timetable.span[i] > 1:
             extra = timetable.span[i] - 1
 
@@ -196,7 +196,7 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
         page.scale(0.5, 0.5)
 
     table = Table(data, colWidths=col_widths, rowHeights=row_heights,
-            style=table_style)
+                  style=table_style)
 
     table.wrapOn(page, width, height)
     table.drawOn(page, 0, -height)
