@@ -18,7 +18,7 @@
 
 {% block bd %}
   {% if deadlines %}
-    <form method="post" action="{% url 'copy-deadlines' semester.year semester.type slug %}">
+    <form method="post" action="{% url 'copy-deadlines' semester.year semester.slug slug %}">
       <table>
         <thead>
           <tr>
@@ -52,7 +52,7 @@
   {% else %}
     <div id="help">
       <p>
-        {% url 'schedule-advanced' semester.year semester.type slug as advanced_url %}
+        {% url 'schedule-advanced' semester.year semester.slug slug as advanced_url %}
         {% blocktrans %}
           No deadlines found. Return to your <a href="{{ advanced_url }}">schedule</a>.
         {% endblocktrans %}

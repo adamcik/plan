@@ -4,7 +4,7 @@
 
 <h3>{% trans "Groups" %}</h3>
 <p>
-  {% url 'change-groups' semester.year semester.type slug as groups_url %}
+  {% url 'change-groups' semester.year semester.slug slug as groups_url %}
   {% blocktrans %}
     Go to <a href="{{ groups_url }}">group selection page</a>
     to change groups/parallels.

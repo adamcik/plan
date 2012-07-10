@@ -2,7 +2,7 @@
 
 {% load url from future %}
 
-<form action="{% url 'change-course' semester.year semester.type slug %}" method="post">
+<form action="{% url 'change-course' semester.year semester.slug slug %}" method="post">
   <h2>{% trans "Courses" %}</h2>
   {% if courses %}
     <table id="courses">
@@ -75,7 +75,7 @@
     </p>
   {% else %}
     <p class="noprint">
-      {% url 'schedule-advanced' semester.year semester.type slug as advanced_url %}
+      {% url 'schedule-advanced' semester.year semester.slug slug as advanced_url %}
       {% blocktrans %}
         Go to <a href="{{ advanced_url }}#courses">advanced options</a>
         to add and remove courses.
