@@ -19,7 +19,7 @@ _ = translation.ugettext
 
 
 def ical(request, year, semester_type, slug, ical_type=None):
-    resources = [u'lectures', u'exams', u'deadlines']
+    resources = [_(u'lectures'), _(u'exams'), _(u'deadlines')]
     if ical_type and ical_type not in resources:
         raise http.Http404
     elif ical_type:
@@ -45,15 +45,15 @@ def ical(request, year, semester_type, slug, ical_type=None):
         'resources': ', '.join(resources),
     }
 
-    if 'lectures' in resources:
+    if _('lectures') in resources:
         lectures = Lecture.objects.get_lectures(year, semester.type, slug)
         add_lectutures(lectures, semester.year, cal)
 
-    if 'exams' in resources:
+    if _('exams') in resources:
         exams = Exam.objects.get_exams(year, semester.type, slug)
         add_exams(exams, cal)
 
-    if 'deadlines' in resources:
+    if _('deadlines') in resources:
         deadlines = Deadline.objects.get_deadlines(year, semester.type, slug)
         add_deadlines(deadlines, cal)
 

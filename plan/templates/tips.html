@@ -6,9 +6,9 @@
 {% url 'course-list' semester.year semester.slug slug as course_list_url %}
 {% url 'schedule-advanced' semester.year semester.slug slug as adavanced_url %}
 
-{% url 'schedule-ical' semester.year semester.slug slug "lectures" as ical_lectures_url%}
-{% url 'schedule-ical' semester.year semester.slug slug "exams" as ical_exams_url %}
-{% url 'schedule-ical' semester.year semester.slug slug "deadlines" as ical_deadlines_url %}
+{% url 'schedule-ical' semester.year semester.slug slug _('lectures') as ical_lectures_url%}
+{% url 'schedule-ical' semester.year semester.slug slug _('exams') as ical_exams_url %}
+{% url 'schedule-ical' semester.year semester.slug slug _('deadlines') as ical_deadlines_url %}
 {% url 'schedule-ical' semester.year semester.slug slug as ical_all_url %}
 
 <h2 id="tips" class="noprint">{% trans "Tips" %}</h2>
