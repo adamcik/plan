@@ -3,20 +3,22 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import logging
-from xml.dom import minidom
+import xml.dom.minidom
 
 from plan.common.models import Exam, ExamType, Course, Semester
 from plan.scrape import utils
 
 logger = logging.getLogger('scrape.studweb')
 
-def _url(semester):
+
+def get_url(semester):
     if Semester.SPRING == semester.type:
-        return 'http://www.ntnu.no/eksamen/plan/%sv/dato.XML' \
-            % str(semester.year)[-2:]
+        return 'http://www.ntnu.no/eksamen/plan/{0}v/dato.XML'.format(
+            str(semester.year)[-2:])
     else:
-        return 'http://www.ntnu.no/eksamen/plan/%sh/dato.XML' \
-            % str(semester.year)[-2:]
+        return 'http://www.ntnu.no/eksamen/plan/{0}h/dato.XML'.format(
+            str(semester.year)[-2:])
+
 
 def get_element_value(node, tagname):
     child = node.getElementsByTagName(tagname)[0].firstChild
@@ -24,22 +26,24 @@ def get_element_value(node, tagname):
         return child.nodeValue
     return None
 
+
 def update_exams(year, semester, url=None):
     added, updated = [], []
     semester = Semester.objects.get(year=year, type=semester)
     first_day = semester.get_first_day().date()
 
     if not url:
-        url = _url(semester)
+        url = get_url(semester)
 
     logger.info('Retrieving %s', url)
     try:
-        dom = minidom.parseString(utils.cached_urlopen(url))
+        dom = xml.dom.minidom.parseString(utils.cached_urlopen(url))
     except IOError:
         logger.error('Loading falied')
         return
 
     for n in dom.getElementsByTagName('dato_row'):
+        # Pull out data for this node.
         comment = get_element_value(n, 'kommentar_eksamen')
         course_code = get_element_value(n, 'emnekode')
         course_name = get_element_value(n, 'emne_emnenavn_bokmal')
@@ -57,8 +61,9 @@ def update_exams(year, semester, url=None):
         status_code = get_element_value(n, 'vurdstatuskode')
         typename = get_element_value(n, 'vurderingsformkode')
 
-        n.unlink()
+        n.unlink()  # Free memory now that we are done with getting data.
 
+        # Sanity check data we've found:
         if not utils.parse_course_code(course_code+'-'+course_version)[0]:
             logger.warning("Bad course code: %s", course_code)
             continue
@@ -75,6 +80,7 @@ def update_exams(year, semester, url=None):
             logger.warning("Wrong semester for %s: %s", course_code, exam_semester)
             continue
 
+        # Start building query:
         exam_kwargs = {}
 
         if exam_date:
@@ -94,6 +100,8 @@ def update_exams(year, semester, url=None):
         if status_code != 'ORD':
             continue
 
+        # TODO(adamcik): fail on missing course?
+        # TODO(adamcik): use memoized helper to fetch?
         course, created = Course.objects.get_or_create(
                 code=course_code.strip(), semester=semester)
 
@@ -118,6 +126,7 @@ def update_exams(year, semester, url=None):
         if handin_time:
             exam_kwargs['exam_time'] = utils.parse_time(handin_time)
 
+        # Create exam with minimal data for correct lookup:
         try:
             exam, created = Exam.objects.get_or_create(**exam_kwargs)
         except Exam.MultipleObjectsReturned, e:
@@ -131,6 +140,7 @@ def update_exams(year, semester, url=None):
             logger.info("Updated exam for %s - %s", course.code, exam.exam_date)
             updated.append(exam.id)
 
+        # Add additional info that might have changed:
         if duration:
             exam.duration = duration
 
