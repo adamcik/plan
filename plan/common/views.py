@@ -34,7 +34,7 @@ def frontpage(self):
         semester = Semester.objects.current()
     except Semester.DoesNotExist:
         raise http.Http404
-    return shortcuts.redirect('semester', semester.year, semester.type)
+    return shortcuts.redirect('semester', semester.year, semester.slug)
 
 
 def shortcut(request, slug):
@@ -96,13 +96,13 @@ def course_query(request, year, semester_type):
 
 
 def schedule_current(request, year, semester_type, slug):
-    if Semester(year=year, type=semester_type).is_current:
+    semester = Semester(year=year, type=semester_type)
+    if semester.is_current:
         current_week = get_current_week()
 
         return shortcuts.redirect(
-            'schedule-week', year, semester_type, slug, current_week)
-
-    return shortcuts.redirect('schedule', year, semester_type, slug)
+            'schedule-week', semester.year, semester.slug, slug, current_week)
+    return shortcuts.redirect('schedule', semester.year, semester.slug, slug)
 
 
 def schedule(request, year, semester_type, slug, advanced=False,
@@ -250,7 +250,8 @@ def select_groups(request, year, semester_type, slug):
 
                 subscription.groups = group_form.cleaned_data['groups']
 
-        return shortcuts.redirect('schedule-advanced', year, semester_type, slug)
+        return shortcuts.redirect(
+            'schedule-advanced', year, Semester.localize(semester_type), slug)
 
     color_map = utils.ColorMap(hex=True)
     subscription_groups = Subscription.get_groups(year, semester_type, slug)
@@ -291,7 +292,8 @@ def toggle_deadlines(request, year, semester_type, slug):
         student.show_deadlines = not student.show_deadlines
         student.save()
 
-    return shortcuts.redirect('schedule-advanced', year, semester_type, slug)
+    return shortcuts.redirect(
+        'schedule-advanced', year, Semester.localize(semester_type), slug)
 
 
 def new_deadline(request, year, semester_type, slug):
@@ -315,7 +317,8 @@ def new_deadline(request, year, semester_type, slug):
                     id__in=request.POST.getlist('deadline_remove')
                 ).delete()
 
-    return shortcuts.redirect('schedule-advanced', year, semester_type, slug)
+    return shortcuts.redirect(
+        'schedule-advanced', year, Semester.localize(semester_type), slug)
 
 
 def copy_deadlines(request, year, semester_type, slug):
@@ -367,7 +370,8 @@ def copy_deadlines(request, year, semester_type, slug):
                         task=d.task
                 )
 
-    return shortcuts.redirect('schedule-advanced', year, semester_type, slug)
+    return shortcuts.redirect(
+        'schedule-advanced', year, Semester.localize(semester_type), slug)
 
 
 def select_course(request, year, semester_type, slug, add=False):
@@ -379,7 +383,8 @@ def select_course(request, year, semester_type, slug, add=False):
     try:
         semester = Semester.objects.get(year=year, type=semester_type)
     except Semester.DoesNotExist:
-        return shortcuts.redirect('schedule', year, semester_type, slug)
+        return shortcuts.redirect(
+            'schedule', year, Semester.localize(semester_type), slug)
 
     if request.method == 'POST':
         if 'submit_add' in request.POST or add:
@@ -427,7 +432,8 @@ def select_course(request, year, semester_type, slug, add=False):
                         'to_many_subscriptions': to_many_subscriptions,
                     })
 
-            return shortcuts.redirect('change-groups', year, semester_type, slug)
+            return shortcuts.redirect(
+                'change-groups', year, Semester.localize(semester_type), slug)
 
         elif 'submit_remove' in request.POST:
             courses = []
@@ -457,7 +463,8 @@ def select_course(request, year, semester_type, slug, add=False):
                     u.alias = alias
                     u.save()
 
-    return shortcuts.redirect('schedule-advanced', year, semester_type, slug)
+    return shortcuts.redirect(
+        'schedule-advanced', year, Semester.localize(semester_type), slug)
 
 
 def select_lectures(request, year, semester_type, slug):
@@ -474,7 +481,8 @@ def select_lectures(request, year, semester_type, slug):
             else:
                 subscription.exclude.clear()
 
-    return shortcuts.redirect('schedule-advanced', year, semester_type, slug)
+    return shortcuts.redirect(
+        'schedule-advanced', year, Semester.localize(semester_type), slug)
 
 
 def list_courses(request, year, semester_type, slug):

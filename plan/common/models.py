@@ -237,7 +237,11 @@ class Semester(models.Model):
 
     @property
     def slug(self):
-        return dict(self.SEMESTER_SLUG)[self.type]
+        return self.localize(self.type)
+
+    @classmethod
+    def localize(cls, semester_type):
+        return dict(cls.SEMESTER_SLUG)[semester_type]
 
     def get_first_day(self):
         if self.type == self.SPRING:
