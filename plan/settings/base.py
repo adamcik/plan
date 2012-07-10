@@ -51,7 +51,7 @@ LOCALE_PATHS = [os.path.join(BASE_PATH, 'locale')]
 # -- App and midleware settings:
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.locale.LocaleMiddleware',
+    'plan.middleware.LocaleMiddleware',
 )
 
 INSTALLED_APPS = (

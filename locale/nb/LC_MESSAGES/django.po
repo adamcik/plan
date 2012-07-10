@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Timeplan\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-03-27 01:45+0200\n"
+"POT-Creation-Date: 2012-07-10 09:55+0200\n"
 "PO-Revision-Date: 2009-09-29 14:46+0100\n"
 "Last-Translator: Thomas Adamcik <timeplan@adamcik.no>\n"
 "Language-Team:  <timeplan@adamcik.no>\n"
@@ -17,273 +17,282 @@ msgstr ""
 "X-Poedit-Language: Norwegian Bokmal\n"
 "X-Poedit-Country: NORWAY\n"
 
-#: plan/common/models.py:37
+#: plan/common/models.py:22
 msgid "Slug"
 msgstr "Timeplannavn"
 
-#: plan/common/models.py:40
+#: plan/common/models.py:23
 msgid "Show deadlines"
 msgstr "Vis frister"
 
-#: plan/common/models.py:43
+#: plan/common/models.py:26
 msgid "Student"
 msgstr "Student"
 
-#: plan/common/models.py:44
+#: plan/common/models.py:27
 msgid "Students"
 msgstr "Studenter"
 
-#: plan/common/models.py:54 plan/templates/courses.html:15
+#: plan/common/models.py:37 plan/templates/courses.html:15
 msgid "Alias"
 msgstr "Alias"
 
-#: plan/common/models.py:55
+#: plan/common/models.py:38
 msgid "Added"
 msgstr "Lagt til"
 
-#: plan/common/models.py:66
+#: plan/common/models.py:49
 msgid "Subscription"
 msgstr "Abonnement"
 
-#: plan/common/models.py:67
+#: plan/common/models.py:50
 msgid "Subscriptions"
 msgstr "Abonnementer"
 
-#: plan/common/models.py:94 plan/common/models.py:106
-#: plan/common/models.py:120 plan/common/models.py:134
-#: plan/common/models.py:299 plan/common/models.py:351
-#: plan/templates/course_list.html:46
+#: plan/common/models.py:77 plan/common/models.py:89 plan/common/models.py:103
+#: plan/common/models.py:117 plan/common/models.py:285
+#: plan/common/models.py:337 plan/templates/course_list.html:46
 msgid "Name"
 msgstr "Navn"
 
-#: plan/common/models.py:95
+#: plan/common/models.py:78
 msgid "Optional"
 msgstr "Valgfritt"
 
-#: plan/common/models.py:101
+#: plan/common/models.py:84
 msgid "Lecture type"
 msgstr "Forelesningstype"
 
-#: plan/common/models.py:102
+#: plan/common/models.py:85
 msgid "Lecture types"
 msgstr "Forelesningstyper"
 
-#: plan/common/models.py:107 plan/common/models.py:137
-#: plan/common/models.py:138
+#: plan/common/models.py:90 plan/common/models.py:120
+#: plan/common/models.py:121
 msgid "URL"
 msgstr "URL"
 
-#: plan/common/models.py:113
+#: plan/common/models.py:96
 msgid "Room"
 msgstr "Rom"
 
-#: plan/common/models.py:114 plan/templates/lectures.html:19
+#: plan/common/models.py:97 plan/templates/lectures.html:19
 msgid "Rooms"
 msgstr "Rom"
 
-#: plan/common/models.py:126
+#: plan/common/models.py:109
 msgid "Group"
 msgstr "Parallell"
 
-#: plan/common/models.py:127 plan/templates/groups_link.html:5
+#: plan/common/models.py:110 plan/templates/groups_link.html:5
 #: plan/templates/lectures.html:21
 msgid "Groups"
 msgstr "Paralleller"
 
-#: plan/common/models.py:131 plan/common/models.py:298
+#: plan/common/models.py:114 plan/common/models.py:284
 msgid "Code"
 msgstr "Kode"
 
-#: plan/common/models.py:135
+#: plan/common/models.py:118
 msgid "Version"
 msgstr "Versjon"
 
-#: plan/common/models.py:139
+#: plan/common/models.py:122
 msgid "Points"
 msgstr "Poeng"
 
-#: plan/common/models.py:144 plan/templates/add_deadlines.html:13
+#: plan/common/models.py:127 plan/templates/add_deadlines.html:13
 #: plan/templates/course_list.html:45 plan/templates/courses.html:14
 #: plan/templates/deadlines.html:14 plan/templates/exams.html:12
 #: plan/templates/lectures.html:16 plan/templates/select_deadlines.html:26
 msgid "Course"
 msgstr "Emne"
 
-#: plan/common/models.py:145 plan/templates/courses.html:6
+#: plan/common/models.py:128 plan/templates/courses.html:6
 msgid "Courses"
 msgstr "Emner"
 
-#: plan/common/models.py:222
+#: plan/common/models.py:205
 msgid "spring"
 msgstr "våren"
 
-#: plan/common/models.py:223
+#: plan/common/models.py:206
 msgid "fall"
 msgstr "høsten"
 
-#: plan/common/models.py:231
+#: plan/common/models.py:210
+msgctxt "slug"
+msgid "spring"
+msgstr "vår"
+
+#: plan/common/models.py:211
+msgctxt "slug"
+msgid "fall"
+msgstr "høst"
+
+#: plan/common/models.py:214
 msgid "Year"
 msgstr "År"
 
-#: plan/common/models.py:232 plan/templates/exams.html:11
+#: plan/common/models.py:215 plan/templates/exams.html:11
 #: plan/templates/lectures.html:20
 msgid "Type"
 msgstr "Type"
 
-#: plan/common/models.py:235
+#: plan/common/models.py:220
 msgid "Semester"
 msgstr "Semester"
 
-#: plan/common/models.py:236
+#: plan/common/models.py:221
 msgid "Semesters"
 msgstr "Semestre"
 
-#: plan/common/models.py:307
+#: plan/common/models.py:293
 msgid "Exam type"
 msgstr "Eksamensform"
 
-#: plan/common/models.py:308
+#: plan/common/models.py:294
 msgid "Exam types"
 msgstr "Eksamensformer"
 
-#: plan/common/models.py:315
+#: plan/common/models.py:301
 msgid "Exam date"
 msgstr "Eksamensdato"
 
-#: plan/common/models.py:316 plan/templates/course_list.html:48
+#: plan/common/models.py:302 plan/templates/course_list.html:48
 msgid "Exam time"
 msgstr "Eksamenstid"
 
-#: plan/common/models.py:318
+#: plan/common/models.py:304
 msgid "Handout date"
 msgstr "Utleveringsdato"
 
-#: plan/common/models.py:319 plan/templates/course_list.html:50
+#: plan/common/models.py:305 plan/templates/course_list.html:50
 msgid "Handout time"
 msgstr "Utleveringstid"
 
-#: plan/common/models.py:321
+#: plan/common/models.py:307
 msgid "Duration"
 msgstr "Varighet"
 
-#: plan/common/models.py:322
+#: plan/common/models.py:308
 msgid "Duration in hours"
 msgstr "Varighet i timer"
 
-#: plan/common/models.py:327 plan/ical/views.py:175 plan/ical/views.py:176
-#: plan/ical/views.py:179 plan/ical/views.py:180
+#: plan/common/models.py:313 plan/ical/views.py:132 plan/ical/views.py:133
+#: plan/ical/views.py:136 plan/ical/views.py:137
 msgid "Exam"
 msgstr "Eksamen"
 
-#: plan/common/models.py:328 plan/templates/exams.html:3
+#: plan/common/models.py:314 plan/templates/exams.html:3
 msgid "Exams"
 msgstr "Eksamener"
 
-#: plan/common/models.py:338
+#: plan/common/models.py:324
 msgid "Week number"
 msgstr "Ukenummer"
 
-#: plan/common/models.py:343
+#: plan/common/models.py:329
 msgid "Lecture week"
 msgstr "Forelesningsuke"
 
-#: plan/common/models.py:344
+#: plan/common/models.py:330
 msgid "Lecture weeks"
 msgstr "Forelesningsuker"
 
-#: plan/common/models.py:354
+#: plan/common/models.py:340
 msgid "Lecturer"
 msgstr "Foreleser"
 
-#: plan/common/models.py:355 plan/templates/lectures.html:22
+#: plan/common/models.py:341 plan/templates/lectures.html:22
 msgid "Lecturers"
 msgstr "Forelesere"
 
-#: plan/common/models.py:363 plan/pdf/views.py:129
+#: plan/common/models.py:349 plan/pdf/views.py:108
 #: plan/templates/schedule_table.html:18
 msgid "Monday"
 msgstr "Mandag"
 
-#: plan/common/models.py:364 plan/pdf/views.py:129
+#: plan/common/models.py:350 plan/pdf/views.py:108
 #: plan/templates/schedule_table.html:19
 msgid "Tuesday"
 msgstr "Tirsdag"
 
-#: plan/common/models.py:365 plan/pdf/views.py:129
+#: plan/common/models.py:351 plan/pdf/views.py:108
 #: plan/templates/schedule_table.html:20
 msgid "Wednesday"
 msgstr "Onsdag"
 
-#: plan/common/models.py:366 plan/pdf/views.py:130
+#: plan/common/models.py:352 plan/pdf/views.py:109
 #: plan/templates/schedule_table.html:21
 msgid "Thursday"
 msgstr "Torsdag"
 
-#: plan/common/models.py:367 plan/pdf/views.py:130
+#: plan/common/models.py:353 plan/pdf/views.py:109
 #: plan/templates/schedule_table.html:22
 msgid "Friday"
 msgstr "Fredag"
 
-#: plan/common/models.py:374
+#: plan/common/models.py:360
 msgid "Week day"
 msgstr "Ukedag"
 
-#: plan/common/models.py:376
+#: plan/common/models.py:362
 msgid "Start time"
 msgstr "Starter"
 
-#: plan/common/models.py:377
+#: plan/common/models.py:363
 msgid "End time"
 msgstr "Slutter"
 
-#: plan/common/models.py:387 plan/common/models.py:388
+#: plan/common/models.py:373 plan/common/models.py:374
 msgid "Lecture"
 msgstr "Forelesning"
 
-#: plan/common/models.py:443 plan/templates/add_deadlines.html:12
+#: plan/common/models.py:429 plan/templates/add_deadlines.html:12
 #: plan/templates/deadlines.html:17 plan/templates/select_deadlines.html:29
 msgid "Task"
 msgstr "Oppgave"
 
-#: plan/common/models.py:444 plan/templates/add_deadlines.html:14
+#: plan/common/models.py:430 plan/templates/add_deadlines.html:14
 #: plan/templates/deadlines.html:15 plan/templates/select_deadlines.html:27
 msgid "Due date"
 msgstr "Forfallsdato"
 
-#: plan/common/models.py:445 plan/templates/add_deadlines.html:15
+#: plan/common/models.py:431 plan/templates/add_deadlines.html:15
 #: plan/templates/deadlines.html:16 plan/templates/exams.html:9
 #: plan/templates/lectures.html:18 plan/templates/select_deadlines.html:28
 msgid "Time"
 msgstr "Tid"
 
-#: plan/common/models.py:447
+#: plan/common/models.py:433
 msgid "Done"
 msgstr "Ferdig"
 
-#: plan/common/models.py:452
+#: plan/common/models.py:438
 msgid "Deadline"
 msgstr "Frist"
 
-#: plan/common/models.py:453 plan/templates/deadlines.html:5
+#: plan/common/models.py:439 plan/templates/deadlines.html:5
 #: plan/templates/deadlines_toggle.html:6
 msgid "Deadlines"
 msgstr "Frister"
 
-#: plan/ical/views.py:78
+#: plan/ical/views.py:36
 #, python-format
 msgid "%(slug)s' %(semester)s %(year)s schedule for %(resources)s"
 msgstr "%(slug)s' timeplan for %(semester)s %(year)s, %(resources)s"
 
-#: plan/ical/views.py:80
+#: plan/ical/views.py:38
 #, python-format
 msgid "%(slug)s's %(semester)s %(year)s schedule for %(resources)s"
 msgstr "%(slug)ss timeplan for %(semester)s %(year)s, %(resources)s"
 
-#: plan/settings/base.py:62
+#: plan/settings/base.py:45
 msgid "Norwegian"
 msgstr "Norsk"
 
-#: plan/settings/base.py:63
+#: plan/settings/base.py:46
 msgid "English"
 msgstr "engelsk"
 

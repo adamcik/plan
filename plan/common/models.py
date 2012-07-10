@@ -5,7 +5,7 @@ import datetime
 from django.db import models
 from django.db import connection
 from django.template import defaultfilters as filters
-from django.utils.translation import ugettext_lazy as _
+from django.utils import translation
 from django.contrib.auth.models import User
 
 from plan.common.managers import LectureManager, DeadlineManager, \
@@ -13,6 +13,9 @@ from plan.common.managers import LectureManager, DeadlineManager, \
 
 # To allow for overriding of the codes idea of now() for tests
 now = datetime.datetime.now
+
+# Setup common alias for translation
+_ = translation.ugettext_lazy
 
 
 class Student(models.Model):
@@ -203,6 +206,11 @@ class Semester(models.Model):
         (FALL, _('fall')),
     )
 
+    SEMESTER_SLUG = (
+        (SPRING, translation.pgettext_lazy('slug', 'spring')),
+        (FALL, translation.pgettext_lazy('slug', 'fall')),
+    )
+
     year = models.PositiveSmallIntegerField(_('Year'))
     type = models.CharField(_('Type'), max_length=10, choices=SEMESTER_TYPES)
 
@@ -217,11 +225,19 @@ class Semester(models.Model):
     def __init__(self, *args, **kwargs):
         super(Semester, self).__init__(*args, **kwargs)
 
+        slug_map = dict((v, k) for k, v in self.SEMESTER_SLUG)
+
         if self.year:
             self.year = int(self.year)
+        if self.type in slug_map:
+            self.type = slug_map[self.type]
 
     def __unicode__(self):
         return u'%s %s' % (self.get_type_display(), self.year)
+
+    @property
+    def slug(self):
+        return dict(self.SEMESTER_SLUG)[self.type]
 
     def get_first_day(self):
         if self.type == self.SPRING:

@@ -1,23 +1,14 @@
 {% load i18n %}
 
-{% load url from future %}
-
 {% get_current_language as LANGUAGE_CODE %}
 {% get_available_languages as LANGUAGES %}
 
-<form id="setlang" action="{% url 'django.views.i18n.set_language' %}" method="post">
-  <p class="large">
-    {% if request %}
-      <input type="hidden" name="next" value="{{ request.get_full_path }}" />
-    {% endif %}
-    {% for code, name in LANGUAGES %}
-      {% ifnotequal LANGUAGE_CODE code %}
-        {% language code %}
-          <button type="submit" class="link" name="language" value="{{ code }}">
-            <span class="icon {{ code }}-flag">{% trans "Switch to English" %}</span>
-          </button>
-        {% endlanguage %}
-      {% endifnotequal %}
-    {% endfor %}
-  </p>
-</form>
+<p class="large" id="setlang">
+  {% for code, name in LANGUAGES %}
+    {% ifnotequal LANGUAGE_CODE code %}
+      {% language code %}
+        <a href="?{{ code }}" class="icon {{ code }}-flag">{% trans "Switch to English" %}</a>
+      {% endlanguage %}
+    {% endifnotequal %}
+  {% endfor %}
+</p>
