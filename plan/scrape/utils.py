@@ -17,7 +17,9 @@ WEEKDAYS = {}
 for lang, name in settings.LANGUAGES:
     with translation.override(lang):
         for i in xrange(5):
-            WEEKDAYS[dates.WEEKDAYS[i].lower()] = i
+            day = dates.WEEKDAYS[i].lower()
+            assert WEEKDAYS.get(day, i) == i, 'Found conflicting day names.'
+            WEEKDAYS[day] = i
 
 scraper_cache = cache.get_cache('webscraper')
 
