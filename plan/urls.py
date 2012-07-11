@@ -14,10 +14,7 @@ else:
     urlpatterns = patterns('')
 
 urlpatterns += patterns('',
-    (r'^i18n/', include('django.conf.urls.i18n')),
-
     (r'^', include('plan.common.urls')),
     (r'^', include('plan.ical.urls')),
     (r'^', include('plan.pdf.urls')),
-
 )
