@@ -6,6 +6,7 @@ from django.conf import settings
 from django.core import urlresolvers
 from django.utils import cache
 from django.utils import translation
+from django.utils.translation import trans_real as trans_internals
 
 from plan.common.models import Semester
 
@@ -22,11 +23,11 @@ class LocaleMiddleware(object):
                     self.values[unicode(slug)] = value
 
     def process_view(self, request, view, args, kwargs):
-        # Default to guessing base on accept when we don't know.
         if 'semester_type' not in kwargs:
-            language = translation.get_language_from_request(request)
+            language = self.guess_language_from_accept_header(request)
         else:
-            # Convert localised semester type to lang and db value.
+            # Use semester type to set language, and convert localised value to
+            # db value.
             try:
                 semester = kwargs['semester_type']
                 language = self.languages[semester]
@@ -34,23 +35,36 @@ class LocaleMiddleware(object):
             except KeyError:
                 raise http.Http404
 
-            # Support ?en etc, if this is present we activate the lang and
-            # resolve the current url to get its name and reverse it with a
-            # localised semester type.
             if request.META['QUERY_STRING'] in dict(settings.LANGUAGES):
-                translation.activate(request.META['QUERY_STRING'])
-                match = urlresolvers.resolve(request.path_info)
-                kwargs['semester_type'] = dict(Semester.SEMESTER_SLUG)[kwargs['semester_type']]
-                return shortcuts.redirect(match.url_name, *args, **kwargs)
+                return self.rederict_to_new_language(request, args, kwargs)
 
         with translation.override(language, deactivate=True):
             response = view(request, *args, **kwargs)
+            response['Content-Language'] = language
 
         if 'semester_type' not in kwargs:
+            # Only set vary header when we had to guess.
             cache.patch_vary_headers(response, ('Accept-Language',))
-        if 'Content-Language' not in response:
-            response['Content-Language'] = language
 
         return response
 
+    def guess_language_from_accept_header(self, request):
+        supported = dict(settings.LANGUAGES)
+        accept = request.META.get('HTTP_ACCEPT_LANGUAGE', '')
 
+        for lang, unused in trans_internals.parse_accept_lang_header(accept):
+            if lang == '*':
+                break
+            lang = lang.split('-')[0].lower()
+            if settings.LANGUAGE_FALLBACK.get(lang, lang) in supported:
+                return lang
+        return settings.LANGUAGE_CODE
+
+    def rederict_to_new_language(self, request, args, kwargs):
+        # Support ?lang etc, if this is present we activate the lang and
+        # resolve the current url to get its name and reverse it with a
+        # localised semester type.
+        with translation.override(request.META['QUERY_STRING'], deactivate=True):
+            match = urlresolvers.resolve(request.path_info)
+            kwargs['semester_type'] = dict(Semester.SEMESTER_SLUG)[kwargs['semester_type']]
+            return shortcuts.redirect(match.url_name, *args, **kwargs)
