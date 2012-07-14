@@ -4,6 +4,7 @@ from django import http
 from django import shortcuts
 from django.conf import settings
 from django.core import urlresolvers
+from django.utils import cache
 from django.utils import translation
 
 from plan.common.models import Semester
@@ -23,13 +24,12 @@ class LocaleMiddleware(object):
     def process_view(self, request, view, args, kwargs):
         # Default to guessing base on accept when we don't know.
         if 'semester_type' not in kwargs:
-            translation.activate(
-                translation.get_language_from_request(request))
+            language = translation.get_language_from_request(request)
         else:
             # Convert localised semester type to lang and db value.
             try:
                 semester = kwargs['semester_type']
-                translation.activate(self.languages[semester])
+                language = self.languages[semester]
                 kwargs['semester_type'] = self.values[semester]
             except KeyError:
                 raise http.Http404
@@ -43,7 +43,14 @@ class LocaleMiddleware(object):
                 kwargs['semester_type'] = dict(Semester.SEMESTER_SLUG)[kwargs['semester_type']]
                 return shortcuts.redirect(match.url_name, *args, **kwargs)
 
-        try:
-            return view(request, *args, **kwargs)
-        finally:
-            translation.deactivate()
+        with translation.override(language, deactivate=True):
+            response = view(request, *args, **kwargs)
+
+        if 'semester_type' not in kwargs:
+            cache.patch_vary_headers(response, ('Accept-Language',))
+        if 'Content-Language' not in response:
+            response['Content-Language'] = language
+
+        return response
+
+
