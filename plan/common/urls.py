@@ -25,6 +25,6 @@ urlpatterns = patterns('plan.common.views',
 
     url(r'^{year}/{semester}/{slug}/deadlines/toggle/$', 'toggle_deadlines', name='toggle-deadlines'),
 
-    url(r'^about/$', 'about', name='about'),
-    url(r'^{slug}/$', 'shortcut', name='shortcut'),
+    url(r'^[+]$', 'about', name='about'),
+    url(r'^{slug}/?$', 'shortcut', name='shortcut'),
 )
