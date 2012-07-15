@@ -10,6 +10,10 @@
     {% trans "Please choose the course variants you belong to." %}
   </p>
   <div id="change-groups">
+    <div class="toogle tiny" id="toogle-template" style="display: none">
+      <a class="toogle-all">{% trans "All" %}</a> -
+      <a class="toogle-none">{% trans "None" %}</a>
+    </div>
     {% for course in courses %}
         <div class="course-{{ course.id }} groupbox" title="{{ course.name }}">
           <p>

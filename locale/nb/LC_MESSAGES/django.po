@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Timeplan\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-07-11 00:22+0200\n"
+"POT-Creation-Date: 2012-07-15 23:03+0200\n"
 "PO-Revision-Date: 2009-09-29 14:46+0100\n"
 "Last-Translator: Thomas Adamcik <timeplan@adamcik.no>\n"
 "Language-Team:  <timeplan@adamcik.no>\n"
@@ -273,6 +273,18 @@ msgstr "Frist"
 msgid "Deadlines"
 msgstr "Frister"
 
+#: plan/ical/views.py:22 plan/ical/views.py:48 plan/templates/tips.html:9
+msgid "lectures"
+msgstr "forelesninger"
+
+#: plan/ical/views.py:22 plan/ical/views.py:52 plan/templates/tips.html:10
+msgid "exams"
+msgstr "eksamener"
+
+#: plan/ical/views.py:22 plan/ical/views.py:56 plan/templates/tips.html:11
+msgid "deadlines"
+msgstr "frister"
+
 #: plan/ical/views.py:36
 #, python-format
 msgid "%(slug)s' %(semester)s %(year)s schedule for %(resources)s"
@@ -324,7 +336,7 @@ msgstr "Serveradministrator er varslet om feilen."
 msgid "Number of timetables"
 msgstr "Antall timeplaner"
 
-#: plan/templates/about.html:17
+#: plan/templates/about.html:20
 msgid "Number of timetables over time"
 msgstr "Antall timeplaner"
 
@@ -625,11 +637,19 @@ msgstr "Endre paralleller"
 msgid "Please choose the course variants you belong to."
 msgstr "Velg din parallell."
 
-#: plan/templates/groups.html:27
+#: plan/templates/groups.html:14 plan/templates/schedule_table_footer.html:34
+msgid "All"
+msgstr "Alle"
+
+#: plan/templates/groups.html:15
+msgid "None"
+msgstr "Ingen"
+
+#: plan/templates/groups.html:31
 msgid "No groups"
 msgstr "Ingen paralleller"
 
-#: plan/templates/groups.html:38
+#: plan/templates/groups.html:42
 msgid "Save groups"
 msgstr "Lagre paralleller"
 
@@ -694,7 +714,7 @@ msgstr ""
 "          for å vise eller skjule forelesninger.\n"
 "        "
 
-#: plan/templates/schedule.html:95
+#: plan/templates/schedule.html:94
 msgid "Settings"
 msgstr "Instillinger"
 
@@ -728,10 +748,6 @@ msgstr "Tips"
 #: plan/templates/schedule_table_footer.html:33
 msgid "Weeks:"
 msgstr "Uker: "
-
-#: plan/templates/schedule_table_footer.html:34
-msgid "All"
-msgstr "Alle"
 
 #: plan/templates/schedule_table_footer.html:36
 msgid "Current"
@@ -850,18 +866,6 @@ msgstr "Antall unike emner lagt til"
 #: plan/templates/statistics.html:19
 msgid "Total number of deadlines"
 msgstr "Antall frister"
-
-#: plan/templates/tips.html:9
-msgid "lectures"
-msgstr "forelesninger"
-
-#: plan/templates/tips.html:10
-msgid "exams"
-msgstr "eksamener"
-
-#: plan/templates/tips.html:11
-msgid "deadlines"
-msgstr "frister"
 
 #: plan/templates/tips.html:18
 msgid ""

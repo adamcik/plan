@@ -28,9 +28,7 @@
 {% endblock %}
 
 {% block extrascript %}
-  {% get_current_language as LANGUAGE_CODE %}
   <script type="text/javascript">
-    var language = '{{ LANGUAGE_CODE }}';
     var autocomplete_url = "{% url 'course-query' semester.year semester.slug %}";
   </script>
   {% compress js %}

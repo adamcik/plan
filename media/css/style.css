@@ -245,6 +245,12 @@ td.error input, td.error select {
 #change-groups li {
 	list-style: none;
 }
+#change-groups .toogle {
+	text-align: right;
+}
+#change-groups .toogle-all, #change-groups .toogle-none {
+	cursor: pointer;
+}
 
 /* Stats box on front page (needs special casing for graph) */
 #stats {

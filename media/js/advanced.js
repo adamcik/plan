@@ -1,24 +1,6 @@
 /* This file is part of the plan timetable generator, see LICENSE for details. yy*/
 
 (function() {
-  try {
-    language = language;
-  } catch (error) {
-    language = 'en';
-  }
-
-  var catalog = {
-    'All': 'Alle',
-    'None': 'Ingen'
-  };
-
-  function gettext(msgid) {
-      if (language == 'en') {
-        return msgid;
-      }
-      return catalog[msgid];
-  }
-
   function add_hidden_to_lectures() {
       var input = $(this);
 
@@ -51,22 +33,16 @@
 
   function add_toggle() {
     var div = $(this);
-    var all = $('<a></a>').text(gettext('All'));
-    var none = $('<a></a>').text(gettext('None'));
-    var wrapper = $('<div class="tiny"></div>')
+    var wrapper = $('#toogle-template').clone();
+    var all = wrapper.find('.toogle-all');
+    var none = wrapper.find('.toogle-none');
 
-    wrapper.css('text-align', 'right');
-    all.css('cursor', 'pointer')
-    none.css('cursor', 'pointer')
+    wrapper.removeAttr('id');
+    wrapper.removeAttr('style');
+    div.append(wrapper);
 
     none.click(function() { div.find(':checkbox').removeAttr('checked'); return false; });
     all.click(function() { div.find(':checkbox').attr('checked', 'checked'); return false; });
-
-    wrapper.append(all);
-    wrapper.append(' - ');
-    wrapper.append(none);
-
-    div.append(wrapper);
   }
 
   $(function() {
