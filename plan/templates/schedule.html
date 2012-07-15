@@ -28,9 +28,6 @@
 {% endblock %}
 
 {% block extrascript %}
-  <script type="text/javascript">
-    var autocomplete_url = "{% url 'course-query' semester.year semester.slug %}";
-  </script>
   {% compress js %}
     <script type="text/javascript" src="{% static 'js/jquery-1.3.1.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/jquery.autocomplete.min.js' %}"></script>
