@@ -123,12 +123,12 @@ msgstr "høsten"
 #: plan/common/models.py:210
 msgctxt "slug"
 msgid "spring"
-msgstr "vår"
+msgstr "var"
 
 #: plan/common/models.py:211
 msgctxt "slug"
 msgid "fall"
-msgstr "høst"
+msgstr "host"
 
 #: plan/common/models.py:214
 msgid "Year"
