@@ -17,6 +17,7 @@
     {% for course in courses %}
         <div class="course-{{ course.id }} groupbox" title="{{ course.name }}">
           <p>
+            {# TODO(adamcik): allow users to set alias in this form? #}
             <strong>{{ course.alias|default:course.code }}</strong>
             {% if course.name %}
               <br />
