@@ -404,37 +404,3 @@ td.error input, td.error select {
 #setlang img {
 	vertical-align: -17%;
 }
-
-/* From http://bassistance.de/jquery-plugins/jquery-plugin-autocomplete
- * Version: 1.0.2
- * License: MIT/GPL */
-.ac_results {
-	border: 1px solid black;
-	background-color: white;
-	overflow: hidden;
-	z-index: 99999;
-}
-
-.ac_results ul {
-	width: 100%;
-	list-style-position: outside;
-	list-style: none;
-	padding: 0;
-	margin: 0;
-}
-
-.ac_results li {
-	padding: 0.1em 0.3em;
-	cursor: default;
-	display: block;
-	overflow: hidden;
-}
-
-.ac_odd {
-	background-color: #FAFAFA;
-}
-
-.ac_over {
-	background-color: #0A246A;
-	color: white;
-}
