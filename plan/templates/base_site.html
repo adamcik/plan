@@ -22,8 +22,23 @@
   <link rel="icon" type="image/png" href="{% static 'gfx/time.png' %}" />
 {% endblock %}
 
-{% block extrascript %}
-  {% googleanalytics %}
+{% block script %}
+  {% compress js inline %}
+    <script type="text/javascript">
+      (function(d, t, tj) {
+        window.asyncLoad = function(src) {
+          var g = d.createElement(t),
+              s = d.getElementsByTagName(t)[0];
+          g.src = src;
+          g.type = tj;
+	  g.async = true;
+          s.parentNode.insertBefore(g, s);
+        };
+      })(document, 'script', 'text/javascript');
+    </script>
+    {% googleanalytics %}
+    {% block extrascript %}{% endblock %}
+  {% endcompress %}
 {% endblock %}
 
 {% block lang %}

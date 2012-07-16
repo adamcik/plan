@@ -1,19 +1,10 @@
-{% load compress %}
-
 {% if not code and debug %}
   <!-- Goggle Analytics not included because you haven't set the settings.GOOGLE_ANALYTICS_CODE variable. -->
 {% elif code %}
-  {% compress js inline %}
-    <script type="text/javascript">
-      var _gaq = _gaq || [];
-      _gaq.push(['_setAccount', '{{ code }}']);
-      _gaq.push(['_trackPageview']);
-
-      (function() {
-        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-        ga.src = '{% if secure %}https://ssl.{% else%}http://www.{% endif %}google-analytics.com/ga.js';
-        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-      })();
-    </script>
-  {% endcompress %}
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', '{{ code }}']);
+    _gaq.push(['_trackPageview']);
+    asyncLoad('{% if secure %}https://ssl.{% else%}http://www.{% endif %}google-analytics.com/ga.js');
+  </script>
 {% endif %}
