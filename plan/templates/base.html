@@ -4,10 +4,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
   <head>
     <title>{% block title %}{% endblock %}</title>
+    {% block script %}{% endblock %}
     {% block style %}{% endblock %}
     {% block extrastyle %}{% endblock %}
     {% block extrahead %}{% endblock %}
-    {% block script %}{% endblock %}
   </head>
   <body id="doc2" class="yui-t4" {% block onload %}{% endblock %}>
     <div id="hd">
