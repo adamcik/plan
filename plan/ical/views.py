@@ -65,6 +65,11 @@ def ical(request, year, semester_type, slug, ical_type=None):
     response['Content-Type'] = 'text/calendar; charset=utf-8'
     response['Filename'] = filename  # IE needs this
     response['Content-Disposition'] = 'attachment; filename=%s' % filename
+
+    # Aggressively cache old semester ical feeds.
+    if datetime.datetime.now() > semester.get_last_day():
+        response['Expires'] = 'Thu, 31 Dec 2037 23:55:55 GMT'
+
     return response
 
 
