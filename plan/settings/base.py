@@ -124,7 +124,7 @@ if DEBUG:
     COMPRESS_DEBUG_TOGGLE = 'no-cache'
 
 COMPRESS_CSS_FILTERS = (
-    'compressor.filters.css_default.CssAbsoluteFilter',
+    'plan.compress.CssSymlinkAbsoluteFilter',
     'compressor.filters.cssmin.CSSMinFilter',
 )
 
