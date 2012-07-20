@@ -1,5 +1,7 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+import re
+
 from django import http
 from django import shortcuts
 from django.conf import settings
@@ -9,6 +11,15 @@ from django.utils import translation
 from django.utils.translation import trans_real as trans_internals
 
 from plan.common.models import Semester
+
+RE_WHITESPACE = re.compile(r'(\s\s+|\n)')
+
+
+class HtmlMinifyMiddleware(object):
+    def process_response(self, request, response):
+        if response.status_code == 200 and 'text/html' in response['Content-Type']:
+            response.content = RE_WHITESPACE.sub(' ', response.content)
+        return response
 
 
 class LocaleMiddleware(object):
