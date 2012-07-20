@@ -5,7 +5,7 @@
 {% if courses %}
   <div class="yui-g noprint">
     <div class="yui-u first">
-      <p class="large">
+      <p>
         <a href="{% url 'course-list' semester.year semester.slug slug %}" class="icon list">{% trans "Course list" %}</a>
         {% if advanced %}
           - <a href="{% url 'schedule' semester.year semester.slug slug %}" class="icon advanced">{% trans "Hide advanced options" %}</a>
