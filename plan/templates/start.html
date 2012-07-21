@@ -9,23 +9,24 @@
   <h1>{% trans "Timetable generator for NTNU students" %}</h1>
 {% endblock %}
 
-{% block onload %}onload="{% stripspace %}
-  var s = document.getElementById('s');
-
-  if (s) {
-    s.focus();
-
-    if (document.cookie) {
-      var last = document.cookie.match(/last=([a-z0-9_-]+)/);
-
-      if (s.value)
-        return;
-
-      if (last)
-        s.value = last[1];
-    }
-  }
-{% endstripspace %}"{% endblock %}
+{% block extrascript %}
+  <script type="text/javascript">
+    // To keep frontpage minimal we don't have jquery available.
+    // Simple onload fallback instead of DOMContentLoaded +
+    // onreadystatechange is deliberate.
+    window.onload = function() {
+      var s = document.getElementById('s'),
+          f = document.getElementById('f');
+      s.focus();
+      if (window.localStorage) {
+        s.value = localStorage.getItem('last') || '';
+        f.onsubmit = function() {
+          localStorage.setItem('last', s.value);
+        }
+      }
+    };
+  </script>
+{% endblock %}
 
 {% block extrastyle %}
   {% if stats %}
@@ -53,7 +54,7 @@
       <div class="yui-u first">
         <h2>{% trans "Getting started" %}</h2>
         <div id="help">
-          <form action="." method="post">
+          <form action="." method="post" id="f">
             <p class="large">
               {% blocktrans %}
                 Please enter a short name identifying your personal
