@@ -147,9 +147,6 @@ TIMETABLE_COLORS = [
 # Maximum number of autocompletere results/
 TIMETABLE_AJAX_LIMIT = 100
 
-# How long to remember frontpage cookie.
-TIMETABLE_COOKIE_AGE = 60*60*24*7*4
-
 # Max number of courses per timetable.
 TIMETABLE_MAX_COURSES = 20
 

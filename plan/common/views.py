@@ -57,14 +57,7 @@ def getting_started(request, year, semester_type):
         if schedule_form.is_valid():
             slug = schedule_form.cleaned_data['slug']
             # TODO(adamcik): what should we do if current is empty?
-            response = schedule_current(request, semester.year, semester.type, slug)
-
-            # Store last timetable visited in a cookie so that we can populate
-            # the field with a default value next time.
-            # TODO(adamcik): use localstore instead, could also be extended to
-            #                recently viewed via js.
-            response.set_cookie('last', slug, settings.TIMETABLE_COOKIE_AGE)
-            return response
+            return schedule_current(request, semester.year, semester.type, slug)
     else:
         schedule_form = forms.ScheduleForm()
 
