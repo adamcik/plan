@@ -27,14 +27,13 @@
       (function(w, d, t) {
         var s = d.getElementsByTagName(t)[0],  // Script element to insert ourselves after.
             l = w.localStorage,  // Shortcut to localStorage object.
-            g,  // Variable for async element to inject.
             m;  // Regex match result variable in cookie code.
 
         w.asyncLoad = function(src) {
-          g = d.createElement(t);
-          g.async = true;
-          g.src = src;
-          s.parentNode.insertBefore(g, s);
+          var e = d.createElement(t);
+          e.async = true;
+          e.src = src;
+          s.parentNode.insertBefore(e, s);
         };
 
         // TODO(adamcik): remove this cleanup code after some time.
