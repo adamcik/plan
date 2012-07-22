@@ -25,16 +25,29 @@
 {% block script %}
   {% compress js inline %}
     <script type="text/javascript">
-      (function(d, t, tj) {
-        window.asyncLoad = function(src) {
-          var g = d.createElement(t),
-              s = d.getElementsByTagName(t)[0];
+      (function(w, d, t) {
+        var s = d.getElementsByTagName(t)[0],  // Script element to insert ourselves after.
+            l = w.localStorage,  // Shortcut to localStorage object.
+            g,  // Variable for async element to inject.
+            m;  // Regex match result variable in cookie code.
+
+        w.asyncLoad = function(src) {
+          g = d.createElement(t);
+          g.async = true;
           g.src = src;
-          g.type = tj;
-	  g.async = true;
           s.parentNode.insertBefore(g, s);
         };
-      })(document, 'script', 'text/javascript');
+
+        // TODO(adamcik): remove this cleanup code after some time.
+        // Transfer last cookie to localStorage if supported and set:
+        if(m = d.cookie.match(/(^|;\s*)last=([^;]+)/))
+          l && l.setItem('last', m[2]);
+
+        // Remove all cookies that don't start with __, this should cleanup old
+        // session, language, crsftoken and last timetable cookies.
+        while(m = d.cookie.match(/(^|;)\s*(?!__)([^\s=]+)=/))
+          d.cookie = m[2]+ '=;expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      })(window, document, 'script');
     </script>
     {% googleanalytics %}
     {% block extrascript %}{% endblock %}

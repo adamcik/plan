@@ -19,7 +19,7 @@
           f = document.getElementById('f');
       s.focus();
       if (window.localStorage) {
-        s.value = localStorage.getItem('last') || '';
+        s.value = localStorage.getItem('last');
         f.onsubmit = function() {
           localStorage.setItem('last', s.value);
         }
