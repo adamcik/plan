@@ -57,8 +57,8 @@ LOCALE_PATHS = [os.path.join(BASE_PATH, 'locale')]
 # -- App and midleware settings:
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
-    'plan.middleware.LocaleMiddleware',
-    'plan.middleware.HtmlMinifyMiddleware',
+    'plan.common.middleware.LocaleMiddleware',
+    'plan.common.middleware.HtmlMinifyMiddleware',
 )
 
 INSTALLED_APPS = (
@@ -124,7 +124,7 @@ if DEBUG:
     COMPRESS_DEBUG_TOGGLE = 'no-cache'
 
 COMPRESS_CSS_FILTERS = (
-    'plan.compress.CssSymlinkAbsoluteFilter',
+    'plan.common.compress.CssSymlinkAbsoluteFilter',
     'compressor.filters.cssmin.CSSMinFilter',
 )
 
