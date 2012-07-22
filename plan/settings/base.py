@@ -67,7 +67,6 @@ INSTALLED_APPS = (
     'plan.scrape',
     'plan.ical',
     'plan.pdf',
-    'plan.google',
     'south',
     'compressor',
 )
@@ -91,6 +90,7 @@ TEMPLATE_DIRS = (
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.request',
     'plan.common.context_processors.source_url',
+    'plan.common.context_processors.analytics_code',
 )
 
 # -- Cache settings:
@@ -143,6 +143,9 @@ TIMETABLE_COLORS = [
     '#F1E2CC',
     '#CCCCCC',
 ]
+
+# Google analytics code to use.
+TIMETABLE_ANALYTICS_CODE = None
 
 # Maximum number of autocompletere results/
 TIMETABLE_AJAX_LIMIT = 100

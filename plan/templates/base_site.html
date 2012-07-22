@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
 {% load compress %}
-{% load google %}
 {% load i18n %}
 {% load static %}
 
@@ -47,9 +46,15 @@
         // session, language, crsftoken and last timetable cookies.
         while(m = d.cookie.match(/(^|;)\s*(?!__)([^\s=]+)=/))
           d.cookie = m[2]+ '=;expires=Thu, 01 Jan 1970 00:00:00 GMT';
+
+        {% if ANALYTICS_CODE %}
+          var _gaq = _gaq || [];
+          _gaq.push(['_setAccount', '{{ ANALYTICS_CODE }}']);
+          _gaq.push(['_trackPageview']);
+          asyncLoad(('https:' == d.location.protocol ? 'https://ssl' : 'http://www') +'.google-analytics.com/ga.js');
+        {% endif %}
       })(window, document, 'script');
     </script>
-    {% googleanalytics %}
     {% block extrascript %}{% endblock %}
   {% endcompress %}
 {% endblock %}
