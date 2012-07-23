@@ -1,9 +1,7 @@
 {% extends "base_site.html" %}
 
-{% load color %}
 {% load compress %}
 {% load i18n %}
-{% load json %}
 {% load static %}
 
 {% block title %}
@@ -58,23 +56,19 @@
   {% compress js inline %}
     <script type="text/javascript">
       (function() {
-        var data = {{ data|json }};
-        var fills = [];
-        {% for a in data %}
-        fills.push("{% color forloop.counter %}");{% endfor %}
+        var data = {{ data }};
 
-        var plot = function() {
-          var series = [];
-          var options = {
-            xaxis: { mode: "time" },
-            yaxis: { min: 0 }
-          };
-          var fill;
+        function plot() {
+          var series = [], fill;
 
-          for (var i = 0; i < data.length; i++) {
-            fill = $.color.parse(fills[i]).scale('a', 0.5);
+          for (var i = 0; i < data.series.length; i++) {
+            for (var j = 0; j < data.series[i].length; j++) {
+              data.series[i][j][0] += data.first;
+              data.series[i][j][0] *= 1000 * data.scale;
+            }
+            fill = $.color.parse(data.fills[i]).scale('a', 0.5);
             series.push({
-              data: data[i],
+              data: data.series[i],
               lines: {
                 show: true,
                 lineWidth: 1,
@@ -85,7 +79,9 @@
             });
           }
 
-          $.plot($('#graph'), series, options);
+          $.plot($('#graph'), series, {
+	    xaxis: { mode: "time" }, yaxis: { min: 0 }
+          });
         };
 
 	// Arrange callback once all async js loads are done, dom ready would

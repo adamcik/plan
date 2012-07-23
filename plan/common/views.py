@@ -1,7 +1,8 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-import logging
 import datetime
+import json
+import logging
 
 from django import http
 from django import shortcuts
@@ -492,42 +493,57 @@ def list_courses(request, year, semester_type, slug):
 
 
 def about(request):
+    # Limit ourselves to 400 buckets to display within 940px - i.e. 2.3 pixels per sample.
     cursor = connection.cursor()
     cursor.execute('''
-        SELECT COUNT(*), date, semester_id FROM (
-            SELECT EXTRACT(EPOCH FROM date_trunc('day', min(s.added))) * 1000 AS date,
-                s.student_id, c.semester_id
+        SELECT CAST(EXTRACT(EPOCH FROM MAX(s.added)) -
+                    EXTRACT(EPOCH FROM MIN(s.added)) AS INTEGER)
+        FROM common_subscription s;''')
+    scale = cursor.fetchone()[0] / 400
+
+    # Fetch number of new subcriptions per time bucket:
+    cursor.execute('''
+        SELECT COUNT(*), bucket, semester_id FROM (
+            SELECT
+                cast(EXTRACT(EPOCH FROM date_trunc('day', min(s.added))) / %s as integer) AS bucket,
+                s.student_id,
+                c.semester_id
             FROM common_subscription s
             JOIN common_course c ON (c.id = s.course_id)
             GROUP BY s.student_id, c.semester_id
-        ) AS foo GROUP BY date, semester_id ORDER by semester_id, date;
-        ''')
+        ) AS foo GROUP BY bucket, semester_id ORDER by semester_id, bucket;
+        ''' % scale)
 
     last_semester = None
-    data = []
-    x = 0
-    y = 0
-    max_x = 0
+    colors = utils.ColorMap(hex=True)
+    fills, series = [], []
+    x, y, max_x, first = 0, 0, 0, 0
 
-    for count, date, semester in cursor.fetchall():
+    # Use zero indexing for x values to keep payload small.
+    for count, bucket, semester in cursor.fetchall():
+        if not first:
+            first = bucket - 1
+
         if last_semester != semester:
             last_semester = semester
-            x = date - 60*60*24*1000
-            y = 0
-            data.append([(x,y)])
+            x, y = (bucket - 1)-first, 0
+            series.append([(x,y)])
 
-        x  = int(date)
-        y += count
+        x, y = bucket - first, y+count
 
-        data[-1].append((x, y))
+        series[-1].append((x, y))
+        max_x = max(max_x, x)
 
-        if x > max_x:
-            max_x = x
+    for i, s in enumerate(series):
+        fills.append(colors[i])
+        s.append((max_x, s[-1][1]))
 
-    for d in data:
-        d.append((max_x, d[-1][1]))
-
+    # Pass on all data we need. First is needed to undo zero indexing, bucket
+    # size is needed to rescale x values to proper epochs.
     return shortcuts.render(request, 'about.html', {
-            'data': data,
-            'color_map': utils.ColorMap(hex=True)
+            'data':  html.mark_safe(json.dumps({
+                'series': series,
+                'fills': fills,
+                'first': first,
+                'scale': scale}, separators=(',',':'))),
         })
