@@ -317,6 +317,9 @@ td.error input, td.error select {
 }
 
 /* schedule styling */
+#schedule {
+	table-layout: fixed;
+}
 
 /* cell contents */
 #schedule .course, #schedule .room, #schedule .type {
@@ -353,7 +356,7 @@ td.error input, td.error select {
 	height: 2em;
 }
 #schedule th {
-	width: 18.6%;
+	width: 18.5%;
 	font-variant: small-caps;
 	font-weight: normal;
 }
@@ -363,7 +366,7 @@ td.error input, td.error select {
 	text-align: center;
 	vertical-align: middle;
 	font-size: 77%;
-	width: 7%;
+	width: 7.5%;
 	white-space: nowrap;
 }
 #schedule td.time {
