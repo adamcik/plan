@@ -1,7 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import os
-import sys
 
 """WSGI config for plan project.
 
@@ -12,10 +11,6 @@ this application via the ``WSGI_APPLICATION`` setting.
 """
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "plan.settings")
-
-project_dir = os.path.dirname(os.path.abspath(__file__)) + '/..'
-if project_dir not in sys.path:
-    sys.path.append(project_dir)
 
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
