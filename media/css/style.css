@@ -232,6 +232,7 @@ td.error input, td.error select {
 }
 #change-groups div div {
 	overflow: auto;
+	overflow-x: hidden;
 	height: 75%;
 	width: 100%;
 	margin: 0;
@@ -244,6 +245,7 @@ td.error input, td.error select {
 }
 #change-groups li {
 	list-style: none;
+	white-space: nowrap;
 }
 #change-groups .toogle {
 	text-align: right;
