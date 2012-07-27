@@ -28,8 +28,6 @@
         var s = d.getElementsByTagName(t)[0],  // Script element to insert ourselves after.
             l = w.localStorage,  // Shortcut to localStorage object.
             c = d.cookie, // copy of cookies for safe parsing.
-            r = /(^|;)\s*(?!__)([^\s=]+)=/g, // Regex for cookies to remove.
-            e = '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;', // Coookie expires template.
             m; // Regex match result variable in cookie code.
 
         w.asyncLoad = function(src) {
@@ -39,18 +37,24 @@
           s.parentNode.insertBefore(e, s);
         };
 
-        // TODO(adamcik): remove this cleanup code after some time.
-        // Transfer last cookie to localStorage if supported and set:
-        if(m = c.match(/(^|;\s*)last=([^;]+)/))
-          l && l.setItem('last', m[2]);
+        {% if MIGRATE_COOKIES %}
+          // TODO(adamcik): remove this cleanup code after some time.
+          // Transfer last cookie to localStorage if supported and set:
+          if(m = c.match(/(^|;\s*)last=([^;]+)/))
+            l && l.setItem('last', m[2]);
+        {% endif %}
 
-        // Remove all cookies that don't start with __, this should cleanup old
-        // session, language, crsftoken and last timetable cookies.
-        while(m = r.exec(c)) {
-          // Browsers vary, so delete cookie with and without path.
-          d.cookie = m[2]+ e;
-          d.cookie = m[2]+ e + 'path=/;';
-        }
+        {% if STRIP_COOKIES %}
+          // Remove all cookies that don't start with __, this should cleanup old
+          // session, language, crsftoken and last timetable cookies.
+          var r = /(^|;)\s*(?!__)([^\s=]+)=/g,
+              e = '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;';
+          while(m = r.exec(c)) {
+            // Browsers vary, so delete cookie with and without path.
+            d.cookie = m[2]+ e;
+            d.cookie = m[2]+ e + 'path=/;';
+          }
+        {% endif %}
 
         {% if ANALYTICS_CODE %}
           var _gaq = _gaq || [];

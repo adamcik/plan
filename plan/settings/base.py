@@ -89,8 +89,7 @@ TEMPLATE_DIRS = (
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.request',
-    'plan.common.context_processors.source_url',
-    'plan.common.context_processors.analytics_code',
+    'plan.common.context_processors.processor',
 )
 
 # -- Cache settings:
@@ -146,6 +145,12 @@ TIMETABLE_COLORS = [
 
 # Google analytics code to use.
 TIMETABLE_ANALYTICS_CODE = None
+
+# Add code to mirgate cookies to localstorage?
+TIMETABLE_MIGRATE_COOKIES = True
+
+# Add code to strip unused cookies using js?
+TIMETABLE_STRIP_COOKIES = False
 
 # Maximum number of autocompletere results/
 TIMETABLE_AJAX_LIMIT = 100
