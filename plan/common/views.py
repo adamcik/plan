@@ -30,7 +30,7 @@ now = datetime.datetime.now
 get_current_week = lambda: (now() + datetime.timedelta(days=2)).isocalendar()[1]
 
 
-def frontpage(self):
+def frontpage(request):
     try:
         semester = Semester.objects.current()
     except Semester.DoesNotExist:
