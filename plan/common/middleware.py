@@ -7,6 +7,7 @@ from django import shortcuts
 from django.conf import settings
 from django.core import urlresolvers
 from django.utils import cache
+from django.utils import http as http_utils
 from django.utils import translation
 from django.utils.translation import trans_real as trans_internals
 
@@ -20,6 +21,31 @@ class HtmlMinifyMiddleware(object):
         if response.status_code == 200 and 'text/html' in response['Content-Type']:
             response.content = RE_WHITESPACE.sub(' ', response.content)
         return response
+
+
+class AppendSlashMiddleware(object):
+    def process_request(self, request):
+        # Bail if we already have trailing slash.
+        if request.path.endswith('/'):
+            return
+
+        urlconf = getattr(request, 'urlconf', None)
+        old_is_valid = lambda: urlresolvers.is_valid_path(request.path_info, urlconf)
+        new_is_valid = lambda: urlresolvers.is_valid_path('%s/' % request.path_info, urlconf)
+
+        # Bail for valid urls or slash version not being valid.
+        if (old_is_valid() or not new_is_valid()):
+            return
+
+        if settings.DEBUG and request.method == 'POST':
+            raise RuntimeError("Can't redirect POST in AppendSlashMiddleware.")
+
+        # Redirect rest:
+        url = http_utils.urlquote('%s/' % request.path_info)
+        if request.META.get('QUERY_STRING', ''):
+            url += '?' + request.META['QUERY_STRING']
+        return http.HttpResponsePermanentRedirect(url)
+
 
 
 class LocaleMiddleware(object):
