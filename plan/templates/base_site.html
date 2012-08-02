@@ -24,6 +24,9 @@
 {% block script %}
   {% compress js inline %}
     <script type="text/javascript">
+      {% if ANALYTICS_CODE %}
+        var _gaq = _gaq || [];
+      {% endif %}
       (function(w, d, t) {
         var s = d.getElementsByTagName(t)[0],  // Script element to insert ourselves after.
             l = w.localStorage,  // Shortcut to localStorage object.
@@ -57,7 +60,6 @@
         {% endif %}
 
         {% if ANALYTICS_CODE %}
-          var _gaq = _gaq || [];
           _gaq.push(['_setAccount', '{{ ANALYTICS_CODE }}']);
           _gaq.push(['_setSiteSpeedSampleRate', 100]);
           _gaq.push(['_trackPageview']);
