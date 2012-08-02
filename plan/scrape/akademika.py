@@ -1,19 +1,13 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+import json
 import logging
-import lxml.html
 import urllib
 
 from plan.common.models import Course, Semester
 from plan.scrape import utils
 
-logger = logging.getLogger('scrape.sit')
-
-SEMESTER_NAMES = {Semester.FALL: 'Autumn',
-                  Semester.SPRING: 'Spring'}
-
-
-# TODO(adamcik): this is broken since tapir merged.
+logger = logging.getLogger('scrape.akademika')
 
 
 def update_syllabus(year, semester, match=None):
@@ -24,19 +18,22 @@ def update_syllabus(year, semester, match=None):
         courses = courses.filter(code__startswith=match)
 
     for course in courses.all():
-        url = 'http://sittapir.sit.no/pensum/NTNU/%s/%s/%s' % (
-            year, SEMESTER_NAMES[semester],
+        url = 'http://www.akademika.no/pensumlister/autocomplete/%s' % (
             urllib.quote(course.code.encode('utf-8')))
 
-        logger.info('Retrieving %s', url)
         try:
-            root = lxml.html.fromstring(utils.cached_urlopen(url))
+            data = json.loads(utils.cached_urlopen(url))
         except IOError, e:
             logger.warning('Parse failed for %s: %s', course.code, e)
             continue
 
-    for course in courses.filter(syllabus=''):
-        course.syllabus = base_url % course.code
-        course.save()
+        if not data:
+            continue
 
-        logger.info(course.syllabus)
+        if len(data.keys()) != 1:
+            logger.warning('More than one match for %s', course.code)
+            continue
+
+        course.syllabus = 'http://www.akademika.no/node/%s' % (data.keys()[0])
+        course.save()
+        logger.info('%s: %s', course.code, course.syllabus)
