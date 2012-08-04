@@ -212,4 +212,5 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
     page.showPage()
     page.save()
 
+    response['X-Robots-Tag'] = 'noindex, nofollow'
     return response
