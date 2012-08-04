@@ -3,11 +3,14 @@
 import datetime
 from dateutil import rrule
 
+from django.conf import settings
+from django.utils import formats
+
 from plan.common.models import Lecture
 
 
 class Timetable:
-    slots = 12
+    slots = len(settings.TIMETABLE_SLOTS)
 
     def __init__(self, lectures):
         self.lecture_queryset = lectures
@@ -125,9 +128,11 @@ class Timetable:
     # FIXME add an insert_days method
 
     def insert_times(self):
-
-        for i in range(8, 20):
-            self.table[i-8].insert(0, [{'time': '%02d:15 - %02d:00' % (i, i+1), 'last': True }])
+        for i, slot in enumerate(settings.TIMETABLE_SLOTS):
+            start = formats.time_format(slot[0])
+            end = formats.time_format(slot[1])
+            self.table[i].insert(0, [{'time': '%s - %s' % (start, end),
+                                      'last': True }])
 
     def map_to_slot(self, lecture):
         '''Maps a given lecture to zero-indexed start and stop slots

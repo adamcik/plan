@@ -1,5 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+import datetime
 import os.path
 import socket
 
@@ -141,6 +142,21 @@ TIMETABLE_COLORS = [
     '#FFF2AE',
     '#F1E2CC',
     '#CCCCCC',
+]
+
+TIMETABLE_SLOTS = [
+    (datetime.time( 8,15), datetime.time( 9,0)),
+    (datetime.time( 9,15), datetime.time(10,0)),
+    (datetime.time(10,15), datetime.time(11,0)),
+    (datetime.time(11,15), datetime.time(12,0)),
+    (datetime.time(12,15), datetime.time(13,0)),
+    (datetime.time(13,15), datetime.time(14,0)),
+    (datetime.time(14,15), datetime.time(15,0)),
+    (datetime.time(15,15), datetime.time(16,0)),
+    (datetime.time(16,15), datetime.time(17,0)),
+    (datetime.time(17,15), datetime.time(18,0)),
+    (datetime.time(18,15), datetime.time(19,0)),
+    (datetime.time(19,15), datetime.time(20,0)),
 ]
 
 # Google analytics code to use.
