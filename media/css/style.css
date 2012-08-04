@@ -387,7 +387,7 @@ td.error input, td.error select {
 #schedule tr.first td {
 	border-top: 1px solid #666;
 }
-#schedule tr.last td {
+#schedule td.bottom {
 	border-bottom: 1px solid #666;
 }
 

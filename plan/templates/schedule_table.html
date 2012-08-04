@@ -25,14 +25,14 @@
   </thead>
   <tbody>
   {% for row in timetable.table %}
-    <tr class="{% cycle odd,even %}{% if forloop.last %} last{% endif %}{% if forloop.first %} first{% endif %}">
+    <tr class="{% cycle odd,even %}{% if forloop.first %} first{% endif %}">
       {% for cells in row %}
         {% if cells %}
           {% for c in cells %}
             {% if not c.remove %}
               <td {% if c.colspan > 1 %}colspan="{{ c.colspan }}"{% endif %}
                   {% if c.rowspan > 1 %}rowspan="{{ c.rowspan }}"{% endif %}
-                  {% if c.lecture or c.time or forloop.last  %}
+                  {% if c.lecture or c.time or c.bottom or c.last %}
                   class="{% stripspace %}
                     {% if c.lecture %}
                       lecture
@@ -42,16 +42,17 @@
                     {% if c.lecture.optional %}
                       optional
                     {% endif %}
-                    {% ifequal c.rowspan 1 %}
+                    {% if c.rowspan == 1 %}
                       single
-                    {% endifequal %}
+                    {% endif %}
                     {% if c.last %}
                       last
                     {% endif %}
+                    {% if c.bottom %}
+                      bottom
+                    {% endif %}
                     {% if c.time %}
                       time
-                    {% else %}
-                      day-{{ forloop.parentloop.counter0 }}
                     {% endif %}
                   {% endstripspace %}"
                 {% endif %}

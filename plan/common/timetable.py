@@ -72,6 +72,7 @@ class Timetable:
                     'lecture': lecture,
                     'rowspan': rowspan,
                     'remove': remove,
+                    'bottom': start+rowspan == len(self.table)
                 }
 
                 # Add lecture to our supplementary data structure and set the
@@ -124,20 +125,19 @@ class Timetable:
                     self.table[m][j][l]['remove'] = True
 
 
-    def add_last_marker(self):
-        # Add last marker
-        for day in self.table:
-            for slot in day:
-                slot[-1]['last'] = True
-
-    # FIXME add an insert_days method
+    def add_markers(self):
+        for row in self.table:
+            for day in row:
+                day[-1]['last'] = True
+        for day in self.table[-1]:
+            for cell in day:
+                cell['bottom'] = True
 
     def insert_times(self):
         for i, slot in enumerate(settings.TIMETABLE_SLOTS):
             start = formats.time_format(slot[0])
             end = formats.time_format(slot[1])
-            self.table[i].insert(0, [{'time': '%s - %s' % (start, end),
-                                      'last': True }])
+            self.table[i].insert(0, [{'time': '%s - %s' % (start, end)}])
 
     def map_to_slot(self, lecture):
         start, end = None, None

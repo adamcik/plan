@@ -170,8 +170,8 @@ def schedule(request, year, semester_type, slug, advanced=False,
         table.place_lectures()
         table.do_expansion()
 
-    table.add_last_marker()
     table.insert_times()
+    table.add_markers()
 
     if advanced:
         subscriptions = Subscription.objects.get_subscriptions(year, semester.type, slug)
