@@ -18,8 +18,8 @@ class Timetable:
         self.lecture_queryset = lectures
         self.lectures = []
         self.table = [[[{}] for a in Lecture.DAYS] for b in range(self.slots)]
-        self.span = [1] * 5
-        self.date = [None] * 5
+        self.span = [1] * len(Lecture.DAYS)
+        self.date = [None] * len(Lecture.DAYS)
 
     def header(self):
         for i, name in Lecture.DAYS:
