@@ -9,9 +9,9 @@ from reportlab.pdfgen import canvas
 from reportlab.platypus import tables
 
 from django import http
-from django.utils import dates
 from django.utils import html
 from django.utils import translation
+from django.utils import dateformat
 
 from plan.common.models import Lecture, Semester, Room, Course
 from plan.common.timetable import Timetable
@@ -93,6 +93,8 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
         timetable.place_lectures()
         timetable.do_expansion()
     timetable.insert_times()
+    if week:
+        timetable.set_week(semester.year, int(week))
 
     paragraph_style = default_styles['Normal']
     paragraph_style.fontName = 'Helvetica-Bold'
@@ -106,13 +108,14 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
     table_style.add('SPAN', (0,0), (-1, 0))
 
     # Add days
-    # FIXME move to timetable
     data.append([''])
-    for i in range(5):
-        data[-1].append(unicode(dates.WEEKDAYS[i]))
-        if timetable.span[i] > 1:
-            extra = timetable.span[i] - 1
-
+    for span, date, name in timetable.header():
+        if date:
+            data[-1].append(dateformat.format(date, 'l - j M.'))
+        else:
+            data[-1].append(unicode(name))
+        if span > 1:
+            extra = span - 1
             table_style.add('SPAN', (len(data[-1])-1, 2), (len(data[-1])-1+extra, 2))
             data[-1].extend([''] * extra)
 
