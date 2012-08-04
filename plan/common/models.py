@@ -5,6 +5,7 @@ import datetime
 from django.db import models
 from django.db import connection
 from django.template import defaultfilters as filters
+from django.utils import dates
 from django.utils import translation
 from django.contrib.auth.models import User
 
@@ -357,15 +358,7 @@ class Lecturer(models.Model):
 
 
 class Lecture(models.Model):
-    DAYS = (
-        (0, _('Monday')),
-        (1, _('Tuesday')),
-        (2, _('Wednesday')),
-        (3, _('Thursday')),
-        (4, _('Friday')),
-#        (5, 'Saturday'),
-#        (6, 'Sunday'),
-    )
+    DAYS = [(i, dates.WEEKDAYS[i]) for i in xrange(5)]
 
     course = models.ForeignKey(Course)
 
