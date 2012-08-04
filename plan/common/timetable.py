@@ -8,6 +8,8 @@ from django.utils import formats
 from plan.common import utils
 from plan.common.models import Lecture
 
+SLOT_END_TIMES = map(lambda s: s[1], settings.TIMETABLE_SLOTS)
+
 
 class Timetable:
     slots = len(settings.TIMETABLE_SLOTS)
@@ -138,31 +140,20 @@ class Timetable:
                                       'last': True }])
 
     def map_to_slot(self, lecture):
-        '''Maps a given lecture to zero-indexed start and stop slots
-           ensuring that start < end'''
+        start, end = None, None
 
-        start = lecture.start.hour
-        end = lecture.end.hour
+        for i, time in enumerate(SLOT_END_TIMES):
+            if start is None and lecture.start < time:
+                start = i
 
-        if start >= 0 and start < 4:
-            start += 24
+            if end is None and lecture.end <= time:
+                end = i
 
-        if end >= 0 and end < 4:
-            end += 24
+        if end is None and lecture.end > time:
+            end = i
 
-        if start == end:
-            end += 1
+        message = '%s slot for %s could not be set.'
+        assert start is not None, message % ('Start', lecture.id)
+        assert end is not None, message % ('End', lecture.id)
 
-        if start < 8:
-            start = 8
-
-        if end < 9:
-            end = 9
-
-        if start > 19:
-            start = 19
-
-        if end > 20:
-            end = 20
-
-        return (start-8, end-9)
+        return (start, end)
