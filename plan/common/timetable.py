@@ -1,11 +1,11 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import datetime
-from dateutil import rrule
 
 from django.conf import settings
 from django.utils import formats
 
+from plan.common import utils
 from plan.common.models import Lecture
 
 
@@ -20,9 +20,8 @@ class Timetable:
         self.date = [] * 5
 
     def set_week(self, year, week):
-        self.date = map(lambda d: d.date(), rrule.rrule(rrule.DAILY, count=5,
-                byweekday=(rrule.MO, rrule.TU, rrule.WE, rrule.TH, rrule.FR),
-                byweekno=week, dtstart=datetime.date(year, 1, 1)))
+        first_day = utils.first_date_in_week(year, week)
+        self.date = [(first_day + datetime.timedelta(days=i)) for i, name in Lecture.DAYS]
 
     def place_lectures(self):
         '''Add basics to datastructure'''

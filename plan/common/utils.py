@@ -2,6 +2,7 @@
 
 import datetime
 import operator
+import time
 
 from django import http
 from django import template
@@ -128,3 +129,8 @@ class ColorMap(dict):
 def max_number_of_weeks(year):
     # dec. 28 is always on the last week if the year.
     return datetime.date(int(year), 12, 28).isocalendar()[1]
+
+
+def first_date_in_week(year, week):
+    struct_time = time.strptime('%d %d 1' % (year, week), '%Y %W %w')
+    return datetime.date.fromtimestamp(time.mktime(struct_time))
