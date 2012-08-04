@@ -15,12 +15,12 @@
   <thead>
     <tr>
       <th class="time"></th>
-      {# TODO(adamcik): no need to hardcode these days... #}
-      <th {% if timetable.span.0 > 1 %}colspan="{{ timetable.span.0 }}" {% endif %}class="day-1"><span class="date">{{ timetable.date.0|date:"j M."|lower }}</span> {% trans "Monday" %}</th>
-      <th {% if timetable.span.1 > 1 %}colspan="{{ timetable.span.1 }}" {% endif %}class="day-2"><span class="date">{{ timetable.date.1|date:"j M."|lower }}</span> {% trans "Tuesday" %}</th>
-      <th {% if timetable.span.2 > 1 %}colspan="{{ timetable.span.2 }}" {% endif %}class="day-3"><span class="date">{{ timetable.date.2|date:"j M."|lower }}</span> {% trans "Wednesday" %}</th>
-      <th {% if timetable.span.3 > 1 %}colspan="{{ timetable.span.3 }}" {% endif %}class="day-4"><span class="date">{{ timetable.date.3|date:"j M."|lower }}</span> {% trans "Thursday" %}</th>
-      <th {% if timetable.span.4 > 1 %}colspan="{{ timetable.span.4 }}" {% endif %}class="day-5"><span class="date">{{ timetable.date.4|date:"j M."|lower }}</span> {% trans "Friday" %}</th>
+      {% for span, date, day in timetable.header %}
+        <th {% if span %}colspan="{{ span }}"{% endif %}>
+          <span class="day">{{ day }}</span>
+          {% if date %}<span class="date">{{ date|date:"j M." }}</span>{% endif %}
+        </th>
+      {% endfor %}
     </tr>
   </thead>
   <tbody>

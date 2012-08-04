@@ -17,7 +17,11 @@ class Timetable:
         self.lectures = []
         self.table = [[[{}] for a in Lecture.DAYS] for b in range(self.slots)]
         self.span = [1] * 5
-        self.date = [] * 5
+        self.date = [None] * 5
+
+    def header(self):
+        for i, name in Lecture.DAYS:
+            yield self.span[i], self.date[i], name
 
     def set_week(self, year, week):
         first_day = utils.first_date_in_week(year, week)

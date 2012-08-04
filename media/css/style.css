@@ -357,7 +357,7 @@ td.error input, td.error select {
 }
 #schedule th {
 	width: 18.5%;
-	font-variant: small-caps;
+	font-size: 77%;
 	font-weight: normal;
 }
 
@@ -374,7 +374,6 @@ td.error input, td.error select {
 }
 #schedule .date {
 	float: right;
-	font-size: 77%;  /* 10px */
 }
 
 #schedule td.lecture {
