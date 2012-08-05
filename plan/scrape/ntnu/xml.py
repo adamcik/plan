@@ -2,6 +2,8 @@
 
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from __future__ import absolute_import
+
 import logging
 
 import xml.dom.minidom
@@ -37,7 +39,7 @@ class Exams(base.Scraper):
             code=code.strip(), semester=self.get_semester())
         return course
 
-    def run(self):
+    def fetch(self):
         added, updated = [], []
         semester = self.get_semester()
         first_day = semester.get_first_day().date()

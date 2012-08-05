@@ -5,5 +5,8 @@ class Scraper(object):
         self.semester = semester
         self.options = options
 
-    def run(self):
+    def fetch(self):
         raise NotImplementedError
+
+    def run(self):
+        return self.fetch()
