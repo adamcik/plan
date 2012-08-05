@@ -41,11 +41,11 @@ class Scraper(object):
         return text
 
 
-class CourseScraper(Scraper):
-    MODEL = Course
-    FIELDS = ('code', 'version')
-    CLEAN_FIELDS = ('name',)
-    DEFAULT_FIELDS = ('name', 'url', 'points')
+class GenericScraper(Scraper):
+    MODEL = None
+    FIELDS = tuple()
+    CLEAN_FIELDS = tuple()
+    DEFAULT_FIELDS = tuple()
 
     def delete(self, items):
         # TODO(adamcik): figure out related cascade deletes?
@@ -57,7 +57,10 @@ class CourseScraper(Scraper):
                 self.stats['deleted'] > 0)
 
     def display(self, item):
-        return item.code
+        return str(item)
+
+    def extra(self, data):
+        pass
 
     def run(self):
         semester, created = Semester.objects.get_or_create(
@@ -65,11 +68,15 @@ class CourseScraper(Scraper):
         to_delete = []
 
         for data in self.fetch():
+            # Allow scrapers to modify data before giving it to
+            # generic cod below.
+            self.extra(data)
+
             # Build kwargs for get or create by:
             #  1. cleaning fields that are in CLEAN_FIELDS
             #  2. adding lookup fields that are in FIELDS
             #  3. adding defaults fields that are in DEFAULT_FIELDS
-            kwargs = {'defaults': {}, 'semester': semester}
+            kwargs = {'defaults': {}}
             for field in data:
                 if field in self.CLEAN_FIELDS:
                     data[field] = self.clean(data[field])
@@ -116,3 +123,18 @@ class CourseScraper(Scraper):
                 logging.debug('No changes for %s', self.display(obj))
 
         return to_delete
+
+
+class CourseScraper(GenericScraper):
+    MODEL = Course
+    FIELDS = ('code', 'version', 'semester')
+    CLEAN_FIELDS = ('name',)
+    DEFAULT_FIELDS = ('name', 'url', 'points')
+
+    def extra(self, data):
+        semester, created = Semester.objects.get_or_create(
+            year=self.semester.year, type=self.semester.type)
+        data['semester'] = semester
+
+    def display(self, item):
+        return item.code
