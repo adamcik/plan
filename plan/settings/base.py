@@ -133,6 +133,8 @@ SKIP_SOUTH_TESTS = True      # Ignore south tests
 SOUTH_TESTS_MIGRATE = False  # Don't use south migrations during tests.
 
 # -- plan specific settings:
+
+# Colors to use in timetables and throught the site.
 TIMETABLE_COLORS = [
     '#B3E2CD',
     '#FDCDAC',
@@ -144,6 +146,8 @@ TIMETABLE_COLORS = [
     '#CCCCCC',
 ]
 
+# List of tuples containing lecture start and end times to show. All lectures
+# will be "pigeonholed" into these slots.
 TIMETABLE_SLOTS = [
     (datetime.time( 8,15), datetime.time( 9,0)),
     (datetime.time( 9,15), datetime.time(10,0)),
@@ -159,16 +163,18 @@ TIMETABLE_SLOTS = [
     (datetime.time(19,15), datetime.time(20,0)),
 ]
 
+# Available scrapers for loading data into plan. can be run using
+# './manage.py scrape <type>' where type is one of the keys bellow.
 TIMETABLE_SCRAPERS = {
-    'courses': 'plan.scrape.ntnu.db.courses',
-    #'courses': 'plan.scrape.ntnu.api.courses',
-    #'courses': 'plan.scrape.ntnu.web.courses',
-    'exams': 'plan.scrape.ntnu.web.exams',
-    'lectures': 'plan.scrape.db.lectures',
-    #'lectures': 'plan.scrape.ntnu.api.lectures',
-    #'lectures': 'plan.scrape.ntnu.web.lectures',
-    'rooms': 'plan.scrape.ntnu.web.rooms',
-    'syllabus': 'plan.scrape.akademika.web.syllabus',
+    #'courses': 'plan.scrape.ntnu.db.Courses',
+    #'courses': 'plan.scrape.ntnu.api.Courses',
+    #'courses': 'plan.scrape.ntnu.web.Courses',
+    'exams': 'plan.scrape.ntnu.xml.Exams',
+    #'lectures': 'plan.scrape.db.Lectures',
+    #'lectures': 'plan.scrape.ntnu.api.Lectures',
+    #'lectures': 'plan.scrape.ntnu.web.Lectures',
+    #'rooms': 'plan.scrape.ntnu.web.Rooms',
+    #'syllabus': 'plan.scrape.akademika.web.Syllabus',
 }
 
 # Google analytics code to use.

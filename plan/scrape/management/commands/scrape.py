@@ -14,7 +14,8 @@ DATE_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 CONSOLE_LOG_FORMAT = '[%(asctime)s %(levelname)s] %(message)s'
 
 logging.basicConfig(format=CONSOLE_LOG_FORMAT,
-                    datefmt=DATE_TIME_FORMAT)
+                    datefmt=DATE_TIME_FORMAT,
+                    level=logging.INFO)
 
 OPTIONS = (
     optparse.make_option('-y', '--year', action='store', dest='year'),
@@ -41,8 +42,8 @@ class Command(management.BaseCommand):
         return semester
 
     def load_scraper(self, type):
-        module, func = settings.TIMETABLE_SCRAPERS[type].rsplit('.', 1)
-        return getattr(importlib.import_module(module), func)
+        module, cls = settings.TIMETABLE_SCRAPERS[type].rsplit('.', 1)
+        return getattr(importlib.import_module(module), cls)
 
     def list_items(self, items):
         buffer = []
@@ -64,7 +65,8 @@ class Command(management.BaseCommand):
 
             semester = self.get_semester(options)
 
-            to_delete = self.load_scraper(args[0])(semester, options)
+            scraper = self.load_scraper(args[0])(semester, options)
+            to_delete = scraper.run()
 
             if to_delete:
                 print 'Delete the following?'
