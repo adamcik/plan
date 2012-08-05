@@ -11,7 +11,6 @@
         <th>{% trans "Type" %}</th>
         <th style="width: 18%">{% trans "Course" %}</th>
         <th>{% trans "Handout" %}</th>
-        <th></th>
       </tr>
     </thead>
     <tbody>
@@ -20,35 +19,36 @@
           <td>
             {{ exam.exam_date }}
           </td>
-          <td>
+          <td align="center">
             {% if exam.exam_time %}
               {{ exam.exam_time|time }}
+            {% else %}
+              -
             {% endif %}
           </td>
           <td align="center">{{ exam.duration|default:"-" }}</td>
-          <td>
-            {% if not exam.type %}
-              -
-            {% else %}
+          {% if not exam.type %}
+            <td align="center">-</td>
+          {% else %}
+            <td>
               {% if exam.type.name %}
                 {{ exam.type.name|lower|capfirst }}
               {% else %}
                 {{ exam.type.code }}
               {% endif %}
-            {% endif %}
-          </td>
+            </td>
+          {% endif %}
           <td>{{ exam.alias|default:exam.course.code }}</td>
-          <td>
-            {% if not exam.handout_date %}
-              -
-            {% else %}
+          {% if not exam.handout_date %}
+            <td align="center">-</td>
+          {% else %}
+            <td>
               {{ exam.handout_date }}
               {% if exam.handout_time %}
                 {{ exam.handout_time|time }}
               {% endif %}
-            {% endif %}
-          </td>
-          <td>{{ exam.course.comment|default:"" }}</td>
+            </td>
+          {% endif %}
         </tr>
       {% endfor %}
     </tbody>
