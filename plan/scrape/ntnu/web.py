@@ -7,9 +7,7 @@ import lxml.html
 import re
 import urllib
 
-from django.db import connections
-
-from plan.common.models import Course, Lecture, Semester
+from plan.common.models import Semester
 from plan.scrape import utils
 from plan.scrape import base
 

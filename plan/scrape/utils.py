@@ -1,7 +1,7 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-import re
 import dateutil.parser
+import re
 import urllib
 
 from django.conf import settings

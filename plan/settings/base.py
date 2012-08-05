@@ -102,7 +102,10 @@ CACHES = {
     'webscraper': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         'LOCATION': os.path.join(BASE_PATH, 'cache'),
-        'TIMEOUT': 60*60*24,
+        'TIMEOUT': 60*60*24*7,
+        'OPTIONS': {
+            'MAX_ENTRIES': 50000,
+        },
     },
 }
 
