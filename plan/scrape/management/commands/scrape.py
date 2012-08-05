@@ -75,6 +75,9 @@ class Command(management.BaseCommand):
             scraper = self.load_scraper(args[0])(semester, options)
             to_delete = scraper.run()
 
+            logging.info(('Created: {created} Updated: {updated} '
+                          'Deleted: {deleted}').format(**scraper.stats))
+
             if to_delete:
                 print 'Delete the following?'
                 print '---------------------'
