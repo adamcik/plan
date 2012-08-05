@@ -5,6 +5,15 @@ import logging
 from plan.common.models import Course, Semester
 
 
+def compare(old, new):
+    old_is_string = isinstance(old, basestring)
+    new_is_string = isinstance(new, basestring)
+
+    if (new_is_string and old_is_string and new.strip() == old.strip()):
+        return '<whitespace>'
+    return '[%s] -> [%s]' % (new, old)
+
+
 class Scraper(object):
     def __init__(self, semester, options):
         self.semester = semester
@@ -33,18 +42,22 @@ class Scraper(object):
 
 
 class CourseScraper(Scraper):
+    MODEL = Course
     FIELDS = ('code', 'version')
     CLEAN_FIELDS = ('name',)
     DEFAULT_FIELDS = ('name', 'url', 'points')
 
-    def delete(self, courses):
-        course_ids = [c.id for c in courses]
-        Course.objects.filter(id__in=course_ids).delete()
+    def delete(self, items):
+        # TODO(adamcik): figure out related cascade deletes?
+        self.MODEL.objects.filter(id__in=[i.id for i in items]).delete()
 
     def needs_commit(self):
         return (self.stats['created'] > 0 or
                 self.stats['updated'] > 0 or
                 self.stats['deleted'] > 0)
+
+    def display(self, item):
+        return item.code
 
     def run(self):
         semester, created = Semester.objects.get_or_create(
@@ -69,13 +82,13 @@ class CourseScraper(Scraper):
             if data.get('delete', False):
                 try:
                     del kwargs['defaults']
-                    to_delete.append(Course.objects.get(**kwargs))
+                    to_delete.append(self.MODEL.objects.get(**kwargs))
                     self.stats['deleted'] += 1
-                except Course.DoesNotExist:
+                except self.MODEL.DoesNotExist:
                     pass
                 continue
 
-            course, created = Course.objects.get_or_create(**kwargs)
+            obj, created = self.MODEL.objects.get_or_create(**kwargs)
             changes = {}
 
             if created:
@@ -83,28 +96,23 @@ class CourseScraper(Scraper):
             else:
                 # Check if any of the non lookup fields need to be fixed.
                 for field, value in kwargs['defaults'].items():
-                    old_value = getattr(course, field)
+                    old_value = getattr(obj, field)
                     if old_value != value:
-                        setattr(course, field, value)
+                        setattr(obj, field, value)
                         changes[field] = (old_value, value)
 
             # TODO(adamcik): use update_fields once we have django 1.5
             if changes:
-                course.save()
+                obj.save()
                 self.stats['updated'] += 1
 
             if created:
-                logging.info('Added course %s', course.code)
+                logging.info('Added %s', self.display(obj))
             elif changes:
-                logging.info('Updated course %s:', course.code)
+                logging.info('Updated %s:', self.display(obj))
                 for key, (new, old) in changes.items():
-                    if (isinstance(old, basestring) and
-                        isinstance(new, basestring) and
-                        new.strip() == old.strip()):
-                        logging.info('  %s: <whitespace fix>', key)
-                    else:
-                        logging.info('  %s: [%s] -> [%s]', key, new, old)
+                    logging.info('  %s: %s', key, compare(old, new))
             else:
-                logging.debug('No changes for course %s', course.code)
+                logging.debug('No changes for %s', self.display(obj))
 
         return to_delete
