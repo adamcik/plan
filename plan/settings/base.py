@@ -166,9 +166,9 @@ TIMETABLE_SLOTS = [
 # Available scrapers for loading data into plan. can be run using
 # './manage.py scrape <type>' where type is one of the keys bellow.
 TIMETABLE_SCRAPERS = {
-    'courses': 'plan.scrape.ntnu.db.Courses',
+    #'courses': 'plan.scrape.ntnu.db.Courses',
     #'courses': 'plan.scrape.ntnu.api.Courses',
-    #'courses': 'plan.scrape.ntnu.web.Courses',
+    'courses': 'plan.scrape.ntnu.web.Courses',
     'exams': 'plan.scrape.ntnu.xml.Exams',
     #'lectures': 'plan.scrape.db.Lectures',
     #'lectures': 'plan.scrape.ntnu.api.Lectures',
