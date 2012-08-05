@@ -37,6 +37,18 @@ def match_term(semester, course):
     return False
 
 
+def filter_exams(semester, course):
+    year = semester.year
+    term = TERM_MAPPING[semester.type]
+
+    for exam in course.get('assessment', []):
+        if exam['statusCode'] != 'ORD':
+            continue
+        if (exam['realExecutionYear'] == year and
+            exam['realExecutionTerm'] == term):
+            yield exam
+
+
 class Courses(base.CourseScraper):
     def fetch(self):
         data = utils.cached_urlopen('http://www.ime.ntnu.no/api/course/-')
@@ -53,7 +65,10 @@ class Courses(base.CourseScraper):
             if not course:
                 continue
 
-            if match_term(self.semester, course):
+            # Add all courses that are being taught this semester or have a
+            # valid exam this semester.
+            if (match_term(self.semester, course) or
+                list(filter_exams(self.semester, course))):
                 yield {'code': code,
                        'name': course['name'],
                        'version': version,
@@ -69,24 +84,14 @@ class Exams(base.ExamScraper):
             semester__year__exact=self.semester.year,
             semester__type=self.semester.type)
 
-        year = self.semester.year
-        term = TERM_MAPPING[self.semester.type]
-
         for course in courses.iterator():
             result = fetch_course(course.code)
 
             if not result or not match_term(self.semester, result):
                 continue
 
-            for exam in result.get('assessment', []):
+            for exam in filter_exams(self.semester, result):
                 data = {'course': course, 'defaults': {}}
-
-                if exam['statusCode'] != 'ORD':
-                    continue
-
-                if (exam['realExecutionYear'] != year or
-                    exam['realExecutionTerm'] != term):
-                    continue
 
                 if 'date' in exam:
                     data['exam_date'] = utils.parse_date(exam['date'])
