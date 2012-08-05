@@ -60,18 +60,24 @@ class GenericScraper(Scraper):
     def display(self, item):
         return str(item)
 
-    def extra(self, data):
-        pass
+    def process_data(self, data):
+        return data
+
+    def process_kwargs(self, kwargs, data):
+        return kwargs
+
+    def process_remove(self, seen):
+        return []
 
     def run(self):
         semester, created = Semester.objects.get_or_create(
             year=self.semester.year, type=self.semester.type)
-        to_delete = []
+        seen = []
 
         for data in self.fetch():
             # Allow scrapers to modify data before giving it to
-            # generic cod below.
-            self.extra(data)
+            # generic code below.
+            data = self.process_data(data)
 
             # Build kwargs for get or create by:
             #  1. cleaning fields that are in CLEAN_FIELDS
@@ -87,16 +93,12 @@ class GenericScraper(Scraper):
                 elif field in self.DEFAULT_FIELDS:
                     kwargs['defaults'][field] = data[field]
 
-            if data.get('delete', False):
-                try:
-                    del kwargs['defaults']
-                    to_delete.append(self.MODEL.objects.get(**kwargs))
-                    self.stats['deleted'] += 1
-                except self.MODEL.DoesNotExist:
-                    pass
+            kwargs = self.process_kwargs(kwargs, data)
+            if not kwargs:
                 continue
 
             obj, created = self.MODEL.objects.get_or_create(**kwargs)
+            seen.append(obj.id)
             changes = {}
 
             if created:
@@ -123,7 +125,9 @@ class GenericScraper(Scraper):
             else:
                 logging.debug('No changes for %s', self.display(obj))
 
-        return to_delete
+        remove = list(self.process_remove(seen))
+        self.stats['deleted'] = len(remove)
+        return remove
 
 
 class CourseScraper(GenericScraper):
@@ -132,10 +136,28 @@ class CourseScraper(GenericScraper):
     CLEAN_FIELDS = ('name',)
     DEFAULT_FIELDS = ('name', 'url', 'points')
 
-    def extra(self, data):
+    def __init__(self, *args, **kwargs):
+        super(CourseScraper, self).__init__(*args, **kwargs)
+        self.to_delete = []
+
+    def process_data(self, data):
         semester, created = Semester.objects.get_or_create(
             year=self.semester.year, type=self.semester.type)
         data['semester'] = semester
+        return data
+
+    def process_kwargs(self, kwargs, data):
+        if not data.get('delete', False):
+            return kwargs
+
+        try:
+            del kwargs['defaults']
+            self.to_delete.append(self.MODEL.objects.get(**kwargs))
+        except self.MODEL.DoesNotExist:
+            pass
+
+    def process_remove(self, seen):
+        return self.to_delete
 
     def display(self, item):
         return item.code
@@ -149,7 +171,7 @@ class ExamScraper(GenericScraper):
 
     # TODO(adamcik): add sanity checking in generic scraper.
 
-    def extra(self, data):
+    def process_data(self, data):
         if 'duration' in data:
             data['duration'] = decimal.Decimal(data['duration'])
 
