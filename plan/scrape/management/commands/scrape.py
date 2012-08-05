@@ -2,6 +2,7 @@
 
 import logging
 import optparse
+import sys
 
 from django.core.management import base as management
 from django.conf import settings
@@ -57,6 +58,12 @@ class Command(management.BaseCommand):
         if buffer:
             print ' | '.join(buffer)
 
+    def prompt(self, message):
+        try:
+            return raw_input('%s [y/N] ' % message).lower() == 'y'
+        except KeyboardInterrupt:
+            sys.exit(1)
+
     @transaction.commit_manually
     def handle(self, *args, **options):
         try:
@@ -75,10 +82,10 @@ class Command(management.BaseCommand):
                 print '---------------------'
                 print 'Going to delete %d items' % len(to_delete)
 
-                if raw_input('Delete? [y/N] ').lower() == 'y':
+                if self.prompt('Delete?'):
                     to_delete.delete()
 
-            if raw_input('Commit changes? [y/N] ').lower() == 'y':
+            if self.prompt('Commit changes?'):
                 transaction.commit()
                 print 'Commiting changes...'
             else:
