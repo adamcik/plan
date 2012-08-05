@@ -85,7 +85,9 @@ class Command(management.BaseCommand):
                 if self.prompt('Delete?'):
                     scraper.delete(to_delete)
 
-            if self.prompt('Commit changes?'):
+            if not scraper.needs_commit():
+                transaction.rollback()
+            elif self.prompt('Commit changes?'):
                 transaction.commit()
                 print 'Commiting changes...'
             else:

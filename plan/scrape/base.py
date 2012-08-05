@@ -9,6 +9,9 @@ class Scraper(object):
     def __init__(self, semester, options):
         self.semester = semester
         self.options = options
+        self.stats = {'created': 0,
+                      'updated': 0,
+                      'deleted': 0}
 
     def delete(self, items):
         raise NotImplementedError
@@ -18,6 +21,9 @@ class Scraper(object):
 
     def run(self):
         return self.fetch()
+
+    def needs_commit(self):
+        return True
 
     def clean(self, raw_text):
         text = raw_text.strip()
@@ -34,6 +40,11 @@ class CourseScraper(Scraper):
     def delete(self, courses):
         course_ids = [c.id for c in courses]
         Course.objects.filter(id__in=course_ids).delete()
+
+    def needs_commit(self):
+        return (self.stats['created'] > 0 or
+                self.stats['updated'] > 0 or
+                self.stats['deleted'] > 0)
 
     def run(self):
         semester, created = Semester.objects.get_or_create(
@@ -59,23 +70,28 @@ class CourseScraper(Scraper):
                 try:
                     del kwargs['defaults']
                     to_delete.append(Course.objects.get(**kwargs))
+                    self.stats['deleted'] += 1
                 except Course.DoesNotExist:
                     pass
                 continue
 
             course, created = Course.objects.get_or_create(**kwargs)
-            old_state = course.__dict__.copy()
-
-            # Check if any of the non lookup fields need to be fixed.
             changes = {}
-            for field, value in kwargs['defaults'].items():
-                old_value = getattr(course, field)
-                if old_value != value:
-                    setattr(course, field, value)
-                    changes[field] = (old_value, value)
+
+            if created:
+                self.stats['created'] += 1
+            else:
+                # Check if any of the non lookup fields need to be fixed.
+                for field, value in kwargs['defaults'].items():
+                    old_value = getattr(course, field)
+                    if old_value != value:
+                        setattr(course, field, value)
+                        changes[field] = (old_value, value)
+
             # TODO(adamcik): use update_fields once we have django 1.5
             if changes:
                 course.save()
+                self.stats['updated'] += 1
 
             if created:
                 logging.info('Added course %s', course.code)
