@@ -1,5 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+import decimal
 import logging
 
 from plan.common.models import Exam, ExamType, Course, Semester
@@ -144,12 +145,14 @@ class ExamScraper(GenericScraper):
     MODEL = Exam
     FIELDS = ('course', 'exam_date', 'exam_time',
               'handout_date', 'handout_time')
-    CLEAN_FIELDS = ('comment',)
-    DEFAULT_FIELDS = ('duration', 'comment', 'type')
+    DEFAULT_FIELDS = ('duration', 'type')
 
     # TODO(adamcik): add sanity checking in generic scraper.
 
     def extra(self, data):
+        if 'duration' in data:
+            data['duration'] = decimal.Decimal(data['duration'])
+
         exam_type, created = ExamType.objects.get_or_create(
             code=data['type__code'], defaults={'name': data['type__name']})
         if exam_type.name != data['type__name']:
