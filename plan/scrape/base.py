@@ -2,7 +2,7 @@
 
 import logging
 
-from plan.common.models import Course, Semester
+from plan.common.models import Exam, ExamType, Course, Semester
 
 
 def compare(old, new):
@@ -138,3 +138,21 @@ class CourseScraper(GenericScraper):
 
     def display(self, item):
         return item.code
+
+
+class ExamScraper(GenericScraper):
+    MODEL = Exam
+    FIELDS = ('course', 'exam_date', 'exam_time',
+              'handout_date', 'handout_time')
+    CLEAN_FIELDS = ('comment',)
+    DEFAULT_FIELDS = ('duration', 'comment', 'type')
+
+    # TODO(adamcik): add sanity checking in generic scraper.
+
+    def extra(self, data):
+        exam_type, created = ExamType.objects.get_or_create(
+            code=data['type__code'], defaults={'name': data['type__name']})
+        if exam_type.name != data['type__name']:
+            exam_type.name = data['type__name']
+            exam_type.save()
+        data['type'] = exam_type

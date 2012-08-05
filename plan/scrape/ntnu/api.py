@@ -61,3 +61,52 @@ class Courses(base.CourseScraper):
                        'url': 'http://www.ntnu.no/studier/emner/%s' % code}
             else:
                 yield {'delete': True, 'code': code, 'version': version}
+
+
+class Exams(base.ExamScraper):
+    def fetch(self):
+        courses = Course.objects.filter(
+            semester__year__exact=self.semester.year,
+            semester__type=self.semester.type)
+
+        year = self.semester.year
+        term = TERM_MAPPING[self.semester.type]
+
+        for course in courses.iterator():
+            result = fetch_course(course.code)
+
+            if not result or not match_term(self.semester, result):
+                continue
+
+            for exam in result.get('assessment', []):
+                data = {'course': course, 'defaults': {}}
+
+                if exam['statusCode'] != 'ORD':
+                    continue
+
+                if (exam['realExecutionYear'] != year or
+                    exam['realExecutionTerm'] != term):
+                    continue
+
+                if 'date' in exam:
+                    data['exam_date'] = utils.parse_date(exam['date'])
+                elif 'submissionDate' in exam:
+                    data['exam_date'] = utils.parse_date(exam['submissionDate'])
+                else:
+                    continue
+
+                if 'appearanceTime' in exam:
+                    data['exam_time'] = utils.parse_time(exam['appearanceTime'])
+
+                if 'withdrawalDate' in exam:
+                    data['handout_date'] = utils.parse_date(exam['withdrawalDate'])
+
+                if 'duration' in exam and exam['duration'] > 0:
+                    data['duration'] = exam['duration']
+
+                data['type__code'] = exam['assessmentFormCode']
+                data['type__name'] = exam['assessmentFormDescription']
+
+                yield data
+
+
