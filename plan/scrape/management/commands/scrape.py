@@ -24,7 +24,7 @@ OPTIONS = (
                          const=Semester.SPRING),
     optparse.make_option('-f', '--fall', action='store_const', dest='type',
                          const=Semester.FALL),
-    optparse.make_option('-m', '--match', action='store', dest='matches',
+    optparse.make_option('-m', '--match', action='store', dest='match',
                          default=None),
 )
 
