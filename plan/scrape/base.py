@@ -93,6 +93,10 @@ class GenericScraper(Scraper):
                 elif field in self.DEFAULT_FIELDS:
                     kwargs['defaults'][field] = data[field]
 
+            for field in self.FIELDS:
+                if field not in kwargs:
+                    kwargs[field] = None
+
             kwargs = self.process_kwargs(kwargs, data)
             if not kwargs:
                 continue
