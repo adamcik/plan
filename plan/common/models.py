@@ -137,7 +137,7 @@ class Course(models.Model):
             name = self.code
 
         if self.semester:
-            return u'%s - %s' % (name, self.semester)
+            return u'%-12s - %s' % (name, self.semester)
 
         return name
 
