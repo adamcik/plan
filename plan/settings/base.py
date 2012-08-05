@@ -159,6 +159,18 @@ TIMETABLE_SLOTS = [
     (datetime.time(19,15), datetime.time(20,0)),
 ]
 
+TIMETABLE_SCRAPERS = {
+    'courses': 'plan.scrape.ntnu.db.courses',
+    #'courses': 'plan.scrape.ntnu.api.courses',
+    #'courses': 'plan.scrape.ntnu.web.courses',
+    'exams': 'plan.scrape.ntnu.web.exams',
+    'lectures': 'plan.scrape.db.lectures',
+    #'lectures': 'plan.scrape.ntnu.api.lectures',
+    #'lectures': 'plan.scrape.ntnu.web.lectures',
+    'rooms': 'plan.scrape.ntnu.web.rooms',
+    'syllabus': 'plan.scrape.akademika.web.syllabus',
+}
+
 # Google analytics code to use.
 TIMETABLE_ANALYTICS_CODE = None
 
