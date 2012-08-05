@@ -83,7 +83,7 @@ class Command(management.BaseCommand):
                 print 'Going to delete %d items' % len(to_delete)
 
                 if self.prompt('Delete?'):
-                    to_delete.delete()
+                    scraper.delete(to_delete)
 
             if self.prompt('Commit changes?'):
                 transaction.commit()

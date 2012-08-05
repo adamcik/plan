@@ -10,6 +10,9 @@ class Scraper(object):
         self.semester = semester
         self.options = options
 
+    def delete(self, items):
+        raise NotImplementedError
+
     def fetch(self, match=None):
         raise NotImplementedError
 
@@ -28,9 +31,14 @@ class CourseScraper(Scraper):
     CLEAN_FIELDS = ('name',)
     DEFAULT_FIELDS = ('name', 'url', 'points')
 
+    def delete(self, courses):
+        course_ids = [c.id for c in courses]
+        Course.objects.filter(id__in=course_ids).delete()
+
     def run(self):
         semester, created = Semester.objects.get_or_create(
             year=self.semester.year, type=self.semester.type)
+        to_delete = []
 
         for data in self.fetch():
             # Build kwargs for get or create by:
@@ -46,6 +54,14 @@ class CourseScraper(Scraper):
                     kwargs[field] = data[field]
                 elif field in self.DEFAULT_FIELDS:
                     kwargs['defaults'][field] = data[field]
+
+            if data.get('delete', False):
+                try:
+                    del kwargs['defaults']
+                    to_delete.append(Course.objects.get(**kwargs))
+                except Course.DoesNotExist:
+                    pass
+                continue
 
             course, created = Course.objects.get_or_create(**kwargs)
             old_state = course.__dict__.copy()
@@ -66,11 +82,13 @@ class CourseScraper(Scraper):
             elif changes:
                 logging.info('Updated course %s:', course.code)
                 for key, (new, old) in changes.items():
-                    if new.strip() == old.strip():
-                        logging.info('%s: <whitespace fix>', key)
+                    if (isinstance(old, basestring) and
+                        isinstance(new, basestring) and
+                        new.strip() == old.strip()):
+                        logging.info('  %s: <whitespace fix>', key)
                     else:
-                        logging.info('%s: [%s] -> [%s]', key, new, old)
+                        logging.info('  %s: [%s] -> [%s]', key, new, old)
             else:
                 logging.debug('No changes for course %s', course.code)
 
-        return []  # Never delete courses in the system.
+        return to_delete

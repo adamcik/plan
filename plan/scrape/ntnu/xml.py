@@ -39,6 +39,10 @@ class Exams(base.Scraper):
             code=code.strip(), semester=self.get_semester())
         return course
 
+    def delete(self, exams):
+        exam_ids = [e.id for e in exams]
+        Exams.objects.filter(id__in=exam_ids).delete()
+
     def fetch(self):
         added, updated = [], []
         semester = self.get_semester()
