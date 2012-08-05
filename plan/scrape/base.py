@@ -16,34 +16,60 @@ class Scraper(object):
     def run(self):
         return self.fetch()
 
+    def clean(self, raw_text):
+        text = raw_text.strip()
+        if text[0] in ('"', "'") and text[0] == text[-1]:
+            text = text[1:-1].strip()
+        return text
+
 
 class CourseScraper(Scraper):
-    def run(self):
-        extra_fields = ('name', 'url', 'syllabus', 'points')
+    FIELDS = ('code', 'version')
+    CLEAN_FIELDS = ('name',)
+    DEFAULT_FIELDS = ('name', 'url', 'points')
 
+    def run(self):
         semester, created = Semester.objects.get_or_create(
             year=self.semester.year, type=self.semester.type)
 
-        for data in self.fetch(match=self.options['match']):
-            defaults = {}
-            for field in extra_fields:
-                if field in data:
-                    defaults[field] = data[field]
+        for data in self.fetch():
+            # Build kwargs for get or create by:
+            #  1. cleaning fields that are in CLEAN_FIELDS
+            #  2. adding lookup fields that are in FIELDS
+            #  3. adding defaults fields that are in DEFAULT_FIELDS
+            kwargs = {'defaults': {}, 'semester': semester}
+            for field in data:
+                if field in self.CLEAN_FIELDS:
+                    data[field] = self.clean(data[field])
 
-            course, created = Course.objects.get_or_create(
-                code=data['code'], version=data['version'],
-                semester=semester, defaults=defaults)
+                if field in self.FIELDS:
+                    kwargs[field] = data[field]
+                elif field in self.DEFAULT_FIELDS:
+                    kwargs['defaults'][field] = data[field]
 
-            updated = False
-            for field in extra_fields:
-                if field in data and not getattr(course, field):
-                    setattr(course, field, data[field])
-                    updated = True
+            course, created = Course.objects.get_or_create(**kwargs)
+            old_state = course.__dict__.copy()
+
+            # Check if any of the non lookup fields need to be fixed.
+            changes = {}
+            for field, value in kwargs['defaults'].items():
+                old_value = getattr(course, field)
+                if old_value != value:
+                    setattr(course, field, value)
+                    changes[field] = (old_value, value)
+            # TODO(adamcik): use update_fields once we have django 1.5
+            if changes:
+                course.save()
 
             if created:
                 logging.info('Added course %s', course.code)
-            elif updated:
-                logging.info('Updated course %s', course.code)
+            elif changes:
+                logging.info('Updated course %s:', course.code)
+                for key, (new, old) in changes.items():
+                    if new.strip() == old.strip():
+                        logging.info('%s: <whitespace fix>', key)
+                    else:
+                        logging.info('%s: [%s] -> [%s]', key, new, old)
             else:
                 logging.debug('No changes for course %s', course.code)
 

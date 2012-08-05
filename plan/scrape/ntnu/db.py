@@ -21,10 +21,10 @@ class Courses(base.CourseScraper):
     def get_cursor(self):
         return connections['ntnu'].cursor()
 
-    def fetch(self, match=None):
-        prefix = self.get_prefix()
+    def fetch(self):
         cursor = self.get_cursor()
-        cursor.execute("SELECT emnekode, emnenavn FROM {0}_fs_emne".format(prefix))
+        cursor.execute("SELECT emnekode, emnenavn FROM {0}_fs_emne".format(
+            self.get_prefix()))
 
         # TODO(adamcik): figure out how to get course credits.
         for raw_code, raw_name in cursor.fetchall():
@@ -33,9 +33,6 @@ class Courses(base.CourseScraper):
             if not code:
                 logging.warning('Skipped invalid course name: %s', raw_code)
                 continue
-            elif match and not code.startswith(match):
-                logging.debug('Skipped %s since it does not start with %s',
-                              raw_code, match)
 
             yield {'code': code,
                    'name': raw_name,
