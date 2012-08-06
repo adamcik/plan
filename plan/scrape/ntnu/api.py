@@ -80,10 +80,7 @@ class Courses(base.CourseScraper):
 
 class Exams(base.ExamScraper):
     def fetch(self):
-        courses = Course.objects.filter(
-            semester__year__exact=self.semester.year,
-            semester__type=self.semester.type)
-
+        courses = Course.objects.filter(semester=self.semester)
         for course in courses.iterator():
             result = fetch_course(course.code)
 
