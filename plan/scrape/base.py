@@ -96,7 +96,8 @@ class Scraper(object):
             if not kwargs:
                 continue
 
-            obj, created = self.MODEL.objects.get_or_create(**kwargs)
+            candidates = self.MODEL.objects.exclude(id__in=seen)
+            obj, created = candidates.get_or_create(**kwargs)
             seen.append(obj.id)
             changes = {}
 
