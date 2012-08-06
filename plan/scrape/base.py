@@ -15,7 +15,20 @@ def compare(old, new):
     return '[%s] -> [%s]' % (new, old)
 
 
+def clean(raw_text):
+    text = raw_text.strip()
+    if text[0] in ('"', "'") and text[0] == text[-1]:
+        text = text[1:-1].strip()
+    return text
+
+
 class Scraper(object):
+    MODEL = None
+    CREATE_SEMESTER = False
+    FIELDS = tuple()
+    CLEAN_FIELDS = dict()
+    DEFAULT_FIELDS = tuple()
+
     def __init__(self, semester, options):
         self.semester = semester
         self.options = options
@@ -23,30 +36,13 @@ class Scraper(object):
                       'updated': 0,
                       'deleted': 0}
 
-    def delete(self, items):
-        raise NotImplementedError
-
-    def fetch(self, match=None):
-        raise NotImplementedError
-
-    def run(self):
-        return self.fetch()
-
-    def needs_commit(self):
-        return True
-
-    def clean(self, raw_text):
-        text = raw_text.strip()
-        if text[0] in ('"', "'") and text[0] == text[-1]:
-            text = text[1:-1].strip()
-        return text
-
-
-class GenericScraper(Scraper):
-    MODEL = None
-    FIELDS = tuple()
-    CLEAN_FIELDS = tuple()
-    DEFAULT_FIELDS = tuple()
+        try:
+            self.semester = Semester.objects.get(
+                year=self.semester.year, type=self.semester.type)
+        except Semester.DoesNotExist:
+            if not self.CREATE_SEMESTER:
+                raise
+            self.semester.save()
 
     def delete(self, items):
         # TODO(adamcik): figure out related cascade deletes?
@@ -86,8 +82,7 @@ class GenericScraper(Scraper):
             kwargs = {'defaults': {}}
             for field in data:
                 if field in self.CLEAN_FIELDS:
-                    data[field] = self.clean(data[field])
-
+                    data[field] = self.CLEAN_FIELDS[field](data[field])
                 if field in self.FIELDS:
                     kwargs[field] = data[field]
                 elif field in self.DEFAULT_FIELDS:
@@ -134,20 +129,19 @@ class GenericScraper(Scraper):
         return remove
 
 
-class CourseScraper(GenericScraper):
+class CourseScraper(Scraper):
     MODEL = Course
     FIELDS = ('code', 'version', 'semester')
-    CLEAN_FIELDS = ('name',)
+    CLEAN_FIELDS = {'name': clean}
     DEFAULT_FIELDS = ('name', 'url', 'points')
+    CREATE_SEMESTER = True
 
     def __init__(self, *args, **kwargs):
         super(CourseScraper, self).__init__(*args, **kwargs)
         self.to_delete = []
 
     def process_data(self, data):
-        semester, created = Semester.objects.get_or_create(
-            year=self.semester.year, type=self.semester.type)
-        data['semester'] = semester
+        data['semester'] = self.semester
         return data
 
     def process_kwargs(self, kwargs, data):
@@ -167,21 +161,21 @@ class CourseScraper(GenericScraper):
         return item.code
 
 
-class ExamScraper(GenericScraper):
+class ExamScraper(Scraper):
     MODEL = Exam
     FIELDS = ('course', 'exam_date', 'exam_time',
               'handout_date', 'handout_time')
+    CLEAN_FIELDS = {'duration': decimal.Decimal}
     DEFAULT_FIELDS = ('duration', 'type')
 
     # TODO(adamcik): add sanity checking in generic scraper.
 
-    def process_data(self, data):
-        if 'duration' in data:
-            data['duration'] = decimal.Decimal(data['duration'])
-
+    def get_exam_type(self, code, name):
         exam_type, created = ExamType.objects.get_or_create(
-            code=data['type__code'], defaults={'name': data['type__name']})
-        if exam_type.name != data['type__name']:
-            exam_type.name = data['type__name']
+            code=code, defaults={'name': name})
+
+        if exam_type.name != name:
+            exam_type.name = name
             exam_type.save()
-        data['type'] = exam_type
+
+        return exam_type

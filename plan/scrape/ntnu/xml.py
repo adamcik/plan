@@ -86,10 +86,8 @@ class Exams(base.ExamScraper):
                 data['exam_time'] = utils.parse_time(handin_time)
             if duration:
                 data['duration'] = duration
-            if typename:
-                data['type__code'] = typename
-            if long_typename:
-                data['type__name'] = long_typename
+
+            data['type'] = self.get_exam_type(typename, long_typename)
 
             yield data
 

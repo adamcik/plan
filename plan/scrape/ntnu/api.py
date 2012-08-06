@@ -109,8 +109,8 @@ class Exams(base.ExamScraper):
                 if 'duration' in exam and exam['duration'] > 0:
                     data['duration'] = exam['duration']
 
-                data['type__code'] = exam['assessmentFormCode']
-                data['type__name'] = exam['assessmentFormDescription']
+                data['type'] = self.get_exam_type(
+                    exam['assessmentFormCode'], exam['assessmentFormDescription'])
 
                 yield data
 

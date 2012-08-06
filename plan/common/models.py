@@ -327,7 +327,7 @@ class Exam(models.Model):
         verbose_name_plural = _('Exams')
 
     def __unicode__(self):
-        return  u'%s - %s' % (self.course.code, self.exam_date)
+        return  u'%-12s - %s' % (self.course.code, self.exam_date)
 
 
 class Week(models.Model):
