@@ -44,6 +44,7 @@ class Exams(base.ExamScraper):
             return
 
         for row in root.xpath('//dato/dato_row'):
+            combination = get(row, 'vurdkombkode')
             course_code = get(row, 'emnekode')
             course_name = get(row, 'emne_emnenavn_bokmal')
             course_version = get(row, 'versjonskode')
@@ -71,23 +72,15 @@ class Exams(base.ExamScraper):
                 continue
 
             data = {'course': courses[course_code]}
+            data['exam_date'] = utils.parse_date(handin_date or exam_date)
+            data['exam_time'] = utils.parse_time(handin_time or exam_time)
+            data['combination'] = combination
 
-            if exam_date:
-                data['exam_date'] = utils.parse_date(exam_date)
-            if handin_date:
-                data['exam_date'] = utils.parse_date(handin_date)
-            if exam_time:
-                data['exam_time'] = utils.parse_time(exam_time)
-            if handout_date:
-                data['handout_date'] = utils.parse_date(handout_date)
-            if handout_time:
-                data['handout_time'] = utils.parse_time(handout_time)
-            if handin_time:
-                data['exam_time'] = utils.parse_time(handin_time)
+            data['handout_date'] = utils.parse_date(handout_date)
+            data['handout_time'] = utils.parse_time(handout_time)
+            data['type'] = self.get_exam_type(typename, long_typename)
+
             if duration:
                 data['duration'] = duration
 
-            data['type'] = self.get_exam_type(typename, long_typename)
-
             yield data
-
