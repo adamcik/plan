@@ -164,12 +164,29 @@ class CourseScraper(Scraper):
 
 class ExamScraper(Scraper):
     MODEL = Exam
-    FIELDS = ('course', 'exam_date', 'exam_time',
-              'handout_date', 'handout_time')
+    FIELDS = ('course', 'combination', 'exam_date', 'exam_time')
     CLEAN_FIELDS = {'duration': decimal.Decimal}
-    DEFAULT_FIELDS = ('duration', 'type')
+    DEFAULT_FIELDS = ('type', 'duration',
+                      'handout_date', 'handout_time')
 
     # TODO(adamcik): add sanity checking in generic scraper.
+    def process_kwargs(self, kwargs, data):
+        start = self.semester.get_first_day().date()
+        end = self.semester.get_last_day().date()
+
+        date = kwargs['exam_date']
+        course = kwargs['course']
+
+        if not date:
+            logging.warning('Date missing for %s', course.code)
+        elif not (start <= date <= end):
+            logging.warning('Bad date %s for %s', date, course.code)
+        else:
+            return kwargs
+
+    def process_remove(self, seen):
+        remove = Exam.objects.filter(course__semester=self.semester)
+        return remove.exclude(id__in=seen)
 
     def get_exam_type(self, code, name):
         exam_type, created = ExamType.objects.get_or_create(
