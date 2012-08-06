@@ -59,14 +59,14 @@ def parse_course_code(value):
 
 def parse_time(value):
     """Convert a textual time to a datetime.time instance."""
-    if not value.strip():
+    if not value or not value.strip():
         return None
     return dateutil.parser.parse(value.strip()).time()
 
 
 def parse_date(value):
     """Convert a textual date to a datetime.date instance."""
-    if not value.strip():
+    if not value or not value.strip():
         return None
     return dateutil.parser.parse(value.strip()).date()
 
