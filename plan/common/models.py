@@ -244,6 +244,7 @@ class Semester(models.Model):
     def localize(cls, semester_type):
         return dict(cls.SEMESTER_SLUG)[semester_type]
 
+    # TODO(adamcik): return datetime.date()?
     def get_first_day(self):
         if self.type == self.SPRING:
             return datetime.datetime(self.year, 1, 1)
@@ -310,6 +311,7 @@ class ExamType(models.Model):
 class Exam(models.Model):
     course = models.ForeignKey(Course)
     type = models.ForeignKey(ExamType, blank=True, null=True)
+    combination = models.CharField(_('Combination'), max_length=50, blank=True, null=True)
 
     exam_date = models.DateField(_('Exam date'), blank=True, null=True)
     exam_time = models.TimeField(_('Exam time'), blank=True, null=True)
@@ -327,7 +329,7 @@ class Exam(models.Model):
         verbose_name_plural = _('Exams')
 
     def __unicode__(self):
-        return  u'%-12s - %s' % (self.course.code, self.exam_date)
+        return  u'%s %s - %s' % (self.course.code, self.combination, self.exam_date)
 
 
 class Week(models.Model):
