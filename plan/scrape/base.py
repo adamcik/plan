@@ -101,9 +101,7 @@ class Scraper(object):
             seen.append(obj.id)
             changes = {}
 
-            if created:
-                self.stats['created'] += 1
-            else:
+            if not created:
                 # Check if any of the non lookup fields need to be fixed.
                 for field, value in kwargs['defaults'].items():
                     old_value = getattr(obj, field)
@@ -114,14 +112,15 @@ class Scraper(object):
             # TODO(adamcik): use update_fields once we have django 1.5
             if changes:
                 obj.save()
-                self.stats['updated'] += 1
 
-            if created:
-                logging.info('Added %s', self.display(obj))
-            elif changes:
+                self.stats['updated'] += 1
                 logging.info('Updated %s:', self.display(obj))
+
                 for key, (new, old) in changes.items():
                     logging.info('  %s: %s', key, compare(old, new))
+            elif created:
+                self.stats['created'] += 1
+                logging.info('Added %s', self.display(obj))
             else:
                 logging.debug('No changes for %s', self.display(obj))
 
