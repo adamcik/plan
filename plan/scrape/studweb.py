@@ -44,6 +44,7 @@ def update_exams(year, semester, url=None):
 
     for n in dom.getElementsByTagName('dato_row'):
         # Pull out data for this node.
+        combination = get_element_value(n, 'vurdkombkode')
         comment = get_element_value(n, 'kommentar_eksamen')
         course_code = get_element_value(n, 'emnekode')
         course_name = get_element_value(n, 'emne_emnenavn_bokmal')
@@ -156,6 +157,7 @@ def update_exams(year, semester, url=None):
 
             exam.type = exam_type
 
+        exam.combination = combination
         exam.save()
 
     seen_exams = added+updated

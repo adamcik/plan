@@ -32,159 +32,243 @@ def clean_decimal(raw_number):
 
 
 class Scraper(object):
-    MODEL = None
-    CREATE_SEMESTER = False
-    FIELDS = tuple()
-    CLEAN_FIELDS = dict()
-    DEFAULT_FIELDS = tuple()
+    model = None
+    fields = tuple()
+    default_fields = tuple()
+    create_semester = False
 
     def __init__(self, semester, options):
-        self.semester = semester
-        self.options = options
-        self.stats = {'created': 0,
-                      'updated': 0,
-                      'deleted': 0}
+        self.stats = {'fetched': 0,   # items we have fetchted
+                      'processed': 0, # items that made it through prepare_data()
+                      'persisted': 0, # items that are in db
+                      'created': 0,   # items that have been created
+                      'updated': 0,   # items we have updated
+                      'unaltered': 0, # items we found but did not alter
+                      'deleted': 0}   # items we plan to delete
+
+        self.semester = self.fetch_semester(options)
+
+    # TOOD(adamcik): get semester from outside and add create semester flag?
+    def fetch_semester(self, options):
+        semester = Semester.current()
+        if options['year']:
+            semester.year = options['year']
+        if options['type']:
+            semester.type = options['type']
 
         try:
-            self.semester = Semester.objects.get(
-                year=self.semester.year, type=self.semester.type)
+            return Semester.objects.get(year=semester.year,
+                                        type=semester.type)
         except Semester.DoesNotExist:
-            if not self.CREATE_SEMESTER:
+            if not self.create_semester:
                 raise
-            self.semester.save()
+            return semester.save()
 
-    def delete(self, items):
-        # TODO(adamcik): figure out related cascade deletes?
-        self.MODEL.objects.filter(id__in=[i.id for i in items]).delete()
-
+    @property
     def needs_commit(self):
+        """Indicate if there are any changes that need to be saved.
+
+           If you override run() or otherwise don't update stats you should
+           replace this with `needs_commit = True` on your scraper
+        """
         return (self.stats['created'] > 0 or
                 self.stats['updated'] > 0 or
                 self.stats['deleted'] > 0)
 
-    def display(self, item):
-        return str(item)
-
-    def process_data(self, data):
-        return data
-
-    def process_kwargs(self, kwargs, data):
-        return kwargs
-
-    def process_remove(self, seen):
-        return []
-
     def run(self):
-        semester, created = Semester.objects.get_or_create(
-            year=self.semester.year, type=self.semester.type)
-        seen = []
+        """Entry point for generic scrape managment command.
 
+           This method will:
+           1. Get data by calling fetch()
+           2. Process data with prepare_data(), this can be adding, cleaning or
+              invalidating data.
+           3. Convert data to get_or_create() arguments using prepare_save()
+           4. Lookup object, and update it or create a new object.
+           5. Call prepare_delete() to determine what to delete.
+
+           This method can be overriden to implement custom scrape logic that
+           does not match this pattern.
+        """
+        pks = []
         for data in self.fetch():
-            # Allow scrapers to modify data before giving it to
-            # generic code below.
-            data = self.process_data(data)
+            self.log_fetched(data)
 
-            # Build kwargs for get or create by:
-            #  1. cleaning fields that are in CLEAN_FIELDS
-            #  2. adding lookup fields that are in FIELDS
-            #  3. adding defaults fields that are in DEFAULT_FIELDS
-            kwargs = {'defaults': {}}
-            for field in data:
-                if field in self.CLEAN_FIELDS:
-                    data[field] = self.CLEAN_FIELDS[field](data[field])
-                if field in self.FIELDS:
-                    kwargs[field] = data[field]
-                elif field in self.DEFAULT_FIELDS:
-                    kwargs['defaults'][field] = data[field]
+            data = self.prepare_data(data)
+            if not data:
+                continue
+            self.log_processed(data)
 
-            for field in self.FIELDS:
-                if field not in kwargs:
-                    kwargs[field] = None
-
-            kwargs = self.process_kwargs(kwargs, data)
+            kwargs = self.prepare_save(data, self.fields, self.default_fields)
             if not kwargs:
                 continue
 
-            candidates = self.MODEL.objects.exclude(id__in=seen)
-            obj, created = candidates.get_or_create(**kwargs)
-            seen.append(obj.id)
-            changes = {}
+            obj, created = self.save(kwargs, self.model, pks)
+            self.log_persisted(obj)
 
-            if not created:
-                # Check if any of the non lookup fields need to be fixed.
-                for field, value in kwargs['defaults'].items():
-                    old_value = getattr(obj, field)
-                    if old_value != value:
-                        setattr(obj, field, value)
-                        changes[field] = (old_value, value)
+            if created:
+                self.log_created(obj)
+                continue
 
-            # TODO(adamcik): use update_fields once we have django 1.5
+            changes = self.update(obj, kwargs['defaults'])
             if changes:
-                obj.save()
+                self.log_updated(obj, changes)
+                continue
 
-                self.stats['updated'] += 1
-                logging.info('Updated %s:', self.display(obj))
+            self.log_unaltered(obj)
 
-                for key, (new, old) in changes.items():
-                    logging.info('  %s: %s', key, compare(old, new))
-            elif created:
-                self.stats['created'] += 1
-                logging.info('Added %s', self.display(obj))
-            else:
-                logging.debug('No changes for %s', self.display(obj))
+        # Note: we don't delete all objects through this query.
+        # defult prepare_delete() returns qs.none() to be on the safe side.
+        qs = self.prepare_delete(self.model.objects.all(), pks)
+        self.log_deleted(qs)
 
-        remove = list(self.process_remove(seen))
-        self.stats['deleted'] = len(remove)
-        return remove
+        self.log_instructions()
+        return qs
+
+    def fetch(self, semester):
+        """Gets data from external source and yields results."""
+        raise NotImplementedError
+
+    def prepare_data(self, data):
+        """Clean and/or validate data from fetch method.
+
+           Not returning data will skip the provided data.
+        """
+        return data
+
+    def prepare_save(self, data, fields, default_fields):
+        """Convert cleaned data into arguments for get_or_create()."""
+        kwargs = {'defaults': {}}
+        for field in fields:
+            kwargs[field] = data.get(field, None)
+        for field in default_fields:
+            if field in data:
+                kwargs['defaults'][field] = data[field]
+        return kwargs
+
+    def save(self, kwargs, model, pks):
+        """Save prepared arguments using get_or_create().
+
+           This method keeps track of known PKs and ignores these objects when
+           creating new ones. Which prevents some cases of stepping on our own
+           toes during updates.
+        """
+        qs = model.objects.exclude(pk__in=pks)
+        obj, created = qs.get_or_create(**kwargs)
+        pks.append(obj.pk)
+        return obj, created
+
+    def update(self, obj, defaults):
+        """Ensure that obj has up to date values for its fields.
+
+           Returns {field: (old_value, new_value)}.
+        """
+        changes = {}
+
+        for field, value in defaults.items():
+            old_value = getattr(obj, field)
+            if old_value != value:
+                setattr(obj, field, value)
+                changes[field] = (old_value, value)
+
+        if changes:
+            # TODO(adamcik): use update_fields once we have django 1.5
+            obj.save()
+
+        return changes
+
+    def prepare_delete(self, qs, pks):
+        """Filter a query set done to objects that should be deleted.
+
+           Default is to return `qs.none()` for safety. Actual use should
+           filter to only items for the current semester and probably exclude
+           items with a PK in `pks`.
+        """
+        return qs.none()
+
+    def display(self, obj):
+        """Helper that defines how objects are stringified for display."""
+        return str(obj)
+
+    def log_fetched(self, data):
+        self.stats['fetched'] += 1
+
+    def log_processed(self, data):
+        self.stats['processed'] += 1
+
+    def log_persisted(self, obj):
+        self.stats['persisted'] += 1
+
+    def log_created(self, obj):
+        self.stats['created'] += 1
+        logging.info('Added %s', self.display(obj))
+
+    def log_updated(self, obj, changes):
+        self.stats['updated'] += 1
+        logging.info('Updated %s:', self.display(obj))
+        for key, (old, new) in changes.items():
+            logging.info('  %s: %s', key, compare(old, new))
+
+    def log_unaltered(self, obj):
+        self.stats['unaltered'] += 1
+
+    def log_deleted(self, qs):
+        self.stats['deleted'] = qs.count()
+
+    def log_instructions(self):
+        pass
 
 
 class CourseScraper(Scraper):
-    MODEL = Course
-    FIELDS = ('code', 'version', 'semester')
-    CLEAN_FIELDS = {'name': clean_string,
-                    'points': clean_decimal}
-    DEFAULT_FIELDS = ('name', 'url', 'points')
-    CREATE_SEMESTER = True
+    model = Course
+    fields = ('code', 'version', 'semester')
+    default_fields = ('name', 'url', 'points')
+    create_semester = True
 
-    def process_data(self, data):
+    def prepare_data(self, data):
         data['semester'] = self.semester
+        if 'name' in data:
+            data['name'] = clean_string(data['name'])
+        if 'points' in data:
+            data['points'] = clean_decimal(data['points'])
         return data
 
-    def process_remove(self, seen):
-        remove = Course.objects.filter(semester=self.semester)
-        return remove.exclude(id__in=seen)
+    def prepare_delete(self, qs, pks):
+        qs = qs.filter(semester=self.semester)
+        qs = qs.exclude(pk__in=pks)
+        return qs.order_by('code', 'version')
 
-    def display(self, course):
-        return course.code
+    def display(self, obj):
+        return obj.code
 
 
 class ExamScraper(Scraper):
-    MODEL = Exam
-    # TODO(adamcik): combination needs to be a default_field for migration.
-    FIELDS = ('course', 'combination', 'exam_date', 'exam_time')
-    # TODO(adamcik): date and time field in clean?
-    CLEAN_FIELDS = {'duration': clean_decimal}
-    DEFAULT_FIELDS = ('type', 'duration',
-                      'handout_date', 'handout_time')
+    model = Exam
+    fields = ('course', 'type', 'combination', 'exam_date')
+    default_fields = ('duration', 'exam_time', 'handout_date', 'handout_time')
 
-    def process_kwargs(self, kwargs, data):
+    def prepare_data(self, data):
+        # TODO(adamcik): do date and time parsing here instead?
         start = self.semester.get_first_day().date()
         end = self.semester.get_last_day().date()
+        course = data['course']
+        date = data['exam_date']
 
-        date = kwargs['exam_date']
-        course = kwargs['course']
+        if 'duration' in data:
+            data['duration'] = clean_decimal(data['duration']) or None
 
         if not date:
-            logging.warning('Date missing for %s', course.code)
+            logging.debug('Date missing for %s', course.code)
         elif not (start <= date <= end):
-            logging.warning('Bad date %s for %s', date, course.code)
+            logging.debug('Bad date %s for %s', date, course.code)
         else:
-            return kwargs
+            return data
 
-    def process_remove(self, seen):
-        remove = Exam.objects.filter(course__semester=self.semester)
-        return remove.exclude(id__in=seen)
+    def prepare_delete(self, qs, pks):
+        qs = qs.filter(course__semester=self.semester)
+        qs = qs.exclude(pk__in=pks)
+        return qs.order_by('course__code', 'exam_date')
 
+    # TODO(adamcik): move to prepare_data()
     def get_exam_type(self, code, name):
         exam_type, created = ExamType.objects.get_or_create(
             code=code, defaults={'name': name})

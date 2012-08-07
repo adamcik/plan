@@ -38,3 +38,13 @@ class Courses(base.CourseScraper):
                    'name': raw_name,
                    'version': version,
                    'url': 'http://www.ntnu.no/studier/emner/%s' % code}
+
+    def prepare_delete(self, qs, pks):
+        return qs.none()
+
+    def log_instructions(self):
+        logging.warning('This scraper only knows about courses in the')
+        logging.warning('timetable db, not deleting any unknown courses.')
+        logging.warning('Note that the scraper is aslo oblivious about if a')
+        logging.warning('course is still being taught and/or assesed, so it')
+        logging.warning('tends to add to much.')

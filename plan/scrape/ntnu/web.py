@@ -12,6 +12,10 @@ from plan.scrape import utils
 from plan.scrape import base
 
 
+# TODO(adamcik): consider using http://www.ntnu.no/web/studier/emner
+#   ?p_p_id=courselistportlet_WAR_courselistportlet_INSTANCE_emne
+#   &_courselistportlet_WAR_courselistportlet_INSTANCE_emne_year=2011
+#   &p_p_lifecycle=2
 class Courses(base.CourseScraper):
     def get_prefix(self):
         if self.semester.type == Semester.SPRING:
@@ -52,3 +56,10 @@ class Courses(base.CourseScraper):
                        'name': name.strip(),
                        'version': version,
                        'url': 'http://www.ntnu.no/studier/emner/%s' % code}
+
+    def prepare_delete(self, qs, pks):
+        return qs.none()
+
+    def log_instructions(self):
+        logging.warning('This scraper only knows about courses on timetable')
+        logging.warning('website, not deleting any unknown courses.')

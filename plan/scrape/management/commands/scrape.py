@@ -86,18 +86,18 @@ class Command(management.BaseCommand):
             to_delete = scraper.run()
 
             logging.info(('Created: {created} Updated: {updated} '
-                          'Deleted: {deleted}').format(**scraper.stats))
+                          'Unaltered: {unaltered} Deleted: {deleted}').format(**scraper.stats))
 
             if to_delete:
                 print 'Delete the following?'
                 # TODO(adamcik): use scraper.display()
                 self.list_items(to_delete)
-                print 'Going to delete %d items' % len(to_delete)
+                print 'Going to delete %d items' % to_delete.count()
 
                 if self.prompt('Delete?'):
-                    scraper.delete(to_delete)
+                    to_delete.delete()
 
-            if not scraper.needs_commit():
+            if not scraper.needs_commit:
                 transaction.rollback()
             elif self.prompt('Commit changes?'):
                 transaction.commit()

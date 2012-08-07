@@ -52,7 +52,7 @@ class Exams(base.ExamScraper):
                 logging.warning("Invalid course code: %s", course_code)
                 continue
             elif course_code not in courses:
-                logging.warning("Unknown course %s.", course_code)
+                logging.debug("Unknown course %s.", course_code)
                 continue
 
             combination = get(row, 'vurdkombkode')
