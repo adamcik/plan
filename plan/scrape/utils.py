@@ -46,9 +46,10 @@ def parse_day_of_week(value):
     return WEEKDAYS.get(value.lower(), None)
 
 
+# TODO(adamcik): since this is ntnu specific this might have to be updated.
 def parse_course_code(value):
     """Extract course code and version from NTNU format."""
-    if not value or not value.strip():\
+    if not value or not value.strip():
         return None, None
 
     match = COURSE_RE.match(value.upper().strip())

@@ -32,9 +32,7 @@ class Exams(base.ExamScraper):
     def fetch(self):
         url = 'http://www.ntnu.no/eksamen/plan/%s/dato.XML' % self.get_prefix()
 
-        courses = Course.objects.filter(
-            semester__year__exact=self.semester.year,
-            semester__type=self.semester.type)
+        courses = Course.objects.filter(semester=self.semester)
         courses = dict((c.code, c) for c in courses)
 
         try:
