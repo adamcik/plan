@@ -136,26 +136,13 @@ class CourseScraper(Scraper):
     DEFAULT_FIELDS = ('name', 'url', 'points')
     CREATE_SEMESTER = True
 
-    def __init__(self, *args, **kwargs):
-        super(CourseScraper, self).__init__(*args, **kwargs)
-        self.to_delete = []
-
     def process_data(self, data):
         data['semester'] = self.semester
         return data
 
-    def process_kwargs(self, kwargs, data):
-        if not data.get('delete', False):
-            return kwargs
-
-        try:
-            del kwargs['defaults']
-            self.to_delete.append(self.MODEL.objects.get(**kwargs))
-        except self.MODEL.DoesNotExist:
-            pass
-
     def process_remove(self, seen):
-        return self.to_delete
+        remove = Course.objects.filter(semester=self.semester)
+        return remove.exclude(id__in=seen)
 
     def display(self, item):
         return item.code
@@ -163,12 +150,12 @@ class CourseScraper(Scraper):
 
 class ExamScraper(Scraper):
     MODEL = Exam
+    # TODO(adamcik): combination needs to be a default_field for migration.
     FIELDS = ('course', 'combination', 'exam_date', 'exam_time')
     CLEAN_FIELDS = {'duration': decimal.Decimal}
     DEFAULT_FIELDS = ('type', 'duration',
                       'handout_date', 'handout_time')
 
-    # TODO(adamcik): add sanity checking in generic scraper.
     def process_kwargs(self, kwargs, data):
         start = self.semester.get_first_day().date()
         end = self.semester.get_last_day().date()

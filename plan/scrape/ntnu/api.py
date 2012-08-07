@@ -74,17 +74,17 @@ class Courses(base.CourseScraper):
                        'version': version,
                        'points': course['credit'],
                        'url': 'http://www.ntnu.no/studier/emner/%s' % code}
-            else:
-                yield {'delete': True, 'code': code, 'version': version}
 
 
 class Exams(base.ExamScraper):
     def fetch(self):
+        # TODO(adamcik): write a common helper that returns a json for all
+        # valid json courses.
         courses = Course.objects.filter(semester=self.semester)
         for course in courses.iterator():
             result = fetch_course(course.code)
 
-            if not result or not match_term(self.semester, result):
+            if not result:
                 continue
 
             for exam in filter_exams(self.semester, result):
@@ -106,9 +106,8 @@ class Exams(base.ExamScraper):
                 if 'duration' in exam and exam['duration'] > 0:
                     data['duration'] = exam['duration']
 
+                data['combination'] = exam['combinationCode']
                 data['type'] = self.get_exam_type(
                     exam['assessmentFormCode'], exam['assessmentFormDescription'])
 
                 yield data
-
-
