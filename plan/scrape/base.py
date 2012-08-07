@@ -12,7 +12,7 @@ def compare(old, new):
 
     if (new_is_string and old_is_string and new.strip() == old.strip()):
         return '<whitespace>'
-    return '[%s] -> [%s]' % (new, old)
+    return '[%s] -> [%s]' % (old, new)
 
 
 # TODO(adamcik): move to utils?
