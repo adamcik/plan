@@ -15,80 +15,72 @@ TERM_MAPPING = {
 }
 
 
+def fetch_courses(semester):
+    data = utils.cached_urlopen('http://www.ime.ntnu.no/api/course/-')
+    for course in json.loads(data)['course']:
+        # TODO(adamcik): need utils that does not require version.
+        raw_code = '%s-%s' % (course['code'], course['versionCode'])
+        if not utils.parse_course_code(raw_code)[0]:
+            logging.warning('Skipped invalid course name: %s', raw_code)
+            continue
+
+        result = fetch_course(course['code'])
+        if not result:
+            continue
+
+        match = False
+        for term in result.get('educationTerm', []):
+            match |= match_term(term, semester)
+        for assessment in result.get('assessment', []):
+            match |= match_assessment(assessment, semester)
+
+        if match:
+            yield result
+
 def fetch_course(code):
-    url = 'http://www.ime.ntnu.no/api/course/%s' % (
-        code.lower().encode('utf-8'))
+    code = code.lower().encode('utf-8')
+    url = 'http://www.ime.ntnu.no/api/course/%s' % code
 
     try:
         logging.debug('Retrieving %s', url)
         return json.loads(utils.cached_urlopen(url))['course']
     except IOError as e:
         logging.error('Loading falied: %s', e)
-        return None
 
 
-def match_term(semester, course):
-    year = semester.year
-    term = TERM_MAPPING[semester.type]
-
-    for t in course.get('educationTerm', []):
-        if t['year'] == year and t['termApplies'] == term:
-            return True
-    return False
+def match_term(data, semester):
+    return (data['year'] == semester.year and
+            data['termApplies'] == TERM_MAPPING[semester.type])
 
 
-def filter_exams(semester, course):
-    year = semester.year
-    term = TERM_MAPPING[semester.type]
-
-    for exam in course.get('assessment', []):
-        if exam['statusCode'] != 'ORD':
-            continue
-        if (exam['realExecutionYear'] == year and
-            exam['realExecutionTerm'] == term):
-            yield exam
+def match_assessment(data, semester):
+    return (data['statusCode'] == 'ORD' and
+            data['realExecutionYear'] == semester.year and
+            data['realExecutionTerm'] == TERM_MAPPING[semester.type])
 
 
 class Courses(base.CourseScraper):
     def fetch(self):
-        data = utils.cached_urlopen('http://www.ime.ntnu.no/api/course/-')
-
-        for c in json.loads(data)['course']:
-            raw_code = '%s-%s' % (c['code'], c['versionCode'])
-            code, version = utils.parse_course_code(raw_code)
-
-            if not code:
-                logging.warning('Skipped invalid course name: %s', raw_code)
-                continue
-
-            course = fetch_course(code)
-            if not course:
-                continue
-
-            # Add all courses that are being taught this semester or have a
-            # valid exam this semester.
-            if (match_term(self.semester, course) or
-                list(filter_exams(self.semester, course))):
-                yield {'code': code,
-                       'name': course['name'],
-                       'version': version,
-                       'points': course['credit'],
-                       'url': 'http://www.ntnu.no/studier/emner/%s' % code}
+        for course in fetch_courses(self.semester):
+            yield {'code': course['code'],
+                   'name': course['name'],
+                   'version': course['versionCode'],
+                   'points': course['credit'],
+                   'url': 'http://www.ntnu.no/studier/emner/%s' % course['code']}
 
 
 class Exams(base.ExamScraper):
     def fetch(self):
-        # TODO(adamcik): write a common helper that returns a json for all
-        # valid json courses.
-        courses = Course.objects.filter(semester=self.semester)
-        for course in courses.iterator():
+        for course in Course.objects.filter(semester=self.semester):
             result = fetch_course(course.code)
-
             if not result:
                 continue
 
-            for exam in filter_exams(self.semester, result):
+            for exam in result.get('assessment', []):
                 data = {'course': course, 'defaults': {}}
+
+                if not match_assessment(exam, self.semester):
+                    continue
 
                 if 'date' in exam:
                     data['exam_date'] = utils.parse_date(exam['date'])
@@ -103,7 +95,7 @@ class Exams(base.ExamScraper):
                 if 'withdrawalDate' in exam:
                     data['handout_date'] = utils.parse_date(exam['withdrawalDate'])
 
-                if 'duration' in exam and exam['duration'] > 0:
+                if 'duration' in exam and exam['duration']:
                     data['duration'] = exam['duration']
 
                 data['combination'] = exam['combinationCode']
