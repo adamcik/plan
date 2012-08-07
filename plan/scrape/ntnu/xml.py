@@ -42,10 +42,20 @@ class Exams(base.ExamScraper):
             return
 
         for row in root.xpath('//dato/dato_row'):
-            combination = get(row, 'vurdkombkode')
             course_code = get(row, 'emnekode')
-            course_name = get(row, 'emne_emnenavn_bokmal')
             course_version = get(row, 'versjonskode')
+            status_code = get(row, 'vurdstatuskode')
+
+            if status_code != 'ORD':
+                continue
+            elif not utils.parse_course_code(course_code+'-'+course_version)[0]:
+                logging.warning("Invalid course code: %s", course_code)
+                continue
+            elif course_code not in courses:
+                logging.warning("Unknown course %s.", course_code)
+                continue
+
+            combination = get(row, 'vurdkombkode')
             duration = get(row, 'varighettimer')
             exam_date = get(row, 'dato_eksamen')
             exam_semester = get(row, 'terminkode_gjelder_i')
@@ -55,30 +65,14 @@ class Exams(base.ExamScraper):
             handin_time = get(row, 'klokkeslett_innlevering')
             handout_date = get(row, 'dato_uttak')
             handout_time = get(row, 'klokkeslett_uttak')
-            long_typename = get(row, 'vurderingskombinasjon_vurdkombnavn_bokmal')
-            status_code = get(row, 'vurdstatuskode')
-            typename = get(row, 'vurderingsformkode')
+            type_code = get(row, 'vurderingsformkode')
+            type_name = get(row, 'vurderingskombinasjon_vurdkombnavn_bokmal')
 
-            if status_code != 'ORD':
-                continue
-
-            if not utils.parse_course_code(course_code+'-'+course_version)[0]:
-                logging.warning("Bad course code: %s", course_code)
-                continue
-            elif course_code not in courses:
-                logging.warning("Unknown course %s for this semester.", course_code)
-                continue
-
-            data = {'course': courses[course_code]}
-            data['exam_date'] = utils.parse_date(handin_date or exam_date)
-            data['exam_time'] = utils.parse_time(handin_time or exam_time)
-            data['combination'] = combination
-
-            data['handout_date'] = utils.parse_date(handout_date)
-            data['handout_time'] = utils.parse_time(handout_time)
-            data['type'] = self.get_exam_type(typename, long_typename)
-
-            if duration:
-                data['duration'] = duration
-
-            yield data
+            yield {'course': courses[course_code],
+                   'exam_date': utils.parse_date(handin_date or exam_date),
+                   'exam_time': utils.parse_time(handin_time or exam_time),
+                   'combination': combination,
+                   'handout_date': utils.parse_date(handout_date),
+                   'handout_time': utils.parse_time(handout_time),
+                   'type': self.get_exam_type(type_code, type_name),
+                   'duration': duration}

@@ -73,35 +73,29 @@ class Courses(base.CourseScraper):
 
 class Exams(base.ExamScraper):
     def fetch(self):
+        # Only bother with courses that have already been loaded.
         for course in Course.objects.filter(semester=self.semester):
             result = fetch_course(course.code)
             if not result:
                 continue
 
             for exam in result.get('assessment', []):
-                data = {'course': course, 'defaults': {}}
-
                 if not match_assessment(exam, self.semester):
                     continue
 
-                if 'date' in exam:
-                    data['exam_date'] = utils.parse_date(exam['date'])
-                elif 'submissionDate' in exam:
-                    data['exam_date'] = utils.parse_date(exam['submissionDate'])
-                else:
-                    continue
+                exam_date = exam.get('date', None)
+                exam_time = exam.get('appearanceTime', None)
+                handout_date = exam.get('withdrawalDate', None)
+                handin_date = exam.get('submissionDate', None)
+                duration = exam.get('duration', None)
+                combination = exam['combinationCode']
+                type_code = exam['assessmentFormCode']
+                type_name = exam['assessmentFormDescription']
 
-                if 'appearanceTime' in exam:
-                    data['exam_time'] = utils.parse_time(exam['appearanceTime'])
-
-                if 'withdrawalDate' in exam:
-                    data['handout_date'] = utils.parse_date(exam['withdrawalDate'])
-
-                if 'duration' in exam and exam['duration']:
-                    data['duration'] = exam['duration']
-
-                data['combination'] = exam['combinationCode']
-                data['type'] = self.get_exam_type(
-                    exam['assessmentFormCode'], exam['assessmentFormDescription'])
-
-                yield data
+                yield {'course': course,
+                       'exam_date': utils.parse_date(handin_date or exam_date),
+                       'exam_time': utils.parse_time(exam_time),
+                       'combination': combination,
+                       'handout_date': utils.parse_date(handout_date),
+                       'type': self.get_exam_type(type_code, type_name),
+                       'duration': duration}
