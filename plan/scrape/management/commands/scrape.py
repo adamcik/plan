@@ -46,17 +46,18 @@ class Command(management.BaseCommand):
         module, cls = settings.TIMETABLE_SCRAPERS[type].rsplit('.', 1)
         return getattr(importlib.import_module(module), cls)
 
-    def list_items(self, items):
-        buffer = []
-        for i in items:
-            if len(buffer) != 3:
-                buffer.append(str(i))
-            else:
-                print ' | '.join(buffer)
-                buffer = []
+    def list_items(self, items, n=3):
+        items = map(unicode, items)
+        size = max(map(len, items))
+        border = unicode('+-' + '-+-'.join(['-'*size]*n) + '-+')
+        template = unicode('| ' + ' | '.join(['{:%d}' % size]*n) + ' |')
+        pad = lambda i: i + ['']*(n-len(i))
 
-        if buffer:
-            print ' | '.join(buffer)
+        print border
+        while items:
+            print template.format(*pad(items[:n]))
+            items = items[n:]
+        print border
 
     def prompt(self, message):
         try:
@@ -80,9 +81,7 @@ class Command(management.BaseCommand):
 
             if to_delete:
                 print 'Delete the following?'
-                print '---------------------'
                 self.list_items(to_delete)
-                print '---------------------'
                 print 'Going to delete %d items' % len(to_delete)
 
                 if self.prompt('Delete?'):
