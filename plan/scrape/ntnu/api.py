@@ -37,6 +37,8 @@ def fetch_courses(semester):
         if match:
             yield result
 
+
+# TODO(adamcik): replace with fetch_json fetch_xml fetch_html etc?
 def fetch_course(code):
     code = code.lower().encode('utf-8')
     url = 'http://www.ime.ntnu.no/api/course/%s' % code

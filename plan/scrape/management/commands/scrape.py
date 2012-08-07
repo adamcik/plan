@@ -67,7 +67,16 @@ class Command(management.BaseCommand):
 
     @transaction.commit_manually
     def handle(self, *args, **options):
+        # TODO(adamcik): move as much as we can to scraper.
+        # - semester should be only in the scraper
+        # - stats printing should be there
+        # - list items in scraper
+        # - delete prompting etc
+        # - prompt should be in utils
+        # - transaction handling should stay here.
+
         try:
+            # TODO(adamcik): command error instead
             assert len(args) == 1, 'usage: ./manage.py scrape <type>'
             assert args[0] in settings.TIMETABLE_SCRAPERS
 
@@ -81,6 +90,7 @@ class Command(management.BaseCommand):
 
             if to_delete:
                 print 'Delete the following?'
+                # TODO(adamcik): use scraper.display()
                 self.list_items(to_delete)
                 print 'Going to delete %d items' % len(to_delete)
 
