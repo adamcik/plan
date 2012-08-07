@@ -15,11 +15,20 @@ def compare(old, new):
     return '[%s] -> [%s]' % (new, old)
 
 
-def clean(raw_text):
+# TODO(adamcik): move to utils?
+def clean_string(raw_text):
+    if raw_text is None:
+        return None
     text = raw_text.strip()
     if text[0] in ('"', "'") and text[0] == text[-1]:
         text = text[1:-1].strip()
     return text
+
+
+def clean_decimal(raw_number):
+    if raw_number is None:
+        return None
+    return decimal.Decimal(raw_number)
 
 
 class Scraper(object):
@@ -132,7 +141,8 @@ class Scraper(object):
 class CourseScraper(Scraper):
     MODEL = Course
     FIELDS = ('code', 'version', 'semester')
-    CLEAN_FIELDS = {'name': clean}
+    CLEAN_FIELDS = {'name': clean_string,
+                    'points': clean_decimal}
     DEFAULT_FIELDS = ('name', 'url', 'points')
     CREATE_SEMESTER = True
 
@@ -144,15 +154,16 @@ class CourseScraper(Scraper):
         remove = Course.objects.filter(semester=self.semester)
         return remove.exclude(id__in=seen)
 
-    def display(self, item):
-        return item.code
+    def display(self, course):
+        return course.code
 
 
 class ExamScraper(Scraper):
     MODEL = Exam
     # TODO(adamcik): combination needs to be a default_field for migration.
     FIELDS = ('course', 'combination', 'exam_date', 'exam_time')
-    CLEAN_FIELDS = {'duration': decimal.Decimal}
+    # TODO(adamcik): date and time field in clean?
+    CLEAN_FIELDS = {'duration': clean_decimal}
     DEFAULT_FIELDS = ('type', 'duration',
                       'handout_date', 'handout_time')
 
