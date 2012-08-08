@@ -56,7 +56,6 @@ def update_courses(year, semester_type):
                             'version': version,
                             'points': None})
 
-    # TODO(adamcik): convert this to generic course handling code.
     for data in courses:
         try:
             course = Course.objects.get(code=data['code'], semester=semester, version=None)

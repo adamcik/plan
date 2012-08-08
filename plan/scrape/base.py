@@ -218,6 +218,8 @@ class Scraper(object):
         pass
 
 
+# TODO(adamcik): add constraint for code+semester to prevent multiple
+#                versions by mistake
 class CourseScraper(Scraper):
     model = Course
     fields = ('code', 'version', 'semester')

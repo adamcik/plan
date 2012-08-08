@@ -103,8 +103,6 @@ def update_exams(year, semester, url=None):
         if status_code != 'ORD':
             continue
 
-        # TODO(adamcik): fail on missing course?
-        # TODO(adamcik): use memoized helper to fetch?
         course, created = Course.objects.get_or_create(
                 code=course_code.strip(), semester=semester)
 

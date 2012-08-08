@@ -16,13 +16,9 @@ from plan.scrape.lectures import process_lectures
 
 logger = logging.getLogger('scrape.db')
 
-# TODO(adamcik): scapring in general, switch to config that determines which
-#                code to use instead of flags.
 
 # TODO(adamcik): switch to passing in semester
 # TODO(adamcik): switch to passing in lectures that match our filter.
-# TODO(adamcik): prefix should be contained to ntnu code, i.e. remove it from
-#                this interface.
 def update_lectures(year, semester_type, prefix=None, matches=None):
     '''Retrive all lectures for a given course'''
 
@@ -114,7 +110,6 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
             'groups': filter(bool, groups),
         })
 
-    # TODO(adamcik): we should be returning data - i.e. time to invert control
     added_lectures = process_lectures(data)
     to_delete = Lecture.objects.exclude(id__in=added_lectures)
     to_delete = to_delete.filter(course__semester=semester)
@@ -132,11 +127,9 @@ def update_courses(year, semester_type, prefix=None):
 
     prefix = prefix or semester.prefix
 
-    # TODO(adamcik): create cursor() helper in module.
     cursor = connections['ntnu'].cursor()
     cursor.execute("SELECT emnekode, emnenavn FROM {0}_fs_emne".format(prefix))
 
-    # TODO(adamcik): figure out how to get course credits.
     for raw_code, raw_name in cursor.fetchall():
         code, version = ntnu.parse_course(raw_code)
 
@@ -144,8 +137,6 @@ def update_courses(year, semester_type, prefix=None):
             logger.info('Skipped invalid course name: %s', raw_code)
             continue
 
-        # TODO(adamcik): add constraint for code+semester to prevent multiple
-        #                versions by mistake
         course, created = Course.objects.get_or_create(
             code=code, semester=semester, version=version)
         course.name = raw_name
@@ -155,5 +146,3 @@ def update_courses(year, semester_type, prefix=None):
             logger.info("Added course %s", course.code)
         else:
             logger.info("Updated course %s", course.code)
-
-    # TODO(adamcik): return data with course code and name.
