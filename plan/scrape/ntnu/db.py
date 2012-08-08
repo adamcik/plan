@@ -7,8 +7,9 @@ import logging
 from django.db import connections
 
 from plan.common.models import Course, Lecture, Semester
-from plan.scrape import ntnu
 from plan.scrape import base
+from plan.scrape import ntnu
+from plan.scrape import utils
 
 
 class Courses(base.CourseScraper):
@@ -38,3 +39,47 @@ class Courses(base.CourseScraper):
         logging.warning('Note that the scraper is aslo oblivious about if a')
         logging.warning('course is still being taught and/or assesed, so it')
         logging.warning('tends to add to much.')
+
+
+class Lectures(base.LectureScraper):
+    def scrape(self):
+        prefix = ntnu.prefix(self.semester)
+        cursor = connections['ntnu'].cursor()
+        groups = {}
+
+        courses = Course.objects.filter(semester=self.semester)
+        courses = dict((c.code, c) for c in courses)
+
+        # TODO(adamcik): start getting group names not just short names?
+        cursor.execute(('SELECT aktkode, studieprogramkode '
+                        'FROM %s_akt_studieprogram') % prefix)
+
+        for activity, group in cursor.fetchall():
+            groups.setdefault(activity, set()).add(group)
+
+        cursor.execute(('SELECT emnekode, typenavn, dag, start, slutt, uke, '
+                        'romnavn, larer, aktkode FROM %s_timeplan ORDER BY '
+                        'emnekode, dag, start, slutt, uke, romnavn, aktkode') %
+                        prefix)
+
+        for row in cursor.fetchall():
+            (raw_code, lecture_type, day, start, end,
+             weeks, rooms, lecturers, activity) = row
+
+            code, version = ntnu.parse_course(raw_code)
+            if not code:
+                logging.warning('Skipped invalid course name: %s', raw_code)
+                continue
+            elif code not in courses:
+                logging.debug("Unknown course %s.", code)
+                continue
+
+            yield {'course': courses[code],
+                   'type': lecture_type,
+                   'day':  utils.parse_day_of_week(day),
+                   'start': utils.parse_time(start),
+                   'end':  utils.parse_time(end),
+                   'weeks': utils.parse_weeks(weeks),
+                   'rooms': utils.split(rooms, '#'),
+                   'lecturers': utils.split(lecturers, '#'),
+                   'groups': groups.get(activity, set())}
