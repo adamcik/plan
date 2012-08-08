@@ -38,7 +38,7 @@ class Scraper(object):
     create_semester = False
 
     def __init__(self, semester, options):
-        self.stats = {'fetched': 0,   # items we have fetchted
+        self.stats = {'scraped': 0,   # items we have scraped
                       'processed': 0, # items that made it through prepare_data()
                       'persisted': 0, # items that are in db
                       'created': 0,   # items that have been created
@@ -79,7 +79,7 @@ class Scraper(object):
         """Entry point for generic scrape managment command.
 
            This method will:
-           1. Get data by calling fetch()
+           1. Get data by calling scrape()
            2. Process data with prepare_data(), this can be adding, cleaning or
               invalidating data.
            3. Convert data to get_or_create() arguments using prepare_save()
@@ -90,8 +90,8 @@ class Scraper(object):
            does not match this pattern.
         """
         pks = []
-        for data in self.fetch():
-            self.log_fetched(data)
+        for data in self. scrape():
+            self.log_scraped(data)
 
             data = self.prepare_data(data)
             if not data:
@@ -124,12 +124,12 @@ class Scraper(object):
         self.log_instructions()
         return qs
 
-    def fetch(self, semester):
+    def scrape(self, semester):
         """Gets data from external source and yields results."""
         raise NotImplementedError
 
     def prepare_data(self, data):
-        """Clean and/or validate data from fetch method.
+        """Clean and/or validate data from scrape method.
 
            Not returning data will skip the provided data.
         """
@@ -189,8 +189,8 @@ class Scraper(object):
         """Helper that defines how objects are stringified for display."""
         return str(obj)
 
-    def log_fetched(self, data):
-        self.stats['fetched'] += 1
+    def log_scraped(self, data):
+        self.stats['scraped'] += 1
 
     def log_processed(self, data):
         self.stats['processed'] += 1

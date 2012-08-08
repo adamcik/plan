@@ -5,7 +5,6 @@ import re
 import urllib
 
 from django.conf import settings
-from django.core import cache
 from django.utils import dates
 from django.utils import translation
 
@@ -20,22 +19,6 @@ for lang, name in settings.LANGUAGES:
             day = dates.WEEKDAYS[i].lower()
             assert WEEKDAYS.get(day, i) == i, 'Found conflicting day names.'
             WEEKDAYS[day] = i
-
-scraper_cache = cache.get_cache('webscraper')
-
-# TODO(adamcik): provide helper that does url+'?'+urllib.urlencode(..>)
-#                and lxml conversion before returning?
-
-def cached_urlopen(url):
-    """Gets cached HTTP response from urlopen."""
-    data = scraper_cache.get(url)
-    if not data:
-        response = urllib.urlopen(url)
-        data = response.read()
-        # TODO(adamcik): not sure if this is smart.
-        if response.getcode() == 200:
-            scraper_cache.set(url, data)
-    return data
 
 
 def parse_day_of_week(value):

@@ -21,7 +21,7 @@ class Courses(base.CourseScraper):
     def get_cursor(self):
         return connections['ntnu'].cursor()
 
-    def fetch(self):
+    def scrape(self):
         cursor = self.get_cursor()
         cursor.execute("SELECT emnekode, emnenavn FROM {0}_fs_emne".format(
             self.get_prefix()))

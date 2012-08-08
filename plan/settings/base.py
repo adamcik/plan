@@ -99,7 +99,7 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'KEY_PREFIX': '',
     },
-    'webscraper': {
+    'scraper': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         'LOCATION': os.path.join(BASE_PATH, 'cache'),
         'TIMEOUT': 60*60*24*7,

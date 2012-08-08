@@ -6,8 +6,9 @@ import logging
 import json
 
 from plan.common.models import Course, Semester
-from plan.scrape import utils
 from plan.scrape import base
+from plan.scrape import fetch
+from plan.scrape import utils
 
 TERM_MAPPING = {
     Semester.SPRING: 'Spring',
@@ -16,8 +17,8 @@ TERM_MAPPING = {
 
 
 def fetch_courses(semester):
-    data = utils.cached_urlopen('http://www.ime.ntnu.no/api/course/-')
-    for course in json.loads(data)['course']:
+    courses = fetch.json('http://www.ime.ntnu.no/api/course/-')['course']
+    for course in courses:
         # TODO(adamcik): need utils that does not require version.
         raw_code = '%s-%s' % (course['code'], course['versionCode'])
         if not utils.parse_course_code(raw_code)[0]:
@@ -38,16 +39,9 @@ def fetch_courses(semester):
             yield result
 
 
-# TODO(adamcik): replace with fetch_json fetch_xml fetch_html etc?
 def fetch_course(code):
     code = code.lower().encode('utf-8')
-    url = 'http://www.ime.ntnu.no/api/course/%s' % code
-
-    try:
-        logging.debug('Retrieving %s', url)
-        return json.loads(utils.cached_urlopen(url))['course']
-    except IOError as e:
-        logging.error('Loading falied: %s', e)
+    return fetch.json('http://www.ime.ntnu.no/api/course/%s' % code)['course']
 
 
 def match_term(data, semester):
@@ -62,7 +56,7 @@ def match_assessment(data, semester):
 
 
 class Courses(base.CourseScraper):
-    def fetch(self):
+    def scrape(self):
         for course in fetch_courses(self.semester):
             yield {'code': course['code'],
                    'name': course['name'],
@@ -72,7 +66,7 @@ class Courses(base.CourseScraper):
 
 
 class Exams(base.ExamScraper):
-    def fetch(self):
+    def scrape(self):
         # Only bother with courses that have already been loaded.
         for course in Course.objects.filter(semester=self.semester):
             result = fetch_course(course.code)

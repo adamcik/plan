@@ -7,6 +7,7 @@ import lxml.etree
 
 from plan.common.models import Exam, ExamType, Course, Semester
 from plan.scrape import base
+from plan.scrape import fetch
 from plan.scrape import utils
 
 
@@ -29,16 +30,14 @@ class Exams(base.ExamScraper):
             return child.nodeValue
         return None
 
-    def fetch(self):
+    def scrape(self):
         url = 'http://www.ntnu.no/eksamen/plan/%s/dato.XML' % self.get_prefix()
 
         courses = Course.objects.filter(semester=self.semester)
         courses = dict((c.code, c) for c in courses)
 
-        try:
-            root = lxml.etree.fromstring(utils.cached_urlopen(url))
-        except IOError:
-            logging.error('Loading falied')
+        root = fetch.xml(url)
+        if root is None:
             return
 
         for row in root.xpath('//dato/dato_row'):

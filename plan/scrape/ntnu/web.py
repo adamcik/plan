@@ -8,8 +8,9 @@ import re
 import urllib
 
 from plan.common.models import Semester
-from plan.scrape import utils
 from plan.scrape import base
+from plan.scrape import fetch
+from plan.scrape import utils
 
 
 # TODO(adamcik): consider using http://www.ntnu.no/web/studier/emner
@@ -23,19 +24,15 @@ class Courses(base.CourseScraper):
         else:
             return 'h%s' % str(self.semester.year)[-2:]
 
-    def fetch(self):
+    def scrape(self):
         prefix = self.get_prefix()
+        url = 'http://www.ntnu.no/studieinformasjon/timeplan/%s/' % prefix
         code_re = re.compile('emnekode=([^&]+)', re.I|re.L)
 
         for letter in u'ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ':
-            url = 'http://www.ntnu.no/studieinformasjon/timeplan/{0}/?{1}'.format(
-                prefix, urllib.urlencode({'bokst': letter.encode('latin1')}))
-
-            try:
-                logging.info('Retrieving %s', url)
-                root = lxml.html.fromstring(utils.cached_urlopen(url))
-            except IOError as e:
-                logging.error('Loading falied: %s', e)
+            root = fetch.html(url, verbose=True,
+                              query={'bokst': letter.encode('latin1')})
+            if root is None:
                 continue
 
             for tr in root.cssselect('.hovedramme table table tr'):
