@@ -1,15 +1,10 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import dateutil.parser
-import re
-import urllib
 
 from django.conf import settings
 from django.utils import dates
 from django.utils import translation
-
-# Regexp to use to pull out course code and version.
-COURSE_RE = re.compile(r'^([^0-9]+[0-9]+)-(\d+)$')
 
 # Build lookup table with weekdays in all installed languages.
 WEEKDAYS = {}
@@ -27,18 +22,6 @@ def parse_day_of_week(value):
     Monday=0, ... Saturday and Sunday do not exist.
     """
     return WEEKDAYS.get(value.lower(), None)
-
-
-# TODO(adamcik): since this is ntnu specific this might have to be updated.
-def parse_course_code(value):
-    """Extract course code and version from NTNU format."""
-    if not value or not value.strip():
-        return None, None
-
-    match = COURSE_RE.match(value.upper().strip())
-    if not match:
-        return None, None
-    return match.groups()
 
 
 def parse_time(value):

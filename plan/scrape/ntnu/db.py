@@ -7,29 +7,18 @@ import logging
 from django.db import connections
 
 from plan.common.models import Course, Lecture, Semester
-from plan.scrape import utils
+from plan.scrape import ntnu
 from plan.scrape import base
 
 
 class Courses(base.CourseScraper):
-    def get_prefix(self):
-        if self.semester.type == Semester.SPRING:
-            return 'v%s' % str(self.semester.year)[-2:]
-        else:
-            return 'h%s' % str(self.semester.year)[-2:]
-
-    def get_cursor(self):
-        return connections['ntnu'].cursor()
-
     def scrape(self):
-        cursor = self.get_cursor()
-        cursor.execute("SELECT emnekode, emnenavn FROM {0}_fs_emne".format(
-            self.get_prefix()))
+        prefix = ntnu.prefix(self.semester)
+        cursor = connections['ntnu'].cursor()
+        cursor.execute("SELECT emnekode, emnenavn FROM %s_fs_emne" % prefix)
 
-        # TODO(adamcik): figure out how to get course credits.
         for raw_code, raw_name in cursor.fetchall():
-            code, version = utils.parse_course_code(raw_code)
-
+            code, version = ntnu.parse_course(raw_code)
             if not code:
                 logging.warning('Skipped invalid course name: %s', raw_code)
                 continue

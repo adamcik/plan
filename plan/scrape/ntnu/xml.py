@@ -8,6 +8,7 @@ import lxml.etree
 from plan.common.models import Exam, ExamType, Course, Semester
 from plan.scrape import base
 from plan.scrape import fetch
+from plan.scrape import ntnu
 from plan.scrape import utils
 
 
@@ -19,19 +20,9 @@ def get(row, tagname):
 
 
 class Exams(base.ExamScraper):
-    def get_prefix(self):
-        if Semester.SPRING == self.semester.type:
-            return '%sv' % str(self.semester.year)[-2:]
-        return '%sh' % str(self.semester.year)[-2:]
-
-    def get_value(self, node, tagname):
-        child = node.getElementsByTagName(tagname)[0].firstChild
-        if child:
-            return child.nodeValue
-        return None
-
     def scrape(self):
-        url = 'http://www.ntnu.no/eksamen/plan/%s/dato.XML' % self.get_prefix()
+        prefix = ntnu.prefix(self.semester, template='{year}{letter}')
+        url = 'http://www.ntnu.no/eksamen/plan/%s/dato.XML' % prefix
 
         courses = Course.objects.filter(semester=self.semester)
         courses = dict((c.code, c) for c in courses)
@@ -47,7 +38,7 @@ class Exams(base.ExamScraper):
 
             if status_code != 'ORD':
                 continue
-            elif not utils.parse_course_code(course_code+'-'+course_version)[0]:
+            elif not ntnu.valid_course_code(course_code):
                 logging.warning("Invalid course code: %s", course_code)
                 continue
             elif course_code not in courses:

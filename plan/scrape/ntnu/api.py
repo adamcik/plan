@@ -8,6 +8,7 @@ import json
 from plan.common.models import Course, Semester
 from plan.scrape import base
 from plan.scrape import fetch
+from plan.scrape import ntnu
 from plan.scrape import utils
 
 TERM_MAPPING = {
@@ -19,10 +20,8 @@ TERM_MAPPING = {
 def fetch_courses(semester):
     courses = fetch.json('http://www.ime.ntnu.no/api/course/-')['course']
     for course in courses:
-        # TODO(adamcik): need utils that does not require version.
-        raw_code = '%s-%s' % (course['code'], course['versionCode'])
-        if not utils.parse_course_code(raw_code)[0]:
-            logging.warning('Skipped invalid course name: %s', raw_code)
+        if not ntnu.valid_course_code(course['code']):
+            logging.warning('Skipped invalid course name: %s', course['code'])
             continue
 
         result = fetch_course(course['code'])

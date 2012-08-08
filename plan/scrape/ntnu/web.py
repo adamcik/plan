@@ -10,7 +10,7 @@ import urllib
 from plan.common.models import Semester
 from plan.scrape import base
 from plan.scrape import fetch
-from plan.scrape import utils
+from plan.scrape import ntnu
 
 
 # TODO(adamcik): consider using http://www.ntnu.no/web/studier/emner
@@ -18,14 +18,8 @@ from plan.scrape import utils
 #   &_courselistportlet_WAR_courselistportlet_INSTANCE_emne_year=2011
 #   &p_p_lifecycle=2
 class Courses(base.CourseScraper):
-    def get_prefix(self):
-        if self.semester.type == Semester.SPRING:
-            return 'v%s' % str(self.semester.year)[-2:]
-        else:
-            return 'h%s' % str(self.semester.year)[-2:]
-
     def scrape(self):
-        prefix = self.get_prefix()
+        prefix = ntnu.prefix(self.semester)
         url = 'http://www.ntnu.no/studieinformasjon/timeplan/%s/' % prefix
         code_re = re.compile('emnekode=([^&]+)', re.I|re.L)
 
@@ -41,9 +35,9 @@ class Courses(base.CourseScraper):
                 code_href = code_link.attrib['href']
                 raw_code = code_re.search(code_href).group(1)
 
-                code, version = utils.parse_course_code(raw_code)
+                code, version = ntnu.parse_course(raw_code)
                 if not code:
-                    logging.warning('Skipped invalid course name: %s', code)
+                    logging.warning('Skipped invalid course name: %s', raw_code)
                     continue
 
                 # Strip out noise in course name.
