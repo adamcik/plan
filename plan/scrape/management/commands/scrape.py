@@ -14,29 +14,33 @@ from plan.scrape import utils
 
 DATE_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 CONSOLE_LOG_FORMAT = '[%(asctime)s %(levelname)s] %(message)s'
+LOG_LEVELS = {'0': logging.ERROR,
+              '1': logging.WARNING,
+              '2': logging.INFO,
+              '3': logging.DEBUG}
 
-logging.basicConfig(format=CONSOLE_LOG_FORMAT,
-                    datefmt=DATE_TIME_FORMAT,
-                    level=logging.INFO)
-
-make_option = optparse.make_option
+OPTIONS = dict((o.dest, o) for o in management.LabelCommand.option_list + (
+        optparse.make_option('-y', '--year', action='store', dest='year', type='int',
+                             help='yearp to scrape'),
+        optparse.make_option('-t', '--type', action='store', dest='type',
+                             type='choice', choices=dict(Semester.SEMESTER_TYPES).keys(),
+                             help='term to scrape'),
+        optparse.make_option('-c', '--create', action='store_true', dest='create',
+                             help='create missing semester, default: false'),
+))
+OPTIONS['verbosity'].default = 2
 
 
 class Command(management.LabelCommand):
     help = 'Load data from external sources using specified scraper.'
-
-    option_list = management.LabelCommand.option_list + (
-        make_option('-y', '--year', action='store', dest='year', type='int',
-                    help='yearp to scrape'),
-        make_option('-t', '--type', action='store', dest='type',
-                    type='choice', choices=dict(Semester.SEMESTER_TYPES).keys(),
-                    help='term to scrape'),
-        make_option('-c', '--create', action='store_true', dest='create',
-                    help='create missing semester, default: false'),
-    )
+    option_list = OPTIONS.values()
 
     @transaction.commit_manually
     def handle_label(self, label, **options):
+        logging.basicConfig(
+            format=CONSOLE_LOG_FORMAT, datefmt=DATE_TIME_FORMAT,
+            level=LOG_LEVELS[options['verbosity']])
+
         try:
             semester = self.load_semester(options)
             scraper = self.load_scraper(label)(semester)
