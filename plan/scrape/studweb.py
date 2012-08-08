@@ -6,6 +6,8 @@ import logging
 import xml.dom.minidom
 
 from plan.common.models import Exam, ExamType, Course, Semester
+from plan.scrape import fetch
+from plan.scrape import ntnu
 from plan.scrape import utils
 
 logger = logging.getLogger('scrape.studweb')
@@ -37,7 +39,7 @@ def update_exams(year, semester, url=None):
 
     logger.info('Retrieving %s', url)
     try:
-        dom = xml.dom.minidom.parseString(utils.cached_urlopen(url))
+        dom = xml.dom.minidom.parseString(fetch.plain(url))
     except IOError:
         logger.error('Loading falied')
         return
@@ -65,7 +67,7 @@ def update_exams(year, semester, url=None):
         n.unlink()  # Free memory now that we are done with getting data.
 
         # Sanity check data we've found:
-        if not utils.parse_course_code(course_code+'-'+course_version)[0]:
+        if not ntnu.valid_course_code(course_code)[0]:
             logger.warning("Bad course code: %s", course_code)
             continue
 

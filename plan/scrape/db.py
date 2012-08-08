@@ -10,6 +10,7 @@ from django.conf import settings
 from django.db import connections
 
 from plan.common.models import Course, Lecture, Semester
+from plan.scrape import ntnu
 from plan.scrape import utils
 from plan.scrape.lectures import process_lectures
 
@@ -55,7 +56,7 @@ def update_lectures(year, semester_type, prefix=None, matches=None):
         (raw_code, raw_type, raw_day, raw_start, raw_end,
          raw_weeks, raw_rooms, raw_lecturers, raw_group) = row
 
-        code, version = utils.parse_course_code(raw_code)
+        code, version = ntnu.parse_course(raw_code)
 
         if not code:
             logging.info('Skipped %s', raw_code)
@@ -137,7 +138,7 @@ def update_courses(year, semester_type, prefix=None):
 
     # TODO(adamcik): figure out how to get course credits.
     for raw_code, raw_name in cursor.fetchall():
-        code, version = utils.parse_course_code(raw_code)
+        code, version = ntnu.parse_course(raw_code)
 
         if not code:
             logger.info('Skipped invalid course name: %s', raw_code)

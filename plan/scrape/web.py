@@ -10,6 +10,8 @@ import urllib
 from django.conf import settings
 
 from plan.common.models import Lecture, Course, Semester
+from plan.scrape import fetch
+from plan.scrape import ntnu
 from plan.scrape import utils
 from plan.scrape.lectures import process_lectures
 
@@ -29,7 +31,7 @@ def update_courses(year, semester_type):
 
         logger.info('Retrieving %s', url)
         try:
-            root = lxml.html.fromstring(utils.cached_urlopen(url))
+            root = lxml.html.fromstring(fetch.plain(url))
         except IOError, e:
             logger.error('Loading falied')
             continue
@@ -41,7 +43,7 @@ def update_courses(year, semester_type):
             code_re = re.compile('emnekode=([^&]+)', re.I|re.L)
             raw_code = code_re.search(code_href).group(1)
 
-            code, version = utils.parse_course_code(raw_code)
+            code, version = ntnu.parse_course(raw_code)
             if not code:
                 logger.info('Skipped invalid course name: %s', code)
                 continue
@@ -99,7 +101,7 @@ def update_lectures(year, semester_type, matches=None, prefix=None):
 
             logger.info('Retrieving %s', final_url)
             try:
-                root = lxml.html.fromstring(utils.cached_urlopen(final_url))
+                root = lxml.html.fromstring(fetch.plain(final_url))
             except IOError:
                 continue
 

@@ -5,7 +5,7 @@ import logging
 import urllib
 
 from plan.common.models import Course, Semester
-from plan.scrape import utils
+from plan.scrape import fetch
 
 logger = logging.getLogger('scrape.akademika')
 
@@ -22,7 +22,7 @@ def update_syllabus(year, semester, match=None):
             urllib.quote(course.code.encode('utf-8')))
 
         try:
-            data = json.loads(utils.cached_urlopen(url))
+            data = json.loads(fetch.plain(url))
         except IOError, e:
             logger.warning('Parse failed for %s: %s', course.code, e)
             continue

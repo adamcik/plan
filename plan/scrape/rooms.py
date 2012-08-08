@@ -6,7 +6,7 @@ import re
 import urllib
 
 from plan.common.models import Room, Course
-from plan.scrape import utils
+from plan.scrape import fetch
 
 logger = logging.getLogger('plan.scrape.rooms')
 
@@ -20,7 +20,7 @@ def update_rooms():
 
         logger.info('Retrieving %s', url)
         try:
-            root = lxml.html.fromstring(utils.cached_urlopen(url))
+            root = lxml.html.fromstring(fetch.plain(url))
         except IOError, e:
             logger.error('Loading falied')
             continue
