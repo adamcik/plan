@@ -22,7 +22,9 @@ logging.basicConfig(format=CONSOLE_LOG_FORMAT,
 make_option = optparse.make_option
 
 
-class Command(management.BaseCommand):
+class Command(management.LabelCommand):
+    help = 'Load data from external sources using specified scraper.'
+
     option_list = management.BaseCommand.option_list + (
         make_option('-y', '--year', action='store', dest='year',
                     help='yearp to scrape'),
@@ -32,6 +34,34 @@ class Command(management.BaseCommand):
                     dest='create', const=True, default=False,
                     help='create missing semester, default: false'),
     )
+
+    @transaction.commit_manually
+    def handle_label(self, label, **options):
+        try:
+            semester = self.load_semester(options)
+            scraper = self.load_scraper(label)(semester)
+
+            to_delete = scraper.run()
+
+            if to_delete:
+                print 'Delete the following?'
+                print utils.columnify(to_delete)
+                print 'Going to delete %d items' % to_delete.count()
+
+                if utils.prompt('Delete?'):
+                    to_delete.delete()
+
+            if not scraper.needs_commit:
+                transaction.rollback()
+            elif utils.prompt('Commit changes?'):
+                transaction.commit()
+                print 'Commited changes.'
+            else:
+                transaction.rollback()
+                print 'Rolled back changes.'
+        except:
+            transaction.rollback()
+            raise
 
     def load_semester(self, options):
         semester = Semester.current()
@@ -52,39 +82,10 @@ class Command(management.BaseCommand):
             return semester.save()
 
     def load_scraper(self, type):
-        module, cls = settings.TIMETABLE_SCRAPERS[type].rsplit('.', 1)
-        return getattr(importlib.import_module(module), cls)
-
-    @transaction.commit_manually
-    def handle(self, *args, **options):
         try:
-            if len(args) != 1:
-                raise management.CommandError('Please specify scraper to use.')
-            elif args[0] not in settings.TIMETABLE_SCRAPERS:
-                raise management.CommandError('Unknown scraper: %s' % args[0])
-
-            semester = self.load_semester(options)
-            scraper = self.load_scraper(args[0])(semester)
-
-            to_delete = scraper.run()
-
-            if to_delete:
-                print 'Delete the following?'
-                # TODO(adamcik): use scraper.display()
-                print utils.columnify(to_delete)
-                print 'Going to delete %d items' % to_delete.count()
-
-                if utils.prompt('Delete?'):
-                    to_delete.delete()
-
-            if not scraper.needs_commit:
-                transaction.rollback()
-            elif utils.prompt('Commit changes?'):
-                transaction.commit()
-                print 'Commiting changes...'
-            else:
-                transaction.rollback()
-                print 'Rolling back changes...'
-        except:
-            transaction.rollback()
-            raise
+            module, cls = settings.TIMETABLE_SCRAPERS.get(type, type).rsplit('.', 1)
+            return getattr(importlib.import_module(module), cls)
+        except ImportError as e:
+            raise management.CommandError('Couldn\'t import %s: %s' % (module, e))
+        except AttributeError:
+            raise management.CommandError('Scraper %s not found in %s' % (cls, module))
