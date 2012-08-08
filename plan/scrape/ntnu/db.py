@@ -31,7 +31,8 @@ class Courses(base.CourseScraper):
     def prepare_delete(self, qs, pks):
         return qs.none()
 
-    def log_instructions(self):
+    def log_finished(self):
+        super(Courses, self).log_finished()
         logging.warning('This scraper only knows about courses in the')
         logging.warning('timetable db, not deleting any unknown courses.')
         logging.warning('Note that the scraper is aslo oblivious about if a')

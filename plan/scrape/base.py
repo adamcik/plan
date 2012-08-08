@@ -37,7 +37,8 @@ class Scraper(object):
     default_fields = tuple()
     create_semester = False
 
-    def __init__(self, semester, options):
+    def __init__(self, semester):
+        self.semester = semester
         self.stats = {'scraped': 0,   # items we have scraped
                       'processed': 0, # items that made it through prepare_data()
                       'persisted': 0, # items that are in db
@@ -45,24 +46,6 @@ class Scraper(object):
                       'updated': 0,   # items we have updated
                       'unaltered': 0, # items we found but did not alter
                       'deleted': 0}   # items we plan to delete
-
-        self.semester = self.fetch_semester(options)
-
-    # TOOD(adamcik): get semester from outside and add create semester flag?
-    def fetch_semester(self, options):
-        semester = Semester.current()
-        if options['year']:
-            semester.year = options['year']
-        if options['type']:
-            semester.type = options['type']
-
-        try:
-            return Semester.objects.get(year=semester.year,
-                                        type=semester.type)
-        except Semester.DoesNotExist:
-            if not self.create_semester:
-                raise
-            return semester.save()
 
     @property
     def needs_commit(self):
@@ -121,7 +104,7 @@ class Scraper(object):
         qs = self.prepare_delete(self.model.objects.all(), pks)
         self.log_deleted(qs)
 
-        self.log_instructions()
+        self.log_finished()
         return qs
 
     def scrape(self, semester):
@@ -214,8 +197,9 @@ class Scraper(object):
     def log_deleted(self, qs):
         self.stats['deleted'] = qs.count()
 
-    def log_instructions(self):
-        pass
+    def log_finished(self):
+        logging.info(('Created: {created} Updated: {updated} Unaltered: '
+                      '{unaltered} Deleted: {deleted}').format(**self.stats))
 
 
 # TODO(adamcik): add constraint for code+semester to prevent multiple
