@@ -10,6 +10,7 @@ from django.db import transaction
 from django.utils import importlib
 
 from plan.common.models import Semester
+from plan.scrape import utils
 
 DATE_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 CONSOLE_LOG_FORMAT = '[%(asctime)s %(levelname)s] %(message)s'
@@ -54,32 +55,8 @@ class Command(management.BaseCommand):
         module, cls = settings.TIMETABLE_SCRAPERS[type].rsplit('.', 1)
         return getattr(importlib.import_module(module), cls)
 
-    def list_items(self, items, n=3):
-        items = map(unicode, items)
-        size = max(map(len, items))
-        border = unicode('+-' + '-+-'.join(['-'*size]*n) + '-+')
-        template = unicode('| ' + ' | '.join(['{:%d}' % size]*n) + ' |')
-        pad = lambda i: i + ['']*(n-len(i))
-
-        print border
-        while items:
-            print template.format(*pad(items[:n]))
-            items = items[n:]
-        print border
-
-    def prompt(self, message):
-        try:
-            return raw_input('%s [y/N] ' % message).lower() == 'y'
-        except KeyboardInterrupt:
-            sys.exit(1)
-
     @transaction.commit_manually
     def handle(self, *args, **options):
-        # TODO(adamcik): move as much as we can to scraper.
-        # - list items in scraper
-        # - delete prompting etc
-        # - prompt should be in utils
-
         try:
             if len(args) != 1:
                 raise management.CommandError('Please specify scraper to use.')
@@ -94,15 +71,15 @@ class Command(management.BaseCommand):
             if to_delete:
                 print 'Delete the following?'
                 # TODO(adamcik): use scraper.display()
-                self.list_items(to_delete)
+                print utils.columnify(to_delete)
                 print 'Going to delete %d items' % to_delete.count()
 
-                if self.prompt('Delete?'):
+                if utils.prompt('Delete?'):
                     to_delete.delete()
 
             if not scraper.needs_commit:
                 transaction.rollback()
-            elif self.prompt('Commit changes?'):
+            elif utils.prompt('Commit changes?'):
                 transaction.commit()
                 print 'Commiting changes...'
             else:

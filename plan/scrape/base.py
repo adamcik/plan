@@ -1,34 +1,9 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-import decimal
 import logging
 
 from plan.common.models import Exam, ExamType, Course, Semester
-
-
-def compare(old, new):
-    old_is_string = isinstance(old, basestring)
-    new_is_string = isinstance(new, basestring)
-
-    if (new_is_string and old_is_string and new.strip() == old.strip()):
-        return '<whitespace>'
-    return '[%s] -> [%s]' % (old, new)
-
-
-# TODO(adamcik): move to utils?
-def clean_string(raw_text):
-    if raw_text is None:
-        return None
-    text = raw_text.strip()
-    if text[0] in ('"', "'") and text[0] == text[-1]:
-        text = text[1:-1].strip()
-    return text
-
-
-def clean_decimal(raw_number):
-    if raw_number is None:
-        return None
-    return decimal.Decimal(raw_number)
+from plan.scrape import utils
 
 
 class Scraper(object):
@@ -189,7 +164,7 @@ class Scraper(object):
         self.stats['updated'] += 1
         logging.info('Updated %s:', self.display(obj))
         for key, (old, new) in changes.items():
-            logging.info('  %s: %s', key, compare(old, new))
+            logging.info('  %s: %s', key, utils.compare(old, new))
 
     def log_unaltered(self, obj):
         self.stats['unaltered'] += 1
@@ -202,8 +177,8 @@ class Scraper(object):
                       '{unaltered} Deleted: {deleted}').format(**self.stats))
 
 
-# TODO(adamcik): add constraint for code+semester to prevent multiple
-#                versions by mistake
+# TODO(adamcik): add constraint for code+semester to prevent multiple versions
+# by mistake
 class CourseScraper(Scraper):
     model = Course
     fields = ('code', 'version', 'semester')
@@ -213,9 +188,9 @@ class CourseScraper(Scraper):
     def prepare_data(self, data):
         data['semester'] = self.semester
         if 'name' in data:
-            data['name'] = clean_string(data['name'])
+            data['name'] = utils.clean_string(data['name'])
         if 'points' in data:
-            data['points'] = clean_decimal(data['points'])
+            data['points'] = utils.clean_decimal(data['points'])
         return data
 
     def prepare_delete(self, qs, pks):
@@ -240,7 +215,7 @@ class ExamScraper(Scraper):
         date = data['exam_date']
 
         if 'duration' in data:
-            data['duration'] = clean_decimal(data['duration']) or None
+            data['duration'] = utils.clean_decimal(data['duration']) or None
 
         if not date:
             logging.debug('Date missing for %s', course.code)
