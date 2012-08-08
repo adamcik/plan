@@ -2,6 +2,7 @@
 
 import dateutil.parser
 import decimal
+import re
 import sys
 
 from django.conf import settings
@@ -62,6 +63,10 @@ def clean_decimal(raw_number):
     if raw_number is None:
         return None
     return decimal.Decimal(raw_number)
+
+
+def split(value, sep):
+    return [i.strip() for i in re.split(sep, value) if i.strip()]
 
 
 def parse_day_of_week(value):

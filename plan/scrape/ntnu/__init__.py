@@ -18,6 +18,8 @@ def prefix(semester, template='{letter}{year}'):
 
 
 def valid_course_code(code):
+    if not code:
+        return False
     return bool(CODE_RE.match(code))
 
 
@@ -26,6 +28,8 @@ def valid_course_version(version):
 
 
 def parse_course(raw):
+    if not raw:
+        return None, None
     m = COURSE_RE.match(raw)
     if m:
         return m.groups()

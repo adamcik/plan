@@ -28,7 +28,7 @@ OPTIONS = dict((o.dest, o) for o in management.LabelCommand.option_list + (
         optparse.make_option('-c', '--create', action='store_true', dest='create',
                              help='create missing semester, default: false'),
 ))
-OPTIONS['verbosity'].default = 2
+OPTIONS['verbosity'].default = '2'
 
 
 class Command(management.LabelCommand):

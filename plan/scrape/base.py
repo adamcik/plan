@@ -2,7 +2,7 @@
 
 import logging
 
-from plan.common.models import Exam, ExamType, Course, Semester
+from plan.common.models import Course, Exam, ExamType, Lecture, Semester
 from plan.scrape import utils
 
 
@@ -200,6 +200,14 @@ class CourseScraper(Scraper):
 
     def display(self, obj):
         return obj.code
+
+
+# TODO(adamcik): remove noop that has been added.
+class LectureScraper(Scraper):
+    model = Lecture
+
+    def prepare_data(self, data):
+        print data
 
 
 class ExamScraper(Scraper):
