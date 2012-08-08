@@ -25,13 +25,13 @@ make_option = optparse.make_option
 class Command(management.LabelCommand):
     help = 'Load data from external sources using specified scraper.'
 
-    option_list = management.BaseCommand.option_list + (
-        make_option('-y', '--year', action='store', dest='year',
+    option_list = management.LabelCommand.option_list + (
+        make_option('-y', '--year', action='store', dest='year', type='int',
                     help='yearp to scrape'),
         make_option('-t', '--type', action='store', dest='type',
+                    type='choice', choices=dict(Semester.SEMESTER_TYPES).keys(),
                     help='term to scrape'),
-        make_option('-c', '--create', action='store_const',
-                    dest='create', const=True, default=False,
+        make_option('-c', '--create', action='store_true', dest='create',
                     help='create missing semester, default: false'),
     )
 
@@ -67,11 +67,6 @@ class Command(management.LabelCommand):
         semester = Semester.current()
         semester.year = options.get('year', None) or semester.year
         semester.type = options.get('type', None) or semester.type
-
-        if semester.type not in dict(Semester.SEMESTER_TYPES):
-            raise management.CommandError('Invalid semester type: %s' % semester.type)
-        elif not str(semester.year).isdigit():
-            raise management.CommandError('Invalid semester year: %s' % semester.year)
 
         try:
             return Semester.objects.get(
