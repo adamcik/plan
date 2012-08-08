@@ -229,8 +229,7 @@ class ExamScraper(Scraper):
         qs = qs.exclude(pk__in=pks)
         return qs.order_by('course__code', 'exam_date')
 
-    # TODO(adamcik): move to prepare_data()
-    def get_exam_type(self, code, name):
+    def exam_type(self, code, name):
         exam_type, created = ExamType.objects.get_or_create(
             code=code, defaults={'name': name})
 

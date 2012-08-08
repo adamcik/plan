@@ -64,5 +64,5 @@ class Exams(base.ExamScraper):
                    'combination': combination,
                    'handout_date': utils.parse_date(handout_date),
                    'handout_time': utils.parse_time(handout_time),
-                   'type': self.get_exam_type(type_code, type_name),
+                   'type': self.exam_type(type_code, type_name),
                    'duration': duration}
