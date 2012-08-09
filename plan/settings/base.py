@@ -170,13 +170,16 @@ TIMETABLE_SLOTS = [
 # './manage.py scrape <type>' where type is one of the keys bellow.
 TIMETABLE_SCRAPERS = {
     'courses': 'plan.scrape.ntnu.api.Courses',
-    #'courses': 'plan.scrape.ntnu.db.Courses',
-    #'courses': 'plan.scrape.ntnu.web.Courses',
+    'courses.api': 'plan.scrape.ntnu.api.Courses',
+    'courses.db': 'plan.scrape.ntnu.db.Courses',
+    'courses.web': 'plan.scrape.ntnu.web.Courses',
     'exams': 'plan.scrape.ntnu.api.Exams',
-    #'exams': 'plan.scrape.ntnu.xml.Exams',
-    #'lectures': 'plan.scrape.ntnu.api.Lectures',
-    #'lectures': 'plan.scrape.db.Lectures',
-    #'lectures': 'plan.scrape.ntnu.web.Lectures',
+    'exams.api': 'plan.scrape.ntnu.api.Exams',
+    'exams.xml': 'plan.scrape.ntnu.xml.Exams',
+    'lectures': 'plan.scrape.ntnu.api.Lectures',
+    'lectures.api': 'plan.scrape.ntnu.api.Lectures',
+    'lectures.db': 'plan.scrape.ntnu.db.Lectures',
+    'lectures.web': 'plan.scrape.ntnu.web.Lectures',
     #'rooms': 'plan.scrape.ntnu.web.Rooms',
     #'syllabus': 'plan.scrape.akademika.web.Syllabus',
 }
