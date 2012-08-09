@@ -37,7 +37,7 @@ def columnify(objects, columns=3):
 def prompt(message):
     try:
         return raw_input('%s [y/N] ' % message).lower() == 'y'
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, EOFError):
         sys.exit(1)
 
 
