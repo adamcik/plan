@@ -87,7 +87,7 @@ class Lectures(base.LectureScraper):
                     table = root.cssselect('.hovedramme table')[1];
                     break
             else:
-                logging.warning("Couldn't load any info for %s", course.code)
+                logging.debug("Couldn't load any info for %s", course.code)
                 continue
 
             lecture_type = None
@@ -109,10 +109,11 @@ class Lectures(base.LectureScraper):
 
                             match = re.match('.*Uke: (.+)', td.text_content())
                             data['weeks'] = utils.parse_weeks(match.group(1))
-                    elif i == 1:
-                        data['rooms'] = [a.text_content() for a in td.cssselect('a')]
+                    elif i == 1 and len(td.cssselect('a')) == 1:
+                        a = td.cssselect('a')[0]
+                        data['rooms'] = [a.text] + [e.tail for e in a]
                     elif i == 2:
-                        data['lecturers'] = [td.text] + [n.tail for n in td]
+                        data['lecturers'] = [td.text] + [e.tail for e in td]
                     elif i == 3:
                         data['groups'] = [g.text_content() for g in td.cssselect('span')]
 
