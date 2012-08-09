@@ -45,9 +45,11 @@
 {% block bd %}
   {% if missing %}
     <div id="help" class="large">
-      <p>
-        {% trans "Sorry, no semesters have been loaded yet." %}
-      </p>
+      <p>{% trans "Sorry, no semesters have been loaded yet." %}</p>
+    </div>
+  {% elif not current %}
+    <div id="help" class="large">
+      <p>{% trans "Sorry, this semester does not exist." %}</p>
     </div>
   {% else %}
     <div class="yui-g">
