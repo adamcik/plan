@@ -51,10 +51,10 @@ def compare(old, new):
 
 
 def clean_string(raw_text):
-    if raw_text is None:
-        return None
+    if not raw_text:
+        return raw_text
     text = raw_text.strip()
-    if text[0] in ('"', "'") and text[0] == text[-1]:
+    if text and text[0] in ('"', "'") and text[0] == text[-1]:
         text = text[1:-1].strip()
     return text
 
@@ -63,6 +63,10 @@ def clean_decimal(raw_number):
     if raw_number is None:
         return None
     return decimal.Decimal(raw_number)
+
+
+def clean_list(items, clean):
+    return filter(bool, map(clean, items))
 
 
 def split(value, sep):
