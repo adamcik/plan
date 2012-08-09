@@ -1,0 +1,134 @@
+Sample output showing what data we can expect from the xml document.
+
+<dato>
+  <dato_row>
+    <institusjonsnr>194</institusjonsnr>
+    <emnekode>AAR4203</emnekode>
+    <versjonskode>1</versjonskode>
+    <vurdkombkode>S&#216;-1</vurdkombkode>
+    <arstall>2012</arstall>
+    <vurdtidkode>12</vurdtidkode>
+    <arstall_reell>2012</arstall_reell>
+    <vurdtidkode_reell>12</vurdtidkode_reell>
+    <status_privatist_meld/>
+    <dato_eksamen>2012-12-10 00:00:00</dato_eksamen>
+    <dato_frist_kunngjoring/>
+    <dato_frist_sensur/>
+    <dato_frist_trekk>2012-11-15 00:00:00</dato_frist_trekk>
+    <status_student_meld/>
+    <emne_emnenavn_bokmal>Form og farge, grunnkurs 1A</emne_emnenavn_bokmal>
+    <status_publiser>J</status_publiser>
+    <status_publiser_eksdato/>
+    <status_publiser_kandtimeplan/>
+    <kommentar_eksamen/>
+    <status_sensurutlegg_melding/>
+    <dato_innlevering/>
+    <dato_start_oppmelding>2012-05-01 00:00:00</dato_start_oppmelding>
+    <dato_frist_oppmelding>2012-09-15 00:00:00</dato_frist_oppmelding>
+    <dato_opprettet>2012-05-08 13:57:45</dato_opprettet>
+    <saksbehinit_opprettet>MRO</saksbehinit_opprettet>
+    <dato_sist_endret>2012-06-14 10:51:04</dato_sist_endret>
+    <saksbehinit_sist_endret>ADMSA</saksbehinit_sist_endret>
+    <dato_klage/>
+    <vurdstatuskode>ORD</vurdstatuskode>
+    <varighettimer>4</varighettimer>
+    <dato_forslag_eksamen/>
+    <klokkeslett_fremmote_tid>1900-01-01 09:00:00</klokkeslett_fremmote_tid>
+    <dato_uttak/>
+    <klokkeslett_uttak/>
+    <dato_frist_oppd_tittel/>
+    <merknadstekst>Eks.dato innsatt av ADMSA 14.06.2012</merknadstekst>
+    <dato_sensur_registrert/>
+    <saksbehinit_sensur_registrert/>
+    <tall_kandidater/>
+    <tall_kandidater_compute> </tall_kandidater_compute>
+    <vurderingskombinasjon_vurdkombnavn_bokmal>Skriftlig eksamen</vurderingskombinasjon_vurdkombnavn_bokmal>
+    <vurdordningkode/>
+    <vurderingsformkode>S</vurderingsformkode>
+    <vurdkombtypekode>EKSAMEN</vurdkombtypekode>
+    <sortrekkefolge>0001 0001</sortrekkefolge>
+    <status_eksamensavvikling>J</status_eksamensavvikling>
+    <status_hjemmeeksamen>N</status_hjemmeeksamen>
+    <status_mappe>N</status_mappe>
+    <status_obligatorisk_aktivitet>N</status_obligatorisk_aktivitet>
+    <status_oppgave>N</status_oppgave>
+    <status_praksis>N</status_praksis>
+    <status_netteksamen>N</status_netteksamen>
+    <arstall_gjelder_i>2012</arstall_gjelder_i>
+    <terminkode_gjelder_i>H&#216;ST</terminkode_gjelder_i>
+    <vurderingstid_rekkefolgenr>12</vurderingstid_rekkefolgenr>
+    <tall_kar_a/>
+    <tall_kar_b/>
+    <tall_kar_c/>
+    <tall_kar_d/>
+    <tall_kar_e/>
+    <tall_kar_f/>
+    <dato_beregnet_tall_kar/>
+    <klokkeslett_innlevering/>
+  </dato_row>
+  <dato_row>
+    <institusjonsnr>194</institusjonsnr>
+    <emnekode>ARK2214</emnekode>
+    <versjonskode>1</versjonskode>
+    <vurdkombkode>OS-1</vurdkombkode>
+    <arstall>2012</arstall>
+    <vurdtidkode>12</vurdtidkode>
+    <arstall_reell>2012</arstall_reell>
+    <vurdtidkode_reell>12</vurdtidkode_reell>
+    <status_privatist_meld/>
+    <dato_eksamen/>
+    <dato_frist_kunngjoring/>
+    <dato_frist_sensur/>
+    <dato_frist_trekk>2012-11-15 00:00:00</dato_frist_trekk>
+    <status_student_meld/>
+    <emne_emnenavn_bokmal>Forhistorisk arkeologi</emne_emnenavn_bokmal>
+    <status_publiser>J</status_publiser>
+    <status_publiser_eksdato/>
+    <status_publiser_kandtimeplan/>
+    <kommentar_eksamen/>
+    <status_sensurutlegg_melding/>
+    <dato_innlevering>2012-12-05 00:00:00</dato_innlevering>
+    <dato_start_oppmelding>2012-05-01 00:00:00</dato_start_oppmelding>
+    <dato_frist_oppmelding>2012-09-15 00:00:00</dato_frist_oppmelding>
+    <dato_opprettet>2012-05-08 13:57:46</dato_opprettet>
+    <saksbehinit_opprettet>MRO</saksbehinit_opprettet>
+    <dato_sist_endret>2012-06-22 14:45:23</dato_sist_endret>
+    <saksbehinit_sist_endret>ADMSA</saksbehinit_sist_endret>
+    <dato_klage/>
+    <vurdstatuskode>ORD</vurdstatuskode>
+    <varighettimer/>
+    <dato_forslag_eksamen/>
+    <klokkeslett_fremmote_tid/>
+    <dato_uttak>2012-11-07 00:00:00</dato_uttak>
+    <klokkeslett_uttak/>
+    <dato_frist_oppd_tittel/>
+    <merknadstekst>ADMSA22.06.2012</merknadstekst>
+    <dato_sensur_registrert/>
+    <saksbehinit_sensur_registrert/>
+    <tall_kandidater/>
+    <tall_kandidater_compute> </tall_kandidater_compute>
+    <vurderingskombinasjon_vurdkombnavn_bokmal>Oppgave</vurderingskombinasjon_vurdkombnavn_bokmal>
+    <vurdordningkode/>
+    <vurderingsformkode>O</vurderingsformkode>
+    <vurdkombtypekode>OPPGAVE</vurdkombtypekode>
+    <sortrekkefolge>0001 0001 0001</sortrekkefolge>
+    <status_eksamensavvikling>N</status_eksamensavvikling>
+    <status_hjemmeeksamen>N</status_hjemmeeksamen>
+    <status_mappe>N</status_mappe>
+    <status_obligatorisk_aktivitet>N</status_obligatorisk_aktivitet>
+    <status_oppgave>J</status_oppgave>
+    <status_praksis>N</status_praksis>
+    <status_netteksamen>N</status_netteksamen>
+    <arstall_gjelder_i>2012</arstall_gjelder_i>
+    <terminkode_gjelder_i>H&#216;ST</terminkode_gjelder_i>
+    <vurderingstid_rekkefolgenr>12</vurderingstid_rekkefolgenr>
+    <tall_kar_a/>
+    <tall_kar_b/>
+    <tall_kar_c/>
+    <tall_kar_d/>
+    <tall_kar_e/>
+    <tall_kar_f/>
+    <dato_beregnet_tall_kar/>
+    <klokkeslett_innlevering/>
+  </dato_row>
+</dato>

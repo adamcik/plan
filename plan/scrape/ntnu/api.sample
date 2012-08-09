@@ -1,0 +1,301 @@
+Sample output showing what data we can get from the json api.
+
+$ wget http://www.ime.ntnu.no/api/course/-
+{
+    "course": [
+        {
+            "code": "TMA4120",
+            "englishName": "Calculus 4K",
+            "name": "Matematikk 4K",
+            "newNorwegianName": "Matematikk 4K",
+            "norwegianName": "Matematikk 4K",
+            "versionCode": "1"
+        },
+        {
+            "code": "TMA4130",
+            "englishName": "Calculus 4N",
+            "name": "Matematikk 4N",
+            "newNorwegianName": "Matematikk 4N",
+            "norwegianName": "Matematikk 4N",
+            "versionCode": "1"
+        }
+    ],
+    "cache": {
+        "expires": "2012-08-16T11:09:02+02:00",
+        "updated": "2012-08-09T11:09:02+02:00"
+    },
+    "request": {
+        "courseCode": "-",
+        "language": "no"
+    }
+}
+
+$ wget http://www.ime.ntnu.no/api/course/tma4130
+{
+    "course": {
+        "admissionRequirement": false,
+        "assessment": [
+            {
+                "appearanceTime": "09:00",
+                "assessmentFormCode": "S",
+                "assessmentFormDescription": "Skriftlig eksamen",
+                "assessmentTimeCode": "12",
+                "code": "S",
+                "codeName": "Skriftlig",
+                "combinationCode": "S",
+                "combinationName": "Skriftlig",
+                "date": "2012-12-01",
+                "deadlineBackOut": "2012-11-15",
+                "duration": 4,
+                "examinationSupport": [
+                    {
+                        "code": "C",
+                        "name": "Spesifiserte trykte og håndskrevne hjelpemidler tillatt. Bestemt, enkel kalkulator tillatt."
+                    }
+                ],
+                "firstExecutionTerm": "Autumn",
+                "firstExecutionYear": 2012,
+                "gradeRuleScheme": "30",
+                "gradeRuleSchemeName": "Bokstavkarakterer",
+                "gradeRuleUnit": "30",
+                "gradeRuleUnitName": "Bokstavkarakterer",
+                "gradeWeightingDenominator": 100,
+                "gradeWeightingNumerator": 100,
+                "partNr": 1,
+                "realExecutionTerm": "Autumn",
+                "realExecutionYear": 2012,
+                "registrationDeadline": "2012-09-15",
+                "statusCode": "ORD",
+                "statusName": "Ordinær eksamen"
+            }
+        ],
+        "code": "TMA4130",
+        "courseTypeCode": "VURDERING",
+        "courseTypeName": "Vurderingsemne",
+        "credit": 7.5,
+        "creditReduction": [...],
+        "creditTypeCode": "SP",
+        "creditTypeName": "Studiepoeng",
+        "educationLanguage": [
+            {
+                "code": "ENGELSK",
+                "englishName": "English",
+                "name": "Engelsk",
+                "norwegianName": "Engelsk"
+            },
+            {
+                "code": "NORSK",
+                "englishName": "Norwegian",
+                "name": "Norsk",
+                "norwegianName": "Norsk"
+            }
+        ],
+        "educationTerm": [
+            {
+                "inDepthStudyHours": 6,
+                "labHours": 2,
+                "lectureHours": 4,
+                "numOfRegistratedStudents": 0,
+                "registrationDeadline": "2012-09-15",
+                "startTerm": "Autumn",
+                "termApplies": "Autumn",
+                "termNum": 1,
+                "year": 2012,
+                "yearIncrement": 0
+            }
+        ],
+        "educationalRole": [
+            {
+                "code": "Coordinator",
+                "name": "Koordinator",
+                "person": {
+                    "affiliated": false,
+                    "dateOfBirth": null,
+                    "displayName": "John Doe",
+                    "email": "john.doe@example.com",
+                    "employee": true,
+                    "firstName": "John",
+                    "gender": "Male",
+                    "lastName": "Doe",
+                    "personId": 1337,
+                    "publicationStatus": "NotReserved",
+                    "student": false,
+                    "username": "doe"
+                },
+                "personId": 1337,
+                "term": "Autumn"
+            }
+        ],
+        "englishName": "Calculus 4N",
+        "gradeRule": "30",
+        "gradeRuleText": "Bokstavkarakterer",
+        "infoType": [
+            {
+                "code": "ANBFORK",
+                "name": "Anbefalte forkunnskaper",
+                "text": "Emnene TMA4100/05/10/15 Matematikk 1/2/3 eller tilsvarende."
+            },
+            {
+                "code": "FORK",
+                "name": "Forkunnskapskrav"
+            },
+            {
+                "code": "INNHOLD",
+                "name": "Faglig innhold",
+                "text": "..."
+            },
+            {
+                "code": "KURSMAT",
+                "name": "Kursmateriell",
+                "text": "Oppgis ved kursstart."
+            },
+            {
+                "code": "LÆRFORM",
+                "name": "Læringsformer og aktiviteter",
+                "text": "..."
+            },
+            {
+                "code": "MÅL",
+                "name": "Læringsmål",
+                "text": "..."
+            }
+        ],
+        "mandatoryActivity": [
+            {
+                "name": "Øvinger",
+                "number": 1
+            }
+        ],
+        "name": "Matematikk 4N",
+        "newNorwegianName": "Matematikk 4N",
+        "norwegianName": "Matematikk 4N",
+        "ouId": 828,
+        "registrationAfterAdmission": "DIREKTE",
+        "studyLevel": "LN",
+        "studyLevelCode": "300",
+        "studyLevelName": "Tredjeårsemner, nivå III",
+        "studyProgrammeCode": "MTENERG",
+        "subjectArea": [
+            {
+                "code": "TEKNOLOGI",
+                "englishName": "Technological subjects",
+                "name": "Teknologiske fag",
+                "newNorwegianName": "Teknologiske fag",
+                "norwegianName": "Teknologiske fag"
+            }
+        ],
+        "taughtFromTerm": "Autumn",
+        "taughtFromYear": 2003,
+        "taughtInAutumn": true,
+        "taughtInEnglish": true,
+        "taughtInSpring": false,
+        "usedInStudyprogrammes": [
+            {
+                "code": "MTENERG",
+                "englishName": "Energy and Environmental Engineering",
+                "name": "Energi og miljø",
+                "requireSelectedInEducationPlan": false,
+                "statusPublishCourseInfoAsPartOfStudyProgramme": true,
+                "statusUseCourseProgrammeConnectionInReporting": true
+            },
+            {
+                "code": "MTFYMA",
+                "englishName": "Applied Physics and Mathematics",
+                "name": "Fysikk og matematikk",
+                "requireSelectedInEducationPlan": false,
+                "statusPublishCourseInfoAsPartOfStudyProgramme": true,
+                "statusUseCourseProgrammeConnectionInReporting": true
+            }
+        ],
+        "versionCode": "1"
+    },
+    "cache": {
+        "expires": "2012-08-13T23:20:23+02:00",
+        "updated": "2012-08-06T23:20:23+02:00"
+    },
+    "request": {
+        "courseCode": "tma4130",
+        "language": "no"
+    }
+}
+
+$ wget http://www.ime.ntnu.no/api/schedule/tma4130
+{
+    "activity": [
+        {
+            "activityAcronym": "ØV",
+            "activityDescription": "Øving",
+            "activityId": "D41B9D9CD3303416104B6356F2959493",
+            "activitySchedules": [
+                {
+                    "dayName": "TORSDAG",
+                    "dayNumber": 3,
+                    "end": "12:00",
+                    "rooms": [
+                        {
+                            "location": "KJL23",
+                            "lydiaCode": "354242"
+                        },
+                        {
+                            "location": "KJL22",
+                            "lydiaCode": "354143"
+                        }
+                    ],
+                    "start": "10:15",
+                    "weeks": "35,36,37,38,39,40,41,42,43,44,45,46,47"
+                }
+            ],
+            "courseCode": "TMA4130",
+            "courseVersionCode": "1",
+            "englishCourseName": "Calculus 4N",
+            "norwegianCourseName": "Matematikk 4N",
+            "studyProgrammes": [
+                "MTIØT"
+            ],
+            "syllabusCourseCode": "TMA4130-1",
+            "weeks": "35-47"
+        },
+        {
+            "activityAcronym": "FOR",
+            "activityDescription": "Forelesning",
+            "activityId": "D41B9D9CD3303416104B6356F2959487",
+            "activitySchedules": [
+                {
+                    "dayName": "TIRSDAG",
+                    "dayNumber": 1,
+                    "end": "10:00",
+                    "rooms": [
+                        {
+                            "location": "F1",
+                            "lydiaCode": "318152"
+                        }
+                    ],
+                    "start": "8:15",
+                    "weeks": "34,35,36,37,38,39,40,41,42,43,44,45,46,47"
+                }
+            ],
+            "courseCode": "TMA4130",
+            "courseVersionCode": "1",
+            "englishCourseName": "Calculus 4N",
+            "norwegianCourseName": "Matematikk 4N",
+            "studyProgrammes": [
+                "MTENERG",
+                "MTIØT",
+                "MTNANO",
+                "MTMART",
+                "MTPROD"
+            ],
+            "syllabusCourseCode": "TMA4130-1",
+            "weeks": "34-47"
+        }
+    ],
+    "cache": {
+        "expires": "2012-08-16T02:45:46+02:00",
+        "updated": "2012-08-09T02:45:46+02:00"
+    },
+    "request": {
+        "courseCode": "tma4130",
+        "term": "autumn",
+        "year": "2012"
+    }
+}

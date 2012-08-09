@@ -1,0 +1,101 @@
+Sample output showing the relevant parts of the web page structures.
+
+$ wget http://www.ntnu.no/studieinformasjon/timeplan/h12/?bokst=A
+<body>
+  <div class="pagewrap">
+    <div class="hovedramme">
+      <table width="730">
+        <tr valign="top">
+          <td width="30%">
+            <!-- sidebar -->
+          </td>
+          <td>
+            <h1>Timeplaner for h&#248;sten 2012</h1>
+            <p>
+              Emnekode som begynner med..<br>
+              <!-- list of course start letters -->
+            </p>
+            <table width="100%">
+              <tr>
+                <td><a href="./?emnekode=AAR4203-1&amp;valg=emnekode&amp;bokst=">AAR4203-1</a></td>
+                <td><a href="./?emnekode=AAR4203-1&amp;valg=emnekode&amp;bokst=">Form og farge, grunnkurs 1A</a></td>
+              </tr>
+              <tr>
+                <td><a href="./?emnekode=AAR4220-1&amp;valg=emnekode&amp;bokst=">AAR4220-1</a></td>
+                <td><a href="./?emnekode=AAR4220-1&amp;valg=emnekode&amp;bokst=">Fysisk oversiktsplanlegging</a></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</body>
+
+$ wget http://www.ntnu.no/studieinformasjon/timeplan/h12/?emnekode=TDT4120-1
+<body>
+  <div class="pagewrap">
+    <div class="hovedramme">
+      <table width="730">
+        <tr valign="top">
+          <td width="30%">
+            <!-- sidebar -->
+          </td>
+          <td>
+            <h3>H&#248;sten 2012<br>Timeplan for:</h3>
+            <h1>TDT4120 - Algoritmer og datastrukturer</h1>
+            <table width="100%">
+              <tr>
+                <th>Tid</th>
+                <th>Sted</th>
+                <th>L&#230;rer</th>
+                <th>Planlagt for</th>
+              </tr>
+              <tr>
+		<td colspan="4">
+                  <h3 class="akttype">Forlesning/&#216;ving</h3>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Tirsdag  16:15 - 19:00</b><br><span class="mindre">Uke: 34-47<br><br></span>
+                </td>
+                <td>
+                  <b><a href="http://www.ntnu.no/studieinformasjon/rom/">R1</a></b>&#160;
+                </td>
+                <td>&#160;</td>
+                <td>
+                  <span class="mindre">BIT</span><br><span class="mindre">BMAT</span><br><span class="mindre">MIBYGG</span><br><span class="mindre">MIEL</span><br><span class="mindre">MITK</span><br><span class="mindre">MLREAL</span><br><span class="mindre">MTBYGG</span><br><span class="mindre">MTDT</span><br><span class="mindre">MTEL</span><br><span class="mindre">MTFYMA</span><br><span class="mindre">MTING</span><br><span class="mindre">MTI&#216;T</span><br><span class="mindre">MTKOM</span><br><span class="mindre">MTTK</span><br>&#160;
+                </td>
+              </tr>
+              <tr>
+                <td colspan="4">
+                  <h3 class="akttype">Forelesning</h3>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Onsdag  8:15 - 10:00</b><br><span class="mindre">Uke: 34-47<br><br></span>
+                </td>
+                <td>
+                  <b><a href="http://www.ntnu.no/studieinformasjon/rom/">R1</a></b>&#160;
+                </td>
+                <td>&#160;</td>
+                <td>
+                  <span class="mindre">BIT</span><br><span class="mindre">BMAT</span><br><span class="mindre">MIBYGG</span><br><span class="mindre">MIEL</span><br><span class="mindre">MITK</span><br><span class="mindre">MLREAL</span><br><span class="mindre">MTBYGG</span><br><span class="mindre">MTDT</span><br><span class="mindre">MTEL</span><br><span class="mindre">MTFYMA</span><br><span class="mindre">MTING</span><br><span class="mindre">MTI&#216;T</span><br><span class="mindre">MTKOM</span><br><span class="mindre">MTTK</span><br>&#160;
+                </td>
+              </tr>
+              <tr>
+                <td colspan="4"><span class="mindre">
+                  <hr>
+                  <p>Sp&#248;rsm&#229;l om undervisning og timeplan rettes til <a href="http://www.ntnu.no/faksent/">instituttet</a> som gir undervisning i emnet.</p>
+                  <p>Det kan forekomme endringer i timeplan etter publisering. Kontroller timeplanen f&#248;r semesterstart for &#229; f&#229; de siste endringene.</p></span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</body>
