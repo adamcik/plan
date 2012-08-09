@@ -381,11 +381,12 @@ class Lecture(models.Model):
         verbose_name_plural = _('Lecture')
 
     def __unicode__(self):
-        return u'%4d %10s %s-%s on %3s' % (
+        return u'%4d %10s %s-%s %s on %3s' % (
             self.id,
             self.course.short_name,
             filters.time(self.start),
             filters.time(self.end),
+            self.type,
             self.get_day_display()[:3])
 
     @property
