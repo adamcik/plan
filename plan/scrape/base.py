@@ -210,9 +210,83 @@ class CourseScraper(Scraper):
 # TODO(adamcik): remove noop that has been added.
 class LectureScraper(Scraper):
     model = Lecture
+    fields = ('course', 'day', 'start', 'end', 'type')
+    default_fields = ('rooms', 'lecturers', 'groups', 'weeks')
 
     def prepare_data(self, data):
-        print data
+        if not data['course'] or not data['start'] or not data['end']:
+            return
+        elif data['day'] not in dict(Lecture.DAYS):
+            return
+
+        data['type'] = self.lecture_type(data['type'])
+        data['rooms'] = [self.room(r) for r in data['rooms']]
+        data['lecturers'] = [self.lecturer(l) for l in data['lecturers']]
+        data['groups'] = [self.group(g) for g in data['groups']]
+
+        if not data['groups']:
+            data['groups'] = [self.group(Group.DEFAULT)]
+
+        return data
+
+    def save(self, kwargs, model, pks):
+        kwargs = kwargs.copy()
+        defaults = kwargs.pop('defaults')
+
+        groups = set(g.pk for g in defaults['groups'])
+        kwargs['type'] = self.lecture_type(kwargs['type'])
+
+        lectures = model.objects.filter(**kwargs).order_by('id')
+        lectures = list(lectures.exclude(pk__in=pks))
+
+        for candidate in lectures:
+            if groups == set(candidate.groups.values_list('pk', flat=True)):
+                pks.append(candidate.pk)
+                return candidate, False
+
+        obj = model.objects.create(**kwargs)
+        self.update(obj, defaults)
+        pks.append(obj.id)
+        return obj, True
+
+    def update(self, obj, defaults):
+        changes = {}
+
+        for field in ('rooms', 'lecturers', 'groups'):
+            current = set(getattr(obj, field).all())
+            if current != set(defaults[field]):
+                changes[field] = current, set(defaults[field])
+                setattr(obj, field, defaults[field])
+
+        if changes:
+            obj.save()
+
+        current = set(obj.week_set.values_list('number', flat=True))
+        if current != set(defaults['weeks']):
+            changes['weeks'] = current, set(defaults['weeks'])
+            obj.week_set.all().delete()
+
+            for week in defaults['weeks']:
+                Week.objects.create(lecture=obj, number=week)
+
+        return changes
+
+    def prepare_delete(self, qs, pks):
+        qs = qs.filter(course__semester=self.semester)
+        qs = qs.exclude(pk__in=pks)
+        return qs.order_by('course__code', 'day', 'start')
+
+    def lecture_type(self, name):
+        return LectureType.objects.get_or_create(name=name)[0]
+
+    def room(self, name):
+        return Room.objects.get_or_create(name=name)[0]
+
+    def lecturer(self, name):
+        return Lecturer.objects.get_or_create(name=name)[0]
+
+    def group(self, name):
+        return Group.objects.get_or_create(name=name)[0]
 
 
 class ExamScraper(Scraper):
