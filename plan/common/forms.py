@@ -60,9 +60,9 @@ class DeadlineForm(forms.models.ModelForm):
         self.fields['subscription'].widget.attrs['style'] = 'width: 7em'
         self.fields['subscription'].label_from_instance = lambda obj: obj.alias or obj.course.code
 
-
         self.fields['date'].initial = now().date()+datetime.timedelta(days=7)
         self.fields['time'].input_formats = ['%H:%M', '%H.%M']
+        self.fields['time'].required = False
 
         self.fields['time'].widget.attrs['size'] = 2
         self.fields['date'].widget.attrs['size'] = 7
