@@ -21,12 +21,13 @@ LOG_LEVELS = {'0': logging.ERROR,
 
 OPTIONS = dict((o.dest, o) for o in management.LabelCommand.option_list + (
         optparse.make_option('-y', '--year', action='store', dest='year', type='int',
-                             help='yearp to scrape'),
+                             help='year to scrape'),
         optparse.make_option('-t', '--type', action='store', dest='type',
                              type='choice', choices=dict(Semester.SEMESTER_TYPES).keys(),
                              help='term to scrape'),
         optparse.make_option('-c', '--create', action='store_true', dest='create',
                              help='create missing semester, default: false'),
+        optparse.make_option('-n', '--dry-run', action='store_true', dest='dry_run')
 ))
 OPTIONS['verbosity'].default = '2'
 
@@ -55,7 +56,7 @@ class Command(management.LabelCommand):
                 if utils.prompt('Delete?'):
                     to_delete.delete()
 
-            if not scraper.needs_commit:
+            if not scraper.needs_commit or options['dry_run']:
                 transaction.rollback()
             elif utils.prompt('Commit changes?'):
                 transaction.commit()
