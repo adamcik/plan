@@ -20,6 +20,17 @@ LETTERS = u'ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ'
 #   ?p_p_id=courselistportlet_WAR_courselistportlet_INSTANCE_emne
 #   &_courselistportlet_WAR_courselistportlet_INSTANCE_emne_year=2011
 #   &p_p_lifecycle=2
+
+# TODO(adamcik): consider using http://www.ntnu.no/studieinformasjon/rom/?romnr=333A-S041
+# selected building will give us the prefix we need to strip to find the actual room
+# page will have a link to the building: http://www.ntnu.no/kart/gloeshaugen/berg/
+# checking each of the rooms we can find the room name A-S041. Basically we
+# should start storing the roomid which we can get in the api, db. for web scraping
+# we can get it from http://www.ntnu.no/studieinformasjon/rom for names that
+# don't have dupes
+
+# TODO(adamcik): link to http://www.ntnu.no/eksamen/sted/?dag=120809 for exams?
+
 class Courses(base.CourseScraper):
     def scrape(self):
         prefix = ntnu.prefix(self.semester)
@@ -79,13 +90,14 @@ class Lectures(base.LectureScraper):
                 logging.warning("Couldn't load any info for %s", course.code)
                 continue
 
+            lecture_type = None
             for tr in table.cssselect('tr')[1:-1]:
                 data = {}
 
                 for i, td in enumerate(tr.cssselect('td')):
                     if i == 0:
                         if td.attrib.get('colspan', 1) == '4':
-                            data['type'] = td.text_content().strip()
+                            lecture_type = td.text_content().strip()
                         else:
                             time = td.cssselect('b')[0].text_content().strip()
                             raw_day, period = time.split(' ', 1)
@@ -109,4 +121,5 @@ class Lectures(base.LectureScraper):
                         data[field] = utils.clean_list(data[field], utils.clean_string)
 
                 if data:
+                    data.update({'course': course, 'type': lecture_type})
                     yield data
