@@ -95,10 +95,10 @@ def parse_date(value):
     return dateutil.parser.parse(value.strip()).date()
 
 
-def parse_weeks(value):
+def parse_weeks(value, sep=r',? '):
     """Expand a list of weeks written in shortform."""
     weeks = []
-    for v in re.split(r',? ', value):
+    for v in re.split(sep, value):
         if '-' in v:
             start, end = v.split('-')
         else:

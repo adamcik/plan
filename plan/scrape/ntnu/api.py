@@ -64,10 +64,33 @@ class Courses(base.CourseScraper):
                    'url': 'http://www.ntnu.no/studier/emner/%s' % course['code']}
 
 
+class Lectures(base.LectureScraper):
+    def scrape(self):
+        url = 'http://www.ime.ntnu.no/api/schedule/%%s/%s/%s' % (
+            TERM_MAPPING[self.semester.type].lower(), self.semester.year)
+
+        for course in Course.objects.filter(semester=self.semester).order_by('code'):
+            result = fetch.json(url % course.code.encode('utf-8'))
+            if not result:
+                continue
+
+            for activity in result['activity']:
+                for schedule in activity['activitySchedules']:
+                    yield {'course': course.code,
+                           'type': activity['activityDescription'],
+                           'day':  schedule['dayNumber'],
+                           'start': utils.parse_time(schedule['start']),
+                           'end':  utils.parse_time(schedule['end']),
+                           'weeks': utils.parse_weeks(schedule['weeks'], ','),
+                           'rooms': [r['location'] for r in schedule.get('rooms', [])],
+                           'lecturers': [s['name'] for s in activity.get('staff', [])],
+                           'groups': activity.get('studyProgrammes', [])}
+
+
 class Exams(base.ExamScraper):
     def scrape(self):
         # Only bother with courses that have already been loaded.
-        for course in Course.objects.filter(semester=self.semester):
+        for course in Course.objects.filter(semester=self.semester).order_by('code'):
             result = fetch_course(course.code)
             if not result:
                 continue
