@@ -30,12 +30,6 @@ class ManagerTestCase(BaseTestCase):
         lectures = filter(lambda l: l.show_week and not l.exclude, lectures)
         self.assertEquals(set(lectures), set())
 
-    def test_get_deadlines(self):
-        control = Deadline.objects.filter(id__in=[1, 2])
-
-        deadlines = Deadline.objects.get_deadlines(2009, Semester.SPRING, 'adamcik')
-        self.assertEquals(set(deadlines), set(control))
-
     def test_get_exams(self):
         exams = Exam.objects.get_exams(2009, Semester.SPRING, 'adamcik')
         self.assertEquals(set(exams), set(Exam.objects.exclude(id__in=[3, 4])))

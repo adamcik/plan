@@ -86,22 +86,6 @@ class LectureManager(models.Manager):
                     .order_by(*order))
 
 
-class DeadlineManager(models.Manager):
-    def get_deadlines(self, year, semester_type, slug):
-        return self.get_query_set().filter(
-                subscription__student__slug=slug,
-                subscription__course__semester__year__exact=year,
-                subscription__course__semester__type__exact=semester_type,
-            ).select_related(
-                'subscription',
-            ).extra(select={
-                'alias': 'common_subscription.alias',
-            }).order_by(
-                'date',
-                'time',
-            )
-
-
 class ExamManager(models.Manager):
     def get_exams(self, year, semester_type, slug=None, course=None):
         if not slug and not course:

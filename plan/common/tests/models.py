@@ -13,7 +13,6 @@ class ModelsTestCase(BaseTestCase):
         self.assertEquals(3, actual.pop('slug_count'))
         self.assertEquals(3, actual.pop('course_count'))
         self.assertEquals(6, actual.pop('subscription_count'))
-        self.assertEquals(3, actual.pop('deadline_count'))
 
         stats = actual.pop('stats')
 
@@ -32,6 +31,3 @@ class ModelsTestCase(BaseTestCase):
     # FIXME test get_first and last day
     # FIXME test semester.next
     # FIXME test semester.current
-    # FIXME test deadline.get_datetime
-    # FIXME test deadline.get_slug
-    # FIXME test deadline.get_course

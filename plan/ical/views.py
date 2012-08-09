@@ -13,13 +13,13 @@ from django.conf import settings
 from django.core import urlresolvers
 from django.utils import translation
 
-from plan.common.models import Exam, Deadline, Lecture, Semester, Room, Week
+from plan.common.models import Exam, Lecture, Semester, Room, Week
 
 _ = translation.ugettext
 
 
 def ical(request, year, semester_type, slug, ical_type=None):
-    resources = [_(u'lectures'), _(u'exams'), _(u'deadlines')]
+    resources = [_(u'lectures'), _(u'exams')]
     if ical_type and ical_type not in resources:
         raise http.Http404
     elif ical_type:
@@ -52,10 +52,6 @@ def ical(request, year, semester_type, slug, ical_type=None):
     if _('exams') in resources:
         exams = Exam.objects.get_exams(year, semester.type, slug)
         add_exams(exams, cal)
-
-    if _('deadlines') in resources:
-        deadlines = Deadline.objects.get_deadlines(year, semester.type, slug)
-        add_deadlines(deadlines, cal)
 
     icalstream = cal.serialize()
 
@@ -176,24 +172,3 @@ def add_exams(exams, cal):
                     hours=hours, minutes=minutes)
             else:
                 vevent.add('dtend').value = start
-
-
-def add_deadlines(deadlines, cal):
-    for d in deadlines:
-        vevent = cal.add('vevent')
-
-        if d.time:
-            start = datetime.datetime.combine(d.date, d.time)
-            start = start.replace(tzinfo=tz.tzlocal())
-        else:
-            start = d.date
-
-        summary = u'%s - %s' % (d.task, d.alias or d.subscription.course)
-        desc = u'%s - %s (%s)' % (d.task, d.subscription.course.name,
-                d.subscription.course.code)
-
-        vevent.add('summary').value = summary
-        vevent.add('description').value = desc
-        vevent.add('dtstamp').value = datetime.datetime.now(tz.tzlocal())
-        vevent.add('uid').value = 'deadline-%d@%s' % (d.id, settings.TIMETABLE_ICAL_HOSTNAME)
-        vevent.add('dtstart').value = start

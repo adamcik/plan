@@ -126,45 +126,5 @@
             "exclude": [], 
             "student": "4"
         }
-    }, 
-    {
-        "pk": 1, 
-        "model": "common.deadline", 
-        "fields": {
-            "date": "2009-03-10", 
-            "task": "Task 1", 
-            "subscription": 1, 
-            "time": "09:00:00"
-        }
-    }, 
-    {
-        "pk": 2, 
-        "model": "common.deadline", 
-        "fields": {
-            "date": "2009-03-11", 
-            "task": "Task 2", 
-            "subscription": 1, 
-            "time": null
-        }
-    },
-    {
-        "pk": 3, 
-        "model": "common.deadline", 
-        "fields": {
-            "date": "2009-03-09", 
-            "task": "Task 1", 
-            "subscription": 4, 
-            "time": null
-        }
-    }, 
-    {
-        "pk": 4, 
-        "model": "common.deadline", 
-        "fields": {
-            "date": "2009-03-09", 
-            "task": "Task 1", 
-            "subscription": 7, 
-            "time": null
-        }
-    } 
+    }
 ]

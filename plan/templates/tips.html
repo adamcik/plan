@@ -8,7 +8,6 @@
 
 {% url 'schedule-ical' semester.year semester.slug slug _('lectures') as ical_lectures_url%}
 {% url 'schedule-ical' semester.year semester.slug slug _('exams') as ical_exams_url %}
-{% url 'schedule-ical' semester.year semester.slug slug _('deadlines') as ical_deadlines_url %}
 {% url 'schedule-ical' semester.year semester.slug slug as ical_all_url %}
 
 <h2 id="tips" class="noprint">{% trans "Tips" %}</h2>
@@ -54,9 +53,8 @@
       {% blocktrans %}
         Calendar export:
         <a href="{{ ical_lectures_url }}">lectures</a>,
-        <a href="{{ ical_exams_url }}">exams</a>,
-        <a href="{{ ical_deadlines_url }}">deadlines</a> or
-        <a href="{{ ical_all_url }}">all combined</a>.
+        <a href="{{ ical_exams_url }}">exams</a> or
+        <a href="{{ ical_all_url }}">both combined</a>.
       {% endblocktrans %}
       <br />
       {% trans "Simply download or copy the link to the calendar you want and add it to any application that supports the Ical format." %}
@@ -65,18 +63,11 @@
       {% blocktrans with "http://www.google.com/calendar/render?cid=http://" as google_cal_prefix and request.META.HTTP_HOST as host %}
         Google calendar:
         <a target="_blank" href="{{ google_cal_prefix }}{{ host }}{{ ical_lectures_url }}">lectures</a>,
-        <a target="_blank" href="{{ google_cal_prefix }}{{ host }}{{ ical_exams_url }}">exams</a>,
-        <a target="_blank" href="{{ google_cal_prefix }}{{ host }}{{ ical_deadlines_url }}">deadlines</a> or
-        <a target="_blank" href="{{ google_cal_prefix }}{{ host }}{{ ical_all_url }}">all combined</a>.
+        <a target="_blank" href="{{ google_cal_prefix }}{{ host }}{{ ical_exams_url }}">exams</a> or
+        <a target="_blank" href="{{ google_cal_prefix }}{{ host }}{{ ical_all_url }}">both combined</a>.
       {% endblocktrans %}
       <br />
       {% trans "Simply click the calendar type you want and it will be added to Google calendar." %}
-    </p>
-    <p class="icon copy">
-      {% blocktrans %}
-        Enter a space separated list of your friends timetables to copy
-        the deadlines they have entered for any classes you're both attending.
-      {% endblocktrans %}
     </p>
   </div>
 </div>

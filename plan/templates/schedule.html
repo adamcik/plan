@@ -65,40 +65,21 @@
     <div class="yui-g">
       <div class="yui-u first">
         {% include "courses.html" %}
-        {% if student.show_deadlines or advanced %}
-          {% include "exams.html" %}
-        {% endif %}
-
-        {% if advanced %}
-          {% if student.show_deadlines %}
-            {% include "deadlines.html" %}
-          {% endif %}
-        {% endif %}
       </div>
       <div class="yui-u">
-        {% if not advanced %}
-          {% if student.show_deadlines %}
-            {% include "deadlines.html" %}
-          {% else %}
-            {% include "exams.html" %}
-            {% include "deadlines_link.html" %}
-          {% endif %}
-        {% endif %}
-
-        {% if advanced %}
-          <h2>{% trans "Settings" %}</h2>
-        {% endif %}
-        {% include "add_courses.html" %}
-        {% if advanced %}
-          {% include "groups_link.html" %}
-          {% include "deadlines_toggle.html" %}
-          {% if student.show_deadlines %}
-            {% include "add_deadlines.html" %}
-            {% include "import_deadlines.html" %}
-          {% endif %}
-        {% endif %}
+        {% include "exams.html" %}
       </div>
     </div>
+    {% if advanced %}
+      <div class="yui-g">
+        <div class="yui-u first">
+          {% include "add_courses.html" %}
+        </div>
+        <div class="yui-u">
+          {% include "groups_link.html" %}
+        </div>
+      </div>
+    {% endif %}
   {% endif %}
 
   {% include "lectures.html" %}

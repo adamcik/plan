@@ -19,7 +19,7 @@ from plan.common import timetable
 from plan.common import utils
 from plan.common.templatetags import slugify
 
-# FIXME split into frontpage/semester, course, deadline, schedule files
+# FIXME split into frontpage/semester, course, schedule files
 # FIXME Split views that do multiple form handling tasks into seperate views
 # that call the top one.
 
@@ -103,7 +103,7 @@ def schedule_current(request, year, semester_type, slug):
 
 
 def schedule(request, year, semester_type, slug, advanced=False,
-             week=None, all=False, deadline_form=None):
+             week=None, all=False):
     '''Page that handels showing schedules'''
 
     current_week = get_current_week()
@@ -129,7 +129,6 @@ def schedule(request, year, semester_type, slug, advanced=False,
 
     # Start setting up queries
     courses = Course.objects.get_courses(year, semester.type, slug)
-    deadlines = Deadline.objects.get_deadlines(year, semester.type, slug)
     lectures = Lecture.objects.get_lectures(year, semester.type, slug, week)
     exams = Exam.objects.get_exams(year, semester.type, slug)
 
@@ -179,10 +178,6 @@ def schedule(request, year, semester_type, slug, advanced=False,
     if advanced:
         subscriptions = Subscription.objects.get_subscriptions(year, semester.type, slug)
 
-        # Set up deadline form
-        if not deadline_form:
-            deadline_form = forms.DeadlineForm(subscriptions)
-
         # Set up and course name forms
         for course in courses:
             alias = course.alias or ''
@@ -206,8 +201,6 @@ def schedule(request, year, semester_type, slug, advanced=False,
             'courses': courses,
             'current': (week == current_week),
             'current_week': current_week,
-            'deadline_form': deadline_form,
-            'deadlines': deadlines,
             'exams': exams,
             'next_message': next_message,
             'lectures': lectures,
@@ -277,98 +270,6 @@ def select_groups(request, year, semester_type, slug):
             'courses': courses,
             'color_map': color_map,
         })
-
-
-def toggle_deadlines(request, year, semester_type, slug):
-    # TODO(adamcik): create helper for this lookup.
-    student = Student.objects.distinct().get(slug=slug,
-        subscription__course__semester__year__exact=year,
-        subscription__course__semester__type=semester_type)
-
-    if request.method == 'POST':
-        student.show_deadlines = not student.show_deadlines
-        student.save()
-
-    return shortcuts.redirect(
-        'schedule-advanced', year, Semester.localize(semester_type), slug)
-
-
-def new_deadline(request, year, semester_type, slug):
-    '''Handels addition of tasks, reshows schedule view if form does not
-       validate'''
-
-    if request.method == 'POST':
-        if 'submit_add' in request.POST:
-            subscriptions = Subscription.objects.get_subscriptions(year, semester_type, slug)
-            deadline_form = forms.DeadlineForm(subscriptions, request.POST)
-
-            if deadline_form.is_valid():
-                deadline_form.save()
-            else:
-                return schedule(request, year, semester_type, slug, advanced=True,
-                        deadline_form=deadline_form)
-
-        elif 'submit_remove' in request.POST:
-            logging.debug(request.POST.getlist('deadline_remove'))
-            Deadline.objects.get_deadlines(year, semester_type, slug).filter(
-                    id__in=request.POST.getlist('deadline_remove')
-                ).delete()
-
-    return shortcuts.redirect(
-        'schedule-advanced', year, Semester.localize(semester_type), slug)
-
-
-def copy_deadlines(request, year, semester_type, slug):
-    '''Handles importing of deadlines'''
-
-    if request.method == 'POST':
-        if 'slugs' in request.POST:
-            slugs = request.POST['slugs'].replace(',', ' ').split()
-
-            color_map = utils.ColorMap()
-
-            courses = Course.objects.get_courses(year, semester_type, slug). \
-                    distinct()
-
-            # Init color map
-            for c in courses:
-                color_map[c.id]
-
-            deadlines = Deadline.objects.filter(
-                    subscription__student__slug__in=slugs,
-                    subscription__course__in=courses,
-                ).select_related(
-                    'subscription__course__id'
-                ).exclude(subscription__student__slug=slug)
-
-            return shortcuts.render(request, 'select_deadlines.html', {
-                    'color_map': color_map,
-                    'deadlines': deadlines,
-                    'semester': Semester(year=year, type=semester_type),
-                    'slug': slug,
-                })
-
-        elif 'deadline_id' in request.POST:
-            deadline_ids = request.POST.getlist('deadline_id')
-            deadlines = Deadline.objects.filter(
-                    id__in=deadline_ids,
-                    subscription__course__semester__year__exact=year,
-                    subscription__course__semester__type__exact=semester_type,
-                )
-
-            for d in deadlines:
-                subscription = Subscription.objects.get_subscriptions(year, semester_type,
-                    slug).get(course=d.subscription.course)
-
-                Deadline.objects.get_or_create(
-                        subscription=subscription,
-                        date=d.date,
-                        time=d.time,
-                        task=d.task
-                )
-
-    return shortcuts.redirect(
-        'schedule-advanced', year, Semester.localize(semester_type), slug)
 
 
 def select_course(request, year, semester_type, slug, add=False):

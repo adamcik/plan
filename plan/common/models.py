@@ -9,8 +9,8 @@ from django.utils import dates
 from django.utils import translation
 from django.contrib.auth.models import User
 
-from plan.common.managers import LectureManager, DeadlineManager, \
-        ExamManager, CourseManager, SubscriptionManager, SemesterManager
+from plan.common.managers import (LectureManager, ExamManager, CourseManager,
+                                  SubscriptionManager, SemesterManager)
 
 # To allow for overriding of the codes idea of now() for tests
 now = datetime.datetime.now
@@ -156,7 +156,6 @@ class Course(models.Model):
 
         slug_count = int(Student.objects.filter(subscription__course__semester=semester).distinct().count())
         subscription_count = int(Subscription.objects.filter(course__semester=semester).count())
-        deadline_count = int(Deadline.objects.filter(subscription__course__semester=semester).count())
         course_count = int(Course.objects.filter(subscription__course__semester=semester).values('name').distinct().count())
 
         cursor = connection.cursor()
@@ -172,7 +171,6 @@ class Course(models.Model):
             'slug_count': slug_count,
             'course_count': course_count,
             'subscription_count': subscription_count,
-            'deadline_count': deadline_count,
             'stats': cursor.fetchall(),
             'limit': limit,
         }
@@ -431,52 +429,10 @@ class Lecture(models.Model):
         return tmp
 
 
+# TODO(adamcik): This has been deprecated, leaving the data around for now.
 class Deadline(models.Model):
     subscription = models.ForeignKey('Subscription')
-
     task = models.CharField(_('Task'), max_length=255)
     date = models.DateField(_('Due date'))
     time = models.TimeField(_('Time'), null=True, blank=True)
-
     done = models.DateTimeField(_('Done'), null=True, blank=True)
-
-    objects = DeadlineManager()
-
-    class Meta:
-        verbose_name = _('Deadline')
-        verbose_name_plural = _('Deadlines')
-
-    def __unicode__(self):
-        if self.time:
-            return u'%s %s- %s %s' % (self.subscription, self.subscription.student.slug,
-                                     self.date, self.time)
-        else:
-            return u'%s %s- %s' % (self.subscription, self.subscription.student.slug, self.date)
-
-    @property
-    def datetime(self):
-        if self.time:
-            return datetime.datetime.combine(self.date, self.time)
-        else:
-            return datetime.datetime.combine(self.date, datetime.time())
-
-    @property
-    def seconds(self):
-        td = self.datetime - now()
-
-        return td.days * 3600 * 24 + td.seconds
-
-    @property
-    def expired(self):
-        if self.time:
-            return datetime.datetime.combine(self.date, self.time) < now()
-        else:
-            return self.date <= now().date()
-
-    @property
-    def slug(self):
-        return self.subscription.student.slug
-
-    @property
-    def course(self):
-        return self.subscription.course

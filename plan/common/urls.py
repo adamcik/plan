@@ -20,11 +20,6 @@ urlpatterns = patterns('plan.common.views',
     url(r'^{year}/{semester}/{slug}/groups/$', 'select_groups', name='change-groups'),
     url(r'^{year}/{semester}/{slug}/filter/$', 'select_lectures', name='change-lectures'),
 
-    url(r'^{year}/{semester}/{slug}/deadlines/$', 'new_deadline', name='new-deadline'),
-    url(r'^{year}/{semester}/{slug}/deadlines/copy/$', 'copy_deadlines', name='copy-deadlines'),
-
-    url(r'^{year}/{semester}/{slug}/deadlines/toggle/$', 'toggle_deadlines', name='toggle-deadlines'),
-
     url(r'^[+]$', 'about', name='about'),
     url(r'^{slug}/?$', 'shortcut', name='shortcut'),
 )
