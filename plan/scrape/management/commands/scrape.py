@@ -64,8 +64,12 @@ class Command(management.LabelCommand):
             else:
                 transaction.rollback()
                 print 'Rolled back changes.'
+        except (SystemExit, KeyboardInterrupt):
+            transaction.rollback()
+            print 'Rolled back changes due to exit.'
         except:
             transaction.rollback()
+            print 'Rolled back changes due to unhandeled exception.'
             raise
 
     def load_semester(self, options):
