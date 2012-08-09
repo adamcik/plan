@@ -239,10 +239,30 @@ class LectureScraper(Scraper):
         lectures = model.objects.filter(**kwargs).order_by('id')
         lectures = list(lectures.exclude(pk__in=pks))
 
-        for candidate in lectures:
-            if groups == set(candidate.groups.values_list('pk', flat=True)):
-                pks.append(candidate.pk)
-                return candidate, False
+        # Try way to hard to find what is likely the same lecture so we can
+        # update instead of replacing. This is needed to have some what stable
+        # imports and not step on our own feet flip flopping lectures back and
+        # forth.
+        candidates = {}
+        for l in lectures:
+            candidates[l] = 0
+
+            if groups == set(l.groups.values_list('pk', flat=True)):
+                candidates[l] = 3
+
+            for field in ('rooms', 'lecturers'):
+                if set(defaults[field]) == set(getattr(l, field).all()):
+                    candidates[l] += 1
+
+            weeks = l.week_set.values_list('number', flat=True)
+            if set(defaults['weeks']) == set(weeks):
+                candidates[l] += 2
+
+        if candidates:
+            obj, score = sorted(candidates.items(), key=lambda i: -i[1])[0]
+            if score > 0:
+                pks.append(obj.pk)
+                return obj, False
 
         obj = model.objects.create(**kwargs)
         self.update(obj, defaults)
