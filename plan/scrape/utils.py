@@ -42,12 +42,22 @@ def prompt(message):
 
 
 def compare(old, new):
-    old_is_string = isinstance(old, basestring)
-    new_is_string = isinstance(new, basestring)
+    if isinstance(old, basestring) and isinstance(new, basestring):
+        if new.strip() == old.strip():
+            return '<whitespace>'
 
-    if (new_is_string and old_is_string and new.strip() == old.strip()):
-        return '<whitespace>'
-    return '[%s] -> [%s]' % (old, new)
+    if isinstance(old, set) and isinstance(new, set):
+        items = []
+        for i in sorted(old | new):
+            if i in old and i in new:
+                items.append('%s' % i)
+            elif i in new:
+                items.append('+%s' % i)
+            else:
+                items.append('+%s' % i)
+        return ', '.join(items)
+
+    return '%s -> %s' % (old, new)
 
 
 def clean_string(raw_text):
