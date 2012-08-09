@@ -2,7 +2,10 @@
 
 import logging
 
-from plan.common.models import Course, Exam, ExamType, Lecture, Semester
+from django import db
+
+from plan.common.models import (Course, Exam, ExamType, Lecture, LectureType,
+                                Lecturer, Group, Room, Semester, Week)
 from plan.scrape import utils
 
 
@@ -10,7 +13,6 @@ class Scraper(object):
     model = None
     fields = tuple()
     default_fields = tuple()
-    create_semester = False
 
     def __init__(self, semester):
         self.semester = semester
@@ -49,30 +51,34 @@ class Scraper(object):
         """
         pks = []
         for data in self. scrape():
-            self.log_scraped(data)
+            try:
+                self.log_scraped(data)
 
-            data = self.prepare_data(data)
-            if not data:
-                continue
-            self.log_processed(data)
+                data = self.prepare_data(data)
+                if not data:
+                    continue
+                self.log_processed(data)
 
-            kwargs = self.prepare_save(data, self.fields, self.default_fields)
-            if not kwargs:
-                continue
+                kwargs = self.prepare_save(
+                    data, self.fields, self.default_fields)
+                if not kwargs:
+                    continue
 
-            obj, created = self.save(kwargs, self.model, pks)
-            self.log_persisted(obj)
+                obj, created = self.save(kwargs, self.model, pks)
+                self.log_persisted(obj)
 
-            if created:
-                self.log_created(obj)
-                continue
+                if created:
+                    self.log_created(obj)
+                    continue
 
-            changes = self.update(obj, kwargs['defaults'])
-            if changes:
-                self.log_updated(obj, changes)
-                continue
+                changes = self.update(obj, kwargs['defaults'])
+                if changes:
+                    self.log_updated(obj, changes)
+                    continue
 
-            self.log_unaltered(obj)
+                self.log_unaltered(obj)
+            finally:
+                db.reset_queries()
 
         # Note: we don't delete all objects through this query.
         # defult prepare_delete() returns qs.none() to be on the safe side.
@@ -183,7 +189,6 @@ class CourseScraper(Scraper):
     model = Course
     fields = ('code', 'version', 'semester')
     default_fields = ('name', 'url', 'points')
-    create_semester = True
 
     def prepare_data(self, data):
         data['semester'] = self.semester
