@@ -76,7 +76,7 @@ class Lectures(base.LectureScraper):
 
             for activity in result['activity']:
                 for schedule in activity['activitySchedules']:
-                    yield {'course': course.code,
+                    yield {'course': course,
                            'type': activity['activityDescription'],
                            'day':  schedule['dayNumber'],
                            'start': utils.parse_time(schedule['start']),
