@@ -7,10 +7,13 @@ import lxml.html
 import re
 import urllib
 
-from plan.common.models import Semester
+from plan.common.models import Course
 from plan.scrape import base
 from plan.scrape import fetch
 from plan.scrape import ntnu
+from plan.scrape import utils
+
+LETTERS = u'ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ'
 
 
 # TODO(adamcik): consider using http://www.ntnu.no/web/studier/emner
@@ -23,9 +26,9 @@ class Courses(base.CourseScraper):
         url = 'http://www.ntnu.no/studieinformasjon/timeplan/%s/' % prefix
         code_re = re.compile('emnekode=([^&]+)', re.I|re.L)
 
-        for letter in u'ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ':
-            root = fetch.html(url, verbose=True,
-                              query={'bokst': letter.encode('latin1')})
+        for letter in LETTERS:
+            root = fetch.html(
+                url, verbose=True, query={'bokst': letter.encode('latin1')})
             if root is None:
                 continue
 
@@ -55,3 +58,55 @@ class Courses(base.CourseScraper):
         super(Courses, self).log_finished()
         logging.warning('This scraper only knows about courses on timetable')
         logging.warning('website, not deleting any unknown courses.')
+
+
+class Lectures(base.LectureScraper):
+    def scrape(self):
+        prefix = ntnu.prefix(self.semester)
+        url = 'http://www.ntnu.no/studieinformasjon/timeplan/%s/' % prefix
+
+        for course in Course.objects.filter(semester=self.semester).order_by('code'):
+            code = '%s-%s' % (course.code, course.version)
+            root = fetch.html(url, query={'emnekode': code.encode('latin1')})
+            if root is None:
+                continue
+
+            for h1 in root.cssselect(u'.hovedramme h1'):
+                if course.code in h1.text_content():
+                    table = root.cssselect('.hovedramme table')[1];
+                    break
+            else:
+                logging.warning("Couldn't load any info for %s", course.code)
+                continue
+
+            for tr in table.cssselect('tr')[1:-1]:
+                data = {}
+
+                for i, td in enumerate(tr.cssselect('td')):
+                    if i == 0:
+                        if td.attrib.get('colspan', 1) == '4':
+                            data['type'] = td.text_content().strip()
+                        else:
+                            time = td.cssselect('b')[0].text_content().strip()
+                            raw_day, period = time.split(' ', 1)
+                            raw_start, raw_end = period.split('-')
+
+                            data['day'] = utils.parse_day_of_week(raw_day)
+                            data['start'] = utils.parse_time(raw_start)
+                            data['end'] = utils.parse_time(raw_end)
+
+                            match = re.match('.*Uke: (.+)', td.text_content())
+                            data['weeks'] = utils.parse_weeks(match.group(1))
+                    elif i == 1:
+                        data['rooms'] = [a.text_content() for a in td.cssselect('a')]
+                    elif i == 2:
+                        data['lecturers'] = [td.text] + [n.tail for n in td]
+                    elif i == 3:
+                        data['groups'] = [g.text_content() for g in td.cssselect('span')]
+
+                for field in ('rooms', 'lecturers', 'groups'):
+                    if field in data:
+                        data[field] = utils.clean_list(data[field], utils.clean_string)
+
+                if data:
+                    yield data
