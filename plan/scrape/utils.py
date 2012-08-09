@@ -48,13 +48,13 @@ def compare(old, new):
 
     if isinstance(old, set) and isinstance(new, set):
         items = []
-        for i in sorted(old | new):
+        for i in sorted(old | new, key=unicode):
             if i in old and i in new:
                 items.append('%s' % i)
             elif i in new:
                 items.append('+%s' % i)
             else:
-                items.append('+%s' % i)
+                items.append('-%s' % i)
         return ', '.join(items)
 
     return '%s -> %s' % (old, new)
