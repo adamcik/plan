@@ -305,8 +305,8 @@ class LectureScraper(Scraper):
     def lecturer(self, name):
         return Lecturer.objects.get_or_create(name=name)[0]
 
-    def group(self, name):
-        return Group.objects.get_or_create(name=name)[0]
+    def group(self, code):
+        return Group.objects.get_or_create(code=code)[0]
 
 
 class ExamScraper(Scraper):

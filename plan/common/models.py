@@ -64,7 +64,7 @@ class Subscription(models.Model):
             ).extra(select={
                 'subscription_id': 'common_subscription.id',
                 'group_id': 'common_group.id',
-            }).values_list('subscription_id', 'group_id').distinct().order_by('name')
+            }).values_list('subscription_id', 'group_id').distinct().order_by('code')
 
         for subscription, group in group_list:
             if subscription not in tmp:
@@ -75,6 +75,7 @@ class Subscription(models.Model):
 
 
 class LectureType(models.Model):
+    code = models.CharField(_('Code'), max_length=20, null=True, unique=True)
     name = models.CharField(_('Name'), max_length=100, unique=True)
     optional = models.BooleanField(_('Optional'))
 
@@ -87,6 +88,7 @@ class LectureType(models.Model):
 
 
 class Room(models.Model):
+    code = models.CharField(_('Code'), max_length=20, null=True, unique=True)
     name = models.CharField(_('Name'), max_length=100, unique=True)
     url = models.URLField(_('URL'), verify_exists=False, blank=True, default='')
 
@@ -101,10 +103,11 @@ class Room(models.Model):
 class Group(models.Model):
     DEFAULT = 'Other'
 
-    name = models.CharField(_('Name'), max_length=100, unique=True)
+    code = models.CharField(_('Code'), max_length=20, unique=True, null=True)
+    name = models.CharField(_('Name'), max_length=100, null=True)
 
     def __unicode__(self):
-        return self.name
+        return self.code
 
     class Meta:
         verbose_name = _('Group')
@@ -186,12 +189,12 @@ class Course(models.Model):
             ).extra(select={
                 'course_id': 'common_lecture.course_id',
                 'group_id': 'common_group.id',
-            }).values_list('course_id', 'group_id', 'name').distinct().order_by('name')
+            }).values_list('course_id', 'group_id', 'code').distinct().order_by('code')
 
-        for course, group, name in group_list:
+        for course, group, code in group_list:
             if course not in tmp:
                 tmp[course] = []
-            tmp[course].append((group, name))
+            tmp[course].append((group, code))
 
         return tmp
 
