@@ -11,10 +11,11 @@ from plan.scrape import utils
 
 class Scraper(object):
     fields = tuple()
-    default_fields = tuple()
+    extra_fields = tuple()
 
     def __init__(self, semester):
         self.semester = semester
+        self.seen = []
         self.stats = {'scraped': 0,   # items we have scraped
                       'processed': 0, # items that made it through prepare_data()
                       'persisted': 0, # items that are in db
@@ -60,7 +61,6 @@ class Scraper(object):
            This method can be overriden to implement custom scrape logic that
            does not match this pattern.
         """
-        pks = []
         for data in self. scrape():
             try:
                 self.log_scraped(data)
@@ -70,12 +70,11 @@ class Scraper(object):
                     continue
                 self.log_processed(data)
 
-                kwargs = self.prepare_save(
-                    data, self.fields, self.default_fields)
+                kwargs = self.prepare_save(data)
                 if not kwargs:
                     continue
 
-                obj, created = self.save(kwargs, pks)
+                obj, created = self.save(kwargs)
                 self.log_persisted(obj)
 
                 if created:
@@ -93,7 +92,7 @@ class Scraper(object):
 
         # Note: we don't delete all objects through this query.
         # defult prepare_delete() returns qs.none() to be on the safe side.
-        qs = self.prepare_delete(pks)
+        qs = self.prepare_delete()
         self.log_deleted(qs)
 
         self.log_finished()
@@ -106,26 +105,25 @@ class Scraper(object):
         """
         return data
 
-    def prepare_save(self, data, fields, default_fields):
+    def prepare_save(self, data):
         """Convert cleaned data into arguments for get_or_create()."""
         kwargs = {'defaults': {}}
-        for field in fields:
+        for field in self.fields:
             kwargs[field] = data.get(field, None)
-        for field in default_fields:
+        for field in self.extra_fields:
             if field in data:
                 kwargs['defaults'][field] = data[field]
         return kwargs
 
-    def save(self, kwargs, pks):
+    def save(self, kwargs):
         """Save prepared arguments using get_or_create().
 
            This method keeps track of known PKs and ignores these objects when
            creating new ones. Which prevents some cases of stepping on our own
            toes during updates.
         """
-        qs = self.queryset().exclude(pk__in=pks)
+        qs = self.queryset().exclude(pk__in=self.seen)
         obj, created = qs.get_or_create(**kwargs)
-        pks.append(obj.pk)
         return obj, created
 
     def update(self, obj, defaults):
@@ -135,7 +133,7 @@ class Scraper(object):
         """
         changes = {}
 
-        for field, value in defaults.items():
+        for field, value in extras.items():
             old_value = getattr(obj, field)
             if old_value != value:
                 setattr(obj, field, value)
@@ -147,13 +145,13 @@ class Scraper(object):
 
         return changes
 
-    def prepare_delete(self, pks):
+    def prepare_delete(self):
         """Filter a query set done to objects that should be deleted.
 
            Default is to delete all items within the current scrapers queryset
            limitation that we have not updated or created.
         """
-        return self.queryset().exclude(pk__in=pks)
+        return self.queryset().exclude(pk__in=self.seen)
 
     def display(self, obj):
         """Helper that defines how objects are stringified for display."""
@@ -166,6 +164,7 @@ class Scraper(object):
         self.stats['processed'] += 1
 
     def log_persisted(self, obj):
+        self.seen.append(obj.pk)
         self.stats['persisted'] += 1
 
     def log_created(self, obj):
@@ -193,7 +192,7 @@ class Scraper(object):
 # by mistake
 class CourseScraper(Scraper):
     fields = ('code', 'version', 'semester')
-    default_fields = ('name', 'url', 'points')
+    extra_fields = ('name', 'url', 'points')
 
     def queryset(self):
         qs = Course.objects.filter(semester=self.semester)
@@ -214,7 +213,7 @@ class CourseScraper(Scraper):
 # TODO(adamcik): remove noop that has been added.
 class LectureScraper(Scraper):
     fields = ('course', 'day', 'start', 'end', 'type')
-    default_fields = ('rooms', 'lecturers', 'groups', 'weeks')
+    extra_fields = ('rooms', 'lecturers', 'groups', 'weeks')
 
     def queryset(self):
         qs = Lecture.objects.filter(course__semester=self.semester)
@@ -236,7 +235,7 @@ class LectureScraper(Scraper):
 
         return data
 
-    def save(self, kwargs, pks):
+    def save(self, kwargs):
         kwargs = kwargs.copy()
         defaults = kwargs.pop('defaults')
 
@@ -244,7 +243,7 @@ class LectureScraper(Scraper):
         kwargs['type'] = self.lecture_type(kwargs['type'])
 
         lectures = self.queryset().filter(**kwargs).order_by('id')
-        lectures = lectures.exclude(pk__in=pks)
+        lectures = lectures.exclude(pk__in=self.seen)
 
         # Try way to hard to find what is likely the same lecture so we can
         # update instead of replacing. This is needed to have some what stable
@@ -268,12 +267,10 @@ class LectureScraper(Scraper):
         if candidates:
             obj, score = sorted(candidates.items(), key=lambda i: -i[1])[0]
             if score > 0:
-                pks.append(obj.pk)
                 return obj, False
 
         obj = lectures.create(**kwargs)
         self.update(obj, defaults)
-        pks.append(obj.id)
         return obj, True
 
     def update(self, obj, defaults):
