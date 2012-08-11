@@ -3,6 +3,7 @@
 import logging
 
 from django import db
+from django.utils import datastructures
 
 from plan.common.models import (Course, Exam, ExamType, Lecture, LectureType,
                                 Lecturer, Group, Room, Semester, Week)
@@ -16,13 +17,17 @@ class Scraper(object):
     def __init__(self, semester):
         self.semester = semester
         self.seen = []
-        self.stats = {'scraped': 0,   # items we have scraped
-                      'processed': 0, # items that made it through prepare_data()
-                      'persisted': 0, # items that are in db
-                      'created': 0,   # items that have been created
-                      'updated': 0,   # items we have updated
-                      'unaltered': 0, # items we found but did not alter
-                      'deleted': 0}   # items we plan to delete
+        self.stats = datastructures.SortedDict([
+            ('initial',  0),  # items initialy in db
+            ('scraped',  0),  # items we have scraped
+            ('processed', 0), # items that made it through prepare_data()
+            ('persisted', 0), # items that are in db
+            ('created', 0),   # items that have been created
+            ('updated', 0),   # items we have updated
+            ('unaltered', 0), # items we found but did not alter
+            ('deleted', 0),   # items we plan to delete
+            ('final', 0),     # items left in db after scrape+delete
+        ])
 
     def scrape(self, semester):
         """Gets data from external source and yields results."""
@@ -61,6 +66,8 @@ class Scraper(object):
            This method can be overriden to implement custom scrape logic that
            does not match this pattern.
         """
+        self.log_initial()
+
         for data in self. scrape():
             try:
                 self.log_scraped(data)
@@ -95,7 +102,7 @@ class Scraper(object):
         qs = self.prepare_delete()
         self.log_deleted(qs)
 
-        self.log_finished()
+        self.log_stats()
         return qs
 
     def prepare_data(self, data):
@@ -133,7 +140,7 @@ class Scraper(object):
         """
         changes = {}
 
-        for field, value in extras.items():
+        for field, value in defaults.items():
             old_value = getattr(obj, field)
             if old_value != value:
                 setattr(obj, field, value)
@@ -157,6 +164,9 @@ class Scraper(object):
         """Helper that defines how objects are stringified for display."""
         return unicode(obj)
 
+    def log_initial(self):
+        self.stats['initial'] = self.queryset().count()
+
     def log_scraped(self, data):
         self.stats['scraped'] += 1
 
@@ -164,8 +174,8 @@ class Scraper(object):
         self.stats['processed'] += 1
 
     def log_persisted(self, obj):
-        self.seen.append(obj.pk)
         self.stats['persisted'] += 1
+        self.seen.append(obj.pk)
 
     def log_created(self, obj):
         self.stats['created'] += 1
@@ -183,9 +193,13 @@ class Scraper(object):
     def log_deleted(self, qs):
         self.stats['deleted'] = qs.count()
 
-    def log_finished(self):
-        logging.info(('Created: {created} Updated: {updated} Unaltered: '
-                      '{unaltered} Deleted: {deleted}').format(**self.stats))
+    def log_stats(self):
+        self.stats['final'] = self.queryset().count() - self.stats['deleted']
+
+        values = []
+        for key, value in self.stats.items():
+            values.append('%s: %s' % (key.title(), value))
+        logging.info(', '.join(values))
 
 
 # TODO(adamcik): add constraint for code+semester to prevent multiple versions
