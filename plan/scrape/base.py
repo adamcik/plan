@@ -10,7 +10,6 @@ from plan.scrape import utils
 
 
 class Scraper(object):
-    model = None
     fields = tuple()
     default_fields = tuple()
 
@@ -23,6 +22,18 @@ class Scraper(object):
                       'updated': 0,   # items we have updated
                       'unaltered': 0, # items we found but did not alter
                       'deleted': 0}   # items we plan to delete
+
+    def scrape(self, semester):
+        """Gets data from external source and yields results."""
+        raise NotImplementedError
+
+    def queryset(self):
+        """Base queryset to use in all scraper operations.
+
+           Needs to limit results to the righ semester and can optionaly order
+           the results for more logical display when listing items.
+        """
+        raise NotImplementedError
 
     @property
     def needs_commit(self):
@@ -64,7 +75,7 @@ class Scraper(object):
                 if not kwargs:
                     continue
 
-                obj, created = self.save(kwargs, self.model, pks)
+                obj, created = self.save(kwargs, pks)
                 self.log_persisted(obj)
 
                 if created:
@@ -82,15 +93,11 @@ class Scraper(object):
 
         # Note: we don't delete all objects through this query.
         # defult prepare_delete() returns qs.none() to be on the safe side.
-        qs = self.prepare_delete(self.model.objects.all(), pks)
+        qs = self.prepare_delete(pks)
         self.log_deleted(qs)
 
         self.log_finished()
         return qs
-
-    def scrape(self, semester):
-        """Gets data from external source and yields results."""
-        raise NotImplementedError
 
     def prepare_data(self, data):
         """Clean and/or validate data from scrape method.
@@ -109,14 +116,14 @@ class Scraper(object):
                 kwargs['defaults'][field] = data[field]
         return kwargs
 
-    def save(self, kwargs, model, pks):
+    def save(self, kwargs, pks):
         """Save prepared arguments using get_or_create().
 
            This method keeps track of known PKs and ignores these objects when
            creating new ones. Which prevents some cases of stepping on our own
            toes during updates.
         """
-        qs = model.objects.exclude(pk__in=pks)
+        qs = self.queryset().exclude(pk__in=pks)
         obj, created = qs.get_or_create(**kwargs)
         pks.append(obj.pk)
         return obj, created
@@ -140,18 +147,17 @@ class Scraper(object):
 
         return changes
 
-    def prepare_delete(self, qs, pks):
+    def prepare_delete(self, pks):
         """Filter a query set done to objects that should be deleted.
 
-           Default is to return `qs.none()` for safety. Actual use should
-           filter to only items for the current semester and probably exclude
-           items with a PK in `pks`.
+           Default is to delete all items within the current scrapers queryset
+           limitation that we have not updated or created.
         """
-        return qs.none()
+        return self.queryset().exclude(pk__in=pks)
 
     def display(self, obj):
         """Helper that defines how objects are stringified for display."""
-        return str(obj)
+        return unicode(obj)
 
     def log_scraped(self, data):
         self.stats['scraped'] += 1
@@ -186,9 +192,12 @@ class Scraper(object):
 # TODO(adamcik): add constraint for code+semester to prevent multiple versions
 # by mistake
 class CourseScraper(Scraper):
-    model = Course
     fields = ('code', 'version', 'semester')
     default_fields = ('name', 'url', 'points')
+
+    def queryset(self):
+        qs = Course.objects.filter(semester=self.semester)
+        return qs.order_by('code', 'version')
 
     def prepare_data(self, data):
         data['semester'] = self.semester
@@ -198,20 +207,18 @@ class CourseScraper(Scraper):
             data['points'] = utils.clean_decimal(data['points'])
         return data
 
-    def prepare_delete(self, qs, pks):
-        qs = qs.filter(semester=self.semester)
-        qs = qs.exclude(pk__in=pks)
-        return qs.order_by('code', 'version')
-
     def display(self, obj):
         return obj.code
 
 
 # TODO(adamcik): remove noop that has been added.
 class LectureScraper(Scraper):
-    model = Lecture
     fields = ('course', 'day', 'start', 'end', 'type')
     default_fields = ('rooms', 'lecturers', 'groups', 'weeks')
+
+    def queryset(self):
+        qs = Lecture.objects.filter(course__semester=self.semester)
+        return qs.order_by('course__code', 'day', 'start')
 
     def prepare_data(self, data):
         if not data['course'] or not data['start'] or not data['end']:
@@ -229,15 +236,15 @@ class LectureScraper(Scraper):
 
         return data
 
-    def save(self, kwargs, model, pks):
+    def save(self, kwargs, pks):
         kwargs = kwargs.copy()
         defaults = kwargs.pop('defaults')
 
         groups = set(g.pk for g in defaults['groups'])
         kwargs['type'] = self.lecture_type(kwargs['type'])
 
-        lectures = model.objects.filter(**kwargs).order_by('id')
-        lectures = list(lectures.exclude(pk__in=pks))
+        lectures = self.queryset().filter(**kwargs).order_by('id')
+        lectures = lectures.exclude(pk__in=pks)
 
         # Try way to hard to find what is likely the same lecture so we can
         # update instead of replacing. This is needed to have some what stable
@@ -264,7 +271,7 @@ class LectureScraper(Scraper):
                 pks.append(obj.pk)
                 return obj, False
 
-        obj = model.objects.create(**kwargs)
+        obj = lectures.create(**kwargs)
         self.update(obj, defaults)
         pks.append(obj.id)
         return obj, True
@@ -291,11 +298,6 @@ class LectureScraper(Scraper):
 
         return changes
 
-    def prepare_delete(self, qs, pks):
-        qs = qs.filter(course__semester=self.semester)
-        qs = qs.exclude(pk__in=pks)
-        return qs.order_by('course__code', 'day', 'start')
-
     def lecture_type(self, name):
         return LectureType.objects.get_or_create(name=name)[0]
 
@@ -310,9 +312,12 @@ class LectureScraper(Scraper):
 
 
 class ExamScraper(Scraper):
-    model = Exam
     fields = ('course', 'type', 'combination', 'exam_date')
     default_fields = ('duration', 'exam_time', 'handout_date', 'handout_time')
+
+    def queryset(self):
+        qs = Exam.objects.filter(course__semester=self.semester)
+        return qs.order_by('course__code', 'exam_date')
 
     def prepare_data(self, data):
         # TODO(adamcik): do date and time parsing here instead?
@@ -330,11 +335,6 @@ class ExamScraper(Scraper):
             logging.debug('Bad date %s for %s', date, course.code)
         else:
             return data
-
-    def prepare_delete(self, qs, pks):
-        qs = qs.filter(course__semester=self.semester)
-        qs = qs.exclude(pk__in=pks)
-        return qs.order_by('course__code', 'exam_date')
 
     def exam_type(self, code, name):
         exam_type, created = ExamType.objects.get_or_create(
