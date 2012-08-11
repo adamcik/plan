@@ -74,6 +74,7 @@ class Subscription(models.Model):
         return tmp
 
 
+# TODO(adamcik): get rid of optional since it can't be imported?
 class LectureType(models.Model):
     code = models.CharField(_('Code'), max_length=20, null=True, unique=True)
     name = models.CharField(_('Name'), max_length=100, unique=True)
@@ -100,6 +101,7 @@ class Room(models.Model):
         verbose_name_plural = _('Rooms')
 
 
+# TODO(adamcik): add url.
 class Group(models.Model):
     DEFAULT = 'Other'
 
@@ -114,6 +116,9 @@ class Group(models.Model):
         verbose_name_plural = _('Groups')
 
 
+# TODO(adamcik): link to groups with required field on intermediate. This
+# field would indicate if the course is mandidtory for a given group might also
+# be an idea to add the year/semester it is expected you take the course?
 class Course(models.Model):
     code = models.CharField(_('Code'), max_length=100)
     semester = models.ForeignKey('Semester')
@@ -336,7 +341,7 @@ class Exam(models.Model):
 class Week(models.Model):
     NUMBER_CHOICES = [(x, x) for x in range(1, 53)]
 
-    lecture = models.ForeignKey('Lecture')
+    lecture = models.ForeignKey('Lecture', related_name='weeks')
     number = models.PositiveIntegerField(_('Week number'), choices=NUMBER_CHOICES)
 
     class Meta:

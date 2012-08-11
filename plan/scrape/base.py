@@ -254,7 +254,7 @@ class LectureScraper(Scraper):
                 if set(defaults[field]) == set(getattr(l, field).all()):
                     candidates[l] += 1
 
-            weeks = l.week_set.values_list('number', flat=True)
+            weeks = l.weeks.values_list('number', flat=True)
             if set(defaults['weeks']) == set(weeks):
                 candidates[l] += 2
 
@@ -281,10 +281,10 @@ class LectureScraper(Scraper):
         if changes:
             obj.save()
 
-        current = set(obj.week_set.values_list('number', flat=True))
+        current = set(obj.weeks.values_list('number', flat=True))
         if current != set(defaults['weeks']):
             changes['weeks'] = current, set(defaults['weeks'])
-            obj.week_set.all().delete()
+            obj.weeks.all().delete()
 
             for week in defaults['weeks']:
                 Week.objects.create(lecture=obj, number=week)
