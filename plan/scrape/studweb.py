@@ -32,7 +32,7 @@ def get_element_value(node, tagname):
 def update_exams(year, semester, url=None):
     added, updated = [], []
     semester = Semester.objects.get(year=year, type=semester)
-    first_day = semester.get_first_day().date()
+    first_day = semester.get_first_day()
 
     if not url:
         url = get_url(semester)
@@ -67,7 +67,7 @@ def update_exams(year, semester, url=None):
         n.unlink()  # Free memory now that we are done with getting data.
 
         # Sanity check data we've found:
-        if not ntnu.valid_course_code(course_code)[0]:
+        if not ntnu.valid_course_code(course_code):
             logger.warning("Bad course code: %s", course_code)
             continue
 
