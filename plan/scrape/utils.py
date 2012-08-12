@@ -57,6 +57,11 @@ def compare(old, new):
                 items.append('-%s' % i)
         return ', '.join(items)
 
+    if old == '':
+        old = '<empty>'
+    if new == '':
+        new = '<empty>'
+
     return '%s -> %s' % (old, new)
 
 
