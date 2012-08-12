@@ -68,6 +68,30 @@ class Courses(base.CourseScraper):
         return self.queryset().none()
 
 
+class Rooms(base.RoomScraper):
+    def scrape(self):
+        rooms = {}
+        for room in self.queryset():
+            root = fetch.html('http://www.ntnu.no/studieinformasjon/rom/',
+                              query={'romnr': room.code})
+            if root is None:
+                continue
+
+            for link in root.cssselect('.hovedramme .hoyrebord a'):
+                if not link.attrib['href'].startswith('http://www.ntnu.no/kart/'):
+                    continue
+
+                root = fetch.html(link.attrib['href'])
+                if root is None:
+                    continue
+
+                for a in root.cssselect('.facilitylist .horizontallist a'):
+                    if a.text == room.name:
+                        yield {'code': room.code,
+                               'name': room.name,
+                               'url': a.attrib['href']}
+
+
 class Lectures(base.LectureScraper):
     def scrape(self):
         prefix = ntnu.prefix(self.semester)
@@ -158,5 +182,3 @@ def parse_row(tr, room_codes):
             data['groups'] = [g.text_content() for g in td.cssselect('span')]
 
     return data
-
-

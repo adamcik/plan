@@ -370,3 +370,16 @@ class ExamScraper(Scraper):
             exam_type.save()
 
         return exam_type
+
+
+class RoomScraper(Scraper):
+    fields = ('code', 'name')
+    extra_fields = ('url',)
+
+    def queryset(self):
+        return Room.objects.all()
+
+    def prepare_delete(self):
+        logging.warning('This scraper newer deletes any rooms as we would')
+        logging.warning('loose data we can\'t get back.')
+        return self.queryset().none()  # Never delete rooms.
