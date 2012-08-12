@@ -35,8 +35,10 @@ OPTIONS['verbosity'].default = '2'
 
 
 class Command(management.LabelCommand):
-    help = 'Load data from external sources using specified scraper.'
     option_list = OPTIONS.values()
+    help = ('Load data from external sources using specified scraper.\n\n'
+            'Available scrapers are:\n  %s' %
+            '\n  '.join(sorted(settings.TIMETABLE_SCRAPERS)))
 
     @transaction.commit_manually
     def handle_label(self, label, **options):
