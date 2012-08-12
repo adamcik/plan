@@ -2,6 +2,7 @@
 
 import datetime
 
+from django.conf import settings
 from django.db import models
 from django.db import connection
 from django.template import defaultfilters as filters
@@ -250,18 +251,13 @@ class Semester(models.Model):
     def localize(cls, semester_type):
         return dict(cls.SEMESTER_SLUG)[semester_type]
 
-    # TODO(adamcik): return datetime.date()?
     def get_first_day(self):
-        if self.type == self.SPRING:
-            return datetime.datetime(self.year, 1, 1)
-        else:
-            return datetime.datetime(self.year, 6, 30)
+        return datetime.date(
+            self.year, *settings.TIMETABLE_SEMESTERS[self.type][0])
 
     def get_last_day(self):
-        if self.type == self.SPRING:
-            return datetime.datetime(self.year, 7, 1)
-        else:
-            return datetime.datetime(self.year, 12, 31)
+        return datetime.date(
+            self.year, *settings.TIMETABLE_SEMESTERS[self.type][1])
 
     def next(self):
         if self.type == self.SPRING:
@@ -270,8 +266,8 @@ class Semester(models.Model):
 
     @property
     def is_current(self):
-        t = now()
-        return t >= self.get_first_day() and t <= self.get_last_day()
+        today = datetime.date.today()
+        return self.get_first_day() <= today <= self.get_last_day()
 
     # TODO(adamcik): this is scraper specific...
     @property

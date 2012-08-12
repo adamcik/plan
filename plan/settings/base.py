@@ -137,6 +137,12 @@ SOUTH_TESTS_MIGRATE = False  # Don't use south migrations during tests.
 
 # -- plan specific settings:
 
+# Tuples with start and end date of semesters:
+TIMETABLE_SEMESTERS = {
+    'spring': ((1,1), (6,30)),
+    'fall': ((7,1), (12,31)),
+}
+
 # Colors to use in timetables and throught the site.
 TIMETABLE_COLORS = [
     '#B3E2CD',

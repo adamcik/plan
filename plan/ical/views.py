@@ -64,7 +64,7 @@ def ical(request, year, semester_type, slug, ical_type=None):
     response['X-Robots-Tag'] = 'noindex, nofollow'
 
     # Aggressively cache old semester ical feeds.
-    if datetime.datetime.now() > semester.get_last_day():
+    if datetime.date.today() > semester.get_last_day():
         response['Expires'] = 'Thu, 31 Dec 2037 23:55:55 GMT'
 
     return response
