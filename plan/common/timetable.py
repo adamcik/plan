@@ -131,7 +131,8 @@ class Timetable:
                 day[-1]['last'] = True
         for day in self.table[-1]:
             for cell in day:
-                cell['bottom'] = True
+                # only bother with cells that will be shown.
+                cell['bottom'] = not cell.get('remove', False)
 
     def insert_times(self):
         for i, slot in enumerate(settings.TIMETABLE_SLOTS):
