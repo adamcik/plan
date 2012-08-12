@@ -367,8 +367,8 @@ class ExamScraper(Scraper):
 
     def prepare_data(self, data):
         # TODO(adamcik): do date and time parsing here instead?
-        start = self.semester.get_first_day().date()
-        end = self.semester.get_last_day().date()
+        start = self.semester.get_first_day()
+        end = self.semester.get_last_day()
         course = data['course']
         date = data['exam_date']
 
