@@ -37,9 +37,12 @@ def plain(url, query=None, verbose=False, cache=True):
 
 def html(*args, **kwargs):
     data = plain(*args, **kwargs)
+    root = None
     if data:
-        return lxml.html.fromstring(data)
-    return None
+        root = lxml.html.fromstring(data)
+    if root is not None:
+        root.make_links_absolute(args[0])
+    return root
 
 
 def json(*args, **kwargs):
