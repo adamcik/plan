@@ -16,6 +16,20 @@ from plan.scrape import utils
 LETTERS = u'ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ'
 
 
+def fetch_rooms():
+    result = fetch.html('http://www.ntnu.no/studieinformasjon/rom/')
+    if result is None:
+        return
+
+    rooms = {}
+    for option in result.cssselect('.hovedramme select[name="romnr"] option'):
+        code = utils.clean_string(option.attrib['value'])
+        name = utils.clean_string(option.text_content())
+
+        if code and name and 'ikkerom' not in name:
+            yield code, name
+
+
 # TODO(adamcik): consider using http://www.ntnu.no/web/studier/emner
 #   ?p_p_id=courselistportlet_WAR_courselistportlet_INSTANCE_emne
 #   &_courselistportlet_WAR_courselistportlet_INSTANCE_emne_year=2011
@@ -72,6 +86,10 @@ class Lectures(base.LectureScraper):
     def scrape(self):
         prefix = ntnu.prefix(self.semester)
         url = 'http://www.ntnu.no/studieinformasjon/timeplan/%s/' % prefix
+        room_codes = {}
+
+        for code, name in fetch_rooms():
+            room_codes.setdefault(name, []).append(code)
 
         for course in Course.objects.filter(semester=self.semester).order_by('code'):
             code = '%s-%s' % (course.code, course.version)
@@ -109,7 +127,17 @@ class Lectures(base.LectureScraper):
                     elif i == 1 and len(td.cssselect('a')) == 1:
                         a = td.cssselect('a')[0]
                         rooms = [a.text] + [e.tail for e in a]
-                        data['rooms'] = [(None, r) for r in rooms]
+
+                        data['rooms'] = []
+                        for name in utils.clean_list(rooms, utils.clean_string):
+                            if name not in room_codes:
+                                data['rooms'].append((None, name))
+                                continue
+
+                            if len(room_codes[name]) > 1:
+                                logging.warning('Multiple rooms with name %s, '
+                                                'simply using first code.', name)
+                            data['rooms'].append((room_codes[name][0], name))
                     elif i == 2:
                         data['lecturers'] = [td.text] + [e.tail for e in td]
                     elif i == 3:
@@ -122,12 +150,5 @@ class Lectures(base.LectureScraper):
 
 class Rooms(base.RoomScraper):
     def scrape(self):
-        result = fetch.html('http://www.ntnu.no/studieinformasjon/rom/')
-        if result is None:
-            return
-
-        for option in result.cssselect('.hovedramme select[name="romnr"] option'):
-            code, name = option.attrib['value'], option.text_content()
-
-            if code and name and 'ikkerom' not in name:
-                yield {'code': code, 'name': name}
+        for code, name in fetch_rooms():
+            yield {'code': code, 'name': name}
