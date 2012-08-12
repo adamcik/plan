@@ -43,63 +43,53 @@
 {% endblock %}
 
 {% block bd %}
-  {% if missing %}
-    <div id="help" class="large">
-      <p>{% trans "Sorry, no semesters have been loaded yet." %}</p>
+  <div class="yui-g">
+    <div class="yui-u first">
+      <h2>{% trans "Getting started" %}</h2>
+      <div id="help">
+        <form action="." method="post" id="f">
+          <p class="large">
+            {% blocktrans %}
+              Please enter a short name identifying your personal
+              timetable, ie. username, nickname etc. If the name
+              you select is in already taken, choose another
+              one.
+            {% endblocktrans %}
+          </p>
+          <p class="right">
+            {{ schedule_form.semester }}
+            {{ schedule_form.slug }}
+            <button type="submit"><span class="icon start">{% trans "Start" %}</span></button>
+          </p>
+        </form>
+      </div>
+      <p>
+        {% blocktrans %}
+          To retrieve your timetable simply enter the same identifier
+          you used last time.
+        {% endblocktrans %}
+      </p>
+      {% include "notice.html" %}
+      {% include "statistics.html" %}
     </div>
-  {% elif not current %}
-    <div id="help" class="large">
-      <p>{% trans "Sorry, this semester does not exist." %}</p>
-    </div>
-  {% else %}
-    <div class="yui-g">
-      <div class="yui-u first">
-        <h2>{% trans "Getting started" %}</h2>
-        <div id="help">
-          <form action="." method="post" id="f">
-            <p class="large">
-              {% blocktrans %}
-                Please enter a short name identifying your personal
-                timetable, ie. username, nickname etc. If the name
-                you select is in already taken, choose another
-                one.
-              {% endblocktrans %}
-            </p>
-            <p class="right">
-              {{ schedule_form.semester }}
-              {{ schedule_form.slug }}
-              <button type="submit"><span class="icon start">{% trans "Start" %}</span></button>
-            </p>
-          </form>
+    <div class="yui-u">
+      <h2>
+        {% blocktrans %}
+          Top {{ limit }} courses {{ current }}
+        {% endblocktrans %}
+      </h2>
+      {% if stats %}
+        <div id="stats">
+          {% for count,course_id,code,name in stats %}
+            <div title="{{ name }}" style="width: {% widthratio count stats.0.0 95 %}%" class="course-{{ course_id }}">
+              <span>{{ count }}</span>
+              {{ code }}
+            </div>
+          {% endfor %}
         </div>
-        <p>
-          {% blocktrans %}
-            To retrieve your timetable simply enter the same identifier
-            you used last time.
-          {% endblocktrans %}
-        </p>
-        {% include "notice.html" %}
-        {% include "statistics.html" %}
-      </div>
-      <div class="yui-u">
-        <h2>
-          {% blocktrans %}
-            Top {{ limit }} courses {{ current }}
-          {% endblocktrans %}
-        </h2>
-        {% if stats %}
-          <div id="stats">
-            {% for count,course_id,code,name in stats %}
-              <div title="{{ name }}" style="width: {% widthratio count stats.0.0 95 %}%" class="course-{{ course_id }}">
-                <span>{{ count }}</span>
-                {{ code }}
-              </div>
-            {% endfor %}
-          </div>
-        {% else %}
-          {% trans "No courses have been added to any schedules yet." %}
-        {% endif %}
-      </div>
+      {% else %}
+        {% trans "No courses have been added to any schedules yet." %}
+      {% endif %}
     </div>
-  {% endif %}
+  </div>
 {% endblock %}

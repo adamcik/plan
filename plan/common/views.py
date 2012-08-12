@@ -34,7 +34,7 @@ def frontpage(request):
     try:
         semester = Semester.objects.current()
     except Semester.DoesNotExist:
-        return shortcuts.render(request, 'start.html', {'missing': True})
+        raise http.Http404
     return shortcuts.redirect('semester', semester.year, semester.slug)
 
 
@@ -52,7 +52,7 @@ def getting_started(request, year, semester_type):
     try:
         semester = Semester.objects.get(year=year, type=semester_type)
     except Semester.DoesNotExist:
-        return shortcuts.render(request, 'start.html', {})
+        raise http.Http404
 
     # Redirect user to their timetable
     if request.method == 'POST':
