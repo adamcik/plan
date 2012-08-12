@@ -92,15 +92,16 @@ class LectureType(models.Model):
 
 class Room(models.Model):
     code = models.CharField(_('Code'), max_length=20, null=True, unique=True)
-    name = models.CharField(_('Name'), max_length=100, unique=True)
+    name = models.CharField(_('Name'), max_length=100)
     url = models.URLField(_('URL'), verify_exists=False, default='')
 
     def __unicode__(self):
-        return self.name
+        return u'%s (%s)' % (self.name, self.code)
 
     class Meta:
         verbose_name = _('Room')
         verbose_name_plural = _('Rooms')
+        unique_together = ('code', 'name')
 
 
 # TODO(adamcik): add url.
