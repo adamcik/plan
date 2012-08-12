@@ -13,6 +13,7 @@ from plan.scrape import utils
 class Scraper(object):
     fields = ()
     extra_fields = ()
+    commit_fields = ('created', 'updated', 'deleted')
 
     def __init__(self, semester):
         self.semester = semester
@@ -46,11 +47,13 @@ class Scraper(object):
         """Indicate if there are any changes that need to be saved.
 
            If you override run() or otherwise don't update stats you should
-           replace this with `needs_commit = True` on your scraper
+           set override this method. The other option is to add other fields
+           to consider to `commit_fields`.
         """
-        return (self.stats['created'] > 0 or
-                self.stats['updated'] > 0 or
-                self.stats['deleted'] > 0)
+        for field in self.commit_fields:
+            if self.stats.get(field, 0) > 0:
+                return True
+        return False
 
     def run(self):
         """Entry point for generic scrape managment command.
@@ -201,6 +204,11 @@ class Scraper(object):
             values.append('%s: %s' % (key.title(), value))
         logging.info(', '.join(values))
 
+    def log_extra(self, field, *args):
+        self.stats[field] = self.stats.get(field, 0) + 1
+        if args:
+            logging.info(*args)
+
 
 # TODO(adamcik): add constraint for code+semester to prevent multiple versions
 # by mistake
@@ -224,10 +232,10 @@ class CourseScraper(Scraper):
         return obj.code
 
 
-# TODO(adamcik): remove noop that has been added.
 class LectureScraper(Scraper):
     fields = ('course', 'day', 'start', 'end', 'type')
     extra_fields = ('rooms', 'lecturers', 'groups', 'weeks')
+    commit_fields = Scraper.commit_fields + ('rooms',)
 
     def queryset(self):
         qs = Lecture.objects.filter(course__semester=self.semester)
