@@ -40,8 +40,8 @@ class Subscription(models.Model):
     alias = models.CharField(_('Alias'), max_length=50, blank=True)
     added = models.DateTimeField(_('Added'), auto_now_add=True)
 
-    groups = models.ManyToManyField('Group', blank=True, null=True)
-    exclude = models.ManyToManyField('Lecture', blank=True, null=True,
+    groups = models.ManyToManyField('Group', null=True)
+    exclude = models.ManyToManyField('Lecture', null=True,
         related_name='excluded_from')
 
     objects = SubscriptionManager()
@@ -93,7 +93,7 @@ class LectureType(models.Model):
 class Room(models.Model):
     code = models.CharField(_('Code'), max_length=20, null=True, unique=True)
     name = models.CharField(_('Name'), max_length=100, unique=True)
-    url = models.URLField(_('URL'), verify_exists=False, blank=True, default='')
+    url = models.URLField(_('URL'), verify_exists=False, default='')
 
     def __unicode__(self):
         return self.name
@@ -109,6 +109,7 @@ class Group(models.Model):
 
     code = models.CharField(_('Code'), max_length=20, unique=True, null=True)
     name = models.CharField(_('Name'), max_length=100, null=True)
+    url = models.URLField(_('URL'), verify_exists=False, default='')
 
     def __unicode__(self):
         return self.code
@@ -125,12 +126,12 @@ class Course(models.Model):
     code = models.CharField(_('Code'), max_length=100)
     semester = models.ForeignKey('Semester')
 
-    name = models.TextField(_('Name'), blank=True)
-    version = models.CharField(_('Version'), max_length=20, blank=True, null=True)
+    name = models.TextField(_('Name'))
+    version = models.CharField(_('Version'), max_length=20, null=True)
 
-    url = models.URLField(_('URL'), verify_exists=False, blank=True)
-    syllabus = models.URLField(_('URL'), verify_exists=False, blank=True)
-    points = models.DecimalField(_('Points'), decimal_places=2, max_digits=5, null=True, blank=True)
+    url = models.URLField(_('URL'), verify_exists=False)
+    syllabus = models.URLField(_('URL'), verify_exists=False)
+    points = models.DecimalField(_('Points'), decimal_places=2, max_digits=5, null=True)
 
     objects = CourseManager()
 
@@ -298,7 +299,7 @@ class Semester(models.Model):
 
 class ExamType(models.Model):
     code = models.CharField(_('Code'), max_length=20, unique=True)
-    name = models.CharField(_('Name'), max_length=100, blank=True, null=True)
+    name = models.CharField(_('Name'), max_length=100, null=True)
 
     def __unicode__(self):
         if self.name:
@@ -312,17 +313,18 @@ class ExamType(models.Model):
 
 class Exam(models.Model):
     course = models.ForeignKey(Course)
-    type = models.ForeignKey(ExamType, blank=True, null=True)
-    combination = models.CharField(_('Combination'), max_length=50, blank=True, null=True)
+    type = models.ForeignKey(ExamType, null=True)
+    combination = models.CharField(_('Combination'), max_length=50, null=True)
 
-    exam_date = models.DateField(_('Exam date'), blank=True, null=True)
-    exam_time = models.TimeField(_('Exam time'), blank=True, null=True)
+    exam_date = models.DateField(_('Exam date'), null=True)
+    exam_time = models.TimeField(_('Exam time'), null=True)
 
-    handout_date = models.DateField(_('Handout date'), blank=True, null=True)
-    handout_time = models.TimeField(_('Handout time'), blank=True, null=True)
+    handout_date = models.DateField(_('Handout date'), null=True)
+    handout_time = models.TimeField(_('Handout time'), null=True)
 
-    duration = models.DecimalField(_('Duration'), blank=True, null=True,
-            max_digits=5, decimal_places=2, help_text=_('Duration in hours'))
+    duration = models.DecimalField(_('Duration'), null=True, max_digits=5,
+                                     decimal_places=2, help_text=_('Duration in hours'))
+    url = models.URLField(_('URL'), verify_exists=False, default='')
 
     objects = ExamManager()
 
@@ -371,10 +373,10 @@ class Lecture(models.Model):
     start = models.TimeField(_('Start time'))
     end = models.TimeField(_('End time'))
 
-    rooms = models.ManyToManyField(Room, blank=True, null=True)
-    type = models.ForeignKey(LectureType, blank=True, null=True)
-    groups = models.ManyToManyField(Group, blank=True, null=True)
-    lecturers = models.ManyToManyField(Lecturer, blank=True, null=True)
+    rooms = models.ManyToManyField(Room, null=True)
+    type = models.ForeignKey(LectureType, null=True)
+    groups = models.ManyToManyField(Group, null=True)
+    lecturers = models.ManyToManyField(Lecturer, null=True)
 
     objects = LectureManager()
 
@@ -438,5 +440,5 @@ class Deadline(models.Model):
     subscription = models.ForeignKey('Subscription')
     task = models.CharField(_('Task'), max_length=255)
     date = models.DateField(_('Due date'))
-    time = models.TimeField(_('Time'), null=True, blank=True)
-    done = models.DateTimeField(_('Done'), null=True, blank=True)
+    time = models.TimeField(_('Time'), null=True)
+    done = models.DateTimeField(_('Done'), null=True)
