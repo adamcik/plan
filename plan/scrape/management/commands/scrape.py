@@ -27,7 +27,9 @@ OPTIONS = dict((o.dest, o) for o in management.LabelCommand.option_list + (
                              help='term to scrape'),
         optparse.make_option('-c', '--create', action='store_true', dest='create',
                              help='create missing semester, default: false'),
-        optparse.make_option('-n', '--dry-run', action='store_true', dest='dry_run')
+        optparse.make_option('-n', '--dry-run', action='store_true', dest='dry_run'),
+        optparse.make_option('--pdb', action='store_true', dest='pdb',
+                             help='use pdb.pm() when we hit and exception'),
 ))
 OPTIONS['verbosity'].default = '2'
 
@@ -68,9 +70,17 @@ class Command(management.LabelCommand):
             transaction.rollback()
             print 'Rolled back changes due to exit.'
         except:
-            transaction.rollback()
-            print 'Rolled back changes due to unhandeled exception.'
-            raise
+            try:
+                if not options['pdb']:
+                    raise
+
+                import pdb, traceback
+                traceback.print_exc()
+                pdb.post_mortem()
+            finally:
+                # Ensure that we also rollback after pdb sessions.
+                transaction.rollback()
+                print 'Rolled back changes due to unhandeled exception.'
 
     def load_semester(self, options):
         semester = Semester.current()

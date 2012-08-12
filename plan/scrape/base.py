@@ -68,7 +68,7 @@ class Scraper(object):
         """
         self.log_initial()
 
-        for data in self. scrape():
+        for data in self.scrape():
             try:
                 self.log_scraped(data)
 
