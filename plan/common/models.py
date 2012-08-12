@@ -386,13 +386,12 @@ class Lecture(models.Model):
         verbose_name_plural = _('Lecture')
 
     def __unicode__(self):
-        return u'%4d %10s %s-%s %s on %3s' % (
-            self.id,
-            self.course.short_name,
+        return u'%s %s-%s on %s for %s' % (
+            self.type,
             filters.time(self.start),
             filters.time(self.end),
-            self.type,
-            self.get_day_display()[:3])
+            self.get_day_display()[:3],
+            self.course.code)
 
     @property
     def short_name(self):
