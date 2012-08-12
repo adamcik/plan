@@ -337,12 +337,18 @@ class LectureScraper(Scraper):
         return LectureType.objects.get_or_create(name=name)[0]
 
     def room(self, code, name):
-        if code:
-            try:
-                return Room.objects.get(code=code)
-            except Room.DoesNotExist:
-                pass
-        return Room.objects.get_or_create(name=name)[0]
+        # Get room by just name and code=None so we can try and upgrade.
+        rooms = Room.objects.filter(code=None, name=name)
+        if len(rooms) == 1:
+            r = rooms.get()
+            if code:
+                self.log_extra('rooms', 'Adding room code %s to %s', code, r.name)
+                r.code = code
+                r.save()
+            return r
+
+        # Fetch or create room with code as primary lookup
+        return Room.objects.get_or_create(code=code, defaults={'name': name})[0]
 
     def lecturer(self, name):
         return Lecturer.objects.get_or_create(name=name)[0]
