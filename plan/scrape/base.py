@@ -42,6 +42,10 @@ class Scraper(object):
         """
         raise NotImplementedError
 
+    def format(self, items):
+        """Format list of items."""
+        return utils.columnify(items)
+
     @property
     def needs_commit(self):
         """Indicate if there are any changes that need to be saved.
@@ -240,6 +244,9 @@ class LectureScraper(Scraper):
     def queryset(self):
         qs = Lecture.objects.filter(course__semester=self.semester)
         return qs.order_by('course__code', 'day', 'start')
+
+    def format(self, items):
+        return utils.columnify(items, 2)
 
     def prepare_data(self, data):
         if not data['course'] or not data['start'] or not data['end']:

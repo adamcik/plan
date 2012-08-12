@@ -53,15 +53,13 @@ class Command(management.LabelCommand):
             to_delete = scraper.run()
 
             if to_delete:
-                print 'Delete the following?'
-                print utils.columnify(to_delete)
-                print 'Going to delete %d items' % to_delete.count()
-
-                if utils.prompt('Delete?'):
-                    to_delete.delete()
+                print 'Deleted items:'
+                print scraper.format(to_delete)
+                to_delete.delete()
 
             if not scraper.needs_commit or options['dry_run']:
                 transaction.rollback()
+                print 'No changes, rolled back.'
             elif utils.prompt('Commit changes?'):
                 transaction.commit()
                 print 'Commited changes.'
