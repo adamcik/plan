@@ -116,3 +116,25 @@ class Exams(base.ExamScraper):
                        'handout_date': utils.parse_date(handout_date),
                        'type': self.exam_type(type_code, type_name),
                        'duration': duration}
+
+
+class Rooms(base.RoomScraper):
+    def scrape(self):
+        url = 'http://www.ime.ntnu.no/api/schedule/%%s/%s/%s' % (
+            TERM_MAPPING[self.semester.type].lower(), self.semester.year)
+        seen = set()
+
+        for course in Course.objects.filter(semester=self.semester).order_by('code'):
+            result = fetch.json(url % course.code.encode('utf-8'))
+            if not result:
+                continue
+
+            for activity in result['activity']:
+                for schedule in activity['activitySchedules']:
+                    for room in schedule.get('rooms', []):
+                        if room['lydiaCode'] in seen:
+                            continue
+
+                        seen.add(room['lydiaCode'])
+                        yield {'code': room['lydiaCode'],
+                               'name': room['location']}

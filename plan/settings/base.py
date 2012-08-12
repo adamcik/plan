@@ -186,7 +186,10 @@ TIMETABLE_SCRAPERS = {
     'lectures.api': 'plan.scrape.ntnu.api.Lectures',
     'lectures.db': 'plan.scrape.ntnu.db.Lectures',
     'lectures.web': 'plan.scrape.ntnu.web.Lectures',
-    #'rooms': 'plan.scrape.ntnu.web.Rooms',
+    'rooms': 'plan.scrape.ntnu.api.Rooms',
+    'rooms.api': 'plan.scrape.ntnu.api.Rooms',
+    'rooms.db': 'plan.scrape.ntnu.db.Rooms',
+    'rooms.web': 'plan.scrape.ntnu.web.Rooms',
     #'syllabus': 'plan.scrape.akademika.web.Syllabus',
 }
 

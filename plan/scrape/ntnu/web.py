@@ -118,3 +118,16 @@ class Lectures(base.LectureScraper):
                 if data:
                     data.update({'course': course, 'type': lecture_type})
                     yield data
+
+
+class Rooms(base.RoomScraper):
+    def scrape(self):
+        result = fetch.html('http://www.ntnu.no/studieinformasjon/rom/')
+        if result is None:
+            return
+
+        for option in result.cssselect('.hovedramme select[name="romnr"] option'):
+            code, name = option.attrib['value'], option.text_content()
+
+            if code and name and 'ikkerom' not in name:
+                yield {'code': code, 'name': name}
