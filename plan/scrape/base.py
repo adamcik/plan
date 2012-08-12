@@ -370,14 +370,3 @@ class ExamScraper(Scraper):
             exam_type.save()
 
         return exam_type
-
-
-class RoomScraper(Scraper):
-    fields = ('code',)
-    extra_fields = ('name',)
-
-    def queryset(self):
-        return Room.objects.order_by('name')
-
-    def prepare_delete(self):
-        return self.queryset().none()  # Never delete rooms.

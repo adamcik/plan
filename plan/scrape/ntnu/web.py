@@ -146,9 +146,3 @@ class Lectures(base.LectureScraper):
                 if data:
                     data.update({'course': course, 'type': lecture_type})
                     yield data
-
-
-class Rooms(base.RoomScraper):
-    def scrape(self):
-        for code, name in fetch_rooms():
-            yield {'code': code, 'name': name}

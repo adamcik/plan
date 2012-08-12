@@ -82,25 +82,3 @@ class Lectures(base.LectureScraper):
                                 utils.split(roomnames, '#')),
                    'lecturers': utils.split(lecturers, '#'),
                    'groups': groups.get(activity, set())}
-
-
-class Rooms(base.RoomScraper):
-    def scrape(self):
-        prefix = ntnu.prefix(self.semester)
-        cursor = connections['ntnu'].cursor()
-        seen = set()
-
-        cursor.execute(('SELECT romnavn, romnr FROM %s_timeplan '
-                        'ORDER BY romnavn') % prefix)
-
-        for names, codes in cursor.fetchall():
-            if not names or not codes:
-                continue
-
-            for name, code in zip(utils.split(names, '#'),
-                                  utils.split(codes, '#')):
-                if code in seen:
-                    continue
-
-                seen.add(code)
-                yield {'code': code, 'name': name}
