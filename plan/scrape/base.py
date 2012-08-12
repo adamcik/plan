@@ -11,8 +11,8 @@ from plan.scrape import utils
 
 
 class Scraper(object):
-    fields = tuple()
-    extra_fields = tuple()
+    fields = ()
+    extra_fields = ()
 
     def __init__(self, semester):
         self.semester = semester
@@ -239,8 +239,17 @@ class LectureScraper(Scraper):
         elif data['day'] not in dict(Lecture.DAYS):
             return
 
+        data['lecturers'] = utils.clean_list(data['lecturers'], utils.clean_string)
+        data['groups'] = utils.clean_list(data['groups'], utils.clean_string)
+
+        rooms, data['rooms'] = data['rooms'][:], []
+        for code, name in rooms:
+            code = utils.clean_string(code)
+            name = utils.clean_string(name)
+            if code or name:
+                data['rooms'].append(self.room(code, name))
+
         data['type'] = self.lecture_type(data['type'])
-        data['rooms'] = [self.room(r) for r in data['rooms']]
         data['lecturers'] = [self.lecturer(l) for l in data['lecturers']]
         data['groups'] = [self.group(g) for g in data['groups']]
 
@@ -312,7 +321,12 @@ class LectureScraper(Scraper):
     def lecture_type(self, name):
         return LectureType.objects.get_or_create(name=name)[0]
 
-    def room(self, name):
+    def room(self, code, name):
+        if code:
+            try:
+                return Room.objects.get(code=code)
+            except Room.DoesNotExist:
+                pass
         return Room.objects.get_or_create(name=name)[0]
 
     def lecturer(self, name):

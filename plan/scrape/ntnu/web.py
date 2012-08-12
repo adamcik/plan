@@ -108,15 +108,12 @@ class Lectures(base.LectureScraper):
                             data['weeks'] = utils.parse_weeks(match.group(1))
                     elif i == 1 and len(td.cssselect('a')) == 1:
                         a = td.cssselect('a')[0]
-                        data['rooms'] = [a.text] + [e.tail for e in a]
+                        rooms = [a.text] + [e.tail for e in a]
+                        data['rooms'] = [(None, r) for r in rooms]
                     elif i == 2:
                         data['lecturers'] = [td.text] + [e.tail for e in td]
                     elif i == 3:
                         data['groups'] = [g.text_content() for g in td.cssselect('span')]
-
-                for field in ('rooms', 'lecturers', 'groups'):
-                    if field in data:
-                        data[field] = utils.clean_list(data[field], utils.clean_string)
 
                 if data:
                     data.update({'course': course, 'type': lecture_type})

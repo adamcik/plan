@@ -82,7 +82,8 @@ class Lectures(base.LectureScraper):
                            'start': utils.parse_time(schedule['start']),
                            'end':  utils.parse_time(schedule['end']),
                            'weeks': utils.parse_weeks(schedule['weeks'], ','),
-                           'rooms': [r['location'] for r in schedule.get('rooms', [])],
+                           'rooms': [(r['lydiaCode'], r['location'])
+                                     for r in schedule.get('rooms', [])],
                            'lecturers': [s['name'] for s in activity.get('staff', [])],
                            'groups': activity.get('studyProgrammes', [])}
 

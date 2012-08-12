@@ -55,13 +55,13 @@ class Lectures(base.LectureScraper):
             groups.setdefault(activity, set()).add(group)
 
         cursor.execute(('SELECT emnekode, typenavn, dag, start, slutt, uke, '
-                        'romnavn, larer, aktkode FROM %s_timeplan ORDER BY '
+                        'romnr, romnavn, larer, aktkode FROM %s_timeplan ORDER BY '
                         'emnekode, dag, start, slutt, uke, romnavn, aktkode') %
                         prefix)
 
         for row in cursor.fetchall():
-            (raw_code, lecture_type, day, start, end,
-             weeks, rooms, lecturers, activity) = row
+            (raw_code, lecture_type, day, start, end, weeks,
+             roomcodes, roomnames, lecturers, activity) = row
 
             code, version = ntnu.parse_course(raw_code)
             if not code:
