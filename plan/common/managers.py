@@ -175,5 +175,6 @@ class SubscriptionManager(models.Manager):
 
 
 class SemesterManager(models.Manager):
+    # TODO(adamcik): this is really a latest method.
     def current(self):
         return self.get_query_set().order_by('-year', 'type')[0:1].get()
