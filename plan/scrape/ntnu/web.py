@@ -71,9 +71,9 @@ class Courses(base.CourseScraper):
 class Rooms(base.RoomScraper):
     def scrape(self):
         rooms = {}
-        for room in self.queryset():
+        for room in self.queryset().filter(code__isnull=False):
             root = fetch.html('http://www.ntnu.no/studieinformasjon/rom/',
-                              query={'romnr': room.code})
+                              query={'romnr': room.code}, verbose=True)
             if root is None:
                 continue
 
@@ -85,11 +85,26 @@ class Rooms(base.RoomScraper):
                 if root is None:
                     continue
 
-                for a in root.cssselect('.facilitylist .horizontallist a'):
-                    if a.text == room.name:
-                        yield {'code': room.code,
-                               'name': room.name,
-                               'url': a.attrib['href']}
+                data = {}
+                # Sort so that link with the right room name bubbles to the top.
+                for a in sorted(root.cssselect('.facilitylist .horizontallist a'),
+                                key=lambda a: (a.text != room.name, a.text)):
+                    code, name = fetch_room(a.attrib['href'])
+                    if code and room.code.endswith(code):
+                        data = {'code': room.code,
+                                'name': name,
+                                'url': a.attrib['href']}
+
+                    # Give up after first element that should be equal to room
+                    # name. Make this conditional on data having been found (i.e.
+                    # if data: break) and we will check all rooms to see if we
+                    # can find one with a matching code, but this takes a long
+                    # time.
+                    break
+
+                if data:
+                    yield data
+                    break
 
 
 class Lectures(base.LectureScraper):
@@ -123,6 +138,20 @@ class Lectures(base.LectureScraper):
                 elif data:
                     data.update({'course': course, 'type': lecture_type})
                     yield data
+
+
+def fetch_room(url):
+    root = fetch.html(url)
+    if root is None:
+        return None, None
+
+    name = root.cssselect('.ntnukart h2')[0].text_content()
+    for div in root.cssselect('.ntnukart .buildingimage .caption'):
+        match = re.match(r'[^(]+\(([^)]+)\)', div.text_content())
+        if match:
+            return match.group(1), name
+
+    return None,None
 
 
 def fetch_rooms():

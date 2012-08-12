@@ -77,7 +77,6 @@ class Lectures(base.LectureScraper):
                    'start': utils.parse_time(start),
                    'end':  utils.parse_time(end),
                    'weeks': utils.parse_weeks(weeks),
-                   'rooms': utils.split(rooms, '#'),
                    'rooms': zip(utils.split(roomcodes, '#'),
                                 utils.split(roomnames, '#')),
                    'lecturers': utils.split(lecturers, '#'),

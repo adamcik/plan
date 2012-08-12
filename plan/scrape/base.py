@@ -373,11 +373,11 @@ class ExamScraper(Scraper):
 
 
 class RoomScraper(Scraper):
-    fields = ('code', 'name')
-    extra_fields = ('url',)
+    fields = ('code',)
+    extra_fields = ('name', 'url',)
 
     def queryset(self):
-        return Room.objects.all()
+        return Room.objects.order_by('name', 'code')
 
     def prepare_delete(self):
         logging.warning('This scraper newer deletes any rooms as we would')
