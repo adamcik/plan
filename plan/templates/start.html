@@ -6,7 +6,11 @@
 {% load i18n %}
 
 {% block hd %}
-  <h1>{% trans "Timetable generator for NTNU students" %}</h1>
+  <h1>
+    {% blocktrans with INSTITUTION as institution %}
+      Timetable generator for {{ institution }} students
+    {% endblocktrans %}
+  </h1>
 {% endblock %}
 
 {% block extrascript %}

@@ -4,8 +4,12 @@
 {% load i18n %}
 {% load static %}
 
+{% load strip %}
+
 {% block title %}
-  {% trans "Timetable generator for NTNU students" %}
+    {% blocktrans with INSTITUTION as institution %}
+      Timetable generator for {{ institution }} students
+    {% endblocktrans %}
 {% endblock %}
 
 {% block style %}
@@ -79,38 +83,33 @@
   <div class="yui-g">
     <div class="yui-u first">
     <p>
-      {% blocktrans %}
-        All lecture times and course data have been automatically retrieved from
-        <a href="http://www.ntnu.no/">NTNU</a>.
-        This data may not reflect the actual lecture times due to changes or erroneous imports.
-        The service is provided as is, please ensure that the data is correct before relying on it.
+      {% blocktrans with INSTITUTION as institution and INSTITUTION_SITE as url %}
+        All lecture times and course data have been automatically retrieved
+        from <a href="{{ url }}">{{ institution }}</a>. This data may not
+        reflect the actual lecture times due to changes or erroneous imports.
+        The service is provided as is, please ensure that the data is correct
+        before relying on it.
       {% endblocktrans %}
     </p>
     <p>
-      {% blocktrans %}
-      Code and design &copy; 2008-2012 <b>Thomas Adamcik</b>.
-      This site has no official affiliation with NTNU, and is hosted and run by Thomas Adamcik.
+      {% blocktrans with INSTITUTION as institution and '2012' as year %}
+      Code and design &copy; 2008-{{ year }} <b>Thomas Adamcik</b>.
+      This site has no official affiliation with {{ institution }}.
       {% endblocktrans %}
+      {% if ADMINS %}
+        {% trans "It is run and hosted by" %}
+        {% for name, email in ADMINS %}
+          <b>{{ name }}</b>{% if not forloop.last %},{% else %}.{% endif %}
+        {% endfor %}
+      {% endif %}
     </p>
     </div>
     <div class="yui-u" id="links">
     <p>
-      <b>{% trans "Course list" %}</b>
-      <a href="http://www.ntnu.no/studier/emner">ntnu.no/studier/emner</a><br/>
-      <b>{% trans "Study Guide" %}</b>
-      <a href="http://www.ntnu.no/studier/studiehandbok/">ntnu.no/studier/studiehandbok</a><br/>
-      <b>{% trans "Exam dates" %}</b>
-      <a href="http://www.ntnu.no/eksamen/plan/">ntnu.no/eksamen/plan/</a><br/>
-      <b>{% trans "Exam rules" %}</b>
-      <a href="http://www.ntnu.no/studier/eksamen/instruks">ntnu.no/studier/eksamen/instruks</a><br />
-      <b>{% trans "Lecture times" %}</b>
-      <a href="http://www.ntnu.no/studieinformasjon/timeplan">ntnu.no/studieinformasjon/timeplan</a><br/>
-      <b>{% trans "Map Dragvoll" %}</b>
-      <a href="http://www.ntnu.no/kart/kart-over-ntnu/dragvoll/">ntnu.no/kart/kart-over-ntnu/dragvoll</a><br/>
-      <b>{% trans "Map Gløshaugen" %}</b>
-      <a href="http://www.ntnu.no/kart/kart-over-ntnu/gloeshaugen/">ntnu.no/kart/kart-over-ntnu/gloeshaugen</a><br/>
-      <b>{% trans "Find rooms" %}</b>
-      <a href="http://www.ntnu.no/studieinformasjon/rom/">ntnu.no/studieinformasjon/rom/</a>
+      {% for name, link in INSTITUTION_LINKS %}
+        <b>{{ name }}</b> <a href="{{ link }}">{{ link|striphttp }}</a>
+        {% if not forloop.last %}<br />{% endif %}
+      {% endfor %}
     </p>
     </div>
   </div>

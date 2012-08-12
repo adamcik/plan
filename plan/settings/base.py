@@ -1,3 +1,4 @@
+# encoding: utf-8
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import datetime
@@ -137,6 +138,25 @@ SOUTH_TESTS_MIGRATE = False  # Don't use south migrations during tests.
 
 # -- plan specific settings:
 
+# Name of institution the timetable instalation is for.
+TIMETABLE_INSTITUTION = 'NTNU'
+TIMETABLE_INSTITUTION_SITE = 'http://www.ntnu.no/'
+
+# Links to display in footer, typically resoucres at given institution.
+TIMETABLE_INSTITUTION_LINKS = (
+    (ugettext('Course list'),    'http://www.ntnu.no/studier/emner'),
+    (ugettext('Study Guide'),    'http://www.ntnu.no/studier/studiehandbok'),
+    (ugettext('Exam dates'),     'http://www.ntnu.no/eksamen/plan/'),
+    (ugettext('Exam rules'),     'http://www.ntnu.no/studier/eksamen/instruks'),
+    (ugettext('Lecture times'),  'http://www.ntnu.no/studieinformasjon/timeplan'),
+    (ugettext('Map Dragvoll'),   'http://www.ntnu.no/kart/kart-over-ntnu/dragvoll'),
+    (ugettext('Map Gløshaugen'), 'http://www.ntnu.no/kart/kart-over-ntnu/gloeshaugen'),
+    (ugettext('Find rooms'),     'http://www.ntnu.no/studieinformasjon/rom/'),
+)
+
+# Person responsible for this instalation.
+TIMETABLE_OWNER = 'John Doe'
+
 # Tuples with start and end date of semesters:
 TIMETABLE_SEMESTERS = {
     'spring': ((1,1), (6,30)),
@@ -207,7 +227,7 @@ TIMETABLE_MAX_COURSES = 20
 
 # Hostname to be used in UID of ical events, should be a constant service-name
 # as UID changes will trigger email notices for new events in google calendar etc.
-TIMETABLE_ICAL_HOSTNAME = socket.getfqdn()
+TIMETABLE_HOSTNAME = socket.getfqdn()
 
 # Where the software can be downloaded.
 TIMETABLE_SOURCE_URL = 'http://www.github.com/adamcik/plan/'

@@ -3,8 +3,15 @@
 import re
 
 from django import template
+from django.template import defaultfilters
 
 register = template.Library()
+
+
+@register.filter
+@defaultfilters.stringfilter
+def striphttp(value):
+    return re.sub('^https?://(www\.)?', '', value)
 
 
 @register.tag(name='stripspace')

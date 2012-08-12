@@ -37,10 +37,9 @@
     </p>
   </div>
   <p>
-    {% blocktrans %}
+    {% blocktrans with INSTITUTION_SITE as url %}
       Please check that the courses that failed can be found at
-      <a href="http://www.ntnu.no/studieinformasjon/timeplan">http://www.ntnu.no/studieinformasjon/timeplan</a>
-      for this semster.
+      <a href="{{ url }}">{{ url }}</a> for this semster.
     {% endblocktrans %}
   </p>
 {% endblock %}

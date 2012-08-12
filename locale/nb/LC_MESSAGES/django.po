@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Timeplan\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-08-10 00:16+0200\n"
+"POT-Creation-Date: 2012-08-12 23:40+0200\n"
 "PO-Revision-Date: 2009-09-29 14:46+0100\n"
 "Last-Translator: Thomas Adamcik <timeplan@adamcik.no>\n"
 "Language-Team:  <timeplan@adamcik.no>\n"
@@ -17,229 +17,231 @@ msgstr ""
 "X-Poedit-Language: Norwegian Bokmal\n"
 "X-Poedit-Country: NORWAY\n"
 
-#: plan/common/models.py:23
+#: plan/common/models.py:25
 msgid "Slug"
 msgstr "Timeplannavn"
 
-#: plan/common/models.py:24
+#: plan/common/models.py:26
 msgid "Show deadlines"
 msgstr "Vis frister"
 
-#: plan/common/models.py:27
+#: plan/common/models.py:29
 msgid "Student"
 msgstr "Student"
 
-#: plan/common/models.py:28
+#: plan/common/models.py:30
 msgid "Students"
 msgstr "Studenter"
 
-#: plan/common/models.py:38 plan/templates/courses.html:15
+#: plan/common/models.py:40 plan/templates/courses.html:15
 msgid "Alias"
 msgstr "Alias"
 
-#: plan/common/models.py:39
+#: plan/common/models.py:41
 msgid "Added"
 msgstr "Lagt til"
 
-#: plan/common/models.py:50
+#: plan/common/models.py:52
 msgid "Subscription"
 msgstr "Abonnement"
 
-#: plan/common/models.py:51
+#: plan/common/models.py:53
 msgid "Subscriptions"
 msgstr "Abonnementer"
 
-#: plan/common/models.py:78 plan/common/models.py:90 plan/common/models.py:104
-#: plan/common/models.py:118 plan/common/models.py:297
-#: plan/common/models.py:350 plan/templates/course_list.html:46
-msgid "Name"
-msgstr "Navn"
-
-#: plan/common/models.py:79
-msgid "Optional"
-msgstr "Valgfritt"
-
-#: plan/common/models.py:85
-msgid "Lecture type"
-msgstr "Forelesningstype"
-
-#: plan/common/models.py:86
-msgid "Lecture types"
-msgstr "Forelesningstyper"
-
-#: plan/common/models.py:91 plan/common/models.py:121
-#: plan/common/models.py:122
-msgid "URL"
-msgstr "URL"
-
-#: plan/common/models.py:97
-msgid "Room"
-msgstr "Rom"
-
-#: plan/common/models.py:98 plan/templates/lectures.html:19
-msgid "Rooms"
-msgstr "Rom"
-
-#: plan/common/models.py:110
-msgid "Group"
-msgstr "Parallell"
-
-#: plan/common/models.py:111 plan/templates/lectures.html:21
-msgid "Groups"
-msgstr "Paralleller"
-
-#: plan/common/models.py:115 plan/common/models.py:296
+#: plan/common/models.py:81 plan/common/models.py:94 plan/common/models.py:111
+#: plan/common/models.py:127 plan/common/models.py:302
 msgid "Code"
 msgstr "Kode"
 
+#: plan/common/models.py:82 plan/common/models.py:95 plan/common/models.py:112
+#: plan/common/models.py:130 plan/common/models.py:303
+#: plan/common/models.py:357 plan/templates/course_list.html:46
+msgid "Name"
+msgstr "Navn"
+
+#: plan/common/models.py:83
+msgid "Optional"
+msgstr "Valgfritt"
+
+#: plan/common/models.py:89
+msgid "Lecture type"
+msgstr "Forelesningstype"
+
+#: plan/common/models.py:90
+msgid "Lecture types"
+msgstr "Forelesningstyper"
+
+#: plan/common/models.py:96 plan/common/models.py:113
+#: plan/common/models.py:133 plan/common/models.py:134
+#: plan/common/models.py:328
+msgid "URL"
+msgstr "URL"
+
+#: plan/common/models.py:102
+msgid "Room"
+msgstr "Rom"
+
+#: plan/common/models.py:103 plan/templates/lectures.html:19
+msgid "Rooms"
+msgstr "Rom"
+
 #: plan/common/models.py:119
+msgid "Group"
+msgstr "Parallell"
+
+#: plan/common/models.py:120 plan/templates/lectures.html:21
+msgid "Groups"
+msgstr "Paralleller"
+
+#: plan/common/models.py:131
 msgid "Version"
 msgstr "Versjon"
 
-#: plan/common/models.py:123
+#: plan/common/models.py:135
 msgid "Points"
 msgstr "Poeng"
 
-#: plan/common/models.py:128 plan/templates/course_list.html:45
+#: plan/common/models.py:140 plan/templates/course_list.html:45
 #: plan/templates/courses.html:14 plan/templates/exams.html:12
 #: plan/templates/lectures.html:16
 msgid "Course"
 msgstr "Emne"
 
-#: plan/common/models.py:129 plan/templates/courses.html:6
+#: plan/common/models.py:141 plan/templates/courses.html:6
 msgid "Courses"
 msgstr "Emner"
 
-#: plan/common/models.py:204
+#: plan/common/models.py:216
 msgid "spring"
 msgstr "våren"
 
-#: plan/common/models.py:205
+#: plan/common/models.py:217
 msgid "fall"
 msgstr "høsten"
 
-#: plan/common/models.py:209
+#: plan/common/models.py:221
 msgctxt "slug"
 msgid "spring"
 msgstr "var"
 
-#: plan/common/models.py:210
+#: plan/common/models.py:222
 msgctxt "slug"
 msgid "fall"
 msgstr "host"
 
-#: plan/common/models.py:213
+#: plan/common/models.py:225
 msgid "Year"
 msgstr "År"
 
-#: plan/common/models.py:214 plan/templates/exams.html:11
+#: plan/common/models.py:226 plan/templates/exams.html:11
 #: plan/templates/lectures.html:20
 msgid "Type"
 msgstr "Type"
 
-#: plan/common/models.py:219
+#: plan/common/models.py:231
 msgid "Semester"
 msgstr "Semester"
 
-#: plan/common/models.py:220
+#: plan/common/models.py:232
 msgid "Semesters"
 msgstr "Semestre"
 
-#: plan/common/models.py:305
+#: plan/common/models.py:311
 msgid "Exam type"
 msgstr "Eksamensform"
 
-#: plan/common/models.py:306
+#: plan/common/models.py:312
 msgid "Exam types"
 msgstr "Eksamensformer"
 
-#: plan/common/models.py:312
+#: plan/common/models.py:318
 msgid "Combination"
 msgstr ""
 
-#: plan/common/models.py:314
+#: plan/common/models.py:320
 msgid "Exam date"
 msgstr "Eksamensdato"
 
-#: plan/common/models.py:315 plan/templates/course_list.html:48
+#: plan/common/models.py:321 plan/templates/course_list.html:48
 msgid "Exam time"
 msgstr "Eksamenstid"
 
-#: plan/common/models.py:317
+#: plan/common/models.py:323
 msgid "Handout date"
 msgstr "Utleveringsdato"
 
-#: plan/common/models.py:318 plan/templates/course_list.html:50
+#: plan/common/models.py:324 plan/templates/course_list.html:50
 msgid "Handout time"
 msgstr "Utleveringstid"
 
-#: plan/common/models.py:320
+#: plan/common/models.py:326
 msgid "Duration"
 msgstr "Varighet"
 
-#: plan/common/models.py:321
+#: plan/common/models.py:327
 msgid "Duration in hours"
 msgstr "Varighet i timer"
 
-#: plan/common/models.py:326 plan/ical/views.py:134 plan/ical/views.py:135
+#: plan/common/models.py:333 plan/ical/views.py:134 plan/ical/views.py:135
 #: plan/ical/views.py:138 plan/ical/views.py:139
 msgid "Exam"
 msgstr "Eksamen"
 
-#: plan/common/models.py:327 plan/templates/exams.html:3
+#: plan/common/models.py:334 plan/templates/exams.html:3
 msgid "Exams"
 msgstr "Eksamener"
 
-#: plan/common/models.py:337
+#: plan/common/models.py:344
 msgid "Week number"
 msgstr "Ukenummer"
 
-#: plan/common/models.py:342
+#: plan/common/models.py:349
 msgid "Lecture week"
 msgstr "Forelesningsuke"
 
-#: plan/common/models.py:343
+#: plan/common/models.py:350
 msgid "Lecture weeks"
 msgstr "Forelesningsuker"
 
-#: plan/common/models.py:353
+#: plan/common/models.py:360
 msgid "Lecturer"
 msgstr "Foreleser"
 
-#: plan/common/models.py:354 plan/templates/lectures.html:22
+#: plan/common/models.py:361 plan/templates/lectures.html:22
 msgid "Lecturers"
 msgstr "Forelesere"
 
-#: plan/common/models.py:365
+#: plan/common/models.py:372
 msgid "Week day"
 msgstr "Ukedag"
 
-#: plan/common/models.py:367
+#: plan/common/models.py:374
 msgid "Start time"
 msgstr "Starter"
 
-#: plan/common/models.py:368
+#: plan/common/models.py:375
 msgid "End time"
 msgstr "Slutter"
 
-#: plan/common/models.py:378 plan/common/models.py:379
+#: plan/common/models.py:385 plan/common/models.py:386
 msgid "Lecture"
 msgstr "Forelesning"
 
-#: plan/common/models.py:435
+#: plan/common/models.py:441
 msgid "Task"
 msgstr "Oppgave"
 
-#: plan/common/models.py:436
+#: plan/common/models.py:442
 msgid "Due date"
 msgstr "Forfallsdato"
 
-#: plan/common/models.py:437 plan/templates/exams.html:9
+#: plan/common/models.py:443 plan/templates/exams.html:9
 #: plan/templates/lectures.html:18
 msgid "Time"
 msgstr "Tid"
 
-#: plan/common/models.py:438
+#: plan/common/models.py:444
 msgid "Done"
 msgstr "Ferdig"
 
@@ -261,17 +263,49 @@ msgstr "%(slug)s' timeplan for %(semester)s %(year)s, %(resources)s"
 msgid "%(slug)s's %(semester)s %(year)s schedule for %(resources)s"
 msgstr "%(slug)ss timeplan for %(semester)s %(year)s, %(resources)s"
 
-#: plan/settings/base.py:46
+#: plan/settings/base.py:47
 msgid "Norwegian"
 msgstr "Norsk"
 
-#: plan/settings/base.py:47
+#: plan/settings/base.py:48
 msgid "English"
 msgstr "engelsk"
 
+#: plan/settings/base.py:147 plan/templates/schedule_table_footer.html:9
+msgid "Course list"
+msgstr "Emneliste"
+
+#: plan/settings/base.py:148
+msgid "Study Guide"
+msgstr "Studiehåndbok"
+
+#: plan/settings/base.py:149
+msgid "Exam dates"
+msgstr "Eksamensdatoer"
+
+#: plan/settings/base.py:150
+msgid "Exam rules"
+msgstr "Eksamensregler"
+
+#: plan/settings/base.py:151
+msgid "Lecture times"
+msgstr "Forelesningstider"
+
+#: plan/settings/base.py:152
+msgid "Map Dragvoll"
+msgstr "Kart: Dragvoll"
+
+#: plan/settings/base.py:153
+msgid "Map Gløshaugen"
+msgstr "Kart: Gløshaugen"
+
+#: plan/settings/base.py:154
+msgid "Find rooms"
+msgstr "Søk etter rom"
+
 #: plan/templates/404.html:8 plan/templates/404.html.py:12
 msgid "Page not found"
-msgstr "Siden ble ikke funnet"
+msgstr "Siden kunne ikke finnes"
 
 #: plan/templates/404.html:19
 #, python-format
@@ -298,11 +332,11 @@ msgstr "En feil oppstod, beklager bryderiet."
 msgid "The server administrator has all ready been notified of this error."
 msgstr "Serveradministrator er varslet om feilen."
 
-#: plan/templates/about.html:9
+#: plan/templates/about.html:8
 msgid "Number of timetables"
 msgstr "Antall timeplaner"
 
-#: plan/templates/about.html:18
+#: plan/templates/about.html:16
 msgid "Number of timetables over time"
 msgstr "Antall timeplaner"
 
@@ -318,79 +352,57 @@ msgstr "Oppgi emnekoder for emner du ønsker å vise"
 msgid "Add course"
 msgstr "Legg til emne"
 
-#: plan/templates/base_site.html:8 plan/templates/start.html:9
-msgid "Timetable generator for NTNU students"
-msgstr "Timeplangenerator for NTNU-studenter"
-
-#: plan/templates/base_site.html:82
+#: plan/templates/base_site.html:10 plan/templates/start.html:10
+#, python-format
 msgid ""
 "\n"
-"        All lecture times and course data have been automatically retrieved "
-"from\n"
-"        <a href=\"http://www.ntnu.no/\">NTNU</a>.\n"
-"        This data may not reflect the actual lecture times due to changes or "
-"erroneous imports.\n"
+"      Timetable generator for %(institution)s students\n"
+"    "
+msgstr ""
+"\n"
+"      Timeplangenerator for %(institution)s-studenter\n"
+"    "
+
+#: plan/templates/base_site.html:86
+#, python-format
+msgid ""
+"\n"
+"        All lecture times and course data have been automatically retrieved\n"
+"        from <a href=\"%(url)s\">%(institution)s</a>. This data may not\n"
+"        reflect the actual lecture times due to changes or erroneous "
+"imports.\n"
 "        The service is provided as is, please ensure that the data is "
-"correct before relying on it.\n"
+"correct\n"
+"        before relying on it.\n"
 "      "
 msgstr ""
 "\n"
 "        Alle datoer og tider er hentet automatisk fra \n"
-"        <a href=\"http://www.ntnu.no/\">NTNUs nettsider</a>.\n"
+"        <a href=\"%(url)s\">%(institution)s nettsider</a>.\n"
 "        Disse vil ikke alltid gjenspeile virkeligheten, grunnet endringer "
 "eller feilaktig dataimport.\n"
 "        Tjenesten tilbys uten garantier, forviss deg om at dataene er "
 "riktige før du stoler på dem.\n"
 "          "
 
-#: plan/templates/base_site.html:90
+#: plan/templates/base_site.html:95
+#, python-format
 msgid ""
 "\n"
-"      Code and design &copy; 2008-2012 <b>Thomas Adamcik</b>.\n"
-"      This site has no official affiliation with NTNU, and is hosted and run "
-"by Thomas Adamcik.\n"
+"      Code and design &copy; 2008-%(year)s <b>Thomas Adamcik</b>.\n"
+"      This site has no official affiliation with %(institution)s.\n"
 "      "
 msgstr ""
 "\n"
-"      Kildekode og design &copy; 2008-2010 <b>Thomas Adamcik</b>.\n"
-"      Siden har ingen offisiell tilknytning til NTNU, og drives på frivilig "
-"basis av Thomas Adamcik.\n"
-"          "
+"      Kildekode og design &copy; 2008-%(year)s <b>Thomas Adamcik</b>.\n"
+"      Siden har ingen offisiell tilknytning til %(institution)s.\n"
+"      "
 
-#: plan/templates/base_site.html:98
-#: plan/templates/schedule_table_footer.html:9
-msgid "Course list"
-msgstr "Emneliste"
+#: plan/templates/base_site.html:99
+msgid "It is run and hosted by"
+msgstr "Den drivers på frivilig basis av"
 
-#: plan/templates/base_site.html:100
-msgid "Study Guide"
-msgstr "Studiehåndbok"
-
-#: plan/templates/base_site.html:102
-msgid "Exam dates"
-msgstr "Eksamensdatoer"
-
-#: plan/templates/base_site.html:104
-msgid "Exam rules"
-msgstr "Eksamensregler"
-
-#: plan/templates/base_site.html:106
-msgid "Lecture times"
-msgstr "Forelesningstider"
-
-#: plan/templates/base_site.html:108
-msgid "Map Dragvoll"
-msgstr "Kart: Dragvoll"
-
-#: plan/templates/base_site.html:110
-msgid "Map Gløshaugen"
-msgstr "Kart: Gløshaugen"
-
-#: plan/templates/base_site.html:112
-msgid "Find rooms"
-msgstr "Søk etter rom"
-
-#: plan/templates/base_site.html:121
+#: plan/templates/base_site.html:118
 #, python-format
 msgid ""
 "\n"
@@ -407,7 +419,7 @@ msgstr ""
 "    på <a href=\"%(SOURCE_URL)s\">%(SOURCE_URL)s</a>.\n"
 "      "
 
-#: plan/templates/base_site.html:128
+#: plan/templates/base_site.html:125
 msgid "Built using:"
 msgstr "Bygget ved hjelp av:"
 
@@ -505,18 +517,16 @@ msgstr ""
 "      "
 
 #: plan/templates/error.html:40
+#, python-format
 msgid ""
 "\n"
 "      Please check that the courses that failed can be found at\n"
-"      <a href=\"http://www.ntnu.no/studieinformasjon/timeplan\">http://www."
-"ntnu.no/studieinformasjon/timeplan</a>\n"
-"      for this semster.\n"
+"      <a href=\"%(url)s\">%(url)s</a> for this semster.\n"
 "    "
 msgstr ""
 "\n"
 "      Kontroller om emnene som feilet finnes på \n"
-"      <a href=\"http://www.ntnu.no/studieinformasjon/timeplan\">http://www."
-"ntnu.no/studieinformasjon/timeplan</a>\n"
+"      <a href=\"%(url)s\">%(url)s</a>\n"
 "      for dette semesteret.\n"
 "        "
 
@@ -654,26 +664,18 @@ msgstr "Velg parallell"
 msgid "Switch to English"
 msgstr "Bytt til norsk"
 
-#: plan/templates/start.html:48
-msgid "Sorry, no semesters have been loaded yet."
-msgstr "Beklager, ingen semester er klartgjort enda."
-
 #: plan/templates/start.html:52
-msgid "Sorry, this semester does not exist."
-msgstr "Beklager, semesteret finnes ikke."
-
-#: plan/templates/start.html:57
 msgid "Getting started"
 msgstr "Kom i gang"
 
-#: plan/templates/start.html:61
+#: plan/templates/start.html:56
 msgid ""
 "\n"
-"                Please enter a short name identifying your personal\n"
-"                timetable, ie. username, nickname etc. If the name\n"
-"                you select is in already taken, choose another\n"
-"                one.\n"
-"              "
+"              Please enter a short name identifying your personal\n"
+"              timetable, ie. username, nickname etc. If the name\n"
+"              you select is in already taken, choose another\n"
+"              one.\n"
+"            "
 msgstr ""
 "\n"
 "                Oppgi et kort navn for timeplanen din\n"
@@ -681,34 +683,34 @@ msgstr ""
 "                Finn på et annet om det allerede er tatt.\n"
 "              "
 
-#: plan/templates/start.html:71
+#: plan/templates/start.html:66
 msgid "Start"
 msgstr "Start"
 
-#: plan/templates/start.html:76
+#: plan/templates/start.html:71
 msgid ""
 "\n"
-"            To retrieve your timetable simply enter the same identifier\n"
-"            you used last time.\n"
-"          "
+"          To retrieve your timetable simply enter the same identifier\n"
+"          you used last time.\n"
+"        "
 msgstr ""
 "\n"
 "            Hent en timeplan ved å oppgi samme navnet som da du             "
 "opprettet den.\n"
 "          "
 
-#: plan/templates/start.html:86
+#: plan/templates/start.html:81
 #, python-format
 msgid ""
 "\n"
-"            Top %(limit)s courses %(current)s\n"
-"          "
+"          Top %(limit)s courses %(current)s\n"
+"        "
 msgstr ""
 "\n"
 "            Topp %(limit)s emner for %(current)s\n"
 "          "
 
-#: plan/templates/start.html:100
+#: plan/templates/start.html:95
 msgid "No courses have been added to any schedules yet."
 msgstr "Ingen timeplaner er opprettet enda."
 
@@ -887,10 +889,14 @@ msgstr ""
 "\n"
 "    %(slug)s%(ending)s timeplan for %(type)s %(year)s"
 
-#: plan/templates/admin/base_site.html:6
-#: plan/templates/admin/base_site.html:10
-msgid "ntnu timetable admin"
-msgstr "NTNU timeplanadministrator"
+#~ msgid "Sorry, no semesters have been loaded yet."
+#~ msgstr "Beklager, ingen semester er klartgjort enda."
+
+#~ msgid "Sorry, this semester does not exist."
+#~ msgstr "Beklager, semesteret finnes ikke."
+
+#~ msgid "ntnu timetable admin"
+#~ msgstr "NTNU timeplanadministrator"
 
 #~ msgid "Deadline"
 #~ msgstr "Frist"
