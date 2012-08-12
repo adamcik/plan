@@ -25,6 +25,7 @@ from plan.common.templatetags import slugify
 
 # To allow for overriding of the codes idea of now() for tests
 now = datetime.datetime.now
+today= datetime.date.today
 
 # Start new week on saturdays
 get_current_week = lambda: (now() + datetime.timedelta(days=2)).isocalendar()[1]

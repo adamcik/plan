@@ -15,6 +15,7 @@ from plan.common.managers import (LectureManager, ExamManager, CourseManager,
 
 # To allow for overriding of the codes idea of now() for tests
 now = datetime.datetime.now
+today= datetime.date.today
 
 # Setup common alias for translation
 _ = translation.ugettext_lazy
@@ -266,8 +267,7 @@ class Semester(models.Model):
 
     @property
     def is_current(self):
-        today = datetime.date.today()
-        return self.get_first_day() <= today <= self.get_last_day()
+        return self.get_first_day() <= today() <= self.get_last_day()
 
     # TODO(adamcik): this is scraper specific...
     @property

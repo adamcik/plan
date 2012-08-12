@@ -1,6 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from datetime import datetime
+import datetime
 
 from django.core.urlresolvers import reverse
 from django.test import TestCase
@@ -22,8 +22,11 @@ class BaseTestCase(TestCase):
 
     def set_now_to(self, year, month, day):
         from plan.common import models, views
-        models.now = lambda: datetime(year, month, day)
-        views.now = lambda: datetime(year, month, day)
+        dt = datetime.datetime(year, month, day)
+
+        for cls in models, views:
+            cls.now = lambda: dt
+            cls.today = lambda: dt.date()
 
     def url(self, name, *args):
         if args:
