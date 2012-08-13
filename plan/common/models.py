@@ -159,8 +159,9 @@ class Course(models.Model):
             return u'-'.join([self.code, self.version])
         return self.code
 
+    # TODO(adamcik): move limit to setting?
     @staticmethod
-    def get_stats(semester=None, limit=15):
+    def get_stats(semester=None, limit=12):
         if hasattr(semester, 'pk'):
             semester_id = semester.pk
         else:

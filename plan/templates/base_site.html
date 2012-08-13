@@ -103,16 +103,16 @@
         {% for name, email in ADMINS %}
           <b>{{ name }}</b>{% if not forloop.last %},{% else %}.{% endif %}
         {% endfor %}
+
       {% endif %}
     </p>
     </div>
     <div class="yui-u" id="links">
-    <p>
+    <dl>
       {% for name, link in INSTITUTION_LINKS %}
-        <b>{{ name }}</b> <a href="{{ link }}">{{ link|striphttp }}</a>
-        {% if not forloop.last %}<br />{% endif %}
+        <dt>{{ name }}</dt> <dd><a href="{{ link }}">{{ link|striphttp }}</a></dd>
       {% endfor %}
-    </p>
+    </dl>
     </div>
   </div>
 

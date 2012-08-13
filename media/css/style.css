@@ -55,15 +55,12 @@ td {
 	border-top: 1px solid #666;
 	border-bottom: 1px solid #666;
 }
-table#munin {
+#totals {
 	width: auto;
 }
-table#munin td {
+#totals td {
 	border: 0;
 	padding: 0 1em 0.2em;
-}
-table#munin a {
-	color: #204A87;
 }
 
 /* Basic inline elements */
@@ -203,7 +200,6 @@ td.error input, td.error select {
 #bd {
 	padding-left: 1em;
 	margin-bottom: 1em;
-	min-height: 25em;
 	position: relative;
 }
 #ft {
@@ -315,6 +311,23 @@ td.error input, td.error select {
 	padding-left: 0;
 	padding-right: 0.1em;
 }
+#links dl {
+	margin: 0;
+}
+#links dt {
+  font-weight: bold;
+  float: left;
+  width: 120px;
+  clear: left;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#links dd {
+  margin-left: 130px;
+}
+
 
 /* schedule styling */
 #schedule {
