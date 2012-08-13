@@ -14,5 +14,6 @@ def processor(request):
             'MIGRATE_COOKIES': settings.TIMETABLE_MIGRATE_COOKIES,
             'ADMINS': settings.ADMINS,
             'SOURCE_URL': settings.TIMETABLE_SOURCE_URL,
+            'SITENAME': settings.TIMETABLE_HOSTNAME or request.META['HTTP_HOST'],
             'STRIP_COOKIES': settings.TIMETABLE_STRIP_COOKIES}
 

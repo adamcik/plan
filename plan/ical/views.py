@@ -27,6 +27,7 @@ def ical(request, year, semester_type, slug, ical_type=None):
 
     title  = urlresolvers.reverse('schedule', args=[year, semester_type, slug])
     semester = Semester(year=year, type=semester_type)
+    hostname = settings.TIMETABLE_HOSTNAME or request.META['HTTP_HOST']
 
     cal = vobject.iCalendar()
     cal.add('method').value = 'PUBLISH'  # IE/Outlook needs this
@@ -47,11 +48,11 @@ def ical(request, year, semester_type, slug, ical_type=None):
 
     if _('lectures') in resources:
         lectures = Lecture.objects.get_lectures(year, semester.type, slug)
-        add_lectutures(lectures, semester.year, cal)
+        add_lectutures(lectures, semester.year, cal, hostname)
 
     if _('exams') in resources:
         exams = Exam.objects.get_exams(year, semester.type, slug)
-        add_exams(exams, cal)
+        add_exams(exams, cal, hostname)
 
     icalstream = cal.serialize()
 
@@ -70,7 +71,7 @@ def ical(request, year, semester_type, slug, ical_type=None):
     return response
 
 
-def add_lectutures(lectures, year, cal):
+def add_lectutures(lectures, year, cal, hostname):
     '''Adds lectures to cal object for current semester'''
 
     all_rooms = Lecture.get_related(Room, lectures)
@@ -115,13 +116,13 @@ def add_lectutures(lectures, year, cal):
             vevent.add('dtstamp').value = datetime.datetime.now(tz.tzlocal())
 
             vevent.add('uid').value = 'lecture-%d-%s@%s' % \
-                    (l.id, d.strftime('%Y%m%d'), settings.TIMETABLE_HOSTNAME)
+                    (l.id, d.strftime('%Y%m%d'), hostname)
 
             if l.type and l.type.optional:
                 vevent.add('transp').value = 'TRANSPARENT'
 
 
-def add_exams(exams, cal):
+def add_exams(exams, cal, hostname):
     for e in exams:
 
         vevent = cal.add('vevent')
@@ -142,7 +143,7 @@ def add_exams(exams, cal):
         vevent.add('description').value = desc
         vevent.add('dtstamp').value = datetime.datetime.now(tz.tzlocal())
 
-        vevent.add('uid').value = 'exam-%d@%s' % (e.id, settings.TIMETABLE_HOSTNAME)
+        vevent.add('uid').value = 'exam-%d@%s' % (e.id, hostname)
 
         if e.handout_date:
             if e.handout_time:

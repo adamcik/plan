@@ -3,8 +3,9 @@
 {% load compress %}
 {% load i18n %}
 {% load static %}
-
 {% load strip %}
+
+{% load url from future %}
 
 {% block title %}
     {% blocktrans with INSTITUTION as institution %}
@@ -97,7 +98,8 @@
       This site has no official affiliation with {{ institution }}.
       {% endblocktrans %}
       {% if ADMINS %}
-        {% trans "It is run and hosted by" %}
+        <a href="{% url 'frontpage' %}">{{ SITENAME }}</a>
+        {% trans "is run and hosted by" %}
         {% for name, email in ADMINS %}
           <b>{{ name }}</b>{% if not forloop.last %},{% else %}.{% endif %}
         {% endfor %}

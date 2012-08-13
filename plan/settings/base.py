@@ -225,9 +225,10 @@ TIMETABLE_AJAX_LIMIT = 100
 # Max number of courses per timetable.
 TIMETABLE_MAX_COURSES = 20
 
-# Hostname to be used in UID of ical events, should be a constant service-name
-# as UID changes will trigger email notices for new events in google calendar etc.
-TIMETABLE_HOSTNAME = socket.getfqdn()
+# Hostname to be used in UID of ical events and to identify site, should be a
+# constant service-name as UID changes will trigger email notices for new
+# events in google calendar etc. Default is to use the HTTP_HOST.
+TIMETABLE_HOSTNAME = None
 
 # Where the software can be downloaded.
 TIMETABLE_SOURCE_URL = 'http://www.github.com/adamcik/plan/'
