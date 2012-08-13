@@ -404,3 +404,24 @@ class RoomScraper(Scraper):
         logging.warning('This scraper newer deletes any rooms as we would')
         logging.warning('loose data we can\'t get back.')
         return self.queryset().none()  # Never delete rooms.
+
+
+class SyllabysScraper(Scraper):
+    fields = ('code',)
+    extra_fields = ('syllabus',)
+
+    def queryset(self):
+        qs = Course.objects.filter(semester=self.semester)
+        return qs.order_by('code', 'version')
+
+    def display(self, obj):
+        return obj.code
+
+    def prepare_data(self, data):
+        # Only update courses we already know about.
+        if self.queryset().filter(code=data['code']):
+            return data
+
+    def prepare_delete(self):
+        # Don't delete anything as we just want to add syllabus URLs
+        return self.queryset().none()
