@@ -1,21 +1,37 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+import re
+
 from plan.scrape import base
 from plan.scrape import fetch
 
 
 class Syllabus(base.SyllabysScraper):
     def scrape(self):
-        return fetch_syllabus('122551') # TODO(adamcik): don't hardcode.
+        return fetch_syllabus('Norges teknisk-naturvitenskapelige universitet')
 
 
-def fetch_syllabus(university):
+def fetch_syllabus(name_re):
+    university = fetch_university(name_re)
+    if not university:
+        return
+
     for study in fetch_studies(university):
         for semester in fetch_semesters(university, study):
             for course, pack in fetch_packs(university, study, semester):
                 url = fetch_node(pack)
                 if url:
                     yield {'code': course, 'syllabus': url}
+
+
+def fetch_university(name_re):
+    root = fetch.html('http://www.akademika.no/pensum', cache=False)
+    if root is None:
+        return
+    for option in root.cssselect('select[name="select_university"] option'):
+        if re.search(name_re, option.text):
+            return option.attrib['value']
+    return None
 
 
 def fetch_params(field, **kwargs):
