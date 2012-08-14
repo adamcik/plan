@@ -17,8 +17,13 @@ RE_WHITESPACE = re.compile(r'(\s\s+|\n)')
 
 
 class HtmlMinifyMiddleware(object):
+    def should_minify(self, response):
+        return (settings.COMPRESS_ENABLED and
+                response.status_code == 200 and
+                'text/html' in response['Content-Type'])
+
     def process_response(self, request, response):
-        if response.status_code == 200 and 'text/html' in response['Content-Type']:
+        if self.should_minify(response):
             response.content = RE_WHITESPACE.sub(' ', response.content)
         return response
 
