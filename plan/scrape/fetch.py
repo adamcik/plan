@@ -1,5 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+import collections
 import json as jsonlib
 import logging
 import lxml.etree
@@ -7,8 +8,18 @@ import lxml.html
 import urllib
 
 from django.core import cache
+from django.db import connections
 
 scraper_cache = cache.get_cache('scraper')
+
+
+def sql(db, query, params=None):
+    cursor = connections[db].cursor()
+    cursor.execute(query, params or [])
+    fields = [col[0] for col in cursor.description]
+    row = collections.namedtuple('row', fields)
+    for values in cursor.fetchall():
+        yield row(*values)
 
 
 def get(url, cache=True, verbose=False):

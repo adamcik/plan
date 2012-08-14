@@ -4,28 +4,26 @@
 
 import logging
 
-from django.db import connections
-
 from plan.common.models import Course, Lecture, Semester
 from plan.scrape import base
 from plan.scrape import ntnu
 from plan.scrape import utils
+from plan.scrape import fetch
 
 
 class Courses(base.CourseScraper):
     def scrape(self):
         prefix = ntnu.prefix(self.semester)
-        cursor = connections['ntnu'].cursor()
-        cursor.execute("SELECT emnekode, emnenavn FROM %s_fs_emne" % prefix)
+        query = "SELECT emnekode, emnenavn FROM %s_fs_emne" % prefix
 
-        for raw_code, raw_name in cursor.fetchall():
-            code, version = ntnu.parse_course(raw_code)
+        for row in fetch.sql('ntnu', query):
+            code, version = ntnu.parse_course(row.emnekode)
             if not code:
-                logging.warning('Skipped invalid course name: %s', raw_code)
+                logging.warning('Skipped invalid course name: %s', row.emnekode)
                 continue
 
             yield {'code': code,
-                   'name': raw_name,
+                   'name': row.emnenavn,
                    'version': version,
                    'url': 'http://www.ntnu.no/studier/emner/%s' % code}
 
@@ -41,43 +39,37 @@ class Courses(base.CourseScraper):
 class Lectures(base.LectureScraper):
     def scrape(self):
         prefix = ntnu.prefix(self.semester)
-        cursor = connections['ntnu'].cursor()
         groups = {}
 
         courses = Course.objects.filter(semester=self.semester)
         courses = dict((c.code, c) for c in courses)
 
-        # TODO(adamcik): start getting group names not just short names?
-        cursor.execute(('SELECT aktkode, studieprogramkode '
-                        'FROM %s_akt_studieprogram') % prefix)
+        query = ('SELECT aktkode, studieprogramkode FROM '
+                 '%s_akt_studieprogram') % prefix
 
-        for activity, group in cursor.fetchall():
-            groups.setdefault(activity, set()).add(group)
+        for row in fetch.sql('ntnu', query):
+            groups.setdefault(row.aktkode, set()).add(row.studieprogramkode)
 
-        cursor.execute(('SELECT emnekode, typenavn, dag, start, slutt, uke, '
-                        'romnr, romnavn, larer, aktkode FROM %s_timeplan ORDER BY '
-                        'emnekode, dag, start, slutt, uke, romnavn, aktkode') %
-                        prefix)
+        query = ('SELECT emnekode, typenavn, dag, start, slutt, uke, romnr, '
+                 'romnavn, larer, aktkode FROM %s_timeplan ORDER BY emnekode, '
+                 'dag, start, slutt, uke, romnavn, aktkode') % prefix
 
-        for row in cursor.fetchall():
-            (raw_code, lecture_type, day, start, end, weeks,
-             roomcodes, roomnames, lecturers, activity) = row
-
-            code, version = ntnu.parse_course(raw_code)
+        for row in fetch.sql('ntnu', query):
+            code, version = ntnu.parse_course(row.emnekode)
             if not code:
-                logging.warning('Skipped invalid course name: %s', raw_code)
+                logging.warning('Skipped invalid course name: %s', row.emnekode)
                 continue
             elif code not in courses:
                 logging.debug("Unknown course %s.", code)
                 continue
 
             yield {'course': courses[code],
-                   'type': lecture_type,
-                   'day':  utils.parse_day_of_week(day),
-                   'start': utils.parse_time(start),
-                   'end':  utils.parse_time(end),
-                   'weeks': utils.parse_weeks(weeks),
-                   'rooms': zip(utils.split(roomcodes, '#'),
-                                utils.split(roomnames, '#')),
-                   'lecturers': utils.split(lecturers, '#'),
-                   'groups': groups.get(activity, set())}
+                   'type': row.typenavn,
+                   'day':  utils.parse_day_of_week(row.dag),
+                   'start': utils.parse_time(row.start),
+                   'end':  utils.parse_time(row.slutt),
+                   'weeks': utils.parse_weeks(row.uke),
+                   'rooms': zip(utils.split(row.romnr, '#'),
+                                utils.split(row.romnavn, '#')),
+                   'lecturers': utils.split(row.larer, '#'),
+                   'groups': groups.get(row.aktkode, set())}
