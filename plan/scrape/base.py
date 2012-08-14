@@ -419,8 +419,11 @@ class SyllabysScraper(Scraper):
 
     def prepare_data(self, data):
         # Only update courses we already know about.
-        if self.queryset().filter(code=data['code']):
+        qs = self.queryset().filter(code=data['code'])
+        if qs.exclude(pk__in=self.seen):
             return data
+        elif qs:
+            logging.warning('Duplicate syllabus info for: %s', data['code'])
 
     def prepare_delete(self):
         # Don't delete anything as we just want to add syllabus URLs
