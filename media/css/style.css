@@ -141,9 +141,16 @@ p.right {
 
 .icon {
 	background-repeat: no-repeat;
-	background-image: url(../gfx/sprite2.png);
+	background-image: url(../gfx/sprite.png);
 	background-position: left top;
 	padding-left: 18px;
+}
+
+i.icon {
+	padding: 0;
+	display: inline-block;
+	width: 16px;
+	height: 16px;
 }
 
 .icon.start, .icon.en-flag, .icon.nb-flag {
@@ -151,11 +158,15 @@ p.right {
 	padding-right: 18px;
 }
 
+.icon.book {
+	opacity: 0.6;
+}
+
 .icon.start   {	background-position: right -650px;  } .large .icon.start   {	background-position: right -649px; }
 .icon.en-flag { background-position: right -1979px; } .large .icon.en-flag { background-position: right -1978px; }
 .icon.nb-flag { background-position: right -2090px; } .large .icon.nb-flag { background-position: right -2089px; }
 
-.icon.copy     { background-position: 0 -95px;   } .large .icon.copy     { background-position: 0 -94px;   }
+.icon.book     { background-position: 0 -95px;   } .large .icon.book     { background-position: 0 -94px;   }
 .icon.warning  { background-position: 0 -206px;  } .large .icon.warning  { background-position: 0 -205px;  }
 .icon.advanced { background-position: 0 -317px;  } .large .icon.advanced { background-position: 0 -316px;  }
 .icon.gcal     { background-position: 0 -428px;  } .large .icon.gcal     { background-position: 0 -427px;  }
