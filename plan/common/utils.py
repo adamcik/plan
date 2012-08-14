@@ -10,6 +10,7 @@ from django.conf import settings
 from django.conf import urls
 from django.db import models
 from django.utils import text as text_utils
+from django.utils import http as http_utils
 
 # Collection of capture groups used in urls.
 url_aliases = {'year': r'(?P<year>\d{4})',
@@ -23,6 +24,16 @@ url_aliases = {'year': r'(?P<year>\d{4})',
 def url(regexp, *args, **kwargs):
     """Helper that inserts our url aliases using string formating."""
     return urls.url(regexp.format(**url_aliases), *args, **kwargs)
+
+
+def expires_in(timeout):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            response = func(*args, **kwargs)
+            response['Expires'] = http_utils.http_date(time.time() + timeout)
+            return response
+        return wrapper
+    return decorator
 
 
 def build_search(searchstring, filters, max_query_length=4,
