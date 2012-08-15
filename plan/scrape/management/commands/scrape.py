@@ -50,14 +50,9 @@ class Command(management.LabelCommand):
             semester = self.load_semester(options)
             scraper = self.load_scraper(label)(semester)
 
-            to_delete = scraper.run()
+            needs_commit = scraper.run()
 
-            if to_delete:
-                print 'Deleted items:'
-                print scraper.format(to_delete)
-                to_delete.delete()
-
-            if not scraper.needs_commit or options['dry_run']:
+            if not needs_commit or options['dry_run']:
                 transaction.rollback()
                 print 'No changes, rolled back.'
             elif utils.prompt('Commit changes?'):

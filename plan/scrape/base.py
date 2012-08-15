@@ -13,7 +13,6 @@ from plan.scrape import utils
 class Scraper(object):
     fields = ()
     extra_fields = ()
-    commit_fields = ('created', 'updated', 'deleted')
 
     def __init__(self, semester):
         self.semester = semester
@@ -46,16 +45,13 @@ class Scraper(object):
         """Format list of items."""
         return utils.columnify(items)
 
-    @property
-    def needs_commit(self):
+    def needs_commit(self, stats=None):
         """Indicate if there are any changes that need to be saved.
 
-           If you override run() or otherwise don't update stats you should
-           set override this method. The other option is to add other fields
-           to consider to `commit_fields`.
+           Can be called via super() when overriden with other fields.
         """
-        for field in self.commit_fields:
-            if self.stats.get(field, 0) > 0:
+        for name in (stats or ('created', 'updated', 'deleted')):
+            if self.stats.get(name, 0) > 0:
                 return True
         return False
 
@@ -104,13 +100,10 @@ class Scraper(object):
             finally:
                 db.reset_queries()
 
-        # Note: we don't delete all objects through this query.
-        # defult prepare_delete() returns qs.none() to be on the safe side.
-        qs = self.prepare_delete()
-        self.log_deleted(qs)
-
+        self.delete(self.prepare_delete())
         self.log_stats()
-        return qs
+
+        return self.needs_commit()
 
     def prepare_data(self, data):
         """Clean and/or validate data from scrape method.
@@ -167,6 +160,11 @@ class Scraper(object):
         """
         return self.queryset().exclude(pk__in=self.seen)
 
+    def delete(self, qs):
+        """Actually delete the query set."""
+        self.log_delete(qs)
+        qs.delete()
+
     def display(self, obj):
         """Helper that defines how objects are stringified for display."""
         return unicode(obj)
@@ -197,8 +195,10 @@ class Scraper(object):
     def log_unaltered(self, obj):
         self.stats['unaltered'] += 1
 
-    def log_deleted(self, qs):
+    def log_delete(self, qs):
         self.stats['deleted'] = qs.count()
+        if qs:
+            logging.info('Deleted:\n%s', self.format(qs))
 
     def log_stats(self):
         self.stats['final'] = self.queryset().count() - self.stats['deleted']
@@ -208,10 +208,10 @@ class Scraper(object):
             values.append('%s: %s' % (key.title(), value))
         logging.info(', '.join(values))
 
-    def log_extra(self, field, *args):
-        self.stats[field] = self.stats.get(field, 0) + 1
-        if args:
-            logging.info(*args)
+    def log_extra(self, field, msg=None, args=None, count=0):
+        self.stats[field] = self.stats.get(field, 0) + count
+        if msg:
+            logging.info(msg, *(args or []))
 
 
 # TODO(adamcik): add constraint for code+semester to prevent multiple versions
@@ -239,7 +239,6 @@ class CourseScraper(Scraper):
 class LectureScraper(Scraper):
     fields = ('course', 'day', 'start', 'end', 'type')
     extra_fields = ('rooms', 'lecturers', 'groups', 'weeks')
-    commit_fields = Scraper.commit_fields + ('rooms',)
 
     def queryset(self):
         qs = Lecture.objects.filter(course__semester=self.semester)
@@ -247,6 +246,10 @@ class LectureScraper(Scraper):
 
     def format(self, items):
         return utils.columnify(items, 2)
+
+    def needs_commit(self, stats=None):
+        return super(LectureScraper, self).needs_commit(
+            ('created', 'updated', 'deleted', 'rooms'))
 
     def prepare_data(self, data):
         if not data['course'] or not data['start'] or not data['end']:
@@ -342,7 +345,7 @@ class LectureScraper(Scraper):
         if len(rooms) == 1:
             r = rooms.get()
             if code:
-                self.log_extra('rooms', 'Adding room code %s to %s', code, r.name)
+                self.log_extra('rooms', 'Adding room code %s to %s', [code, r.name])
                 r.code = code
                 r.save()
             return r
@@ -400,10 +403,9 @@ class RoomScraper(Scraper):
     def queryset(self):
         return Room.objects.order_by('name', 'code')
 
-    def prepare_delete(self):
-        logging.warning('This scraper newer deletes any rooms as we would')
-        logging.warning('loose data we can\'t get back.')
-        return self.queryset().none()  # Never delete rooms.
+    def delete(self, qs):
+        logging.warning('This scraper newer deletes any rooms as we would '
+                        'loose data we can\'t get back.')
 
 
 class SyllabysScraper(Scraper):
@@ -425,6 +427,6 @@ class SyllabysScraper(Scraper):
         elif qs:
             logging.warning('Duplicate syllabus info for: %s', data['code'])
 
-    def prepare_delete(self):
-        # Don't delete anything as we just want to add syllabus URLs
-        return self.queryset().none()
+    def delete(self, qs):
+        # TODO(adamcik): clear syllabus we didn't find.
+        pass
