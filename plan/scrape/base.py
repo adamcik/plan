@@ -350,7 +350,8 @@ class LectureScraper(Scraper):
                 r.save()
             return r
 
-        # Fetch or create room with code as primary lookup
+        if not code:
+            return Room.objects.get_or_create(name=name)[0]
         return Room.objects.get_or_create(code=code, defaults={'name': name})[0]
 
     def lecturer(self, name):
@@ -362,7 +363,7 @@ class LectureScraper(Scraper):
 
 class ExamScraper(Scraper):
     fields = ('course', 'type', 'combination', 'exam_date')
-    default_fields = ('duration', 'exam_time', 'handout_date', 'handout_time')
+    extra_fields = ('duration', 'exam_time', 'handout_date', 'handout_time')
 
     def queryset(self):
         qs = Exam.objects.filter(course__semester=self.semester)
