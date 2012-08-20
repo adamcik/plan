@@ -118,7 +118,15 @@
 
   <hr />
 
-  <p style="text-align: center">
+  {% if SHARE_LINKS %}
+    <p id="share">
+      {% for icon, name, url in SHARE_LINKS %}
+          <a href="{{ url }}" class="icon-{{ icon }}">{{ name }}</a>
+      {% endfor %}
+    </p>
+  {% endif %}
+
+  <p style="text-align: center" class="small">
     {% blocktrans %}
     The source code is freely available under the
     <a href="http://www.gnu.org/licenses/agpl-3.0.html">Affero General Public License</a>
