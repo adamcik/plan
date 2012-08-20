@@ -155,9 +155,9 @@ TIMETABLE_INSTITUTION_LINKS = (
 )
 
 TIMETABLE_SHARE_LINKS = (
-    ('google-plus', 'Google+', 'https://plus.google.com/share?url=%(url)s'),
-    ('twitter', 'Twitter', 'https://twitter.com/share?url=%(url)s&hashtags=timeplan'),
-    ('facebook', 'Facebook', 'https://www.facebook.com/sharer/sharer.php?u=%(url)s'),
+    ('icon-google-plus-sign', 'Google+', 'https://plus.google.com/share?url=%(url)s'),
+    ('icon-twitter-sign', 'Twitter', 'https://twitter.com/share?url=%(url)s&hashtags=timeplan'),
+    ('icon-facebook-sign', 'Facebook', 'https://www.facebook.com/sharer/sharer.php?u=%(url)s'),
 )
 
 # Tuples with start and end date of semesters:

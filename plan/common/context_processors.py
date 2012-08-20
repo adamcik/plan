@@ -1,16 +1,19 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 from django.conf import settings
+from django.core import urlresolvers
 from django.utils import translation
 
 _ = translation.gettext_lazy
 
 def processor(request):
     sitename = settings.TIMETABLE_HOSTNAME or request.META['HTTP_HOST']
+    scheme = 'https://' if request.is_secure() else 'http://'
+    url = scheme + sitename + urlresolvers.reverse('frontpage')
 
     share_links = []
     for icon, name, link in settings.TIMETABLE_SHARE_LINKS:
-        share_links.append((icon, name, link % {'url': sitename}))
+        share_links.append((icon, name, link % {'url': url}))
 
     institution_links = []
     for name, url in settings.TIMETABLE_INSTITUTION_LINKS:
