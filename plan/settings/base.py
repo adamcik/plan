@@ -154,9 +154,6 @@ TIMETABLE_INSTITUTION_LINKS = (
     (ugettext('Find rooms'),     'http://www.ntnu.no/studieinformasjon/rom/'),
 )
 
-# Person responsible for this instalation.
-TIMETABLE_OWNER = 'John Doe'
-
 # Tuples with start and end date of semesters:
 TIMETABLE_SEMESTERS = {
     'spring': ((1,1), (6,30)),

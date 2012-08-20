@@ -432,3 +432,20 @@ td.error input, td.error select {
 #setlang img {
 	vertical-align: -17%;
 }
+#social {
+	text-align: center;
+	padding: 1em 0;
+}
+#social a {
+	opacity: 0.7;
+	font-size: 116%; /* 15px */
+	color: #333;
+	text-decoration: none;
+	margin: 0 3px;
+}
+#social a:hover {
+	opacity: 1;
+}
+#social a:after {
+	content: " " attr(title);
+}
