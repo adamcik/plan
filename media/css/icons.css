@@ -1,0 +1,39 @@
+[class^="icon-"],
+[class*=" icon-"] {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+  vertical-align: text-top;
+  background: url("../gfx/icons/sprite.png") no-repeat;
+}
+.icon-arrow-right { background-position: 0px 0px; }
+.icon-ban-circle { background-position: 0px -19px; }
+.icon-bookmark { background-position: 0px -38px; }
+.icon-book { background-position: 0px -57px; }
+.icon-briefcase { background-position: 0px -76px; }
+.icon-calendar { background-position: -19px 0px; }
+.icon-cog { background-position: -19px -19px; }
+.icon-cogs { background-position: -19px -38px; }
+.icon-download-alt { background-position: -19px -57px; }
+.icon-download { background-position: -19px -76px; }
+.icon-external-link { background-position: -38px 0px; }
+.icon-facebook-sign { background-position: -38px -19px; }
+.icon-flag { background-position: -38px -38px; }
+.icon-flattr-sign { background-position: -38px -57px; }
+.icon-globe { background-position: -38px -76px; }
+.icon-google-plus-sign { background-position: -57px 0px; }
+.icon-info-sign { background-position: -57px -19px; }
+.icon-link { background-position: -57px -38px; }
+.icon-list-alt { background-position: -57px -57px; }
+.icon-list { background-position: -57px -76px; }
+.icon-pencil { background-position: -76px 0px; }
+.icon-plus-sign { background-position: -76px -19px; }
+.icon-question-sign { background-position: -76px -38px; }
+.icon-remove { background-position: -76px -57px; }
+.icon-save { background-position: -76px -76px; }
+.icon-time { background-position: -95px 0px; }
+.icon-twitter-sign { background-position: -95px -19px; }
+.icon-warning-sign { background-position: -95px -38px; }
+.icon-wrench { background-position: -95px -57px; }
+
