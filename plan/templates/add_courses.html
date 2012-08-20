@@ -10,7 +10,7 @@
     <p>
       <span class="large">{% trans "Please enter the codes for the courses you want to attend" %}</span>
       <input id="course" type="text" name="course_add" size="46" data-autocomplete="{% url 'course-query' semester.year semester.slug %}"/>
-      <button name="submit_add" type="submit"><span class="icon add">{% trans "Add course" %}</span></button>
+      <button name="submit_add" type="submit"><i class="icon-plus-sign"></i> {% trans "Add course" %}</button>
     </p>
   </form>
 {% endif %}

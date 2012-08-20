@@ -119,14 +119,6 @@
 
   <hr />
 
-  {% if SHARE_LINKS %}
-    <p id="share">
-      {% for icon, name, url in SHARE_LINKS %}
-          <a href="{{ url }}"><i class="{{ icon }}"></i> {{ name }}</a>
-      {% endfor %}
-    </p>
-  {% endif %}
-
   <p style="text-align: center" class="small">
     {% blocktrans %}
     The source code is freely available under the
@@ -144,4 +136,12 @@
     <a href="http://colorbrewer2.org/">ColorBrewer</a>
     </span>
   </p>
+
+  {% if SHARE_LINKS %}
+    <p id="share">
+      {% for icon, name, url in SHARE_LINKS %}
+          <a href="{{ url }}"><i class="{{ icon }}"></i> {{ name }}</a>
+      {% endfor %}
+    </p>
+  {% endif %}
 {% endblock %}

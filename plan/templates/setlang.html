@@ -7,7 +7,7 @@
   {% for code, name in LANGUAGES %}
     {% ifnotequal LANGUAGE_CODE code %}
       {% language code %}
-        <a href="?{{ code }}" class="icon {{ code }}-flag">{% trans "Switch to English" %}</a>
+        <i class="icon-globe"></i> <a href="?{{ code }}">{% trans "Switch to English" %}</a>
       {% endlanguage %}
     {% endifnotequal %}
   {% endfor %}

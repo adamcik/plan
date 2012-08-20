@@ -50,7 +50,7 @@
             </td>
             <td align="center">
               {% if course.syllabus %}
-                <a href="{{ course.syllabus }}"><i class="icon book"></i></a>
+                <a href="{{ course.syllabus }}"><i class="icon-book"></i></a>
               {% else %}
                 -
               {% endif %}
@@ -64,14 +64,8 @@
 
   {% if courses and advanced %}
     <p class="noprint">
-      <!--[if lte IE 6]>
-        <input name="submit_name" type="submit" value="{% trans "Update names" %}" class="icon name"  style="width: 9em; height: 1.8em;" />
-        <input name="submit_remove" type="submit" value="{% trans "Remove selected" %}" class="icon remove" style="width: 10em; height: 1.8em" />
-      <![endif]-->
-      <!--[if gt IE 6]><!-->
-        <button name="submit_name" type="submit"><span class="icon name">{% trans "Update names" %}</span></button>
-        <button name="submit_remove" type="submit"><span class="icon remove">{% trans "Remove selected" %}</span></button>
-      <!--<![endif]-->
+      <button name="submit_name" type="submit"><i class="icon-pencil"></i> {% trans "Update names" %}</button>
+      <button name="submit_remove" type="submit"><i class="icon-remove"></i> {% trans "Remove selected" %}</button>
     </p>
   {% else %}
     <p class="noprint">

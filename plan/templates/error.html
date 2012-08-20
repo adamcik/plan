@@ -12,7 +12,8 @@
 {% block bd %}
   <div id="help">
     {% if to_many_subscriptions %}
-      <p class="large icon error">
+      <p class="large">
+        <i class="icon-flag"></i>
         {% blocktrans %}
           Sorry, but the generator has been set up to limit
           timetables to {{ max }} courses.
@@ -20,7 +21,8 @@
       </p>
     {% endif %}
     {% if courses %}
-      <p class="large"><img alt="" src="{% static 'gfx/error.png' %}" />
+      <p class="large">
+        <i class="icon-flag"></i>
         {% trans "Adding the following courses failed:" %}
       </p>
       <ul>
@@ -29,7 +31,7 @@
         {% endfor %}
       </ul>
     {% endif %}
-    <p class="large right">
+    <p class="large">
       {% url 'schedule-advanced' year type slug as adavanced_url %}
       {% blocktrans %}
         Back to your <a href="{{ adavanced_url }}">schedule</a>.

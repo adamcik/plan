@@ -53,7 +53,7 @@
     </table>
     <p class="noprint">
       {% if advanced %}
-        <button type="submit"><span class="icon hide">{% trans "Hide selected lectures" %}</span></button>
+        <button type="submit"><i class="icon-ban-circle"></i> {% trans "Hide selected lectures" %}</span></button>
       {% else %}
         {% url 'schedule-advanced' semester.year semester.slug slug as advanced_url %}
         {% blocktrans %}
