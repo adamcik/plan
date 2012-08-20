@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Timeplan\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-08-14 01:27+0200\n"
+"POT-Creation-Date: 2012-08-21 01:24+0200\n"
 "PO-Revision-Date: 2009-09-29 14:46+0100\n"
 "Last-Translator: Thomas Adamcik <timeplan@adamcik.no>\n"
 "Language-Team:  <timeplan@adamcik.no>\n"
@@ -183,8 +183,8 @@ msgstr "Varighet"
 msgid "Duration in hours"
 msgstr "Varighet i timer"
 
-#: plan/common/models.py:334 plan/ical/views.py:134 plan/ical/views.py:135
-#: plan/ical/views.py:138 plan/ical/views.py:139
+#: plan/common/models.py:334 plan/ical/views.py:135 plan/ical/views.py:136
+#: plan/ical/views.py:139 plan/ical/views.py:140
 msgid "Exam"
 msgstr "Eksamen"
 
@@ -245,20 +245,20 @@ msgstr "Tid"
 msgid "Done"
 msgstr "Ferdig"
 
-#: plan/ical/views.py:22 plan/ical/views.py:48 plan/templates/tips.html:9
+#: plan/ical/views.py:22 plan/ical/views.py:49 plan/templates/tips.html:9
 msgid "lectures"
 msgstr "forelesninger"
 
-#: plan/ical/views.py:22 plan/ical/views.py:52 plan/templates/tips.html:10
+#: plan/ical/views.py:22 plan/ical/views.py:53 plan/templates/tips.html:10
 msgid "exams"
 msgstr "eksamener"
 
-#: plan/ical/views.py:36
+#: plan/ical/views.py:37
 #, python-format
 msgid "%(slug)s' %(semester)s %(year)s schedule for %(resources)s"
 msgstr "%(slug)s' timeplan for %(semester)s %(year)s, %(resources)s"
 
-#: plan/ical/views.py:38
+#: plan/ical/views.py:39
 #, python-format
 msgid "%(slug)s's %(semester)s %(year)s schedule for %(resources)s"
 msgstr "%(slug)ss timeplan for %(semester)s %(year)s, %(resources)s"
@@ -312,7 +312,7 @@ msgstr "Viktige datoer"
 msgid "Page not found"
 msgstr "Siden kunne ikke finnes"
 
-#: plan/templates/404.html:19
+#: plan/templates/404.html:20
 #, python-format
 msgid ""
 "\n"
@@ -329,11 +329,11 @@ msgstr ""
 msgid "Server error"
 msgstr "Serverfeil"
 
-#: plan/templates/500.html:16
+#: plan/templates/500.html:17
 msgid "An error has occurred, sorry about the inconvenience."
 msgstr "En feil oppstod, beklager bryderiet."
 
-#: plan/templates/500.html:19
+#: plan/templates/500.html:18
 msgid "The server administrator has all ready been notified of this error."
 msgstr "Serveradministrator er varslet om feilen."
 
@@ -368,7 +368,7 @@ msgstr ""
 "      Timeplangenerator for %(institution)s-studenter\n"
 "    "
 
-#: plan/templates/base_site.html:87
+#: plan/templates/base_site.html:89
 #, python-format
 msgid ""
 "\n"
@@ -390,7 +390,7 @@ msgstr ""
 "riktige før du stoler på dem.\n"
 "          "
 
-#: plan/templates/base_site.html:96
+#: plan/templates/base_site.html:98
 #, python-format
 msgid ""
 "\n"
@@ -403,11 +403,11 @@ msgstr ""
 "      Siden har ingen offisiell tilknytning til %(institution)s.\n"
 "      "
 
-#: plan/templates/base_site.html:102
+#: plan/templates/base_site.html:104
 msgid "is run and hosted by"
 msgstr "drivers på frivilig basis av"
 
-#: plan/templates/base_site.html:122
+#: plan/templates/base_site.html:124
 #, python-format
 msgid ""
 "\n"
@@ -424,7 +424,7 @@ msgstr ""
 "    på <a href=\"%(SOURCE_URL)s\">%(SOURCE_URL)s</a>.\n"
 "      "
 
-#: plan/templates/base_site.html:129
+#: plan/templates/base_site.html:131
 msgid "Built using:"
 msgstr "Bygget ved hjelp av:"
 
@@ -467,15 +467,15 @@ msgstr "Beskrivelse"
 msgid "Syllabus"
 msgstr "Pensum"
 
-#: plan/templates/courses.html:68 plan/templates/courses.html.py:72
+#: plan/templates/courses.html:67
 msgid "Update names"
 msgstr "Oppdater navn"
 
-#: plan/templates/courses.html:69 plan/templates/courses.html.py:73
+#: plan/templates/courses.html:68
 msgid "Remove selected"
 msgstr "Slett valgte"
 
-#: plan/templates/courses.html:79
+#: plan/templates/courses.html:73
 #, python-format
 msgid ""
 "\n"
@@ -493,7 +493,7 @@ msgstr ""
 msgid "Couldn't add one or more courses"
 msgstr "Kunne ikke legge til ett eller flere emner"
 
-#: plan/templates/error.html:16
+#: plan/templates/error.html:17
 #, python-format
 msgid ""
 "\n"
@@ -506,11 +506,11 @@ msgstr ""
 "          %(max)s emner pr. timeplan.\n"
 "        "
 
-#: plan/templates/error.html:24
+#: plan/templates/error.html:26
 msgid "Adding the following courses failed:"
 msgstr "Følgende emner ble ikke lagt inn:"
 
-#: plan/templates/error.html:34
+#: plan/templates/error.html:36
 #, python-format
 msgid ""
 "\n"
@@ -521,7 +521,7 @@ msgstr ""
 "        Tilbake til <a href=\"%(adavanced_url)s\">timeplanen</a>.\n"
 "      "
 
-#: plan/templates/error.html:40
+#: plan/templates/error.html:42
 #, python-format
 msgid ""
 "\n"
@@ -563,7 +563,7 @@ msgstr "Endre paralleller"
 msgid "Please choose the course variants you belong to."
 msgstr "Velg din parallell."
 
-#: plan/templates/groups.html:14 plan/templates/schedule_table_footer.html:34
+#: plan/templates/groups.html:14 plan/templates/schedule_table_footer.html:33
 msgid "All"
 msgstr "Alle"
 
@@ -653,11 +653,11 @@ msgstr "Avanserte innstillinger"
 msgid "Tips"
 msgstr "Tips"
 
-#: plan/templates/schedule_table_footer.html:33
+#: plan/templates/schedule_table_footer.html:32
 msgid "Weeks:"
 msgstr "Uker: "
 
-#: plan/templates/schedule_table_footer.html:36
+#: plan/templates/schedule_table_footer.html:35
 msgid "Current"
 msgstr "Inneværende"
 
@@ -738,75 +738,75 @@ msgstr "Antall unike timeplaner"
 msgid "Total number of unique courses added"
 msgstr "Antall unike emner lagt til"
 
-#: plan/templates/tips.html:17
+#: plan/templates/tips.html:19
 msgid ""
 "Multiple courses can be added at once by separating course codes with spaces."
 msgstr ""
 "Legg til flere emner samtidig ved å skrive inn emnekoder adskilt med "
 "mellomrom."
 
-#: plan/templates/tips.html:20
+#: plan/templates/tips.html:23
 #, python-format
 msgid ""
 "\n"
-"        For quick access to your schedule simply go to\n"
-"        <a href=\"%(shortcut_url)s\">%(host)s%(shortcut_url)s</a>\n"
-"      "
+"          For quick access to your schedule simply go to\n"
+"          <a href=\"%(shortcut_url)s\">%(host)s%(shortcut_url)s</a>\n"
+"        "
 msgstr ""
 "\n"
 "        Visste du at du alltid finner timeplanen din på: \n"
 "        <a href=\"%(shortcut_url)s\">%(host)s%(shortcut_url)s</a>\n"
 "      "
 
-#: plan/templates/tips.html:26
+#: plan/templates/tips.html:30
 #, python-format
 msgid ""
 "\n"
-"        Did you know that you can choose to hide lectures that you don't "
+"          Did you know that you can choose to hide lectures that you don't "
 "want to be shown under\n"
-"        <a href=\"%(adavanced_url)s\">advanced options</a>?\n"
-"      "
+"          <a href=\"%(adavanced_url)s\">advanced options</a>?\n"
+"        "
 msgstr ""
 "\n"
 "        Visste du at du kan skjule forelesninger under\n"
 "        <a href=\"%(adavanced_url)s\">avanserte innstillinger</a>?\n"
 "      "
 
-#: plan/templates/tips.html:32
+#: plan/templates/tips.html:37
 msgid ""
 "\n"
-"        Did you know that you can select which groups (paralleller) you\n"
-"        want to attend, and than you can select more than one group?\n"
-"      "
+"          Did you know that you can select which groups (paralleller) you\n"
+"          want to attend, and than you can select more than one group?\n"
+"        "
 msgstr ""
 "\n"
 "        Visste du at du kan velge hvilken parallell du tilhører,\n"
 "        og at du kan velge mer enn én?\n"
 "      "
 
-#: plan/templates/tips.html:38
+#: plan/templates/tips.html:44
 #, python-format
 msgid ""
 "\n"
-"        Did you know that you can change which names are used for courses "
+"          Did you know that you can change which names are used for courses "
 "under\n"
-"        <a href=\"%(adavanced_url)s\">advanced options</a>?\n"
-"      "
+"          <a href=\"%(adavanced_url)s\">advanced options</a>?\n"
+"        "
 msgstr ""
 "\n"
 "        Visste du at du kan endre visningsnavn på emner under\n"
 "        <a href=\"%(adavanced_url)s\">avanserte innstillinger</a>?\n"
 "       "
 
-#: plan/templates/tips.html:46
+#: plan/templates/tips.html:55
 #, python-format
 msgid ""
 "\n"
-"        The <a href=\"%(course_list_url)s\">course list</a>\n"
-"        contains all courses for the current semester, including exam dates "
-"and\n"
-"        allows you to easily select courses to add to your schedule.\n"
-"      "
+"          The <a href=\"%(course_list_url)s\">course list</a>\n"
+"          contains all courses for the current semester, including exam "
+"dates and\n"
+"          allows you to easily select courses to add to your schedule.\n"
+"        "
 msgstr ""
 "\n"
 "        <a href=\"%(course_list_url)s\">Emnelisten</a>\n"
@@ -815,15 +815,15 @@ msgstr ""
 "        og lar deg enkelt legge dem til timeplanen.\n"
 "      "
 
-#: plan/templates/tips.html:53
+#: plan/templates/tips.html:63
 #, python-format
 msgid ""
 "\n"
-"        Calendar export:\n"
-"        <a href=\"%(ical_lectures_url)s\">lectures</a>,\n"
-"        <a href=\"%(ical_exams_url)s\">exams</a> or\n"
-"        <a href=\"%(ical_all_url)s\">both combined</a>.\n"
-"      "
+"          Calendar export:\n"
+"          <a href=\"%(ical_lectures_url)s\">lectures</a>,\n"
+"          <a href=\"%(ical_exams_url)s\">exams</a> or\n"
+"          <a href=\"%(ical_all_url)s\">both combined</a>.\n"
+"        "
 msgstr ""
 "\n"
 "         Eksporter kalenderfil:\n"
@@ -832,7 +832,7 @@ msgstr ""
 "         <a href=\"%(ical_all_url)s\">begge kombinert</a>.\n"
 "      "
 
-#: plan/templates/tips.html:60
+#: plan/templates/tips.html:70
 msgid ""
 "Simply download or copy the link to the calendar you want and add it to any "
 "application that supports the Ical format."
@@ -840,18 +840,18 @@ msgstr ""
 "Last ned eller bruk lenken i valgfritt kalendersystem. (Må støtte ical-"
 "formatet)."
 
-#: plan/templates/tips.html:63
+#: plan/templates/tips.html:74
 #, python-format
 msgid ""
 "\n"
-"        Google calendar:\n"
-"        <a target=\"_blank\" href=\"%(google_cal_prefix)s%(host)s"
+"          Google calendar:\n"
+"          <a target=\"_blank\" href=\"%(google_cal_prefix)s%(host)s"
 "%(ical_lectures_url)s\">lectures</a>,\n"
-"        <a target=\"_blank\" href=\"%(google_cal_prefix)s%(host)s"
+"          <a target=\"_blank\" href=\"%(google_cal_prefix)s%(host)s"
 "%(ical_exams_url)s\">exams</a> or\n"
-"        <a target=\"_blank\" href=\"%(google_cal_prefix)s%(host)s"
+"          <a target=\"_blank\" href=\"%(google_cal_prefix)s%(host)s"
 "%(ical_all_url)s\">both combined</a>.\n"
-"      "
+"        "
 msgstr ""
 "\n"
 "        Google Calendar:\n"
@@ -863,7 +863,7 @@ msgstr ""
 "%(ical_all_url)s\">begge kombinert</a>.\n"
 "      "
 
-#: plan/templates/tips.html:70
+#: plan/templates/tips.html:81
 msgid ""
 "Simply click the calendar type you want and it will be added to Google "
 "calendar."
