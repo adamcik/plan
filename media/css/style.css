@@ -271,7 +271,7 @@ td.error input, td.error select {
 	padding-right: 0.1em;
 }
 #links dl, #tips dl {
-	margin: 0;
+	margin: 0 0 1em;
 }
 #links dt, #tips dt {
   font-weight: bold;
