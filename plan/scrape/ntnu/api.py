@@ -76,6 +76,10 @@ class Lectures(base.LectureScraper):
 
             for activity in result['activity']:
                 for schedule in activity['activitySchedules']:
+                    if 'activityDescription' not in activity:
+                        logging.warning('A %s lecture does not have a type', course.code)
+                        continue
+
                     yield {'course': course,
                            'type': activity['activityDescription'],
                            'day':  schedule['dayNumber'],
