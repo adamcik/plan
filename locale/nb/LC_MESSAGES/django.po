@@ -405,7 +405,7 @@ msgstr ""
 
 #: plan/templates/base_site.html:104
 msgid "is run and hosted by"
-msgstr "drivers på frivilig basis av"
+msgstr "drives på frivilig basis av"
 
 #: plan/templates/base_site.html:124
 #, python-format
