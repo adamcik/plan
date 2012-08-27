@@ -88,7 +88,8 @@ class Command(management.LabelCommand):
         except Semester.DoesNotExist:
             if not options['create']:
                 raise
-            return semester.save()
+            semester.save()
+            return semester
 
     def load_scraper(self, type):
         try:
