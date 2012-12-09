@@ -74,7 +74,7 @@ class Lectures(base.LectureScraper):
             if not result:
                 continue
 
-            for activity in result['activity']:
+            for activity in result['activity'] or []:
                 for schedule in activity['activitySchedules']:
                     if 'activityDescription' not in activity:
                         logging.warning('A %s lecture does not have a type', course.code)
