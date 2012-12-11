@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Timeplan\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-08-21 01:24+0200\n"
+"POT-Creation-Date: 2012-12-12 00:28+0100\n"
 "PO-Revision-Date: 2009-09-29 14:46+0100\n"
 "Last-Translator: Thomas Adamcik <timeplan@adamcik.no>\n"
 "Language-Team:  <timeplan@adamcik.no>\n"
@@ -50,13 +50,13 @@ msgid "Subscriptions"
 msgstr "Abonnementer"
 
 #: plan/common/models.py:81 plan/common/models.py:94 plan/common/models.py:111
-#: plan/common/models.py:127 plan/common/models.py:303
+#: plan/common/models.py:127 plan/common/models.py:269
 msgid "Code"
 msgstr "Kode"
 
 #: plan/common/models.py:82 plan/common/models.py:95 plan/common/models.py:112
-#: plan/common/models.py:130 plan/common/models.py:304
-#: plan/common/models.py:358 plan/templates/course_list.html:46
+#: plan/common/models.py:130 plan/common/models.py:270
+#: plan/common/models.py:324 plan/templates/course_list.html:46
 msgid "Name"
 msgstr "Navn"
 
@@ -74,7 +74,7 @@ msgstr "Forelesningstyper"
 
 #: plan/common/models.py:96 plan/common/models.py:113
 #: plan/common/models.py:133 plan/common/models.py:134
-#: plan/common/models.py:329
+#: plan/common/models.py:295
 msgid "URL"
 msgstr "URL"
 
@@ -139,126 +139,130 @@ msgstr "År"
 msgid "Type"
 msgstr "Type"
 
-#: plan/common/models.py:232
+#: plan/common/models.py:228
+msgid "Active"
+msgstr ""
+
+#: plan/common/models.py:233
 msgid "Semester"
 msgstr "Semester"
 
-#: plan/common/models.py:233
+#: plan/common/models.py:234
 msgid "Semesters"
 msgstr "Semestre"
 
-#: plan/common/models.py:312
+#: plan/common/models.py:278
 msgid "Exam type"
 msgstr "Eksamensform"
 
-#: plan/common/models.py:313
+#: plan/common/models.py:279
 msgid "Exam types"
 msgstr "Eksamensformer"
 
-#: plan/common/models.py:319
+#: plan/common/models.py:285
 msgid "Combination"
 msgstr ""
 
-#: plan/common/models.py:321
+#: plan/common/models.py:287
 msgid "Exam date"
 msgstr "Eksamensdato"
 
-#: plan/common/models.py:322 plan/templates/course_list.html:48
+#: plan/common/models.py:288 plan/templates/course_list.html:48
 msgid "Exam time"
 msgstr "Eksamenstid"
 
-#: plan/common/models.py:324
+#: plan/common/models.py:290
 msgid "Handout date"
 msgstr "Utleveringsdato"
 
-#: plan/common/models.py:325 plan/templates/course_list.html:50
+#: plan/common/models.py:291 plan/templates/course_list.html:50
 msgid "Handout time"
 msgstr "Utleveringstid"
 
-#: plan/common/models.py:327
+#: plan/common/models.py:293
 msgid "Duration"
 msgstr "Varighet"
 
-#: plan/common/models.py:328
+#: plan/common/models.py:294
 msgid "Duration in hours"
 msgstr "Varighet i timer"
 
-#: plan/common/models.py:334 plan/ical/views.py:135 plan/ical/views.py:136
-#: plan/ical/views.py:139 plan/ical/views.py:140
+#: plan/common/models.py:300 plan/ical/views.py:136 plan/ical/views.py:137
+#: plan/ical/views.py:140 plan/ical/views.py:141
 msgid "Exam"
 msgstr "Eksamen"
 
-#: plan/common/models.py:335 plan/templates/exams.html:3
+#: plan/common/models.py:301 plan/templates/exams.html:3
 msgid "Exams"
 msgstr "Eksamener"
 
-#: plan/common/models.py:345
+#: plan/common/models.py:311
 msgid "Week number"
 msgstr "Ukenummer"
 
-#: plan/common/models.py:350
+#: plan/common/models.py:316
 msgid "Lecture week"
 msgstr "Forelesningsuke"
 
-#: plan/common/models.py:351
+#: plan/common/models.py:317
 msgid "Lecture weeks"
 msgstr "Forelesningsuker"
 
-#: plan/common/models.py:361
+#: plan/common/models.py:327
 msgid "Lecturer"
 msgstr "Foreleser"
 
-#: plan/common/models.py:362 plan/templates/lectures.html:22
+#: plan/common/models.py:328 plan/templates/lectures.html:22
 msgid "Lecturers"
 msgstr "Forelesere"
 
-#: plan/common/models.py:373
+#: plan/common/models.py:339
 msgid "Week day"
 msgstr "Ukedag"
 
-#: plan/common/models.py:375
+#: plan/common/models.py:341
 msgid "Start time"
 msgstr "Starter"
 
-#: plan/common/models.py:376
+#: plan/common/models.py:342
 msgid "End time"
 msgstr "Slutter"
 
-#: plan/common/models.py:386 plan/common/models.py:387
+#: plan/common/models.py:352 plan/common/models.py:353
 msgid "Lecture"
 msgstr "Forelesning"
 
-#: plan/common/models.py:442
+#: plan/common/models.py:408
 msgid "Task"
 msgstr "Oppgave"
 
-#: plan/common/models.py:443
+#: plan/common/models.py:409
 msgid "Due date"
 msgstr "Forfallsdato"
 
-#: plan/common/models.py:444 plan/templates/exams.html:9
+#: plan/common/models.py:410 plan/templates/exams.html:9
 #: plan/templates/lectures.html:18
 msgid "Time"
 msgstr "Tid"
 
-#: plan/common/models.py:445
+#: plan/common/models.py:411
 msgid "Done"
 msgstr "Ferdig"
 
-#: plan/ical/views.py:22 plan/ical/views.py:49 plan/templates/tips.html:9
+#: plan/ical/views.py:23 plan/ical/views.py:52 plan/templates/tips.html:9
 msgid "lectures"
 msgstr "forelesninger"
 
-#: plan/ical/views.py:22 plan/ical/views.py:53 plan/templates/tips.html:10
+#: plan/ical/views.py:23 plan/ical/views.py:56 plan/templates/tips.html:10
 msgid "exams"
 msgstr "eksamener"
 
-#: plan/ical/views.py:37
+#: plan/ical/views.py:40
 #, python-format
 msgid "%(slug)s' %(semester)s %(year)s schedule for %(resources)s"
 msgstr "%(slug)s' timeplan for %(semester)s %(year)s, %(resources)s"
 
-#: plan/ical/views.py:39
+#: plan/ical/views.py:42
 #, python-format
 msgid "%(slug)s's %(semester)s %(year)s schedule for %(resources)s"
 msgstr "%(slug)ss timeplan for %(semester)s %(year)s, %(resources)s"
@@ -271,42 +275,37 @@ msgstr "Norsk"
 msgid "English"
 msgstr "engelsk"
 
-#: plan/settings/base.py:147 plan/settings/local.py:49
-#: plan/templates/schedule_table_footer.html:9
+#: plan/settings/base.py:147 plan/templates/schedule_table_footer.html:9
 msgid "Course list"
 msgstr "Emneliste"
 
-#: plan/settings/base.py:148 plan/settings/local.py:50
+#: plan/settings/base.py:148
 msgid "Study Guide"
 msgstr "Studiehåndbok"
 
-#: plan/settings/base.py:149 plan/settings/local.py:51
+#: plan/settings/base.py:149
 msgid "Exam dates"
 msgstr "Eksamensdatoer"
 
-#: plan/settings/base.py:150 plan/settings/local.py:52
+#: plan/settings/base.py:150
 msgid "Exam rules"
 msgstr "Eksamensregler"
 
-#: plan/settings/base.py:151 plan/settings/local.py:53
+#: plan/settings/base.py:151
 msgid "Lecture times"
 msgstr "Forelesningstider"
 
-#: plan/settings/base.py:152 plan/settings/local.py:54
+#: plan/settings/base.py:152
 msgid "Map Dragvoll"
 msgstr "Kart: Dragvoll"
 
-#: plan/settings/base.py:153 plan/settings/local.py:55
+#: plan/settings/base.py:153
 msgid "Map Gløshaugen"
 msgstr "Kart: Gløshaugen"
 
-#: plan/settings/base.py:154 plan/settings/local.py:56
+#: plan/settings/base.py:154
 msgid "Find rooms"
 msgstr "Søk etter rom"
-
-#: plan/settings/local.py:57
-msgid "Important dates"
-msgstr "Viktige datoer"
 
 #: plan/templates/404.html:8 plan/templates/404.html.py:12
 msgid "Page not found"
@@ -368,7 +367,7 @@ msgstr ""
 "      Timeplangenerator for %(institution)s-studenter\n"
 "    "
 
-#: plan/templates/base_site.html:89
+#: plan/templates/base_site.html:88
 #, python-format
 msgid ""
 "\n"
@@ -390,7 +389,7 @@ msgstr ""
 "riktige før du stoler på dem.\n"
 "          "
 
-#: plan/templates/base_site.html:98
+#: plan/templates/base_site.html:97
 #, python-format
 msgid ""
 "\n"
@@ -403,11 +402,11 @@ msgstr ""
 "      Siden har ingen offisiell tilknytning til %(institution)s.\n"
 "      "
 
-#: plan/templates/base_site.html:104
+#: plan/templates/base_site.html:103
 msgid "is run and hosted by"
 msgstr "drives på frivilig basis av"
 
-#: plan/templates/base_site.html:124
+#: plan/templates/base_site.html:123
 #, python-format
 msgid ""
 "\n"
@@ -424,7 +423,7 @@ msgstr ""
 "    på <a href=\"%(SOURCE_URL)s\">%(SOURCE_URL)s</a>.\n"
 "      "
 
-#: plan/templates/base_site.html:131
+#: plan/templates/base_site.html:130
 msgid "Built using:"
 msgstr "Bygget ved hjelp av:"
 
@@ -626,7 +625,7 @@ msgstr ""
 "          for å vise eller skjule forelesninger.\n"
 "        "
 
-#: plan/templates/schedule_message.html:9
+#: plan/templates/schedule_message.html:10
 #, python-format
 msgid ""
 "\n"
@@ -673,7 +672,20 @@ msgstr "Bytt til norsk"
 msgid "Getting started"
 msgstr "Kom i gang"
 
-#: plan/templates/start.html:56
+#: plan/templates/start.html:57
+#, python-format
+msgid ""
+"\n"
+"            A new semester is available, <a href=\"%(url)s\">click here</a> "
+"to get started.\n"
+"          "
+msgstr ""
+"\n"
+"            Et nytt semester er nå tilgjengelig, <a href=\"%(url)s\">klikk her</a> "
+"for å komme igang.\n"
+"          "
+
+#: plan/templates/start.html:65
 msgid ""
 "\n"
 "              Please enter a short name identifying your personal\n"
@@ -688,11 +700,11 @@ msgstr ""
 "                Finn på et annet om det allerede er tatt.\n"
 "              "
 
-#: plan/templates/start.html:66
+#: plan/templates/start.html:75
 msgid "Start"
 msgstr "Start"
 
-#: plan/templates/start.html:71
+#: plan/templates/start.html:80
 msgid ""
 "\n"
 "          To retrieve your timetable simply enter the same identifier\n"
@@ -704,7 +716,7 @@ msgstr ""
 "opprettet den.\n"
 "          "
 
-#: plan/templates/start.html:81
+#: plan/templates/start.html:90
 #, python-format
 msgid ""
 "\n"
@@ -715,7 +727,7 @@ msgstr ""
 "            Topp %(limit)s emner for %(current)s\n"
 "          "
 
-#: plan/templates/start.html:95
+#: plan/templates/start.html:104
 msgid "No courses have been added to any schedules yet."
 msgstr "Ingen timeplaner er opprettet enda."
 
@@ -893,6 +905,9 @@ msgid ""
 msgstr ""
 "\n"
 "    %(slug)s%(ending)s timeplan for %(type)s %(year)s"
+
+#~ msgid "Important dates"
+#~ msgstr "Viktige datoer"
 
 #~ msgid "Sorry, no semesters have been loaded yet."
 #~ msgstr "Beklager, ingen semester er klartgjort enda."

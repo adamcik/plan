@@ -50,6 +50,15 @@
   <div class="yui-g">
     <div class="yui-u first">
       <h2>{% trans "Getting started" %}</h2>
+      {% if next_semester %}
+        {% url semester next_semester.year next_semester.slug as next_semester_url %}
+        <p class="large">
+          <i class="icon-info-sign"></i>
+          {% blocktrans with url=next_semester_url %}
+            A new semester is available, <a href="{{ url }}">click here</a> to get started.
+          {% endblocktrans %}
+        </p>
+      {% endif %}
       <div id="help">
         <form action="." method="post" id="f">
           <p class="large">

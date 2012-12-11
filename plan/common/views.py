@@ -58,6 +58,14 @@ def getting_started(request, year, semester_type):
     except Semester.DoesNotExist:
         raise http.Http404
 
+    try:
+        next_semester = Semester.objects.next()
+    except Semester.DoesNotExist:
+        next_semester = None
+
+    if next_semester and next_semester == semester:
+        next_semester = None
+
     # Redirect user to their timetable
     if request.method == 'POST':
         schedule_form = forms.ScheduleForm(request.POST)
@@ -73,6 +81,7 @@ def getting_started(request, year, semester_type):
     context.update({
         'color_map': utils.ColorMap(hex=True),
         'current': semester,
+        'next_semester': next_semester,
         'schedule_form': schedule_form,
     })
     return shortcuts.render(request, 'start.html', context)
