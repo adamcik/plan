@@ -4,7 +4,8 @@
         "model": "common.semester", 
         "fields": {
             "type": "spring", 
-            "year": 2009
+            "year": 2009, 
+            "active": "2008-12-20"
         }
     }, 
     {
@@ -12,7 +13,8 @@
         "model": "common.semester", 
         "fields": {
             "type": "fall", 
-            "year": 2009
+            "year": 2009, 
+            "active": "2009-06-20"
         }
     }, 
     {
@@ -20,7 +22,8 @@
         "model": "common.semester", 
         "fields": {
             "type": "spring", 
-            "year": 2010
+            "year": 2010, 
+            "active": "2009-12-20"
         }
     }, 
     {

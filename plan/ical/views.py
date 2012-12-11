@@ -3,6 +3,7 @@
 import copy
 import datetime
 import math
+import socket
 import vobject
 
 from dateutil import rrule
@@ -26,8 +27,10 @@ def ical(request, year, semester_type, slug, ical_type=None):
         resources = [ical_type]
 
     title  = urlresolvers.reverse('schedule', args=[year, semester_type, slug])
+    hostname = (settings.TIMETABLE_HOSTNAME or
+                request.META.get('HTTP_HOST', socket.getfqdn()))
+
     semester = Semester(year=year, type=semester_type)
-    hostname = settings.TIMETABLE_HOSTNAME or request.META['HTTP_HOST']
 
     cal = vobject.iCalendar()
     cal.add('method').value = 'PUBLISH'  # IE/Outlook needs this
@@ -64,9 +67,7 @@ def ical(request, year, semester_type, slug, ical_type=None):
     response['Content-Disposition'] = 'attachment; filename=%s' % filename
     response['X-Robots-Tag'] = 'noindex, nofollow'
 
-    # Aggressively cache old semester ical feeds.
-    if datetime.date.today() > semester.get_last_day():
-        response['Expires'] = 'Thu, 31 Dec 2037 23:55:55 GMT'
+    # TODO(adamcik): add expires header that reduces load on old semesters
 
     return response
 

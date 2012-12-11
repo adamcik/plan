@@ -13,7 +13,7 @@ class BaseTestCase(TestCase):
     def setUp(self):
         self.set_now_to(2009, 1, 1)
 
-        self.semester = Semester.current()
+        self.semester = Semester(year=2009, type='spring')
         self.default_args = [
                 self.semester.year,
                 self.semester.type,

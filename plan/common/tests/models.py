@@ -20,14 +20,7 @@ class ModelsTestCase(BaseTestCase):
         self.assertEquals((2, 1, u'COURSE1', u'Course 1 full name'), stats[1])
         self.assertEquals((1, 3, u'COURSE3', u'Course 3 full name'), stats[2])
 
-        self.assertEquals(15, actual.pop('limit'))
-
-        self.assertEquals({}, actual)
-
     # FIXME test unicode
     # FIXME test course.get_url
     # FIXME test get_stats(int)
     # FIXME test semester.init customisation
-    # FIXME test get_first and last day
-    # FIXME test semester.next
-    # FIXME test semester.current

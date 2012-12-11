@@ -34,7 +34,7 @@ get_current_week = lambda: (now() + datetime.timedelta(days=2)).isocalendar()[1]
 @utils.expires_in(3600)
 def frontpage(request):
     try:
-        semester = Semester.objects.current()
+        semester = Semester.objects.active()
     except Semester.DoesNotExist:
         raise http.Http404
     return shortcuts.redirect('semester', semester.year, semester.slug)
@@ -44,7 +44,7 @@ def frontpage(request):
 def shortcut(request, slug):
     '''Redirect users to their timetable for the current semester'''
     try:
-        semester = Semester.objects.current()
+        semester = Semester.objects.active()
     except Semester.DoesNotExist:
         raise http.Http404
     return schedule_current(request, semester.year, semester.type, slug)
@@ -98,9 +98,15 @@ def course_query(request, year, semester_type):
 
 def schedule_current(request, year, semester_type, slug):
     semester = Semester(year=year, type=semester_type)
-    if semester.is_current:
-        current_week = get_current_week()
+    current_week = get_current_week()
 
+    weeks = Week.objects.filter(
+        lecture__course__subscription__student__slug=slug,
+        lecture__course__semester__year__exact=semester.year,
+        lecture__course__semester__type=semester.type)
+    weeks = weeks.distinct().values_list('number', flat=True)
+
+    if current_week in weeks and semester.year == today().year:
         return shortcuts.redirect(
             'schedule-week', semester.year, semester.slug, slug, current_week)
     return shortcuts.redirect('schedule', semester.year, semester.slug, slug)
@@ -109,7 +115,6 @@ def schedule_current(request, year, semester_type, slug):
 def schedule(request, year, semester_type, slug, advanced=False,
              week=None, all=False):
     '''Page that handels showing schedules'''
-
     current_week = get_current_week()
     if week:
         week = int(week)
@@ -121,7 +126,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
     # Color mapping for the courses
     color_map = utils.ColorMap(hex=True)
 
-    try:  # TODO(adamcik): lookup up to two semesters larger than given ones instead.
+    try:
         semester = Semester.objects.get(year=year, type=semester_type)
     except Semester.DoesNotExist:
         raise http.Http404
@@ -156,6 +161,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
     next_week = None
     prev_week = None
 
+    # TODO(adamcik): lookup actuall valid weeks.
     if week and week < max_week:
         next_week = week+1
 
@@ -188,15 +194,15 @@ def schedule(request, year, semester_type, slug, advanced=False,
             course.alias_form = forms.CourseAliasForm(
                 initial={'alias': alias}, prefix=course.id)
 
-    next_semester = Semester.current().next()
-    if next_semester.year == semester.year and \
-            next_semester.type == semester.type:
+    try:
+        next_semester = Semester.objects.next()
+        next_message = Subscription.objects.get_subscriptions(
+            next_semester.year, next_semester.type, slug).count() == 0
+    except Semester.DoesNotExist:
+        next_semester = None
         next_message = False
-    elif not Semester.objects.filter(year=next_semester.year, type=next_semester.type).count():
-        next_message = False
-    else:
-        next_message = Subscription.objects.get_subscriptions(next_semester.year, next_semester.type, slug).count()
-        next_message = next_message == 0
+
+    semester_is_current = semester.year == today().year and week == current_week
 
     return shortcuts.render(request, 'schedule.html', {
             'advanced': advanced,
@@ -209,6 +215,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
             'next_message': next_message,
             'lectures': lectures,
             'semester': semester,
+            'semester_is_current': semester_is_current,
             'next_semester': next_semester,
             'slug': slug,
             'timetable': table,

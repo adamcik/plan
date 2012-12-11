@@ -77,7 +77,7 @@ class ViewTestCase(BaseTestCase):
     def test_course_list(self):
         # FIXME test POST
 
-        s = Semester.current()
+        s = Semester.objects.active()
         url = self.url('course-list')
         key = '/'.join([str(s.year), s.type, 'courses'])
 

@@ -1,5 +1,7 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+import datetime
+
 from django.db import connection
 from django.db import models
 
@@ -175,6 +177,18 @@ class SubscriptionManager(models.Manager):
 
 
 class SemesterManager(models.Manager):
-    # TODO(adamcik): this is really a latest method.
-    def current(self):
-        return self.get_query_set().order_by('-year', 'type')[0:1].get()
+    def active(self):
+        qs = self.get_query_set()
+        qs = qs.filter(active__lt=datetime.date.today())
+        try:
+            return qs.order_by('-active')[0]
+        except IndexError:
+            raise self.model.DoesNotExist
+
+    def next(self):
+        qs = self.get_query_set()
+        qs = qs.filter(active__gte=datetime.date.today())
+        try:
+            return qs.order_by('active')[0]
+        except IndexError:
+            raise self.model.DoesNotExist

@@ -256,23 +256,6 @@ class Semester(models.Model):
     def localize(cls, semester_type):
         return dict(cls.SEMESTER_SLUG)[semester_type]
 
-    def get_first_day(self):
-        return datetime.date(
-            self.year, *settings.TIMETABLE_SEMESTERS[self.type][0])
-
-    def get_last_day(self):
-        return datetime.date(
-            self.year, *settings.TIMETABLE_SEMESTERS[self.type][1])
-
-    def next(self):
-        if self.type == self.SPRING:
-            return Semester(year=self.year, type=self.FALL)
-        return Semester(year=self.year+1, type=self.SPRING)
-
-    @property
-    def is_current(self):
-        return self.get_first_day() <= today() <= self.get_last_day()
-
     # TODO(adamcik): this is scraper specific...
     @property
     def prefix(self):
@@ -280,24 +263,6 @@ class Semester(models.Model):
             return 'v%s' % str(self.year)[-2:]
         else:
             return 'h%s' % str(self.year)[-2:]
-
-    @staticmethod
-    def current(from_db=False, early=False):
-        current_time = now()
-
-        if early:
-            current_time += datetime.timedelta(weeks=2) # FIXME to low for summer
-
-        # Default to current semester
-        if current_time.month <= 6:
-            current = Semester(type=Semester.SPRING, year=current_time.year)
-        else:
-            current = Semester(type=Semester.FALL, year=current_time.year)
-
-        if not from_db:
-            return current
-
-        return Semester.objects.get(year=current.year, type=current.type)
 
 
 class ExamType(models.Model):

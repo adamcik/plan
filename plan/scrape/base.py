@@ -1,5 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+import datetime
 import logging
 
 from django import db
@@ -376,9 +377,14 @@ class ExamScraper(Scraper):
         return qs.order_by('course__code', 'exam_date')
 
     def prepare_data(self, data):
-        # TODO(adamcik): do date and time parsing here instead?
-        start = self.semester.get_first_day()
-        end = self.semester.get_last_day()
+        # TODO(adamcik): consider not hardcoding these.
+        if self.semester.type == self.semester.SPRING:
+            start = datetime.date(self.semester.year, 1, 1)
+            end = datetime.date(self.semester.year, 6, 30)
+        else:
+            start = datetime.date(self.semester.year, 7, 1)
+            end = datetime.date(self.semester.year, 12, 31)
+
         course = data['course']
         date = data['exam_date']
 

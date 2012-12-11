@@ -78,18 +78,18 @@ class Command(management.LabelCommand):
                 print 'Rolled back changes due to unhandeled exception.'
 
     def load_semester(self, options):
-        semester = Semester.current()
-        semester.year = options.get('year', None) or semester.year
-        semester.type = options.get('type', None) or semester.type
+        year = options['year']
+        type = options['type']
+
+        if not year or not type:
+            raise management.CommandError('Semester year and/or type is missing.')
 
         try:
-            return Semester.objects.get(
-                year=semester.year, type=semester.type)
+            return Semester.objects.get(year=year, type=type)
         except Semester.DoesNotExist:
             if not options['create']:
                 raise
-            semester.save()
-            return semester
+            return Semester.objects.create(year=year, type=type)
 
     def load_scraper(self, type):
         try:

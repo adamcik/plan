@@ -1,13 +1,17 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+import socket
+
 from django.conf import settings
 from django.core import urlresolvers
 from django.utils import translation
 
 _ = translation.gettext_lazy
 
+
 def processor(request):
-    sitename = settings.TIMETABLE_HOSTNAME or request.META['HTTP_HOST']
+    sitename = (settings.TIMETABLE_HOSTNAME or
+                request.META.get('HTTP_HOST', socket.getfqdn()))
     scheme = 'https://' if request.is_secure() else 'http://'
     url = scheme + sitename + urlresolvers.reverse('frontpage')
 
