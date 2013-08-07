@@ -95,6 +95,8 @@ class Room(models.Model):
     name = models.CharField(_('Name'), max_length=100)
     url = models.URLField(_('URL'), verify_exists=False, default='')
 
+    last_import = models.DateTimeField(_('Last import time'), auto_now=True)
+
     def __unicode__(self):
         return u'%s (%s)' % (self.name, self.code)
 
@@ -133,6 +135,8 @@ class Course(models.Model):
     url = models.URLField(_('URL'), verify_exists=False)
     syllabus = models.URLField(_('URL'), verify_exists=False)
     points = models.DecimalField(_('Points'), decimal_places=2, max_digits=5, null=True)
+
+    last_import = models.DateTimeField(_('Last import time'), auto_now=True)
 
     objects = CourseManager()
 
@@ -269,6 +273,8 @@ class ExamType(models.Model):
     code = models.CharField(_('Code'), max_length=20, unique=True)
     name = models.CharField(_('Name'), max_length=100, null=True)
 
+    last_import = models.DateTimeField(_('Last import time'), auto_now=True)
+
     def __unicode__(self):
         if self.name:
             return self.name
@@ -293,6 +299,8 @@ class Exam(models.Model):
     duration = models.DecimalField(_('Duration'), null=True, max_digits=5,
                                      decimal_places=2, help_text=_('Duration in hours'))
     url = models.URLField(_('URL'), verify_exists=False, default='')
+
+    last_import = models.DateTimeField(_('Last import time'), auto_now=True)
 
     objects = ExamManager()
 
@@ -345,6 +353,8 @@ class Lecture(models.Model):
     type = models.ForeignKey(LectureType, null=True)
     groups = models.ManyToManyField(Group, null=True)
     lecturers = models.ManyToManyField(Lecturer, null=True)
+
+    last_import = models.DateTimeField(_('Last import time'), auto_now=True)
 
     objects = LectureManager()
 
