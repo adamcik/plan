@@ -17,7 +17,7 @@ class Scraper(object):
 
     def __init__(self, semester):
         self.semester = semester
-        self.seen = []
+        self.import_time = datetime.datetime.now()
         self.stats = datastructures.SortedDict([
             ('initial',  0),  # items initialy in db
             ('scraped',  0),  # items we have scraped
@@ -93,6 +93,7 @@ class Scraper(object):
                     continue
 
                 changes = self.update(obj, kwargs['defaults'])
+
                 if changes:
                     self.log_updated(obj, changes)
                     continue
@@ -126,13 +127,11 @@ class Scraper(object):
     def save(self, kwargs):
         """Save prepared arguments using get_or_create().
 
-           This method keeps track of known PKs and ignores these objects when
-           creating new ones. Which prevents some cases of stepping on our own
-           toes during updates.
+           This method keeps filters out already updated items. Which prevents
+           some cases of stepping on our own toes during updates.
         """
-        qs = self.queryset().exclude(pk__in=self.seen)
-        obj, created = qs.get_or_create(**kwargs)
-        return obj, created
+        qs = self.queryset().filter(last_import__lt=self.import_time)
+        return qs.get_or_create(**kwargs)
 
     def update(self, obj, defaults):
         """Ensure that obj has up to date values for its fields.
@@ -140,17 +139,13 @@ class Scraper(object):
            Returns {field: (old_value, new_value)}.
         """
         changes = {}
-
         for field, value in defaults.items():
             old_value = getattr(obj, field)
             if old_value != value:
                 setattr(obj, field, value)
                 changes[field] = (old_value, value)
 
-        if changes:
-            # TODO(adamcik): use update_fields once we have django 1.5
-            obj.save()
-
+        obj.save()  # To trigger update of last import time.
         return changes
 
     def prepare_delete(self):
@@ -159,7 +154,7 @@ class Scraper(object):
            Default is to delete all items within the current scrapers queryset
            limitation that we have not updated or created.
         """
-        return self.queryset().exclude(pk__in=self.seen)
+        return self.queryset().filter(last_import__lt=self.import_time)
 
     def delete(self, qs):
         """Actually delete the query set."""
@@ -181,7 +176,6 @@ class Scraper(object):
 
     def log_persisted(self, obj):
         self.stats['persisted'] += 1
-        self.seen.append(obj.pk)
 
     def log_created(self, obj):
         self.stats['created'] += 1
@@ -285,7 +279,7 @@ class LectureScraper(Scraper):
         kwargs['type'] = self.lecture_type(kwargs['type'])
 
         lectures = self.queryset().filter(**kwargs).order_by('id')
-        lectures = lectures.exclude(pk__in=self.seen)
+        lectures = lectures.filter(last_import__lt=self.import_time)
 
         # Try way to hard to find what is likely the same lecture so we can
         # update instead of replacing. This is needed to have some what stable
@@ -324,8 +318,7 @@ class LectureScraper(Scraper):
                 changes[field] = current, set(defaults[field])
                 setattr(obj, field, defaults[field])
 
-        if changes:
-            obj.save()
+        obj.save()
 
         current = set(obj.weeks.values_list('number', flat=True))
         if current != set(defaults['weeks']):
@@ -435,7 +428,7 @@ class SyllabysScraper(Scraper):
     def prepare_data(self, data):
         # Only update courses we already know about.
         qs = self.queryset().filter(code=data['code'])
-        if qs.exclude(pk__in=self.seen):
+        if qs.filter(last_import__lt=self.import_time):
             return data
         elif qs:
             logging.warning('Duplicate syllabus info for: %s', data['code'])
