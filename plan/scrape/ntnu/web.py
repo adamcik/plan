@@ -7,19 +7,11 @@ import lxml.html
 import re
 import urllib
 
-from plan.common.models import Course
+from plan.common.models import Course, Semester
 from plan.scrape import base
 from plan.scrape import fetch
 from plan.scrape import ntnu
 from plan.scrape import utils
-
-LETTERS = u'ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ'
-
-
-# TODO(adamcik): consider using http://www.ntnu.no/web/studier/emner
-#   ?p_p_id=courselistportlet_WAR_courselistportlet_INSTANCE_emne
-#   &_courselistportlet_WAR_courselistportlet_INSTANCE_emne_year=2011
-#   &p_p_lifecycle=2
 
 # TODO(adamcik): consider using http://www.ntnu.no/studieinformasjon/rom/?romnr=333A-S041
 # selected building will give us the prefix we need to strip to find the actual room
@@ -33,38 +25,63 @@ LETTERS = u'ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ'
 
 class Courses(base.CourseScraper):
     def scrape(self):
-        prefix = ntnu.prefix(self.semester)
-        url = 'http://www.ntnu.no/studieinformasjon/timeplan/%s/' % prefix
-        code_re = re.compile('emnekode=([^&]+)', re.I|re.L)
+        if self.semester.type == Semester.FALL:
+            year = self.semester.year
+        else:
+            year = self.semester.year - 1
 
-        for letter in LETTERS:
-            root = fetch.html(
-                url, verbose=True, query={'bokst': letter.encode('latin1')})
-            if root is None:
+        code_re = re.compile('/studier/emner/([^/]+)/', re.I|re.L)
+
+        url = 'http://www.ntnu.no/web/studier/emnesok'
+        query = {
+            'p_p_lifecycle': '2',
+            'p_p_id': 'courselistportlet_WAR_courselistportlet_INSTANCE_m8nT',
+            '_courselistportlet_WAR_courselistportlet_INSTANCE_m8nT_year': year}
+
+        courses_root = fetch.html(url, query=query, verbose=True)
+        for a in courses_root.cssselect('a[href*="/studier/emner/"]'):
+            course_url = a.attrib['href']
+            code = code_re.search(course_url).group(1)
+            quoted_code = urllib.quote(code.encode('utf-8'))
+            name = a.text_content()
+
+            if not ntnu.valid_course_code(code):
                 continue
 
-            for tr in root.cssselect('.hovedramme table table tr'):
-                code_link, name_link = tr.cssselect('a')
+            title = None
+            data = {}
+            root = fetch.html(
+                'http://www.ntnu.no/studier/emner/%s/%s' % (quoted_code, year))
 
-                code_href = code_link.attrib['href']
-                raw_code = code_re.search(code_href).group(1)
+            # Construct dict out of info boxes.
+            for box in root.cssselect('.infoBox'):
+                for child in box.getchildren():
+                    if child.tag == 'h3':
+                        title = child.text_content()
+                    else:
+                        parts = [child.text or '']
+                        for br in child.getchildren():
+                            parts.append(br.tail or '')
+                        for key, value in [p.split(':', 1) for p in parts if ':' in p]:
+                            key = key.strip(u' \n\xa0')
+                            value = value.strip(u' \n\xa0')
+                            data.setdefault(title, {}).setdefault(key, []).append(value)
 
-                code, version = ntnu.parse_course(raw_code)
-                if not code:
-                    logging.warning('Skipped invalid course name: %s', raw_code)
-                    continue
+            try:
+                semesters = data['Undervisning']['Undervises']
+            except KeyError:
+                continue
 
-                # Strip out noise in course name.
-                name = re.search(r'(.*)(\(Nytt\))?', name_link.text_content()).group(1)
+            if self.semester.type == Semester.FALL and u'HØST %s' % year not in semesters:
+                continue
+            elif self.semester.type == Semester.SPRING and u'VÅR %s' % year not in semesters:
+                continue
 
-                yield {'code': code,
-                       'name': name.strip(),
-                       'version': version,
-                       'url': 'http://www.ntnu.no/studier/emner/%s' % code}
-
-    def delete(self, qs):
-        logging.warning('This scraper only knows about courses on timetable '
-                        'website, not deleting any unknown courses.')
+            yield {'code': code,
+                   'name': name,
+                   'version': int(data['Fakta om emnet']['Versjon'][0]),
+                   'points': float(data['Fakta om emnet']['Studiepoeng'][0]),
+                   'url': course_url}
 
 
 class Rooms(base.RoomScraper):
