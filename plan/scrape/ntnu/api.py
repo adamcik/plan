@@ -26,15 +26,17 @@ def fetch_courses(semester):
 
         result = fetch_course(course['code'])
         if not result:
+             continue
+
+        if semester.year < result['taughtFromYear']:
             continue
 
-        match = False
-        for term in result.get('educationTerm', []):
-            match |= match_term(term, semester)
-        for assessment in result.get('assessment', []):
-            match |= match_assessment(assessment, semester)
+        if result['lastYearTaught'] and semester.year > result['lastYearTaught']:
+            continue
 
-        if match:
+        if semester.type == semester.FALL and result['taughtInAutumn']:
+            yield result
+        elif semester.type == semester.SPRING and result['taughtInSpring']:
             yield result
 
 
