@@ -56,11 +56,13 @@ def html(*args, **kwargs):
     return root
 
 
-def json(*args, **kwargs):
-    data = plain(*args, **kwargs)
-    if data:
+def json(url, *args, **kwargs):
+    data = plain(url, *args, **kwargs)
+    try:
         return jsonlib.loads(data)
-    return {}
+    except ValueError as e:
+        logging.error('Loading %s falied: %s', url, e)
+        return {}
 
 
 def xml(*args, **kwargs):
