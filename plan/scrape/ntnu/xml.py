@@ -58,6 +58,10 @@ class Exams(base.ExamScraper):
             type_code = get(row, 'vurderingsformkode')
             type_name = get(row, 'vurderingskombinasjon_vurdkombnavn_bokmal')
 
+            if not type_code:
+                logging.warning('Missing exam type for %s', course_code)
+                continue
+
             yield {'course': courses[course_code],
                    'exam_date': utils.parse_date(handin_date or exam_date),
                    'exam_time': utils.parse_time(handin_time or exam_time),
