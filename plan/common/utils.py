@@ -143,5 +143,7 @@ def max_number_of_weeks(year):
 
 
 def first_date_in_week(year, week):
-    struct_time = time.strptime('%d %d 1' % (year, week), '%Y %W %w')
-    return datetime.date.fromtimestamp(time.mktime(struct_time))
+    if datetime.date(year, 1, 4).isoweekday() > 4:
+        return datetime.datetime.strptime('%d %d 1' % (year, week-1), '%Y %W %w')
+    else:
+        return datetime.datetime.strptime('%d %d 1' % (year, week), '%Y %W %w')
