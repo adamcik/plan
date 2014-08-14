@@ -1,4 +1,4 @@
-/* This file is part of the plan timetable generator, see LICENSE for details. yy*/
+/* This file is part of the plan timetable generator, see LICENSE for details. */
 
 (function() {
   function add_hidden_to_lectures() {
