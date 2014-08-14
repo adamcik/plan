@@ -58,26 +58,28 @@
                 {% endif %}
                 {% if c.lecture %}title="{{ c.lecture.course.name }} {{ c.lecture.start|time }}-{{ c.lecture.end|time }}"{% endif %}
               >
-                {% if c.lecture %}
-                  <div class="course">{{ c.lecture.alias|default:c.lecture.course.code }}</div>
-                  <div class="room">
-                    {% for room in rooms|get:c.lecture.id|slice:":2" %}
-                      {% if room.url %}
-                        <a href="{{ room.url }}">
-                          {{ room.name }}</a>{% if not forloop.last %},{% endif %}
-                      {% else %}
-                        {{ room.name }}{% if not forloop.last %},{% endif %}
-                      {% endif %}
-                    {% endfor %}
-                  </div>
-                  <div class="type">{{ c.lecture.type|default:"" }}</div>
-                {% endif %}
-                {{ c.time|escape|nbsp|default:"" }}
+                <div class="wrapper">
+                  {% if c.lecture %}
+                    <div class="course">{{ c.lecture.alias|default:c.lecture.course.code }}</div>
+                    <div class="room">
+                      {% for room in rooms|get:c.lecture.id|slice:":2" %}
+                        {% if room.url %}
+                          <a href="{{ room.url }}">
+                            {{ room.name }}</a>{% if not forloop.last %},{% endif %}
+                        {% else %}
+                          {{ room.name }}{% if not forloop.last %},{% endif %}
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                    <div class="type">{{ c.lecture.type|default:"" }}</div>
+                  {% endif %}
+                  {{ c.time|escape|nbsp|default:"" }}
+                </div>
               </td>
             {% endif %}
           {% endfor %}
         {% else %}
-          <td></td>
+          <td><div class="wrapper"></div></td>
         {% endif %}
       {% endfor %}
     </tr>

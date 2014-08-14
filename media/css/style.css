@@ -302,7 +302,7 @@ td.error input, td.error select {
 }
 
 /* cell contents */
-#schedule .course, #schedule .room, #schedule .type {
+#schedule .wrapper {
 	overflow: hidden;
 }
 #schedule .course {
