@@ -1,4 +1,4 @@
-/* This file is part of the plan timetable generator, see LICENSE for details. yy*/
+/* This file is part of the plan timetable generator, see LICENSE for details. */
 
 /* Basic block elements */
 h1,h2,h3 {
@@ -305,6 +305,9 @@ td.error input, td.error select {
 #schedule .wrapper {
 	overflow: hidden;
 }
+#schedule .time .wrapper, #schedule .single .wrapper {
+	height: 30px;
+}
 #schedule .course {
 	float: left;
 }
@@ -319,10 +322,10 @@ td.error input, td.error select {
 }
 /* single cells need to be smaller */
 #schedule .single {
-	font-size: 77%;
+	font-size: 10px;
 }
 #schedule .single .type, #schedule .single .room {
-	font-size: 100%;
+	font-size: 8px;
 }
 
 #schedule .optional {
