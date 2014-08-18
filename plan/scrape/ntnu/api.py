@@ -17,11 +17,15 @@ TERM_MAPPING = {
 }
 
 
-def fetch_courses(semester):
+def fetch_courses(semester, prefix=None):
     courses = fetch.json('http://www.ime.ntnu.no/api/course/-')['course']
     for course in courses:
         if not ntnu.valid_course_code(course['code']):
             logging.warning('Skipped invalid course name: %s', course['code'])
+            continue
+
+        # TODO: shouldn't reimplement should_proccess_course
+        if prefix and not course['code'].startswith(prefix):
             continue
 
         result = fetch_course(course['code'])
@@ -58,7 +62,7 @@ def match_assessment(data, semester):
 
 class Courses(base.CourseScraper):
     def scrape(self):
-        for course in fetch_courses(self.semester):
+        for course in fetch_courses(self.semester, self.course_prefix):
             yield {'code': course['code'],
                    'name': course['name'],
                    'version': course['versionCode'],
@@ -71,7 +75,7 @@ class Lectures(base.LectureScraper):
         url = 'http://www.ime.ntnu.no/api/schedule/%%s/%s/%s' % (
             TERM_MAPPING[self.semester.type].lower(), self.semester.year)
 
-        for course in Course.objects.filter(semester=self.semester).order_by('code'):
+        for course in self.course_queryset():
             result = fetch.json(url % course.code.encode('utf-8'))
             if not result:
                 continue
@@ -97,7 +101,7 @@ class Lectures(base.LectureScraper):
 class Exams(base.ExamScraper):
     def scrape(self):
         # Only bother with courses that have already been loaded.
-        for course in Course.objects.filter(semester=self.semester).order_by('code'):
+        for course in self.course_queryset():
             result = fetch_course(course.code)
             if not result:
                 continue

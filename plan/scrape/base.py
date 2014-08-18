@@ -15,8 +15,9 @@ class Scraper(object):
     fields = ()
     extra_fields = ()
 
-    def __init__(self, semester):
+    def __init__(self, semester, course_prefix=None):
         self.semester = semester
+        self.course_prefix = course_prefix
         self.import_time = datetime.datetime.now()
         self.stats = datastructures.SortedDict([
             ('initial',  0),  # items initialy in db
@@ -41,6 +42,10 @@ class Scraper(object):
            the results for more logical display when listing items.
         """
         raise NotImplementedError
+
+    def should_proccess_course(self, code):
+        """Common helper for filtering out course codes to skip."""
+        return not self.course_prefix or code.startswith(self.course_prefix)
 
     def format(self, items):
         """Format list of items."""
@@ -217,6 +222,8 @@ class CourseScraper(Scraper):
 
     def queryset(self):
         qs = Course.objects.filter(semester=self.semester)
+        if self.course_prefix:
+            qs = qs.filter(code__startswith=self.course_prefix)
         return qs.order_by('code', 'version')
 
     def prepare_data(self, data):
@@ -237,7 +244,15 @@ class LectureScraper(Scraper):
 
     def queryset(self):
         qs = Lecture.objects.filter(course__semester=self.semester)
+        if self.course_prefix:
+            qs = qs.filter(course__code__startswith=self.course_prefix)
         return qs.order_by('course__code', 'day', 'start')
+
+    def course_queryset(self):
+        qs = Course.objects.filter(semester=self.semester)
+        if self.course_prefix:
+            qs = qs.filter(code__startswith=self.course_prefix)
+        return qs.order_by('code', 'version')
 
     def format(self, items):
         return utils.columnify(items, 2)
@@ -285,6 +300,7 @@ class LectureScraper(Scraper):
         # update instead of replacing. This is needed to have some what stable
         # imports and not step on our own feet flip flopping lectures back and
         # forth.
+        # TODO: add an external_id field to use when available.
         candidates = {}
         for l in lectures:
             candidates[l] = 0
@@ -367,6 +383,8 @@ class ExamScraper(Scraper):
 
     def queryset(self):
         qs = Exam.objects.filter(course__semester=self.semester)
+        if self.course_prefix:
+            qs = qs.filter(course__code__startswith=self.course_prefix)
         return qs.order_by('course__code', 'exam_date')
 
     def prepare_data(self, data):
@@ -420,6 +438,8 @@ class SyllabysScraper(Scraper):
 
     def queryset(self):
         qs = Course.objects.filter(semester=self.semester)
+        if self.course_prefix:
+            qs = qs.filter(code__startswith=self.course_prefix)
         return qs.order_by('code', 'version')
 
     def display(self, obj):

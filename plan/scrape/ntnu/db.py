@@ -22,6 +22,9 @@ class Courses(base.CourseScraper):
                 logging.warning('Skipped invalid course name: %s', row.emnekode)
                 continue
 
+            if not self.should_proccess_course(code):
+                continue
+
             yield {'code': code,
                    'name': row.emnenavn,
                    'version': version,
@@ -41,7 +44,7 @@ class Lectures(base.LectureScraper):
         groups = {}
 
         courses = Course.objects.filter(semester=self.semester)
-        courses = dict((c.code, c) for c in courses)
+        courses = {c.code: c for c in courses}
 
         query = ('SELECT aktkode, studieprogramkode FROM '
                  '%s_akt_studieprogram') % prefix
@@ -60,6 +63,8 @@ class Lectures(base.LectureScraper):
                 continue
             elif code not in courses:
                 logging.debug("Unknown course %s.", code)
+                continue
+            elif not self.should_proccess_course(code):
                 continue
 
             yield {'course': courses[code],

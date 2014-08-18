@@ -47,6 +47,8 @@ class Courses(base.CourseScraper):
 
             if not ntnu.valid_course_code(code):
                 continue
+            elif not self.should_proccess_course(code):
+                continue
 
             title = None
             data = {}
@@ -132,7 +134,7 @@ class Lectures(base.LectureScraper):
         for code, name in fetch_rooms():
             room_codes.setdefault(name, []).append(code)
 
-        for course in Course.objects.filter(semester=self.semester).order_by('code'):
+        for course in self.course_queryset():
             code = '%s-%s' % (course.code, course.version)
             root = fetch.html(url, query={'emnekode': code.encode('latin1')})
             if root is None:

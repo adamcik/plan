@@ -25,7 +25,7 @@ class Exams(base.ExamScraper):
         url = 'http://www.ntnu.no/eksamen/plan/%s/dato.XML' % prefix
 
         courses = Course.objects.filter(semester=self.semester)
-        courses = dict((c.code, c) for c in courses)
+        courses = {c.code: c for c in courses}
 
         root = fetch.xml(url)
         if root is None:
@@ -43,6 +43,8 @@ class Exams(base.ExamScraper):
                 continue
             elif course_code not in courses:
                 logging.debug("Unknown course %s.", course_code)
+                continue
+            elif not self.should_proccess_course(code):
                 continue
 
             combination = get(row, 'vurdkombkode')

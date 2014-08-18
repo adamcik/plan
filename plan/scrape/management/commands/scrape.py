@@ -30,6 +30,8 @@ OPTIONS = dict((o.dest, o) for o in management.LabelCommand.option_list + (
         optparse.make_option('-n', '--dry-run', action='store_true', dest='dry_run'),
         optparse.make_option('--pdb', action='store_true', dest='pdb',
                              help='use pdb.pm() when we hit and exception'),
+        optparse.make_option('--prefix', action='store', dest='prefix',
+                             help='course code prefix to limit scrape to'),
 ))
 OPTIONS['verbosity'].default = '2'
 
@@ -48,7 +50,7 @@ class Command(management.LabelCommand):
 
         try:
             semester = self.load_semester(options)
-            scraper = self.load_scraper(label)(semester)
+            scraper = self.load_scraper(label)(semester, options['prefix'])
 
             needs_commit = scraper.run()
 
