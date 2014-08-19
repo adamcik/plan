@@ -104,9 +104,11 @@ class Rooms(base.RoomScraper):
                     continue
 
                 data = {}
+
                 # Sort so that link with the right room name bubbles to the top.
-                for a in sorted(root.cssselect('.facilitylist .horizontallist a'),
-                                key=lambda a: (a.text != room.name, a.text)):
+                links = root.cssselect('.facilitylist .horizontallist a')
+                links.sort(key=lambda a: (a.text != room.name, a.text))
+                for a in links:
                     code, name = fetch_room(a.attrib['href'])
                     if code and room.code.endswith(code):
                         data = {'code': room.code,
@@ -119,6 +121,15 @@ class Rooms(base.RoomScraper):
                     # can find one with a matching code, but this takes a long
                     # time.
                     break
+
+                crumb = root.cssselect('h1.ntnucrumb')
+                if crumb[0].text_content() == room.name:
+                    links = root.cssselect('link[rel="canonical"]')
+                    for link in links:
+                        if link.attrib['href'] != 'http://www.ntnu.no/kart/':
+                            data = {'code': room.code,
+                                    'name': room.name,
+                                    'url': link.attrib['href']}
 
                 if data:
                     yield data
