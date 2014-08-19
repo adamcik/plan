@@ -58,6 +58,9 @@ def html(*args, **kwargs):
 
 def json(url, *args, **kwargs):
     data = plain(url, *args, **kwargs)
+    if not data:
+        logging.error('Loading %s falied: empty repsonse', url)
+        return {}
     try:
         return jsonlib.loads(data)
     except ValueError as e:
