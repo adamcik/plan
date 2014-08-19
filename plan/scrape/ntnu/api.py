@@ -16,9 +16,11 @@ TERM_MAPPING = {
     Semester.FALL: 'Autumn',
 }
 
+BASE = 'https://www.ime.ntnu.no/api'
+
 
 def fetch_courses(semester, prefix=None):
-    courses = fetch.json('http://www.ime.ntnu.no/api/course/-')['course']
+    courses = fetch.json(BASE + '/course/-')['course']
     for course in courses:
         if not ntnu.valid_course_code(course['code']):
             logging.warning('Skipped invalid course name: %s', course['code'])
@@ -46,7 +48,7 @@ def fetch_courses(semester, prefix=None):
 
 def fetch_course(code):
     code = code.lower().encode('utf-8')
-    return fetch.json('http://www.ime.ntnu.no/api/course/%s' % code)['course']
+    return fetch.json(BASE + '/course/%s' % code)['course']
 
 
 def match_term(data, semester):
@@ -72,8 +74,8 @@ class Courses(base.CourseScraper):
 
 class Lectures(base.LectureScraper):
     def scrape(self):
-        url = 'http://www.ime.ntnu.no/api/schedule/%%s/%s/%s' % (
-            TERM_MAPPING[self.semester.type].lower(), self.semester.year)
+        term = TERM_MAPPING[self.semester.type].lower()
+        url = BASE + '/schedule/%%s/%s/%s' % (term, self.semester.year)
 
         for course in self.course_queryset():
             result = fetch.json(url % course.code.encode('utf-8'))
