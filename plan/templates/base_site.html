@@ -32,33 +32,19 @@
     <link rel="dns-prefetch" href="//{{ STATIC_DOMAIN }}" />
   {% endif %}
   {% compress js inline %}
-    <script type="text/javascript">
-      {% if ANALYTICS_CODE %}
+    {% if ANALYTICS_CODE %}
+      <script type="text/javascript">
         var _gaq = _gaq || [];
-      {% endif %}
-      (function(w, d, t) {
-        var s = d.getElementsByTagName(t)[0],  // Script element to insert ourselves after.
-            l = w.localStorage,  // Shortcut to localStorage object.
-            c = d.cookie, // copy of cookies for safe parsing.
-            m; // Regex match result variable in cookie code.
-
-        w.asyncLoad = function(src) {
-          var e = d.createElement(t);
-          e.async = true;
-          e.src = src;
-          s.parentNode.insertBefore(e, s);
-        };
-
-        {% if ANALYTICS_CODE %}
-          _gaq.push(['_setAccount', '{{ ANALYTICS_CODE }}']);
-          _gaq.push(['_setSiteSpeedSampleRate', 100]);
-          _gaq.push(['_trackPageview']);
-          asyncLoad('{{ request.is_secure|yesno:"https://ssl,http://www" }}.google-analytics.com/ga.js');
-        {% endif %}
-      })(window, document, 'script');
-    </script>
+        _gaq.push(['_setAccount', '{{ ANALYTICS_CODE }}']);
+        _gaq.push(['_setSiteSpeedSampleRate', 100]);
+        _gaq.push(['_trackPageview']);
+      </script>
+    {% endif %}
     {% block extrascript %}{% endblock %}
   {% endcompress %}
+  {% if ANALYTICS_CODE %}
+    <script src="{{ request.is_secure|yesno:"https://ssl,http://www" }}.google-analytics.com/ga.js" async defer></script>
+  {% endif %}
 {% endblock %}
 
 {% block lang %}
