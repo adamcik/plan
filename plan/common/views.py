@@ -462,6 +462,9 @@ def about(request):
         fills.append(colors[i])
         s.append((max_x, s[-1][1]))
 
+    # TODO: we can further reduce this by just having one big array for
+    # everything and knowing the stride to use
+
     # Pass on all data we need. First is needed to undo zero indexing, bucket
     # size is needed to rescale x values to proper epochs.
     return shortcuts.render(request, 'about.html', {
