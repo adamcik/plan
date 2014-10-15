@@ -46,25 +46,6 @@
           s.parentNode.insertBefore(e, s);
         };
 
-        {% if MIGRATE_COOKIES %}
-          // TODO(adamcik): remove this cleanup code after some time.
-          // Transfer last cookie to localStorage if supported and set:
-          if(m = c.match(/(^|;\s*)last=([^;]+)/))
-            l && l.setItem('last', m[2]);
-        {% endif %}
-
-        {% if STRIP_COOKIES %}
-          // Remove all cookies that don't start with __, this should cleanup old
-          // session, language, crsftoken and last timetable cookies.
-          var r = /(^|;)\s*(?!__)([^\s=]+)=/g,
-              e = '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;';
-          while(m = r.exec(c)) {
-            // Browsers vary, so delete cookie with and without path.
-            d.cookie = m[2]+ e;
-            d.cookie = m[2]+ e + 'path=/;';
-          }
-        {% endif %}
-
         {% if ANALYTICS_CODE %}
           _gaq.push(['_setAccount', '{{ ANALYTICS_CODE }}']);
           _gaq.push(['_setSiteSpeedSampleRate', 100]);

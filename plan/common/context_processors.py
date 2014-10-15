@@ -27,10 +27,8 @@ def processor(request):
             'INSTITUTION': settings.TIMETABLE_INSTITUTION,
             'INSTITUTION_LINKS': institution_links,
             'INSTITUTION_SITE': settings.TIMETABLE_INSTITUTION_SITE,
-            'MIGRATE_COOKIES': settings.TIMETABLE_MIGRATE_COOKIES,
             'ADMINS': settings.ADMINS,
             'SHARE_LINKS': share_links,
             'SOURCE_URL': settings.TIMETABLE_SOURCE_URL,
-            'SITENAME': sitename,
-            'STRIP_COOKIES': settings.TIMETABLE_STRIP_COOKIES}
+            'SITENAME': sitename}
 

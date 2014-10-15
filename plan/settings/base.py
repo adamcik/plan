@@ -210,12 +210,6 @@ TIMETABLE_SCRAPERS = {
 # Google analytics code to use.
 TIMETABLE_ANALYTICS_CODE = None
 
-# Add code to mirgate cookies to localstorage?
-TIMETABLE_MIGRATE_COOKIES = True
-
-# Add code to strip unused cookies using js?
-TIMETABLE_STRIP_COOKIES = False
-
 # Maximum number of autocompletere results/
 TIMETABLE_AJAX_LIMIT = 100
 
