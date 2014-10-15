@@ -28,6 +28,9 @@
 {% endblock %}
 
 {% block script %}
+  {% if STATIC_DOMAIN %}
+    <link rel="dns-prefetch" href="//{{ STATIC_DOMAIN }}" />
+  {% endif %}
   {% compress js inline %}
     <script type="text/javascript">
       {% if ANALYTICS_CODE %}

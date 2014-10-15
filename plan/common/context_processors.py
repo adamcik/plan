@@ -1,6 +1,7 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import socket
+import urlparse
 
 from django.conf import settings
 from django.core import urlresolvers
@@ -23,6 +24,10 @@ def processor(request):
     for name, url in settings.TIMETABLE_INSTITUTION_LINKS:
         institution_links.append((_(name), url))
 
+    static_domain = urlparse.urlparse(settings.STATIC_URL).netloc.split(':')[0]
+    if static_domain == sitename:
+        static_domain = None
+
     return {'ANALYTICS_CODE': settings.TIMETABLE_ANALYTICS_CODE,
             'INSTITUTION': settings.TIMETABLE_INSTITUTION,
             'INSTITUTION_LINKS': institution_links,
@@ -30,5 +35,6 @@ def processor(request):
             'ADMINS': settings.ADMINS,
             'SHARE_LINKS': share_links,
             'SOURCE_URL': settings.TIMETABLE_SOURCE_URL,
+            'STATIC_DOMAIN': static_domain,
             'SITENAME': sitename}
 
