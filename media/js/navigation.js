@@ -1,4 +1,6 @@
-/* This file is part of the plan timetable generator, see LICENSE for details. yy*/
+/* This file is part of the plan timetable generator, see LICENSE for details. */
+
+// TODO: switch to simpler inlined custom code for this.
 
 $(document).keyup(function(event) {
   if ($(event.target).is(':input')) {

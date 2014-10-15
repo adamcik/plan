@@ -1,5 +1,7 @@
 /* This file is part of the plan timetable generator, see LICENSE for details. */
 
+// TODO: use http://www.hunlock.com/blogs/Totally_Pwn_CSS_with_Javascript instead
+
 (function() {
   function add_hidden_to_lectures() {
       var input = $(this);
