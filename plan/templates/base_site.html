@@ -40,8 +40,8 @@
         _gaq.push(['_trackPageview']);
       </script>
     {% endif %}
-    {% block extrascript %}{% endblock %}
   {% endcompress %}
+  {% block extrascript %}{% endblock %}
   {% if ANALYTICS_CODE %}
     <script src="{{ request.is_secure|yesno:"https://ssl,http://www" }}.google-analytics.com/ga.js" async defer></script>
   {% endif %}
