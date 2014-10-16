@@ -28,15 +28,19 @@
 {% endblock %}
 
 {% block extrascript %}
-  {% compress js inline %}
-    <script type="text/javascript" src="{% static 'js/navigation.js' %}"></script>
-  {% endcompress %}
-  {% compress js %}
-    <script type="text/javascript" src="{% static 'js/jquery-1.7.2.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/jquery.autocomplete.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/autocomplete.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/advanced.js' %}"></script>
-  {% endcompress %}
+  {% if courses and not advanced %}
+    {% compress js inline %}
+      <script type="text/javascript" src="{% static 'js/navigation.js' %}"></script>
+    {% endcompress %}
+  {% endif %}
+  {% if not courses or advanced %}
+    {% compress js %}
+      <script type="text/javascript" src="{% static 'js/jquery-1.7.2.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'js/jquery.autocomplete.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'js/autocomplete.js' %}"></script>
+      <script type="text/javascript" src="{% static 'js/advanced.js' %}"></script>
+    {% endcompress %}
+  {% endif %}
 {% endblock %}
 
 {% block title %}
