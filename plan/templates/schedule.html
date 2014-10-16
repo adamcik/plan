@@ -24,6 +24,9 @@
       <link rel="stylesheet" href="{% static 'js/jquery.autocomplete.css' %}" />
     {% endif %}
   {% endcompress %}
+  {% compress css %}
+    <link rel="stylesheet" href="{% static 'css/schedule.css' %}" />
+  {% endcompress %}
 {% endblock %}
 
 {% block extrahead %}

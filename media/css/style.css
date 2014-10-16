@@ -185,29 +185,6 @@ td.error input, td.error select {
 	margin-bottom: 0.5em;
 }
 
-#next, #previous {
-	position: absolute;
-	top: 3.7em;
-	text-decoration: none;
-	color: #D3D7CF;
-	font-size: 300%;
-}
-#next {
-	right: -0.55em;
-	padding-right: 0.05em;
-}
-#previous {
-	left: -0.25em;
-	padding-left: 0.05em;
-}
-#next:hover {
-	padding-left: 0.05em;
-	padding-right: 0;
-}
-#previous:hover {
-	padding-left: 0;
-	padding-right: 0.1em;
-}
 #links dl, #tips dl {
 	margin: 0 0 1em;
 }
@@ -231,85 +208,6 @@ td.error input, td.error select {
 	margin-left: 20px;
 	line-height: 16px;
 	margin-bottom: 0.8em;
-}
-
-
-/* schedule styling */
-#schedule {
-	table-layout: fixed;
-}
-
-/* cell contents */
-#schedule .wrapper {
-	overflow: hidden;
-}
-#schedule .time .wrapper, #schedule .single .wrapper {
-	height: 30px;
-}
-#schedule .course {
-	float: left;
-}
-#schedule .room {
-	font-size: 77%;
-	float: right;
-	margin-left: 0.5em;
-}
-#schedule .type {
-	clear: both;
-	font-size: 77%;
-}
-/* single cells need to be smaller */
-#schedule .single {
-	font-size: 10px;
-}
-#schedule .single .type, #schedule .single .room {
-	font-size: 8px;
-}
-
-#schedule .optional {
-	color: #555753;
-}
-
-#schedule td {
-	border-color: #CCC;
-	padding: 0.1em 0.2em;
-	vertical-align: top;
-	height: 2em;
-}
-#schedule th {
-	width: 18.5%;
-	font-size: 77%;
-	font-weight: normal;
-}
-
-/* time col */
-#schedule .time {
-	text-align: center;
-	vertical-align: middle;
-	font-size: 77%;
-	width: 7.5%;
-	white-space: nowrap;
-}
-#schedule td.time {
-	border-left: 1px solid #666;
-}
-#schedule .date {
-	float: right;
-}
-
-#schedule td.lecture {
-	border-right: 1px solid #CCC;
-}
-/* Proper :first-child  selectors would be nice, but
- * classes from the templates should do the trick */
-#schedule td.last, #schedule td.last.lecture {
-	border-right: 1px solid #666;
-}
-#schedule tr.first td {
-	border-top: 1px solid #666;
-}
-#schedule td.bottom {
-	border-bottom: 1px solid #666;
 }
 
 @media print {
