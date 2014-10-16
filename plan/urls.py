@@ -3,6 +3,8 @@
 from django.conf.urls import *
 from django.conf import settings
 
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+
 handler500 = 'plan.common.utils.server_error'
 
 if settings.DEBUG:
@@ -18,3 +20,6 @@ urlpatterns += patterns('',
     (r'^', include('plan.ical.urls')),
     (r'^', include('plan.pdf.urls')),
 )
+
+# This will only be active when DEBUG=False or --insecure is set
+urlpatterns += staticfiles_urlpatterns()
