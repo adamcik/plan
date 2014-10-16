@@ -27,12 +27,14 @@
   <meta name="robots" content="noindex, nofollow, noarchive" />
 {% endblock %}
 
-{% block extrascript %}
+{% block extrascriptinline %}
+  {{ block.super }}
   {% if courses and not advanced %}
-    {% compress js inline %}
-      <script type="text/javascript" src="{% static 'js/navigation.js' %}"></script>
-    {% endcompress %}
+    <script type="text/javascript" src="{% static 'js/navigation.js' %}"></script>
   {% endif %}
+{% endblock %}
+
+{% block extrascript %}
   {% if not courses or advanced %}
     {% compress js %}
       <script type="text/javascript" src="{% static 'js/jquery-1.7.2.min.js' %}"></script>
