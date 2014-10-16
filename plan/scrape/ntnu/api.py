@@ -59,6 +59,11 @@ def match_term(data, semester):
             data['termApplies'] == TERM_MAPPING[semester.type])
 
 
+def fetch_buildings():
+    data = fetch.json(BASE + '/fdv/buildings')
+    return {b['id']: b['nr'] for b in data.get('buildings', [])}
+
+
 def match_assessment(data, semester):
     return (data['statusCode'] == 'ORD' and
             data['realExecutionYear'] == semester.year and
@@ -131,3 +136,33 @@ class Exams(base.ExamScraper):
                        'handout_date': utils.parse_date(handout_date),
                        'type': self.exam_type(type_code, type_name),
                        'duration': duration}
+
+
+class Rooms(base.RoomScraper):
+    def scrape(self):
+        buildings = fetch_buildings()
+
+        qs = self.queryset()
+        qs = qs.filter(lecture__course__semester=self.semester)
+        qs = qs.distinct()
+
+        for code, name, url in qs.values_list('code', 'name', 'url'):
+            if not code or url:
+                continue
+
+            data = fetch.json(BASE + '/fdv/rooms/lydiacode:%s' % code)
+            if not data:
+                continue
+
+            room = data['rooms'][0]
+            url = 'http://www.ntnu.no/kart/%s/%s' % (
+                 buildings[room['buildingId']], room['nr'])
+            name = (room['name'] or '').strip() or 'Rom %s' % room['nr']
+
+            root = fetch.html(url)
+            if root:
+                for link in root.cssselect('link[rel="canonical"]'):
+                    if link.attrib['href'] != 'http://www.ntnu.no/kart':
+                        url = link.attrib['href']
+
+            yield {'code': code, 'name': name, 'url': url}
