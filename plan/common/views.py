@@ -211,7 +211,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
         next_semester = None
         next_message = False
 
-    semester_is_current = semester.year == today().year and week == current_week
+    week_is_current = semester.year == today().year and week == current_week
 
     return shortcuts.render(request, 'schedule.html', {
             'advanced': advanced,
@@ -224,7 +224,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
             'next_message': next_message,
             'lectures': lectures,
             'semester': semester,
-            'semester_is_current': semester_is_current,
+            'week_is_current': week_is_current,
             'next_semester': next_semester,
             'slug': slug,
             'timetable': table,

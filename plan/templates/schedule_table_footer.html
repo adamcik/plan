@@ -31,7 +31,7 @@
       <p class="right">
         <i class="icon-list-alt"></i> {% trans "Weeks:" %}
         <a href="{% url 'schedule' semester.year semester.slug slug %}"{% if all %} class="current"{% endif %}>{% trans "All" %}</a>
-        {% if semester_is_current %}
+        {% if not week_is_current %}
           <a href="{% url 'schedule-current' semester.year semester.slug slug %}">{% trans "Current" %}</a>
         {% endif %}
         {% for w in weeks %}
