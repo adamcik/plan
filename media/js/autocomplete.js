@@ -7,7 +7,7 @@ $(function() {
   course.autocomplete(course.attr('data-autocomplete'), {
     maxItemsToShow: 100,
     minChars: 3,
-    showResult: function(code, name) { return code + ': ' + name},
+    showResult: function(code, name) { return '<b>' + code + '</b>' + ': ' + name},
     useDelimiter: ', ',
   });
 });
