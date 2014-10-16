@@ -6,8 +6,8 @@
 {% load static %}
 
 {% block extrastyle %}
-  {% if courses %}
-    {% compress css inline %}
+  {% compress css inline %}
+    {% if courses %}
       <style type="text/css">
         {% for course in courses %}
         .course-{{ course.id }} {
@@ -15,8 +15,9 @@
         }
         {% endfor %}
       </style>
-    {% endcompress %}
-  {% endif %}
+    {% endif %}
+    <link rel="stylesheet" href="{% static 'css/select_groups.css' %}" />
+  {% endcompress %}
 {% endblock %}
 
 {% block extrascriptinline %}

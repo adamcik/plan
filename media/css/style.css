@@ -170,45 +170,6 @@ td.error input, td.error select {
 
 /* Specialcased elements */
 
-/* Box used for selecting which groups to use for a course */
-#change-groups div {
-	float: left;
-	padding: 0.2em;
-	margin-right: 0.5em;
-	margin-bottom: 0.5em;
-	border: 1px solid #666;
-	width: 15%;
-	height: 20em;
-}
-#change-groups p {
-	overflow: hidden;
-	height: 20%;
-	margin-bottom: 0.25em;
-}
-#change-groups div div {
-	overflow: auto;
-	overflow-x: hidden;
-	height: 75%;
-	width: 100%;
-	margin: 0;
-	padding: 0;
-	border: 0;
-	float: none;
-}
-#change-groups ul {
-	margin: 0;
-}
-#change-groups li {
-	list-style: none;
-	white-space: nowrap;
-}
-#change-groups .toogle {
-	text-align: right;
-}
-#change-groups .toogle-all, #change-groups .toogle-none {
-	cursor: pointer;
-}
-
 /* Stats box on front page (needs special casing for graph) */
 #stats {
 	border-left: 0.2em solid #D3D7CF;
@@ -225,7 +186,7 @@ td.error input, td.error select {
 	float: right;
 }
 
-/* Links on all pages nedd constant width b */
+/* Links on all pages need constant width b */
 #links b {
 	font-size: 93%;
 	width: 9em;
