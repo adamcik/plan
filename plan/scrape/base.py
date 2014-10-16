@@ -4,6 +4,7 @@ import datetime
 import logging
 
 from django import db
+from django.db.models import Count
 from django.utils import datastructures
 
 from plan.common.models import (Course, Exam, ExamType, Lecture, LectureType,
@@ -224,6 +225,7 @@ class CourseScraper(Scraper):
         qs = Course.objects.filter(semester=self.semester)
         if self.course_prefix:
             qs = qs.filter(code__startswith=self.course_prefix)
+        qs = qs.annotate(Count('lecture'))
         return qs.order_by('code', 'version')
 
     def prepare_data(self, data):
@@ -237,6 +239,10 @@ class CourseScraper(Scraper):
     def display(self, obj):
         return obj.code
 
+    def format(self, items):
+        return utils.columnify(
+            (u'%s - %s lectures' % (c, c.lecture__count) for c in items), 2)
+
 
 class LectureScraper(Scraper):
     fields = ('course', 'day', 'start', 'end', 'type')
@@ -246,6 +252,7 @@ class LectureScraper(Scraper):
         qs = Lecture.objects.filter(course__semester=self.semester)
         if self.course_prefix:
             qs = qs.filter(course__code__startswith=self.course_prefix)
+        qs = qs.annotate(Count('course__subscription'))
         return qs.order_by('course__code', 'day', 'start')
 
     def course_queryset(self):
@@ -255,7 +262,8 @@ class LectureScraper(Scraper):
         return qs.order_by('code', 'version')
 
     def format(self, items):
-        return utils.columnify(items, 2)
+        return utils.columnify(
+            (u'%s - %s subscriptions' % (c, c.course__subscription__count) for c in items), 2)
 
     def needs_commit(self, stats=None):
         return super(LectureScraper, self).needs_commit(
