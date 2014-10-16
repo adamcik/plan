@@ -20,12 +20,8 @@
 {% endblock %}
 
 {% block extrascript %}
-  {% compress js %}
-    <script type="text/javascript" src="{% static 'js/jquery-1.7.2.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/jquery.autocomplete.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/autocomplete.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/navigation.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/advanced.js' %}"></script>
+  {% compress js inline %}
+    <script type="text/javascript" src="{% static 'js/toggle.js' %}"></script>
   {% endcompress %}
   {{ block.super }}
 {% endblock %}

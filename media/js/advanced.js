@@ -23,25 +23,10 @@
       }
   };
 
-  function add_toggle() {
-    var div = $(this);
-    var wrapper = $('#toogle-template').clone();
-    var all = wrapper.find('.toogle-all');
-    var none = wrapper.find('.toogle-none');
-
-    wrapper.removeAttr('id');
-    wrapper.removeAttr('style');
-    div.append(wrapper);
-
-    none.click(function() { div.find(':checkbox').removeAttr('checked'); return false; });
-    all.click(function() { div.find(':checkbox').attr('checked', 'checked'); return false; });
-  }
-
   $(function() {
     $('#lectures input[name=exclude]:checked').each(add_hidden_to_lectures);
     $('#lectures input[name=exclude]').click(add_hidden_to_lectures);
     $('#courses input[name=course_remove]:checked').each(add_delete_to_courses);
     $('#courses input[name=course_remove]').click(add_delete_to_courses);
-    $('#change-groups div.groupbox').each(add_toggle)
   });
 })();
