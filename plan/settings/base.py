@@ -128,9 +128,12 @@ if DEBUG:
     COMPRESS_DEBUG_TOGGLE = 'no-cache'
 
 COMPRESS_CSS_FILTERS = (
-    'plan.common.compress.CssSymlinkAbsoluteFilter',
+    'compressor.filters.css_default.CssAbsoluteFilter',
+    'compressor.filters.datauri.CssDataUriFilter',
     'compressor.filters.cssmin.CSSMinFilter',
 )
+
+COMPRESS_DATA_URI_MAX_SIZE = 5<<10
 
 # -- South settings:
 SKIP_SOUTH_TESTS = True      # Ignore south tests
