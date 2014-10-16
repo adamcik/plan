@@ -1,23 +1,20 @@
 /* This file is part of the plan timetable generator, see LICENSE for details. */
 
-// TODO: switch to simpler inlined custom code for this.
-
-$(document).keyup(function(event) {
-  if ($(event.target).is(':input')) {
-    return true;
-  }
-
-  var scroll = $(window).width() < $(document).width();
-  var url = null;
-
-  if (event.keyCode == 74 || (!scroll && event.keyCode == 37)) { // j or ←
-    url = $('#previous').attr('href');
-  } else if (event.keyCode == 75 || (!scroll && event.keyCode == 39)) { // k or →
-    url = $('#next').attr('href');
-  }
-
-  if (url) {
-    document.location = url;
-  }
-});
-
+document.addEventListener('DOMContentLoaded', function() {
+  document.body.addEventListener('keyup', function(e) {
+    var url, inputs = ['INPUT', 'TEXTAREA', 'BUTTON', 'SELECT'],
+        scroll = document.documentElement.scrollWidth >
+                 document.documentElement.clientWidth;
+    if (inputs.indexOf(event.target.tagName) >= 0) {
+      return true;
+    }
+    if (e.keyCode == 74 || (!scroll && e.keyCode == 37)) {         // j or ←
+      link = document.getElementById('previous');
+    } else if (e.keyCode == 75 || (!scroll && e.keyCode == 39)) {  // k or →
+      link = document.getElementById('next');
+    }
+    if (link && link.href) {
+      document.location = link.href;
+    }
+  }, false);
+}, false);
