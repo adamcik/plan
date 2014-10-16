@@ -9,8 +9,9 @@
 {% load url from future %}
 
 {% block extrastyle %}
-  {% if courses %}
-    {% compress css inline %}
+  {{ block.super }}
+  {% compress css inline %}
+    {% if courses %}
       <style type="text/css">
         {% for course in courses %}
         .course-{{ course.id }} {
@@ -18,8 +19,11 @@
         }
         {% endfor %}
       </style>
-    {% endcompress %}
-  {% endif %}
+    {% endif %}
+    {% if not courses or advanced %}
+      <link rel="stylesheet" href="{% static 'js/jquery.autocomplete.css' %}" />
+    {% endif %}
+  {% endcompress %}
 {% endblock %}
 
 {% block extrahead %}
