@@ -3,30 +3,35 @@
 // TODO: use http://www.hunlock.com/blogs/Totally_Pwn_CSS_with_Javascript instead
 
 (function() {
-  function add_hidden_to_lectures() {
-      var input = $(this);
+  function attach(selector, type, action) {
+    var func, inputs = document.querySelectorAll(selector);
+    for (var i=0; i < inputs.length; i++) {
+      func = toggle.bind(inputs[i], '.' + type + '-' + inputs[i].value, action);
+      inputs[i].addEventListener('change', func, false);
+      func();
+    }
+  }
 
-      if (input.is(':checked')) {
-          $('.lecture-' + input.val()).addClass('hide');
+  function toggle(selector, klass) {
+    var targets = document.querySelectorAll(selector);
+    for (var i=0; i < targets.length; i++) {
+      if (this.checked) {
+        targets[i].classList.add(klass);
       } else {
-          $('.lecture-' + input.val()).removeClass('hide');
+        targets[i].classList.remove(klass);
       }
-  };
+    }
+  }
 
-  function add_delete_to_courses() {
-      var input = $(this);
+  function init() {
+    document.removeEventListener('DOMContentLoaded', arguments.callee, false);
+    attach('#courses input[name="course_remove"]', 'course', 'delete');
+    attach('#lectures input[name="exclude"]', 'lecture', 'hide');
+  }
 
-      if (input.is(':checked')) {
-          $('.course-' + input.val()).addClass('delete');
-      } else {
-          $('.course-' + input.val()).removeClass('delete');
-      }
-  };
-
-  $(function() {
-    $('#lectures input[name=exclude]:checked').each(add_hidden_to_lectures);
-    $('#lectures input[name=exclude]').click(add_hidden_to_lectures);
-    $('#courses input[name=course_remove]:checked').each(add_delete_to_courses);
-    $('#courses input[name=course_remove]').click(add_delete_to_courses);
-  });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, false);
+  } else {
+    init();
+  }
 })();
