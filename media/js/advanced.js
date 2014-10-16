@@ -23,16 +23,6 @@
       }
   };
 
-  function add_delete_to_deadlines() {
-      var input = $(this);
-
-      if (input.is(':checked')) {
-          $('.deadline-' + input.val()).addClass('delete');
-      } else {
-          $('.deadline-' + input.val()).removeClass('delete');
-      }
-  }
-
   function add_toggle() {
     var div = $(this);
     var wrapper = $('#toogle-template').clone();
@@ -52,8 +42,6 @@
     $('#lectures input[name=exclude]').click(add_hidden_to_lectures);
     $('#courses input[name=course_remove]:checked').each(add_delete_to_courses);
     $('#courses input[name=course_remove]').click(add_delete_to_courses);
-    $('#deadlines input[name=deadline_remove]:checked').each(add_delete_to_deadlines);
-    $('#deadlines input[name=deadline_remove]').click(add_delete_to_deadlines);
     $('#change-groups div.groupbox').each(add_toggle)
   });
 })();
