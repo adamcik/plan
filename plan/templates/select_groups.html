@@ -20,9 +20,10 @@
   {% endcompress %}
 {% endblock %}
 
-{% block extrascriptinline %}
-  {{ block.super }}
-  <script type="text/javascript" src="{% static 'js/toggle.js' %}"></script>
+{% block extrascript %}
+  {% compress js %}
+    <script type="text/javascript" src="{% static 'js/toggle.js' %}"></script>
+  {% endcompress %}
 {% endblock %}
 
 {% block title %}

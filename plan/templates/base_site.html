@@ -33,20 +33,28 @@
     <link rel="dns-prefetch" href="//{{ STATIC_DOMAIN }}" />
   {% endif %}
   {% compress js inline %}
+    <script type="text/javascript">
+      (function(w, d, t) {
+        var s = d.getElementsByTagName(t)[0];
+        w.asyncLoad = function(src) {
+          var e = d.createElement(t);
+          e.async = true;
+          e.src = src;
+          s.parentNode.insertBefore(e, s);
+        };
+      })(window, document, 'script');
+    </script>
     {% if ANALYTICS_CODE %}
       <script type="text/javascript">
         var _gaq = _gaq || [];
         _gaq.push(['_setAccount', '{{ ANALYTICS_CODE }}']);
         _gaq.push(['_setSiteSpeedSampleRate', 100]);
         _gaq.push(['_trackPageview']);
+        asyncLoad('{{ request.is_secure|yesno:"https://ssl,http://www" }}.google-analytics.com/ga.js');
       </script>
     {% endif %}
-    {% block extrascriptinline %}{% endblock %}
+    {% block extrascript %}{% endblock %}
   {% endcompress %}
-  {% block extrascript %}{% endblock %}
-  {% if ANALYTICS_CODE %}
-    <script src="{{ request.is_secure|yesno:"https://ssl,http://www" }}.google-analytics.com/ga.js" async defer></script>
-  {% endif %}
 {% endblock %}
 
 {% block lang %}
