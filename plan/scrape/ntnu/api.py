@@ -40,6 +40,9 @@ def fetch_courses(semester, prefix=None):
         if result['lastYearTaught'] and semester.year > result['lastYearTaught']:
             continue
 
+        if result['versionCode'] != course['versionCode']:
+            continue
+
         if semester.type == semester.FALL and result['taughtInAutumn']:
             yield result
         elif semester.type == semester.SPRING and result['taughtInSpring']:
