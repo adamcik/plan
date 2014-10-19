@@ -3,15 +3,13 @@
 /* Basic block elements */
 h1,h2,h3 {
 	font-family: Georgia;
-	clear: both;
 }
 h1 {
 	padding-left: 0.6em;
 	font-size: 167%;
 	margin-top: 0;
 	margin-bottom: -0.25em;
-	float: left;
-	clear: none;
+	border-bottom: 2px solid #D3D7CF;
 }
 h2 {
 	border-bottom: 1px solid #D3D7CF;
@@ -146,7 +144,6 @@ td.error input, td.error select {
 /* header/body/footer */
 #hd {
 	margin-top: 0.5em;
-	border-bottom: 2px solid #D3D7CF;
 	margin-bottom: 1em;
 }
 #bd {

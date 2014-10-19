@@ -56,7 +56,7 @@
 {% endblock %}
 
 {% block hd %}
-  {% include "notice.html" %}
+  {{ block.super }}
   <h1>
     {% title semester slug week %}
   </h1>
@@ -64,6 +64,8 @@
 
 {% block bd %}
   {% url 'schedule-advanced' semester.year semester.slug slug as advanced_url %}
+
+  {% include "notice.html" %}
 
   {% if not courses %}
     <div id="help">
