@@ -11,6 +11,7 @@
 {% block extrastyle %}
   {{ block.super }}
   {% compress css inline %}
+    <link rel="stylesheet" href="{% static 'css/schedule.css' %}" />
     {% if courses %}
       <style type="text/css">
         {% for course in courses %}
@@ -23,9 +24,6 @@
     {% if not courses or advanced %}
       <link rel="stylesheet" href="{% static 'js/jquery.autocomplete.css' %}" />
     {% endif %}
-  {% endcompress %}
-  {% compress css %}
-    <link rel="stylesheet" href="{% static 'css/schedule.css' %}" />
   {% endcompress %}
 {% endblock %}
 
