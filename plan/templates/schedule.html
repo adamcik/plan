@@ -35,7 +35,7 @@
 
 {% block extrascript %}
   {% if courses and not advanced %}
-    {% compress js %}
+    {% compress js inline %}
       <script type="text/javascript" src="{% static 'js/navigation.js' %}"></script>
     {% endcompress %}
   {% endif %}
