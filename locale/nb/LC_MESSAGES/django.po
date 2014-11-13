@@ -333,7 +333,7 @@ msgid "An error has occurred, sorry about the inconvenience."
 msgstr "En feil oppstod, beklager bryderiet."
 
 #: plan/templates/500.html:18
-msgid "The server administrator has all ready been notified of this error."
+msgid "The server administrator has already been notified of this error."
 msgstr "Serveradministrator er varslet om feilen."
 
 #: plan/templates/about.html:8
