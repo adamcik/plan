@@ -395,6 +395,12 @@ class ExamScraper(Scraper):
             qs = qs.filter(course__code__startswith=self.course_prefix)
         return qs.order_by('course__code', 'exam_date')
 
+    def course_queryset(self):
+        qs = Course.objects.filter(semester=self.semester)
+        if self.course_prefix:
+            qs = qs.filter(code__startswith=self.course_prefix)
+        return qs.order_by('code', 'version')
+
     def prepare_data(self, data):
         # TODO(adamcik): consider not hardcoding these.
         if self.semester.type == self.semester.SPRING:
