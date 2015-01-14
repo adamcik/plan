@@ -7,7 +7,7 @@ import logging
 from django import http
 from django import shortcuts
 from django.conf import settings
-from django.db import connection
+from django.db import connection, transaction
 from django.utils import html
 from django.utils import text
 
@@ -246,22 +246,23 @@ def select_groups(request, year, semester_type, slug):
     course_groups = Course.get_groups(year, semester_type, [c.id for c in courses])
 
     if request.method == 'POST':
-        for c in courses:
-            try:
-                groups = course_groups[c.id]
-            except KeyError: # Skip courses without groups
-                continue
+        with transaction.commit_on_success():
+            for c in courses:
+                try:
+                    groups = course_groups[c.id]
+                except KeyError: # Skip courses without groups
+                    continue
 
-            group_form = forms.GroupForm(groups, request.POST, prefix=c.id)
+                group_form = forms.GroupForm(groups, request.POST, prefix=c.id)
 
-            if group_form.is_valid():
-                subscription = Subscription.objects.get_subscriptions(year,
-                        semester_type, slug).get(course=c)
+                if group_form.is_valid():
+                    subscription = Subscription.objects.get_subscriptions(year,
+                            semester_type, slug).get(course=c)
 
-                subscription.groups = group_form.cleaned_data['groups']
+                    subscription.groups = group_form.cleaned_data['groups']
 
-        return shortcuts.redirect(
-            'schedule-advanced', year, Semester.localize(semester_type), slug)
+            return shortcuts.redirect(
+                'schedule-advanced', year, Semester.localize(semester_type), slug)
 
     color_map = utils.ColorMap(hex=True)
     subscription_groups = Subscription.get_groups(year, semester_type, slug)
@@ -354,16 +355,17 @@ def select_course(request, year, semester_type, slug, add=False):
                 'change-groups', year, Semester.localize(semester_type), slug)
 
         elif 'submit_remove' in request.POST:
-            courses = []
-            for c in request.POST.getlist('course_remove'):
-                if c.strip():
-                    courses.append(c.strip())
+            with transaction.commit_on_success():
+                courses = []
+                for c in request.POST.getlist('course_remove'):
+                    if c.strip():
+                        courses.append(c.strip())
 
-            Subscription.objects.get_subscriptions(year, semester_type, slug). \
-                    filter(course__id__in=courses).delete()
+                Subscription.objects.get_subscriptions(year, semester_type, slug). \
+                        filter(course__id__in=courses).delete()
 
-            if Subscription.objects.filter(student__slug=slug).count() == 0:
-                Student.objects.filter(slug=slug).delete()
+                if Subscription.objects.filter(student__slug=slug).count() == 0:
+                    Student.objects.filter(slug=slug).delete()
 
         elif 'submit_name' in request.POST:
             subscriptions = Subscription.objects.get_subscriptions(year, semester_type, slug)
@@ -389,15 +391,16 @@ def select_lectures(request, year, semester_type, slug):
     '''Handle selection of lectures to hide'''
 
     if request.method == 'POST':
-        excludes = request.POST.getlist('exclude')
+        with transaction.commit_on_success():
+            excludes = request.POST.getlist('exclude')
 
-        subscriptions = Subscription.objects.get_subscriptions(year, semester_type, slug)
+            subscriptions = Subscription.objects.get_subscriptions(year, semester_type, slug)
 
-        for subscription in subscriptions:
-            if excludes:
-                subscription.exclude = subscription.course.lecture_set.filter(id__in=excludes)
-            else:
-                subscription.exclude.clear()
+            for subscription in subscriptions:
+                if excludes:
+                    subscription.exclude = subscription.course.lecture_set.filter(id__in=excludes)
+                else:
+                    subscription.exclude.clear()
 
     return shortcuts.redirect(
         'schedule-advanced', year, Semester.localize(semester_type), slug)
