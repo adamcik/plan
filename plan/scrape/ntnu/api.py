@@ -51,7 +51,7 @@ def fetch_courses(semester, prefix=None):
 
 def fetch_course(code):
     code = code.lower().encode('utf-8')
-    return fetch.json(BASE + '/course/%s' % code)['course']
+    return fetch.json(BASE + '/course/%s' % code).get('course')
 
 
 def match_term(data, semester):
