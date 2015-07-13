@@ -26,11 +26,28 @@ from plan.scrape import utils
 class Courses(base.CourseScraper):
     def scrape(self):
         for course in fetch_courses(self.semester):
+            root = fetch.html(course['courseUrl'].encode('utf-8'))
+
+            title, data = '', {}
+            for box in root.cssselect('.infoBox'):
+                for child in box.getchildren():
+                    if child.tag == 'h3':
+                        title = child.text_content()
+                    else:
+                        parts = [child.text or '']
+                        for br in child.getchildren():
+                            parts.append(br.tail or '')
+                        for key, value in [p.split(':', 1) for p in parts if ':' in p]:
+                            key = key.strip(u' \n\xa0')
+                            value = value.strip(u' \n\xa0')
+                            data.setdefault(title, {}).setdefault(key, []).append(value)
+
             yield {
                 'code': course['courseCode'],
                 'name': course['courseName'],
                 'version': course['courseVersion'],
                 'url': course['courseUrl'],
+                'points': float(data['Fakta om emnet']['Studiepoeng'][0]),
             }
 
 
