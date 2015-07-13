@@ -5,10 +5,14 @@ import json as jsonlib
 import logging
 import lxml.etree
 import lxml.html
+import warnings
 import urllib
 
 from django.core import cache
 from django.db import connections
+from django.core.cache import CacheKeyWarning
+
+warnings.simplefilter('ignore', CacheKeyWarning)
 
 scraper_cache = cache.get_cache('scraper')
 
