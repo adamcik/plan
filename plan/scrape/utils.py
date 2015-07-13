@@ -48,7 +48,7 @@ def compare(old, new):
 
     if isinstance(old, set) and isinstance(new, set):
         items = []
-        for i in sorted(old | new, key=unicode):
+        for i in sorted(old | new):
             if i in old and i in new:
                 items.append('%s' % i)
             elif i in new:
