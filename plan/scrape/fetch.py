@@ -75,8 +75,6 @@ def html(*args, **kwargs):
     root = None
     if data:
         root = lxml.html.fromstring(data)
-    if root is not None:
-        root.make_links_absolute(args[0])
     return root
 
 
