@@ -118,5 +118,8 @@ def parse_weeks(value, sep=r',? '):
             start, end = v.split('-')
         else:
             start = end = v
-        weeks.extend(range(int(start), int(end)+1))
+        try:
+            weeks.extend(range(int(start), int(end)+1))
+        except ValueError:
+            pass
     return sorted(set(weeks))
