@@ -25,65 +25,13 @@ from plan.scrape import utils
 
 class Courses(base.CourseScraper):
     def scrape(self):
-        if self.semester.type == Semester.FALL:
-            year = self.semester.year
-        else:
-            year = self.semester.year - 1
-
-        code_re = re.compile('/studier/emner/([^/]+)/', re.I|re.L)
-
-        url = 'http://www.ntnu.no/web/studier/emnesok'
-        query = {
-            'p_p_lifecycle': '2',
-            'p_p_id': 'courselistportlet_WAR_courselistportlet_INSTANCE_m8nT',
-            '_courselistportlet_WAR_courselistportlet_INSTANCE_m8nT_year': year}
-
-        courses_root = fetch.html(url, query=query, verbose=True)
-        for a in courses_root.cssselect('a[href*="/studier/emner/"]'):
-            course_url = a.attrib['href']
-            code = code_re.search(course_url).group(1)
-            quoted_code = urllib.quote(code.encode('utf-8'))
-            name = a.text_content()
-
-            if not ntnu.valid_course_code(code):
-                continue
-            elif not self.should_proccess_course(code):
-                continue
-
-            title = None
-            data = {}
-            root = fetch.html(
-                'http://www.ntnu.no/studier/emner/%s/%s' % (quoted_code, year))
-
-            # Construct dict out of info boxes.
-            for box in root.cssselect('.infoBox'):
-                for child in box.getchildren():
-                    if child.tag == 'h3':
-                        title = child.text_content()
-                    else:
-                        parts = [child.text or '']
-                        for br in child.getchildren():
-                            parts.append(br.tail or '')
-                        for key, value in [p.split(':', 1) for p in parts if ':' in p]:
-                            key = key.strip(u' \n\xa0')
-                            value = value.strip(u' \n\xa0')
-                            data.setdefault(title, {}).setdefault(key, []).append(value)
-
-            try:
-                semesters = data['Undervisning']['Undervises']
-            except KeyError:
-                continue
-
-            if self.semester.type == Semester.FALL and u'HØST %s' % year not in semesters:
-                continue
-            elif self.semester.type == Semester.SPRING and u'VÅR %s' % year not in semesters:
-                continue
-
-            yield {'code': code,
-                   'name': name,
-                   'version': int(data['Fakta om emnet']['Versjon'][0]),
-                   'points': float(data['Fakta om emnet']['Studiepoeng'][0]),
-                   'url': course_url}
+        for course in fetch_courses(self.semester):
+            yield {
+                'code': course['courseCode'],
+                'name': course['courseName'],
+                'version': course['courseVersion'],
+                'url': course['courseUrl'],
+            }
 
 
 class Rooms(base.RoomScraper):
@@ -138,35 +86,72 @@ class Rooms(base.RoomScraper):
 
 class Lectures(base.LectureScraper):
     def scrape(self):
-        prefix = ntnu.prefix(self.semester)
-        url = 'http://www.ntnu.no/studieinformasjon/timeplan/%s/' % prefix
-        room_codes = {}
+        url = 'http://www.ntnu.no/web/studier/emner'
+        query = {
+            'p_p_id': 'coursedetailsportlet_WAR_courselistportlet',
+            'p_p_lifecycle': 2,
+            'p_p_resource_id': 'timetable',
+            '_coursedetailsportlet_WAR_courselistportlet_year': self.semester.year,
+        }
+        if self.semester.type == Semester.FALL:
+            ntnu_semeter = u'%d_HØST' % self.semester.year
+        else:
+            ntnu_semeter = u'%d_VÅR' % self.semester.year
 
-        for code, name in fetch_rooms():
-            room_codes.setdefault(name, []).append(code)
+        for c in self.course_queryset():
+            query['_coursedetailsportlet_WAR_courselistportlet_courseCode'] = c.code.encode('utf-8')
+            course = fetch.json(url, query=query, data={})['course']
+            for activity in course.get('summarized', []):
+                if activity['arsterminId'] != ntnu_semeter:
+                    continue
+                yield {
+                    'course': c,
+                    'type': activity.get('description', activity['acronym']),
+                    'day': activity['dayNum'] - 1,
+                    'start': utils.parse_time(activity['from']),
+                    'end':  utils.parse_time(activity['to']),
+                    'weeks': utils.parse_weeks(','.join(activity['weeks']), ','),
+                    'rooms': [(r['syllabusKey'], r['romNavn'])
+                               for r in activity.get('rooms', [])],
+                    'groups': activity.get('studyProgramKeys', []),
+                    'lecturers': [],
+                }
 
-        for course in self.course_queryset():
-            code = '%s-%s' % (course.code, course.version)
-            root = fetch.html(url, query={'emnekode': code.encode('latin1')})
-            if root is None:
-                continue
 
-            for h1 in root.cssselect(u'.hovedramme h1'):
-                if course.code in h1.text_content():
-                    table = root.cssselect('.hovedramme table')[1];
-                    break
-            else:
-                logging.debug("Couldn't load any info for %s", course.code)
-                continue
+def fetch_courses(semester):
+    if semester.type == Semester.FALL:
+        year = semester.year
+    else:
+        year = semester.year - 1
 
-            lecture_type = None
-            for tr in table.cssselect('tr')[1:-1]:
-                data = parse_row(tr, room_codes)
-                if data.get('lecture_type', None):
-                    lecture_type = data['lecture_type']
-                elif data:
-                    data.update({'course': course, 'type': lecture_type})
-                    yield data
+    url = 'http://www.ntnu.no/web/studier/emnesok'
+    query = {
+        'p_p_lifecycle': '2',
+        'p_p_id': 'courselistportlet_WAR_courselistportlet',
+        'p_p_mode': 'view',
+        'p_p_resource_id': 'fetch-courselist-as-json'
+    }
+    data = {
+        'english': 0,
+        'pageNo': 1,
+        'semester': year,
+        'sortOrder': '+title'
+    }
+    if semester.type == Semester.FALL:
+        data['courseAutumn'] = 1
+    else:
+        data['courseSpring'] = 1
+
+
+    while True:
+        result = fetch.json(url, query=query, data=data, verbose=True)
+        data['pageNo'] += 1
+
+        if not result['courses']:
+            break
+
+        for course in result['courses']:
+            yield course
 
 
 def fetch_room(url):
@@ -181,62 +166,3 @@ def fetch_room(url):
             return match.group(1), name
 
     return None,None
-
-
-def fetch_rooms():
-    result = fetch.html('http://www.ntnu.no/studieinformasjon/rom/')
-    if result is None:
-        return
-
-    rooms = {}
-    for option in result.cssselect('.hovedramme select[name="romnr"] option'):
-        code = utils.clean_string(option.attrib['value'])
-        name = utils.clean_string(option.text_content())
-
-        if code and name and 'ikkerom' not in name:
-            yield code, name
-
-
-def parse_row(tr, room_codes):
-    data = {}
-    for i, td in enumerate(tr.cssselect('td')):
-        if i == 0:
-            if td.attrib.get('colspan', 1) == '4':
-                lecture_type = utils.clean_string(td.text_content())
-                if lecture_type:
-                    data['lecture_type'] = lecture_type
-            else:
-                time = td.cssselect('b')[0].text_content().strip()
-                raw_day, period = time.split(' ', 1)
-                raw_start, raw_end = period.split('-')
-
-                data['day'] = utils.parse_day_of_week(raw_day)
-                data['start'] = utils.parse_time(raw_start)
-                data['end'] = utils.parse_time(raw_end)
-
-                match = re.match('.*Uke: (.+)', td.text_content())
-                data['weeks'] = utils.parse_weeks(match.group(1))
-        elif i == 1 and len(td.cssselect('a')) > 0:
-            if len(td.cssselect('a')) > 1:
-                logging.warning('Multiple rooms links found, simply '
-                                'using first one.')
-
-            a = td.cssselect('a')[0]
-            rooms = [a.text] + [e.tail for e in a]
-
-            data['rooms'] = []
-            for name in utils.clean_list(rooms, utils.clean_string):
-                if name not in room_codes:
-                    data['rooms'].append((None, name))
-                    continue
-
-                if len(room_codes[name]) > 1:
-                    logging.warning('Multiple rooms with name %s, '
-                                    'simply using first code.', name)
-                data['rooms'].append((room_codes[name][0], name))
-        elif i == 2:
-            data['lecturers'] = [td.text] + [e.tail for e in td]
-        elif i == 3:
-            data['groups'] = [g.text_content() for g in td.cssselect('span')]
-
-    return data
