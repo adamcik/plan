@@ -27,27 +27,47 @@ def sql(db, query, params=None):
 
 
 def get(url, cache=True, verbose=False):
-    data = scraper_cache.get(url)
+    key = 'get:%s' % (url)
+    result = scraper_cache.get(key)
     msg = 'Cached fetch: %s' % url
-    if not data or not cache:
+    if not result or not cache:
         msg = 'Fetched: %s' % url
         response = urllib.urlopen(url)
-        data = response.read()
-        if response.getcode() == 200 and data:
-            scraper_cache.set(url, data)
+        result = response.read()
+        if response.getcode() == 200 and result:
+            scraper_cache.set(key, result)
 
     logging.log(logging.INFO if verbose else logging.DEBUG, msg)
-    return data
+    return result
 
 
-def plain(url, query=None, verbose=False, cache=True):
+def post(url, data, cache=True, verbose=False):
+    data = urllib.urlencode(data)
+    key = 'post:%s:%s' % (url, data)
+    result = scraper_cache.get(key)
+    msg = 'Cached post: %s - %s' % (url, data)
+
+    if not result or not cache:
+        msg = 'Posted: %s - %s' % (url, data)
+        response = urllib.urlopen(url, data)
+        result = response.read()
+        if response.getcode() == 200 and result:
+            scraper_cache.set(key, result)
+
+    logging.log(logging.INFO if verbose else logging.DEBUG, msg)
+    return result
+
+
+def plain(url, query=None, data=None, verbose=False, cache=True):
     if query:
         url += '?' + urllib.urlencode(query)
 
     try:
-       return get(url, cache=cache, verbose=verbose)
+        if data is not None:
+            return post(url, data, cache=cache, verbose=verbose)
+        return get(url, cache=cache, verbose=verbose)
     except IOError as e:
-        logging.error('Loading %s falied: %s', url, e)
+        logging.error('Loading %s failed: %s', url, e)
 
 
 def html(*args, **kwargs):
