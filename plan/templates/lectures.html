@@ -19,7 +19,6 @@
           <th>{% trans "Rooms" %}</th>
           <th>{% trans "Type" %}</th>
           <th>{% trans "Groups" %}</th>
-          <th>{% trans "Lecturers" %}</th>
           <th>{% trans "Weeks" %}</th>
         </tr>
       </thead>
@@ -45,7 +44,6 @@
             </td>
             <td class="small">{{ l.type|default:"" }}</td>
             <td class="small">{{ groups|get:l.id|join:", " }}</td>
-            <td class="small">{{ lecturers|get:l.id|join:", "|default:"&nbsp;" }}</td>
             <td class="small">{{ lecture_weeks|get:l.id|compact|join:", " }}</td>
           </tr>
         {% endfor %}
