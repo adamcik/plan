@@ -7,7 +7,7 @@ import lxml.html
 import re
 import urllib
 
-from plan.common.models import Course, Semester
+from plan.common.models import Course, ExamType, Semester
 from plan.scrape import base
 from plan.scrape import fetch
 from plan.scrape import ntnu
@@ -49,6 +49,37 @@ class Courses(base.CourseScraper):
                 'url': course['courseUrl'],
                 'points': float(data['Fakta om emnet']['Studiepoeng'][0]),
             }
+
+
+class Exams(base.ExamScraper):
+    def scrape(self):
+        for course in self.course_queryset():
+            root = fetch.html(course.url.encode('utf-8'))
+            for table in root.cssselect('table.assessment.examinfo'):
+                mapping = []
+                for tr in table.cssselect('tr'):
+                    if not mapping:
+                        for th in list(tr):
+                            mapping.append(th.attrib['class'])
+                    else:
+                        data = dict(zip(mapping, [td.text_content() for td in tr]))
+
+                        if data['term'] == u'Vår' and self.semester.type != Semester.SPRING:
+                            continue
+                        elif data['term'] == u'Høst' and self.semester.type != Semester.FALL:
+                            continue
+
+                        result = {'course': course, 'type': ExamType.objects.get(name=data['form'])}
+                        for variant, date in re.findall(r'\s*(?:(\w+) )?(\d{2}\.\d{2}\.\d{4})', data['date']):
+                            if variant == 'Utlevering':
+                                result['handout_date'] = utils.parse_date(date)
+                            elif variant == 'Innlevering':
+                                result['exam_date'] = utils.parse_date(date)
+                            else:
+                                result['exam_date'] = utils.parse_date(date)
+
+                        if 'exam_date' in result:
+                            yield result
 
 
 class Rooms(base.RoomScraper):

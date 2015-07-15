@@ -201,6 +201,7 @@ TIMETABLE_SCRAPERS = {
     'courses.web': 'plan.scrape.ntnu.web.Courses',
     'exams': 'plan.scrape.ntnu.api.Exams',
     'exams.api': 'plan.scrape.ntnu.api.Exams',
+    'exams.web': 'plan.scrape.ntnu.web.Exams',
     'exams.xml': 'plan.scrape.ntnu.xml.Exams',
     'lectures': 'plan.scrape.ntnu.api.Lectures',
     'lectures.api': 'plan.scrape.ntnu.api.Lectures',
