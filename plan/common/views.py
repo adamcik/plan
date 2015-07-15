@@ -148,7 +148,9 @@ def schedule(request, year, semester_type, slug, advanced=False,
     # Start setting up queries
     courses = Course.objects.get_courses(year, semester.type, slug)
     lectures = Lecture.objects.get_lectures(year, semester.type, slug, week)
-    exams = Exam.objects.get_exams(year, semester.type, slug)
+    exams = {}
+    for exam in Exam.objects.get_exams(year, semester.type, slug):
+        exams.setdefault(exam.course_id, []).append(exam)
 
     # Use get_related to cut query counts
     lecturers = Lecture.get_related(Lecturer, lectures)

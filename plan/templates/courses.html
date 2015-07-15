@@ -1,3 +1,4 @@
+{% load get %}
 {% load i18n %}
 
 {% load url from future %}
@@ -9,11 +10,12 @@
       <thead>
         <tr>
           {% if advanced %}
-            <th style="width:  5%"></th>
+            <th style="width: 1.2em"></th>
           {% endif %}
-          <th style="width: 18%">{% trans "Course" %}</th>
+          <th>{% trans "Course" %}</th>
           <th>{% trans "Alias" %}</th>
           <th>{% trans "Description" %}</th>
+          <th>{% trans "Exams" %}</th>
         </tr>
       </thead>
       <tbody>
@@ -42,6 +44,13 @@
             </td>
             <td>
               {{ course.name }}
+            </td>
+            <td>
+              {% for exam in exams|get:course.id %}
+                {{ exam.exam_date }}{% if not forloop.last %},{% endif %}
+              {% empty %}
+                -
+              {% endfor %}
             </td>
           </tr>
         {% endfor %}

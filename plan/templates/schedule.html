@@ -76,15 +76,8 @@
   {% include "schedule_table_footer.html" %}
 
   {% if courses %}
-    <div class="yui-g">
-      <div class="yui-u first">
-        {% include "courses.html" %}
-      </div>
-      <div class="yui-u">
-        {% include "exams.html" %}
-      </div>
-    </div>
     {% if advanced %}
+      {% include "courses.html" %}
       <div class="yui-g">
         <div class="yui-u first">
           {% include "add_courses.html" %}
@@ -97,5 +90,8 @@
   {% endif %}
 
   {% include "lectures.html" %}
+  {% if not advanced %}
+    {% include "courses.html" %}
+  {% endif %}
   {% include "tips.html" %}
 {% endblock %}
