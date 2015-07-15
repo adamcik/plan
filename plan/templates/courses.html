@@ -14,7 +14,6 @@
           <th style="width: 18%">{% trans "Course" %}</th>
           <th>{% trans "Alias" %}</th>
           <th>{% trans "Description" %}</th>
-          <th style="width: 10%">{% trans "Credits" %}</th>
         </tr>
       </thead>
       <tbody>
@@ -43,9 +42,6 @@
             </td>
             <td>
               {{ course.name }}
-            </td>
-            <td align="right">
-              {{ course.points|default:""|floatformat:"1" }}
             </td>
           </tr>
         {% endfor %}
