@@ -14,8 +14,6 @@ urlpatterns = patterns('plan.common.views',
     url(r'^{year}/{semester}/{slug}/current/$', 'schedule_current', name='schedule-current'),
     url(r'^{year}/{semester}/{slug}/{week}/$', 'schedule', name='schedule-week'),
 
-    url(r'^{year}/{semester}/{slug}/list/$', 'list_courses', name='course-list'),
-
     url(r'^{year}/{semester}/{slug}/change/$', 'select_course', name='change-course'),
     url(r'^{year}/{semester}/{slug}/groups/$', 'select_groups', name='change-groups'),
     url(r'^{year}/{semester}/{slug}/filter/$', 'select_lectures', name='change-lectures'),

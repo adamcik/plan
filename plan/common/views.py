@@ -406,19 +406,6 @@ def select_lectures(request, year, semester_type, slug):
         'schedule-advanced', year, Semester.localize(semester_type), slug)
 
 
-def list_courses(request, year, semester_type, slug):
-    '''Display a list of courses'''
-
-    if request.method == 'POST':
-        return select_course(request, year, semester_type, slug, add=True)
-
-    courses = Course.objects.get_courses_with_exams(year, semester_type)
-    return shortcuts.render(request, 'course_list.html', {
-            'semester': Semester(year=year, type=semester_type),
-            'course_list': courses,
-        })
-
-
 def about(request):
     # Limit ourselves to 400 buckets to display within 940px - i.e. 2.3 pixels per sample.
     cursor = connection.cursor()

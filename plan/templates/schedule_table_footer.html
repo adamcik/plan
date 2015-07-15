@@ -6,11 +6,10 @@
   <div class="yui-g noprint">
     <div class="yui-u first">
       <p>
-        <i class="icon-list"></i> <a href="{% url 'course-list' semester.year semester.slug slug %}">{% trans "Course list" %}</a>
         {% if advanced %}
-          - <i class="icon-wrench"></i> <a href="{% url 'schedule' semester.year semester.slug slug %}">{% trans "Hide advanced options" %}</a>
+          <i class="icon-wrench"></i> <a href="{% url 'schedule' semester.year semester.slug slug %}">{% trans "Hide advanced options" %}</a>
         {% else %}
-          - <i class="icon-wrench"></i> <a href="{% url 'schedule-advanced' semester.year semester.slug slug %}">{% trans "Advanced options" %}</a>
+          <i class="icon-wrench"></i> <a href="{% url 'schedule-advanced' semester.year semester.slug slug %}">{% trans "Advanced options" %}</a>
         {% endif %}
         - <i class="icon-question-sign"></i> <a href="#tips">{% trans "Tips" %}</a>
         - <i class="icon-download-alt"></i>
