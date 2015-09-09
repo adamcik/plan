@@ -54,6 +54,7 @@
         "pk": 1, 
         "model": "common.room", 
         "fields": {
+            "last_import": "2015-09-10",
             "name": "Room 1"
         }
     }, 
@@ -61,6 +62,7 @@
         "pk": 2, 
         "model": "common.room", 
         "fields": {
+            "last_import": "2015-09-10",
             "name": "Room 2"
         }
     }, 
@@ -68,6 +70,7 @@
         "pk": 3, 
         "model": "common.room", 
         "fields": {
+            "last_import": "2015-09-10",
             "name": "Room 3"
         }
     }, 
@@ -121,6 +124,7 @@
             "points": "1", 
             "semester": 1,
             "code": "COURSE1", 
+            "last_import": "2015-09-10",
             "name": "Course 1 full name"
         }
     }, 
@@ -132,6 +136,7 @@
             "points": "1", 
             "semester": 1, 
             "code": "COURSE2", 
+            "last_import": "2015-09-10",
             "name": "Course 2 full name"
         }
     }, 
@@ -143,6 +148,7 @@
             "points": "1", 
             "semester": 1, 
             "code": "COURSE3", 
+            "last_import": "2015-09-10",
             "name": "Course 3 full name"
         }
     }, 
@@ -154,6 +160,7 @@
             "points": "1", 
             "semester": 1, 
             "code": "COURSE4", 
+            "last_import": "2015-09-10",
             "name": "Course 4 full name"
         }
     }, 
@@ -165,6 +172,7 @@
             "points": "1", 
             "semester": 2, 
             "code": "COURSE4", 
+            "last_import": "2015-09-10",
             "name": "Course 4 full name"
         }
     }, 
@@ -173,6 +181,7 @@
         "model": "common.examtype", 
         "fields": {
             "code": "E",
+            "last_import": "2015-09-10",
             "name": "Written exam"
         }
     }, 
@@ -181,6 +190,7 @@
         "model": "common.examtype", 
         "fields": {
             "code": "H",
+            "last_import": "2015-09-10",
             "name": "Home exam"
         }
     }, 
@@ -194,6 +204,7 @@
             "handout_date": null, 
             "duration": null, 
             "type": 1,
+            "last_import": "2015-09-10",
             "exam_date": "2009-05-05" 
         }
     }, 
@@ -207,6 +218,7 @@
             "handout_date": null, 
             "duration": "3", 
             "type": 1,
+            "last_import": "2015-09-10",
             "exam_date": "2009-05-15"
         }
     }, 
@@ -220,6 +232,7 @@
             "handout_date": "2009-05-02", 
             "duration": "1", 
             "type": 1,
+            "last_import": "2015-09-10",
             "exam_date": "2009-05-15" 
         }
     }, 
@@ -233,6 +246,7 @@
             "handout_date": null, 
             "duration": "1", 
             "type": 1,
+            "last_import": "2015-09-10",
             "exam_date": "2009-05-15" 
         }
     }, 
@@ -246,6 +260,7 @@
             "handout_date": "2009-05-01", 
             "duration": 1, 
             "type": 1,
+            "last_import": "2015-09-10",
             "exam_date": "2009-05-06" 
         }
     }, 
@@ -259,6 +274,7 @@
             "handout_date": null, 
             "duration": null, 
             "type": 1,
+            "last_import": "2015-09-10",
             "exam_date": "2009-05-03" 
         }
     }, 
@@ -272,6 +288,7 @@
             "handout_date": null, 
             "duration": 4, 
             "type": 2,
+            "last_import": "2015-09-10",
             "exam_date": "2009-05-15" 
         }
     }, 
@@ -279,6 +296,7 @@
         "pk": 2, 
         "model": "common.lecture", 
         "fields": {
+            "last_import": "2015-09-10",
             "lecturers": [
                 1
             ], 
@@ -299,6 +317,7 @@
         "pk": 3, 
         "model": "common.lecture", 
         "fields": {
+            "last_import": "2015-09-10",
             "lecturers": [
                 2
             ], 
@@ -319,6 +338,7 @@
         "pk": 7, 
         "model": "common.lecture", 
         "fields": {
+            "last_import": "2015-09-10",
             "lecturers": [], 
             "end": "12:00:00", 
             "start": "08:15:00", 
@@ -335,6 +355,7 @@
         "pk": 4, 
         "model": "common.lecture", 
         "fields": {
+            "last_import": "2015-09-10",
             "lecturers": [
                 3
             ], 
@@ -355,6 +376,7 @@
         "pk": 5, 
         "model": "common.lecture", 
         "fields": {
+            "last_import": "2015-09-10",
             "lecturers": [], 
             "end": "11:00:00", 
             "start": "09:15:00", 
@@ -370,6 +392,7 @@
         "pk": 6, 
         "model": "common.lecture", 
         "fields": {
+            "last_import": "2015-09-10",
             "lecturers": [], 
             "end": "12:00:00", 
             "start": "08:15:00", 
@@ -386,6 +409,7 @@
         "pk": 8, 
         "model": "common.lecture", 
         "fields": {
+            "last_import": "2015-09-10",
             "lecturers": [], 
             "end": "16:00:00", 
             "start": "15:15:00", 
@@ -402,6 +426,7 @@
         "pk": 9, 
         "model": "common.lecture", 
         "fields": {
+            "last_import": "2015-09-10",
             "lecturers": [], 
             "end": "21:00:00", 
             "start": "07:00:00", 
@@ -418,6 +443,7 @@
         "pk": 10,
         "model": "common.lecture",
         "fields": {
+            "last_import": "2015-09-10",
             "lecturers": [],
             "end": "08:30:00",
             "start": "08:15:00",
@@ -434,6 +460,7 @@
         "pk": 11, 
         "model": "common.lecture", 
         "fields": {
+            "last_import": "2015-09-10",
             "lecturers": [], 
             "end": "23:00:00", 
             "start": "19:15:00", 
