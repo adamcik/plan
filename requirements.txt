@@ -5,7 +5,6 @@ psycopg2         # Postgres database adapter
 vobject          # Ical generation
 ReportLab        # PDF generation
 
-south >= 0.7     # Database migrations
 lxml             # Web scraping of data
 sphinx           # To build docs
 

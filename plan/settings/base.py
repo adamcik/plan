@@ -69,7 +69,6 @@ INSTALLED_APPS = (
     'plan.scrape',
     'plan.ical',
     'plan.pdf',
-    'south',
     'compressor',
 )
 
@@ -134,10 +133,6 @@ COMPRESS_CSS_FILTERS = (
 )
 
 COMPRESS_DATA_URI_MAX_SIZE = 5<<10
-
-# -- South settings:
-SKIP_SOUTH_TESTS = True      # Ignore south tests
-SOUTH_TESTS_MIGRATE = False  # Don't use south migrations during tests.
 
 # -- plan specific settings:
 
