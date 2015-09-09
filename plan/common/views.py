@@ -91,7 +91,7 @@ def course_query(request, year, semester_type):
     limit = min(request.GET.get('limit', '10'), settings.TIMETABLE_AJAX_LIMIT)
     query = request.GET.get('q', '').strip()[:100]
 
-    response = http.HttpResponse(mimetype='text/plain; charset=utf-8')
+    response = http.HttpResponse(content_type='text/plain; charset=utf-8')
     if not query:
         return response
 

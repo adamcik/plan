@@ -61,7 +61,7 @@ def ical(request, year, semester_type, slug, ical_type=None):
 
     filename = '%s.ics' % '-'.join([str(semester.year), semester.type, slug] + resources)
 
-    response = http.HttpResponse(icalstream, mimetype='text/calendar')
+    response = http.HttpResponse(icalstream, content_type='text/calendar')
     response['Content-Type'] = 'text/calendar; charset=utf-8'
     response['Filename'] = filename  # IE needs this
     response['Content-Disposition'] = 'attachment; filename=%s' % filename

@@ -78,7 +78,7 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
     if week:
         filename += '-%s' % week
 
-    response = http.HttpResponse(mimetype='application/pdf')
+    response = http.HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename=%s.pdf' % filename
 
     lectures = Lecture.objects.get_lectures(year, semester.type, slug, week)
