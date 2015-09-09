@@ -93,7 +93,7 @@ class LectureType(models.Model):
 class Room(models.Model):
     code = models.CharField(_('Code'), max_length=20, null=True, unique=True)
     name = models.CharField(_('Name'), max_length=100)
-    url = models.URLField(_('URL'), verify_exists=False, default='')
+    url = models.URLField(_('URL'), default='')
 
     last_import = models.DateTimeField(_('Last import time'), auto_now=True)
 
@@ -112,7 +112,7 @@ class Group(models.Model):
 
     code = models.CharField(_('Code'), max_length=20, unique=True, null=True)
     name = models.CharField(_('Name'), max_length=100, null=True)
-    url = models.URLField(_('URL'), verify_exists=False, default='')
+    url = models.URLField(_('URL'), default='')
 
     def __unicode__(self):
         return self.code
@@ -132,8 +132,8 @@ class Course(models.Model):
     name = models.TextField(_('Name'))
     version = models.CharField(_('Version'), max_length=20, null=True)
 
-    url = models.URLField(_('URL'), verify_exists=False)
-    syllabus = models.URLField(_('URL'), verify_exists=False)
+    url = models.URLField(_('URL'))
+    syllabus = models.URLField(_('URL'))
     points = models.DecimalField(_('Points'), decimal_places=2, max_digits=5, null=True)
 
     last_import = models.DateTimeField(_('Last import time'), auto_now=True)
@@ -298,7 +298,7 @@ class Exam(models.Model):
 
     duration = models.DecimalField(_('Duration'), null=True, max_digits=5,
                                      decimal_places=2, help_text=_('Duration in hours'))
-    url = models.URLField(_('URL'), verify_exists=False, default='')
+    url = models.URLField(_('URL'), default='')
 
     last_import = models.DateTimeField(_('Last import time'), auto_now=True)
 
