@@ -80,7 +80,7 @@ class Subscription(models.Model):
 class LectureType(models.Model):
     code = models.CharField(_('Code'), max_length=20, null=True, unique=True)
     name = models.CharField(_('Name'), max_length=100, unique=True)
-    optional = models.BooleanField(_('Optional'))
+    optional = models.BooleanField(_('Optional'), default=False)
 
     def __unicode__(self):
         return self.name
