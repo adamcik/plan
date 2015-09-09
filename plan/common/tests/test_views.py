@@ -74,17 +74,6 @@ class ViewTestCase(BaseTestCase):
             self.assertEquals(response.status_code, 200)
             self.assertTemplateUsed(response, 'schedule.html')
 
-    def test_course_list(self):
-        # FIXME test POST
-
-        s = Semester.objects.active()
-        url = self.url('course-list')
-        key = '/'.join([str(s.year), s.type, 'courses'])
-
-        response = self.client.get(url)
-        self.failUnlessEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'course_list.html')
-
     def test_change_course(self):
         # FIXME test semester does not exist
         # FIXME test ie handling
