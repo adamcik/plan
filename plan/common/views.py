@@ -99,7 +99,7 @@ def course_query(request, year, semester_type):
 
     for course in courses:
         code = html.escape(course.code)
-        name = html.escape(text.truncate_words(course.name, 5))
+        name = html.escape(text.Truncator(course.name).words(5, truncate='...'))
         response.write(u'%s|%s\n' % (code, name or u'?'))
 
     return response
