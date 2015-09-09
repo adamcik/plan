@@ -56,6 +56,10 @@ LANGUAGE_FALLBACK = {
 
 LOCALE_PATHS = [os.path.join(BASE_PATH, 'locale')]
 
+# -- Test:
+
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+
 # -- App and midleware settings:
 MIDDLEWARE_CLASSES = (
     'plan.common.middleware.AppendSlashMiddleware',
