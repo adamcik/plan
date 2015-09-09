@@ -40,9 +40,8 @@ class Subscription(models.Model):
     alias = models.CharField(_('Alias'), max_length=50, blank=True)
     added = models.DateTimeField(_('Added'), auto_now_add=True)
 
-    groups = models.ManyToManyField('Group', null=True)
-    exclude = models.ManyToManyField('Lecture', null=True,
-        related_name='excluded_from')
+    groups = models.ManyToManyField('Group')
+    exclude = models.ManyToManyField('Lecture', related_name='excluded_from')
 
     objects = SubscriptionManager()
 
@@ -349,10 +348,10 @@ class Lecture(models.Model):
     start = models.TimeField(_('Start time'))
     end = models.TimeField(_('End time'))
 
-    rooms = models.ManyToManyField(Room, null=True)
+    rooms = models.ManyToManyField(Room)
     type = models.ForeignKey(LectureType, null=True)
-    groups = models.ManyToManyField(Group, null=True)
-    lecturers = models.ManyToManyField(Lecturer, null=True)
+    groups = models.ManyToManyField(Group)
+    lecturers = models.ManyToManyField(Lecturer)
 
     last_import = models.DateTimeField(_('Last import time'), auto_now=True)
 
