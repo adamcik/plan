@@ -1,7 +1,5 @@
 {% load i18n %}
 
-{% load url from future %}
-
 <h3>{% trans "Change course groups" %}</h3>
 <p>
   {% url 'change-groups' semester.year semester.slug slug as groups_url %}

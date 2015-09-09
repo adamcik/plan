@@ -2,8 +2,6 @@
 {% load get %}
 {% load i18n %}
 
-{% load url from future %}
-
 {% if lectures %}
   <h2>{% trans "Lecture list" %}</h2>
   <form action="{% url 'change-lectures' semester.year semester.slug slug %}" method="post">

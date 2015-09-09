@@ -1,7 +1,5 @@
 {% load i18n %}
 
-{% load url from future %}
-
 {% if advanced or not courses %}
   <form action="{% url 'change-course' semester.year semester.slug slug %}" method="post" class="noprint">
     {% if courses %}

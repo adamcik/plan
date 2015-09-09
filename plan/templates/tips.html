@@ -1,7 +1,5 @@
 {% load i18n %}
 
-{% load url from future %}
-
 {% url 'shortcut' slug as shortcut_url %}
 {% url 'course-list' semester.year semester.slug slug as course_list_url %}
 {% url 'schedule-advanced' semester.year semester.slug slug as adavanced_url %}

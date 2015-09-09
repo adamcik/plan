@@ -3,9 +3,6 @@
 {% load nbsp %}
 {% load strip %}
 
-{% load cycle from future %}
-{% load url from future %}
-
 {% if prev_week %}
   <a href="{% url 'schedule-week' semester.year semester.slug slug prev_week %}" id="previous" class="noprint">«</a>
 {% endif %}
