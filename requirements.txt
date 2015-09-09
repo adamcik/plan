@@ -1,4 +1,4 @@
-Django >= 1.6, < 1.7 # Django webframework
+Django >= 1.7, < 1.8 # Django webframework
 
 psycopg2         # Postgres database adapter
 
