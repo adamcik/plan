@@ -81,7 +81,7 @@ class LectureManager(models.Manager):
 
         params = [week or True]
 
-        return list(self.get_query_set().filter(**filter_kwargs)
+        return list(self.get_queryset().filter(**filter_kwargs)
                     .distinct()
                     .select_related(*related)
                     .extra(where=where, tables=tables, select=select, select_params=params)
@@ -110,7 +110,7 @@ class ExamManager(models.Manager):
             }
             select = {}
 
-        return self.get_query_set().filter(**exam_filter).select_related(
+        return self.get_queryset().filter(**exam_filter).select_related(
                 'course',
                 'type',
             ).extra(
@@ -126,7 +126,7 @@ class CourseManager(models.Manager):
             'subscription__course__semester__year__exact': year,
             'subscription__course__semester__type__exact': semester_type,
         }
-        return self.get_query_set().filter(**course_filter). \
+        return self.get_queryset().filter(**course_filter). \
             extra(select={'alias': 'common_subscription.alias'}).distinct().\
             order_by('code')
 
@@ -155,7 +155,7 @@ class CourseManager(models.Manager):
                                              'name__icontains',
                                              'subscription__alias__exact'])
 
-        qs = self.get_query_set()
+        qs = self.get_queryset()
         qs = qs.filter(search_filter)
         qs = qs.filter(semester__year__exact=year,
                        semester__type__exact=semester_type)
@@ -167,7 +167,7 @@ class CourseManager(models.Manager):
 
 class SubscriptionManager(models.Manager):
     def get_subscriptions(self, year, semester_type, slug):
-        return self.get_query_set().filter(
+        return self.get_queryset().filter(
                 student__slug=slug,
                 course__semester__year__exact=year,
                 course__semester__type__exact=semester_type,
@@ -178,7 +178,7 @@ class SubscriptionManager(models.Manager):
 
 class SemesterManager(models.Manager):
     def active(self):
-        qs = self.get_query_set()
+        qs = self.get_queryset()
         qs = qs.filter(active__lt=datetime.date.today())
         try:
             return qs.order_by('-active')[0]
@@ -186,7 +186,7 @@ class SemesterManager(models.Manager):
             raise self.model.DoesNotExist
 
     def next(self):
-        qs = self.get_query_set()
+        qs = self.get_queryset()
         qs = qs.filter(active__gte=datetime.date.today())
         try:
             return qs.order_by('active')[0]
