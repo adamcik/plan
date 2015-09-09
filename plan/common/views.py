@@ -248,7 +248,7 @@ def select_groups(request, year, semester_type, slug):
     course_groups = Course.get_groups(year, semester_type, [c.id for c in courses])
 
     if request.method == 'POST':
-        with transaction.commit_on_success():
+        with transaction.atomic():
             for c in courses:
                 try:
                     groups = course_groups[c.id]
@@ -357,7 +357,7 @@ def select_course(request, year, semester_type, slug, add=False):
                 'change-groups', year, Semester.localize(semester_type), slug)
 
         elif 'submit_remove' in request.POST:
-            with transaction.commit_on_success():
+            with transaction.atomic():
                 courses = []
                 for c in request.POST.getlist('course_remove'):
                     if c.strip():
@@ -393,7 +393,7 @@ def select_lectures(request, year, semester_type, slug):
     '''Handle selection of lectures to hide'''
 
     if request.method == 'POST':
-        with transaction.commit_on_success():
+        with transaction.atomic():
             excludes = request.POST.getlist('exclude')
 
             subscriptions = Subscription.objects.get_subscriptions(year, semester_type, slug)
