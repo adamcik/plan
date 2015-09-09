@@ -1,8 +1,6 @@
 Django >= 1.4 < 1.5 # Django webframework
 
-ipython          # Better interactive python shell
 psycopg2         # Postgres database adapter
-python-memcached # Memcache client library
 
 vobject          # Ical generation
 ReportLab        # PDF generation
