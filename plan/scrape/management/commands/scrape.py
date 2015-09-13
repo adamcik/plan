@@ -1,7 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import logging
-import optparse
 import sys
 
 from django.core.management import base as management
@@ -14,33 +13,32 @@ from plan.scrape import utils
 
 DATE_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 CONSOLE_LOG_FORMAT = '[%(asctime)s %(levelname)s] %(message)s'
-LOG_LEVELS = {'0': logging.ERROR,
-              '1': logging.WARNING,
-              '2': logging.INFO,
-              '3': logging.DEBUG}
-
-OPTIONS = dict((o.dest, o) for o in management.LabelCommand.option_list + (
-        optparse.make_option('-y', '--year', action='store', dest='year', type='int',
-                             help='year to scrape'),
-        optparse.make_option('-t', '--type', action='store', dest='type',
-                             type='choice', choices=dict(Semester.SEMESTER_TYPES).keys(),
-                             help='term to scrape'),
-        optparse.make_option('-c', '--create', action='store_true', dest='create',
-                             help='create missing semester, default: false'),
-        optparse.make_option('-n', '--dry-run', action='store_true', dest='dry_run'),
-        optparse.make_option('--pdb', action='store_true', dest='pdb',
-                             help='use pdb.pm() when we hit and exception'),
-        optparse.make_option('--prefix', action='store', dest='prefix',
-                             help='course code prefix to limit scrape to'),
-))
-OPTIONS['verbosity'].default = '2'
+LOG_LEVELS = {0: logging.ERROR,
+              1: logging.WARNING,
+              2: logging.INFO,
+              3: logging.DEBUG}
 
 
 class Command(management.LabelCommand):
-    option_list = OPTIONS.values()
     help = ('Load data from external sources using specified scraper.\n\n'
             'Available scrapers are:\n  %s' %
             '\n  '.join(sorted(settings.TIMETABLE_SCRAPERS)))
+
+    def add_arguments(self, parser):
+        super(Command, self).add_arguments(parser)
+
+        parser.add_argument('-y', '--year', action='store', dest='year', type=int,
+                             help='year to scrape')
+        parser.add_argument('-t', '--type', action='store', dest='type',
+                             choices=dict(Semester.SEMESTER_TYPES).keys(),
+                             help='term to scrape')
+        parser.add_argument('-c', '--create', action='store_true', dest='create',
+                             help='create missing semester, default: false'),
+        parser.add_argument('-n', '--dry-run', action='store_true', dest='dry_run')
+        parser.add_argument('--pdb', action='store_true', dest='pdb',
+                             help='use pdb.pm() when we hit and exception')
+        parser.add_argument('--prefix', action='store', dest='prefix',
+                             help='course code prefix to limit scrape to')
 
     @transaction.commit_manually
     def handle_label(self, label, **options):
