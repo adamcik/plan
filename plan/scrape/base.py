@@ -1,11 +1,11 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+import collections
 import datetime
 import logging
 
 from django import db
 from django.db.models import Count
-from django.utils import datastructures
 
 from plan.common.models import (Course, Exam, ExamType, Lecture, LectureType,
                                 Lecturer, Group, Room, Semester, Week)
@@ -20,7 +20,7 @@ class Scraper(object):
         self.semester = semester
         self.course_prefix = course_prefix
         self.import_time = datetime.datetime.now()
-        self.stats = datastructures.SortedDict([
+        self.stats = collections.OrderedDict([
             ('initial',  0),  # items initialy in db
             ('scraped',  0),  # items we have scraped
             ('processed', 0), # items that made it through prepare_data()
