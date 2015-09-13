@@ -53,7 +53,7 @@ file to setup the dependencies using `pip <http://pip.openplans.org/>`_.
 Upgrading
 ---------
 
-For a regular install that is all ready using :command:`south` the following should
+For a regular install that is already using :command:`south` the following should
 suffice for upgrading to a newer version:
 
 #. Backup your database (and optionally your install).
@@ -162,7 +162,7 @@ Example Apache config
     <Location /timeplan/media>
         SetHandler None
 
-        # If DEFLATE is all ready turned on globally this is not needed.
+        # If DEFLATE is already turned on globally this is not needed.
         AddOutputFilterByType DEFLATE text/css application/x-javascript
     </Location>
 
