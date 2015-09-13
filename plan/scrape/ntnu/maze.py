@@ -18,7 +18,7 @@ def fetch_pois( tag):
     for campus in campuses['children']:
         data = fetch.json(base_url % campus['campusId'])
         for p in data['pois']:
-            if p['identifier']:
+            if p['identifier'] and not p['deleted']:
                 pois[normalize(p['identifier'])] = p
     return pois
 
