@@ -160,16 +160,6 @@ td.error input, td.error select {
 
 /* Specialcased elements */
 
-/* Links on all pages need constant width b */
-#links b {
-	font-size: 93%;
-	width: 9em;
-	text-align: right;
-	display: block;
-	float: left;
-	margin-right: 0.5em;
-}
-
 #help {
 	border: 1px solid #CCC;
 	background: #FFC;
@@ -182,24 +172,8 @@ td.error input, td.error select {
 	margin-bottom: 0.5em;
 }
 
-#links dl, #tips dl {
-	margin: 0 0 1em;
-}
-#links dt, #tips dt {
-  font-weight: bold;
-  float: left;
-  width: 120px;
-  clear: left;
-  text-align: right;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 #tips dt {
 	width: 16px;
-}
-#links dd {
-  margin-left: 130px;
 }
 #tips dd {
 	margin-left: 20px;

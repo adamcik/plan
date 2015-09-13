@@ -144,18 +144,6 @@ COMPRESS_DATA_URI_MAX_SIZE = 5<<10
 TIMETABLE_INSTITUTION = 'NTNU'
 TIMETABLE_INSTITUTION_SITE = 'http://www.ntnu.no/'
 
-# Links to display in footer, typically resoucres at given institution.
-TIMETABLE_INSTITUTION_LINKS = (
-    (ugettext('Course list'),    'http://www.ntnu.no/studier/emner'),
-    (ugettext('Study Guide'),    'http://www.ntnu.no/studier/studiehandbok'),
-    (ugettext('Exam dates'),     'http://www.ntnu.no/eksamen/plan/'),
-    (ugettext('Exam rules'),     'http://www.ntnu.no/studier/eksamen/instruks'),
-    (ugettext('Lecture times'),  'http://www.ntnu.no/studieinformasjon/timeplan'),
-    (ugettext('Map Dragvoll'),   'http://www.ntnu.no/kart/kart-over-ntnu/dragvoll'),
-    (ugettext('Map Gløshaugen'), 'http://www.ntnu.no/kart/kart-over-ntnu/gloeshaugen'),
-    (ugettext('Find rooms'),     'http://www.ntnu.no/studieinformasjon/rom/'),
-)
-
 TIMETABLE_SHARE_LINKS = (
     ('icon-google-plus-sign', 'Google+', 'https://plus.google.com/share?url=%(url)s'),
     ('icon-twitter-sign', 'Twitter', 'https://twitter.com/share?url=%(url)s&hashtags=timeplan'),

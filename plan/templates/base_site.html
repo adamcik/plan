@@ -71,6 +71,8 @@
         before relying on it.
       {% endblocktrans %}
     </p>
+    </div>
+    <div class="yui-u">
     <p>
       {% blocktrans with INSTITUTION as institution and '2015' as year %}
       Code and design &copy; 2008-{{ year }} <b>Thomas Adamcik</b>.
@@ -85,13 +87,6 @@
 
       {% endif %}
     </p>
-    </div>
-    <div class="yui-u" id="links">
-    <dl>
-      {% for name, link in INSTITUTION_LINKS %}
-        <dt>{{ name }}</dt> <dd><a href="{{ link }}">{{ link|striphttp }}</a></dd>
-      {% endfor %}
-    </dl>
     </div>
   </div>
 
