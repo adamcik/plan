@@ -44,13 +44,13 @@ USE_I18N = True
 LANGUAGE_CODE = 'en'
 
 LANGUAGES = (
-    ('nb', ugettext('Bokmål')),
-    ('nn', ugettext('Nynorsk')),
+    ('nb', ugettext('Norwegian')),
     ('en', ugettext('English')),
 )
 
 # Fallback to given values if users accept the following languages.
 LANGUAGE_FALLBACK = {
+    'nn': 'nb',  # Nynorsk -> Bokmaal
     'no': 'nb',  # "Norsk" -> Bokmaal
 }
 
