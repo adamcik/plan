@@ -37,6 +37,7 @@ class Courses(base.CourseScraper):
 class Exams(base.ExamScraper):
     def scrape(self):
         for course in fetch_courses(self.semester):
+            seen = set()
             for exam in course['exam']:
                 if not exam.get('date'):
                     continue
@@ -45,13 +46,17 @@ class Exams(base.ExamScraper):
                 elif self.semester.type == Semester.SPRING and exam['season'] != 'SPRING':
                     continue
 
+                date = utils.parse_date(exam['date'])
+                if date in seen:
+                    continue
 
+                seen.add(date)
                 yield {
                     'course': Course.objects.get(
                         code=course['courseCode'],
                         version=course['courseVersion'],
                         semester=self.semester),
-                    'exam_date': utils.parse_date(exam['date']),
+                    'exam_date': date,
                 }
 
 
