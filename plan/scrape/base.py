@@ -360,7 +360,10 @@ class LectureScraper(Scraper):
     def room(self, code, name):
         if code:
             try:
-                return Room.objects.get(code=code)
+                room = Room.objects.get(code=code)
+                if room.name != name:
+                    logging.warning('Room %s: %s != %s', room.code, room.name, name)
+                return room
             except Room.DoesNotExist:
                 pass
 
