@@ -13,14 +13,6 @@ from plan.scrape import fetch
 from plan.scrape import ntnu
 from plan.scrape import utils
 
-# TODO(adamcik): consider using http://www.ntnu.no/studieinformasjon/rom/?romnr=333A-S041
-# selected building will give us the prefix we need to strip to find the actual room
-# page will have a link to the building: http://www.ntnu.no/kart/gloeshaugen/berg/
-# checking each of the rooms we can find the room name A-S041. Basically we
-# should start storing the roomid which we can get in the api, db. for web scraping
-# we can get it from http://www.ntnu.no/studieinformasjon/rom for names that
-# don't have dupes
-
 # TODO(adamcik): link to http://www.ntnu.no/eksamen/sted/?dag=120809 for exams?
 
 class Courses(base.CourseScraper):
@@ -58,56 +50,6 @@ class Exams(base.ExamScraper):
                         semester=self.semester),
                     'exam_date': date,
                 }
-
-
-class Rooms(base.RoomScraper):
-    def scrape(self):
-        rooms = {}
-        for room in self.queryset().filter(code__isnull=False):
-            root = fetch.html('http://www.ntnu.no/studieinformasjon/rom/',
-                              query={'romnr': room.code}, verbose=True)
-            if root is None:
-                continue
-
-            for link in root.cssselect('.hovedramme .hoyrebord a'):
-                if not link.attrib['href'].startswith('http://www.ntnu.no/kart/'):
-                    continue
-
-                root = fetch.html(link.attrib['href'])
-                if root is None:
-                    continue
-
-                data = {}
-
-                # Sort so that link with the right room name bubbles to the top.
-                links = root.cssselect('.facilitylist .horizontallist a')
-                links.sort(key=lambda a: (a.text != room.name, a.text))
-                for a in links:
-                    code, name = fetch_room(a.attrib['href'])
-                    if code and room.code.endswith(code):
-                        data = {'code': room.code,
-                                'name': name,
-                                'url': a.attrib['href']}
-
-                    # Give up after first element that should be equal to room
-                    # name. Make this conditional on data having been found (i.e.
-                    # if data: break) and we will check all rooms to see if we
-                    # can find one with a matching code, but this takes a long
-                    # time.
-                    break
-
-                crumb = root.cssselect('h1.ntnucrumb')
-                if crumb[0].text_content() == room.name:
-                    links = root.cssselect('link[rel="canonical"]')
-                    for link in links:
-                        if link.attrib['href'] != 'http://www.ntnu.no/kart/':
-                            data = {'code': room.code,
-                                    'name': room.name,
-                                    'url': link.attrib['href']}
-
-                if data:
-                    yield data
-                    break
 
 
 class Lectures(base.LectureScraper):
@@ -180,17 +122,3 @@ def fetch_courses(semester):
 
         for course in result['courses']:
             yield course
-
-
-def fetch_room(url):
-    root = fetch.html(url)
-    if root is None:
-        return None, None
-
-    name = root.cssselect('.ntnukart h2')[0].text_content()
-    for div in root.cssselect('.ntnukart .buildingimage .caption'):
-        match = re.match(r'[^(]+\(([^)]+)\)', div.text_content())
-        if match:
-            return match.group(1), name
-
-    return None,None
