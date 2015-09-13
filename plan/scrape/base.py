@@ -442,11 +442,7 @@ class RoomScraper(Scraper):
     extra_fields = ('name', 'url',)
 
     def queryset(self):
-        # Only bother with rooms that are in use this semester:
-        qs = Room.objects.filter(lecture__course__semester=self.semester)
-        if self.course_prefix:
-            qs = qs.filter(lecture__course__code__startswith=self.course_prefix)
-        return qs.distinct().order_by('name', 'code')
+        return Room.objects.order_by('name', 'code')
 
     def delete(self, qs):
         logging.warning('This scraper newer deletes any rooms as we would '
