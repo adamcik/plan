@@ -40,11 +40,13 @@ class Command(management.LabelCommand):
         parser.add_argument('--prefix', action='store', dest='prefix',
                              help='course code prefix to limit scrape to')
 
-    @transaction.commit_manually
+    @transaction.atomic
     def handle_label(self, label, **options):
         logging.basicConfig(
             format=CONSOLE_LOG_FORMAT, datefmt=DATE_TIME_FORMAT,
             level=LOG_LEVELS[options['verbosity']])
+
+        sid = transaction.savepoint()
 
         try:
             semester = self.load_semester(options)
@@ -53,16 +55,16 @@ class Command(management.LabelCommand):
             needs_commit = scraper.run()
 
             if not needs_commit or options['dry_run']:
-                transaction.rollback()
+                transaction.savepoint_rollback(sid)
                 print 'No changes, rolled back.'
             elif utils.prompt('Commit changes?'):
-                transaction.commit()
-                print 'Commited changes.'
+                transaction.savepoint_commit(sid)
+                print 'Commiting changes.'
             else:
-                transaction.rollback()
+                transaction.savepoint_rollback(sid)
                 print 'Rolled back changes.'
         except (SystemExit, KeyboardInterrupt):
-            transaction.rollback()
+            transaction.savepoint_rollback(sid)
             print 'Rolled back changes due to exit.'
         except:
             try:
@@ -74,7 +76,7 @@ class Command(management.LabelCommand):
                 pdb.post_mortem()
             finally:
                 # Ensure that we also rollback after pdb sessions.
-                transaction.rollback()
+                transaction.savepoint_rollback(sid)
                 print 'Rolled back changes due to unhandeled exception.'
 
     def load_semester(self, options):
