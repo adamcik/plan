@@ -14,7 +14,7 @@ from django.core.cache import CacheKeyWarning
 
 warnings.simplefilter('ignore', CacheKeyWarning)
 
-scraper_cache = cache.get_cache('scraper')
+scraper_cache = cache.caches['scraper']
 
 
 def sql(db, query, params=None):
