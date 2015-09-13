@@ -78,6 +78,24 @@ class Lectures(base.LectureScraper):
                 }
 
 
+class Rooms(base.RoomScraper):
+    def scrape(self):
+        if self.semester.type == Semester.FALL:
+            ntnu_semeter = u'%d_HØST' % self.semester.year
+        else:
+            ntnu_semeter = u'%d_VÅR' % self.semester.year
+
+        seen = set()
+        for c in Course.objects.filter(semester=self.semester):
+            course = fetch_course_lectures(self.semester, c)
+            for activity in course.get('summarized', []):
+                for room in activity.get('rooms', []):
+                    if room['syllabusKey'] not in seen:
+                        seen.add(room['syllabusKey'])
+                        yield {'code': room['syllabusKey'],
+                               'name': room['romNavn']}
+
+
 def fetch_course_lectures(semester, course):
     url = 'http://www.ntnu.no/web/studier/emner'
     query = {

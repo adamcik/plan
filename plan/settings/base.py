@@ -198,6 +198,8 @@ TIMETABLE_SCRAPERS = {
     'exams': 'plan.scrape.ntnu.web.Exams',
     'lectures': 'plan.scrape.ntnu.web.Lectures',
     'rooms': 'plan.scrape.ntnu.maze.Rooms',
+    'rooms.maze': 'plan.scrape.ntnu.maze.Rooms',
+    'rooms.web': 'plan.scrape.ntnu.web.Rooms',
 }
 
 # Google analytics code to use.
