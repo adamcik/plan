@@ -33,8 +33,6 @@ class Rooms(base.RoomScraper):
 
             if not poi:
                 continue
-            elif  poi['title'] != room.name:
-                continue
 
             yield {'code': room.code,
                    'name': room.name,
