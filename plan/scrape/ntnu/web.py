@@ -54,23 +54,13 @@ class Exams(base.ExamScraper):
 
 class Lectures(base.LectureScraper):
     def scrape(self):
-        url = 'http://www.ntnu.no/web/studier/emner'
-        query = {
-            'p_p_id': 'coursedetailsportlet_WAR_courselistportlet',
-            'p_p_lifecycle': 2,
-            'p_p_resource_id': 'timetable',
-            '_coursedetailsportlet_WAR_courselistportlet_year': self.semester.year,
-            'year': self.semester.year,
-        }
         if self.semester.type == Semester.FALL:
             ntnu_semeter = u'%d_HØST' % self.semester.year
         else:
             ntnu_semeter = u'%d_VÅR' % self.semester.year
 
         for c in self.course_queryset():
-            query['_coursedetailsportlet_WAR_courselistportlet_courseCode'] = c.code.encode('utf-8')
-            query['version'] = c.version
-            course = fetch.json(url, query=query, data={})['course']
+            course = fetch_course_lectures(self.semester, c)
             for activity in course.get('summarized', []):
                 if activity['arsterminId'] != ntnu_semeter:
                     continue
@@ -86,6 +76,20 @@ class Lectures(base.LectureScraper):
                     'groups': activity.get('studyProgramKeys', []),
                     'lecturers': [],
                 }
+
+
+def fetch_course_lectures(semester, course):
+    url = 'http://www.ntnu.no/web/studier/emner'
+    query = {
+        'p_p_id': 'coursedetailsportlet_WAR_courselistportlet',
+        'p_p_lifecycle': 2,
+        'p_p_resource_id': 'timetable',
+        '_coursedetailsportlet_WAR_courselistportlet_year': semester.year,
+        '_coursedetailsportlet_WAR_courselistportlet_courseCode': course.code.encode('utf-8'),
+        'year': semester.year,
+        'version': course.version,
+    }
+    return fetch.json(url, query=query, data={})['course']
 
 
 def fetch_courses(semester):
