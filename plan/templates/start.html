@@ -54,7 +54,7 @@
     <div class="yui-u first">
       <h2>{% trans "Getting started" %}</h2>
       {% if next_semester %}
-        {% url semester next_semester.year next_semester.slug as next_semester_url %}
+        {% url 'semester' next_semester.year next_semester.slug as next_semester_url %}
         <p class="large">
           <i class="icon-info-sign"></i>
           {% blocktrans with url=next_semester_url %}
