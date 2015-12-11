@@ -199,6 +199,9 @@ TIMETABLE_AJAX_LIMIT = 100
 # Max number of courses per timetable.
 TIMETABLE_MAX_COURSES = 20
 
+# Number of courses to show on frontpage stats.
+TIMETABLE_TOP_COURSE_COUNT = 10
+
 # Hostname to be used in UID of ical events and to identify site, should be a
 # constant service-name as UID changes will trigger email notices for new
 # events in google calendar etc. Default is to use the HTTP_HOST.

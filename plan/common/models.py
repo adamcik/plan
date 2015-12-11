@@ -164,7 +164,8 @@ class Course(models.Model):
 
     # TODO(adamcik): move limit to setting?
     @staticmethod
-    def get_stats(semester=None, limit=12):
+    def get_stats(semester=None, limit=None):
+        limit = limit or settings.TIMETABLE_TOP_COURSE_COUNT
         if hasattr(semester, 'pk'):
             semester_id = semester.pk
         else:
