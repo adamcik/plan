@@ -325,6 +325,11 @@ def select_course(request, year, semester_type, slug, add=False):
             subscriptions = set(Subscription.objects.get_subscriptions(year,
                 semester_type, slug).values_list('course__code', flat=True))
 
+            if not lookup:
+                localized_semester = Semester.localize(semester_type)
+                return shortcuts.redirect(
+                    'schedule-advanced', year, localized_semester, slug)
+
             errors = []
             to_many_subscriptions = False
 
