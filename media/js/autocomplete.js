@@ -1,13 +1,72 @@
 /* This file is part of the plan timetable generator, see LICENSE for details. */
 
-// TODO: see if http://caniuse.com/#feat=datalist can be used or a simpler pure js one
+(function() {
+  var xhr, cache = {};
 
-$(function() {
-  var course = $('#course');
-  course.autocomplete(course.attr('data-autocomplete'), {
-    maxItemsToShow: 100,
-    minChars: 3,
-    showResult: function(code, name) { return '<b>' + code + '</b>' + ': ' + name},
-    useDelimiter: ', ',
-  });
-});
+  function fetch(url, callback) {
+    try {
+      xhr.abort()
+    } catch (e) {}
+    xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        callback(JSON.parse(this.responseText));
+      }
+    };
+    xhr.open('GET', url, true);
+    xhr.setRequestHeader('Accept', 'application/json');
+    xhr.send();
+  }
+
+  function source(term, callback) {
+    term = term.split(/\s*,\s*/).pop().replace(/^\s+|\s+/g, '').toLowerCase();
+    if (cache[term]) {
+      callback(cache[term]);
+    } else if (term.length >= 3) {
+      var query = '?q=' + encodeURIComponent(term);
+      var url = this.selector.getAttribute('data-autocomplete');
+      fetch(url + query, function(data) {
+        cache[term] = data;
+        callback(data);
+      });
+    }
+  }
+
+  function render(item, search) {
+    var s = document.createElement('div');
+    s.className = 'autocomplete-suggestion';
+    s.setAttribute('data-code', item[0]);
+    s.setAttribute('data-val', search);
+    var b = document.createElement('b');
+    b.appendChild(document.createTextNode(item[0]));
+    s.appendChild(b);
+    s.appendChild(document.createTextNode(': ' + item[1]));
+    return s.outerHTML;
+  }
+
+  function select(e, term, item) {
+    var terms = term.split(/\s*,\s*/);
+    terms[terms.length - 1] = item.getAttribute('data-code')
+    this.selector.value = terms.join(', ') + ', ';
+    e.preventDefault();
+    return false;
+  }
+
+  function init() {
+    document.removeEventListener('DOMContentLoaded', arguments.callee, false);
+    new autoComplete({
+      selector: document.getElementById('course'),
+      minChars: 0,
+      cache: false,
+      source: source,
+      renderItem: render,
+      onSelect: select
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, false);
+  } else {
+    init();
+  }
+})();

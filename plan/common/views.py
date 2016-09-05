@@ -90,18 +90,26 @@ def getting_started(request, year, semester_type):
 def course_query(request, year, semester_type):
     limit = min(request.GET.get('limit', '10'), settings.TIMETABLE_AJAX_LIMIT)
     query = request.GET.get('q', '').strip()[:100]
+    send_json = request.META.get('HTTP_ACCEPT') == 'application/json'
 
-    response = http.HttpResponse(content_type='text/plain; charset=utf-8')
+    if send_json:
+        response = http.HttpResponse(content_type='application/json')
+    else:
+        response = http.HttpResponse(content_type='text/plain; charset=utf-8')
+
     if not query:
-        return response
+        courses = Course.objects.none()
+    else:
+        courses = Course.objects.search(year, semester_type, query, limit)
+    course_list = list(courses.values_list('code', 'name'))
 
-    courses = Course.objects.search(year, semester_type, query, limit)
-
-    for course in courses:
-        code = html.escape(course.code)
-        name = html.escape(text.Truncator(course.name).words(5, truncate='...'))
-        response.write(u'%s|%s\n' % (code, name or u'?'))
-
+    if send_json:
+        json.dump(course_list, response)
+    else:
+        for code, name in course_list:
+            code = html.escape(code)
+            name = html.escape(text.Truncator(name).words(5, truncate='...'))
+            response.write(u'%s|%s\n' % (code, name or u'?'))
     return response
 
 

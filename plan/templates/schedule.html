@@ -20,7 +20,21 @@
       </style>
     {% endif %}
     {% if not courses or advanced %}
-      <link rel="stylesheet" href="{% static 'js/jquery.autocomplete.css' %}" />
+      <link rel="stylesheet" href="{% static 'js/auto-complete.css' %}" />
+      <style type="text/css">
+        .autocomplete-suggestions {
+          border-color: WindowFrame;
+          background-color: Window;
+        }
+        .autocomplete-suggestion.selected {
+          background-color: Highlight;
+          color: HighlightText;
+        }
+        .autocomplete-suggestion b {
+          font-weight: bold;
+          color: inherit;
+        }
+      </style>
     {% endif %}
   {% endcompress %}
 {% endblock %}
@@ -39,8 +53,7 @@
   {% endif %}
   {% if not courses or advanced %}
     {% compress js %}
-      <script type="text/javascript" src="{% static 'js/jquery-1.7.2.min.js' %}"></script>
-      <script type="text/javascript" src="{% static 'js/jquery.autocomplete.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'js/auto-complete.min.js' %}"></script>
       <script type="text/javascript" src="{% static 'js/autocomplete.js' %}"></script>
       <script type="text/javascript" src="{% static 'js/advanced.js' %}"></script>
     {% endcompress %}
