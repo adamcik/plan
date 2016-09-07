@@ -44,15 +44,16 @@
     </script>
     {% if ANALYTICS_CODE %}
       <script type="text/javascript">
-        var _gaq = _gaq || [];
-        _gaq.push(['_setAccount', '{{ ANALYTICS_CODE }}']);
-        _gaq.push(['_setSiteSpeedSampleRate', 100]);
-        _gaq.push(['_trackPageview']);
-        asyncLoad('{{ request.is_secure|yesno:"https://ssl,http://www" }}.google-analytics.com/ga.js');
+        window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+        ga('create', '{{ ANALYTICS_CODE }}', 'auto', {'sampleRate': 100});
+        ga('send', 'pageview');
       </script>
     {% endif %}
     {% block extrascript %}{% endblock %}
   {% endcompress %}
+  {% if ANALYTICS_CODE %}
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  {% endif %}
 {% endblock %}
 
 {% block hd %}
