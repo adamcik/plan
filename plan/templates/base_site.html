@@ -31,17 +31,6 @@
     <link rel="dns-prefetch" href="//{{ STATIC_DOMAIN }}" />
   {% endif %}
   {% compress js inline %}
-    <script type="text/javascript">
-      (function(w, d, t) {
-        var s = d.getElementsByTagName(t)[0];
-        w.asyncLoad = function(src) {
-          var e = d.createElement(t);
-          e.async = true;
-          e.src = src;
-          s.parentNode.insertBefore(e, s);
-        };
-      })(window, document, 'script');
-    </script>
     {% if ANALYTICS_CODE %}
       <script type="text/javascript">
         window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
@@ -49,8 +38,8 @@
         ga('send', 'pageview');
       </script>
     {% endif %}
-    {% block extrascript %}{% endblock %}
   {% endcompress %}
+  {% block extrascript %}{% endblock %}
   {% if ANALYTICS_CODE %}
     <script async src='https://www.google-analytics.com/analytics.js'></script>
   {% endif %}
