@@ -137,7 +137,7 @@ def add_exams(exams, cal, hostname):
             desc = _('Exam') + u' (%s) - %s (%s)' % (e.type.code, e.course.name,
                     e.course.code)
         else:
-            summary = _('Exam') + e.alias or e.course.code
+            summary = _('Exam') + u' %s' % (e.alias or e.course.code)
             desc = _('Exam') + u' %s (%s)' % (e.course.name, e.course.code)
 
         vevent.add('summary').value = summary
