@@ -65,7 +65,8 @@
     </div>
     <div class="yui-u">
     <p>
-      {% blocktrans with INSTITUTION as institution and '2016' as year %}
+      {% now "Y" as year %}
+      {% blocktrans with INSTITUTION as institution and year as year %}
       Code and design &copy; 2008-{{ year }} <b>Thomas Adamcik</b>.
       This site has no official affiliation with {{ institution }}.
       {% endblocktrans %}
