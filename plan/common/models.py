@@ -90,7 +90,7 @@ class LectureType(models.Model):
 
 
 class Room(models.Model):
-    code = models.CharField(_('Code'), max_length=20, null=True, unique=True)
+    code = models.CharField(_('Code'), max_length=100, null=True, unique=True)
     name = models.CharField(_('Name'), max_length=100)
     url = models.URLField(_('URL'), default='')
 

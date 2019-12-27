@@ -35,6 +35,7 @@
       <script type="text/javascript">
         window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
         ga('create', '{{ ANALYTICS_CODE }}', 'auto', {'sampleRate': 100});
+	ga('set', 'anonymizeIp', true);
         ga('send', 'pageview');
       </script>
     {% endif %}
@@ -64,7 +65,8 @@
     </div>
     <div class="yui-u">
     <p>
-      {% blocktrans with INSTITUTION as institution and '2016' as year %}
+      {% now "Y" as year %}
+      {% blocktrans with INSTITUTION as institution and year as year %}
       Code and design &copy; 2008-{{ year }} <b>Thomas Adamcik</b>.
       This site has no official affiliation with {{ institution }}.
       {% endblocktrans %}

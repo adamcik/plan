@@ -8,6 +8,8 @@ import lxml.html
 import warnings
 import urllib
 
+import requests
+
 from django.core import cache
 from django.db import connections
 from django.core.cache import CacheKeyWarning
@@ -15,6 +17,8 @@ from django.core.cache import CacheKeyWarning
 warnings.simplefilter('ignore', CacheKeyWarning)
 
 scraper_cache = cache.caches['scraper']
+
+session = requests.Session()
 
 
 def sql(db, query, params=None):
@@ -27,14 +31,14 @@ def sql(db, query, params=None):
 
 
 def get(url, cache=True, verbose=False):
-    key = 'get:%s' % (url)
+    key = 'get||%s' % (url)
     result = scraper_cache.get(key)
     msg = 'Cached fetch: %s' % url
     if not result or not cache:
         msg = 'Fetched: %s' % url
-        response = urllib.urlopen(url)
-        result = response.read()
-        if response.getcode() == 200 and result:
+        response = session.get(url, timeout=30)
+        result = response.text
+        if response.status_code == 200 and result:
             scraper_cache.set(key, result)
 
     logging.log(logging.INFO if verbose else logging.DEBUG, msg)
@@ -42,16 +46,15 @@ def get(url, cache=True, verbose=False):
 
 
 def post(url, data, cache=True, verbose=False):
-    data = urllib.urlencode(data)
-    key = 'post:%s:%s' % (url, data)
+    key = 'post||%s||%s' % (url, urllib.urlencode(data))
     result = scraper_cache.get(key)
-    msg = 'Cached post: %s - %s' % (url, data)
+    msg = 'Cached result found under: %s' % key
 
     if not result or not cache:
-        msg = 'Posted: %s - %s' % (url, data)
-        response = urllib.urlopen(url, data)
-        result = response.read()
-        if response.getcode() == 200 and result:
+        msg = 'Post: %s Data: %s' % (url, data)
+        response = session.post(url, data=data, timeout=30)
+        result = response.text
+        if response.status_code == 200 and result:
             scraper_cache.set(key, result)
 
     logging.log(logging.INFO if verbose else logging.DEBUG, msg)
