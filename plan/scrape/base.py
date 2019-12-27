@@ -45,6 +45,7 @@ class Scraper(object):
         raise NotImplementedError
 
     def should_proccess_course(self, code):
+        # TODO: delete as this is no longer called?
         """Common helper for filtering out course codes to skip."""
         return not self.course_prefix or code.startswith(self.course_prefix)
 
