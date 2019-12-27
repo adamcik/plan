@@ -42,6 +42,9 @@
 {% block extrahead %}
   {{ block.super }}
   <meta name="robots" content="noindex, nofollow, noarchive" />
+  {% if next_week %}
+    <link ref="next"  href="{% url 'schedule-week' semester.year semester.slug slug next_week %}" />
+  {% endif %}
 {% endblock %}
 
 
