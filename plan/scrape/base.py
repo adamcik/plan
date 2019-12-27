@@ -3,6 +3,7 @@
 import collections
 import datetime
 import logging
+import HTMLParser
 
 from django import db
 from django.db.models import Count
@@ -10,6 +11,9 @@ from django.db.models import Count
 from plan.common.models import (Course, Exam, ExamType, Lecture, LectureType,
                                 Lecturer, Group, Room, Semester, Week)
 from plan.scrape import utils
+
+
+html_parser = HTMLParser.HTMLParser()
 
 
 class Scraper(object):
@@ -280,11 +284,11 @@ class LectureScraper(Scraper):
         data['groups'] = utils.clean_list(data['groups'], utils.clean_string)
 
         rooms, data['rooms'] = data['rooms'][:], []
-        for code, name in rooms:
+        for code, name, url in rooms:
             code = utils.clean_string(code)
             name = utils.clean_string(name)
             if code or name:
-                data['rooms'].append(self.room(code, name))
+                data['rooms'].append(self.room(code, name, url))
 
         data['type'] = self.lecture_type(data['type'])
         data['lecturers'] = [self.lecturer(l) for l in data['lecturers']]
@@ -358,12 +362,19 @@ class LectureScraper(Scraper):
     def lecture_type(self, name):
         return LectureType.objects.get_or_create(name=name)[0]
 
-    def room(self, code, name):
+    def room(self, code, name, url):
+        if url and '&amp;' in url:
+            url = html_parser.unescape(url)
+
         if code:
             try:
                 room = Room.objects.get(code=code)
                 if room.name != name:
                     logging.warning('Room %s: %s != %s', room.code, room.name, name)
+                if url and room.url != url:
+                    self.log_extra('rooms', 'Adding room url %s to %s (%s)', [url, room.name, room.code])
+                    room.url = url
+                    room.save()
                 return room
             except Room.DoesNotExist:
                 pass
@@ -375,6 +386,10 @@ class LectureScraper(Scraper):
             if code:
                 self.log_extra('rooms', 'Adding room code %s to %s', [code, r.name])
                 r.code = code
+                r.save()
+            if url and url != r.url:
+                self.log_extra('rooms', 'Adding room url %s to %s', [url, r.name])
+                r.url = url
                 r.save()
             return r
 

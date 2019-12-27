@@ -2,9 +2,6 @@
 
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-import logging
-import lxml.html
-import re
 import urllib
 
 from plan.common.models import Course, ExamType, Semester
@@ -62,16 +59,16 @@ class Lectures(base.LectureScraper):
         for c in self.course_queryset():
             course = fetch_course_lectures(self.semester, c)
             for activity in course.get('summarized', []):
-                if activity['arsterminId'] != ntnu_semeter:
+                if activity['artermin'] != ntnu_semeter:
                     continue
                 yield {
                     'course': c,
-                    'type': activity.get('description', activity['acronym']),
+                    'type': activity.get('name', activity['acronym']),
                     'day': activity['dayNum'] - 1,
                     'start': utils.parse_time(activity['from']),
                     'end':  utils.parse_time(activity['to']),
                     'weeks': utils.parse_weeks(','.join(activity['weeks']), ','),
-                    'rooms': [(r['syllabusKey'], r['romNavn'])
+                    'rooms': [(r['id'], r['room'], r['url'])
                                for r in activity.get('rooms', [])],
                     'groups': activity.get('studyProgramKeys', []),
                     'lecturers': [],
@@ -80,11 +77,6 @@ class Lectures(base.LectureScraper):
 
 class Rooms(base.RoomScraper):
     def scrape(self):
-        if self.semester.type == Semester.FALL:
-            ntnu_semeter = u'%d_HØST' % self.semester.year
-        else:
-            ntnu_semeter = u'%d_VÅR' % self.semester.year
-
         seen = set()
         for c in Course.objects.filter(semester=self.semester):
             course = fetch_course_lectures(self.semester, c)
@@ -93,11 +85,12 @@ class Rooms(base.RoomScraper):
                     if room['syllabusKey'] not in seen:
                         seen.add(room['syllabusKey'])
                         yield {'code': room['syllabusKey'],
-                               'name': room['romNavn']}
+                               'name': room['romNavn'],
+                               'url': room.get('url')}
 
 
 def fetch_course_lectures(semester, course):
-    url = 'http://www.ntnu.no/web/studier/emner'
+    url = 'https://www.ntnu.no/web/studier/emner'
     query = {
         'p_p_id': 'coursedetailsportlet_WAR_courselistportlet',
         'p_p_lifecycle': 2,
@@ -107,33 +100,71 @@ def fetch_course_lectures(semester, course):
         'year': semester.year,
         'version': course.version,
     }
-    return fetch.json(url, query=query, data={})['course']
+    return fetch.json(url, query=query, data={})
 
 
 def fetch_courses(semester):
+    """
+    https://www.ntnu.no/web/studier/emnesok?
+        p_p_id=courselistportlet_WAR_courselistportlet
+        p_p_lifecycle=2
+        p_p_state=normal
+        p_p_mode=view
+        p_p_resource_id=fetch-courselist-as-json
+        p_p_cacheability=cacheLevelPage
+        p_p_col_id=column-1
+        p_p_col_pos=1
+        p_p_col_count=2
+
+    X-Requested-With: XMLHttpRequest
+    Cookie: GUEST_LANGUAGE_ID=nb_NO
+
+    Data:
+        semester=2018
+        gjovik=0
+        trondheim=1
+        alesund=0
+        faculty=-1
+        institute=-1
+        multimedia=0
+        english=0
+        phd=0
+        courseAutumn=0
+        courseSpring=1
+        courseSummer=0
+        searchQueryString=
+        pageNo=1
+        season=spring
+        sortOrder=%2Btitle
+        year=
+    """
+
     if semester.type == Semester.FALL:
         year = semester.year
     else:
         year = semester.year - 1
 
-    url = 'http://www.ntnu.no/web/studier/emnesok'
+    url = 'https://www.ntnu.no/web/studier/emnesok'
+
     query = {
-        'p_p_lifecycle': '2',
         'p_p_id': 'courselistportlet_WAR_courselistportlet',
+        'p_p_lifecycle': '2',
         'p_p_mode': 'view',
         'p_p_resource_id': 'fetch-courselist-as-json'
     }
+
     data = {
         'english': 0,
         'pageNo': 1,
         'semester': year,
-        'sortOrder': '+title'
+        'sortOrder': '+title',
+        'trondheim': 1,
     }
+
     if semester.type == Semester.FALL:
         data['courseAutumn'] = 1
     else:
         data['courseSpring'] = 1
-
 
     while True:
         result = fetch.json(url, query=query, data=data, verbose=True)
