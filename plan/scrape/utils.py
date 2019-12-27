@@ -47,22 +47,26 @@ def compare(old, new):
             return '<whitespace>'
 
     if isinstance(old, set) and isinstance(new, set):
-        items = []
+        added = set()
+        same = set()
+        removed = set()
+
         for i in sorted(old | new):
             if i in old and i in new:
-                items.append('%s' % i)
+                same.add(' %s' % i)
             elif i in new:
-                items.append('+%s' % i)
+                added.add('+%s' % i)
             else:
-                items.append('-%s' % i)
-        return ', '.join(items)
+                removed.add('-%s' % i)
+
+        return ', '.join(sorted(added) + sorted(removed) + sorted(same))
 
     if old == '':
         old = '<empty>'
     if new == '':
         new = '<empty>'
 
-    return '%s -> %s' % (old, new)
+    return '%s --> %s' % (old, new)
 
 
 def clean_string(raw_text):
