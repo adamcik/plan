@@ -4,56 +4,58 @@
 <form action="{% url 'change-course' semester.year semester.slug slug %}" method="post">
   <h2>{% trans "Courses" %}</h2>
   {% if courses %}
-    <table id="courses">
-      <thead>
-        <tr>
-          {% if advanced %}
-            <th style="width: 1.2em"></th>
-          {% endif %}
-          <th>{% trans "Course" %}</th>
-          <th>{% trans "Alias" %}</th>
-          <th>{% trans "Description" %}</th>
-          <th>{% trans "Exams" %}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for course in courses %}
-          <tr class="course-{{ course.id }}" title="{{ course.name }}">
+    <div class="overflow">
+      <table id="courses">
+        <thead>
+          <tr>
             {% if advanced %}
-              <td>
-                <input type="checkbox" name="course_remove" value="{{ course.id }}" class="noprint" />
-              </td>
+              <th style="width: 1.2em"></th>
             {% endif %}
-            <td>
-              {% if course.url %}
-                <a href="{{ course.url }}">
-                  {{ course.code }}
-                </a>
-              {% else %}
-                {{ course.code }}
-              {% endif %}
-            </td>
-            <td>
-              {% if course.alias_form %}
-                {{ course.alias_form.alias}}
-              {% else %}
-                {{ course.alias|default:"-" }}
-              {% endif %}
-            </td>
-            <td>
-              {{ course.name }}
-            </td>
-            <td>
-              {% for exam in exams|get:course.id %}
-                {{ exam.exam_date }}{% if not forloop.last %},{% endif %}
-              {% empty %}
-                -
-              {% endfor %}
-            </td>
+            <th>{% trans "Course" %}</th>
+            <th>{% trans "Alias" %}</th>
+            <th>{% trans "Description" %}</th>
+            <th>{% trans "Exams" %}</th>
           </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {% for course in courses %}
+            <tr class="course-{{ course.id }}" title="{{ course.name }}">
+              {% if advanced %}
+                <td>
+                  <input type="checkbox" name="course_remove" value="{{ course.id }}" class="noprint" />
+                </td>
+              {% endif %}
+              <td>
+                {% if course.url %}
+                  <a href="{{ course.url }}">
+                    {{ course.code }}
+                  </a>
+                {% else %}
+                  {{ course.code }}
+                {% endif %}
+              </td>
+              <td>
+                {% if course.alias_form %}
+                  {{ course.alias_form.alias}}
+                {% else %}
+                  {{ course.alias|default:"-" }}
+                {% endif %}
+              </td>
+              <td>
+                {{ course.name }}
+              </td>
+              <td>
+                {% for exam in exams|get:course.id %}
+                  {{ exam.exam_date }}{% if not forloop.last %},{% endif %}
+                {% empty %}
+                  -
+                {% endfor %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   {% endif %}
 
 

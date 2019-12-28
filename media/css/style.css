@@ -5,7 +5,7 @@ h1,h2,h3 {
 	font-family: Georgia;
 }
 h1 {
-	padding-left: 0.6em;
+	padding: 0 0.6em;
 	font-size: 167%;
 	margin-top: 0;
 	margin-bottom: -0.25em;
@@ -147,7 +147,7 @@ td.error input, td.error select {
 	margin-bottom: 1em;
 }
 #bd {
-	padding-left: 1em;
+	padding: 0 1em;
 	margin-bottom: 1em;
 	position: relative;
 }
@@ -208,4 +208,22 @@ td.error input, td.error select {
 }
 #share a:hover {
 	opacity: 1;
+}
+
+/* Switch behavior on "small" screens */
+@media screen and (max-width: 1023px) {
+	#doc2, .yui-g .yui-u, .yui-g div.first, .yui-g .yui-u {
+		float: none;
+		width: auto;
+	}
+	.overflow {
+		overflow-x: auto;
+	}
+	#schedule {
+		width: 73.076em;
+		*width: 71.25em;
+	}
+	#next, #previous {
+		display: none;
+	}
 }

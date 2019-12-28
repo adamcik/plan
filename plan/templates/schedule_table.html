@@ -9,79 +9,80 @@
 {% if next_week %}
   <a href="{% url 'schedule-week' semester.year semester.slug slug next_week %}" id="next" class="noprint">»</a>
 {% endif %}
-<table id="schedule">
-  <thead>
-    <tr>
-      <th class="time"></th>
-      {% for span, date, day in timetable.header %}
-        <th {% if span %}colspan="{{ span }}"{% endif %}>
-          <span class="day">{{ day }}</span>
-          {% if date %}<span class="date">{{ date|date:"j M." }}</span>{% endif %}
-        </th>
-      {% endfor %}
-    </tr>
-  </thead>
-  <tbody>
-  {% for row in timetable.table %}
-    <tr class="{% cycle odd,even %}{% if forloop.first %} first{% endif %}">
-      {% for cells in row %}
-        {% if cells %}
-          {% for c in cells %}
-            {% if not c.remove %}
-              <td {% if c.colspan > 1 %}colspan="{{ c.colspan }}"{% endif %}
-                  {% if c.rowspan > 1 %}rowspan="{{ c.rowspan }}"{% endif %}
-                  {% if c.lecture or c.time or c.bottom or c.last %}
-                  class="{% stripspace %}
-                    {% if c.lecture %}
-                      lecture
-                      lecture-{{ c.lecture.id }}
-                      course-{{ c.lecture.course_id }}
-                    {% endif %}
-                    {% if c.lecture.optional %}
-                      optional
-                    {% endif %}
-                    {% if c.rowspan == 1 %}
-                      single
-                    {% endif %}
-                    {% if c.last %}
-                      last
-                    {% endif %}
-                    {% if c.bottom %}
-                      bottom
-                    {% endif %}
-                    {% if c.time %}
-                      time
-                    {% endif %}
-                  {% endstripspace %}"
-                {% endif %}
-                {% if c.lecture %}title="{{ c.lecture.course.name }} {{ c.lecture.start|time }}-{{ c.lecture.end|time }}"{% endif %}
-              >
-                <div class="wrapper">
-                  {% if c.lecture %}
-                    <div class="course">{{ c.lecture.alias|default:c.lecture.course.code }}</div>
-                    <div class="room">
-                      {% for room in rooms|get:c.lecture.id|slice:":2" %}
-                        {% if room.url %}
-                          <a href="{{ room.url }}">
-                            {{ room.name }}</a>{% if not forloop.last %},{% endif %}
-                        {% else %}
-                          {{ room.name }}{% if not forloop.last %},{% endif %}
-                        {% endif %}
-                      {% endfor %}
-                    </div>
-                    <div class="type">{{ c.lecture.type|default:"" }}</div>
+<div class="overflow">
+  <table id="schedule">
+    <thead>
+      <tr>
+        <th class="time"></th>
+        {% for span, date, day in timetable.header %}
+          <th {% if span %}colspan="{{ span }}"{% endif %}>
+            <span class="day">{{ day }}</span>
+            {% if date %}<span class="date">{{ date|date:"j M." }}</span>{% endif %}
+          </th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+    {% for row in timetable.table %}
+      <tr class="{% cycle odd,even %}{% if forloop.first %} first{% endif %}">
+        {% for cells in row %}
+          {% if cells %}
+            {% for c in cells %}
+              {% if not c.remove %}
+                <td {% if c.colspan > 1 %}colspan="{{ c.colspan }}"{% endif %}
+                    {% if c.rowspan > 1 %}rowspan="{{ c.rowspan }}"{% endif %}
+                    {% if c.lecture or c.time or c.bottom or c.last %}
+                    class="{% stripspace %}
+                      {% if c.lecture %}
+                        lecture
+                        lecture-{{ c.lecture.id }}
+                        course-{{ c.lecture.course_id }}
+                      {% endif %}
+                      {% if c.lecture.optional %}
+                        optional
+                      {% endif %}
+                      {% if c.rowspan == 1 %}
+                        single
+                      {% endif %}
+                      {% if c.last %}
+                        last
+                      {% endif %}
+                      {% if c.bottom %}
+                        bottom
+                      {% endif %}
+                      {% if c.time %}
+                        time
+                      {% endif %}
+                    {% endstripspace %}"
                   {% endif %}
-                  {{ c.time|escape|nbsp|default:"" }}
-                </div>
-              </td>
-            {% endif %}
-          {% endfor %}
-        {% else %}
-          <td><div class="wrapper"></div></td>
-        {% endif %}
-      {% endfor %}
-    </tr>
-  {% endfor %}
-
-  </tbody>
-</table>
+                  {% if c.lecture %}title="{{ c.lecture.course.name }} {{ c.lecture.start|time }}-{{ c.lecture.end|time }}"{% endif %}
+                >
+                  <div class="wrapper">
+                    {% if c.lecture %}
+                      <div class="course">{{ c.lecture.alias|default:c.lecture.course.code }}</div>
+                      <div class="room">
+                        {% for room in rooms|get:c.lecture.id|slice:":2" %}
+                          {% if room.url %}
+                            <a href="{{ room.url }}">
+                              {{ room.name }}</a>{% if not forloop.last %},{% endif %}
+                          {% else %}
+                            {{ room.name }}{% if not forloop.last %},{% endif %}
+                          {% endif %}
+                        {% endfor %}
+                      </div>
+                      <div class="type">{{ c.lecture.type|default:"" }}</div>
+                    {% endif %}
+                    {{ c.time|escape|nbsp|default:"" }}
+                  </div>
+                </td>
+              {% endif %}
+            {% endfor %}
+          {% else %}
+            <td><div class="wrapper"></div></td>
+          {% endif %}
+        {% endfor %}
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
