@@ -44,7 +44,7 @@
               <td>
                 {{ course.name }}
               </td>
-              <td>
+              <td class="nowrap">
                 {% for exam in exams|get:course.id %}
                   {{ exam.exam_date }}{% if not forloop.last %},{% endif %}
                 {% empty %}

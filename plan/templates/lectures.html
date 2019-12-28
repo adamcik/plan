@@ -29,7 +29,7 @@
               {% endif %}
               <td>{{ l.alias|default:l.course.code }}</td>
               <td>{{ l.get_day_display }}</td>
-              <td>{{ l.start|time }}-{{ l.end|time }}</td>
+              <td class="nowrap">{{ l.start|time }}-{{ l.end|time }}</td>
               <td class="small">
                 {% for room in rooms|get:l.id %}
                   {% if room.url %}
@@ -43,7 +43,7 @@
               </td>
               <td class="small">{{ l.type|default:"" }}</td>
               <td class="small">{{ groups|get:l.id|join:", " }}</td>
-              <td class="small">{{ lecture_weeks|get:l.id|compact|join:", " }}</td>
+              <td class="small nowrap">{{ lecture_weeks|get:l.id|compact|join:", " }}</td>
             </tr>
           {% endfor %}
         </tbody>

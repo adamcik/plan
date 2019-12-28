@@ -122,6 +122,10 @@ p.right {
 	clear: both;
 }
 
+.nowrap {
+	white-space: nowrap;
+}
+
 /* error classes */
 .errorlist {
 	color: #A00000;
