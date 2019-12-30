@@ -68,8 +68,8 @@ class LectureManager(models.Manager):
             select['exclude'] = 'False'
 
         related = [
-            'type__name',
-            'course__code',
+            'type',
+            'course',
         ]
 
         order = [
@@ -172,7 +172,7 @@ class SubscriptionManager(models.Manager):
                 course__semester__year__exact=year,
                 course__semester__type__exact=semester_type,
             ).select_related(
-                'course__code',
+                'course',
             ).order_by('student__slug', 'course__code')
 
 
