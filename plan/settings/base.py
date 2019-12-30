@@ -14,7 +14,6 @@ BASE_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', '..')
 
 # -- Debug settings:
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
 
 # -- Admin settings:
 ADMINS = (
@@ -78,24 +77,27 @@ INSTALLED_APPS = (
 
 # -- Template settings:
 # List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    ('django.template.loaders.cached.Loader', (
-        'django.template.loaders.filesystem.Loader',
-        'django.template.loaders.app_directories.Loader',
-    )),
-)
 
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or
-    # "C:/www/django/templates".  Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    BASE_PATH + '/plan/templates',
-)
-
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.core.context_processors.request',
-    'plan.common.context_processors.processor',
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            BASE_PATH + '/plan/templates',
+        ],
+        'OPTIONS': {
+            'loaders': (
+                ('django.template.loaders.cached.Loader', (
+                    'django.template.loaders.filesystem.Loader',
+                    'django.template.loaders.app_directories.Loader',
+                )),
+            ),
+            'context_processors': (
+                'django.template.context_processors.request',
+                'plan.common.context_processors.processor',
+            ),
+        },
+    },
+]
 
 # -- Cache settings:
 CACHES = {
