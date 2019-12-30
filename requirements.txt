@@ -1,6 +1,6 @@
 Django >= 1.11, < 1.12 # Django webframework
 
-psycopg2         # Postgres database adapter
+psycopg2 >= 2.7, < 2.8 # Postgres database adapter
 
 vobject          # Ical generation
 ReportLab        # PDF generation
