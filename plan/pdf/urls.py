@@ -1,8 +1,8 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from django.conf.urls import patterns
 from plan.common.utils import url
+from plan.pdf import views
 
-urlpatterns = patterns('plan.pdf.views',
-    url(r'^{year}/{semester}/{slug}/pdf/(?:{size}/)?(?:{week}/)?$', 'pdf', name='schedule-pdf'),
-)
+urlpatterns = [
+    url(r'^{year}/{semester}/{slug}/pdf/(?:{size}/)?(?:{week}/)?$', views.pdf, name='schedule-pdf'),
+]

@@ -1,8 +1,8 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from django.conf.urls import patterns
 from plan.common.utils import url
+from plan.ical import views
 
-urlpatterns = patterns('plan.ical.views',
-    url(r'^{year}/{semester}/{slug}/ical/(?:{ical}/)?$', 'ical', name='schedule-ical'),
-)
+urlpatterns = [
+    url(r'^{year}/{semester}/{slug}/ical/(?:{ical}/)?$', views.ical, name='schedule-ical'),
+]
