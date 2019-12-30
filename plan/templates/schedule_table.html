@@ -24,7 +24,7 @@
     </thead>
     <tbody>
     {% for row in timetable.table %}
-      <tr class="{% cycle odd,even %}{% if forloop.first %} first{% endif %}">
+      <tr class="{% cycle "odd" "even" %}{% if forloop.first %} first{% endif %}">
         {% for cells in row %}
           {% if cells %}
             {% for c in cells %}
