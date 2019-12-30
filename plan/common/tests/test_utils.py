@@ -2,7 +2,7 @@
 
 from django.conf import settings
 
-from plan.common.tests.base import BaseTestCase
+from plan.common.tests import BaseTestCase
 from plan.common.utils import ColorMap, compact_sequence
 
 class UtilTestCase(BaseTestCase):

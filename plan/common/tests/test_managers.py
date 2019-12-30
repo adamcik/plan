@@ -1,6 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from plan.common.tests.base import BaseTestCase
+from plan.common.tests import BaseTestCase
 from plan.common.models import Lecture, Semester, Deadline, Exam, Course, Subscription
 
 class ManagerTestCase(BaseTestCase):
