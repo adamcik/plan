@@ -8,7 +8,6 @@ from django.db import connection
 from django.template import defaultfilters as filters
 from django.utils import dates
 from django.utils import translation
-from django.contrib.auth.models import User
 
 from plan.common.managers import (LectureManager, ExamManager, CourseManager,
                                   SubscriptionManager, SemesterManager)
