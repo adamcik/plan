@@ -68,7 +68,7 @@ class Lectures(base.LectureScraper):
                     'start': utils.parse_time(activity['from']),
                     'end':  utils.parse_time(activity['to']),
                     'weeks': utils.parse_weeks(','.join(activity['weeks']), ','),
-                    'rooms': [(r['id'], r['room'], r['url'])
+                    'rooms': [(r['id'], r['room'], r.get('url'))
                                for r in activity.get('rooms', [])],
                     'groups': activity.get('studyProgramKeys', []),
                     'lecturers': [],
