@@ -150,7 +150,7 @@ class CourseManager(models.Manager):
 
         return cursor.fetchall()
 
-    def search(self, year, semester_type, query, limit=10):
+    def search(self, year, semester_type, query, limit=10, location=None):
         search_filter = build_search(query, ['code__icontains',
                                              'name__icontains',
                                              'subscription__alias__exact'])
@@ -159,6 +159,9 @@ class CourseManager(models.Manager):
         qs = qs.filter(search_filter)
         qs = qs.filter(semester__year__exact=year,
                        semester__type__exact=semester_type)
+        if location:
+            qs = qs.filter(locations__id=location)
+
         qs = qs.distinct()
         qs = qs.order_by('code')
 

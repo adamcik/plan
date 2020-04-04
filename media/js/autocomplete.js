@@ -20,13 +20,16 @@
 
   function source(term, callback) {
     term = term.split(/\s*,\s*/).pop().replace(/^\s+|\s+/g, '').toLowerCase();
-    if (cache[term]) {
-      callback(cache[term]);
+    var location = document.getElementById('location');
+    var query = '?q=' + encodeURIComponent(term) +
+                '&l=' + encodeURIComponent(location !== null ? location.value : '');
+
+    if (cache[query]) {
+      callback(cache[query]);
     } else if (term.length >= 3) {
-      var query = '?q=' + encodeURIComponent(term);
       var url = this.selector.getAttribute('data-autocomplete');
       fetch(url + query, function(data) {
-        cache[term] = data;
+        cache[query] = data;
         callback(data);
       });
     }

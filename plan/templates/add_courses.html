@@ -8,6 +8,14 @@
     <p>
       <span class="large">{% trans "Please enter the codes for the courses you want to attend" %}</span>
       <input id="course" type="text" name="course_add" data-autocomplete="{% url 'course-query' semester.year semester.slug %}"/>
+      {% if locations|length > 1 %}
+        <select id="location" name="course_location">
+          <option value="">{% trans "All" %}</option>
+          {% for l in locations %}
+            <option value="{{ l.id }}">{{ l.name }}</option>
+          {% endfor %}
+        </select>
+      {% endif %}
       <button name="submit_add" type="submit"><i class="icon-plus-sign"></i> {% trans "Add course" %}</button>
     </p>
   </form>

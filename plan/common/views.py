@@ -12,7 +12,7 @@ from django.utils import html
 from django.utils import text
 
 from plan.common.models import (Course, Deadline, Exam, Group, Lecture,
-    Semester, Subscription, Room, Lecturer, Week, Student)
+    Location, Semester, Subscription, Room, Lecturer, Week, Student)
 
 from plan.common import forms
 from plan.common import timetable
@@ -90,6 +90,7 @@ def getting_started(request, year, semester_type):
 def course_query(request, year, semester_type):
     limit = min(request.GET.get('limit', '10'), settings.TIMETABLE_AJAX_LIMIT)
     query = request.GET.get('q', '').strip()[:100]
+    location = request.GET.get('l', '')
     send_json = request.META.get('HTTP_ACCEPT') == 'application/json'
 
     if send_json:
@@ -100,7 +101,8 @@ def course_query(request, year, semester_type):
     if not query:
         courses = Course.objects.none()
     else:
-        courses = Course.objects.search(year, semester_type, query, limit)
+        courses = Course.objects.search(year, semester_type, query, limit, location)
+
     course_list = list(courses.values_list('code', 'name'))
 
     if send_json:
@@ -222,6 +224,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
         next_message = False
 
     week_is_current = semester.year == today().year and week == current_week
+    locations = Location.objects.filter(course__semester=semester).distinct()
 
     return shortcuts.render(request, 'schedule.html', {
             'advanced': advanced,
@@ -247,6 +250,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
             'lecturers': lecturers,
             'lecture_weeks': weeks,
             'student': student,
+            'locations': locations,
         })
 
 
