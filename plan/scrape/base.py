@@ -274,7 +274,7 @@ class CourseScraper(Scraper):
 
 class LectureScraper(Scraper):
     fields = ('course', 'day', 'start', 'end', 'type')
-    extra_fields = ('rooms', 'lecturers', 'groups', 'weeks')
+    extra_fields = ('rooms', 'lecturers', 'groups', 'weeks', 'title')
 
     def queryset(self):
         qs = Lecture.objects.filter(course__semester=self.semester)
@@ -364,11 +364,16 @@ class LectureScraper(Scraper):
     def update(self, obj, defaults):
         changes = {}
 
+        # TODO: Replace with m2m_fields handling?
         for field in ('rooms', 'lecturers', 'groups'):
             current = set(getattr(obj, field).all())
             if current != set(defaults[field]):
                 changes[field] = current, set(defaults[field])
                 setattr(obj, field, defaults[field])
+
+        if obj.title != defaults['title']:
+            changes['title'] = (obj.title, defaults['title'])
+            obj.title = defaults['title']
 
         obj.save()
 

@@ -73,6 +73,7 @@ class Lectures(base.LectureScraper):
                                for r in activity.get('rooms', [])],
                     'groups': activity.get('studyProgramKeys', []),
                     'lecturers': [],
+                    'title': activity.get('title'),
                 }
 
 
