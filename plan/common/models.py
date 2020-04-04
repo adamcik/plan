@@ -33,6 +33,17 @@ class Student(models.Model):
         return self.slug
 
 
+class Location(models.Model):
+    name = models.CharField(_('Location'), max_length=100, unique=True)
+
+    class Meta:
+        verbose_name = _('Location')
+        verbose_name_plural = _('Locations')
+
+    def __unicode__(self):
+        return self.name
+
+
 class Subscription(models.Model):
     student = models.ForeignKey(Student)
     course = models.ForeignKey('Course')
