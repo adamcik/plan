@@ -1,12 +1,12 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+import importlib
 import logging
 import sys
 
 from django.core.management import base as management
 from django.conf import settings
 from django.db import transaction
-from django.utils import importlib
 
 from plan.common.models import Semester
 from plan.scrape import utils
