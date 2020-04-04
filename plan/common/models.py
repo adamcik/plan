@@ -22,6 +22,7 @@ _ = translation.ugettext_lazy
 
 class Student(models.Model):
     slug = models.SlugField(_('Slug'), unique=True)
+    # TODO(adamcik): Delete this
     show_deadlines = models.BooleanField(_('Show deadlines'), default=False)
 
     class Meta:
@@ -38,6 +39,8 @@ class Subscription(models.Model):
 
     alias = models.CharField(_('Alias'), max_length=50, blank=True)
     added = models.DateTimeField(_('Added'), auto_now_add=True)
+    # TODO(adamcik): Consider adding this so we can set better cache headers
+    # modified = models.DateTimeField(_('Modified'), auto_now=True)
 
     groups = models.ManyToManyField('Group')
     exclude = models.ManyToManyField('Lecture', related_name='excluded_from')
@@ -411,7 +414,7 @@ class Lecture(models.Model):
         return tmp
 
 
-# TODO(adamcik): This has been deprecated, leaving the data around for now.
+# TODO(adamcik): Delete
 class Deadline(models.Model):
     subscription = models.ForeignKey('Subscription')
     task = models.CharField(_('Task'), max_length=255)

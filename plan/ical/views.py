@@ -26,6 +26,8 @@ def ical(request, year, semester_type, slug, ical_type=None):
     elif ical_type:
         resources = [ical_type]
 
+    # TODO(adamcik): Add a last modified header and return 304s?
+
     title  = urlresolvers.reverse('schedule', args=[year, semester_type, slug])
     hostname = (settings.TIMETABLE_HOSTNAME or
                 request.META.get('HTTP_HOST', socket.getfqdn()))
