@@ -140,6 +140,7 @@ class Group(models.Model):
 class Course(models.Model):
     code = models.CharField(_('Code'), max_length=100)
     semester = models.ForeignKey('Semester')
+    locations = models.ManyToManyField(Location)
 
     name = models.TextField(_('Name'))
     version = models.CharField(_('Version'), max_length=20, null=True)
