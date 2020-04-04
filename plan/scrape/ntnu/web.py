@@ -20,6 +20,7 @@ class Courses(base.CourseScraper):
                 'name': course['courseName'],
                 'version': course['courseVersion'],
                 'url': course['courseUrl'],
+                'locations': course['location'].split(','),
             }
 
 
@@ -158,7 +159,6 @@ def fetch_courses(semester):
         'pageNo': 1,
         'semester': year,
         'sortOrder': '+title',
-        'trondheim': 1,
     }
 
     if semester.type == Semester.FALL:

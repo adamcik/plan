@@ -9,7 +9,7 @@ from django import db
 from django.db.models import Count
 
 from plan.common.models import (Course, Exam, ExamType, Lecture, LectureType,
-                                Lecturer, Group, Room, Semester, Week)
+                                Lecturer, Location, Group, Room, Semester, Week)
 from plan.scrape import utils
 
 
@@ -19,6 +19,7 @@ html_parser = HTMLParser.HTMLParser()
 class Scraper(object):
     fields = ()
     extra_fields = ()
+    m2m_fields = ()
 
     def __init__(self, semester, course_prefix=None):
         self.semester = semester
@@ -99,11 +100,13 @@ class Scraper(object):
                 obj, created = self.save(kwargs)
                 self.log_persisted(obj)
 
+                changes = self.update_m2m(obj, data)
+
                 if created:
                     self.log_created(obj)
                     continue
 
-                changes = self.update(obj, kwargs['defaults'])
+                changes.update(self.update(obj, kwargs['defaults']))
 
                 if changes:
                     self.log_updated(obj, changes)
@@ -143,6 +146,17 @@ class Scraper(object):
         """
         qs = self.queryset().filter(last_import__lt=self.import_time)
         return qs.get_or_create(**kwargs)
+
+    def update_m2m(self, obj, data):
+        changes = {}
+        for field in self.m2m_fields:
+            new_values = data[field]
+            old_values = list(getattr(obj, field).all())
+
+            if set(new_values) != set(old_values):
+                getattr(obj, field).set(new_values)
+                changes[field] = (old_values, new_values)
+        return changes
 
     def update(self, obj, defaults):
         """Ensure that obj has up to date values for its fields.
@@ -225,6 +239,7 @@ class Scraper(object):
 class CourseScraper(Scraper):
     fields = ('code', 'version', 'semester')
     extra_fields = ('name', 'url', 'points')
+    m2m_fields = ('locations',)
 
     def queryset(self):
         qs = Course.objects.filter(semester=self.semester)
@@ -239,6 +254,11 @@ class CourseScraper(Scraper):
             data['name'] = utils.clean_string(data['name'])
         if 'points' in data:
             data['points'] = utils.clean_decimal(data['points'])
+
+        locations, data['locations'] = data['locations'][:], []
+        for name in locations:
+            data['locations'].append(self.location(utils.clean_string(name)))
+
         return data
 
     def display(self, obj):
@@ -247,6 +267,9 @@ class CourseScraper(Scraper):
     def format(self, items):
         return utils.columnify(
             (u'%s - %s lectures' % (c, c.lecture__count) for c in items), 2)
+
+    def location(self, name):
+        return Location.objects.get_or_create(name=name)[0]
 
 
 class LectureScraper(Scraper):
