@@ -357,6 +357,7 @@ class Lecture(models.Model):
     DAYS = [(i, dates.WEEKDAYS[i]) for i in xrange(5)]
 
     course = models.ForeignKey(Course)
+    title = models.TextField(_('Title'), null=True)
 
     day = models.PositiveSmallIntegerField(_('Week day'), choices=DAYS)
 
