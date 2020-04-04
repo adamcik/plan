@@ -41,7 +41,7 @@
                 {% endfor %}
                 {% if not rooms|get:l.id %}&nbsp;{% endif %}
               </td>
-              <td class="small">{{ l.type|default:"" }}</td>
+              <td class="small">{% if l.title %}{{ l.title }}{% else %}{{l.type|default:"" }}{% endif %}</td>
               <td class="small">{{ groups|get:l.id|join:", " }}</td>
               <td class="small nowrap">{{ lecture_weeks|get:l.id|compact|join:", " }}</td>
             </tr>
