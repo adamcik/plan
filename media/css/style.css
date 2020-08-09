@@ -214,6 +214,13 @@ td.error input, td.error select {
 	opacity: 1;
 }
 
+/* Autocomplete */
+.autocomplete-suggestions {
+	width: auto !important;
+	max-width: 40em;
+	border: 1px solid #ccc !important;
+}
+
 /* Switch behavior on "small" screens */
 @media screen and (max-width: 1023px) {
 	#doc2, .yui-g .yui-u, .yui-g div.first, .yui-g .yui-u {
