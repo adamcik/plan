@@ -217,7 +217,7 @@ td.error input, td.error select {
 /* Autocomplete */
 .autocomplete-suggestions {
 	width: auto !important;
-	max-width: 40em;
+	max-width: 90%;
 	border: 1px solid #ccc !important;
 }
 
