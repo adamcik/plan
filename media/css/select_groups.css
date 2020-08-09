@@ -2,10 +2,10 @@
 #change-groups div {
 	float: left;
 	padding: 0.2em;
-	margin-right: 0.5em;
+	margin-right: 1%;
 	margin-bottom: 0.5em;
 	border: 1px solid #666;
-	width: 10em;
+	width: 30%;
 	height: 20em;
 }
 #change-groups p {
