@@ -63,9 +63,9 @@
       <dd>
         {% blocktrans with "http://www.google.com/calendar/render?cid=http://" as google_cal_prefix and request.META.HTTP_HOST as host %}
           Google calendar:
-          <a target="_blank" href="{{ google_cal_prefix }}{{ host }}{{ ical_lectures_url }}">lectures</a>,
-          <a target="_blank" href="{{ google_cal_prefix }}{{ host }}{{ ical_exams_url }}">exams</a> or
-          <a target="_blank" href="{{ google_cal_prefix }}{{ host }}{{ ical_all_url }}">both combined</a>.
+          <a target="_blank" rel="noreferrer" href="{{ google_cal_prefix }}{{ host }}{{ ical_lectures_url }}">lectures</a>,
+          <a target="_blank" rel="noreferrer" href="{{ google_cal_prefix }}{{ host }}{{ ical_exams_url }}">exams</a> or
+          <a target="_blank" rel="noreferrer" href="{{ google_cal_prefix }}{{ host }}{{ ical_all_url }}">both combined</a>.
         {% endblocktrans %}
         <br />
         {% trans "Simply click the calendar type you want and it will be added to Google calendar." %}
