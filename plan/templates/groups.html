@@ -19,7 +19,7 @@
             <strong>{{ course.alias|default:course.code }}</strong>
             {% if course.name %}
               <br />
-              <span class="small">{{ course.name|truncatewords:"3" }}</span>
+              <span class="small">{{ course.name }}</span>
             {% endif %}
           </p>
           <div>

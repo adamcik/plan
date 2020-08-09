@@ -1,27 +1,13 @@
 /* Box used for selecting which groups to use for a course */
-#change-groups div {
-	float: left;
+#change-groups {
+  display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(15em, 1fr));
+  grid-gap: 1em;
+}
+#change-groups .groupbox {
 	padding: 0.2em;
-	margin-right: 1%;
 	margin-bottom: 0.5em;
 	border: 1px solid #666;
-	width: 30%;
-	height: 20em;
-}
-#change-groups p {
-	overflow: hidden;
-	height: 20%;
-	margin-bottom: 0.25em;
-}
-#change-groups div div {
-	overflow: auto;
-	overflow-x: hidden;
-	height: 75%;
-	width: 100%;
-	margin: 0;
-	padding: 0;
-	border: 0;
-	float: none;
 }
 #change-groups ul {
 	margin: 0;
