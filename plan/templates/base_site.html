@@ -24,6 +24,7 @@
 
 {% block extrahead %}
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="{% blocktrans with INSTITUTION as institution %}Timetable generator for {{ institution }} students{% endblocktrans %}" />
   <link rel="icon" type="image/png" href="{% static 'gfx/icons/time.png' %}" />
 {% endblock %}
 

@@ -19,10 +19,11 @@
         </thead>
         <tbody>
           {% for course in courses %}
+            {% blocktrans asvar remove_title  %}Remove {{ course }}{% endblocktrans %}
             <tr class="course-{{ course.id }}" title="{{ course.name }}">
               {% if advanced %}
                 <td>
-                  <input type="checkbox" name="course_remove" value="{{ course.id }}" class="noprint" />
+                  <input type="checkbox" name="course_remove" value="{{ course.id }}" class="noprint" title="{{ remove_title }}" />
                 </td>
               {% endif %}
               <td>

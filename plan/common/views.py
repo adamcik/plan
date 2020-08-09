@@ -10,6 +10,7 @@ from django.conf import settings
 from django.db import connection, transaction
 from django.utils import html
 from django.utils import text
+from django.utils import translation
 
 from plan.common.models import (Course, Deadline, Exam, Group, Lecture,
     Location, Semester, Subscription, Room, Lecturer, Week, Student)
@@ -26,6 +27,9 @@ from plan.common.templatetags import slugify
 # To allow for overriding of the codes idea of now() for tests
 now = datetime.datetime.now
 today= datetime.date.today
+
+# Setup common alias for translation
+_ = translation.ugettext_lazy
 
 # Start new week on saturdays
 get_current_week = lambda: (now() + datetime.timedelta(days=2)).isocalendar()[1]
@@ -214,6 +218,8 @@ def schedule(request, year, semester_type, slug, advanced=False,
             alias = course.alias or ''
             course.alias_form = forms.CourseAliasForm(
                 initial={'alias': alias}, prefix=course.id)
+            course.alias_form.fields['alias'].widget.attrs['title'] = _(
+                'Display %(course)s as:') % {'course': course.code}
 
     try:
         next_semester = Semester.objects.next()

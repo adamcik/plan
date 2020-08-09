@@ -64,14 +64,14 @@
       {% endif %}
       <div id="help">
         <form action="." method="post" id="f">
-          <p class="large">
+          <label class="large" for="s">
             {% blocktrans %}
               Please enter a short name identifying your personal
               timetable, ie. username, nickname etc. If the name
               you select is in already taken, choose another
               one.
             {% endblocktrans %}
-          </p>
+          </label>
           <p class="right">
             {{ schedule_form.semester }}
             {{ schedule_form.slug }}

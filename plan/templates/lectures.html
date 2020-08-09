@@ -23,9 +23,10 @@
         </thead>
         <tbody>
           {% for l in lectures %}
+            {% blocktrans asvar exclude_title %}Hide {{ l }}{% endblocktrans %}
             <tr class="course-{{ l.course_id }} lecture-{{ l.id }}{% if l.exclude %} excluded{% endif %}" title="{{ l.course.name }}">
               {% if advanced %}
-                <td><input type="checkbox" name="exclude" value="{{ l.id }}"{% if l.exclude %} checked="checked"{% endif %} class="noprint" /></td>
+                <td><input type="checkbox" name="exclude" value="{{ l.id }}"{% if l.exclude %} checked="checked"{% endif %} class="noprint" title="{{ exclude_title }}" /></td>
               {% endif %}
               <td>{{ l.alias|default:l.course.code }}</td>
               <td>{{ l.get_day_display }}</td>

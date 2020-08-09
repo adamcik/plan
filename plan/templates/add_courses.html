@@ -6,16 +6,17 @@
       <h3>{% trans "Add courses" %}</h3>
     {% endif %}
     <p>
-      <span class="large">{% trans "Please enter the codes for the courses you want to attend" %}</span>
-      <input id="course" type="text" name="course_add" data-autocomplete="{% url 'course-query' semester.year semester.slug %}"/>
+      <label for="course">{% trans "Search for courses by code or name" %}</label>
       {% if locations|length > 1 %}
+        <label for="location" class="large">{% trans "in" %}</label>
         <select id="location" name="course_location">
-          <option value="">{% trans "All" %}</option>
+          <option value="">{% trans "any location" %}</option>
           {% for l in locations %}
             <option value="{{ l.id }}">{{ l.name }}</option>
           {% endfor %}
         </select>
       {% endif %}
+      <input id="course" type="text" name="course_add" style="width: 70%; max-width: 30em" data-autocomplete="{% url 'course-query' semester.year semester.slug %}"/>
       <button name="submit_add" type="submit"><i class="icon-plus-sign"></i> {% trans "Add course" %}</button>
     </p>
   </form>
