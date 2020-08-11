@@ -2,6 +2,7 @@
 
 import datetime
 import operator
+import re
 import time
 
 from django import http
@@ -147,3 +148,9 @@ def first_date_in_week(year, week):
         return datetime.datetime.strptime('%d %d 1' % (year, week-1), '%Y %W %w')
     else:
         return datetime.datetime.strptime('%d %d 1' % (year, week), '%Y %W %w')
+
+
+def natural_sort(values, key=None):
+    split = lambda v: re.split(r'(\d+)', key(v) if key else v)
+    convert = lambda v: int(v) if v.isdigit() else v.lower()
+    return sorted(values, key=lambda v: [convert(p) for p in split(v)])
