@@ -26,7 +26,8 @@
         'click', toggle.bind(inputs, true));
       wrapper.querySelector('.toogle-none').addEventListener(
         'click', toggle.bind(inputs, false));
-      groups[i].insertBefore(wrapper, groups[i].firstChild);
+
+      groups[i].querySelector('strong').parentNode.appendChild(wrapper);
     }
   }
 

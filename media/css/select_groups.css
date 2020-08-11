@@ -1,13 +1,8 @@
 /* Box used for selecting which groups to use for a course */
-#change-groups {
-  display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(15em, 1fr));
-  grid-gap: 1em;
-}
 #change-groups .groupbox {
-	padding: 0.2em;
 	margin-bottom: 0.5em;
 	border: 1px solid #666;
+	padding: 0.5em 1em;
 }
 #change-groups ul {
 	margin: 0;
@@ -15,9 +10,6 @@
 #change-groups li {
 	list-style: none;
 	white-space: nowrap;
-}
-#change-groups .toogle {
-	text-align: right;
 }
 #change-groups .toogle-all, #change-groups .toogle-none {
 	cursor: pointer;
