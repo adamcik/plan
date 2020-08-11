@@ -2,6 +2,7 @@
 
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+import re
 import urllib
 
 from plan.common.models import Course, ExamType, Semester
@@ -62,6 +63,21 @@ class Lectures(base.LectureScraper):
             for activity in course.get('summarized', []):
                 if activity['artermin'] != ntnu_semeter:
                     continue
+
+                groups = activity.get('studyProgramKeys', [])
+                title = re.sub(r'^\d+(-\d*)?\s?', '', activity['title']).strip(' ')
+
+                if not title or title == c.code:
+                    title = None
+
+                if not groups and title:
+                    groups = [title]
+                    title = None
+
+                if activity['name'] in ('Seminar', 'Gruppe') and title != activity['name']:
+                    groups.append(title)
+                    title = None
+
                 yield {
                     'course': c,
                     'type': activity.get('name', activity['acronym']),
@@ -71,9 +87,9 @@ class Lectures(base.LectureScraper):
                     'weeks': utils.parse_weeks(','.join(activity['weeks']), ','),
                     'rooms': [(r['id'], r['room'], r.get('url'))
                                for r in activity.get('rooms', [])],
-                    'groups': activity.get('studyProgramKeys', []),
+                    'groups': groups,
                     'lecturers': [],
-                    'title': activity.get('title'),
+                    'title': title,
                 }
 
 
