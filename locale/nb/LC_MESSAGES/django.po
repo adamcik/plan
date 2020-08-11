@@ -353,9 +353,8 @@ msgstr "i"
 
 #: plan/templates/add_courses.html:13
 #, fuzzy
-#| msgid "Combination"
 msgid "any location"
-msgstr "Sted"
+msgstr "alle studiesteder"
 
 #: plan/templates/add_courses.html:20
 msgid "Add course"
