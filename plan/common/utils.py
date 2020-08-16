@@ -150,6 +150,8 @@ def first_date_in_week(year, week):
 
 
 def natural_sort(values, key=None):
-    split = lambda v: re.split(r'(\d+)', key(v) if key else v)
+    if key is None:
+        key = lambda k: k
+    split = lambda v: re.split(r'(\d+)', v) if isinstance(v, basestring) else [v]
     convert = lambda v: int(v) if v.isdigit() else v.lower()
-    return sorted(values, key=lambda v: [convert(p) for p in split(v)])
+    return sorted(values, key=lambda v: [convert(p) if isinstance(p, basestring) else p for p in split(key(v))])
