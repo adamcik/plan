@@ -72,11 +72,10 @@ def server_error(request, template_name='500.html'):
     # You need to create a 500.html template.
     t = template.loader.get_template(template_name)
 
-    context = template.Context({'MEDIA_URL': settings.MEDIA_URL,
-                                'STATIC_URL': settings.STATIC_URL,
-                                'SOURCE_URL': settings.TIMETABLE_SOURCE_URL})
-
-    return http.HttpResponseServerError(t.render(context))
+    return http.HttpResponseServerError(t.render({
+        'MEDIA_URL': settings.MEDIA_URL,
+        'STATIC_URL': settings.STATIC_URL,
+        'SOURCE_URL': settings.TIMETABLE_SOURCE_URL}))
 
 
 def compact_sequence(sequence):
