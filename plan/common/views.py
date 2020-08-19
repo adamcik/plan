@@ -167,7 +167,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
         exams.setdefault(exam.course_id, []).append(exam)
 
     # Use get_related to cut query counts
-    lecturers = Lecture.get_related(Lecturer, lectures)
+    lecturers = [] # Lecture.get_related(Lecturer, lectures)
     groups = Lecture.get_related(Group, lectures, fields=['code'])
     rooms = Lecture.get_related(Room, lectures, fields=['name', 'url'])
     weeks = Lecture.get_related(Week, lectures, fields=['number'], use_extra=False)
@@ -230,7 +230,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
         next_message = False
 
     week_is_current = semester.year == today().year and week == current_week
-    locations = Location.objects.filter(course__semester=semester).distinct()
+    locations = Location.objects.distinct() # .filter(course__semester=semester)
 
     return shortcuts.render(request, 'schedule.html', {
             'advanced': advanced,
