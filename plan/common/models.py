@@ -3,6 +3,7 @@
 import datetime
 
 from django.conf import settings
+from django.core.cache import cache
 from django.db import models
 from django.db import connection
 from django.template import defaultfilters as filters
@@ -185,6 +186,12 @@ class Course(models.Model):
         else:
             semester_id = semester
 
+        key = 'course-semester-stats-%d-%d' % (semester_id, limit)
+        result = cache.get(key)
+
+        if result:
+            return result
+
         slug_count = int(Student.objects.filter(subscription__course__semester=semester).distinct().count())
         subscription_count = int(Subscription.objects.filter(course__semester=semester).count())
         course_count = int(Course.objects.filter(subscription__course__semester=semester).values('name').distinct().count())
@@ -198,13 +205,15 @@ class Course(models.Model):
             ORDER BY num DESC
             LIMIT %s''', [semester_id, limit])
 
-        return {
+        result = {
             'slug_count': slug_count,
             'course_count': course_count,
             'subscription_count': subscription_count,
             'stats': cursor.fetchall(),
             'limit': limit,
         }
+        cache.set(key, result, 300)
+        return result
 
     @staticmethod
     def get_groups(year, semester_type, courses):
