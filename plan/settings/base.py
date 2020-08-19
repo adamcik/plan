@@ -213,3 +213,6 @@ TIMETABLE_HOSTNAME = None
 
 # Where the software can be downloaded.
 TIMETABLE_SOURCE_URL = 'http://www.github.com/adamcik/plan/'
+
+# If the syllabus column should be displayed for courses
+TIMETABLE_SHOW_SYLLABUS = True

@@ -1,4 +1,5 @@
 {% load get %}
+{% load hostname %}
 {% load i18n %}
 
 <form action="{% url 'change-course' semester.year semester.slug slug %}" method="post">
@@ -14,6 +15,9 @@
             <th>{% trans "Course" %}</th>
             <th>{% trans "Alias" %}</th>
             <th>{% trans "Description" %}</th>
+            {% if SHOW_SYLLABUS %}
+              <th>{% trans "Syllabus" %}</th>
+            {% endif %}
             <th>{% trans "Exams" %}</th>
           </tr>
         </thead>
@@ -45,6 +49,15 @@
               <td>
                 {{ course.name }}
               </td>
+              {% if SHOW_SYLLABUS %}
+                <td>
+                  {% if course.syllabus %}
+                    <a href="{{ course.syllabus }}">{{ course.syllabus|hostname }}</a>
+                  {% else %}
+                    -
+                  {% endif %}
+                </td>
+              {% endif %}
               <td class="nowrap">
                 {% for exam in exams|get:course.id %}
                   {{ exam.exam_date }}{% if not forloop.last %},{% endif %}

@@ -27,6 +27,7 @@ def processor(request):
     return {'ANALYTICS_CODE': settings.TIMETABLE_ANALYTICS_CODE,
             'INSTITUTION': settings.TIMETABLE_INSTITUTION,
             'INSTITUTION_SITE': settings.TIMETABLE_INSTITUTION_SITE,
+            'SHOW_SYLLABUS': settings.TIMETABLE_SHOW_SYLLABUS,
             'ADMINS': settings.ADMINS,
             'SHARE_LINKS': share_links,
             'SOURCE_URL': settings.TIMETABLE_SOURCE_URL,
