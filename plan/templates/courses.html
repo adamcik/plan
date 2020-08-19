@@ -23,7 +23,7 @@
         </thead>
         <tbody>
           {% for course in courses %}
-            {% blocktrans asvar remove_title  %}Remove {{ course }}{% endblocktrans %}
+            {% blocktrans asvar remove_title  %}Remove {{ course.code }} {{ course.name }}{% endblocktrans %}
             <tr class="course-{{ course.id }}" title="{{ course.name }}">
               {% if advanced %}
                 <td>
