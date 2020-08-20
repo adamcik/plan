@@ -2,6 +2,7 @@
 
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+import datetime
 import re
 import urllib
 
@@ -60,35 +61,51 @@ class Lectures(base.LectureScraper):
 
         for c in self.course_queryset():
             course = fetch_course_lectures(self.semester, c)
-            for activity in course.get('summarized', []):
+            groupings = {}
+            for activity in course.get('schedules', []):
                 if activity['artermin'] != ntnu_semeter:
                     continue
 
-                groups = activity.get('studyProgramKeys', [])
-                title = re.sub(r'^\d+(-\d*)?\s?', '', activity['title']).strip(' ')
+                start = datetime.datetime.fromtimestamp(activity['from'] / 1000)
+                end = datetime.datetime.fromtimestamp(activity['to'] / 1000)
+                name = activity.get('name', activity['acronym']).strip()
+                title = re.sub(r'^\d+(-\d*)?\s?', '', activity['title']).strip()
+                groups = set(activity.get('studyProgramKeys', []))
 
                 if not title or title == c.code:
                     title = None
 
                 if not groups and title:
-                    groups = [title]
+                    groups.add(title)
+                    title = None
+                elif name in ('Seminar', 'Gruppe') and title != name:
+                    groups.add(title)
                     title = None
 
-                if activity['name'] in ('Seminar', 'Gruppe') and title != activity['name']:
-                    groups.append(title)
-                    title = None
+                if not title and activity['summary'].strip() != activity['title'].strip():
+                    title = activity['summary'].strip()
 
+                key = (
+                    start.weekday(), start.time(), end.time(), name, title,
+                    tuple(sorted(groups)),
+                    tuple(sorted({(r['id'], r['room'], r.get('url')) for r in activity['rooms']})),
+                    tuple(sorted({(s['name'], s.get('url')) for s in activity['staff']})),
+                )
+                groupings.setdefault(key, set()).add(activity['week'])
+
+            # TODO: see if we can move the grouping to the base scraper?
+            for key, weeks in sorted(groupings.items()):
+                day, start, end, name, title, groups, rooms, lecturers = key
                 yield {
                     'course': c,
-                    'type': activity.get('name', activity['acronym']),
-                    'day': activity['dayNum'] - 1,
-                    'start': utils.parse_time(activity['from']),
-                    'end':  utils.parse_time(activity['to']),
-                    'weeks': utils.parse_weeks(','.join(activity['weeks']), ','),
-                    'rooms': [(r['id'], r['room'], r.get('url'))
-                               for r in activity.get('rooms', [])],
+                    'type': name,
+                    'day': day,
+                    'start': start,
+                    'end': end,
+                    'weeks': weeks,
+                    'rooms': rooms,
                     'groups': groups,
-                    'lecturers': [],
+                    'lecturers': tuple(),
                     'title': title,
                 }
 
@@ -96,6 +113,7 @@ class Lectures(base.LectureScraper):
 class Rooms(base.RoomScraper):
     def scrape(self):
         seen = set()
+        # TODO: this is broken after switch from timetable to schedules
         for c in Course.objects.filter(semester=self.semester):
             course = fetch_course_lectures(self.semester, c)
             for activity in course.get('summarized', []):
@@ -112,7 +130,7 @@ def fetch_course_lectures(semester, course):
     query = {
         'p_p_id': 'coursedetailsportlet_WAR_courselistportlet',
         'p_p_lifecycle': 2,
-        'p_p_resource_id': 'timetable',
+        'p_p_resource_id': 'schedules',
         '_coursedetailsportlet_WAR_courselistportlet_year': semester.year,
         '_coursedetailsportlet_WAR_courselistportlet_courseCode': course.code.encode('utf-8'),
         'year': semester.year,
