@@ -232,6 +232,8 @@ def schedule(request, year, semester_type, slug, advanced=False,
     week_is_current = semester.year == today().year and week == current_week
     locations = Location.objects.distinct() # .filter(course__semester=semester)
 
+    lectures.sort(key=lambda l: (l.course.code, weeks[l.id][0]))
+
     return shortcuts.render(request, 'schedule.html', {
             'advanced': advanced,
             'all': all,
