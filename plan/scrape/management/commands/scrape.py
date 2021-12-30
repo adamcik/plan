@@ -9,7 +9,7 @@ from django.conf import settings
 from django.db import transaction
 
 from plan.common.models import Semester
-from plan.scrape import utils
+from plan.scrape import fetch, utils
 
 DATE_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 CONSOLE_LOG_FORMAT = '[%(asctime)s %(levelname)s] %(message)s'
@@ -39,12 +39,19 @@ class Command(management.LabelCommand):
                              help='use pdb.pm() when we hit and exception')
         parser.add_argument('--prefix', action='store', dest='prefix',
                              help='course code prefix to limit scrape to')
+        parser.add_argument('--disable_cache', action='store_true',
+                            dest='disable_cache')
+        parser.add_argument('--max_per_second', action='store', default=5,
+                            dest='max_per_second', type=float)
 
     @transaction.atomic
     def handle_label(self, label, **options):
         logging.basicConfig(
             format=CONSOLE_LOG_FORMAT, datefmt=DATE_TIME_FORMAT,
             level=LOG_LEVELS[options['verbosity']])
+
+        fetch.disable_cache = options['disable_cache']
+        fetch.max_per_second = options['max_per_second'] or float('inf')
 
         sid = transaction.savepoint()
 

@@ -25,6 +25,7 @@ class Command(management.BaseCommand):
     def add_arguments(self, parser):
         super(Command, self).add_arguments(parser)
 
+        # TODO: Get rid of need for this in load_semester?
         parser.add_argument('-c', '--create', action='store_true', dest='create',
                              help='create missing semester, default: false'),
 
@@ -77,6 +78,7 @@ class Command(management.BaseCommand):
             return Semester.objects.create(year=year, type=type)
 
     def load_scrapers(self):
+        # TODO: Some of the scrapers depend on courses being loaded, handle this somehow?
         scrapers = []
         for scraper in settings.TIMETABLE_SCRAPERS_PREFETCH:
             try:

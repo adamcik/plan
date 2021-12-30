@@ -68,6 +68,13 @@ class Scraper(object):
                 return True
         return False
 
+    def prefetch(self):
+        self.log_initial()
+        for data in self.scrape():
+            self.log_scraped(data)
+        self.log_stats()
+        return False
+
     def run(self):
         """Entry point for generic scrape managment command.
 
@@ -493,7 +500,7 @@ class RoomScraper(Scraper):
                         'loose data we can\'t get back.')
 
 
-class SyllabysScraper(Scraper):
+class SyllabusScraper(Scraper):
     fields = ('code',)
     extra_fields = ('syllabus',)
 
@@ -515,5 +522,6 @@ class SyllabysScraper(Scraper):
             logging.warning('Duplicate syllabus info for: %s', data['code'])
 
     def delete(self, qs):
-        # TODO(adamcik): clear syllabus we didn't find.
-        pass
+        return
+        self.log_delete(qs)
+        qs.update(syllabus=None)
