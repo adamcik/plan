@@ -3,6 +3,7 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import datetime
+import logging
 import re
 import urllib
 
@@ -17,18 +18,30 @@ from plan.scrape import utils
 class Courses(base.CourseScraper):
     def scrape(self):
         for course in fetch_courses(self.semester):
+            code = course['courseCode']
+            version = course['courseVersion']
+            location = course['location'].split(',')
+
             yield {
-                'code': course['courseCode'],
+                'code': code,
                 'name': course['courseName'],
-                'version': course['courseVersion'],
+                'version': version,
                 'url': course['courseUrl'],
-                'locations': course['location'].split(','),
+                'locations': location,
             }
 
 
 class Exams(base.ExamScraper):
     def scrape(self):
         for course in fetch_courses(self.semester):
+            try:
+                obj = Course.objects.get(
+                        code=course['courseCode'],
+                        version=course['courseVersion'],
+                        semester=self.semester)
+            except Course.DoesNotExist:
+                continue
+
             seen = set()
             for exam in course['exam']:
                 if not exam.get('date'):
@@ -44,10 +57,7 @@ class Exams(base.ExamScraper):
 
                 seen.add(date)
                 yield {
-                    'course': Course.objects.get(
-                        code=course['courseCode'],
-                        version=course['courseVersion'],
-                        semester=self.semester),
+                    'course': obj,
                     'exam_date': date,
                 }
 
@@ -84,6 +94,9 @@ class Lectures(base.LectureScraper):
 
                 if not title and activity['summary'].strip() != activity['title'].strip():
                     title = activity['summary'].strip()
+
+                # TODO: handle building='Digital undervisning' such that we get unique url per room.
+                # Current model assumes unique code per room, which we need to work around or change.
 
                 key = (
                     start.weekday(), start.time(), end.time(), name, title,
@@ -201,12 +214,22 @@ def fetch_courses(semester):
     else:
         data['courseSpring'] = 1
 
+    seen = set()
+
     while True:
         result = fetch.json(url, query=query, data=data, verbose=True)
+        # TODO use hasMoreResults?
         data['pageNo'] += 1
 
         if not result['courses']:
             break
 
         for course in result['courses']:
-            yield course
+            key = (course['courseCode'], course['courseVersion'])
+            key += tuple(course['location'].split(','))
+
+            if key in seen:
+                logging.warn('Skipping duplicate %r', key)
+            else:
+                seen.add(key)
+                yield course
