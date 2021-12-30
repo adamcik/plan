@@ -192,7 +192,14 @@ TIMETABLE_SCRAPERS = {
     'rooms': 'plan.scrape.ntnu.web.Rooms',
     'rooms.maze': 'plan.scrape.ntnu.maze.Rooms',
     'rooms.web': 'plan.scrape.ntnu.web.Rooms',
+    'syllabus': 'plan.scrape.ntnu.akademika.Syllabus',
 }
+
+TIMETABLE_SCRAPERS_PREFETCH = [
+    'plan.scrape.ntnu.web.Courses',
+    'plan.scrape.ntnu.web.Lectures',
+    'plan.scrape.ntnu.akademika.Syllabus',
+]
 
 # Google analytics code to use.
 TIMETABLE_ANALYTICS_CODE = None
