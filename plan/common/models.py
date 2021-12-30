@@ -106,7 +106,7 @@ class LectureType(models.Model):
 class Room(models.Model):
     code = models.CharField(_('Code'), max_length=100, null=True, unique=True)
     name = models.CharField(_('Name'), max_length=100)
-    url = models.URLField(_('URL'), default='')
+    url = models.URLField(_('URL'), default='', max_length=500)
 
     last_import = models.DateTimeField(_('Last import time'), auto_now=True)
 
@@ -323,6 +323,8 @@ class Exam(models.Model):
                                      decimal_places=2, help_text=_('Duration in hours'))
     url = models.URLField(_('URL'), default='')
 
+    # TODO: add link to a location
+
     last_import = models.DateTimeField(_('Last import time'), auto_now=True)
 
     objects = ExamManager()
@@ -353,6 +355,7 @@ class Week(models.Model):
 
 class Lecturer(models.Model):
     name = models.CharField(_('Name'), max_length=200, unique=True)
+    # TODO: url
 
     class Meta:
         verbose_name = _('Lecturer')
