@@ -14,6 +14,7 @@ import requests
 
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
+from requests.packages.urllib3.exceptions import MaxRetryError
 
 from django.core import cache
 from django.db import connections
@@ -31,7 +32,7 @@ scraper_cache = cache.caches['scraper']
 
 adapter = HTTPAdapter(max_retries=Retry(
     total=3,
-    status_forcelist=[429, 500, 502, 503, 504],
+    status_forcelist=[429, 502, 503, 504],
     method_whitelist=['GET', 'POST'],
     backoff_factor=1,
 ))
@@ -66,37 +67,42 @@ def sql(db, query, params=None):
         yield row(*values)
 
 
-def get(url, cache=True, verbose=False):
-    key = 'get||%s' % (url)
-    result = scraper_cache.get(key)
-    msg = 'Cached fetch: %s' % url
-    if not result or not cache or disable_cache:
-        msg = 'Fetched: %s' % url
-        with rate_limit(max_per_second):
-            response = session.get(url, timeout=30)
-        result = response.text
-        if response.status_code == 200 and result:
-            scraper_cache.set(key, result)
+def _fetch(req, key, msg, cache, verbose):
+    sentinel = object()
+    result = scraper_cache.get(key, default=sentinel)
+
+    if result is sentinel or not cache or disable_cache:
+        result = None
+        try:
+            prepped = session.prepare_request(req)
+            with rate_limit(max_per_second):
+                response = session.send(prepped, timeout=30)
+        except MaxRetryError:
+            scraper_cache.set(key, None, timeout=60*30)
+        else:
+            result = response.text
+            if response.status_code == 200 and result:
+                scraper_cache.set(key, result)
+            elif response.status_code == 500:
+                scraper_cache.set(key, result, timeout=60*30)
+    else:
+        msg = 'Cached hit: %s' % key
 
     logging.log(logging.INFO if verbose else logging.DEBUG, msg)
     return result
+
+
+def get(url, cache=True, verbose=False):
+    return _fetch(
+        requests.Request('GET', url), 'get||%s' % (url), 'GET: %s' % url,
+        cache, verbose)
 
 
 def post(url, data, cache=True, verbose=False):
     key = 'post||%s||%s' % (url, six.moves.urllib.parse.urlencode(data))
-    result = scraper_cache.get(key)
-    msg = 'Cached result found under: %s' % key
-
-    if not result or not cache or disable_cache:
-        msg = 'Post: %s Data: %s' % (url, data)
-        with rate_limit(max_per_second):
-            response = session.post(url, data=data, timeout=30)
-        result = response.text
-        if response.status_code == 200 and result:
-            scraper_cache.set(key, result)
-
-    logging.log(logging.INFO if verbose else logging.DEBUG, msg)
-    return result
+    msg = 'POST: %s Data: %s' % (url, data)
+    return _fetch(
+        requests.Request('POST', url, data=data), key, msg, cache, verbose)
 
 
 def plain(url, query=None, data=None, verbose=False, cache=True):
