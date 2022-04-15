@@ -42,7 +42,7 @@ class Scraper(object):
             ('final', 0),     # items left in db after scrape+delete
         ])
 
-    def scrape(self, semester):
+    def scrape(self):
         """Gets data from external source and yields results."""
         raise NotImplementedError
 
