@@ -7,6 +7,23 @@ class EmptyViewTestCase(tests.BaseTestCase):
 
     def test_ical(self):
         url = self.url('schedule-ical')
+        self.assertEquals(self.client.get(url).status_code, 204)
+
+        for arg in ('exams', 'lectures'):
+            url_args = list(self.default_args) + [arg]
+            url = self.url('schedule-ical', *url_args)
+            self.assertEquals(self.client.get(url).status_code, 204)
+
+        url_args = list(self.default_args) + ['foo']
+        url = self.url('schedule-ical', *url_args)
+        self.assertEquals(self.client.get(url).status_code, 400)
+
+
+class ViewTestCase(tests.BaseTestCase):
+    fixtures = ['test_data.json', 'test_user.json']
+
+    def test_ical(self):
+        url = self.url('schedule-ical')
         self.assertEquals(self.client.get(url).status_code, 200)
 
         for arg in ('exams', 'lectures'):
@@ -16,8 +33,4 @@ class EmptyViewTestCase(tests.BaseTestCase):
 
         url_args = list(self.default_args) + ['foo']
         url = self.url('schedule-ical', *url_args)
-        self.assertEquals(self.client.get(url).status_code, 404)
-
-
-class ViewTestCase(EmptyViewTestCase):
-    fixtures = ['test_data.json', 'test_user.json']
+        self.assertEquals(self.client.get(url).status_code, 400)

@@ -22,14 +22,14 @@ _ = translation.ugettext
 def ical(request, year, semester_type, slug, ical_type=None):
     resources = [_(u'lectures'), _(u'exams')]
     if ical_type and ical_type not in resources:
-        raise http.Http404
+        return http.HttpResponse(status=400)
     elif ical_type:
         resources = [ical_type]
 
     try:
         semester = Semester.objects.get(year=year, type=semester_type)
     except Semester.DoesNotExist:
-        raise http.Http404
+        return http.HttpResponse(status=204)
 
     # TODO(adamcik): Lookup in cache?
 
