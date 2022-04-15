@@ -6,6 +6,8 @@ import re
 import sys
 
 from django.conf import settings
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
 from django.utils import dates
 from django.utils import translation
 
@@ -86,6 +88,16 @@ def clean_decimal(raw_number):
 
 def clean_list(items, clean):
     return filter(bool, map(clean, items))
+
+
+def valid_url(url):
+    try:
+        validator = URLValidator(schemes=('http', 'https'))
+        validator(url)
+        return True
+    except ValidationError:
+        return False
+
 
 
 def split(value, sep):

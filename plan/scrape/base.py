@@ -406,7 +406,7 @@ class LectureScraper(Scraper):
                 room = Room.objects.get(code=code)
                 if room.name != name:
                     logging.warning('Room %s: %s != %s', room.code, room.name, name)
-                if url and room.url != url:
+                if utils.valid_url(url) and room.url != url:
                     self.log_extra('rooms', 'Adding room url %s to %s (%s)', [url, room.name, room.code])
                     room.url = url
                     room.save()
