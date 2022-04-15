@@ -233,7 +233,7 @@ class Scraper(object):
         values = []
         for key, value in self.stats.items():
             values.append('%s: %s' % (key.title(), value))
-        logging.info(', '.join(values))
+        logging.warning(', '.join(values))
 
     def log_extra(self, field, msg=None, args=None, count=0):
         self.stats[field] = self.stats.get(field, 0) + count
@@ -280,6 +280,7 @@ class CourseScraper(Scraper):
 
 
 class LectureScraper(Scraper):
+    # TODO: should we unhide lectures that get modified?
     fields = ('course', 'day', 'start', 'end', 'type')
     extra_fields = ('rooms', 'lecturers', 'groups', 'weeks', 'title')
 
@@ -321,6 +322,7 @@ class LectureScraper(Scraper):
                 data['rooms'].append(self.room(code, name, url))
 
         data['type'] = self.lecture_type(data['type'])
+        # TODO: Handle url in addition to names?
         data['lecturers'] = [self.lecturer(l) for l in data['lecturers']]
         data['groups'] = [self.group(g) for g in data['groups']]
 
@@ -391,6 +393,8 @@ class LectureScraper(Scraper):
 
             for week in defaults['weeks']:
                 Week.objects.create(lecture=obj, number=week)
+            # TODO: delete exclusions if the weeks changed?
+            # obj.excluded_fromc.clear()
 
         return changes
 
