@@ -54,6 +54,9 @@ class Scraper(object):
         """
         raise NotImplementedError
 
+    def estimate_count(self):
+        return self.queryset().count()
+
     def should_proccess_course(self, code):
         # TODO: delete as this is no longer called?
         """Common helper for filtering out course codes to skip."""
@@ -97,7 +100,7 @@ class Scraper(object):
 
         with logging_redirect_tqdm():
             initial = self.queryset().count()
-            with tqdm.tqdm(total=initial, unit='items') as progress:
+            with tqdm.tqdm(total=self.estimate_count(), unit='items') as progress:
 
                 self.log_initial()
 
