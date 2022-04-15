@@ -100,10 +100,10 @@ class Lectures(base.LectureScraper):
                 # Current model assumes unique code per room, which we need to work around or change.
 
                 key = (
-                    start.weekday(), start.time(), end.time(), name, title,
+                    start.weekday(), start.time(), end.time(), name, title or '',
                     tuple(sorted(groups)),
-                    tuple(sorted({(r['id'], r['room'], r.get('url')) for r in activity['rooms']})),
-                    tuple(sorted({(s['name'], s.get('url')) for s in activity['staff']})),
+                    tuple(sorted({(r['id'], r['room'], r.get('url', '')) for r in activity['rooms']})),
+                    tuple(sorted({(s['name'], s.get('url', '')) for s in activity['staff']})),
                 )
                 groupings.setdefault(key, set()).add(activity['week'])
 
