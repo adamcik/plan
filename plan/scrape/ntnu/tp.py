@@ -2,6 +2,7 @@
 
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from __future__ import absolute_import
 import json
 import re
 
@@ -9,6 +10,7 @@ from plan.common.models import Semester
 from plan.scrape import base
 from plan.scrape import fetch
 from plan.scrape import utils
+import six
 
 
 class Courses(base.CourseScraper):
@@ -20,7 +22,7 @@ class Courses(base.CourseScraper):
 
         url = 'https://www.ntnu.no/studier/emner/%s/2018'
 
-        for course, name in fetch_courses(self.semester).iteritems():
+        for course, name in six.iteritems(fetch_courses(self.semester)):
             yield {
                 'code': course,
                 'name': name,

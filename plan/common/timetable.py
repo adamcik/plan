@@ -1,5 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from __future__ import absolute_import
 import datetime
 
 from django.conf import settings
@@ -7,8 +8,9 @@ from django.utils import formats
 
 from plan.common import utils
 from plan.common.models import Lecture
+from six.moves import range
 
-SLOT_END_TIMES = map(lambda s: s[1], settings.TIMETABLE_SLOTS)
+SLOT_END_TIMES = [s[1] for s in settings.TIMETABLE_SLOTS]
 
 
 class Timetable:
@@ -103,8 +105,8 @@ class Timetable:
 
             # Find safe expansion of colspan
             safe = True
-            for l in xrange(k+1, len(self.table[i][j])):
-                for m in xrange(i, i+height):
+            for l in range(k+1, len(self.table[i][j])):
+                for m in range(i, i+height):
                     if self.table[m][j][l]:
                         safe = False
                         break
@@ -120,8 +122,8 @@ class Timetable:
                 self.table[i][j][k]['last'] = True
 
             # Remove cells that will get replaced by colspan
-            for l in xrange(k+1, k+expand_by):
-                for m in xrange(i, i+height):
+            for l in range(k+1, k+expand_by):
+                for m in range(i, i+height):
                     self.table[m][j][l]['remove'] = True
 
 

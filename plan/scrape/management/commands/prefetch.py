@@ -1,5 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from __future__ import absolute_import
 import importlib
 import logging
 import sys
@@ -32,7 +33,7 @@ class Command(management.BaseCommand):
         parser.add_argument('-y', '--year', action='store', dest='year', type=int,
                              help='year to scrape')
         parser.add_argument('-t', '--type', action='store', dest='type',
-                             choices=dict(Semester.SEMESTER_TYPES).keys(),
+                             choices=list(dict(Semester.SEMESTER_TYPES).keys()),
                              help='term to scrape')
         parser.add_argument('--pdb', action='store_true', dest='pdb',
                              help='use pdb.pm() when we hit and exception')

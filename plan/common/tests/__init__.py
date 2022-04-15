@@ -1,5 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from __future__ import absolute_import
 import datetime
 
 from django.core.urlresolvers import reverse

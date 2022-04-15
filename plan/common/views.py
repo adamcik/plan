@@ -1,5 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from __future__ import absolute_import
 import datetime
 import json
 import logging
@@ -19,6 +20,7 @@ from plan.common import forms
 from plan.common import timetable
 from plan.common import utils
 from plan.common.templatetags import slugify
+from six.moves import range
 
 # FIXME split into frontpage/semester, course, schedule files
 # FIXME Split views that do multiple form handling tasks into seperate views
@@ -63,7 +65,7 @@ def getting_started(request, year, semester_type):
         raise http.Http404
 
     try:
-        next_semester = Semester.objects.next()
+        next_semester = next(Semester.objects)
     except Semester.DoesNotExist:
         next_semester = None
 
@@ -92,7 +94,11 @@ def getting_started(request, year, semester_type):
 
 
 def course_query(request, year, semester_type):
-    limit = min(request.GET.get('limit', '10'), settings.TIMETABLE_AJAX_LIMIT)
+    try:
+        limit = int(request.GET.get('limit', ''))
+    except ValueError:
+        limit = 10
+    limit = min(limit, settings.TIMETABLE_AJAX_LIMIT)
     query = request.GET.get('q', '').strip()[:100]
     location = request.GET.get('l', '')
     send_json = request.META.get('HTTP_ACCEPT') == 'application/json'
@@ -181,7 +187,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
     schedule_weeks.sort()
 
     if schedule_weeks:
-        schedule_weeks = range(schedule_weeks[0], schedule_weeks[-1]+1)
+        schedule_weeks = list(range(schedule_weeks[0], schedule_weeks[-1]+1))
 
     next_week = None
     prev_week = None
@@ -222,7 +228,7 @@ def schedule(request, year, semester_type, slug, advanced=False,
                 'Display %(course)s as:') % {'course': course.code}
 
     try:
-        next_semester = Semester.objects.next()
+        next_semester = next(Semester.objects)
         next_message = Subscription.objects.get_subscriptions(
             next_semester.year, next_semester.type, slug).count() == 0
     except Semester.DoesNotExist:

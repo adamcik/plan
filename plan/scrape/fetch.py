@@ -1,5 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from __future__ import absolute_import
 import collections
 import json as jsonlib
 import logging
@@ -7,7 +8,7 @@ import lxml.etree
 import lxml.html
 import time
 import warnings
-import urllib
+import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
 
 import requests
 
@@ -82,7 +83,7 @@ def get(url, cache=True, verbose=False):
 
 
 def post(url, data, cache=True, verbose=False):
-    key = 'post||%s||%s' % (url, urllib.urlencode(data))
+    key = 'post||%s||%s' % (url, six.moves.urllib.parse.urlencode(data))
     result = scraper_cache.get(key)
     msg = 'Cached result found under: %s' % key
 
@@ -100,7 +101,7 @@ def post(url, data, cache=True, verbose=False):
 
 def plain(url, query=None, data=None, verbose=False, cache=True):
     if query:
-        url += '?' + urllib.urlencode(query)
+        url += '?' + six.moves.urllib.parse.urlencode(query)
 
     try:
         if data is not None:

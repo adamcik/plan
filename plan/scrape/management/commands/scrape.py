@@ -1,5 +1,7 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from __future__ import absolute_import
+from __future__ import print_function
 import importlib
 import logging
 import sys
@@ -30,7 +32,7 @@ class Command(management.LabelCommand):
         parser.add_argument('-y', '--year', action='store', dest='year', type=int,
                              help='year to scrape')
         parser.add_argument('-t', '--type', action='store', dest='type',
-                             choices=dict(Semester.SEMESTER_TYPES).keys(),
+                             choices=list(dict(Semester.SEMESTER_TYPES).keys()),
                              help='term to scrape')
         parser.add_argument('-c', '--create', action='store_true', dest='create',
                              help='create missing semester, default: false'),
@@ -63,16 +65,16 @@ class Command(management.LabelCommand):
 
             if not needs_commit or options['dry_run']:
                 transaction.savepoint_rollback(sid)
-                print 'No changes, rolled back.'
+                print('No changes, rolled back.')
             elif utils.prompt('Commit changes?'):
                 transaction.savepoint_commit(sid)
-                print 'Commiting changes.'
+                print('Commiting changes.')
             else:
                 transaction.savepoint_rollback(sid)
-                print 'Rolled back changes.'
+                print('Rolled back changes.')
         except (SystemExit, KeyboardInterrupt):
             transaction.savepoint_rollback(sid)
-            print 'Rolled back changes due to exit.'
+            print('Rolled back changes due to exit.')
         except:
             try:
                 if not options['pdb']:
@@ -84,7 +86,7 @@ class Command(management.LabelCommand):
             finally:
                 # Ensure that we also rollback after pdb sessions.
                 transaction.savepoint_rollback(sid)
-                print 'Rolled back changes due to unhandeled exception.'
+                print('Rolled back changes due to unhandeled exception.')
 
     def load_semester(self, options):
         year = options['year']

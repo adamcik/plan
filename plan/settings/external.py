@@ -1,5 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from __future__ import absolute_import
 import os
 
 from plan.settings.base import *
@@ -10,4 +11,5 @@ from plan.settings.base import *
 # DJANGO_SETTINGS_MODULE=plan.settings.external EXTERNAL_SETTINGS_FILE=/path/to/settings.py ...
 
 if 'EXTERNAL_SETTINGS_FILE' in os.environ:
-    execfile(os.environ['EXTERNAL_SETTINGS_FILE'])
+    with open(os.environ['EXTERNAL_SETTINGS_FILE'], "rb") as f:
+        exec(compile(f.read(), os.environ['EXTERNAL_SETTINGS_FILE'], 'exec'))

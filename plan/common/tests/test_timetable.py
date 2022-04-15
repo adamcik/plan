@@ -1,10 +1,12 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from __future__ import absolute_import
 from copy import copy
 
 from plan.common.tests import BaseTestCase
 from plan.common.models import Lecture, Semester
 from plan.common.timetable import Timetable
+from six.moves import zip
 
 class TimetableTestCase(BaseTestCase):
     maxDiff = None

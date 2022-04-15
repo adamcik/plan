@@ -1,5 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from __future__ import absolute_import
 from reportlab.lib import colors
 from reportlab.lib import pagesizes
 from reportlab.lib import styles
@@ -17,6 +18,7 @@ from plan.common.models import Lecture, Semester, Room, Course
 from plan.common.timetable import Timetable
 from plan.common.utils import ColorMap
 from plan.common.templatetags.title import render_title
+import six
 
 _ = translation.ugettext
 
@@ -113,7 +115,7 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
         if date:
             data[-1].append(dateformat.format(date, 'l - j M.'))
         else:
-            data[-1].append(unicode(name))
+            data[-1].append(six.text_type(name))
         if span > 1:
             extra = span - 1
             table_style.add('SPAN', (len(data[-1])-1, 2), (len(data[-1])-1+extra, 2))

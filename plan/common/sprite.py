@@ -3,6 +3,8 @@
 
 """Minimal binary to generate and optimize sprites for css."""
 
+from __future__ import absolute_import
+from __future__ import print_function
 import argparse
 import os
 import shutil
@@ -11,6 +13,7 @@ import sys
 import tempfile
 
 from PIL import Image
+from six.moves import map
 
 BASE_CSS = '''
 [class^="%(prefix)s"],
@@ -42,7 +45,7 @@ if __name__ == '__main__':
     size = args.size + padding
     rows = args.rows
     output = os.path.abspath(args.output)
-    files = map(os.path.abspath, args.input)
+    files = list(map(os.path.abspath, args.input))
     grid = []
 
     context = {'prefix': args.prefix,
@@ -90,9 +93,9 @@ if __name__ == '__main__':
 
     final_size = os.stat(output).st_size
 
-    print '/* -- sprite css rules -- */'
-    print css
-    print '/* -- done -- */'
+    print('/* -- sprite css rules -- */')
+    print(css)
+    print('/* -- done -- */')
 
-    print 'Original size: %s, final size: %s. %.3f%% improvment.' % (
-        original_size, final_size, 100 - final_size * 100.0 / original_size)
+    print('Original size: %s, final size: %s. %.3f%% improvment.' % (
+        original_size, final_size, 100 - final_size * 100.0 / original_size))

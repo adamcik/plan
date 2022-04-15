@@ -1,5 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from __future__ import absolute_import
 import re
 
 from django import http
@@ -12,8 +13,9 @@ from django.utils import translation
 from django.utils.translation import trans_real as trans_internals
 
 from plan.common.models import Semester
+import six
 
-RE_WHITESPACE = re.compile(r'(\s\s+|\n)')
+RE_WHITESPACE = re.compile(r'(\s\s+|\n)'.encode('ascii'))
 
 
 class HtmlMinifyMiddleware(object):
@@ -24,7 +26,7 @@ class HtmlMinifyMiddleware(object):
 
     def process_response(self, request, response):
         if self.should_minify(response):
-            response.content = RE_WHITESPACE.sub(' ', response.content)
+            response.content = RE_WHITESPACE.sub(b' ', response.content)
         return response
 
 
@@ -61,8 +63,8 @@ class LocaleMiddleware(object):
         for lang, name in settings.LANGUAGES:
             with translation.override(lang):
                 for value, slug in Semester.SEMESTER_SLUG:
-                    self.languages[unicode(slug)] = lang
-                    self.values[unicode(slug)] = value
+                    self.languages[six.text_type(slug)] = lang
+                    self.values[six.text_type(slug)] = value
 
     def process_view(self, request, view, args, kwargs):
         if 'semester_type' not in kwargs:

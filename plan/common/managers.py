@@ -1,5 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from __future__ import absolute_import
 import datetime
 
 from django.db import connection
@@ -187,6 +188,9 @@ class SemesterManager(models.Manager):
             return qs.order_by('-active')[0]
         except IndexError:
             raise self.model.DoesNotExist
+
+    def __next__(self):
+        return self.next()
 
     def next(self):
         qs = self.get_queryset()

@@ -1,9 +1,10 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from __future__ import absolute_import
 import collections
 import datetime
 import logging
-import HTMLParser
+import six.moves.html_parser
 
 from django import db
 from django.db.models import Count
@@ -11,9 +12,10 @@ from django.db.models import Count
 from plan.common.models import (Course, Exam, ExamType, Lecture, LectureType,
                                 Lecturer, Location, Group, Room, Semester, Week)
 from plan.scrape import utils
+import six
 
 
-html_parser = HTMLParser.HTMLParser()
+html_parser = six.moves.html_parser.HTMLParser()
 
 
 class Scraper(object):
@@ -195,7 +197,7 @@ class Scraper(object):
 
     def display(self, obj):
         """Helper that defines how objects are stringified for display."""
-        return unicode(obj)
+        return six.text_type(obj)
 
     def log_initial(self):
         self.stats['initial'] = self.queryset().count()
@@ -362,7 +364,7 @@ class LectureScraper(Scraper):
                 candidates[l] += 2
 
         if candidates:
-            obj, score = sorted(candidates.items(), key=lambda i: -i[1])[0]
+            obj, score = sorted(list(candidates.items()), key=lambda i: -i[1])[0]
             if score > 0:
                 return obj, False
 

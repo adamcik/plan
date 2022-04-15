@@ -1,5 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from __future__ import absolute_import
 from django.utils.datastructures import MultiValueDict
 from django.core.urlresolvers import reverse
 
@@ -183,13 +184,13 @@ class ViewTestCase(BaseTestCase):
 
         response = self.client.get(url)
 
-        self.assertEquals("", response.content)
+        self.assertEquals(b"", response.content)
 
         response = self.client.get(url, {'q': 'COURSE'})
-        lines = response.content.split('\n')
+        lines = response.content.split(b'\n')
 
-        self.assertEquals("COURSE1|Course 1 full name", lines[0])
-        self.assertEquals("COURSE2|Course 2 full name", lines[1])
-        self.assertEquals("COURSE3|Course 3 full name", lines[2])
-        self.assertEquals("COURSE4|Course 4 full name", lines[3])
+        self.assertEquals(b"COURSE1|Course 1 full name", lines[0])
+        self.assertEquals(b"COURSE2|Course 2 full name", lines[1])
+        self.assertEquals(b"COURSE3|Course 3 full name", lines[2])
+        self.assertEquals(b"COURSE4|Course 4 full name", lines[3])
 

@@ -1,5 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from __future__ import absolute_import
 from django.conf import settings
 
 from plan.common.tests import BaseTestCase

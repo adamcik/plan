@@ -2,10 +2,11 @@
 
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from __future__ import absolute_import
 import datetime
 import logging
 import re
-import urllib
+import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
 
 from plan.common.models import Course, ExamType, Semester
 from plan.scrape import base

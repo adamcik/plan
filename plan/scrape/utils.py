@@ -1,5 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from __future__ import absolute_import
 import dateutil.parser
 import decimal
 import re
@@ -10,22 +11,27 @@ from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 from django.utils import dates
 from django.utils import translation
+import six
+from six.moves import filter
+from six.moves import map
+from six.moves import range
+from six.moves import input
 
 # Build lookup table with weekdays in all installed languages.
 WEEKDAYS = {}
 for lang, name in settings.LANGUAGES:
     with translation.override(lang):
-        for i in xrange(5):
+        for i in range(5):
             day = dates.WEEKDAYS[i].lower()
             assert WEEKDAYS.get(day, i) == i, 'Found conflicting day names.'
             WEEKDAYS[day] = i
 
 
 def columnify(objects, columns=3):
-    objects = map(unicode, objects)
-    width = max(map(len, objects))
-    border = unicode('+-' + '-+-'.join(['-'*width]*columns) + '-+')
-    template = unicode('| ' + ' | '.join(['{:%d}' % width]*columns) + ' |')
+    objects = list(map(six.text_type, objects))
+    width = max(list(map(len, objects)))
+    border = six.text_type('+-' + '-+-'.join(['-'*width]*columns) + '-+')
+    template = six.text_type('| ' + ' | '.join(['{:%d}' % width]*columns) + ' |')
     pad_list = lambda i: i + ['']*(columns-len(i))
     lines = []
 
@@ -38,13 +44,13 @@ def columnify(objects, columns=3):
 
 def prompt(message):
     try:
-        return raw_input('%s [y/N] ' % message).lower() == 'y'
+        return input('%s [y/N] ' % message).lower() == 'y'
     except (KeyboardInterrupt, EOFError):
         sys.exit(1)
 
 
 def compare(old, new):
-    if isinstance(old, basestring) and isinstance(new, basestring):
+    if isinstance(old, six.string_types) and isinstance(new, six.string_types):
         if new.strip() == old.strip():
             return '<whitespace>'
 
@@ -87,7 +93,7 @@ def clean_decimal(raw_number):
 
 
 def clean_list(items, clean):
-    return filter(bool, map(clean, items))
+    return list(filter(bool, list(map(clean, items))))
 
 
 def valid_url(url):
@@ -135,7 +141,7 @@ def parse_weeks(value, sep=r',? '):
         else:
             start = end = v
         try:
-            weeks.extend(range(int(start), int(end)+1))
+            weeks.extend(list(range(int(start), int(end)+1)))
         except ValueError:
             pass
     return sorted(set(weeks))

@@ -1,5 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from __future__ import absolute_import
 import datetime
 
 from django.conf import settings
@@ -12,6 +13,8 @@ from django.utils import translation
 
 from plan.common.managers import (LectureManager, ExamManager, CourseManager,
                                   SubscriptionManager, SemesterManager)
+from six.moves import map
+from six.moves import range
 
 # To allow for overriding of the codes idea of now() for tests
 now = datetime.datetime.now
@@ -370,7 +373,7 @@ class Lecturer(models.Model):
 
 
 class Lecture(models.Model):
-    DAYS = [(i, dates.WEEKDAYS[i]) for i in xrange(5)]
+    DAYS = [(i, dates.WEEKDAYS[i]) for i in range(5)]
 
     course = models.ForeignKey(Course)
     title = models.TextField(_('Title'), null=True)

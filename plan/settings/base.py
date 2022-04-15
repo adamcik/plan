@@ -1,6 +1,7 @@
 # encoding: utf-8
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from __future__ import absolute_import
 import datetime
 import os.path
 import socket

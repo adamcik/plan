@@ -1,5 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from __future__ import absolute_import
 from plan.common.tests import BaseTestCase
 from plan.common.models import Lecture, Semester, Deadline, Exam, Course, Subscription
 
@@ -12,22 +13,22 @@ class ManagerTestCase(BaseTestCase):
 
         # Try showing all lectures
         lectures = Lecture.objects.get_lectures(2009, Semester.SPRING, 'adamcik')
-        lectures = filter(lambda l: l.show_week and not l.exclude, lectures)
+        lectures = [l for l in lectures if l.show_week and not l.exclude]
         self.assertEquals(set(lectures), set(control))
 
         # Try showing only lectures in week 1
         lectures = Lecture.objects.get_lectures(2009, Semester.SPRING, 'adamcik', 1)
-        lectures = filter(lambda l: l.show_week and not l.exclude, lectures)
+        lectures = [l for l in lectures if l.show_week and not l.exclude]
         self.assertEquals(set(lectures), set(control.filter(weeks__number=1)))
 
         # Try showing lectures in week 2
         lectures = Lecture.objects.get_lectures(2009, Semester.SPRING, 'adamcik', 2)
-        lectures = filter(lambda l: l.show_week and not l.exclude, lectures)
+        lectures = [l for l in lectures if l.show_week and not l.exclude]
         self.assertEquals(set(lectures), set(control.filter(weeks__number=2)))
 
         # Try lectures in week 3, ie none
         lectures = Lecture.objects.get_lectures(2009, Semester.SPRING, 'adamcik', 3)
-        lectures = filter(lambda l: l.show_week and not l.exclude, lectures)
+        lectures = [l for l in lectures if l.show_week and not l.exclude]
         self.assertEquals(set(lectures), set())
 
     def test_get_exams(self):
@@ -40,7 +41,7 @@ class ManagerTestCase(BaseTestCase):
 
     def test_get_courses_with_exams(self):
         courses = Course.objects.get_courses_with_exams(2009, Semester.SPRING)
-        courses = map(lambda a: a[0], courses)
+        courses = [a[0] for a in courses]
 
         # Ensure that courses without exams are included and courses with
         # multiple exams on time per exam

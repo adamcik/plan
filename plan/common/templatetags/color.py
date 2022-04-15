@@ -1,5 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from __future__ import absolute_import
 from django import template
 
 register = template.Library()
@@ -14,7 +15,7 @@ def do_color(parser, token):
             "%r tag requires a single argument" % token.contents.split()[0])
 
     if value[0] == value[-1] and value[0] in ('"', "'"):
-        raise template.TemplateSyntaxError,(
+        raise template.TemplateSyntaxError(
             "%r tag's argument should not be in quotes" % tag_name)
 
     return ColorNode(value)
