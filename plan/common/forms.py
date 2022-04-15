@@ -1,6 +1,5 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from __future__ import absolute_import
 import datetime
 
 from django import forms
@@ -33,7 +32,7 @@ class GroupForm(forms.Form):
     groups = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple)
 
     def __init__(self, choices, *args, **kwargs):
-        super(GroupForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.fields['groups'].choices = utils.natural_sort(choices, key=lambda v: v[1])
         self.fields['groups'].widget.attrs['size'] = 5
@@ -43,7 +42,7 @@ class ScheduleForm(forms.Form):
     slug = forms.CharField(max_length=50)
 
     def __init__(self, *args, **kwargs):
-        super(ScheduleForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['slug'].widget.attrs['size'] = 12
         self.fields['slug'].widget.attrs['id'] = 's'
 

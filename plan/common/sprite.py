@@ -3,8 +3,6 @@
 
 """Minimal binary to generate and optimize sprites for css."""
 
-from __future__ import absolute_import
-from __future__ import print_function
 import argparse
 import os
 import shutil
@@ -13,7 +11,6 @@ import sys
 import tempfile
 
 from PIL import Image
-from six.moves import map
 
 BASE_CSS = '''
 [class^="%(prefix)s"],
@@ -97,5 +94,5 @@ if __name__ == '__main__':
     print(css)
     print('/* -- done -- */')
 
-    print('Original size: %s, final size: %s. %.3f%% improvment.' % (
+    print('Original size: {}, final size: {}. {:.3f}% improvment.'.format(
         original_size, final_size, 100 - final_size * 100.0 / original_size))

@@ -1,6 +1,5 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from __future__ import absolute_import
 import datetime
 
 from django.conf import settings
@@ -13,8 +12,6 @@ from django.utils import translation
 
 from plan.common.managers import (LectureManager, ExamManager, CourseManager,
                                   SubscriptionManager, SemesterManager)
-from six.moves import map
-from six.moves import range
 
 # To allow for overriding of the codes idea of now() for tests
 now = datetime.datetime.now
@@ -73,7 +70,7 @@ class Subscription(models.Model):
         verbose_name_plural = _('Subscriptions')
 
     def __unicode__(self):
-        return u'%s - %s' % (self.student, self.course)
+        return '{} - {}'.format(self.student, self.course)
 
     @staticmethod
     def get_groups(year, semester_type, slug):
@@ -118,7 +115,7 @@ class Room(models.Model):
     last_import = models.DateTimeField(_('Last import time'), auto_now=True)
 
     def __unicode__(self):
-        return u'%s (%s)' % (self.name, self.code)
+        return '{} ({})'.format(self.name, self.code)
 
     class Meta:
         verbose_name = _('Room')
@@ -169,19 +166,19 @@ class Course(models.Model):
 
     def __unicode__(self):
         if self.version:
-            name = u'-'.join([self.code, self.version])
+            name = '-'.join([self.code, self.version])
         else:
             name = self.code
 
         if self.semester:
-            return u'%-12s - %s' % (name, self.semester)
+            return '%-12s - %s' % (name, self.semester)
 
         return name
 
     @property
     def short_name(self):
         if self.version:
-            return u'-'.join([self.code, self.version])
+            return '-'.join([self.code, self.version])
         return self.code
 
     # TODO(adamcik): move limit to setting?
@@ -270,9 +267,9 @@ class Semester(models.Model):
         unique_together = [('year', 'type')]
 
     def __init__(self, *args, **kwargs):
-        super(Semester, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
-        slug_map = dict((v, k) for k, v in self.SEMESTER_SLUG)
+        slug_map = {v: k for k, v in self.SEMESTER_SLUG}
 
         if self.year:
             self.year = int(self.year)
@@ -280,7 +277,7 @@ class Semester(models.Model):
             self.type = slug_map[self.type]
 
     def __unicode__(self):
-        return u'%s %s' % (self.get_type_display(), self.year)
+        return '{} {}'.format(self.get_type_display(), self.year)
 
     @property
     def slug(self):
@@ -341,7 +338,7 @@ class Exam(models.Model):
         verbose_name_plural = _('Exams')
 
     def __unicode__(self):
-        return  u'%s %s - %s' % (self.course.code, self.combination, self.exam_date)
+        return  '{} {} - {}'.format(self.course.code, self.combination, self.exam_date)
 
 
 class Week(models.Model):
@@ -357,7 +354,7 @@ class Week(models.Model):
         verbose_name_plural = _('Lecture weeks')
 
     def __unicode__(self):
-        return u'%s week %d' % (self.lecture, self.number)
+        return '%s week %d' % (self.lecture, self.number)
 
 
 class Lecturer(models.Model):
@@ -397,7 +394,7 @@ class Lecture(models.Model):
         verbose_name_plural = _('Lecture')
 
     def __unicode__(self):
-        return u'%s %s-%s on %s for %s' % (
+        return '{} {}-{} on {} for {}'.format(
             self.type,
             filters.time(self.start),
             filters.time(self.end),
@@ -406,7 +403,7 @@ class Lecture(models.Model):
 
     @property
     def short_name(self):
-        return u'%s-%s on %s' % (
+        return '{}-{} on {}'.format(
                 filters.time(self.start),
                 filters.time(self.end),
                 self.get_day_display()

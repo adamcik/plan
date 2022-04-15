@@ -1,6 +1,5 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from __future__ import absolute_import
 import re
 
 from django import http
@@ -13,12 +12,11 @@ from django.utils import translation
 from django.utils.translation import trans_real as trans_internals
 
 from plan.common.models import Semester
-import six
 
-RE_WHITESPACE = re.compile(r'(\s\s+|\n)'.encode('ascii'))
+RE_WHITESPACE = re.compile(br'(\s\s+|\n)')
 
 
-class HtmlMinifyMiddleware(object):
+class HtmlMinifyMiddleware:
     def should_minify(self, response):
         return (settings.COMPRESS_ENABLED and
                 response.status_code == 200 and
@@ -30,7 +28,7 @@ class HtmlMinifyMiddleware(object):
         return response
 
 
-class AppendSlashMiddleware(object):
+class AppendSlashMiddleware:
     def process_request(self, request):
         # Bail if we already have trailing slash.
         if request.path.endswith('/'):
@@ -55,7 +53,7 @@ class AppendSlashMiddleware(object):
 
 
 
-class LocaleMiddleware(object):
+class LocaleMiddleware:
     def __init__(self):
         self.languages = {}  # Localised semester type -> lang
         self.values = {}     # Localised semester type -> db value
@@ -63,8 +61,8 @@ class LocaleMiddleware(object):
         for lang, name in settings.LANGUAGES:
             with translation.override(lang):
                 for value, slug in Semester.SEMESTER_SLUG:
-                    self.languages[six.text_type(slug)] = lang
-                    self.values[six.text_type(slug)] = value
+                    self.languages[str(slug)] = lang
+                    self.values[str(slug)] = value
 
     def process_view(self, request, view, args, kwargs):
         if 'semester_type' not in kwargs:

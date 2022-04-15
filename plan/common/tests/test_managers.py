@@ -1,6 +1,5 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from __future__ import absolute_import
 from plan.common.tests import BaseTestCase
 from plan.common.models import Lecture, Semester, Deadline, Exam, Course, Subscription
 
@@ -14,30 +13,30 @@ class ManagerTestCase(BaseTestCase):
         # Try showing all lectures
         lectures = Lecture.objects.get_lectures(2009, Semester.SPRING, 'adamcik')
         lectures = [l for l in lectures if l.show_week and not l.exclude]
-        self.assertEquals(set(lectures), set(control))
+        self.assertEqual(set(lectures), set(control))
 
         # Try showing only lectures in week 1
         lectures = Lecture.objects.get_lectures(2009, Semester.SPRING, 'adamcik', 1)
         lectures = [l for l in lectures if l.show_week and not l.exclude]
-        self.assertEquals(set(lectures), set(control.filter(weeks__number=1)))
+        self.assertEqual(set(lectures), set(control.filter(weeks__number=1)))
 
         # Try showing lectures in week 2
         lectures = Lecture.objects.get_lectures(2009, Semester.SPRING, 'adamcik', 2)
         lectures = [l for l in lectures if l.show_week and not l.exclude]
-        self.assertEquals(set(lectures), set(control.filter(weeks__number=2)))
+        self.assertEqual(set(lectures), set(control.filter(weeks__number=2)))
 
         # Try lectures in week 3, ie none
         lectures = Lecture.objects.get_lectures(2009, Semester.SPRING, 'adamcik', 3)
         lectures = [l for l in lectures if l.show_week and not l.exclude]
-        self.assertEquals(set(lectures), set())
+        self.assertEqual(set(lectures), set())
 
     def test_get_exams(self):
         exams = Exam.objects.get_exams(2009, Semester.SPRING, 'adamcik')
-        self.assertEquals(set(exams), set(Exam.objects.exclude(id__in=[3, 4])))
+        self.assertEqual(set(exams), set(Exam.objects.exclude(id__in=[3, 4])))
 
     def test_get_courses(self):
         courses = Course.objects.get_courses(2009, Semester.SPRING, 'adamcik')
-        self.assertEquals(set(Course.objects.exclude(id__in=[4, 5])), set(courses))
+        self.assertEqual(set(Course.objects.exclude(id__in=[4, 5])), set(courses))
 
     def test_get_courses_with_exams(self):
         courses = Course.objects.get_courses_with_exams(2009, Semester.SPRING)
@@ -45,21 +44,21 @@ class ManagerTestCase(BaseTestCase):
 
         # Ensure that courses without exams are included and courses with
         # multiple exams on time per exam
-        self.assertEquals(courses, [1, 1, 1, 1, 2, 3, 4, 4])
+        self.assertEqual(courses, [1, 1, 1, 1, 2, 3, 4, 4])
 
     def test_get_subscriptions(self):
         control = Subscription.objects.filter(id__in=[1, 2, 3])
         subscriptions = Subscription.objects.get_subscriptions(2009, Semester.SPRING, 'adamcik')
-        self.assertEquals(set(control), set(subscriptions))
+        self.assertEqual(set(control), set(subscriptions))
 
     def test_search(self):
         control = Course.objects.exclude(id=5)
         courses = Course.objects.search(2009, Semester.SPRING, 'COURSE')
 
-        self.assertEquals(set(control), set(courses))
+        self.assertEqual(set(control), set(courses))
 
         control = Course.objects.filter(code='COURSE1')
         courses = Course.objects.search(2009, Semester.SPRING, 'COURSE1')
 
-        self.assertEquals(set(control), set(courses))
+        self.assertEqual(set(control), set(courses))
 

@@ -1,8 +1,5 @@
-# encoding: utf-8
-
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from __future__ import absolute_import
 import json
 import re
 
@@ -10,7 +7,6 @@ from plan.common.models import Semester
 from plan.scrape import base
 from plan.scrape import fetch
 from plan.scrape import utils
-import six
 
 
 class Courses(base.CourseScraper):
@@ -22,7 +18,7 @@ class Courses(base.CourseScraper):
 
         url = 'https://www.ntnu.no/studier/emner/%s/2018'
 
-        for course, name in six.iteritems(fetch_courses(self.semester)):
+        for course, name in fetch_courses(self.semester).items():
             yield {
                 'code': course,
                 'name': name,
@@ -98,9 +94,9 @@ def fetch_course_lectures(semester, course):
 
 def convert_semester(semester):
     if semester.type == Semester.FALL:
-        return u'%sh' % str(semester.year)[-2:]
+        return '%sh' % str(semester.year)[-2:]
     else:
-        return u'%sv' % str(semester.year)[-2:]
+        return '%sv' % str(semester.year)[-2:]
 
 
 def process_groups(values):

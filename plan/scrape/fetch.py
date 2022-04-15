@@ -1,6 +1,5 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from __future__ import absolute_import
 import collections
 import json as jsonlib
 import logging
@@ -8,7 +7,7 @@ import lxml.etree
 import lxml.html
 import time
 import warnings
-import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
+import urllib.parse
 
 import requests
 
@@ -42,7 +41,7 @@ session.mount("https://", adapter)
 session.mount("http://", adapter)
 
 
-class rate_limit(object):
+class rate_limit:
     previous = 0
 
     def __init__(self, max_per_second):
@@ -99,21 +98,21 @@ def get(url, cache=True, verbose=False):
 
 
 def post(url, data, cache=True, verbose=False):
-    key = 'post||%s||%s' % (url, six.moves.urllib.parse.urlencode(data))
-    msg = 'POST: %s Data: %s' % (url, data)
+    key = 'post||{}||{}'.format(url, urllib.parse.urlencode(data))
+    msg = 'POST: {} Data: {}'.format(url, data)
     return _fetch(
         requests.Request('POST', url, data=data), key, msg, cache, verbose)
 
 
 def plain(url, query=None, data=None, verbose=False, cache=True):
     if query:
-        url += '?' + six.moves.urllib.parse.urlencode(query)
+        url += '?' + urllib.parse.urlencode(query)
 
     try:
         if data is not None:
             return post(url, data, cache=cache, verbose=verbose)
         return get(url, cache=cache, verbose=verbose)
-    except IOError as e:
+    except OSError as e:
         logging.error('Loading %s failed: %s', url, e)
 
 

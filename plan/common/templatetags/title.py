@@ -1,6 +1,5 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from __future__ import absolute_import
 import re
 
 from django import template
@@ -31,7 +30,7 @@ def render_title(semester, slug, week=None):
     context = title(semester, slug, week)
     rendered = title_template.render(context)
     rendered = rendered.replace('\n', ' ')
-    rendered = re.sub('\s+', ' ', rendered)
+    rendered = re.sub(r'\s+', ' ', rendered)
     return rendered.strip()
 
 

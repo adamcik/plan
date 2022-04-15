@@ -1,6 +1,5 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from __future__ import absolute_import
 from plan.common.tests import BaseTestCase
 
 class EmptyViewTestCase(BaseTestCase):
@@ -17,13 +16,13 @@ class EmptyViewTestCase(BaseTestCase):
 
             response = self.client.get(url)
             if size == 'A9':
-                self.assertEquals(response.status_code, 404)
+                self.assertEqual(response.status_code, 404)
                 continue
             else:
-                self.assertEquals(response.status_code, 200)
+                self.assertEqual(response.status_code, 200)
 
             response = self.client.get(url)
-            self.assertEquals(response.status_code, 200)
+            self.assertEqual(response.status_code, 200)
 
 
 class ViewTestCase(EmptyViewTestCase):

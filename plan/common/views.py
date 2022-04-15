@@ -1,6 +1,5 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from __future__ import absolute_import
 import datetime
 import json
 import logging
@@ -20,7 +19,6 @@ from plan.common import forms
 from plan.common import timetable
 from plan.common import utils
 from plan.common.templatetags import slugify
-from six.moves import range
 
 # FIXME split into frontpage/semester, course, schedule files
 # FIXME Split views that do multiple form handling tasks into seperate views
@@ -121,7 +119,7 @@ def course_query(request, year, semester_type):
         for code, name in course_list:
             code = html.escape(code)
             name = html.escape(text.Truncator(name).words(5, truncate='...'))
-            response.write(u'%s|%s\n' % (code, name or u'?'))
+            response.write('{}|{}\n'.format(code, name or '?'))
     return response
 
 

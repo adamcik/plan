@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # plan documentation build configuration file, created by
 # sphinx-quickstart on Sun Nov 29 20:16:43 2009.
@@ -11,7 +10,6 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-from __future__ import absolute_import
 import sys, os
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -38,8 +36,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'plan'
-copyright = u'2009, 2010 Thomas Adamcik'
+project = 'plan'
+copyright = '2009, 2010 Thomas Adamcik'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -173,8 +171,8 @@ htmlhelp_basename = 'plandoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'plan.tex', u'plan Documentation',
-   u'Thomas Adamcik', 'manual'),
+  ('index', 'plan.tex', 'plan Documentation',
+   'Thomas Adamcik', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

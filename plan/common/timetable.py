@@ -1,6 +1,5 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from __future__ import absolute_import
 import datetime
 
 from django.conf import settings
@@ -8,7 +7,6 @@ from django.utils import formats
 
 from plan.common import utils
 from plan.common.models import Lecture
-from six.moves import range
 
 SLOT_END_TIMES = [s[1] for s in settings.TIMETABLE_SLOTS]
 
@@ -140,7 +138,7 @@ class Timetable:
         for i, slot in enumerate(settings.TIMETABLE_SLOTS):
             start = formats.time_format(slot[0])
             end = formats.time_format(slot[1])
-            self.table[i].insert(0, [{'time': '%s - %s' % (start, end)}])
+            self.table[i].insert(0, [{'time': '{} - {}'.format(start, end)}])
 
     def map_to_slot(self, lecture):
         start, end = None, None

@@ -1,20 +1,17 @@
-# encoding: utf-8
-
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from __future__ import absolute_import
 from django import template
 from django.template import defaultfilters
 
 register = template.Library()
 
 REPLACE_MAP = (
-    (u'Æ', u'Ae'),
-    (u'Ø', u'O'),
-    (u'Å', u'Aa'),
-    (u'æ', u'ae'),
-    (u'ø', u'o'),
-    (u'å', u'aa'),
+    ('Æ', 'Ae'),
+    ('Ø', 'O'),
+    ('Å', 'Aa'),
+    ('æ', 'ae'),
+    ('ø', 'o'),
+    ('å', 'aa'),
 )
 
 

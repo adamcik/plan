@@ -1,12 +1,10 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from __future__ import absolute_import
 from copy import copy
 
 from plan.common.tests import BaseTestCase
 from plan.common.models import Lecture, Semester
 from plan.common.timetable import Timetable
-from six.moves import zip
 
 class TimetableTestCase(BaseTestCase):
     maxDiff = None
@@ -28,7 +26,7 @@ class TimetableTestCase(BaseTestCase):
         last = {'last': True}
         bottomlast = {'bottom': True, 'last': True}
 
-        lectures  = dict((l.id, l) for l in lectures)
+        lectures  = {l.id: l for l in lectures}
         lecture2  = {'lecture': lectures[2],  'rowspan': 2,  'remove': False, 'bottom': False}
         lecture3  = {'lecture': lectures[3],  'rowspan': 2,  'remove': False, 'bottom': False}
         lecture4  = {'lecture': lectures[4],  'rowspan': 6,  'remove': False, 'bottom': False}
@@ -70,4 +68,4 @@ class TimetableTestCase(BaseTestCase):
         rows.append([[bottom,   bottom,   bottomlast], [lecture9], [lecture11], [bottomlast], [bottomlast]])
 
         for i, (t, r) in enumerate(zip(timetable.table, rows)):
-            self.assertEquals(t, r)
+            self.assertEqual(t, r)

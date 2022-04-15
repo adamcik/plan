@@ -1,7 +1,5 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from __future__ import absolute_import
-from __future__ import print_function
 import importlib
 import logging
 import sys
@@ -27,7 +25,7 @@ class Command(management.LabelCommand):
             '\n  '.join(sorted(settings.TIMETABLE_SCRAPERS)))
 
     def add_arguments(self, parser):
-        super(Command, self).add_arguments(parser)
+        super().add_arguments(parser)
 
         parser.add_argument('-y', '--year', action='store', dest='year', type=int,
                              help='year to scrape')
@@ -107,6 +105,6 @@ class Command(management.LabelCommand):
             module, cls = settings.TIMETABLE_SCRAPERS.get(type, type).rsplit('.', 1)
             return getattr(importlib.import_module(module), cls)
         except ImportError as e:
-            raise management.CommandError('Couldn\'t import %s: %s' % (module, e))
+            raise management.CommandError('Couldn\'t import {}: {}'.format(module, e))
         except AttributeError:
-            raise management.CommandError('Scraper %s not found in %s' % (cls, module))
+            raise management.CommandError('Scraper {} not found in {}'.format(cls, module))

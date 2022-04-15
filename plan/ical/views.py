@@ -1,6 +1,5 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from __future__ import absolute_import
 import copy
 import datetime
 import math
@@ -21,7 +20,7 @@ _ = translation.ugettext
 
 
 def ical(request, year, semester_type, slug, ical_type=None):
-    resources = [_(u'lectures'), _(u'exams')]
+    resources = [_('lectures'), _('exams')]
     if ical_type and ical_type not in resources:
         return http.HttpResponse(status=400)
     elif ical_type:
@@ -43,9 +42,9 @@ def ical(request, year, semester_type, slug, ical_type=None):
 
     # TODO(adamcik): use same logic as in common.templatetags.title
     if slug.lower().endswith('s'):
-        description = _(u"%(slug)s' %(semester)s %(year)s schedule for %(resources)s")
+        description = _("%(slug)s' %(semester)s %(year)s schedule for %(resources)s")
     else:
-        description = _(u"%(slug)s's %(semester)s %(year)s schedule for %(resources)s")
+        description = _("%(slug)s's %(semester)s %(year)s schedule for %(resources)s")
 
     cal.add('X-WR-CALNAME').value = title.strip('/')
     cal.add('X-WR-CALDESC').value = description % {
@@ -108,9 +107,9 @@ def add_lectutures(lectures, year, cal, hostname):
         rooms = ', '.join(all_rooms.get(l.id, []))
 
         if l.type:
-            desc = u'%s - %s (%s)' % (l.type.name, l.course.name, l.course.code)
+            desc = '{} - {} ({})'.format(l.type.name, l.course.name, l.course.code)
         else:
-            desc = u'%s (%s)' % (l.course.name, l.course.code)
+            desc = '{} ({})'.format(l.course.name, l.course.code)
 
         # TODO: Add title to ical
         for d in rrule.rrule(rrule.WEEKLY, **rrule_kwargs):
@@ -140,16 +139,16 @@ def add_exams(exams, cal, hostname):
         vevent = cal.add('vevent')
 
         if e.type and e.type.name:
-            summary = u'%s - %s' % (e.type.name, e.alias or e.course.name)
-            desc = u'%s (%s) - %s (%s)' % (e.type.name, e.type.code,
+            summary = '{} - {}'.format(e.type.name, e.alias or e.course.name)
+            desc = '{} ({}) - {} ({})'.format(e.type.name, e.type.code,
                     e.course.name, e.course.code)
         elif e.type:
-            summary = _('Exam') + u' (%s) - %s' % (e.type, e.alias or e.course.code)
-            desc = _('Exam') + u' (%s) - %s (%s)' % (e.type.code, e.course.name,
+            summary = _('Exam') + ' ({}) - {}'.format(e.type, e.alias or e.course.code)
+            desc = _('Exam') + ' ({}) - {} ({})'.format(e.type.code, e.course.name,
                     e.course.code)
         else:
-            summary = _('Exam') + u' %s' % (e.alias or e.course.code)
-            desc = _('Exam') + u' %s (%s)' % (e.course.name, e.course.code)
+            summary = _('Exam') + ' %s' % (e.alias or e.course.code)
+            desc = _('Exam') + ' {} ({})'.format(e.course.name, e.course.code)
 
         vevent.add('summary').value = summary
         vevent.add('description').value = desc

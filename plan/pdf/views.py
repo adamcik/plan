@@ -1,6 +1,5 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from __future__ import absolute_import
 from reportlab.lib import colors
 from reportlab.lib import pagesizes
 from reportlab.lib import styles
@@ -18,7 +17,6 @@ from plan.common.models import Lecture, Semester, Room, Course
 from plan.common.timetable import Timetable
 from plan.common.utils import ColorMap
 from plan.common.templatetags.title import render_title
-import six
 
 _ = translation.ugettext
 
@@ -75,7 +73,7 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
     time_width = 0.06 * width
     day_width = (width-time_width) / 5
 
-    filename = '%s-%s-%s' % (year, semester.type, slug)
+    filename = '{}-{}-{}'.format(year, semester.type, slug)
 
     if week:
         filename += '-%s' % week
@@ -115,7 +113,7 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
         if date:
             data[-1].append(dateformat.format(date, 'l - j M.'))
         else:
-            data[-1].append(six.text_type(name))
+            data[-1].append(str(name))
         if span > 1:
             extra = span - 1
             table_style.add('SPAN', (len(data[-1])-1, 2), (len(data[-1])-1+extra, 2))
@@ -138,9 +136,9 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
                     paragraph_style.leading = 8
 
                     if lecture.type:
-                        content += [platypus.Paragraph(u'<font size=6>%s</font>' % lecture.type.name.replace('/', ' / '), paragraph_style)]
+                        content += [platypus.Paragraph('<font size=6>%s</font>' % lecture.type.name.replace('/', ' / '), paragraph_style)]
 
-                    content += [platypus.Paragraph(u'<font size=6>%s</font>' % u', '.join(rooms.get(lecture.id, [])), paragraph_style)]
+                    content += [platypus.Paragraph('<font size=6>%s</font>' % ', '.join(rooms.get(lecture.id, [])), paragraph_style)]
 
                     paragraph_style.leading = 12
                     paragraph_style.fontName = 'Helvetica-Bold'

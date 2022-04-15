@@ -1,6 +1,5 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from __future__ import absolute_import
 import dateutil.parser
 import decimal
 import re
@@ -11,11 +10,6 @@ from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 from django.utils import dates
 from django.utils import translation
-import six
-from six.moves import filter
-from six.moves import map
-from six.moves import range
-from six.moves import input
 
 # Build lookup table with weekdays in all installed languages.
 WEEKDAYS = {}
@@ -28,10 +22,10 @@ for lang, name in settings.LANGUAGES:
 
 
 def columnify(objects, columns=3):
-    objects = list(map(six.text_type, objects))
+    objects = list(map(str, objects))
     width = max(list(map(len, objects)))
-    border = six.text_type('+-' + '-+-'.join(['-'*width]*columns) + '-+')
-    template = six.text_type('| ' + ' | '.join(['{:%d}' % width]*columns) + ' |')
+    border = str('+-' + '-+-'.join(['-'*width]*columns) + '-+')
+    template = str('| ' + ' | '.join(['{:%d}' % width]*columns) + ' |')
     pad_list = lambda i: i + ['']*(columns-len(i))
     lines = []
 
@@ -50,7 +44,7 @@ def prompt(message):
 
 
 def compare(old, new):
-    if isinstance(old, six.string_types) and isinstance(new, six.string_types):
+    if isinstance(old, str) and isinstance(new, str):
         if new.strip() == old.strip():
             return '<whitespace>'
 
@@ -74,7 +68,7 @@ def compare(old, new):
     if new == '':
         new = '<empty>'
 
-    return '%s --> %s' % (old, new)
+    return '{} --> {}'.format(old, new)
 
 
 def clean_string(raw_text):

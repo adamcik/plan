@@ -1,10 +1,9 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from __future__ import absolute_import
 import collections
 import datetime
 import logging
-import six.moves.html_parser
+import html_parser
 
 from django import db
 from django.db.models import Count
@@ -12,16 +11,12 @@ from django.db.models import Count
 from plan.common.models import (Course, Exam, ExamType, Lecture, LectureType,
                                 Lecturer, Location, Group, Room, Semester, Week)
 from plan.scrape import utils
-import six
 
 import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
 
 
-html_parser = six.moves.html_parser.HTMLParser()
-
-
-class Scraper(object):
+class Scraper:
     fields = ()
     extra_fields = ()
     m2m_fields = ()
@@ -209,7 +204,7 @@ class Scraper(object):
 
     def display(self, obj):
         """Helper that defines how objects are stringified for display."""
-        return six.text_type(obj)
+        return str(obj)
 
     def log_initial(self):
         self.stats['initial'] = self.queryset().count()
@@ -246,7 +241,7 @@ class Scraper(object):
 
         values = []
         for key, value in self.stats.items():
-            values.append('%s: %s' % (key.title(), value))
+            values.append('{}: {}'.format(key.title(), value))
         logging.warning(', '.join(values))
 
     def log_extra(self, field, msg=None, args=None, count=0):
@@ -287,7 +282,7 @@ class CourseScraper(Scraper):
 
     def format(self, items):
         return utils.columnify(
-            (u'%s - %s lectures' % (c, c.lecture__count) for c in items), 2)
+            ('{} - {} lectures'.format(c, c.lecture__count) for c in items), 2)
 
     def location(self, name):
         return Location.objects.get_or_create(name=name)[0]
@@ -313,10 +308,10 @@ class LectureScraper(Scraper):
 
     def format(self, items):
         return utils.columnify(
-            (u'%s - %s subscriptions' % (c, c.course__subscription__count) for c in items), 2)
+            ('{} - {} subscriptions'.format(c, c.course__subscription__count) for c in items), 2)
 
     def needs_commit(self, stats=None):
-        return super(LectureScraper, self).needs_commit(
+        return super().needs_commit(
             ('created', 'updated', 'deleted', 'rooms'))
 
     def prepare_data(self, data):
@@ -349,7 +344,7 @@ class LectureScraper(Scraper):
         kwargs = kwargs.copy()
         defaults = kwargs.pop('defaults')
 
-        groups = set(g.pk for g in defaults['groups'])
+        groups = {g.pk for g in defaults['groups']}
         kwargs['type'] = self.lecture_type(kwargs['type'])
 
         lectures = self.queryset().filter(**kwargs).order_by('id')
@@ -417,7 +412,7 @@ class LectureScraper(Scraper):
 
     def room(self, code, name, url):
         if url and '&amp;' in url:
-            url = html_parser.unescape(url)
+            url = html_parser.HTMLParser().unescape(url
 
         if code:
             try:

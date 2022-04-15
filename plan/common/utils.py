@@ -1,6 +1,5 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from __future__ import absolute_import
 import datetime
 import operator
 import re
@@ -13,7 +12,6 @@ from django.conf import urls
 from django.db import models
 from django.utils import text as text_utils
 from django.utils import http as http_utils
-import six
 
 # Collection of capture groups used in urls.
 url_aliases = {'year': r'(?P<year>\d{4})',
@@ -129,14 +127,14 @@ class ColorMap(dict):
             return ''
 
         if k in self:
-            return super(ColorMap, self).__getitem__(k)
+            return super().__getitem__(k)
         else:
             self.index += 1
             if self.hex:
                 self[k] = settings.TIMETABLE_COLORS[self.index % self.max]
             else:
                 self[k] = 'color%d' % (self.index % self.max)
-            return super(ColorMap, self).__getitem__(k)
+            return super().__getitem__(k)
 
 
 def max_number_of_weeks(year):
@@ -154,6 +152,6 @@ def first_date_in_week(year, week):
 def natural_sort(values, key=None):
     if key is None:
         key = lambda k: k
-    split = lambda v: re.split(r'(\d+)', v) if isinstance(v, six.string_types) else [v]
+    split = lambda v: re.split(r'(\d+)', v) if isinstance(v, str) else [v]
     convert = lambda v: int(v) if v.isdigit() else v.lower()
-    return sorted(values, key=lambda v: [convert(p) if isinstance(p, six.string_types) else p for p in split(key(v))])
+    return sorted(values, key=lambda v: [convert(p) if isinstance(p, str) else p for p in split(key(v))])

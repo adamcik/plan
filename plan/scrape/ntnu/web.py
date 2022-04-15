@@ -1,12 +1,8 @@
-# encoding: utf-8
-
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from __future__ import absolute_import
 import datetime
 import logging
 import re
-import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
 
 from plan.common.models import Course, ExamType, Semester
 from plan.scrape import base
@@ -66,9 +62,9 @@ class Exams(base.ExamScraper):
 class Lectures(base.LectureScraper):
     def scrape(self):
         if self.semester.type == Semester.FALL:
-            ntnu_semeter = u'%d_HØST' % self.semester.year
+            ntnu_semeter = '%d_HØST' % self.semester.year
         else:
-            ntnu_semeter = u'%d_VÅR' % self.semester.year
+            ntnu_semeter = '%d_VÅR' % self.semester.year
 
         for c in self.course_queryset():
             course = fetch_course_lectures(self.semester, c)

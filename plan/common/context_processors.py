@@ -1,8 +1,7 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from __future__ import absolute_import
 import socket
-import six.moves.urllib.parse
+import urllib.parse
 
 from django.conf import settings
 from django.core import urlresolvers
@@ -21,7 +20,7 @@ def processor(request):
     for icon, name, link in settings.TIMETABLE_SHARE_LINKS:
         share_links.append((icon, name, link % {'url': url}))
 
-    static_domain = six.moves.urllib.parse.urlparse(settings.STATIC_URL).netloc.split(':')[0]
+    static_domain = urllib.parse.urlparse(settings.STATIC_URL).netloc.split(':')[0]
     if static_domain == sitename:
         static_domain = None
 

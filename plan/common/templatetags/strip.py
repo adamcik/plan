@@ -1,6 +1,5 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from __future__ import absolute_import
 import re
 
 from django import template
@@ -12,7 +11,7 @@ register = template.Library()
 @register.filter
 @defaultfilters.stringfilter
 def striphttp(value):
-    return re.sub('^https?://(www\.)?', '', value)
+    return re.sub(r'^https?://(www\.)?', '', value)
 
 
 @register.tag(name='stripspace')
@@ -23,7 +22,7 @@ def do_stripspace(parser, token):
 
 
 class StripNode(template.Node):
-    regexp = re.compile('\s+')
+    regexp = re.compile(r'\s+')
 
     def __init__(self, nodelist):
         self.nodelist = nodelist

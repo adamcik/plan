@@ -1,6 +1,5 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from __future__ import absolute_import
 import importlib
 import logging
 import sys
@@ -24,7 +23,7 @@ class Command(management.BaseCommand):
     help = ('Prefetch data from external sources')
 
     def add_arguments(self, parser):
-        super(Command, self).add_arguments(parser)
+        super().add_arguments(parser)
 
         # TODO: Get rid of need for this in load_semester?
         parser.add_argument('-c', '--create', action='store_true', dest='create',
@@ -86,7 +85,7 @@ class Command(management.BaseCommand):
                 module, cls = scraper.rsplit('.', 1)
                 scrapers.append(getattr(importlib.import_module(module), cls))
             except ImportError as e:
-                raise management.CommandError('Couldn\'t import %s: %s' % (module, e))
+                raise management.CommandError('Couldn\'t import {}: {}'.format(module, e))
             except AttributeError:
-                raise management.CommandError('Scraper %s not found in %s' % (cls, module))
+                raise management.CommandError('Scraper {} not found in {}'.format(cls, module))
         return scrapers

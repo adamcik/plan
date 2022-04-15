@@ -1,6 +1,5 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from __future__ import absolute_import
 from django.utils.datastructures import MultiValueDict
 from django.core.urlresolvers import reverse
 
@@ -11,13 +10,13 @@ class EmptyViewTestCase(BaseTestCase):
     def test_index(self):
         response = self.client.get(self.url_basic('frontpage'))
 
-        self.failUnlessEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)
         self.assertTemplateUsed(response, '404.html')
 
     def test_shortcut(self):
         response = self.client.get(self.url('shortcut', 'adamcik'))
 
-        self.failUnlessEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)
         self.assertTemplateUsed(response, '404.html')
 
 class ViewTestCase(BaseTestCase):
@@ -72,7 +71,7 @@ class ViewTestCase(BaseTestCase):
             url = self.url(name, *args)
 
             response = self.client.get(url)
-            self.assertEquals(response.status_code, 200)
+            self.assertEqual(response.status_code, 200)
             self.assertTemplateUsed(response, 'schedule.html')
 
     def test_change_course(self):
@@ -107,10 +106,10 @@ class ViewTestCase(BaseTestCase):
 
             response = self.client.post(url, data)
 
-            self.assertEquals(response.status_code, 302)
+            self.assertEqual(response.status_code, 302)
 
             new_subscriptions = list(Subscription.objects.filter(student__slug='adamcik').order_by('id').values_list())
-            self.assert_(new_subscriptions != subscriptions)
+            self.assertTrue(new_subscriptions != subscriptions)
 
             subscriptions = new_subscriptions
 
@@ -139,11 +138,11 @@ class ViewTestCase(BaseTestCase):
 
             response = self.client.post(url, MultiValueDict(data))
 
-            self.assert_(response['Location'].endswith(original_url))
-            self.assertEquals(response.status_code, 302)
+            self.assertTrue(response['Location'].endswith(original_url))
+            self.assertEqual(response.status_code, 302)
 
             new_groups = list(Group.objects.filter(subscription__student__slug='adamcik').order_by('id').values_list())
-            self.assert_(groups != new_groups)
+            self.assertTrue(groups != new_groups)
 
             groups = new_groups
 
@@ -170,11 +169,11 @@ class ViewTestCase(BaseTestCase):
 
             response = self.client.post(url, MultiValueDict(data))
 
-            self.assert_(response['Location'].endswith(original_url))
-            self.assertEquals(response.status_code, 302)
+            self.assertTrue(response['Location'].endswith(original_url))
+            self.assertEqual(response.status_code, 302)
 
             new_lectures = list(Lecture.objects.filter(excluded_from__student__slug='adamcik').order_by('id').values_list())
-            self.assert_(lectures != new_lectures)
+            self.assertTrue(lectures != new_lectures)
 
             lectures = new_lectures
 
@@ -184,13 +183,13 @@ class ViewTestCase(BaseTestCase):
 
         response = self.client.get(url)
 
-        self.assertEquals(b"", response.content)
+        self.assertEqual(b"", response.content)
 
         response = self.client.get(url, {'q': 'COURSE'})
         lines = response.content.split(b'\n')
 
-        self.assertEquals(b"COURSE1|Course 1 full name", lines[0])
-        self.assertEquals(b"COURSE2|Course 2 full name", lines[1])
-        self.assertEquals(b"COURSE3|Course 3 full name", lines[2])
-        self.assertEquals(b"COURSE4|Course 4 full name", lines[3])
+        self.assertEqual(b"COURSE1|Course 1 full name", lines[0])
+        self.assertEqual(b"COURSE2|Course 2 full name", lines[1])
+        self.assertEqual(b"COURSE3|Course 3 full name", lines[2])
+        self.assertEqual(b"COURSE4|Course 4 full name", lines[3])
 
