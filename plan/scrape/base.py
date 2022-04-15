@@ -14,6 +14,9 @@ from plan.common.models import (Course, Exam, ExamType, Lecture, LectureType,
 from plan.scrape import utils
 import six
 
+import tqdm
+from tqdm.contrib.logging import logging_redirect_tqdm
+
 
 html_parser = six.moves.html_parser.HTMLParser()
 
@@ -91,44 +94,50 @@ class Scraper(object):
            This method can be overriden to implement custom scrape logic that
            does not match this pattern.
         """
-        self.log_initial()
 
-        for data in self.scrape():
-            try:
-                self.log_scraped(data)
+        with logging_redirect_tqdm():
+            initial = self.queryset().count()
+            with tqdm.tqdm(total=initial, unit='items') as progress:
 
-                data = self.prepare_data(data)
-                if not data:
-                    continue
-                self.log_processed(data)
+                self.log_initial()
 
-                kwargs = self.prepare_save(data)
-                if not kwargs:
-                    continue
+                for data in self.scrape():
+                    try:
+                        self.log_scraped(data)
 
-                obj, created = self.save(kwargs)
-                self.log_persisted(obj)
+                        data = self.prepare_data(data)
+                        if not data:
+                            continue
+                        self.log_processed(data)
 
-                changes = self.update_m2m(obj, data)
+                        kwargs = self.prepare_save(data)
+                        if not kwargs:
+                            continue
 
-                if created:
-                    self.log_created(obj)
-                    continue
+                        obj, created = self.save(kwargs)
+                        self.log_persisted(obj)
 
-                changes.update(self.update(obj, kwargs['defaults']))
+                        changes = self.update_m2m(obj, data)
 
-                if changes:
-                    self.log_updated(obj, changes)
-                    continue
+                        if created:
+                            self.log_created(obj)
+                            continue
 
-                self.log_unaltered(obj)
-            finally:
-                db.reset_queries()
+                        changes.update(self.update(obj, kwargs['defaults']))
 
-        self.delete(self.prepare_delete())
-        self.log_stats()
+                        if changes:
+                            self.log_updated(obj, changes)
+                            continue
 
-        return self.needs_commit()
+                        self.log_unaltered(obj)
+                    finally:
+                        db.reset_queries()
+                        progress.update(1)
+
+                self.delete(self.prepare_delete())
+                self.log_stats()
+
+                return self.needs_commit()
 
     def prepare_data(self, data):
         """Clean and/or validate data from scrape method.

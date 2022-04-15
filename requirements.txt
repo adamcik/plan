@@ -9,3 +9,5 @@ lxml             # Web scraping of data
 sphinx           # To build docs
 
 django-compressor
+
+tqdm
