@@ -41,6 +41,7 @@
         {% for count,course_id,code,name in stats %}
           .course-{{ course_id }} {
             background-color: {% color course_id %};
+            width: {% widthratio count stats.0.0 95 %}%;
           }
         {% endfor %}
       </style>
@@ -97,7 +98,7 @@
       {% if stats %}
         <div id="stats">
           {% for count,course_id,code,name in stats %}
-            <div title="{{ name }}" style="width: {% widthratio count stats.0.0 95 %}%" class="course-{{ course_id }}">
+            <div title="{{ name }}" class="course-{{ course_id }}">
               <span>{{ count }}</span>
               {{ code }}
             </div>

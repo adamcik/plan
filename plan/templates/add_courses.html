@@ -16,7 +16,7 @@
           {% endfor %}
         </select>
       {% endif %}
-      <input id="course" type="text" name="course_add" style="width: 70%; max-width: 30em" data-autocomplete="{% url 'course-query' semester.year semester.slug %}"/>
+      <input id="course" type="text" name="course_add" data-autocomplete="{% url 'course-query' semester.year semester.slug %}"/>
       <button name="submit_add" type="submit"><i class="icon-plus-sign"></i> {% trans "Add course" %}</button>
     </p>
   </form>

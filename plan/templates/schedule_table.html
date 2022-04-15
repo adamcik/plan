@@ -55,7 +55,7 @@
                       {% endif %}
                     {% endstripspace %}"
                   {% endif %}
-                  {% if c.lecture %}title="{{ c.lecture.course.name }} {{ c.lecture.start|time }}-{{ c.lecture.end|time }}"{% endif %}
+                  {% if c.lecture %}title="{{ c.lecture.course.name }} {{ c.lecture.start|time }}-{{ c.lecture.end|time }}{% if c.lecture.title %}: {{ c.lecture.title }}{% endif %}"{% endif %}
                 >
                   <div class="wrapper">
                     {% if c.lecture %}
@@ -70,7 +70,7 @@
                           {% endif %}
                         {% endfor %}
                       </div>
-                      <div class="type">{{ c.lecture.type|default:"" }}</div>
+		      <div class="type">{{ c.lecture.type|default:"" }}</div>
                     {% endif %}
                     {{ c.time|escape|nbsp|default:"" }}
                   </div>

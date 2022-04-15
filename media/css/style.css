@@ -186,6 +186,10 @@ td.error input, td.error select {
 	margin-bottom: 0.8em;
 }
 
+#attribution {
+	text-align: center;
+}
+
 @media print {
 	/* FIXME dont like noprint :( */
 	#ft, .noprint {
@@ -238,3 +242,5 @@ td.error input, td.error select {
 		display: none;
 	}
 }
+
+
