@@ -26,13 +26,16 @@ def ical(request, year, semester_type, slug, ical_type=None):
     elif ical_type:
         resources = [ical_type]
 
-    # TODO(adamcik): Add a last modified header and return 304s?
+    try:
+        semester = Semester.objects.get(year=year, type=semester_type)
+    except Semester.DoesNotExist:
+        raise http.Http404
+
+    # TODO(adamcik): Lookup in cache?
 
     title  = urlresolvers.reverse('schedule', args=[year, semester_type, slug])
     hostname = (settings.TIMETABLE_HOSTNAME or
                 request.META.get('HTTP_HOST', socket.getfqdn()))
-
-    semester = Semester(year=year, type=semester_type)
 
     cal = vobject.iCalendar()
     cal.add('method').value = 'PUBLISH'  # IE/Outlook needs this
@@ -69,8 +72,12 @@ def ical(request, year, semester_type, slug, ical_type=None):
     response['Content-Disposition'] = 'attachment; filename=%s' % filename
     response['X-Robots-Tag'] = 'noindex, nofollow'
 
+    # TODO(adamcik): Add a last modified header and return 304s?
     # TODO(adamcik): add expires header that reduces load on old semesters
+    if semester != Semester.objects.active():
+        response['Cache-Control'] = 'max-age=604800'
 
+    # TODO(adamcik): Stick this in a cache?
     return response
 
 
@@ -104,6 +111,7 @@ def add_lectutures(lectures, year, cal, hostname):
         else:
             desc = u'%s (%s)' % (l.course.name, l.course.code)
 
+        # TODO: Add title to ical
         for d in rrule.rrule(rrule.WEEKLY, **rrule_kwargs):
             vevent = cal.add('vevent')
             vevent.add('summary').value = summary
