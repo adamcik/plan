@@ -30,7 +30,7 @@ class Student(models.Model):
         verbose_name = _('Student')
         verbose_name_plural = _('Students')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.slug
 
 
@@ -41,7 +41,7 @@ class Location(models.Model):
         verbose_name = _('Location')
         verbose_name_plural = _('Locations')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -69,7 +69,7 @@ class Subscription(models.Model):
         verbose_name = _('Subscription')
         verbose_name_plural = _('Subscriptions')
 
-    def __unicode__(self):
+    def __str__(self):
         return '{} - {}'.format(self.student, self.course)
 
     @staticmethod
@@ -99,7 +99,7 @@ class LectureType(models.Model):
     name = models.CharField(_('Name'), max_length=100, unique=True)
     optional = models.BooleanField(_('Optional'), default=False)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     class Meta:
@@ -114,7 +114,7 @@ class Room(models.Model):
 
     last_import = models.DateTimeField(_('Last import time'), auto_now=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return '{} ({})'.format(self.name, self.code)
 
     class Meta:
@@ -131,7 +131,7 @@ class Group(models.Model):
     name = models.CharField(_('Name'), max_length=100, null=True)
     url = models.URLField(_('URL'), default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.code
 
     class Meta:
@@ -164,7 +164,7 @@ class Course(models.Model):
 
         unique_together = [('code', 'semester', 'version')]
 
-    def __unicode__(self):
+    def __str__(self):
         if self.version:
             name = '-'.join([self.code, self.version])
         else:
@@ -276,7 +276,7 @@ class Semester(models.Model):
         if self.type in slug_map:
             self.type = slug_map[self.type]
 
-    def __unicode__(self):
+    def __str__(self):
         return '{} {}'.format(self.get_type_display(), self.year)
 
     @property
@@ -302,7 +302,7 @@ class ExamType(models.Model):
 
     last_import = models.DateTimeField(_('Last import time'), auto_now=True)
 
-    def __unicode__(self):
+    def __str__(self):
         if self.name:
             return self.name
         return self.code
@@ -337,7 +337,7 @@ class Exam(models.Model):
         verbose_name = _('Exam')
         verbose_name_plural = _('Exams')
 
-    def __unicode__(self):
+    def __str__(self):
         return  '{} {} - {}'.format(self.course.code, self.combination, self.exam_date)
 
 
@@ -353,7 +353,7 @@ class Week(models.Model):
         verbose_name = _('Lecture week')
         verbose_name_plural = _('Lecture weeks')
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s week %d' % (self.lecture, self.number)
 
 
@@ -365,7 +365,7 @@ class Lecturer(models.Model):
         verbose_name = _('Lecturer')
         verbose_name_plural = _('Lecturers')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -393,7 +393,7 @@ class Lecture(models.Model):
         verbose_name = _('Lecture')
         verbose_name_plural = _('Lecture')
 
-    def __unicode__(self):
+    def __str__(self):
         return '{} {}-{} on {} for {}'.format(
             self.type,
             filters.time(self.start),
