@@ -412,7 +412,7 @@ class LectureScraper(Scraper):
 
     def room(self, code, name, url):
         if url and '&amp;' in url:
-            url = html_parser.HTMLParser().unescape(url
+            url = html_parser.HTMLParser().unescape(url)
 
         if code:
             try:
