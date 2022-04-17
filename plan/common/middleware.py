@@ -2,8 +2,7 @@
 
 import re
 
-from django import urls, http
-from django import shortcuts
+from django import http, shortcuts, urls
 from django.conf import settings
 from django.utils import cache
 from django.utils import http as http_utils

@@ -4,9 +4,7 @@ import json
 import re
 
 from plan.common.models import Semester
-from plan.scrape import base
-from plan.scrape import fetch
-from plan.scrape import utils
+from plan.scrape import base, fetch, utils
 
 
 class Courses(base.CourseScraper):

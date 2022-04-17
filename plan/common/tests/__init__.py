@@ -1,10 +1,11 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import datetime
+
 from django.test import TestCase
+from django.urls import reverse
 
 from plan.common.models import Semester
-from django.urls import reverse
 
 
 # TODO(adamcik): switch to proper mock lib.

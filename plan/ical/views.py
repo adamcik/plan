@@ -4,16 +4,14 @@ import copy
 import datetime
 import math
 import socket
+
 import vobject
-
-from dateutil import rrule
-from dateutil import tz
-
-from django import urls, http
+from dateutil import rrule, tz
+from django import http, urls
 from django.conf import settings
 from django.utils import translation
 
-from plan.common.models import Exam, Lecture, Semester, Room, Week
+from plan.common.models import Exam, Lecture, Room, Semester, Week
 
 _ = translation.gettext
 

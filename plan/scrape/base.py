@@ -3,28 +3,17 @@
 import collections
 import datetime
 import logging
-import html_parser
 
+import html_parser
+import tqdm
 from django import db
 from django.db.models import Count
-
-from plan.common.models import (
-    Course,
-    Exam,
-    ExamType,
-    Lecture,
-    LectureType,
-    Lecturer,
-    Location,
-    Group,
-    Room,
-    Semester,
-    Week,
-)
-from plan.scrape import utils
-
-import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
+
+from plan.common.models import (Course, Exam, ExamType, Group, Lecture,
+                                Lecturer, LectureType, Location, Room,
+                                Semester, Week)
+from plan.scrape import utils
 
 
 class Scraper:

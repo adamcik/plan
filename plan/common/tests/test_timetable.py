@@ -2,8 +2,8 @@
 
 from copy import copy
 
-from plan.common.tests import BaseTestCase
 from plan.common.models import Lecture, Semester
+from plan.common.tests import BaseTestCase
 from plan.common.timetable import Timetable
 
 

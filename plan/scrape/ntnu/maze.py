@@ -2,8 +2,7 @@
 
 import re
 
-from plan.scrape import base
-from plan.scrape import fetch
+from plan.scrape import base, fetch
 
 
 def normalize(identifier):

@@ -1,22 +1,16 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from reportlab.lib import colors
-from reportlab.lib import pagesizes
-from reportlab.lib import styles
-from reportlab.lib import units
+from django import http
+from django.utils import dateformat, html, translation
 from reportlab import platypus
+from reportlab.lib import colors, pagesizes, styles, units
 from reportlab.pdfgen import canvas
 from reportlab.platypus import tables
 
-from django import http
-from django.utils import html
-from django.utils import translation
-from django.utils import dateformat
-
-from plan.common.models import Lecture, Semester, Room, Course
+from plan.common.models import Course, Lecture, Room, Semester
+from plan.common.templatetags.title import render_title
 from plan.common.timetable import Timetable
 from plan.common.utils import ColorMap
-from plan.common.templatetags.title import render_title
 
 _ = translation.gettext
 

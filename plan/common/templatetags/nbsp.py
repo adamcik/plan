@@ -1,8 +1,7 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 from django import template
-from django.utils import safestring
-from django.utils import html
+from django.utils import html, safestring
 
 register = template.Library()
 

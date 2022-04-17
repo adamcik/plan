@@ -7,7 +7,6 @@ from django.db import models
 
 from plan.common import utils
 from plan.common.models import Semester
-
 from plan.common.templatetags import slugify
 
 now = datetime.datetime.now  # To allow for overriding of now in test

@@ -5,13 +5,11 @@ import operator
 import re
 import time
 
-from django import http
-from django import template
-from django.conf import settings
-from django.conf import urls
+from django import http, template
+from django.conf import settings, urls
 from django.db import models
-from django.utils import text as text_utils
 from django.utils import http as http_utils
+from django.utils import text as text_utils
 
 # Collection of capture groups used in urls.
 url_aliases = {

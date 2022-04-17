@@ -1,8 +1,7 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from django.conf.urls import *
 from django.conf import settings
-
+from django.conf.urls import *
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 handler500 = "plan.common.utils.server_error"

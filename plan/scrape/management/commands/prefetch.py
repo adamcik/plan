@@ -4,8 +4,8 @@ import importlib
 import logging
 import sys
 
-from django.core.management import base as management
 from django.conf import settings
+from django.core.management import base as management
 from django.db import transaction
 
 from plan.common.models import Semester
@@ -83,7 +83,8 @@ class Command(management.BaseCommand):
             if not options["pdb"]:
                 raise
 
-            import pdb, traceback
+            import pdb
+            import traceback
 
             traceback.print_exc()
             pdb.post_mortem()

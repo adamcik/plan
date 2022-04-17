@@ -1,15 +1,14 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-import dateutil.parser
 import decimal
 import re
 import sys
 
+import dateutil.parser
 from django.conf import settings
-from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
-from django.utils import dates
-from django.utils import translation
+from django.core.validators import URLValidator
+from django.utils import dates, translation
 
 # Build lookup table with weekdays in all installed languages.
 WEEKDAYS = {}

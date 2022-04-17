@@ -2,8 +2,7 @@
 
 import datetime
 
-from django.db import connection
-from django.db import models
+from django.db import connection, models
 
 from plan.common.utils import build_search
 

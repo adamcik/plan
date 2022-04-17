@@ -1,7 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from plan.scrape import base
-from plan.scrape import fetch
+from plan.scrape import base, fetch
 
 
 def fetch_syllabus(code):

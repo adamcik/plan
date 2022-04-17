@@ -4,19 +4,12 @@ import datetime
 
 from django.conf import settings
 from django.core.cache import cache
-from django.db import models
-from django.db import connection
+from django.db import connection, models
 from django.template import defaultfilters as filters
-from django.utils import dates
-from django.utils import translation
+from django.utils import dates, translation
 
-from plan.common.managers import (
-    LectureManager,
-    ExamManager,
-    CourseManager,
-    SubscriptionManager,
-    SemesterManager,
-)
+from plan.common.managers import (CourseManager, ExamManager, LectureManager,
+                                  SemesterManager, SubscriptionManager)
 
 # To allow for overriding of the codes idea of now() for tests
 now = datetime.datetime.now

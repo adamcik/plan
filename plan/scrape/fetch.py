@@ -3,21 +3,19 @@
 import collections
 import json as jsonlib
 import logging
+import time
+import urllib.parse
+import warnings
+
 import lxml.etree
 import lxml.html
-import time
-import warnings
-import urllib.parse
-
 import requests
-
-from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
-from requests.packages.urllib3.exceptions import MaxRetryError
-
 from django.core import cache
-from django.db import connections
 from django.core.cache import CacheKeyWarning
+from django.db import connections
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.exceptions import MaxRetryError
+from requests.packages.urllib3.util.retry import Retry
 
 warnings.simplefilter("ignore", CacheKeyWarning)
 
