@@ -15,7 +15,7 @@ from django.utils import translation
 
 from plan.common.models import Exam, Lecture, Semester, Room, Week
 
-_ = translation.ugettext
+_ = translation.gettext
 
 
 def ical(request, year, semester_type, slug, ical_type=None):

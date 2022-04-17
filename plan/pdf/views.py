@@ -18,7 +18,7 @@ from plan.common.timetable import Timetable
 from plan.common.utils import ColorMap
 from plan.common.templatetags.title import render_title
 
-_ = translation.ugettext
+_ = translation.gettext
 
 outer_border = colors.HexColor('#666666')
 inner_border = colors.HexColor('#CCCCCC')

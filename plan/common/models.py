@@ -18,7 +18,7 @@ now = datetime.datetime.now
 today= datetime.date.today
 
 # Setup common alias for translation
-_ = translation.ugettext_lazy
+_ = translation.gettext_lazy
 
 
 class Student(models.Model):
