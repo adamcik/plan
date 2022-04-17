@@ -12,7 +12,7 @@ def hostname(value):
     result = urllib.parse.urlparse(value)
     if not result:
         return None
-    elif result.hostname.startswith('www.'):
+    elif result.hostname.startswith("www."):
         return result.hostname[4:]
     else:
         return result.hostname

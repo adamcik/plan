@@ -17,28 +17,28 @@ for lang, name in settings.LANGUAGES:
     with translation.override(lang):
         for i in range(5):
             day = dates.WEEKDAYS[i].lower()
-            assert WEEKDAYS.get(day, i) == i, 'Found conflicting day names.'
+            assert WEEKDAYS.get(day, i) == i, "Found conflicting day names."
             WEEKDAYS[day] = i
 
 
 def columnify(objects, columns=3):
     objects = list(map(str, objects))
     width = max(list(map(len, objects)))
-    border = str('+-' + '-+-'.join(['-'*width]*columns) + '-+')
-    template = str('| ' + ' | '.join(['{:%d}' % width]*columns) + ' |')
-    pad_list = lambda i: i + ['']*(columns-len(i))
+    border = str("+-" + "-+-".join(["-" * width] * columns) + "-+")
+    template = str("| " + " | ".join(["{:%d}" % width] * columns) + " |")
+    pad_list = lambda i: i + [""] * (columns - len(i))
     lines = []
 
     while objects:
         lines.append(template.format(*pad_list(objects[:columns])))
         objects = objects[columns:]
 
-    return '\n'.join([border] + lines + [border])
+    return "\n".join([border] + lines + [border])
 
 
 def prompt(message):
     try:
-        return input('%s [y/N] ' % message).lower() == 'y'
+        return input("%s [y/N] " % message).lower() == "y"
     except (KeyboardInterrupt, EOFError):
         sys.exit(1)
 
@@ -46,7 +46,7 @@ def prompt(message):
 def compare(old, new):
     if isinstance(old, str) and isinstance(new, str):
         if new.strip() == old.strip():
-            return '<whitespace>'
+            return "<whitespace>"
 
     if isinstance(old, set) and isinstance(new, set):
         added = set()
@@ -55,20 +55,20 @@ def compare(old, new):
 
         for i in sorted(old | new):
             if i in old and i in new:
-                same.add(' %s' % i)
+                same.add(" %s" % i)
             elif i in new:
-                added.add('+%s' % i)
+                added.add("+%s" % i)
             else:
-                removed.add('-%s' % i)
+                removed.add("-%s" % i)
 
-        return ', '.join(sorted(added) + sorted(removed) + sorted(same))
+        return ", ".join(sorted(added) + sorted(removed) + sorted(same))
 
-    if old == '':
-        old = '<empty>'
-    if new == '':
-        new = '<empty>'
+    if old == "":
+        old = "<empty>"
+    if new == "":
+        new = "<empty>"
 
-    return f'{old} --> {new}'
+    return f"{old} --> {new}"
 
 
 def clean_string(raw_text):
@@ -92,12 +92,11 @@ def clean_list(items, clean):
 
 def valid_url(url):
     try:
-        validator = URLValidator(schemes=('http', 'https'))
+        validator = URLValidator(schemes=("http", "https"))
         validator(url)
         return True
     except ValidationError:
         return False
-
 
 
 def split(value, sep):
@@ -126,16 +125,16 @@ def parse_date(value):
     return dateutil.parser.parse(value.strip()).date()
 
 
-def parse_weeks(value, sep=r',? '):
+def parse_weeks(value, sep=r",? "):
     """Expand a list of weeks written in shortform."""
     weeks = []
     for v in re.split(sep, value):
-        if '-' in v:
-            start, end = v.split('-')
+        if "-" in v:
+            start, end = v.split("-")
         else:
             start = end = v
         try:
-            weeks.extend(list(range(int(start), int(end)+1)))
+            weeks.extend(list(range(int(start), int(end) + 1)))
         except ValueError:
             pass
     return sorted(set(weeks))

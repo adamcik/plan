@@ -6,13 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('common', '0007_update_url_fields'),
+        ("common", "0007_update_url_fields"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='semester',
-            name='type',
-            field=models.CharField(choices=[('spring', 'spring'), ('fall', 'fall')], max_length=10, verbose_name='Type'),
+            model_name="semester",
+            name="type",
+            field=models.CharField(
+                choices=[("spring", "spring"), ("fall", "fall")],
+                max_length=10,
+                verbose_name="Type",
+            ),
         ),
     ]

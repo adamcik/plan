@@ -12,19 +12,20 @@ from plan.scrape import utils
 
 # TODO(adamcik): link to http://www.ntnu.no/eksamen/sted/?dag=120809 for exams?
 
+
 class Courses(base.CourseScraper):
     def scrape(self):
         for course in fetch_courses(self.semester):
-            code = course['courseCode']
-            version = course['courseVersion']
-            location = course['location'].split(',')
+            code = course["courseCode"]
+            version = course["courseVersion"]
+            location = course["location"].split(",")
 
             yield {
-                'code': code,
-                'name': course['courseName'],
-                'version': version,
-                'url': course['courseUrl'],
-                'locations': location,
+                "code": code,
+                "name": course["courseName"],
+                "version": version,
+                "url": course["courseUrl"],
+                "locations": location,
             }
 
 
@@ -33,51 +34,54 @@ class Exams(base.ExamScraper):
         for course in fetch_courses(self.semester):
             try:
                 obj = Course.objects.get(
-                        code=course['courseCode'],
-                        version=course['courseVersion'],
-                        semester=self.semester)
+                    code=course["courseCode"],
+                    version=course["courseVersion"],
+                    semester=self.semester,
+                )
             except Course.DoesNotExist:
                 continue
 
             seen = set()
-            for exam in course['exam']:
-                if not exam.get('date'):
+            for exam in course["exam"]:
+                if not exam.get("date"):
                     continue
-                elif self.semester.type == Semester.FALL and exam['season'] != 'AUTUMN':
+                elif self.semester.type == Semester.FALL and exam["season"] != "AUTUMN":
                     continue
-                elif self.semester.type == Semester.SPRING and exam['season'] != 'SPRING':
+                elif (
+                    self.semester.type == Semester.SPRING and exam["season"] != "SPRING"
+                ):
                     continue
 
-                date = utils.parse_date(exam['date'])
+                date = utils.parse_date(exam["date"])
                 if date in seen:
                     continue
 
                 seen.add(date)
                 yield {
-                    'course': obj,
-                    'exam_date': date,
+                    "course": obj,
+                    "exam_date": date,
                 }
 
 
 class Lectures(base.LectureScraper):
     def scrape(self):
         if self.semester.type == Semester.FALL:
-            ntnu_semeter = '%d_HØST' % self.semester.year
+            ntnu_semeter = "%d_HØST" % self.semester.year
         else:
-            ntnu_semeter = '%d_VÅR' % self.semester.year
+            ntnu_semeter = "%d_VÅR" % self.semester.year
 
         for c in self.course_queryset():
             course = fetch_course_lectures(self.semester, c)
             groupings = {}
-            for activity in course.get('schedules', []):
-                if activity['artermin'] != ntnu_semeter:
+            for activity in course.get("schedules", []):
+                if activity["artermin"] != ntnu_semeter:
                     continue
 
-                start = datetime.datetime.fromtimestamp(activity['from'] / 1000)
-                end = datetime.datetime.fromtimestamp(activity['to'] / 1000)
-                name = activity.get('name', activity['acronym']).strip()
-                title = re.sub(r'^\d+(-\d*)?\s?', '', activity['title']).strip()
-                groups = set(activity.get('studyProgramKeys', []))
+                start = datetime.datetime.fromtimestamp(activity["from"] / 1000)
+                end = datetime.datetime.fromtimestamp(activity["to"] / 1000)
+                name = activity.get("name", activity["acronym"]).strip()
+                title = re.sub(r"^\d+(-\d*)?\s?", "", activity["title"]).strip()
+                groups = set(activity.get("studyProgramKeys", []))
 
                 if not title or title == c.code:
                     title = None
@@ -85,38 +89,56 @@ class Lectures(base.LectureScraper):
                 if not groups and title:
                     groups.add(title)
                     title = None
-                elif name in ('Seminar', 'Gruppe') and title != name:
+                elif name in ("Seminar", "Gruppe") and title != name:
                     groups.add(title)
                     title = None
 
-                if not title and activity['summary'].strip() != activity['title'].strip():
-                    title = activity['summary'].strip()
+                if (
+                    not title
+                    and activity["summary"].strip() != activity["title"].strip()
+                ):
+                    title = activity["summary"].strip()
 
                 # TODO: handle building='Digital undervisning' such that we get unique url per room.
                 # Current model assumes unique code per room, which we need to work around or change.
 
                 key = (
-                    start.weekday(), start.time(), end.time(), name, title or '',
+                    start.weekday(),
+                    start.time(),
+                    end.time(),
+                    name,
+                    title or "",
                     tuple(sorted(groups)),
-                    tuple(sorted({(r['id'], r['room'], r.get('url', '')) for r in activity['rooms']})),
-                    tuple(sorted({(s['name'], s.get('url', '')) for s in activity['staff']})),
+                    tuple(
+                        sorted(
+                            {
+                                (r["id"], r["room"], r.get("url", ""))
+                                for r in activity["rooms"]
+                            }
+                        )
+                    ),
+                    tuple(
+                        sorted(
+                            {(s["name"], s.get("url", "")) for s in activity["staff"]}
+                        )
+                    ),
                 )
-                groupings.setdefault(key, set()).add(activity['week'])
+                groupings.setdefault(key, set()).add(activity["week"])
 
             # TODO: see if we can move the grouping to the base scraper?
             for key, weeks in sorted(groupings.items()):
                 day, start, end, name, title, groups, rooms, lecturers = key
                 yield {
-                    'course': c,
-                    'type': name,
-                    'day': day,
-                    'start': start,
-                    'end': end,
-                    'weeks': weeks,
-                    'rooms': rooms,
-                    'groups': groups,
-                    'lecturers': tuple(),
-                    'title': title,
+                    "course": c,
+                    "type": name,
+                    "day": day,
+                    "start": start,
+                    "end": end,
+                    "weeks": weeks,
+                    "rooms": rooms,
+                    "groups": groups,
+                    "lecturers": tuple(),
+                    "title": title,
                 }
 
 
@@ -126,25 +148,29 @@ class Rooms(base.RoomScraper):
         # TODO: this is broken after switch from timetable to schedules
         for c in Course.objects.filter(semester=self.semester):
             course = fetch_course_lectures(self.semester, c)
-            for activity in course.get('summarized', []):
-                for room in activity.get('rooms', []):
-                    if room['syllabusKey'] not in seen:
-                        seen.add(room['syllabusKey'])
-                        yield {'code': room['syllabusKey'],
-                               'name': room['romNavn'],
-                               'url': room.get('url')}
+            for activity in course.get("summarized", []):
+                for room in activity.get("rooms", []):
+                    if room["syllabusKey"] not in seen:
+                        seen.add(room["syllabusKey"])
+                        yield {
+                            "code": room["syllabusKey"],
+                            "name": room["romNavn"],
+                            "url": room.get("url"),
+                        }
 
 
 def fetch_course_lectures(semester, course):
-    url = 'https://www.ntnu.no/web/studier/emner'
+    url = "https://www.ntnu.no/web/studier/emner"
     query = {
-        'p_p_id': 'coursedetailsportlet_WAR_courselistportlet',
-        'p_p_lifecycle': 2,
-        'p_p_resource_id': 'schedules',
-        '_coursedetailsportlet_WAR_courselistportlet_year': semester.year,
-        '_coursedetailsportlet_WAR_courselistportlet_courseCode': course.code.encode('utf-8'),
-        'year': semester.year,
-        'version': course.version,
+        "p_p_id": "coursedetailsportlet_WAR_courselistportlet",
+        "p_p_lifecycle": 2,
+        "p_p_resource_id": "schedules",
+        "_coursedetailsportlet_WAR_courselistportlet_year": semester.year,
+        "_coursedetailsportlet_WAR_courselistportlet_courseCode": course.code.encode(
+            "utf-8"
+        ),
+        "year": semester.year,
+        "version": course.version,
     }
     return fetch.json(url, query=query, data={})
 
@@ -190,43 +216,43 @@ def fetch_courses(semester):
     else:
         year = semester.year - 1
 
-    url = 'https://www.ntnu.no/web/studier/emnesok'
+    url = "https://www.ntnu.no/web/studier/emnesok"
 
     query = {
-        'p_p_id': 'courselistportlet_WAR_courselistportlet',
-        'p_p_lifecycle': '2',
-        'p_p_mode': 'view',
-        'p_p_resource_id': 'fetch-courselist-as-json'
+        "p_p_id": "courselistportlet_WAR_courselistportlet",
+        "p_p_lifecycle": "2",
+        "p_p_mode": "view",
+        "p_p_resource_id": "fetch-courselist-as-json",
     }
 
     data = {
-        'english': 0,
-        'pageNo': 1,
-        'semester': year,
-        'sortOrder': '+title',
+        "english": 0,
+        "pageNo": 1,
+        "semester": year,
+        "sortOrder": "+title",
     }
 
     if semester.type == Semester.FALL:
-        data['courseAutumn'] = 1
+        data["courseAutumn"] = 1
     else:
-        data['courseSpring'] = 1
+        data["courseSpring"] = 1
 
     seen = set()
 
     while True:
         result = fetch.json(url, query=query, data=data, verbose=True)
         # TODO use hasMoreResults?
-        data['pageNo'] += 1
+        data["pageNo"] += 1
 
-        if not result['courses']:
+        if not result["courses"]:
             break
 
-        for course in result['courses']:
-            key = (course['courseCode'], course['courseVersion'])
-            key += tuple(course['location'].split(','))
+        for course in result["courses"]:
+            key = (course["courseCode"], course["courseVersion"])
+            key += tuple(course["location"].split(","))
 
             if key in seen:
-                logging.warn('Skipping duplicate %r', key)
+                logging.warn("Skipping duplicate %r", key)
             else:
                 seen.add(key)
                 yield course

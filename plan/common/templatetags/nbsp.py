@@ -9,6 +9,7 @@ register = template.Library()
 
 @register.filter
 def nbsp(string):
-    return safestring.mark_safe(
-        html.conditional_escape(string).replace(' ', '&nbsp;'))
+    return safestring.mark_safe(html.conditional_escape(string).replace(" ", "&nbsp;"))
+
+
 nbsp.is_safe = True

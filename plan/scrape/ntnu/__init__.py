@@ -4,14 +4,13 @@ import re
 
 from plan.common.models import Semester
 
-SEMESTER_MAPPING = {Semester.SPRING: 'v',
-                    Semester.FALL: 'h'}
+SEMESTER_MAPPING = {Semester.SPRING: "v", Semester.FALL: "h"}
 
-CODE_RE = re.compile(r'^[^0-9]+[0-9]+$')
-COURSE_RE= re.compile(r'^([^0-9]+[0-9]+)-(\d+)$')
+CODE_RE = re.compile(r"^[^0-9]+[0-9]+$")
+COURSE_RE = re.compile(r"^([^0-9]+[0-9]+)-(\d+)$")
 
 
-def prefix(semester, template='{letter}{year}'):
+def prefix(semester, template="{letter}{year}"):
     year = str(semester.year)[-2:]
     letter = SEMESTER_MAPPING[semester.type]
     return template.format(letter=letter, year=year)

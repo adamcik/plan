@@ -11,22 +11,22 @@ register = template.Library()
 @register.filter
 @defaultfilters.stringfilter
 def striphttp(value):
-    return re.sub(r'^https?://(www\.)?', '', value)
+    return re.sub(r"^https?://(www\.)?", "", value)
 
 
-@register.tag(name='stripspace')
+@register.tag(name="stripspace")
 def do_stripspace(parser, token):
-    nodelist = parser.parse(('endstripspace',))
+    nodelist = parser.parse(("endstripspace",))
     parser.delete_first_token()
     return StripNode(nodelist)
 
 
 class StripNode(template.Node):
-    regexp = re.compile(r'\s+')
+    regexp = re.compile(r"\s+")
 
     def __init__(self, nodelist):
         self.nodelist = nodelist
 
     def render(self, context):
         output = self.nodelist.render(context)
-        return re.sub(self.regexp, ' ', output).strip()
+        return re.sub(self.regexp, " ", output).strip()

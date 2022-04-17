@@ -6,19 +6,32 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('common', '0001_initial'),
+        ("common", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Location',
+            name="Location",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100, unique=True, verbose_name='Location')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(
+                        max_length=100, unique=True, verbose_name="Location"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Location',
-                'verbose_name_plural': 'Locations',
+                "verbose_name": "Location",
+                "verbose_name_plural": "Locations",
             },
         ),
     ]

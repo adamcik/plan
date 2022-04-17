@@ -6,4 +6,4 @@ from plan.common.utils import compact_sequence
 
 register = template.Library()
 
-register.filter('compact', compact_sequence)
+register.filter("compact", compact_sequence)

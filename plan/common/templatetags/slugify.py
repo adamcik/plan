@@ -6,12 +6,12 @@ from django.template import defaultfilters
 register = template.Library()
 
 REPLACE_MAP = (
-    ('Æ', 'Ae'),
-    ('Ø', 'O'),
-    ('Å', 'Aa'),
-    ('æ', 'ae'),
-    ('ø', 'o'),
-    ('å', 'aa'),
+    ("Æ", "Ae"),
+    ("Ø", "O"),
+    ("Å", "Aa"),
+    ("æ", "ae"),
+    ("ø", "o"),
+    ("å", "aa"),
 )
 
 
@@ -21,4 +21,6 @@ def slugify(text):
     for old, new in REPLACE_MAP:
         text = text.replace(old, new)
     return defaultfilters.slugify(text)
+
+
 slugify.is_safe = True

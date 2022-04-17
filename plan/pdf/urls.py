@@ -4,5 +4,9 @@ from plan.common.utils import url
 from plan.pdf import views
 
 urlpatterns = [
-    url(r'^{year}/{semester}/{slug}/pdf/(?:{size}/)?(?:{week}/)?$', views.pdf, name='schedule-pdf'),
+    url(
+        r"^{year}/{semester}/{slug}/pdf/(?:{size}/)?(?:{week}/)?$",
+        views.pdf,
+        name="schedule-pdf",
+    ),
 ]

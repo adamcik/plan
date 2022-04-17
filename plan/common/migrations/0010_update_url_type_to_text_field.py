@@ -6,28 +6,28 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('common', '0009_update_id_types'),
+        ("common", "0009_update_id_types"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='course',
-            name='url',
-            field=models.TextField(verbose_name='URL'),
+            model_name="course",
+            name="url",
+            field=models.TextField(verbose_name="URL"),
         ),
         migrations.AlterField(
-            model_name='exam',
-            name='url',
-            field=models.TextField(default='', verbose_name='URL'),
+            model_name="exam",
+            name="url",
+            field=models.TextField(default="", verbose_name="URL"),
         ),
         migrations.AlterField(
-            model_name='group',
-            name='url',
-            field=models.TextField(default='', verbose_name='URL'),
+            model_name="group",
+            name="url",
+            field=models.TextField(default="", verbose_name="URL"),
         ),
         migrations.AlterField(
-            model_name='room',
-            name='url',
-            field=models.TextField(default='', verbose_name='URL'),
+            model_name="room",
+            name="url",
+            field=models.TextField(default="", verbose_name="URL"),
         ),
     ]

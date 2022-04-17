@@ -27,10 +27,12 @@ class Timetable:
 
     def set_week(self, year, week):
         first_day = utils.first_date_in_week(year, week)
-        self.date = [(first_day + datetime.timedelta(days=i)) for i, name in Lecture.DAYS]
+        self.date = [
+            (first_day + datetime.timedelta(days=i)) for i, name in Lecture.DAYS
+        ]
 
     def place_lectures(self):
-        '''Add basics to datastructure'''
+        """Add basics to datastructure"""
 
         for i, lecture in enumerate(self.lecture_queryset):
             if lecture.exclude or not lecture.show_week:
@@ -69,23 +71,25 @@ class Timetable:
                 # Replace the cell we found with a base containing info about our
                 # lecture
                 self.table[start][lecture.day][row] = {
-                    'lecture': lecture,
-                    'rowspan': rowspan,
-                    'remove': remove,
-                    'bottom': start+rowspan == len(self.table)
+                    "lecture": lecture,
+                    "rowspan": rowspan,
+                    "remove": remove,
+                    "bottom": start + rowspan == len(self.table),
                 }
 
                 # Add lecture to our supplementary data structure and set the
                 # remove flag.
                 if not remove:
                     remove = True
-                    self.lectures.append({
-                        'height': rowspan,
-                        'i': start,
-                        'j': lecture.day,
-                        'k': row,
-                        'l': lecture,
-                    })
+                    self.lectures.append(
+                        {
+                            "height": rowspan,
+                            "i": start,
+                            "j": lecture.day,
+                            "k": row,
+                            "l": lecture,
+                        }
+                    )
 
                 start += 1
 
@@ -93,18 +97,18 @@ class Timetable:
         for lecture in self.lectures:
             # Loop over supplementary data structure using this to figure out which
             # colspan expansions are safe
-            i = lecture['i']
-            j = lecture['j']
-            k = lecture['k']
+            i = lecture["i"]
+            j = lecture["j"]
+            k = lecture["k"]
 
-            height = lecture['height']
+            height = lecture["height"]
 
             expand_by = 1
 
             # Find safe expansion of colspan
             safe = True
-            for l in range(k+1, len(self.table[i][j])):
-                for m in range(i, i+height):
+            for l in range(k + 1, len(self.table[i][j])):
+                for m in range(i, i + height):
                     if self.table[m][j][l]:
                         safe = False
                         break
@@ -113,32 +117,31 @@ class Timetable:
                 else:
                     break
 
-            self.table[i][j][k]['colspan'] = expand_by
-            lecture['width'] = expand_by
+            self.table[i][j][k]["colspan"] = expand_by
+            lecture["width"] = expand_by
 
-            if k+expand_by == len(self.table[i][j]):
-                self.table[i][j][k]['last'] = True
+            if k + expand_by == len(self.table[i][j]):
+                self.table[i][j][k]["last"] = True
 
             # Remove cells that will get replaced by colspan
-            for l in range(k+1, k+expand_by):
-                for m in range(i, i+height):
-                    self.table[m][j][l]['remove'] = True
-
+            for l in range(k + 1, k + expand_by):
+                for m in range(i, i + height):
+                    self.table[m][j][l]["remove"] = True
 
     def add_markers(self):
         for row in self.table:
             for day in row:
-                day[-1]['last'] = True
+                day[-1]["last"] = True
         for day in self.table[-1]:
             for cell in day:
                 # only bother with cells that will be shown.
-                cell['bottom'] = not cell.get('remove', False)
+                cell["bottom"] = not cell.get("remove", False)
 
     def insert_times(self):
         for i, slot in enumerate(settings.TIMETABLE_SLOTS):
             start = formats.time_format(slot[0])
             end = formats.time_format(slot[1])
-            self.table[i].insert(0, [{'time': f'{start} - {end}'}])
+            self.table[i].insert(0, [{"time": f"{start} - {end}"}])
 
     def map_to_slot(self, lecture):
         start, end = None, None
@@ -153,8 +156,8 @@ class Timetable:
         if end is None and lecture.end > time:
             end = i
 
-        message = '%s slot for %s could not be set.'
-        assert start is not None, message % ('Start', lecture.id)
-        assert end is not None, message % ('End', lecture.id)
+        message = "%s slot for %s could not be set."
+        assert start is not None, message % ("Start", lecture.id)
+        assert end is not None, message % ("End", lecture.id)
 
         return (start, end)

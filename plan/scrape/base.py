@@ -8,8 +8,19 @@ import html_parser
 from django import db
 from django.db.models import Count
 
-from plan.common.models import (Course, Exam, ExamType, Lecture, LectureType,
-                                Lecturer, Location, Group, Room, Semester, Week)
+from plan.common.models import (
+    Course,
+    Exam,
+    ExamType,
+    Lecture,
+    LectureType,
+    Lecturer,
+    Location,
+    Group,
+    Room,
+    Semester,
+    Week,
+)
 from plan.scrape import utils
 
 import tqdm
@@ -25,17 +36,19 @@ class Scraper:
         self.semester = semester
         self.course_prefix = course_prefix
         self.import_time = datetime.datetime.now()
-        self.stats = collections.OrderedDict([
-            ('initial',  0),  # items initialy in db
-            ('scraped',  0),  # items we have scraped
-            ('processed', 0), # items that made it through prepare_data()
-            ('persisted', 0), # items that are in db
-            ('created', 0),   # items that have been created
-            ('updated', 0),   # items we have updated
-            ('unaltered', 0), # items we found but did not alter
-            ('deleted', 0),   # items we plan to delete
-            ('final', 0),     # items left in db after scrape+delete
-        ])
+        self.stats = collections.OrderedDict(
+            [
+                ("initial", 0),  # items initialy in db
+                ("scraped", 0),  # items we have scraped
+                ("processed", 0),  # items that made it through prepare_data()
+                ("persisted", 0),  # items that are in db
+                ("created", 0),  # items that have been created
+                ("updated", 0),  # items we have updated
+                ("unaltered", 0),  # items we found but did not alter
+                ("deleted", 0),  # items we plan to delete
+                ("final", 0),  # items left in db after scrape+delete
+            ]
+        )
 
     def scrape(self):
         """Gets data from external source and yields results."""
@@ -44,8 +57,8 @@ class Scraper:
     def queryset(self):
         """Base queryset to use in all scraper operations.
 
-           Needs to limit results to the righ semester and can optionaly order
-           the results for more logical display when listing items.
+        Needs to limit results to the righ semester and can optionaly order
+        the results for more logical display when listing items.
         """
         raise NotImplementedError
 
@@ -64,9 +77,9 @@ class Scraper:
     def needs_commit(self, stats=None):
         """Indicate if there are any changes that need to be saved.
 
-           Can be called via super() when overriden with other fields.
+        Can be called via super() when overriden with other fields.
         """
-        for name in (stats or ('created', 'updated', 'deleted')):
+        for name in stats or ("created", "updated", "deleted"):
             if self.stats.get(name, 0) > 0:
                 return True
         return False
@@ -81,21 +94,21 @@ class Scraper:
     def run(self):
         """Entry point for generic scrape managment command.
 
-           This method will:
-           1. Get data by calling scrape()
-           2. Process data with prepare_data(), this can be adding, cleaning or
-              invalidating data.
-           3. Convert data to get_or_create() arguments using prepare_save()
-           4. Lookup object, and update it or create a new object.
-           5. Call prepare_delete() to determine what to delete.
+        This method will:
+        1. Get data by calling scrape()
+        2. Process data with prepare_data(), this can be adding, cleaning or
+           invalidating data.
+        3. Convert data to get_or_create() arguments using prepare_save()
+        4. Lookup object, and update it or create a new object.
+        5. Call prepare_delete() to determine what to delete.
 
-           This method can be overriden to implement custom scrape logic that
-           does not match this pattern.
+        This method can be overriden to implement custom scrape logic that
+        does not match this pattern.
         """
 
         with logging_redirect_tqdm():
             initial = self.queryset().count()
-            with tqdm.tqdm(total=self.estimate_count(), unit='items') as progress:
+            with tqdm.tqdm(total=self.estimate_count(), unit="items") as progress:
 
                 self.log_initial()
 
@@ -121,7 +134,7 @@ class Scraper:
                             self.log_created(obj)
                             continue
 
-                        changes.update(self.update(obj, kwargs['defaults']))
+                        changes.update(self.update(obj, kwargs["defaults"]))
 
                         if changes:
                             self.log_updated(obj, changes)
@@ -140,25 +153,25 @@ class Scraper:
     def prepare_data(self, data):
         """Clean and/or validate data from scrape method.
 
-           Not returning data will skip the provided data.
+        Not returning data will skip the provided data.
         """
         return data
 
     def prepare_save(self, data):
         """Convert cleaned data into arguments for get_or_create()."""
-        kwargs = {'defaults': {}}
+        kwargs = {"defaults": {}}
         for field in self.fields:
             kwargs[field] = data.get(field, None)
         for field in self.extra_fields:
             if field in data:
-                kwargs['defaults'][field] = data[field]
+                kwargs["defaults"][field] = data[field]
         return kwargs
 
     def save(self, kwargs):
         """Save prepared arguments using get_or_create().
 
-           This method keeps filters out already updated items. Which prevents
-           some cases of stepping on our own toes during updates.
+        This method keeps filters out already updated items. Which prevents
+        some cases of stepping on our own toes during updates.
         """
         qs = self.queryset().filter(last_import__lt=self.import_time)
         return qs.get_or_create(**kwargs)
@@ -177,7 +190,7 @@ class Scraper:
     def update(self, obj, defaults):
         """Ensure that obj has up to date values for its fields.
 
-           Returns {field: (old_value, new_value)}.
+        Returns {field: (old_value, new_value)}.
         """
         changes = {}
         for field, value in defaults.items():
@@ -192,8 +205,8 @@ class Scraper:
     def prepare_delete(self):
         """Filter a query set done to objects that should be deleted.
 
-           Default is to delete all items within the current scrapers queryset
-           limitation that we have not updated or created.
+        Default is to delete all items within the current scrapers queryset
+        limitation that we have not updated or created.
         """
         return self.queryset().filter(last_import__lt=self.import_time)
 
@@ -207,42 +220,42 @@ class Scraper:
         return str(obj)
 
     def log_initial(self):
-        self.stats['initial'] = self.queryset().count()
+        self.stats["initial"] = self.queryset().count()
 
     def log_scraped(self, data):
-        self.stats['scraped'] += 1
+        self.stats["scraped"] += 1
 
     def log_processed(self, data):
-        self.stats['processed'] += 1
+        self.stats["processed"] += 1
 
     def log_persisted(self, obj):
-        self.stats['persisted'] += 1
+        self.stats["persisted"] += 1
 
     def log_created(self, obj):
-        self.stats['created'] += 1
-        logging.info('Added %s', self.display(obj))
+        self.stats["created"] += 1
+        logging.info("Added %s", self.display(obj))
 
     def log_updated(self, obj, changes):
-        self.stats['updated'] += 1
-        logging.info('Updated %s:', self.display(obj))
+        self.stats["updated"] += 1
+        logging.info("Updated %s:", self.display(obj))
         for key, (old, new) in changes.items():
-            logging.info('  %s: %s', key, utils.compare(old, new))
+            logging.info("  %s: %s", key, utils.compare(old, new))
 
     def log_unaltered(self, obj):
-        self.stats['unaltered'] += 1
+        self.stats["unaltered"] += 1
 
     def log_delete(self, qs):
-        self.stats['deleted'] = qs.count()
+        self.stats["deleted"] = qs.count()
         if qs:
-            logging.info('Deleted:\n%s', self.format(qs))
+            logging.info("Deleted:\n%s", self.format(qs))
 
     def log_stats(self):
-        self.stats['final'] = self.queryset().count() - self.stats['deleted']
+        self.stats["final"] = self.queryset().count() - self.stats["deleted"]
 
         values = []
         for key, value in self.stats.items():
-            values.append('{}: {}'.format(key.title(), value))
-        logging.warning(', '.join(values))
+            values.append("{}: {}".format(key.title(), value))
+        logging.warning(", ".join(values))
 
     def log_extra(self, field, msg=None, args=None, count=0):
         self.stats[field] = self.stats.get(field, 0) + count
@@ -253,27 +266,27 @@ class Scraper:
 # TODO(adamcik): add constraint for code+semester to prevent multiple versions
 # by mistake
 class CourseScraper(Scraper):
-    fields = ('code', 'version', 'semester')
-    extra_fields = ('name', 'url', 'points')
-    m2m_fields = ('locations',)
+    fields = ("code", "version", "semester")
+    extra_fields = ("name", "url", "points")
+    m2m_fields = ("locations",)
 
     def queryset(self):
         qs = Course.objects.filter(semester=self.semester)
         if self.course_prefix:
             qs = qs.filter(code__startswith=self.course_prefix)
-        qs = qs.annotate(Count('lecture'))
-        return qs.order_by('code', 'version')
+        qs = qs.annotate(Count("lecture"))
+        return qs.order_by("code", "version")
 
     def prepare_data(self, data):
-        data['semester'] = self.semester
-        if 'name' in data:
-            data['name'] = utils.clean_string(data['name'])
-        if 'points' in data:
-            data['points'] = utils.clean_decimal(data['points'])
+        data["semester"] = self.semester
+        if "name" in data:
+            data["name"] = utils.clean_string(data["name"])
+        if "points" in data:
+            data["points"] = utils.clean_decimal(data["points"])
 
-        locations, data['locations'] = data['locations'][:], []
+        locations, data["locations"] = data["locations"][:], []
         for name in locations:
-            data['locations'].append(self.location(utils.clean_string(name)))
+            data["locations"].append(self.location(utils.clean_string(name)))
 
         return data
 
@@ -282,7 +295,8 @@ class CourseScraper(Scraper):
 
     def format(self, items):
         return utils.columnify(
-            ('{} - {} lectures'.format(c, c.lecture__count) for c in items), 2)
+            ("{} - {} lectures".format(c, c.lecture__count) for c in items), 2
+        )
 
     def location(self, name):
         return Location.objects.get_or_create(name=name)[0]
@@ -290,64 +304,68 @@ class CourseScraper(Scraper):
 
 class LectureScraper(Scraper):
     # TODO: should we unhide lectures that get modified?
-    fields = ('course', 'day', 'start', 'end', 'type')
-    extra_fields = ('rooms', 'lecturers', 'groups', 'weeks', 'title')
+    fields = ("course", "day", "start", "end", "type")
+    extra_fields = ("rooms", "lecturers", "groups", "weeks", "title")
 
     def queryset(self):
         qs = Lecture.objects.filter(course__semester=self.semester)
         if self.course_prefix:
             qs = qs.filter(course__code__startswith=self.course_prefix)
-        qs = qs.annotate(Count('course__subscription'))
-        return qs.order_by('course__code', 'day', 'start')
+        qs = qs.annotate(Count("course__subscription"))
+        return qs.order_by("course__code", "day", "start")
 
     def course_queryset(self):
         qs = Course.objects.filter(semester=self.semester)
         if self.course_prefix:
             qs = qs.filter(code__startswith=self.course_prefix)
-        return qs.order_by('code', 'version')
+        return qs.order_by("code", "version")
 
     def format(self, items):
         return utils.columnify(
-            ('{} - {} subscriptions'.format(c, c.course__subscription__count) for c in items), 2)
+            (
+                "{} - {} subscriptions".format(c, c.course__subscription__count)
+                for c in items
+            ),
+            2,
+        )
 
     def needs_commit(self, stats=None):
-        return super().needs_commit(
-            ('created', 'updated', 'deleted', 'rooms'))
+        return super().needs_commit(("created", "updated", "deleted", "rooms"))
 
     def prepare_data(self, data):
-        if not data['course'] or not data['start'] or not data['end']:
+        if not data["course"] or not data["start"] or not data["end"]:
             return
-        elif data['day'] not in dict(Lecture.DAYS):
+        elif data["day"] not in dict(Lecture.DAYS):
             return
 
-        data['lecturers'] = utils.clean_list(data['lecturers'], utils.clean_string)
-        data['groups'] = utils.clean_list(data['groups'], utils.clean_string)
+        data["lecturers"] = utils.clean_list(data["lecturers"], utils.clean_string)
+        data["groups"] = utils.clean_list(data["groups"], utils.clean_string)
 
-        rooms, data['rooms'] = data['rooms'][:], []
+        rooms, data["rooms"] = data["rooms"][:], []
         for code, name, url in rooms:
             code = utils.clean_string(code)
             name = utils.clean_string(name)
             if code or name:
-                data['rooms'].append(self.room(code, name, url))
+                data["rooms"].append(self.room(code, name, url))
 
-        data['type'] = self.lecture_type(data['type'])
+        data["type"] = self.lecture_type(data["type"])
         # TODO: Handle url in addition to names?
-        data['lecturers'] = [self.lecturer(l) for l in data['lecturers']]
-        data['groups'] = [self.group(g) for g in data['groups']]
+        data["lecturers"] = [self.lecturer(l) for l in data["lecturers"]]
+        data["groups"] = [self.group(g) for g in data["groups"]]
 
-        if not data['groups']:
-            data['groups'] = [self.group(Group.DEFAULT)]
+        if not data["groups"]:
+            data["groups"] = [self.group(Group.DEFAULT)]
 
         return data
 
     def save(self, kwargs):
         kwargs = kwargs.copy()
-        defaults = kwargs.pop('defaults')
+        defaults = kwargs.pop("defaults")
 
-        groups = {g.pk for g in defaults['groups']}
-        kwargs['type'] = self.lecture_type(kwargs['type'])
+        groups = {g.pk for g in defaults["groups"]}
+        kwargs["type"] = self.lecture_type(kwargs["type"])
 
-        lectures = self.queryset().filter(**kwargs).order_by('id')
+        lectures = self.queryset().filter(**kwargs).order_by("id")
         lectures = lectures.filter(last_import__lt=self.import_time)
 
         # Try way to hard to find what is likely the same lecture so we can
@@ -359,15 +377,15 @@ class LectureScraper(Scraper):
         for l in lectures:
             candidates[l] = 0
 
-            if groups == set(l.groups.values_list('pk', flat=True)):
+            if groups == set(l.groups.values_list("pk", flat=True)):
                 candidates[l] = 3
 
-            for field in ('rooms', 'lecturers'):
+            for field in ("rooms", "lecturers"):
                 if set(defaults[field]) == set(getattr(l, field).all()):
                     candidates[l] += 1
 
-            weeks = l.weeks.values_list('number', flat=True)
-            if set(defaults['weeks']) == set(weeks):
+            weeks = l.weeks.values_list("number", flat=True)
+            if set(defaults["weeks"]) == set(weeks):
                 candidates[l] += 2
 
         if candidates:
@@ -383,24 +401,24 @@ class LectureScraper(Scraper):
         changes = {}
 
         # TODO: Replace with m2m_fields handling?
-        for field in ('rooms', 'lecturers', 'groups'):
+        for field in ("rooms", "lecturers", "groups"):
             current = set(getattr(obj, field).all())
             if current != set(defaults[field]):
                 changes[field] = current, set(defaults[field])
                 setattr(obj, field, defaults[field])
 
-        if obj.title != defaults['title']:
-            changes['title'] = (obj.title, defaults['title'])
-            obj.title = defaults['title']
+        if obj.title != defaults["title"]:
+            changes["title"] = (obj.title, defaults["title"])
+            obj.title = defaults["title"]
 
         obj.save()
 
-        current = set(obj.weeks.values_list('number', flat=True))
-        if current != set(defaults['weeks']):
-            changes['weeks'] = current, set(defaults['weeks'])
+        current = set(obj.weeks.values_list("number", flat=True))
+        if current != set(defaults["weeks"]):
+            changes["weeks"] = current, set(defaults["weeks"])
             obj.weeks.all().delete()
 
-            for week in defaults['weeks']:
+            for week in defaults["weeks"]:
                 Week.objects.create(lecture=obj, number=week)
             # TODO: delete exclusions if the weeks changed?
             # obj.excluded_fromc.clear()
@@ -411,16 +429,20 @@ class LectureScraper(Scraper):
         return LectureType.objects.get_or_create(name=name)[0]
 
     def room(self, code, name, url):
-        if url and '&amp;' in url:
+        if url and "&amp;" in url:
             url = html_parser.HTMLParser().unescape(url)
 
         if code:
             try:
                 room = Room.objects.get(code=code)
                 if room.name != name:
-                    logging.warning('Room %s: %s != %s', room.code, room.name, name)
+                    logging.warning("Room %s: %s != %s", room.code, room.name, name)
                 if utils.valid_url(url) and room.url != url:
-                    self.log_extra('rooms', 'Adding room url %s to %s (%s)', [url, room.name, room.code])
+                    self.log_extra(
+                        "rooms",
+                        "Adding room url %s to %s (%s)",
+                        [url, room.name, room.code],
+                    )
                     room.url = url
                     room.save()
                 return room
@@ -432,18 +454,18 @@ class LectureScraper(Scraper):
         if len(rooms) == 1:
             r = rooms.get()
             if code:
-                self.log_extra('rooms', 'Adding room code %s to %s', [code, r.name])
+                self.log_extra("rooms", "Adding room code %s to %s", [code, r.name])
                 r.code = code
                 r.save()
             if url and url != r.url:
-                self.log_extra('rooms', 'Adding room url %s to %s', [url, r.name])
+                self.log_extra("rooms", "Adding room url %s to %s", [url, r.name])
                 r.url = url
                 r.save()
             return r
 
         if not code:
             return Room.objects.get_or_create(name=name)[0]
-        return Room.objects.get_or_create(code=code, defaults={'name': name})[0]
+        return Room.objects.get_or_create(code=code, defaults={"name": name})[0]
 
     def lecturer(self, name):
         return Lecturer.objects.get_or_create(name=name)[0]
@@ -453,20 +475,20 @@ class LectureScraper(Scraper):
 
 
 class ExamScraper(Scraper):
-    fields = ('course', 'type', 'combination', 'exam_date')
-    extra_fields = ('duration', 'exam_time', 'handout_date', 'handout_time')
+    fields = ("course", "type", "combination", "exam_date")
+    extra_fields = ("duration", "exam_time", "handout_date", "handout_time")
 
     def queryset(self):
         qs = Exam.objects.filter(course__semester=self.semester)
         if self.course_prefix:
             qs = qs.filter(course__code__startswith=self.course_prefix)
-        return qs.order_by('course__code', 'exam_date')
+        return qs.order_by("course__code", "exam_date")
 
     def course_queryset(self):
         qs = Course.objects.filter(semester=self.semester)
         if self.course_prefix:
             qs = qs.filter(code__startswith=self.course_prefix)
-        return qs.order_by('code', 'version')
+        return qs.order_by("code", "version")
 
     def prepare_data(self, data):
         # TODO(adamcik): consider not hardcoding these.
@@ -477,22 +499,23 @@ class ExamScraper(Scraper):
             start = datetime.date(self.semester.year, 7, 1)
             end = datetime.date(self.semester.year, 12, 31)
 
-        course = data['course']
-        date = data['exam_date']
+        course = data["course"]
+        date = data["exam_date"]
 
-        if 'duration' in data:
-            data['duration'] = utils.clean_decimal(data['duration']) or None
+        if "duration" in data:
+            data["duration"] = utils.clean_decimal(data["duration"]) or None
 
         if not date:
-            logging.debug('Date missing for %s', course.code)
+            logging.debug("Date missing for %s", course.code)
         elif not (start <= date <= end):
-            logging.debug('Bad date %s for %s', date, course.code)
+            logging.debug("Bad date %s for %s", date, course.code)
         else:
             return data
 
     def exam_type(self, code, name):
         exam_type, created = ExamType.objects.get_or_create(
-            code=code, defaults={'name': name})
+            code=code, defaults={"name": name}
+        )
 
         if exam_type.name != name:
             exam_type.name = name
@@ -502,37 +525,42 @@ class ExamScraper(Scraper):
 
 
 class RoomScraper(Scraper):
-    fields = ('code',)
-    extra_fields = ('name', 'url',)
+    fields = ("code",)
+    extra_fields = (
+        "name",
+        "url",
+    )
 
     def queryset(self):
-        return Room.objects.order_by('name', 'code')
+        return Room.objects.order_by("name", "code")
 
     def delete(self, qs):
-        logging.warning('This scraper newer deletes any rooms as we would '
-                        'loose data we can\'t get back.')
+        logging.warning(
+            "This scraper newer deletes any rooms as we would "
+            "loose data we can't get back."
+        )
 
 
 class SyllabusScraper(Scraper):
-    fields = ('code',)
-    extra_fields = ('syllabus',)
+    fields = ("code",)
+    extra_fields = ("syllabus",)
 
     def queryset(self):
         qs = Course.objects.filter(semester=self.semester)
         if self.course_prefix:
             qs = qs.filter(code__startswith=self.course_prefix)
-        return qs.order_by('code', 'version')
+        return qs.order_by("code", "version")
 
     def display(self, obj):
         return obj.code
 
     def prepare_data(self, data):
         # Only update courses we already know about.
-        qs = self.queryset().filter(code=data['code'])
+        qs = self.queryset().filter(code=data["code"])
         if qs.filter(last_import__lt=self.import_time):
             return data
         elif qs:
-            logging.warning('Duplicate syllabus info for: %s', data['code'])
+            logging.warning("Duplicate syllabus info for: %s", data["code"])
 
     def delete(self, qs):
         return

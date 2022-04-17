@@ -14,12 +14,14 @@ from django.utils import text as text_utils
 from django.utils import http as http_utils
 
 # Collection of capture groups used in urls.
-url_aliases = {'year': r'(?P<year>\d{4})',
-               'semester': r'(?P<semester_type>\w+)',
-               'slug': r'(?P<slug>[a-z0-9-_]{1,50})',
-               'week': r'(?P<week>\d{1,2})',
-               'size': r'(?P<size>A\d)',
-               'ical': r'(?P<ical_type>\w+)'}
+url_aliases = {
+    "year": r"(?P<year>\d{4})",
+    "semester": r"(?P<semester_type>\w+)",
+    "slug": r"(?P<slug>[a-z0-9-_]{1,50})",
+    "week": r"(?P<week>\d{1,2})",
+    "size": r"(?P<size>A\d)",
+    "ical": r"(?P<ical_type>\w+)",
+}
 
 
 def url(regexp, *args, **kwargs):
@@ -31,14 +33,15 @@ def expires_in(timeout):
     def decorator(func):
         def wrapper(*args, **kwargs):
             response = func(*args, **kwargs)
-            response['Expires'] = http_utils.http_date(time.time() + timeout)
+            response["Expires"] = http_utils.http_date(time.time() + timeout)
             return response
+
         return wrapper
+
     return decorator
 
 
-def build_search(searchstring, filters, max_query_length=4,
-                 combine=operator.and_):
+def build_search(searchstring, filters, max_query_length=4, combine=operator.and_):
     count = 0
     search_filter = models.Q()
 
@@ -62,7 +65,7 @@ def build_search(searchstring, filters, max_query_length=4,
     return search_filter
 
 
-def server_error(request, template_name='500.html'):
+def server_error(request, template_name="500.html"):
     """
     500 error handler.
 
@@ -72,14 +75,19 @@ def server_error(request, template_name='500.html'):
     # You need to create a 500.html template.
     t = template.loader.get_template(template_name)
 
-    return http.HttpResponseServerError(t.render({
-        'MEDIA_URL': settings.MEDIA_URL,
-        'STATIC_URL': settings.STATIC_URL,
-        'SOURCE_URL': settings.TIMETABLE_SOURCE_URL}))
+    return http.HttpResponseServerError(
+        t.render(
+            {
+                "MEDIA_URL": settings.MEDIA_URL,
+                "STATIC_URL": settings.STATIC_URL,
+                "SOURCE_URL": settings.TIMETABLE_SOURCE_URL,
+            }
+        )
+    )
 
 
 def compact_sequence(sequence):
-    '''Compact sequences of numbers into array of strings [i, j, k-l, n-m]'''
+    """Compact sequences of numbers into array of strings [i, j, k-l, n-m]"""
     if not sequence:
         return []
 
@@ -94,17 +102,17 @@ def compact_sequence(sequence):
             last = item
         else:
             if first != last:
-                compact.append('%d-%d' % (first, last))
+                compact.append("%d-%d" % (first, last))
             else:
-                compact.append('%d' % first)
+                compact.append("%d" % first)
 
             first = item
             last = item
 
     if first != last:
-        compact.append('%d-%d' % (first, last))
+        compact.append("%d-%d" % (first, last))
     else:
-        compact.append('%d' % first)
+        compact.append("%d" % first)
 
     return compact
 
@@ -124,7 +132,7 @@ class ColorMap(dict):
     def __getitem__(self, k):
         # Remember to use super to prevent inf loop
         if k is None:
-            return ''
+            return ""
 
         if k in self:
             return super().__getitem__(k)
@@ -133,7 +141,7 @@ class ColorMap(dict):
             if self.hex:
                 self[k] = settings.TIMETABLE_COLORS[self.index % self.max]
             else:
-                self[k] = 'color%d' % (self.index % self.max)
+                self[k] = "color%d" % (self.index % self.max)
             return super().__getitem__(k)
 
 
@@ -144,14 +152,17 @@ def max_number_of_weeks(year):
 
 def first_date_in_week(year, week):
     if datetime.date(year, 1, 4).isoweekday() > 4:
-        return datetime.datetime.strptime('%d %d 1' % (year, week-1), '%Y %W %w')
+        return datetime.datetime.strptime("%d %d 1" % (year, week - 1), "%Y %W %w")
     else:
-        return datetime.datetime.strptime('%d %d 1' % (year, week), '%Y %W %w')
+        return datetime.datetime.strptime("%d %d 1" % (year, week), "%Y %W %w")
 
 
 def natural_sort(values, key=None):
     if key is None:
         key = lambda k: k
-    split = lambda v: re.split(r'(\d+)', v) if isinstance(v, str) else [v]
+    split = lambda v: re.split(r"(\d+)", v) if isinstance(v, str) else [v]
     convert = lambda v: int(v) if v.isdigit() else v.lower()
-    return sorted(values, key=lambda v: [convert(p) if isinstance(p, str) else p for p in split(key(v))])
+    return sorted(
+        values,
+        key=lambda v: [convert(p) if isinstance(p, str) else p for p in split(key(v))],
+    )

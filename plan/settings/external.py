@@ -9,6 +9,6 @@ from plan.settings.base import *
 #
 # DJANGO_SETTINGS_MODULE=plan.settings.external EXTERNAL_SETTINGS_FILE=/path/to/settings.py ...
 
-if 'EXTERNAL_SETTINGS_FILE' in os.environ:
-    with open(os.environ['EXTERNAL_SETTINGS_FILE'], "rb") as f:
-        exec(compile(f.read(), os.environ['EXTERNAL_SETTINGS_FILE'], 'exec'))
+if "EXTERNAL_SETTINGS_FILE" in os.environ:
+    with open(os.environ["EXTERNAL_SETTINGS_FILE"], "rb") as f:
+        exec(compile(f.read(), os.environ["EXTERNAL_SETTINGS_FILE"], "exec"))

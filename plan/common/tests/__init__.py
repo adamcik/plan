@@ -12,15 +12,12 @@ class BaseTestCase(TestCase):
     def setUp(self):
         self.set_now_to(2009, 1, 1)
 
-        self.semester = Semester(year=2009, type='spring')
-        self.default_args = [
-                self.semester.year,
-                self.semester.type,
-                'adamcik'
-            ]
+        self.semester = Semester(year=2009, type="spring")
+        self.default_args = [self.semester.year, self.semester.type, "adamcik"]
 
     def set_now_to(self, year, month, day):
         from plan.common import models, views
+
         dt = datetime.datetime(year, month, day)
 
         for cls in models, views:

@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('common', '0004_set_default_location'),
+        ("common", "0004_set_default_location"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='lecture',
-            name='title',
-            field=models.TextField(null=True, verbose_name='Title'),
+            model_name="lecture",
+            name="title",
+            field=models.TextField(null=True, verbose_name="Title"),
         ),
     ]

@@ -7,4 +7,4 @@ register = template.Library()
 
 @register.filter
 def get(value, key):
-    return value.get(key, '')
+    return value.get(key, "")

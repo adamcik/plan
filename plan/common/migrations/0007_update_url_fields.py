@@ -6,23 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('common', '0006_auto_20210314_1651'),
+        ("common", "0006_auto_20210314_1651"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='exam',
-            name='url',
-            field=models.URLField(default='', verbose_name='URL'),
+            model_name="exam",
+            name="url",
+            field=models.URLField(default="", verbose_name="URL"),
         ),
         migrations.AlterField(
-            model_name='group',
-            name='url',
-            field=models.URLField(default='', verbose_name='URL'),
+            model_name="group",
+            name="url",
+            field=models.URLField(default="", verbose_name="URL"),
         ),
         migrations.AlterField(
-            model_name='room',
-            name='url',
-            field=models.URLField(default='', max_length=500, verbose_name='URL'),
+            model_name="room",
+            name="url",
+            field=models.URLField(default="", max_length=500, verbose_name="URL"),
         ),
     ]
