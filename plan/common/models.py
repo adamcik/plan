@@ -22,6 +22,7 @@ _ = translation.gettext_lazy
 
 
 class Student(models.Model):
+    id = models.AutoField(primary_key=True)
     slug = models.SlugField(_('Slug'), unique=True)
     # TODO(adamcik): Delete this
     show_deadlines = models.BooleanField(_('Show deadlines'), default=False)
@@ -35,6 +36,7 @@ class Student(models.Model):
 
 
 class Location(models.Model):
+    id = models.AutoField(primary_key=True)
     name = models.CharField(_('Location'), max_length=100, unique=True)
 
     class Meta:
@@ -46,6 +48,7 @@ class Location(models.Model):
 
 
 class Subscription(models.Model):
+    id = models.AutoField(primary_key=True)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     course = models.ForeignKey('Course', on_delete=models.CASCADE)
 
@@ -95,6 +98,7 @@ class Subscription(models.Model):
 
 # TODO(adamcik): get rid of optional since it can't be imported?
 class LectureType(models.Model):
+    id = models.AutoField(primary_key=True)
     code = models.CharField(_('Code'), max_length=20, null=True, unique=True)
     name = models.CharField(_('Name'), max_length=100, unique=True)
     optional = models.BooleanField(_('Optional'), default=False)
@@ -108,6 +112,7 @@ class LectureType(models.Model):
 
 
 class Room(models.Model):
+    id = models.AutoField(primary_key=True)
     code = models.CharField(_('Code'), max_length=100, null=True, unique=True)
     name = models.CharField(_('Name'), max_length=100)
     url = models.URLField(_('URL'), default='', max_length=500)
@@ -127,6 +132,7 @@ class Room(models.Model):
 class Group(models.Model):
     DEFAULT = 'Other'
 
+    id = models.AutoField(primary_key=True)
     code = models.CharField(_('Code'), max_length=20, unique=True, null=True)
     name = models.CharField(_('Name'), max_length=100, null=True)
     url = models.URLField(_('URL'), default='')
@@ -143,6 +149,7 @@ class Group(models.Model):
 # field would indicate if the course is mandidtory for a given group might also
 # be an idea to add the year/semester it is expected you take the course?
 class Course(models.Model):
+    id = models.AutoField(primary_key=True)
     code = models.CharField(_('Code'), max_length=100)
     semester = models.ForeignKey('Semester', on_delete=models.CASCADE)
     locations = models.ManyToManyField(Location)
@@ -254,6 +261,7 @@ class Semester(models.Model):
         (FALL, translation.pgettext_lazy('slug', 'fall')),
     )
 
+    id = models.AutoField(primary_key=True)
     year = models.PositiveSmallIntegerField(_('Year'))
     type = models.CharField(_('Type'), max_length=10, choices=SEMESTER_TYPES)
     active = models.DateField(_('Active'), null=True)
@@ -297,6 +305,7 @@ class Semester(models.Model):
 
 
 class ExamType(models.Model):
+    id = models.AutoField(primary_key=True)
     code = models.CharField(_('Code'), max_length=20, unique=True)
     name = models.CharField(_('Name'), max_length=100, null=True)
 
@@ -313,6 +322,7 @@ class ExamType(models.Model):
 
 
 class Exam(models.Model):
+    id = models.AutoField(primary_key=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     type = models.ForeignKey(ExamType, null=True, on_delete=models.CASCADE)
     combination = models.CharField(_('Combination'), max_length=50, null=True)
@@ -344,6 +354,7 @@ class Exam(models.Model):
 class Week(models.Model):
     NUMBER_CHOICES = [(x, x) for x in range(1, 53)]
 
+    id = models.AutoField(primary_key=True)
     lecture = models.ForeignKey('Lecture', related_name='weeks', on_delete=models.CASCADE)
     number = models.PositiveIntegerField(_('Week number'), choices=NUMBER_CHOICES)
 
@@ -358,6 +369,7 @@ class Week(models.Model):
 
 
 class Lecturer(models.Model):
+    id = models.AutoField(primary_key=True)
     name = models.CharField(_('Name'), max_length=200, unique=True)
     # TODO: url
 
@@ -372,6 +384,7 @@ class Lecturer(models.Model):
 class Lecture(models.Model):
     DAYS = [(i, dates.WEEKDAYS[i]) for i in range(5)]
 
+    id = models.AutoField(primary_key=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     title = models.TextField(_('Title'), null=True)
 
@@ -445,6 +458,7 @@ class Lecture(models.Model):
 
 # TODO(adamcik): Delete
 class Deadline(models.Model):
+    id = models.AutoField(primary_key=True)
     subscription = models.ForeignKey('Subscription', on_delete=models.CASCADE)
     task = models.CharField(_('Task'), max_length=255)
     date = models.DateField(_('Due date'))
