@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "plan"
+version = "2.0.0"
+readme = "README.md"
+description = "Timetable generator for educational institutions."
+repository = "https://github.com/adamcik/plan"
+authors = ["Thomas Adamcik <thomas@adamcik.no>"]
+license = "AGLv3"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+Django = "~3.2"
+vobject = "*"
+django-compressor = "*"
+lxml = "*"
+tqdm = "*"
+psycopg2 = "*"
+memcache = "*"
+requests = "*"
+
+[tool.poetry.dev-dependencies]
+black = "*"
+flake8 = "*"
+flake8-black = "*"
+flake8-bugbear = "*"
+flake8-isort = "*"
+flake8-pyi = "*"
+isort = "*"
+
+[tool.black]
+target-version = ["py39"]
+
+[tool.isort]
+profile = "black"
+
+[tool.pylint.format]
+max-line-length = "88"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
