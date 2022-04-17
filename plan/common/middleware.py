@@ -91,7 +91,7 @@ class LocaleMiddleware:
 
     def guess_language_from_accept_header(self, request):
         supported = dict(settings.LANGUAGES)
-        accept = request.META.get('HTTP_ACCEPT_LANGUAGE', '')
+        accept = request.headers.get('Accept-Language', '')
 
         for lang, unused in trans_internals.parse_accept_lang_header(accept):
             if lang == '*':

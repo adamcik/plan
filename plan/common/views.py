@@ -99,7 +99,7 @@ def course_query(request, year, semester_type):
     limit = min(limit, settings.TIMETABLE_AJAX_LIMIT)
     query = request.GET.get('q', '').strip()[:100]
     location = request.GET.get('l', '')
-    send_json = request.META.get('HTTP_ACCEPT') == 'application/json'
+    send_json = request.headers.get('Accept') == 'application/json'
 
     if send_json:
         response = http.HttpResponse(content_type='application/json')

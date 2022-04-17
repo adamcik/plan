@@ -34,7 +34,7 @@ def ical(request, year, semester_type, slug, ical_type=None):
 
     title  = urls.reverse('schedule', args=[year, semester_type, slug])
     hostname = (settings.TIMETABLE_HOSTNAME or
-                request.META.get('HTTP_HOST', socket.getfqdn()))
+                request.headers.get('Host', socket.getfqdn()))
 
     cal = vobject.iCalendar()
     cal.add('method').value = 'PUBLISH'  # IE/Outlook needs this
