@@ -20,8 +20,8 @@ other students.
 - python3-django
 - python3-django-compressor
 - python3-lxml
-- python3-memcache
 - python3-psycopg2
+- python3-pylibmc
 - python3-reportlab
 - python3-requests
 - python3-sentry-sdk

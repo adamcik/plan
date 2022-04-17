@@ -15,7 +15,7 @@ django-compressor = "*"
 lxml = "*"
 tqdm = "*"
 psycopg2 = "*"
-memcache = "*"
+pylibmc = "*"
 requests = "*"
 
 [tool.poetry.dev-dependencies]

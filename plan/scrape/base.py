@@ -2,9 +2,9 @@
 
 import collections
 import datetime
+import html.parser
 import logging
 
-import html.parser
 import tqdm
 from django import db
 from django.db.models import Count
