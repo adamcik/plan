@@ -2,10 +2,9 @@
 
 import re
 
-from django import http
+from django import urls, http
 from django import shortcuts
 from django.conf import settings
-from django.core import urlresolvers
 from django.utils import cache
 from django.utils import http as http_utils
 from django.utils import translation

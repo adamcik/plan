@@ -9,9 +9,8 @@ import vobject
 from dateutil import rrule
 from dateutil import tz
 
-from django import http
+from django import urls, http
 from django.conf import settings
-from django.core import urlresolvers
 from django.utils import translation
 
 from plan.common.models import Exam, Lecture, Semester, Room, Week

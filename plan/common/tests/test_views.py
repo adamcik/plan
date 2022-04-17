@@ -1,10 +1,10 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 from django.utils.datastructures import MultiValueDict
-from django.core.urlresolvers import reverse
 
 from plan.common.tests import BaseTestCase
 from plan.common.models import Semester, Group, Subscription, Lecture, Deadline
+from django.urls import reverse
 
 class EmptyViewTestCase(BaseTestCase):
     def test_index(self):

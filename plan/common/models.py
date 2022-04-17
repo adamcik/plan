@@ -46,8 +46,8 @@ class Location(models.Model):
 
 
 class Subscription(models.Model):
-    student = models.ForeignKey(Student)
-    course = models.ForeignKey('Course')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    course = models.ForeignKey('Course', on_delete=models.CASCADE)
 
     alias = models.CharField(_('Alias'), max_length=50, blank=True)
     added = models.DateTimeField(_('Added'), auto_now_add=True)
@@ -144,7 +144,7 @@ class Group(models.Model):
 # be an idea to add the year/semester it is expected you take the course?
 class Course(models.Model):
     code = models.CharField(_('Code'), max_length=100)
-    semester = models.ForeignKey('Semester')
+    semester = models.ForeignKey('Semester', on_delete=models.CASCADE)
     locations = models.ManyToManyField(Location)
 
     name = models.TextField(_('Name'))
@@ -313,8 +313,8 @@ class ExamType(models.Model):
 
 
 class Exam(models.Model):
-    course = models.ForeignKey(Course)
-    type = models.ForeignKey(ExamType, null=True)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    type = models.ForeignKey(ExamType, null=True, on_delete=models.CASCADE)
     combination = models.CharField(_('Combination'), max_length=50, null=True)
 
     exam_date = models.DateField(_('Exam date'), null=True)
@@ -344,7 +344,7 @@ class Exam(models.Model):
 class Week(models.Model):
     NUMBER_CHOICES = [(x, x) for x in range(1, 53)]
 
-    lecture = models.ForeignKey('Lecture', related_name='weeks')
+    lecture = models.ForeignKey('Lecture', related_name='weeks', on_delete=models.CASCADE)
     number = models.PositiveIntegerField(_('Week number'), choices=NUMBER_CHOICES)
 
     class Meta:
@@ -372,7 +372,7 @@ class Lecturer(models.Model):
 class Lecture(models.Model):
     DAYS = [(i, dates.WEEKDAYS[i]) for i in range(5)]
 
-    course = models.ForeignKey(Course)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
     title = models.TextField(_('Title'), null=True)
 
     day = models.PositiveSmallIntegerField(_('Week day'), choices=DAYS)
@@ -381,7 +381,7 @@ class Lecture(models.Model):
     end = models.TimeField(_('End time'))
 
     rooms = models.ManyToManyField(Room)
-    type = models.ForeignKey(LectureType, null=True)
+    type = models.ForeignKey(LectureType, null=True, on_delete=models.CASCADE)
     groups = models.ManyToManyField(Group)
     lecturers = models.ManyToManyField(Lecturer)
 
@@ -445,7 +445,7 @@ class Lecture(models.Model):
 
 # TODO(adamcik): Delete
 class Deadline(models.Model):
-    subscription = models.ForeignKey('Subscription')
+    subscription = models.ForeignKey('Subscription', on_delete=models.CASCADE)
     task = models.CharField(_('Task'), max_length=255)
     date = models.DateField(_('Due date'))
     time = models.TimeField(_('Time'), null=True)

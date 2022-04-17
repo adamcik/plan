@@ -4,8 +4,8 @@ import socket
 import urllib.parse
 
 from django.conf import settings
-from django.core import urlresolvers
 from django.utils import translation
+from django import urls
 
 _ = translation.gettext_lazy
 
