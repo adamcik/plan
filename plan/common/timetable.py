@@ -138,7 +138,7 @@ class Timetable:
         for i, slot in enumerate(settings.TIMETABLE_SLOTS):
             start = formats.time_format(slot[0])
             end = formats.time_format(slot[1])
-            self.table[i].insert(0, [{'time': '{} - {}'.format(start, end)}])
+            self.table[i].insert(0, [{'time': f'{start} - {end}'}])
 
     def map_to_slot(self, lecture):
         start, end = None, None

@@ -105,6 +105,6 @@ class Command(management.LabelCommand):
             module, cls = settings.TIMETABLE_SCRAPERS.get(type, type).rsplit('.', 1)
             return getattr(importlib.import_module(module), cls)
         except ImportError as e:
-            raise management.CommandError('Couldn\'t import {}: {}'.format(module, e))
+            raise management.CommandError(f'Couldn\'t import {module}: {e}')
         except AttributeError:
-            raise management.CommandError('Scraper {} not found in {}'.format(cls, module))
+            raise management.CommandError(f'Scraper {cls} not found in {module}')

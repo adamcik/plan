@@ -70,7 +70,7 @@ class Subscription(models.Model):
         verbose_name_plural = _('Subscriptions')
 
     def __str__(self):
-        return '{} - {}'.format(self.student, self.course)
+        return f'{self.student} - {self.course}'
 
     @staticmethod
     def get_groups(year, semester_type, slug):
@@ -115,7 +115,7 @@ class Room(models.Model):
     last_import = models.DateTimeField(_('Last import time'), auto_now=True)
 
     def __str__(self):
-        return '{} ({})'.format(self.name, self.code)
+        return f'{self.name} ({self.code})'
 
     class Meta:
         verbose_name = _('Room')
@@ -277,7 +277,7 @@ class Semester(models.Model):
             self.type = slug_map[self.type]
 
     def __str__(self):
-        return '{} {}'.format(self.get_type_display(), self.year)
+        return f'{self.get_type_display()} {self.year}'
 
     @property
     def slug(self):
@@ -338,7 +338,7 @@ class Exam(models.Model):
         verbose_name_plural = _('Exams')
 
     def __str__(self):
-        return  '{} {} - {}'.format(self.course.code, self.combination, self.exam_date)
+        return  f'{self.course.code} {self.combination} - {self.exam_date}'
 
 
 class Week(models.Model):

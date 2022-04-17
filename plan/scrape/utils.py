@@ -68,7 +68,7 @@ def compare(old, new):
     if new == '':
         new = '<empty>'
 
-    return '{} --> {}'.format(old, new)
+    return f'{old} --> {new}'
 
 
 def clean_string(raw_text):

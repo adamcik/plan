@@ -107,9 +107,9 @@ def add_lectutures(lectures, year, cal, hostname):
         rooms = ', '.join(all_rooms.get(l.id, []))
 
         if l.type:
-            desc = '{} - {} ({})'.format(l.type.name, l.course.name, l.course.code)
+            desc = f'{l.type.name} - {l.course.name} ({l.course.code})'
         else:
-            desc = '{} ({})'.format(l.course.name, l.course.code)
+            desc = f'{l.course.name} ({l.course.code})'
 
         # TODO: Add title to ical
         for d in rrule.rrule(rrule.WEEKLY, **rrule_kwargs):
@@ -139,16 +139,16 @@ def add_exams(exams, cal, hostname):
         vevent = cal.add('vevent')
 
         if e.type and e.type.name:
-            summary = '{} - {}'.format(e.type.name, e.alias or e.course.name)
+            summary = f'{e.type.name} - {e.alias or e.course.name}'
             desc = '{} ({}) - {} ({})'.format(e.type.name, e.type.code,
                     e.course.name, e.course.code)
         elif e.type:
-            summary = _('Exam') + ' ({}) - {}'.format(e.type, e.alias or e.course.code)
+            summary = _('Exam') + f' ({e.type}) - {e.alias or e.course.code}'
             desc = _('Exam') + ' ({}) - {} ({})'.format(e.type.code, e.course.name,
                     e.course.code)
         else:
             summary = _('Exam') + ' %s' % (e.alias or e.course.code)
-            desc = _('Exam') + ' {} ({})'.format(e.course.name, e.course.code)
+            desc = _('Exam') + f' {e.course.name} ({e.course.code})'
 
         vevent.add('summary').value = summary
         vevent.add('description').value = desc

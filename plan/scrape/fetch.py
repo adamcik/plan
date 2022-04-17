@@ -98,8 +98,8 @@ def get(url, cache=True, verbose=False):
 
 
 def post(url, data, cache=True, verbose=False):
-    key = 'post||{}||{}'.format(url, urllib.parse.urlencode(data))
-    msg = 'POST: {} Data: {}'.format(url, data)
+    key = f'post||{url}||{urllib.parse.urlencode(data)}'
+    msg = f'POST: {url} Data: {data}'
     return _fetch(
         requests.Request('POST', url, data=data), key, msg, cache, verbose)
 

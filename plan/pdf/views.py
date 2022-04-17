@@ -73,7 +73,7 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
     time_width = 0.06 * width
     day_width = (width-time_width) / 5
 
-    filename = '{}-{}-{}'.format(year, semester.type, slug)
+    filename = f'{year}-{semester.type}-{slug}'
 
     if week:
         filename += '-%s' % week
