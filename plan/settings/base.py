@@ -59,7 +59,7 @@ LOCALE_PATHS = [os.path.join(BASE_PATH, "locale")]
 TEST_RUNNER = "django.test.runner.DiscoverRunner"
 
 # -- App and midleware settings:
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     "plan.common.middleware.AppendSlashMiddleware",
     "plan.common.middleware.LocaleMiddleware",
     "plan.common.middleware.HtmlMinifyMiddleware",

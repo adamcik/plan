@@ -7,6 +7,7 @@ from django.conf import settings
 from django.utils import cache
 from django.utils import http as http_utils
 from django.utils import translation
+from django.utils.deprecation import MiddlewareMixin
 from django.utils.translation import trans_real as trans_internals
 
 from plan.common.models import Semester
@@ -14,7 +15,7 @@ from plan.common.models import Semester
 RE_WHITESPACE = re.compile(rb"(\s\s+|\n)")
 
 
-class HtmlMinifyMiddleware:
+class HtmlMinifyMiddleware(MiddlewareMixin):
     def should_minify(self, response):
         return (
             settings.COMPRESS_ENABLED
@@ -28,7 +29,7 @@ class HtmlMinifyMiddleware:
         return response
 
 
-class AppendSlashMiddleware:
+class AppendSlashMiddleware(MiddlewareMixin):
     def process_request(self, request):
         # Bail if we already have trailing slash.
         if request.path.endswith("/"):
@@ -52,8 +53,10 @@ class AppendSlashMiddleware:
         return http.HttpResponsePermanentRedirect(url)
 
 
-class LocaleMiddleware:
-    def __init__(self):
+class LocaleMiddleware(MiddlewareMixin):
+    def __init__(self, get_response):
+        self.get_response = get_response
+
         self.languages = {}  # Localised semester type -> lang
         self.values = {}  # Localised semester type -> db value
 
