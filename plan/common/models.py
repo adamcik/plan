@@ -8,8 +8,13 @@ from django.db import connection, models
 from django.template import defaultfilters as filters
 from django.utils import dates, translation
 
-from plan.common.managers import (CourseManager, ExamManager, LectureManager,
-                                  SemesterManager, SubscriptionManager)
+from plan.common.managers import (
+    CourseManager,
+    ExamManager,
+    LectureManager,
+    SemesterManager,
+    SubscriptionManager,
+)
 
 # To allow for overriding of the codes idea of now() for tests
 now = datetime.datetime.now

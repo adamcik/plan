@@ -10,9 +10,19 @@ from django import db
 from django.db.models import Count
 from tqdm.contrib.logging import logging_redirect_tqdm
 
-from plan.common.models import (Course, Exam, ExamType, Group, Lecture,
-                                Lecturer, LectureType, Location, Room,
-                                Semester, Week)
+from plan.common.models import (
+    Course,
+    Exam,
+    ExamType,
+    Group,
+    Lecture,
+    Lecturer,
+    LectureType,
+    Location,
+    Room,
+    Semester,
+    Week,
+)
 from plan.scrape import utils
 
 

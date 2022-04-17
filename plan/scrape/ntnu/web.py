@@ -4,8 +4,8 @@ import datetime
 import logging
 import re
 
-from plan.common.models import Course, ExamType, Semester
-from plan.scrape import base, fetch, ntnu, utils
+from plan.common.models import Course, Semester
+from plan.scrape import base, fetch, utils
 
 # TODO(adamcik): link to http://www.ntnu.no/eksamen/sted/?dag=120809 for exams?
 

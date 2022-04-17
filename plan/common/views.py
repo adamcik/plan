@@ -10,9 +10,20 @@ from django.db import connection, transaction
 from django.utils import html, text, translation
 
 from plan.common import forms, timetable, utils
-from plan.common.models import (Course, Deadline, Exam, Group, Lecture,
-                                Lecturer, Location, Room, Semester, Student,
-                                Subscription, Week)
+from plan.common.models import (
+    Course,
+    Deadline,
+    Exam,
+    Group,
+    Lecture,
+    Lecturer,
+    Location,
+    Room,
+    Semester,
+    Student,
+    Subscription,
+    Week,
+)
 from plan.common.templatetags import slugify
 
 # FIXME split into frontpage/semester, course, schedule files
