@@ -4,7 +4,7 @@ import collections
 import datetime
 import logging
 
-import html_parser
+import html.parser
 import tqdm
 from django import db
 from django.db.models import Count
@@ -429,7 +429,7 @@ class LectureScraper(Scraper):
 
     def room(self, code, name, url):
         if url and "&amp;" in url:
-            url = html_parser.HTMLParser().unescape(url)
+            url = html.parser.HTMLParser().unescape(url)
 
         if code:
             try:

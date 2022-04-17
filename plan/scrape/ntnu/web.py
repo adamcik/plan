@@ -96,8 +96,9 @@ class Lectures(base.LectureScraper):
                 ):
                     title = activity["summary"].strip()
 
-                # TODO: handle building='Digital undervisning' such that we get unique url per room.
-                # Current model assumes unique code per room, which we need to work around or change.
+                # TODO: handle building='Digital undervisning' such that we get
+                # unique url per room.  Current model assumes unique code per
+                # room, which we need to work around or change.
 
                 key = (
                     start.weekday(),
