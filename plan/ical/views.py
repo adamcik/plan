@@ -32,7 +32,7 @@ def ical(request, year, semester_type, slug, ical_type=None):
 
     # TODO(adamcik): Lookup in cache?
 
-    title  = urlresolvers.reverse('schedule', args=[year, semester_type, slug])
+    title  = urls.reverse('schedule', args=[year, semester_type, slug])
     hostname = (settings.TIMETABLE_HOSTNAME or
                 request.META.get('HTTP_HOST', socket.getfqdn()))
 

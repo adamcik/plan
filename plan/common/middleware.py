@@ -34,8 +34,8 @@ class AppendSlashMiddleware:
             return
 
         urlconf = getattr(request, 'urlconf', None)
-        old_is_valid = lambda: urlresolvers.is_valid_path(request.path_info, urlconf)
-        new_is_valid = lambda: urlresolvers.is_valid_path('%s/' % request.path_info, urlconf)
+        old_is_valid = lambda: urls.is_valid_path(request.path_info, urlconf)
+        new_is_valid = lambda: urls.is_valid_path('%s/' % request.path_info, urlconf)
 
         # Bail for valid urls or slash version not being valid.
         if (old_is_valid() or not new_is_valid()):
@@ -106,6 +106,6 @@ class LocaleMiddleware:
         # resolve the current url to get its name and reverse it with a
         # localised semester type.
         with translation.override(request.META['QUERY_STRING'], deactivate=True):
-            match = urlresolvers.resolve(request.path_info)
+            match = urls.resolve(request.path_info)
             kwargs['semester_type'] = dict(Semester.SEMESTER_SLUG)[kwargs['semester_type']]
             return shortcuts.redirect(match.url_name, *args, **kwargs)

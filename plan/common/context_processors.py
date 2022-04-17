@@ -14,7 +14,7 @@ def processor(request):
     sitename = (settings.TIMETABLE_HOSTNAME or
                 request.META.get('HTTP_HOST', socket.getfqdn()))
     scheme = 'https://' if request.is_secure() else 'http://'
-    url = scheme + sitename + urlresolvers.reverse('frontpage')
+    url = scheme + sitename + urls.reverse('frontpage')
 
     share_links = []
     for icon, name, link in settings.TIMETABLE_SHARE_LINKS:
