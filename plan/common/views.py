@@ -285,7 +285,7 @@ def select_groups(request, year, semester_type, slug):
                     subscription = Subscription.objects.get_subscriptions(year,
                             semester_type, slug).get(course=c)
 
-                    subscription.groups = group_form.cleaned_data['groups']
+                    subscription.groups.set(group_form.cleaned_data['groups'])
 
             return shortcuts.redirect(
                 'schedule-advanced', year, Semester.localize(semester_type), slug)
@@ -429,7 +429,7 @@ def select_lectures(request, year, semester_type, slug):
 
             for subscription in subscriptions:
                 if excludes:
-                    subscription.exclude = subscription.course.lecture_set.filter(id__in=excludes)
+                    subscription.exclude.set(subscription.course.lecture_set.filter(id__in=excludes))
                 else:
                     subscription.exclude.clear()
 
