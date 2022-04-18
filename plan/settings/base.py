@@ -4,9 +4,10 @@ import datetime
 import os.path
 import socket
 
-# Dummy translation fuction as we can't import real one
-# http://docs.djangoproject.com/en/1.0/topics/i18n/#id2
-ugettext = lambda s: s
+def ugettext(s):
+    # Dummy translation fuction as we can't import real one
+    # http://docs.djangoproject.com/en/1.0/topics/i18n/#id2
+    return s
 
 # -- Base settings:
 BASE_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", ".."))
