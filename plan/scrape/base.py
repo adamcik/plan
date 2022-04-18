@@ -2,7 +2,7 @@
 
 import collections
 import datetime
-import html.parser
+import html
 import logging
 
 import tqdm
@@ -428,8 +428,9 @@ class LectureScraper(Scraper):
         return LectureType.objects.get_or_create(name=name)[0]
 
     def room(self, code, name, url):
+        # TODO: Does this belong in the base scraper?
         if url and "&amp;" in url:
-            url = html.parser.HTMLParser().unescape(url)
+            url = html.unescape(url)
 
         if code:
             try:
