@@ -4,6 +4,9 @@ import datetime
 import os.path
 import socket
 
+import pkg_resources
+
+
 def ugettext(s):
     # Dummy translation fuction as we can't import real one
     # http://docs.djangoproject.com/en/1.0/topics/i18n/#id2
@@ -27,7 +30,7 @@ ROOT_URLCONF = "plan.urls"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.path.join(BASE_PATH, "plan.sqlite"),
+        "NAME": "./plan.sqlite",
     },
 }
 
@@ -110,7 +113,7 @@ CACHES = {
     },
     "scraper": {
         "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
-        "LOCATION": os.path.join(BASE_PATH, "cache"),
+        "LOCATION": "./cache",
         "TIMEOUT": 60 * 60 * 24 * 7,
         "OPTIONS": {
             "MAX_ENTRIES": 50000,
@@ -119,7 +122,7 @@ CACHES = {
 }
 
 # -- Statifiles settings:
-STATIC_ROOT = os.path.join(BASE_PATH, "static")
+STATIC_ROOT = "./static/"
 STATIC_URL = "/static/"
 
 STATICFILES_FINDERS = (
