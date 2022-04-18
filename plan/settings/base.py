@@ -118,7 +118,6 @@ CACHES = {
 }
 
 # -- Statifiles settings:
-MEDIA_ROOT = os.path.join(BASE_PATH, "media")
 STATIC_ROOT = os.path.join(BASE_PATH, "static")
 STATIC_URL = "/static/"
 
@@ -128,7 +127,7 @@ STATICFILES_FINDERS = (
     "compressor.finders.CompressorFinder",
 )
 
-STATICFILES_DIRS = (MEDIA_ROOT,)
+STATICFILES_DIRS = ()
 
 # -- Django compress settings:
 if DEBUG:
