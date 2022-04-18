@@ -66,6 +66,7 @@ def sql(db, query, params=None):
         yield row(*values)
 
 
+# TODO: Store response code and content in cache?
 def _fetch(req, key, msg, cache, verbose):
     sentinel = object()
     result = scraper_cache.get(key, default=sentinel)
@@ -83,7 +84,7 @@ def _fetch(req, key, msg, cache, verbose):
             if response.status_code == 200 and result:
                 scraper_cache.set(key, result)
             elif response.status_code == 500:
-                scraper_cache.set(key, result, timeout=60 * 30)
+                scraper_cache.set(key, None, timeout=60 * 30)
     else:
         msg = "Cached hit: %s" % key
 
@@ -112,7 +113,7 @@ def plain(url, query=None, data=None, verbose=False, cache=True):
             return post(url, data, cache=cache, verbose=verbose)
         return get(url, cache=cache, verbose=verbose)
     except OSError as e:
-        logging.error("Loading %s failed: %s", url, e)
+        logging.error("Loading %s as plain failed: %s", url, e)
 
 
 def html(*args, **kwargs):
@@ -126,12 +127,12 @@ def html(*args, **kwargs):
 def json(url, *args, **kwargs):
     data = plain(url, *args, **kwargs)
     if not data:
-        logging.error("Loading %s falied: empty repsonse", url)
+        logging.error("Loading %s as json falied: empty repsonse", url)
         return {}
     try:
         return jsonlib.loads(data)
     except ValueError as e:
-        logging.error("Loading %s falied: %s", url, e)
+        logging.error("Loading %s as json falied: %s", url, e)
         return {}
 
 
