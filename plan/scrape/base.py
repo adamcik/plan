@@ -20,7 +20,6 @@ from plan.common.models import (
     LectureType,
     Location,
     Room,
-    Semester,
     Week,
 )
 from plan.scrape import utils
@@ -106,7 +105,6 @@ class Scraper:
         """
 
         with logging_redirect_tqdm():
-            initial = self.queryset().count()
             with tqdm.tqdm(total=self.estimate_count(), unit="items") as progress:
 
                 self.log_initial()
