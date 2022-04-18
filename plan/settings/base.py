@@ -1,8 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import datetime
-import os.path
-import socket
 
 import pkg_resources
 
@@ -12,8 +10,6 @@ def ugettext(s):
     # http://docs.djangoproject.com/en/1.0/topics/i18n/#id2
     return s
 
-# -- Base settings:
-BASE_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 # -- Debug settings:
 DEBUG = True
@@ -56,7 +52,7 @@ LANGUAGE_FALLBACK = {
     "no": "nb",  # "Norsk" -> Bokmaal
 }
 
-LOCALE_PATHS = [os.path.join(BASE_PATH, "locale")]
+LOCALE_PATHS = [pkg_resources.resource_filename("plan", "locales")]
 
 # -- Test:
 
@@ -85,16 +81,13 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            BASE_PATH + "/plan/templates",
+            pkg_resources.resource_filename("plan", "templates"),
         ],
         "OPTIONS": {
             "loaders": (
                 (
                     "django.template.loaders.cached.Loader",
-                    (
-                        "django.template.loaders.filesystem.Loader",
-                        "django.template.loaders.app_directories.Loader",
-                    ),
+                    ["django.template.loaders.filesystem.Loader"],
                 ),
             ),
             "context_processors": (
@@ -126,12 +119,11 @@ STATIC_ROOT = "./static/"
 STATIC_URL = "/static/"
 
 STATICFILES_FINDERS = (
-    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "compressor.finders.CompressorFinder",
 )
 
-STATICFILES_DIRS = ()
+STATICFILES_DIRS = [pkg_resources.resource_filename("plan", "static")]
 
 # -- Django compress settings:
 if DEBUG:
