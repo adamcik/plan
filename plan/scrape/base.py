@@ -404,7 +404,7 @@ class LectureScraper(Scraper):
             current = set(getattr(obj, field).all())
             if current != set(defaults[field]):
                 changes[field] = current, set(defaults[field])
-                setattr(obj, field, defaults[field])
+                getattr(obj, field).set(defaults[field])
 
         if obj.title != defaults["title"]:
             changes["title"] = (obj.title, defaults["title"])
