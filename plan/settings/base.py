@@ -1,6 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-import datetime
+from datetime import time
 
 import pkg_resources
 
@@ -147,7 +147,6 @@ TIMETABLE_INSTITUTION = "NTNU"
 TIMETABLE_INSTITUTION_SITE = "http://www.ntnu.no/"
 
 TIMETABLE_SHARE_LINKS = (
-    ("icon-google-plus-sign", "Google+", "https://plus.google.com/share?url=%(url)s"),
     (
         "icon-twitter-sign",
         "Twitter",
@@ -175,18 +174,18 @@ TIMETABLE_COLORS = [
 # List of tuples containing lecture start and end times to show. All lectures
 # will be "pigeonholed" into these slots.
 TIMETABLE_SLOTS = [
-    (datetime.time(8, 15), datetime.time(9, 0)),
-    (datetime.time(9, 15), datetime.time(10, 0)),
-    (datetime.time(10, 15), datetime.time(11, 0)),
-    (datetime.time(11, 15), datetime.time(12, 0)),
-    (datetime.time(12, 15), datetime.time(13, 0)),
-    (datetime.time(13, 15), datetime.time(14, 0)),
-    (datetime.time(14, 15), datetime.time(15, 0)),
-    (datetime.time(15, 15), datetime.time(16, 0)),
-    (datetime.time(16, 15), datetime.time(17, 0)),
-    (datetime.time(17, 15), datetime.time(18, 0)),
-    (datetime.time(18, 15), datetime.time(19, 0)),
-    (datetime.time(19, 15), datetime.time(20, 0)),
+    (time(8, 15), time(9, 0)),
+    (time(9, 15), time(10, 0)),
+    (time(10, 15), time(11, 0)),
+    (time(11, 15), time(12, 0)),
+    (time(12, 15), time(13, 0)),
+    (time(13, 15), time(14, 0)),
+    (time(14, 15), time(15, 0)),
+    (time(15, 15), time(16, 0)),
+    (time(16, 15), time(17, 0)),
+    (time(17, 15), time(18, 0)),
+    (time(18, 15), time(19, 0)),
+    (time(19, 15), time(20, 0)),
 ]
 
 # Available scrapers for loading data into plan. can be run using
@@ -227,7 +226,7 @@ TIMETABLE_TOP_COURSE_COUNT = 10
 TIMETABLE_HOSTNAME = None
 
 # Where the software can be downloaded.
-TIMETABLE_SOURCE_URL = "http://www.github.com/adamcik/plan/"
+TIMETABLE_SOURCE_URL = "https://github.com/adamcik/plan/"
 
 # If the syllabus column should be displayed for courses
 TIMETABLE_SHOW_SYLLABUS = True
