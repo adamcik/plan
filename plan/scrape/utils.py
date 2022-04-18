@@ -52,7 +52,7 @@ def compare(old, new):
         same = set()
         removed = set()
 
-        for i in sorted(old | new):
+        for i in sorted(old | new, key=lambda v: str(v)):
             if i in old and i in new:
                 same.add(" %s" % i)
             elif i in new:
