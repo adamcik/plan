@@ -82,6 +82,9 @@ class Scraper:
                 return True
         return False
 
+    # TODO: Prefetch should work without any courses in the data base, or even
+    # the semester existing. Right now it still depends on courses being
+    # loaded.
     def prefetch(self):
         self.log_initial()
         for data in self.scrape():
@@ -109,6 +112,9 @@ class Scraper:
 
                 self.log_initial()
 
+                # TODO: Always scrape in terms of courses? This would allow us
+                # to base an outer progress bar on the number of courses, but
+                # have an inner one without a known total for e.g. lectures.
                 for data in self.scrape():
                     try:
                         self.log_scraped(data)
