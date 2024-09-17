@@ -4,6 +4,8 @@ import datetime
 import logging
 import re
 
+import tqdm
+
 from plan.common.models import Course, Semester
 from plan.scrape import base, fetch, utils
 
@@ -67,7 +69,7 @@ class Lectures(base.LectureScraper):
         else:
             ntnu_semeter = "%d_VÅR" % self.semester.year
 
-        for c in self.course_queryset():
+        for c in tqdm.tqdm(self.course_queryset(), unit='courses'):
             course = fetch_course_lectures(self.semester, c)
             groupings = {}
             for activity in course.get("schedules", []):
@@ -83,12 +85,13 @@ class Lectures(base.LectureScraper):
                 if not title or title == c.code:
                     title = None
 
-                if not groups and title:
-                    groups.add(title)
-                    title = None
-                elif name in ("Seminar", "Gruppe") and title != name:
-                    groups.add(title)
-                    title = None
+                if title is not None:
+                    if not groups and title:
+                        groups.add(title)
+                        title = None
+                    elif name in ("Seminar", "Gruppe") and title != name:
+                        groups.add(title)
+                        title = None
 
                 if (
                     not title
