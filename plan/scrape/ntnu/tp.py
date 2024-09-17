@@ -97,10 +97,9 @@ class Lectures(base.LectureScraper):
 
 
 def fetch_courses(semester):
-    query = {"semester": convert_semester(semester)}
+    query = {"sem": convert_semester(semester)}
     resp = fetch.plain("https://tp.uio.no/ntnu/timeplan/emner.php", query)
-    result = json.loads(re.search(r"var courses = (.+);", resp).group(1))
-    return {c["value"]: c["name"].split(": ")[1] for c in result}
+    return json.loads(re.search(r"var courses = (.+);", resp).group(1))
 
 
 def fetch_course_lectures(semester, course):
