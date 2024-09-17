@@ -9,14 +9,13 @@ license = "AGLv3"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-Django = "~3.2"
-vobject = "*"
-django-compressor = "*"
-lxml = "*"
+Django = "~3.2.12"
+vobject = "~0.9.6.1"
+django-compressor = "~2.4"
+lxml = "~4.6.3"
 tqdm = "*"
-psycopg2 = "*"
-pylibmc = "*"
-requests = "*"
+psycopg2 = "~2.8.6"
+requests = "~2.25.1"
 
 [tool.poetry.dev-dependencies]
 black = "*"
