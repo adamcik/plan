@@ -304,6 +304,9 @@ class CourseScraper(Scraper):
     def location(self, name):
         return Location.objects.get_or_create(name=name)[0]
 
+    def delete(self, qs):
+        logging.warning('Not deleting courses')
+
 
 class LectureScraper(Scraper):
     # TODO: should we unhide lectures that get modified?

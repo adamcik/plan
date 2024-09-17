@@ -6,23 +6,41 @@ import re
 from plan.common.models import Semester
 from plan.scrape import base, fetch, utils
 
+_LOCATIONS = {
+    "GLOSHAUGEN": "Trondheim",
+    "OLAVSKVART": "Trondheim",
+    "ALESUND": "Ålesund",
+    "DRAGVOLL": "Trondheim",
+    "KALVSKINNE": "Trondheim",
+    "OYA": "Trondheim",
+    "TUNGA": "Trondheim",
+    "GJOVIK": "Gjøvik",
+    "TYHOLT": "Trondheim",
+    "LERKVALG": "Trondheim",
+    "MOHOLT": "Trondheim",
+    "TRONDHEIM": "Trondheim",
+}
+
 
 class Courses(base.CourseScraper):
     def scrape(self):
-        if self.semester == Semester.SPRING:
-            year = self.semester.year - 1
-        else:
-            year = self.semester.year
+        year = self.semester.year
+        if self.semester.type == Semester.SPRING:
+            year -= 1
 
-        url = "https://www.ntnu.no/studier/emner/%s/2018"
-
-        for course, name in fetch_courses(self.semester).items():
-            yield {
-                "code": course,
-                "name": name,
-                "version": 1,
-                "url": url % course,
-            }
+        for c in fetch_courses(self.semester):
+            # TODO: Handle mapping to right semester, e.g. AAR4400 has two terms
+            # TODO: Handle classes without a campus...
+            # TODO: Don't hardcode version?
+            # TODO: Filter to active courses for this semester?
+            if c["nofterms"] == 1 and c["campusid"] is not None:
+                yield {
+                    "code": c["id"],
+                    "name": c["name"],
+                    "version": 1,
+                    "url": "https://www.ntnu.no/studier/emner/%s/%s" % (c["id"], year),
+                    "locations": [_LOCATIONS[c["campusid"]]],
+                }
 
 
 class Lectures(base.LectureScraper):
