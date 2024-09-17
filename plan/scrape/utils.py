@@ -42,7 +42,7 @@ def prompt(message):
         sys.exit(1)
 
 
-def compare(old, new):
+def compare(old, new, key=str):
     if isinstance(old, str) and isinstance(new, str):
         if new.strip() == old.strip():
             return "<whitespace>"
@@ -52,7 +52,7 @@ def compare(old, new):
         same = set()
         removed = set()
 
-        for i in sorted(old | new, key=lambda v: str(v)):
+        for i in sorted(old | new, key=key):
             if i in old and i in new:
                 same.add(" %s" % i)
             elif i in new:
