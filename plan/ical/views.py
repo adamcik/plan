@@ -1,6 +1,5 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-import copy
 import datetime
 import math
 import socket
@@ -9,7 +8,8 @@ import vobject
 from dateutil import rrule, tz
 from django import http, urls
 from django.conf import settings
-from django.utils import translation
+from django.utils import cache, translation
+from django.core.cache import caches
 
 from plan.common.models import Exam, Lecture, Room, Semester, Week
 
@@ -17,6 +17,12 @@ _ = translation.gettext
 
 
 def ical(request, year, semester_type, slug, ical_type=None):
+    key = cache.get_cache_key(request, key_prefix="ical")
+    response = caches["default"].get(key)
+    if response:
+        response["X-Cache"] = "HIT"
+        return response
+
     resources = [_("lectures"), _("exams")]
     if ical_type and ical_type not in resources:
         return http.HttpResponse(status=400)
@@ -77,7 +83,9 @@ def ical(request, year, semester_type, slug, ical_type=None):
     if semester != Semester.objects.active():
         response["Cache-Control"] = "max-age=604800"
 
-    # TODO(adamcik): Stick this in a cache?
+    caches["default"].set(key, response, timeout=3600)
+
+    response["X-Cache"] = "MISS"
     return response
 
 
@@ -140,7 +148,6 @@ def add_lectutures(lectures, year, cal, hostname):
 
 def add_exams(exams, cal, hostname):
     for e in exams:
-
         vevent = cal.add("vevent")
 
         if e.type and e.type.name:
