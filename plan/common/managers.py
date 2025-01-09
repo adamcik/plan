@@ -12,8 +12,8 @@ class LectureManager(models.Manager):
         """
         Get all lectures for subscription during given period.
 
-        To do this we need to pull in a bunch of extra tables and manualy join them
-        in the where cluase. The first element in the custom where is the important
+        To do this we need to pull in a bunch of extra tables and manually join them
+        in the where clause. The first element in the custom where is the important
         one that limits our results, the rest are simply meant for joining.
         """
 
@@ -41,9 +41,7 @@ class LectureManager(models.Manager):
         }
 
         if week:
-            select[
-                "show_week"
-            ] = """
+            select["show_week"] = """
                 EXISTS (SELECT 1 FROM common_week w WHERE
                     w.lecture_id = common_lecture.id AND w.number = %s)"""
 
