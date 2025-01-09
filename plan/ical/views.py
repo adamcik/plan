@@ -8,33 +8,63 @@ import vobject
 from dateutil import rrule, tz
 from django import http, urls
 from django.conf import settings
-from django.utils import cache, translation
-from django.core.cache import caches
+from django.db.models import Max
+from django.http.response import http_date
+from django.utils import translation
+from django.utils.http import parse_http_date_safe
 
-from plan.common.models import Exam, Lecture, Room, Semester, Week
+from plan.common.models import Exam, Lecture, Room, Semester, Subscription, Week
 
 _ = translation.gettext
 
 
 def ical(request, year, semester_type, slug, ical_type=None):
-    key = cache.get_cache_key(request, key_prefix="ical")
-    response = caches["default"].get(key)
-    if response:
-        response["X-Cache"] = "HIT"
-        return response
+    try:
+        semester = Semester.objects.get(year=year, type=semester_type)
+    except Semester.DoesNotExist:
+        return http.HttpResponseNotFound()
+
+    # Calculate last modified time from database:
+    aggregates = [
+        int(agg.timestamp())
+        for agg in Subscription.objects.filter(
+            course__semester=semester,
+            student__slug=slug,
+        )
+        .aggregate(
+            # TODO(adamcik): Add subscription modified time instead of added.
+            subscription_max=Max("added"),
+            course_max=Max("course__last_import"),
+            lecture_max=Max("course__lecture__last_import"),
+            room_max=Max("course__lecture__rooms__last_import"),
+            exam_max=Max("course__exam__last_import"),
+        )
+        .values()
+        if agg
+    ]
+
+    # NOTE: len(aggregates) == 0 implies the slug/subs don't exist.
+    # We could bail here and return a 404, but instead we just give an empty ical.
+
+    last_modified = max(aggregates) if len(aggregates) else None
+    if_modified_since = parse_http_date_safe(request.META.get("HTTP_IF_MODIFIED_SINCE"))
+
+    cache_headers = {
+        "X-Robots-Tag": "noindex, nofollow",
+        "Cache-Control": "max-age=%d"
+        % (30 * 60 if not semester.stale else 30 * 24 * 60 * 60),
+    }
+    if last_modified:
+        cache_headers["Last-Modified"] = http_date(last_modified)
+
+    if if_modified_since is not None and last_modified <= if_modified_since:
+        return http.HttpResponseNotModified(headers=cache_headers)
 
     resources = [_("lectures"), _("exams")]
     if ical_type and ical_type not in resources:
         return http.HttpResponse(status=400)
     elif ical_type:
         resources = [ical_type]
-
-    try:
-        semester = Semester.objects.get(year=year, type=semester_type)
-    except Semester.DoesNotExist:
-        return http.HttpResponse(status=204)
-
-    # TODO(adamcik): Lookup in cache?
 
     title = urls.reverse("schedule", args=[year, semester_type, slug])
     hostname = settings.TIMETABLE_HOSTNAME or request.headers.get(
@@ -72,20 +102,14 @@ def ical(request, year, semester_type, slug, ical_type=None):
         [str(semester.year), semester.type, slug] + resources
     )
 
-    response = http.HttpResponse(icalstream, content_type="text/calendar")
+    response = http.HttpResponse(
+        icalstream, content_type="text/calendar", headers=cache_headers
+    )
     response["Content-Type"] = "text/calendar; charset=utf-8"
     response["Filename"] = filename  # IE needs this
     response["Content-Disposition"] = "attachment; filename=%s" % filename
-    response["X-Robots-Tag"] = "noindex, nofollow"
 
-    # TODO(adamcik): Add a last modified header and return 304s?
-    # TODO(adamcik): add expires header that reduces load on old semesters
-    if semester != Semester.objects.active():
-        response["Cache-Control"] = "max-age=604800"
-
-    caches["default"].set(key, response, timeout=3600)
-
-    response["X-Cache"] = "MISS"
+    # TODO(adamcik): Rate limit remote hosts?
     return response
 
 

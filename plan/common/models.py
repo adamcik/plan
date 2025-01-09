@@ -24,6 +24,7 @@ today = datetime.date.today
 _ = translation.gettext_lazy
 
 
+# TODO(adamcik): Student model isn't really needed once deadlines is removed.
 class Student(models.Model):
     id = models.AutoField(primary_key=True)
     slug = models.SlugField(_("Slug"), unique=True)
@@ -319,6 +320,13 @@ class Semester(models.Model):
 
     def __str__(self):
         return f"{self.get_type_display()} {self.year}"
+
+    @property
+    def stale(self):
+        today = datetime.date.today()
+        if self.active is None:
+            return today.year - self.year > 2
+        return today - self.active > datetime.timedelta(days=365)
 
     @property
     def slug(self):
