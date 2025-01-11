@@ -10,7 +10,7 @@ def fetch_syllabus(code):
         if not e.xpath('.//a[contains(text(),"NTNU")]'):
             continue
         url = "https://www.akademika.no/ajax/curriculum/" + e.attrib["data-id"]
-        for (_, _, href, _) in fetch.html(url, verbose=True).iterlinks():
+        for _, _, href, _ in fetch.html(url, verbose=True).iterlinks():
             if href.startswith("/pensum/%s-" % code.lower()):
                 return "https://www.akademika.no" + href
     return ""

@@ -202,6 +202,8 @@ class Scraper:
                 setattr(obj, field, value)
                 changes[field] = (old_value, value)
 
+        # TODO: Store last modified in addition to last import time?
+        # TODO: Is `last_import` set to `self.import_time` or does it rely on auto?
         obj.save()  # To trigger update of last import time.
         return changes
 

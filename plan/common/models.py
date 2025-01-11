@@ -123,6 +123,8 @@ class LectureType(models.Model):
         verbose_name_plural = _("Lecture types")
 
 
+# TODO: Consider connecting to a semester(s) to avoid update issues and make imports easier?
+# TODO: Track campus things are on as well?
 class Room(models.Model):
     id = models.AutoField(primary_key=True)
     code = models.CharField(_("Code"), max_length=100, null=True, unique=True)
@@ -130,6 +132,7 @@ class Room(models.Model):
     url = models.TextField(_("URL"), default="")
 
     last_import = models.DateTimeField(_("Last import time"), auto_now=True)
+    # TODO: Add last modified which only updates when fields change
 
     def __str__(self):
         return f"{self.name} ({self.code})"
@@ -140,7 +143,7 @@ class Room(models.Model):
         unique_together = ("code", "name")
 
 
-# TODO(adamcik): add url.
+# TODO: See if we can handle missing group better than default fallback?
 class Group(models.Model):
     DEFAULT = "Other"
 

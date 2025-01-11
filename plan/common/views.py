@@ -2,7 +2,6 @@
 
 import datetime
 import json
-import logging
 
 from django import http, shortcuts
 from django.conf import settings
@@ -12,11 +11,9 @@ from django.utils import html, text, translation
 from plan.common import forms, timetable, utils
 from plan.common.models import (
     Course,
-    Deadline,
     Exam,
     Group,
     Lecture,
-    Lecturer,
     Location,
     Room,
     Semester,
@@ -24,7 +21,6 @@ from plan.common.models import (
     Subscription,
     Week,
 )
-from plan.common.templatetags import slugify
 
 # FIXME split into frontpage/semester, course, schedule files
 # FIXME Split views that do multiple form handling tasks into seperate views
