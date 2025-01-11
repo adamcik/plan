@@ -1,1 +1,2 @@
 uv.lock linguist-generated=true merge=binary
+plan/static/lib/* linguist-generated=true merge=binary

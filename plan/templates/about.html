@@ -22,15 +22,15 @@
 {% block extrascript %}
   {% nonce CSP_NONCE %}
     {% compress js %}
-      <script type="text/javascript" src="{% static 'js/jquery-1.7.2.min.js' %}"></script>
-      <script type="text/javascript" src="{% static 'js/jquery.flot.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'js/lib/jquery-1.7.2.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'js/lib/jquery.flot.min.js' %}"></script>
     {% endcompress %}
   {% endnonce %}
 {% endblock %}
 
 {% block extrahead %}
   {{ block.super }}
-  <!--[if IE]><script language="javascript" type="text/javascript" src="{% static 'js/excanvas.min.js' %}"></script><![endif]-->
+  <!--[if IE]><script language="javascript" type="text/javascript" src="{% static 'js/lib/excanvas.min.js' %}"></script><![endif]-->
 {% endblock %}
 
 {% block bd %}

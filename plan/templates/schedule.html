@@ -22,7 +22,7 @@
         </style>
       {% endif %}
       {% if not courses or advanced %}
-        <link rel="stylesheet" href="{% static 'js/auto-complete.css' %}" />
+        <link rel="stylesheet" href="{% static 'js/lib/auto-complete.css' %}" />
         <style type="text/css">
           .autocomplete-suggestions {
             border-color: WindowFrame;
@@ -62,7 +62,7 @@
   {% if not courses or advanced %}
     {% nonce CSP_NONCE %}
       {% compress js %}
-        <script type="text/javascript" src="{% static 'js/auto-complete.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/lib/auto-complete.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/autocomplete.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/advanced.js' %}"></script>
       {% endcompress %}
