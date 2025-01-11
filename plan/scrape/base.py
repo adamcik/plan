@@ -414,35 +414,39 @@ class LectureScraper(Scraper):
         return obj, True
 
     def update_m2m(self, obj, data):
-        groups = set(obj.groups.all())
         default = self.group(Group.DEFAULT)
 
         migrations = data.get("migrate", set()).intersection(
             {g.code for g in data["groups"]}
         )
 
-        for g in migrations:
+        # TODO: migrate `mlreal` to `MLREAL`
+        # TODO: match existing code without looking at case
+        if migrations:
             self.stats["lecture_migrations"] = (
                 self.stats.get("lecture_migrations", 0) + 1
             )
 
-            group = Group.objects.get(code=g)
+            groups = Group.objects.filter(code__in=migrations)
+            data["groups"] = set(data["groups"]).union({default}) - set(groups)
 
-            data["groups"] = set(data["groups"]).union({default}) - {group}
+            qs = list(
+                Subscription.objects.filter(course__lecture=obj, groups__in=groups)
+            )
 
-            qs = list(Subscription.objects.filter(course__lecture=obj, groups=group))
             if qs:
                 logging.info("Migrating %d subscriptions.", len(qs))
-
             for s in qs:
                 self.stats["subscription_migrations"] = (
                     self.stats.get("subscription_migrations", 0) + 1
                 )
                 old = set(s.groups.all())
-                s.groups.remove(group)
+                s.groups.remove(*groups)
                 s.groups.add(default)
                 new = set(s.groups.all())
-                logging.info("  groups: %s", utils.compare(old, new))
+
+                same = old.intersection(new)
+                logging.info("  groups: %s", utils.compare(old - same, new - same))
 
         return super().update_m2m(obj, data)
 
