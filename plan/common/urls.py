@@ -24,5 +24,6 @@ urlpatterns = [
     url(r"^{year}/{semester}/{slug}/groups/$", select_groups, name="change-groups"),
     url(r"^{year}/{semester}/{slug}/filter/$", select_lectures, name="change-lectures"),
     url(r"^[+]$", about, name="about"),
+    url(r"^r/{id}/?$", room_redirect, name="room_redirect"),
     url(r"^{slug}/?$", shortcut, name="shortcut"),
 ]

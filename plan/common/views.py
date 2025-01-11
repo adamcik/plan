@@ -57,6 +57,19 @@ def shortcut(request, slug):
 
 
 @utils.expires_in(3600)
+def room_redirect(request, id):
+    try:
+        room = Room.objects.get(id=id)
+    except Room.DoesNotExist:
+        raise http.Http404
+
+    if not room.url:
+        raise http.Http404
+
+    return shortcuts.redirect(room.url)
+
+
+@utils.expires_in(3600)
 def getting_started(request, year, semester_type):
     """Intial top level page that greets users"""
     try:
