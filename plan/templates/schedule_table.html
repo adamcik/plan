@@ -61,6 +61,9 @@
                     {% if c.lecture %}
                       <div class="course">{{ c.lecture.alias|default:c.lecture.course.code }}</div>
                       <div class="room">
+                        {% if c.lecture.stream %}
+                          <a href="{{ c.lecture.stream }}">{% trans "Stream" %}</a>{% if rooms|get:c.lecture.id %}, {% endif %}
+                        {% endif %}
                         {% for room in rooms|get:c.lecture.id|slice:":2" %}
                           {% if room.url %}
                             <a href="{{ room.url }}">

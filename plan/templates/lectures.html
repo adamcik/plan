@@ -15,7 +15,7 @@
             <th>{% trans "Course" %}</th>
             <th>{% trans "Day" %}</th>
             <th>{% trans "Time" %}</th>
-            <th>{% trans "Title" %}</th>
+            <th>{% trans "Info" %}</th>
             <th>{% trans "Rooms" %}</th>
             <th>{% trans "Type" %}</th>
             <th>{% trans "Groups" %}</th>
@@ -36,8 +36,11 @@
               <td>{{ l.alias|default:l.course.code }}</td>
               <td>{{ l.get_day_display }}</td>
               <td class="nowrap">{{ l.start|time }}-{{ l.end|time }}</td>
-              <td class="small">{{l.title|default:"" }}</td>
+              <td class="small">{{l.title }}{% if l.title and l.summary %} - {% endif %}{{ l.summary }}</td>
               <td class="small">
+                {% if l.stream %}
+                  <a href="{{ l.stream }}">{% trans "Stream" %}</a>{% if rooms|get:l.id %}, {% endif %}
+                {% endif %}
                 {% for room in rooms|get:l.id %}
                   {% if room.url %}
                     <a href="{{ room.url }}">

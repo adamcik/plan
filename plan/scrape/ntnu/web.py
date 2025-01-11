@@ -112,16 +112,7 @@ class Lectures(base.LectureScraper):
                         # Try to store stream links on the lectures:
                         assert stream is None
                         stream = room_url
-
-                        # HACK: This keeps the URL stable for virtual lectures,
-                        # ideally we would have a virtual room per lecture so we
-                        # can use the link with access code etc.
-                        if room_name == "Zoom":
-                            room_url = "https://ntnu.zoom.us"
-                        elif room_name == "Blackboard":
-                            room_url = "https://innsida.ntnu.no/blackboard"
-                        else:
-                            room_url = None
+                        continue
                     elif not room_url:
                         # Fallback to searching if not known:
                         room_url = (
@@ -175,6 +166,7 @@ class Lectures(base.LectureScraper):
                     "groups": groups,
                     # FIXME: Why is staff dropped?
                     "lecturers": tuple(),
+                    # TODO: Pass through displin to use as groups for med students?
                     # "disiplin": disiplin,
                     "title": title,
                     "summary": summary or None,

@@ -115,13 +115,17 @@ def ical(request, year, semester_type, slug, ical_type=None):
 
 
 # TODO: Consider adding redirect/url-shortner for rooms?
-DESCRIPTION_TEXT = template.Template("""
-{{ lecture.course.name }} ({{ lecture.course.code }})
-
-{{ lecture.title|default:lecture.type }}
+DESCRIPTION_TEXT = template.Template(
+    """
+{{ lecture.course.name }} ({{ lecture.type }})
+{% if lecture.stream %}
+Stream: {{ lecture.stream }}
+{% endif %}
+{{ lecture.title }}{% if lecture.summary and lecture.title %} - {% endif %}{{ lecture.summary }}
 {% for room in rooms %}
- - {{ room.name }}{% if room.url %} - {{ room.url }}{% endif %}{% endfor %}
-""")
+ - {{ room.name }}{% if room.url %} (kart: {{ room.url }}){% endif %}{% endfor %}
+""".strip()
+)
 
 
 def add_lectutures(lectures, year, cal, request, hostname):
@@ -147,6 +151,9 @@ def add_lectutures(lectures, year, cal, request, hostname):
         }
 
         summary = l.alias or l.course.code
+        if l.title:
+            summary += "\n" + l.title
+
         rooms = []
         for r in all_rooms.get(l.id, []):
             if r["url"]:
