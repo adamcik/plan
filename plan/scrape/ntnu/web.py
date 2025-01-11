@@ -85,6 +85,9 @@ class Lectures(base.LectureScraper):
                 title = re.sub(r"^\d+(-\d*)?\s?", "", activity["title"]).strip()
                 groups = set(activity.get("studyProgramKeys", []))
 
+                # TODO: Use disiplin as groups? And if so migrate users to them?
+                # groups.update(activity.get("disiplin", []))
+
                 if not title or title == c.code or name == title:
                     title = None
 
@@ -99,6 +102,7 @@ class Lectures(base.LectureScraper):
                         groups.add(title)
                         # title = None
 
+                # FIXME: Remove this and store summary on lecture? Just append to title?
                 if (
                     not title
                     and activity["summary"].strip() != activity["title"].strip()
@@ -159,6 +163,7 @@ class Lectures(base.LectureScraper):
                     "weeks": weeks,
                     "rooms": rooms,
                     "groups": groups,
+                    # FIXME: Why is staff dropped?
                     "lecturers": tuple(),
                     "title": title,
                     "migrate": fake_groups,

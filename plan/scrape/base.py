@@ -168,6 +168,9 @@ class Scraper:
         for field in self.extra_fields:
             if field in data:
                 kwargs["defaults"][field] = data[field]
+
+        # TODO: Automatically track last modified time.
+        # kwargs["defaults"]["modified"] = self.import_time
         return kwargs
 
     def save(self, kwargs):
