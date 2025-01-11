@@ -2,7 +2,6 @@
 
 import datetime
 import json
-from urllib.parse import quote_plus
 
 from django import http, shortcuts
 from django.conf import settings
@@ -65,8 +64,8 @@ def room_redirect(request, id):
         raise http.Http404
 
     if not room.url:
-        url = "https://use.mazemap.com/#v=1&config=ntnu&search=%s"
-        raise shortcuts.redirect(url % quote_plus(room.name))
+        raise http.Http404
+
     return shortcuts.redirect(room.url)
 
 

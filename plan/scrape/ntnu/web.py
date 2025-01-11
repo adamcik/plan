@@ -3,6 +3,7 @@
 import datetime
 import logging
 import re
+from urllib.parse import quote_plus
 
 import tqdm
 
@@ -121,6 +122,12 @@ class Lectures(base.LectureScraper):
                     # can use the link with access code etc.
                     if room_code == "194_VR_OM":
                         room_url = "https://ntnu.zoom.us/"
+
+                    if not room_url:
+                        room_url = (
+                            "https://use.mazemap.com/#v=1&config=ntnu&search=%s"
+                            % quote_plus(room_name)
+                        )
 
                     rooms.add((room_code, room_name, room_url))
 
