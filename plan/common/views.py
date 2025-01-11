@@ -320,6 +320,8 @@ def select_groups(request, year, semester_type, slug):
 
                     subscription.groups.set(group_form.cleaned_data["groups"])
 
+                    subscription.save()  # Update last modified.
+
             return shortcuts.redirect(
                 "schedule-advanced", year, Semester.localize(semester_type), slug
             )
@@ -492,6 +494,8 @@ def select_lectures(request, year, semester_type, slug):
                     )
                 else:
                     subscription.exclude.clear()
+
+                subscription.save()  # Trigger last_modified update
 
     return shortcuts.redirect(
         "schedule-advanced", year, Semester.localize(semester_type), slug

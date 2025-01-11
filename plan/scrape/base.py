@@ -168,7 +168,7 @@ class Scraper:
             if field in data:
                 kwargs["defaults"][field] = data[field]
 
-        kwargs["defaults"]["last_modified"] = self.import_time
+        kwargs["defaults"]["last_modified"] = datetime.datetime.now()
         return kwargs
 
     def save(self, data, kwargs):
@@ -209,7 +209,6 @@ class Scraper:
 
         if changes:
             obj.last_modified = last_modified
-
         obj.save()  # To store update of last import time.
         return changes
 
@@ -458,8 +457,9 @@ class LectureScraper(Scraper):
             setattr(room, key, new)
 
         self.stats["rooms"] += 1
+
+        room.last_modified = datetime.datetime.now()
         room.save()
-        # TODO: Update modified time?
 
         return room
 
