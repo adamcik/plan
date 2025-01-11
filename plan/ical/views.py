@@ -25,29 +25,21 @@ def ical(request, year, semester_type, slug, ical_type=None):
     except Semester.DoesNotExist:
         return http.HttpResponseNotFound()
 
-    # Calculate last modified time from database:
-    aggregates = [
-        int(agg.timestamp())
-        for agg in Subscription.objects.filter(
-            course__semester=semester,
-            student__slug=slug,
-        )
-        .aggregate(
-            # TODO(adamcik): Add subscription modified time instead of added.
-            subscription_max=Max("added"),
-            course_max=Max("course__last_import"),
-            lecture_max=Max("course__lecture__last_import"),
-            room_max=Max("course__lecture__rooms__last_import"),
-            exam_max=Max("course__exam__last_import"),
-        )
-        .values()
-        if agg
-    ]
-
-    # NOTE: len(aggregates) == 0 implies the slug/subs don't exist.
+    qs = Subscription.objects.filter(
+        course__semester=semester,
+        student__slug=slug,
+    ).aggregate(
+        subscription_added=Max("added"),
+        subscription_last_modified=Max("last_modified"),
+        courses_last_modified=Max("course__last_modified"),
+        lectures_last_modified=Max("course__lecture__last_modified"),
+        rooms_last_modified=Max("course__lecture__rooms__last_modified"),
+        exams_last_modified=Max("course__exam__last_modified"),
+    )
+    # NOTE: last_modified == 0 implies the slug/subs don't exist.
     # We could bail here and return a 404, but instead we just give an empty ical.
+    last_modified = max([0] + [int(agg.timestamp()) for agg in qs.values() if agg])
 
-    last_modified = max(aggregates) if len(aggregates) else None
     if_modified_since = parse_http_date_safe(request.META.get("HTTP_IF_MODIFIED_SINCE"))
 
     cache_headers = {
@@ -55,7 +47,7 @@ def ical(request, year, semester_type, slug, ical_type=None):
         "Cache-Control": "max-age=%d"
         % (30 * 60 if not semester.stale else 30 * 24 * 60 * 60),
     }
-    if last_modified:
+    if last_modified > 0:
         cache_headers["Last-Modified"] = http_date(last_modified)
 
     if if_modified_since is not None and last_modified <= if_modified_since:

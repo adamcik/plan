@@ -57,8 +57,8 @@ class Subscription(models.Model):
     course = models.ForeignKey("Course", on_delete=models.CASCADE)
 
     alias = models.CharField(_("Alias"), max_length=50, blank=True)
-    added = models.DateTimeField(_("Added"), auto_now_add=True)
 
+    added = models.DateTimeField(_("Added"), auto_now_add=True)
     last_modified = models.DateTimeField(_("Modified"), auto_now=True)
 
     groups = models.ManyToManyField("Group")
