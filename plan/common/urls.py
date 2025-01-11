@@ -33,5 +33,6 @@ urlpatterns = [
     ),
     url_helper(r"^[+]$", about, name="about"),
     url_helper(r"^r/{id}/?$", room_redirect, name="room_redirect"),
+    url_helper(r"^stats[+]$", api, name="api"),
     url_helper(r"^{slug}/?$", shortcut, name="shortcut"),
 ]

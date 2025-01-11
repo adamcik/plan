@@ -127,7 +127,7 @@ DESCRIPTION_TEXT = template.Template("""
 def add_lectutures(lectures, year, cal, request, hostname):
     """Adds lectures to cal object for current semester"""
 
-    all_rooms = Lecture.get_related(Room, lectures, fields=["id", "name"])
+    all_rooms = Lecture.get_related(Room, lectures, fields=["id", "name", "url"])
     all_weeks = Lecture.get_related(Week, lectures, fields=["number"], use_extra=False)
 
     for l in lectures:
@@ -149,8 +149,9 @@ def add_lectutures(lectures, year, cal, request, hostname):
         summary = l.alias or l.course.code
         rooms = []
         for r in all_rooms.get(l.id, []):
-            tmp = reverse("room_redirect", args=(r["id"],))
-            r["url"] = request.build_absolute_uri(tmp)
+            if r["url"]:
+                tmp = reverse("room_redirect", args=(r["id"],))
+                r["url"] = request.build_absolute_uri(tmp)
             rooms.append(r)
 
         context = template.Context({"lecture": l, "rooms": all_rooms.get(l.id, [])})

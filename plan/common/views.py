@@ -498,6 +498,54 @@ def select_lectures(request, year, semester_type, slug):
     )
 
 
+def api(request):
+    return http.HttpResponse(api_generator(), content_type="text/plain")
+
+
+def api_generator():
+    cursor = connection.cursor()
+    cursor.execute(
+        """
+        SELECT COUNT(*), added, semester_id FROM (
+            SELECT
+                CAST(EXTRACT(DAYS FROM MIN(s.added) - '2008-01-01') AS INT) AS added,
+                c.semester_id AS semester_id,
+                s.student_id AS student_id
+            FROM common_course c
+            JOIN common_subscription s ON (c.id = s.course_id)
+            GROUP BY 3,2
+        ) AS query GROUP BY 3,2 ORDER BY 3, 2;
+        """,
+    )
+
+    current = None
+    prev = 0
+    tmp = []
+
+    for count, added, semester in cursor:
+        if current is None or current != semester:
+            if current:
+                yield ";".join(tmp) + "\n"
+
+            current = semester
+            prev = 0
+            tmp = []
+
+        if added - prev == 1 and count == 1:
+            tmp.append("")
+        elif added - prev == 1:
+            tmp.append(f"{count}")  # no time = 1
+        elif count == 1:
+            tmp.append(f"{added - prev}-")  # no count = 1
+        else:
+            tmp.append(f"{added - prev}-{count}")
+
+        prev = added
+
+    if tmp is not None:
+        yield ";".join(tmp)
+
+
 def about(request):
     # Limit ourselves to 400 buckets to display within 940px - i.e. 2.3 pixels per sample.
     cursor = connection.cursor()
