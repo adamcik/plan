@@ -12,7 +12,7 @@ from django.utils import http as http_utils
 from django.utils import text as text_utils
 
 # Collection of capture groups used in urls.
-url_aliases = {
+URL_ALIASES = {
     "year": r"(?P<year>\d{4})",
     "semester": r"(?P<semester_type>\w+)",
     "slug": r"(?P<slug>[a-z0-9-_]{1,50})",
@@ -23,9 +23,9 @@ url_aliases = {
 }
 
 
-def url(regexp, *args, **kwargs):
+def url_helper(regexp, *args, **kwargs):
     """Helper that inserts our url aliases using string formating."""
-    return urls.url(regexp.format(**url_aliases), *args, **kwargs)
+    return urls.url(regexp.format(**URL_ALIASES), *args, **kwargs)
 
 
 def expires_in(timeout):
