@@ -15,6 +15,7 @@
             <th>{% trans "Course" %}</th>
             <th>{% trans "Day" %}</th>
             <th>{% trans "Time" %}</th>
+            <th>{% trans "Title" %}</th>
             <th>{% trans "Rooms" %}</th>
             <th>{% trans "Type" %}</th>
             <th>{% trans "Groups" %}</th>
@@ -22,6 +23,10 @@
           </tr>
         </thead>
         <tbody>
+          {% comment %}
+            TODO: Setup toogle helper per course for table
+            TODO: Setup proper tab ordering for select boxes
+          {% endcomment %}
           {% for l in lectures %}
             {% blocktrans asvar exclude_title %}Hide {{ l }}{% endblocktrans %}
             <tr class="course-{{ l.course_id }} lecture-{{ l.id }}{% if l.exclude %} excluded{% endif %}" title="{{ l.course.name }}">
@@ -31,6 +36,7 @@
               <td>{{ l.alias|default:l.course.code }}</td>
               <td>{{ l.get_day_display }}</td>
               <td class="nowrap">{{ l.start|time }}-{{ l.end|time }}</td>
+              <td class="small">{{l.title|default:"" }}</td>
               <td class="small">
                 {% for room in rooms|get:l.id %}
                   {% if room.url %}
@@ -42,7 +48,7 @@
                 {% endfor %}
                 {% if not rooms|get:l.id %}&nbsp;{% endif %}
               </td>
-              <td class="small">{% if l.title %}{{ l.title }}{% else %}{{l.type|default:"" }}{% endif %}</td>
+              <td class="small">{{l.type|default:"" }}</td>
               <td class="small">{{ groups|get:l.id|join:", " }}</td>
               <td class="small nowrap">{{ lecture_weeks|get:l.id|compact|join:", " }}</td>
             </tr>
