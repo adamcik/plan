@@ -168,8 +168,7 @@ class Scraper:
             if field in data:
                 kwargs["defaults"][field] = data[field]
 
-        # TODO: Automatically track last modified time.
-        # kwargs["defaults"]["modified"] = self.import_time
+        kwargs["defaults"]["last_modified"] = self.import_time
         return kwargs
 
     def save(self, data, kwargs):
@@ -198,17 +197,20 @@ class Scraper:
 
         Returns {field: (old_value, new_value)}.
         """
+        kwargs = defaults.copy()
+        last_modified = kwargs.pop("last_modified")
+
         changes = {}
-        for field, value in defaults.items():
+        for field, value in kwargs.items():
             old_value = getattr(obj, field)
             if old_value != value:
                 setattr(obj, field, value)
                 changes[field] = (old_value, value)
 
-        # TODO: Store last modified in addition to last import time?
-        # TODO: Is `last_import` set to `self.import_time` or does it rely on auto?
+        if changes:
+            obj.last_modified = last_modified
 
-        obj.save()  # To trigger update of last import time.
+        obj.save()  # To store update of last import time.
         return changes
 
     def prepare_delete(self):
