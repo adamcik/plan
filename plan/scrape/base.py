@@ -413,6 +413,39 @@ class LectureScraper(Scraper):
         self.update(obj, defaults)
         return obj, True
 
+    def update_m2m(self, obj, data):
+        groups = set(obj.groups.all())
+        default = self.group(Group.DEFAULT)
+
+        migrations = data.get("migrate", set()).intersection(
+            {g.code for g in data["groups"]}
+        )
+
+        for g in migrations:
+            self.stats["lecture_migrations"] = (
+                self.stats.get("lecture_migrations", 0) + 1
+            )
+
+            group = Group.objects.get(code=g)
+
+            data["groups"] = set(data["groups"]).union({default}) - {group}
+
+            qs = list(Subscription.objects.filter(course__lecture=obj, groups=group))
+            if qs:
+                logging.info("Migrating %d subscriptions.", len(qs))
+
+            for s in qs:
+                self.stats["subscription_migrations"] = (
+                    self.stats.get("subscription_migrations", 0) + 1
+                )
+                old = set(s.groups.all())
+                s.groups.remove(group)
+                s.groups.add(default)
+                new = set(s.groups.all())
+                logging.info("  groups: %s", utils.compare(old, new))
+
+        return super().update_m2m(obj, data)
+
     def update(self, obj, defaults):
         changes = {}
 

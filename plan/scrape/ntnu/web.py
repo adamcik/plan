@@ -93,11 +93,11 @@ class Lectures(base.LectureScraper):
                     if not groups and title:
                         fake_groups.add(title)
                         groups.add(title)
-                        title = None
+                        # title = None
                     elif name in ("Seminar", "Gruppe") and title != name:
                         fake_groups.add(title)
                         groups.add(title)
-                        title = None
+                        # title = None
 
                 if (
                     not title
@@ -149,6 +149,7 @@ class Lectures(base.LectureScraper):
             # TODO: see if we can move the grouping to the base scraper?
             for key, weeks in sorted(groupings.items()):
                 day, start, end, name, title, groups, rooms, lecturers = key
+
                 yield {
                     "course": c,
                     "type": name,
@@ -160,6 +161,7 @@ class Lectures(base.LectureScraper):
                     "groups": groups,
                     "lecturers": tuple(),
                     "title": title,
+                    "migrate": fake_groups,
                 }
 
 
