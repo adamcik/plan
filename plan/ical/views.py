@@ -6,10 +6,11 @@ import socket
 
 import vobject
 from dateutil import rrule, tz
-from django import http, urls
+from django import http, template, urls
 from django.conf import settings
 from django.db.models import Max
 from django.http.response import http_date
+from django.shortcuts import reverse
 from django.utils import translation
 from django.utils.http import parse_http_date_safe
 
@@ -90,7 +91,7 @@ def ical(request, year, semester_type, slug, ical_type=None):
 
     if _("lectures") in resources:
         lectures = Lecture.objects.get_lectures(year, semester.type, slug)
-        add_lectutures(lectures, semester.year, cal, hostname)
+        add_lectutures(lectures, semester.year, cal, request, hostname)
 
     if _("exams") in resources:
         exams = Exam.objects.get_exams(year, semester.type, slug)
@@ -113,10 +114,20 @@ def ical(request, year, semester_type, slug, ical_type=None):
     return response
 
 
-def add_lectutures(lectures, year, cal, hostname):
+# TODO: Consider adding redirect/url-shortner for rooms?
+DESCRIPTION_TEXT = template.Template("""
+{{ lecture.course.name }} ({{ lecture.course.code }})
+
+{{ lecture.title|default:lecture.type }}
+{% for room in rooms %}
+ - {{ room.name }}{% if room.url %} - {{ room.url }}{% endif %}{% endfor %}
+""")
+
+
+def add_lectutures(lectures, year, cal, request, hostname):
     """Adds lectures to cal object for current semester"""
 
-    all_rooms = Lecture.get_related(Room, lectures)
+    all_rooms = Lecture.get_related(Room, lectures, fields=["id", "name", "url"])
     all_weeks = Lecture.get_related(Week, lectures, fields=["number"], use_extra=False)
 
     for l in lectures:
@@ -136,18 +147,20 @@ def add_lectutures(lectures, year, cal, hostname):
         }
 
         summary = l.alias or l.course.code
-        rooms = ", ".join(all_rooms.get(l.id, []))
+        rooms = []
+        for r in all_rooms.get(l.id, []):
+            if r["url"]:
+                tmp = reverse("room_redirect", args=(r["id"],))
+                r["url"] = request.build_absolute_uri(tmp)
+            rooms.append(r)
 
-        if l.type:
-            desc = f"{l.type.name} - {l.course.name} ({l.course.code})"
-        else:
-            desc = f"{l.course.name} ({l.course.code})"
+        context = template.Context({"lecture": l, "rooms": all_rooms.get(l.id, [])})
+        desc = DESCRIPTION_TEXT.render(context)
 
-        # TODO: Add title to ical
         for d in rrule.rrule(rrule.WEEKLY, **rrule_kwargs):
             vevent = cal.add("vevent")
             vevent.add("summary").value = summary
-            vevent.add("location").value = rooms
+            vevent.add("location").value = ", ".join(r["name"] for r in rooms)
             vevent.add("description").value = desc
 
             vevent.add("dtstart").value = d.replace(

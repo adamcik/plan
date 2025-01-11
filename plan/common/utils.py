@@ -19,6 +19,7 @@ url_aliases = {
     "week": r"(?P<week>\d{1,2})",
     "size": r"(?P<size>A\d)",
     "ical": r"(?P<ical_type>\w+)",
+    "id": r"(?P<id>\d+)",
 }
 
 
