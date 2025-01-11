@@ -20,6 +20,7 @@ from plan.common.models import (
     LectureType,
     Location,
     Room,
+    Subscription,
     Week,
 )
 from plan.scrape import utils
@@ -109,7 +110,6 @@ class Scraper:
 
         with logging_redirect_tqdm():
             with tqdm.tqdm(total=self.estimate_count(), unit="items") as progress:
-
                 self.log_initial()
 
                 # TODO: Always scrape in terms of courses? This would allow us
@@ -204,6 +204,7 @@ class Scraper:
 
         # TODO: Store last modified in addition to last import time?
         # TODO: Is `last_import` set to `self.import_time` or does it rely on auto?
+
         obj.save()  # To trigger update of last import time.
         return changes
 
@@ -307,13 +308,18 @@ class CourseScraper(Scraper):
         return Location.objects.get_or_create(name=name)[0]
 
     def delete(self, qs):
-        logging.warning('Not deleting courses')
+        logging.warning("Not deleting courses")
 
 
 class LectureScraper(Scraper):
     # TODO: should we unhide lectures that get modified?
     fields = ("course", "day", "start", "end", "type")
     extra_fields = ("rooms", "lecturers", "groups", "weeks", "title")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.stats["rooms"] = 0
+        self.modified_rooms = set()
 
     def queryset(self):
         qs = Lecture.objects.filter(course__semester=self.semester)
@@ -436,6 +442,29 @@ class LectureScraper(Scraper):
     def lecture_type(self, name):
         return LectureType.objects.get_or_create(name=name)[0]
 
+    def update_room(self, room, changes):
+        if not changes:
+            return room
+
+        # TODO: Special case zoom links / rooms?
+
+        # Try and catch inconsistent data if we have already changed a room:
+        if room.pk in self.modified_rooms:
+            logging.warning("Room %s has already been modified" % room.code)
+        self.modified_rooms.add(room.pk)
+
+        logging.info("Updated room %s - code=%s:", room.pk, room.code)
+        for key, new in changes.items():
+            old = getattr(room, key)
+            logging.info("  %s: %s", key, utils.compare(old, new))
+            setattr(room, key, new)
+
+        self.stats["rooms"] += 1
+        room.save()
+        # TODO: Update modified time?
+
+        return room
+
     def room(self, code, name, url):
         # TODO: Does this belong in the base scraper?
         if url and "&amp;" in url:
@@ -444,17 +473,15 @@ class LectureScraper(Scraper):
         if code:
             try:
                 room = Room.objects.get(code=code)
+                changes = {}
+
                 if room.name != name:
-                    logging.warning("Room %s: %s != %s", room.code, room.name, name)
+                    changes["name"] = name
+
                 if utils.valid_url(url) and room.url != url:
-                    self.log_extra(
-                        "rooms",
-                        "Adding room url %s to %s (%s)",
-                        [url, room.name, room.code],
-                    )
-                    room.url = url
-                    room.save()
-                return room
+                    changes["url"] = url
+
+                return self.update_room(room, changes)
             except Room.DoesNotExist:
                 pass
 
@@ -462,18 +489,20 @@ class LectureScraper(Scraper):
         rooms = Room.objects.filter(code=None, name=name)
         if len(rooms) == 1:
             r = rooms.get()
-            if code:
-                self.log_extra("rooms", "Adding room code %s to %s", [code, r.name])
-                r.code = code
-                r.save()
-            if url and url != r.url:
-                self.log_extra("rooms", "Adding room url %s to %s", [url, r.name])
-                r.url = url
-                r.save()
-            return r
 
+            changes = {}
+            if code:
+                changes["code"] = code
+
+            if url and url != r.url:
+                changes["url"] = url
+
+            return self.update_room(room, changes)
+
+        self.stats["rooms"] += 1
         if not code:
             return Room.objects.get_or_create(name=name)[0]
+
         return Room.objects.get_or_create(code=code, defaults={"name": name})[0]
 
     def lecturer(self, name):

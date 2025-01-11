@@ -85,6 +85,7 @@ class Lectures(base.LectureScraper):
                 if not title or title == c.code:
                     title = None
 
+                # FIXME: This heuristic is broken, but I need a migration plan
                 if title is not None:
                     if not groups and title:
                         groups.add(title)
@@ -103,6 +104,24 @@ class Lectures(base.LectureScraper):
                 # unique url per room.  Current model assumes unique code per
                 # room, which we need to work around or change.
 
+                rooms = set()
+                for r in activity["rooms"]:
+                    room_code = r["id"]
+                    room_name = r["room"]
+                    room_url = r.get("url", "")
+
+                    # TODO: Move storing the stream link to the lecture itself?
+
+                    # HACK: This keeps the URL stable for virtual lectures,
+                    # ideally we would have a virtual room per lecture so we
+                    # can use the link with access code etc.
+                    if room_code == "194_VR_OM":
+                        room_url = "https://ntnu.zoom.us/"
+
+                    rooms.add((room_code, room_name, room_url))
+
+                staff = {(s["name"], s.get("url", "")) for s in activity["staff"]}
+
                 key = (
                     start.weekday(),
                     start.time(),
@@ -110,19 +129,8 @@ class Lectures(base.LectureScraper):
                     name,
                     title or "",
                     tuple(sorted(groups)),
-                    tuple(
-                        sorted(
-                            {
-                                (r["id"], r["room"], r.get("url", ""))
-                                for r in activity["rooms"]
-                            }
-                        )
-                    ),
-                    tuple(
-                        sorted(
-                            {(s["name"], s.get("url", "")) for s in activity["staff"]}
-                        )
-                    ),
+                    tuple(sorted(rooms)),
+                    tuple(sorted(staff)),
                 )
                 groupings.setdefault(key, set()).add(activity["week"])
 
