@@ -20,7 +20,6 @@ from plan.common.models import (
     LectureType,
     Location,
     Room,
-    Subscription,
     Week,
 )
 from plan.scrape import utils
@@ -415,43 +414,6 @@ class LectureScraper(Scraper):
         obj = lectures.create(**kwargs)
         self.update(obj, defaults)
         return obj, True
-
-    def update_m2m(self, obj, data):
-        default = self.group(Group.DEFAULT)
-
-        migrations = data.get("migrate", set()).intersection(
-            {g.code for g in data["groups"]}
-        )
-
-        # TODO: migrate `mlreal` to `MLREAL`
-        # TODO: match existing code without looking at case
-        if migrations:
-            self.stats["lecture_migrations"] = (
-                self.stats.get("lecture_migrations", 0) + 1
-            )
-
-            groups = Group.objects.filter(code__in=migrations)
-            data["groups"] = set(data["groups"]).union({default}) - set(groups)
-
-            qs = list(
-                Subscription.objects.filter(course__lecture=obj, groups__in=groups)
-            )
-
-            if qs:
-                logging.info("Migrating %d subscriptions.", len(qs))
-            for s in qs:
-                self.stats["subscription_migrations"] = (
-                    self.stats.get("subscription_migrations", 0) + 1
-                )
-                old = set(s.groups.all())
-                s.groups.remove(*groups)
-                s.groups.add(default)
-                new = set(s.groups.all())
-
-                same = old.intersection(new)
-                logging.info("  groups: %s", utils.compare(old - same, new - same))
-
-        return super().update_m2m(obj, data)
 
     def update(self, obj, defaults):
         changes = {}

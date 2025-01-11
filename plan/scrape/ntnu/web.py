@@ -70,8 +70,6 @@ class Lectures(base.LectureScraper):
         else:
             ntnu_semeter = "%d_VÅR" % self.semester.year
 
-        fake_groups = set()
-
         for c in tqdm.tqdm(self.course_queryset(), unit="courses"):
             course = fetch_course_lectures(self.semester, c)
             groupings = {}
@@ -88,19 +86,11 @@ class Lectures(base.LectureScraper):
                 # TODO: Use disiplin as groups? And if so migrate users to them?
                 # groups.update(activity.get("disiplin", []))
 
+                # TODO: migrate `mlreal` to `MLREAL`
+                # TODO: match existing code without looking at case
+
                 if not title or title == c.code or name == title:
                     title = None
-
-                # FIXME: This heuristic is broken, but I need a migration plan
-                if title is not None:
-                    if not groups and title:
-                        fake_groups.add(title)
-                        groups.add(title)
-                        # title = None
-                    elif name in ("Seminar", "Gruppe") and title != name:
-                        fake_groups.add(title)
-                        groups.add(title)
-                        # title = None
 
                 # FIXME: Remove this and store summary on lecture? Just append to title?
                 if (
@@ -166,7 +156,6 @@ class Lectures(base.LectureScraper):
                     # FIXME: Why is staff dropped?
                     "lecturers": tuple(),
                     "title": title,
-                    "migrate": fake_groups,
                 }
 
 
