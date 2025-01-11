@@ -82,7 +82,7 @@ class Lectures(base.LectureScraper):
                 title = re.sub(r"^\d+(-\d*)?\s?", "", activity["title"]).strip()
                 groups = set(activity.get("studyProgramKeys", []))
 
-                if not title or title == c.code:
+                if not title or title == c.code:  # or name == title:
                     title = None
 
                 # FIXME: This heuristic is broken, but I need a migration plan
