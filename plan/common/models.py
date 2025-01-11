@@ -58,9 +58,8 @@ class Subscription(models.Model):
 
     alias = models.CharField(_("Alias"), max_length=50, blank=True)
     added = models.DateTimeField(_("Added"), auto_now_add=True)
-    # TODO(adamcik): Consider adding this so we can set better cache headers
-    # also make sure to reset modified when the ManyToManyFields get updated
 
+    # last_modified = models.DateTimeField(_("Modified"), auto_now=True)
 
     groups = models.ManyToManyField("Group")
     exclude = models.ManyToManyField("Lecture", related_name="excluded_from")
@@ -129,7 +128,7 @@ class Room(models.Model):
     url = models.TextField(_("URL"), default="")
 
     last_import = models.DateTimeField(_("Last import time"), auto_now=True)
-    # TODO: Add last modified which only updates when fields change
+    # last_modified = models.DateTimeField(_("Last modified"))
 
     def __str__(self):
         return f"{self.name} ({self.code})"
@@ -174,6 +173,7 @@ class Course(models.Model):
     points = models.DecimalField(_("Points"), decimal_places=2, max_digits=5, null=True)
 
     last_import = models.DateTimeField(_("Last import time"), auto_now=True)
+    # last_modified = models.DateTimeField(_("Last modified"))
 
     objects = CourseManager()
 
@@ -383,9 +383,10 @@ class Exam(models.Model):
     )
     url = models.TextField(_("URL"), default="")
 
-    # TODO: add link to a location
+    # TODO: add link to a location/campus?
 
     last_import = models.DateTimeField(_("Last import time"), auto_now=True)
+    # last_modified = models.DateTimeField(_("Last modified"))
 
     objects = ExamManager()
 
@@ -435,6 +436,8 @@ class Lecture(models.Model):
     id = models.AutoField(primary_key=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     title = models.TextField(_("Title"), null=True)
+    # summary = models.TextField(_("Summary"), null=True)
+    # stream = models.TextField(_("Stream"), null=True)
 
     day = models.PositiveSmallIntegerField(_("Week day"), choices=DAYS)
 
@@ -447,6 +450,7 @@ class Lecture(models.Model):
     lecturers = models.ManyToManyField(Lecturer)
 
     last_import = models.DateTimeField(_("Last import time"), auto_now=True)
+    # last_modified = models.DateTimeField(_("Last modified"))
 
     objects = LectureManager()
 
