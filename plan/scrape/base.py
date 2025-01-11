@@ -182,12 +182,13 @@ class Scraper:
     def update_m2m(self, obj, data):
         changes = {}
         for field in self.m2m_fields:
-            new_values = data[field]
-            old_values = list(getattr(obj, field).all())
+            new_values = set(data[field])
+            old_values = set(getattr(obj, field).all())
 
-            if set(new_values) != set(old_values):
+            if new_values != old_values:
                 getattr(obj, field).set(new_values)
                 changes[field] = (old_values, new_values)
+
         return changes
 
     def update(self, obj, defaults):
@@ -315,6 +316,7 @@ class LectureScraper(Scraper):
     # TODO: should we unhide lectures that get modified?
     fields = ("course", "day", "start", "end", "type")
     extra_fields = ("rooms", "lecturers", "groups", "weeks", "title")
+    m2m_fields = ("rooms", "lecturers", "groups")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -414,19 +416,13 @@ class LectureScraper(Scraper):
     def update(self, obj, defaults):
         changes = {}
 
-        # TODO: Replace with m2m_fields handling?
-        for field in ("rooms", "lecturers", "groups"):
-            current = set(getattr(obj, field).all())
-            if current != set(defaults[field]):
-                changes[field] = current, set(defaults[field])
-                getattr(obj, field).set(defaults[field])
-
         if obj.title != defaults["title"]:
             changes["title"] = (obj.title, defaults["title"])
             obj.title = defaults["title"]
 
         obj.save()
 
+        # TODO: This could maybe use `update_m2m` if we handle flat instead of objects?
         current = set(obj.weeks.values_list("number", flat=True))
         if current != set(defaults["weeks"]):
             changes["weeks"] = current, set(defaults["weeks"])
@@ -435,7 +431,7 @@ class LectureScraper(Scraper):
             for week in defaults["weeks"]:
                 Week.objects.create(lecture=obj, number=week)
             # TODO: delete exclusions if the weeks changed?
-            # obj.excluded_fromc.clear()
+            # obj.excluded_from.clear()
 
         return changes
 
