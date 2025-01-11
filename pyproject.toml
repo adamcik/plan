@@ -1,39 +1,25 @@
-[tool.poetry]
+[project]
+authors = [{ name = "Thomas Adamcik", email = "thomas@adamcik.no" }]
+license = { text = "AGLv3" }
+requires-python = "<4.0,>=3.9"
+dependencies = [
+  "Django~=3.2.12",
+  "django-compressor~=2.4",
+  "lxml~=4.6.3",
+  "psycopg2~=2.8.6",
+  "requests~=2.25.1",
+  "tqdm",
+  "vobject~=0.9.6.1",
+]
 name = "plan"
 version = "2.0.0"
 readme = "README.md"
 description = "Timetable generator for educational institutions."
+
+[project.urls]
 repository = "https://github.com/adamcik/plan"
-authors = ["Thomas Adamcik <thomas@adamcik.no>"]
-license = "AGLv3"
 
-[tool.poetry.dependencies]
-python = "^3.9"
-Django = "~3.2.12"
-vobject = "~0.9.6.1"
-django-compressor = "~2.4"
-lxml = "~4.6.3"
-tqdm = "*"
-psycopg2 = "~2.8.6"
-requests = "~2.25.1"
-
-[tool.poetry.dev-dependencies]
-black = "*"
-flake8 = "*"
-flake8-black = "*"
-flake8-bugbear = "*"
-flake8-isort = "*"
-isort = "*"
-
-[tool.black]
-target-version = ["py39"]
-
-[tool.isort]
-profile = "black"
-
-[tool.pylint.format]
-max-line-length = "88"
-
+# TODO: Is this needed?
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
