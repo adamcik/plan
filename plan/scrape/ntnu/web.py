@@ -69,7 +69,9 @@ class Lectures(base.LectureScraper):
         else:
             ntnu_semeter = "%d_VÅR" % self.semester.year
 
-        for c in tqdm.tqdm(self.course_queryset(), unit='courses'):
+        fake_groups = set()
+
+        for c in tqdm.tqdm(self.course_queryset(), unit="courses"):
             course = fetch_course_lectures(self.semester, c)
             groupings = {}
             for activity in course.get("schedules", []):
@@ -88,9 +90,11 @@ class Lectures(base.LectureScraper):
                 # FIXME: This heuristic is broken, but I need a migration plan
                 if title is not None:
                     if not groups and title:
+                        fake_groups.add(title)
                         groups.add(title)
                         title = None
                     elif name in ("Seminar", "Gruppe") and title != name:
+                        fake_groups.add(title)
                         groups.add(title)
                         title = None
 
