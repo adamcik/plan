@@ -3,24 +3,27 @@
 {% load color %}
 {% load compress %}
 {% load i18n %}
+{% load nonce %}
 {% load static %}
 
 {% block extrastyle %}
-  {% compress css inline %}
-    {% if courses %}
-      <style type="text/css">
-        {% for course in courses %}
-        .course-{{ course.id }} {
-          background-color: {% color course.id %};
-        }
-        {% endfor %}
-        #toogle-template {
-          display: none;
-        }
-      </style>
-    {% endif %}
-    <link rel="stylesheet" href="{% static 'css/select_groups.css' %}" />
-  {% endcompress %}
+  {% nonce CSP_NONCE %}
+    {% compress css inline %}
+      {% if courses %}
+        <style type="text/css">
+          {% for course in courses %}
+          .course-{{ course.id }} {
+            background-color: {% color course.id %};
+          }
+          {% endfor %}
+          #toogle-template {
+            display: none;
+          }
+        </style>
+      {% endif %}
+      <link rel="stylesheet" href="{% static 'css/select_groups.css' %}" />
+    {% endcompress %}
+  {% endnonce %}
 {% endblock %}
 
 {% block extrascript %}

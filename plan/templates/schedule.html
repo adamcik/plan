@@ -3,40 +3,43 @@
 {% load color %}
 {% load compress %}
 {% load i18n %}
+{% load nonce %}
 {% load static %}
 {% load title %}
 
 {% block extrastyle %}
   {{ block.super }}
-  {% compress css inline %}
-    <link rel="stylesheet" href="{% static 'css/schedule.css' %}" />
-    {% if courses %}
-      <style type="text/css">
-        {% for course in courses %}
-        .course-{{ course.id }} {
-          background-color: {% color course.id %};
-        }
-        {% endfor %}
-      </style>
-    {% endif %}
-    {% if not courses or advanced %}
-      <link rel="stylesheet" href="{% static 'js/auto-complete.css' %}" />
-      <style type="text/css">
-        .autocomplete-suggestions {
-          border-color: WindowFrame;
-          background-color: Window;
-        }
-        .autocomplete-suggestion.selected {
-          background-color: Highlight;
-          color: HighlightText;
-        }
-        .autocomplete-suggestion b {
-          font-weight: bold;
-          color: inherit;
-        }
-      </style>
-    {% endif %}
-  {% endcompress %}
+  {% nonce CSP_NONCE %}
+    {% compress css inline %}
+      <link rel="stylesheet" href="{% static 'css/schedule.css' %}" />
+      {% if courses %}
+        <style type="text/css">
+          {% for course in courses %}
+          .course-{{ course.id }} {
+            background-color: {% color course.id %};
+          }
+          {% endfor %}
+        </style>
+      {% endif %}
+      {% if not courses or advanced %}
+        <link rel="stylesheet" href="{% static 'js/auto-complete.css' %}" />
+        <style type="text/css">
+          .autocomplete-suggestions {
+            border-color: WindowFrame;
+            background-color: Window;
+          }
+          .autocomplete-suggestion.selected {
+            background-color: Highlight;
+            color: HighlightText;
+          }
+          .autocomplete-suggestion b {
+            font-weight: bold;
+            color: inherit;
+          }
+        </style>
+      {% endif %}
+    {% endcompress %}
+  {% endnonce %}
 {% endblock %}
 
 {% block extrahead %}
@@ -50,16 +53,20 @@
 
 {% block extrascript %}
   {% if courses and not advanced %}
-    {% compress js inline %}
-      <script type="text/javascript" src="{% static 'js/navigation.js' %}"></script>
-    {% endcompress %}
+    {% nonce CSP_NONCE %}
+      {% compress js inline %}
+        <script type="text/javascript" src="{% static 'js/navigation.js' %}"></script>
+      {% endcompress %}
+    {% endnonce %}
   {% endif %}
   {% if not courses or advanced %}
-    {% compress js %}
-      <script type="text/javascript" src="{% static 'js/auto-complete.min.js' %}"></script>
-      <script type="text/javascript" src="{% static 'js/autocomplete.js' %}"></script>
-      <script type="text/javascript" src="{% static 'js/advanced.js' %}"></script>
-    {% endcompress %}
+    {% nonce CSP_NONCE %}
+      {% compress js %}
+        <script type="text/javascript" src="{% static 'js/auto-complete.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/autocomplete.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/advanced.js' %}"></script>
+      {% endcompress %}
+    {% endnonce %}
   {% endif %}
 {% endblock %}
 

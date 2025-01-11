@@ -1,12 +1,12 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+import secrets
 import re
 
 from django import http, shortcuts, urls
 from django.conf import settings
-from django.utils import cache
+from django.utils import cache, translation
 from django.utils import http as http_utils
-from django.utils import translation
 from django.utils.deprecation import MiddlewareMixin
 from django.utils.translation import trans_real as trans_internals
 
@@ -26,6 +26,35 @@ class HtmlMinifyMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
         if self.should_minify(response):
             response.content = RE_WHITESPACE.sub(b" ", response.content)
+        return response
+
+
+class CspMiddleware(MiddlewareMixin):
+    def process_request(self, request):
+        request._csp_nonce = secrets.token_urlsafe(16)
+
+    def process_response(self, request, response):
+        if response.status_code in (404, 500) and settings.DEBUG:
+            return response
+
+        policy = [
+            "default-src 'self'",
+            f"script-src 'self' 'nonce-{request._csp_nonce}'",
+            f"style-src  'self' 'nonce-{request._csp_nonce}'",
+            "img-src 'self' data:",
+            "frame-ancestors *",
+        ]
+
+        if settings.TIMETABLE_REPORT_URI:
+            response["Reporting-Endpoints"] = (
+                f'endpoint="{settings.TIMETABLE_REPORT_URI}"'
+            )
+            policy += [
+                f"report-uri {settings.TIMETABLE_REPORT_URI}",
+                "report-to endpoint",
+            ]
+
+        response["Content-Security-Policy"] = " ; ".join(policy)
         return response
 
 

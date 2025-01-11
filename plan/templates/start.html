@@ -2,9 +2,10 @@
 
 {% load color %}
 {% load compress %}
-{% load strip %}
 {% load i18n %}
+{% load nonce %}
 {% load static %}
+{% load strip %}
 
 {% block hd %}
   {{ block.super }}
@@ -16,38 +17,42 @@
 {% endblock %}
 
 {% block extrascript %}
-  {% compress js inline %}
-    <script type="text/javascript">
-      document.addEventListener('DOMContentLoaded', function() {
-        var s = document.getElementById('s'),
-            f = document.getElementById('f'),
-            l = window.localStorage;
-        s.focus();
-        if (l) {
-          s.value = l.getItem('last');
-          f.onsubmit = function() {
-            l.setItem('last', s.value);
+  {% nonce CSP_NONCE %}
+    {% compress js inline %}
+      <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+          var s = document.getElementById('s'),
+              f = document.getElementById('f'),
+              l = window.localStorage;
+          s.focus();
+          if (l) {
+            s.value = l.getItem('last');
+            f.onsubmit = function() {
+              l.setItem('last', s.value);
+            }
           }
-        }
-      }, false);
-    </script>
-  {% endcompress %}
+        }, false);
+      </script>
+    {% endcompress %}
+  {% endnonce %}
 {% endblock %}
 
 {% block extrastyle %}
-  {% compress css inline %}
-    {% if stats %}
-      <style type="text/css">
-        {% for count,course_id,code,name in stats %}
-          .course-{{ course_id }} {
-            background-color: {% color course_id %};
-            width: {% widthratio count stats.0.0 95 %}%;
-          }
-        {% endfor %}
-      </style>
-    {% endif %}
-    <link rel="stylesheet" href="{% static 'css/start.css' %}" />
-  {% endcompress %}
+  {% nonce CSP_NONCE %}
+    {% compress css inline %}
+      {% if stats %}
+        <style type="text/css">
+          {% for count,course_id,code,name in stats %}
+            .course-{{ course_id }} {
+              background-color: {% color course_id %};
+              width: {% widthratio count stats.0.0 95 %}%;
+            }
+          {% endfor %}
+        </style>
+      {% endif %}
+      <link rel="stylesheet" href="{% static 'css/start.css' %}" />
+    {% endcompress %}
+  {% endnonce %}
 {% endblock %}
 
 {% block bd %}

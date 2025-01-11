@@ -60,6 +60,7 @@ TEST_RUNNER = "django.test.runner.DiscoverRunner"
 
 # -- App and midleware settings:
 MIDDLEWARE = (
+    "plan.common.middleware.CspMiddleware",
     "plan.common.middleware.AppendSlashMiddleware",
     "plan.common.middleware.LocaleMiddleware",
     "plan.common.middleware.HtmlMinifyMiddleware",
@@ -230,3 +231,6 @@ TIMETABLE_SOURCE_URL = "https://github.com/adamcik/plan/"
 
 # If the syllabus column should be displayed for courses
 TIMETABLE_SHOW_SYLLABUS = True
+
+# The CSP report URI to use.
+TIMETABLE_REPORT_URI = None
