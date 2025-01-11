@@ -436,8 +436,8 @@ class Lecture(models.Model):
     id = models.AutoField(primary_key=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     title = models.TextField(_("Title"), null=True)
-    # summary = models.TextField(_("Summary"), null=True)
-    # stream = models.TextField(_("Stream"), null=True)
+    summary = models.TextField(_("Summary"), null=True)
+    stream = models.TextField(_("Stream"), null=True)
 
     day = models.PositiveSmallIntegerField(_("Week day"), choices=DAYS)
 
