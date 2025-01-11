@@ -105,10 +105,6 @@ class Lectures(base.LectureScraper):
                 ):
                     title = activity["summary"].strip()
 
-                # TODO: handle building='Digital undervisning' such that we get
-                # unique url per room.  Current model assumes unique code per
-                # room, which we need to work around or change.
-
                 rooms = set()
                 for r in activity["rooms"]:
                     room_code = r["id"]
@@ -120,10 +116,15 @@ class Lectures(base.LectureScraper):
                     # HACK: This keeps the URL stable for virtual lectures,
                     # ideally we would have a virtual room per lecture so we
                     # can use the link with access code etc.
-                    if room_code == "194_VR_OM":
-                        room_url = "https://ntnu.zoom.us/"
 
-                    if not room_url:
+                    if r["building"] == "Digital undervisning":
+                        if room_name == "Zoom":
+                            room_url = "https://ntnu.zoom.us/"
+                        elif room_name == "Blackboard":
+                            room_url = "https://innsida.ntnu.no/blackboard"
+                        else:
+                            room_url = None
+                    elif not room_url:
                         room_url = (
                             "https://use.mazemap.com/#v=1&config=ntnu&search=%s"
                             % quote_plus(room_name)
