@@ -3,7 +3,7 @@
 from django.urls import reverse
 from django.utils.datastructures import MultiValueDict
 
-from plan.common.models import Deadline, Group, Lecture, Semester, Subscription
+from plan.common.models import Group, Lecture, Semester, Subscription
 from plan.common.tests import BaseTestCase
 
 

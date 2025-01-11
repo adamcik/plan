@@ -2,7 +2,6 @@
 
 import importlib
 import logging
-import sys
 
 from django.conf import settings
 from django.core.management import base as management

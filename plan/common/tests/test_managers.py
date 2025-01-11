@@ -1,6 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from plan.common.models import Course, Deadline, Exam, Lecture, Semester, Subscription
+from plan.common.models import Course, Exam, Lecture, Semester, Subscription
 from plan.common.tests import BaseTestCase
 
 

@@ -2,14 +2,12 @@
 
 import importlib
 import logging
-import sys
 
 from django.conf import settings
 from django.core.management import base as management
-from django.db import transaction
 
 from plan.common.models import Semester
-from plan.scrape import fetch, utils
+from plan.scrape import fetch
 
 DATE_TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 CONSOLE_LOG_FORMAT = "[%(asctime)s %(levelname)s] %(message)s"
