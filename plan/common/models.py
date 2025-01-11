@@ -61,9 +61,6 @@ class Subscription(models.Model):
     # TODO(adamcik): Consider adding this so we can set better cache headers
     # also make sure to reset modified when the ManyToManyFields get updated
 
-    # Subscription.objects.filter(course__semester__year=2020, course__semester__type=Semester.FALL, student__slug='adamcik')
-    # max(qs.aggregate(course=Max('course__last_import'), lecture=Max('course__lecture__last_import'), room=Max('course__lecture__rooms__last_import'), exam=Max('course__exam__last_import'), student=Max('modified')).values())
-    # modified = models.DateTimeField(_('Modified'), auto_now=True)
 
     groups = models.ManyToManyField("Group")
     exclude = models.ManyToManyField("Lecture", related_name="excluded_from")
