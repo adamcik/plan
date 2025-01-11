@@ -21,13 +21,15 @@ class Command(management.BaseCommand):
         super().add_arguments(parser)
 
         # TODO: Get rid of need for this in load_semester?
-        parser.add_argument(
-            "-c",
-            "--create",
-            action="store_true",
-            dest="create",
-            help="create missing semester, default: false",
-        ),
+        (
+            parser.add_argument(
+                "-c",
+                "--create",
+                action="store_true",
+                dest="create",
+                help="create missing semester, default: false",
+            ),
+        )
 
         parser.add_argument(
             "-y", "--year", action="store", dest="year", type=int, help="year to scrape"

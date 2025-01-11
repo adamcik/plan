@@ -36,13 +36,15 @@ class Command(management.LabelCommand):
             choices=list(dict(Semester.SEMESTER_TYPES).keys()),
             help="term to scrape",
         )
-        parser.add_argument(
-            "-c",
-            "--create",
-            action="store_true",
-            dest="create",
-            help="create missing semester, default: false",
-        ),
+        (
+            parser.add_argument(
+                "-c",
+                "--create",
+                action="store_true",
+                dest="create",
+                help="create missing semester, default: false",
+            ),
+        )
         parser.add_argument("-n", "--dry-run", action="store_true", dest="dry_run")
         parser.add_argument(
             "--pdb",

@@ -75,9 +75,7 @@ if __name__ == "__main__":
     original_size = os.stat(tmp.name).st_size
 
     if args.compress == "pngcrush":
-        subprocess.call(
-            ["pngcrush", "-rem", "alla" "-reduce", "-brute", tmp.name, output]
-        )
+        subprocess.call(["pngcrush", "-rem", "alla-reduce", "-brute", tmp.name, output])
     elif args.compress == "optipng":
         if os.path.exists(output):
             os.remove(output)

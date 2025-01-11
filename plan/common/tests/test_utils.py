@@ -10,7 +10,6 @@ class UtilTestCase(BaseTestCase):
     fixtures = ["test_data.json"]
 
     def test_colormap(self):
-
         c = ColorMap()
         keys = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 3, 5, 6]
         for k in keys:
@@ -23,7 +22,6 @@ class UtilTestCase(BaseTestCase):
         self.assertEqual(c[None], "")
 
     def test_compact_sequence(self):
-
         seq = compact_sequence([1, 2, 3, 5, 6, 7, 8, 12, 13, 15, 17, 19])
         self.assertEqual(seq, ["1-3", "5-8", "12-13", "15", "17", "19"])
 

@@ -45,7 +45,6 @@ class Courses(base.CourseScraper):
 
 class Lectures(base.LectureScraper):
     def scrape(self):
-
         for c in self.course_queryset():
             result = fetch_course_lectures(self.semester, c)
 
@@ -82,7 +81,6 @@ class Lectures(base.LectureScraper):
 
                             for key in tmp:
                                 if current[key] != tmp[key]:
-
                                     logging.warning(
                                         "Mismatch %s: %s", self.display(obj), key
                                     )
