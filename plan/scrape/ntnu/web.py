@@ -79,25 +79,28 @@ class Lectures(base.LectureScraper):
 
                 start = datetime.datetime.fromtimestamp(activity["from"] / 1000)
                 end = datetime.datetime.fromtimestamp(activity["to"] / 1000)
-                name = activity.get("name", activity["acronym"]).strip()
+                lecture_type = activity.get("name", activity["acronym"]).strip()
                 title = re.sub(r"^\d+(-\d*)?\s?", "", activity["title"]).strip()
-                groups = set(activity.get("studyProgramKeys", []))
+                summary = activity["summary"].strip()
+                stream = None
 
-                # TODO: Use disiplin as groups? And if so migrate users to them?
-                # groups.update(activity.get("disiplin", []))
+                groups = set(activity.get("studyProgramKeys", []))
+                # TODO: Treat this a group?
+                # disiplin = set(activity.get("disiplin", []))
 
                 # TODO: migrate `mlreal` to `MLREAL`
                 # TODO: match existing code without looking at case
 
-                if not title or title == c.code or name == title:
+                # Remove these if the are equal course code or type
+                if not title or title == c.code or lecture_type == title:
                     title = None
-
-                # FIXME: Remove this and store summary on lecture? Just append to title?
                 if (
-                    not title
-                    and activity["summary"].strip() != activity["title"].strip()
+                    not summary
+                    or summary == c.code
+                    or summary == lecture_type
+                    or summary == title
                 ):
-                    title = activity["summary"].strip()
+                    summary = None
 
                 rooms = set()
                 for r in activity["rooms"]:
@@ -105,20 +108,22 @@ class Lectures(base.LectureScraper):
                     room_name = r["room"]
                     room_url = r.get("url", "")
 
-                    # TODO: Move storing the stream link to the lecture itself?
-
-                    # HACK: This keeps the URL stable for virtual lectures,
-                    # ideally we would have a virtual room per lecture so we
-                    # can use the link with access code etc.
-
                     if r["building"] == "Digital undervisning":
+                        # Try to store stream links on the lectures:
+                        assert stream is None
+                        stream = room_url
+
+                        # HACK: This keeps the URL stable for virtual lectures,
+                        # ideally we would have a virtual room per lecture so we
+                        # can use the link with access code etc.
                         if room_name == "Zoom":
-                            room_url = "https://ntnu.zoom.us/"
+                            room_url = "https://ntnu.zoom.us"
                         elif room_name == "Blackboard":
                             room_url = "https://innsida.ntnu.no/blackboard"
                         else:
                             room_url = None
                     elif not room_url:
+                        # Fallback to searching if not known:
                         room_url = (
                             "https://use.mazemap.com/#v=1&config=ntnu&search=%s"
                             % quote_plus(room_name)
@@ -132,21 +137,36 @@ class Lectures(base.LectureScraper):
                     start.weekday(),
                     start.time(),
                     end.time(),
-                    name,
+                    lecture_type,
                     title or "",
+                    summary or "",
+                    stream or "",
                     tuple(sorted(groups)),
                     tuple(sorted(rooms)),
                     tuple(sorted(staff)),
+                    # tuple(sorted(disiplin)),
                 )
                 groupings.setdefault(key, set()).add(activity["week"])
 
             # TODO: see if we can move the grouping to the base scraper?
             for key, weeks in sorted(groupings.items()):
-                day, start, end, name, title, groups, rooms, lecturers = key
+                (
+                    day,
+                    start,
+                    end,
+                    lecture_type,
+                    title,
+                    summary,
+                    stream,
+                    groups,
+                    rooms,
+                    lecturers,
+                    # disiplin,
+                ) = key
 
                 yield {
                     "course": c,
-                    "type": name,
+                    "type": lecture_type,
                     "day": day,
                     "start": start,
                     "end": end,
@@ -155,7 +175,10 @@ class Lectures(base.LectureScraper):
                     "groups": groups,
                     # FIXME: Why is staff dropped?
                     "lecturers": tuple(),
+                    # "disiplin": disiplin,
                     "title": title,
+                    "summary": summary or None,
+                    "stream": stream or None,
                 }
 
 

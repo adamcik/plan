@@ -64,8 +64,13 @@ def compare(old, new, key=str):
 
     if old == "":
         old = "<empty>"
+    if old is None:
+        old = "<null>"
+
     if new == "":
         new = "<empty>"
+    if new is None:
+        new = "<null>"
 
     return f"{old} --> {new}"
 

@@ -127,7 +127,7 @@ class Scraper:
                         if not kwargs:
                             continue
 
-                        obj, created = self.save(kwargs)
+                        obj, created = self.save(data, kwargs)
                         self.log_persisted(obj)
 
                         changes = self.update_m2m(obj, data)
@@ -136,7 +136,7 @@ class Scraper:
                             self.log_created(obj)
                             continue
 
-                        changes.update(self.update(obj, kwargs["defaults"]))
+                        changes.update(self.update(obj, data, kwargs["defaults"]))
 
                         if changes:
                             self.log_updated(obj, changes)
@@ -172,7 +172,7 @@ class Scraper:
         # kwargs["defaults"]["modified"] = self.import_time
         return kwargs
 
-    def save(self, kwargs):
+    def save(self, data, kwargs):
         """Save prepared arguments using get_or_create().
 
         This method keeps filters out already updated items. Which prevents
@@ -193,7 +193,7 @@ class Scraper:
 
         return changes
 
-    def update(self, obj, defaults):
+    def update(self, obj, data, defaults):
         """Ensure that obj has up to date values for its fields.
 
         Returns {field: (old_value, new_value)}.
@@ -317,7 +317,7 @@ class CourseScraper(Scraper):
 class LectureScraper(Scraper):
     # TODO: should we unhide lectures that get modified?
     fields = ("course", "day", "start", "end", "type")
-    extra_fields = ("rooms", "lecturers", "groups", "weeks", "title")
+    extra_fields = ("title", "summary", "stream")
     m2m_fields = ("rooms", "lecturers", "groups")
 
     def __init__(self, *args, **kwargs):
@@ -376,11 +376,11 @@ class LectureScraper(Scraper):
 
         return data
 
-    def save(self, kwargs):
+    def save(self, data, kwargs):
         kwargs = kwargs.copy()
         defaults = kwargs.pop("defaults")
 
-        groups = {g.pk for g in defaults["groups"]}
+        groups = {g.pk for g in data["groups"]}
         kwargs["type"] = self.lecture_type(kwargs["type"])
 
         lectures = self.queryset().filter(**kwargs).order_by("id")
@@ -396,15 +396,19 @@ class LectureScraper(Scraper):
             candidates[l] = 0
 
             if groups == set(l.groups.values_list("pk", flat=True)):
-                candidates[l] = 3
+                candidates[l] += 4
 
             for field in ("rooms", "lecturers"):
-                if set(defaults[field]) == set(getattr(l, field).all()):
+                if set(data[field]) == set(getattr(l, field).all()):
                     candidates[l] += 1
 
+            for field in ("title",):
+                if defaults[field] == getattr(l, field):
+                    candidates[l] += 2
+
             weeks = l.weeks.values_list("number", flat=True)
-            if set(defaults["weeks"]) == set(weeks):
-                candidates[l] += 2
+            if set(data["weeks"]) == set(weeks):
+                candidates[l] += 3
 
         if candidates:
             obj, score = sorted(list(candidates.items()), key=lambda i: -i[1])[0]
@@ -412,25 +416,19 @@ class LectureScraper(Scraper):
                 return obj, False
 
         obj = lectures.create(**kwargs)
-        self.update(obj, defaults)
+        self.update(obj, data, defaults)
         return obj, True
 
-    def update(self, obj, defaults):
-        changes = {}
-
-        if obj.title != defaults["title"]:
-            changes["title"] = (obj.title, defaults["title"])
-            obj.title = defaults["title"]
-
-        obj.save()
+    def update(self, obj, data, defaults):
+        changes = super().update(obj, data, defaults)
 
         # TODO: This could maybe use `update_m2m` if we handle flat instead of objects?
         current = set(obj.weeks.values_list("number", flat=True))
-        if current != set(defaults["weeks"]):
-            changes["weeks"] = current, set(defaults["weeks"])
+        if current != set(data["weeks"]):
+            changes["weeks"] = current, set(data["weeks"])
             obj.weeks.all().delete()
 
-            for week in defaults["weeks"]:
+            for week in data["weeks"]:
                 Week.objects.create(lecture=obj, number=week)
             # TODO: delete exclusions if the weeks changed?
             # obj.excluded_from.clear()
