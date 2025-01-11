@@ -70,7 +70,7 @@
                           {% endif %}
                         {% endfor %}
                       </div>
-		      <div class="type">{{ c.lecture.type|default:"" }}</div>
+                      <div class="type">{% if c.lecture.title %}{{ c.lecture.title }}{% elif c.lecture.type %}{{ c.lecture.type }}{% endif %}</div>
                     {% endif %}
                     {{ c.time|escape|nbsp|default:"" }}
                   </div>
