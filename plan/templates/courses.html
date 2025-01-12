@@ -1,6 +1,7 @@
 {% load get %}
 {% load hostname %}
 {% load i18n %}
+{% load tabindex %}
 
 <form action="{% url 'change-course' semester.year semester.slug slug %}" method="post">
   <h2>{% trans "Courses" %}</h2>
@@ -34,7 +35,7 @@
             <tr class="course-{{ course.id }}" title="{{ course.name }}">
               {% if advanced %}
                 <td>
-                  <input type="checkbox" name="course_remove" value="{{ course.id }}" class="noprint" title="{{ remove_title }}" />
+                  <input type="checkbox" name="course_remove" value="{{ course.id }}" class="noprint" title="{{ remove_title }}" tabindex="{{ tabindex|default:0|add:4 }}" />
                 </td>
               {% endif %}
               <td>
@@ -48,7 +49,9 @@
               </td>
               <td>
                 {% if course.alias_form %}
-                  {{ course.alias_form.alias}}
+                  {% with index=tabindex|default:0|add:5 %}
+                    {{ course.alias_form.alias|tabindex:index }}
+                  {% endwith %}
                 {% else %}
                   {{ course.alias|default:"-" }}
                 {% endif %}
@@ -82,8 +85,8 @@
 
   {% if courses and advanced %}
     <p class="noprint">
-      <button name="submit_name" type="submit"><i class="icon-pencil"></i> {% trans "Update names" %}</button>
-      <button name="submit_remove" type="submit"><i class="icon-remove"></i> {% trans "Remove selected" %}</button>
+      <button name="submit_name" type="submit"><i class="icon-pencil" tabindex="{{ tabindex|default:0|add:6 }}"></i> {% trans "Update names" %}</button>
+      <button name="submit_remove" type="submit" tabindex="{{ tabindex|default:0|add:6 }}"><i class="icon-remove"></i> {% trans "Remove selected" %}</button>
     </p>
   {% else %}
     <p class="noprint">

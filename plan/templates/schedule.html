@@ -99,10 +99,10 @@
 
   {% if courses %}
     {% if advanced %}
-      {% include "courses.html" %}
+      {% include "courses.html" with tabindex=10 %}
       <div class="yui-g">
         <div class="yui-u first">
-          {% include "add_courses.html" %}
+          {% include "add_courses.html" with tabindex=20 %}
         </div>
         <div class="yui-u">
           {% include "groups_link.html" %}
@@ -111,7 +111,7 @@
     {% endif %}
   {% endif %}
 
-  {% include "lectures.html" %}
+  {% include "lectures.html" with tabindex=30 %}
   {% if not advanced %}
     {% include "courses.html" %}
   {% endif %}

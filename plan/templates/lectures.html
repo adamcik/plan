@@ -38,7 +38,7 @@
             {% blocktrans asvar exclude_title %}Hide {{ l }}{% endblocktrans %}
             <tr class="course-{{ l.course_id }} lecture-{{ l.id }}{% if l.exclude %} excluded{% endif %}" title="{{ l.course.name }}">
               {% if advanced %}
-                <td><input type="checkbox" name="exclude" value="{{ l.id }}"{% if l.exclude %} checked="checked"{% endif %} class="noprint" title="{{ exclude_title }}" /></td>
+              <td><input type="checkbox" name="exclude" value="{{ l.id }}"{% if l.exclude %} checked="checked"{% endif %} class="noprint" title="{{ exclude_title }}" tabindex="{{ tabindex|default:0|add:4 }}"/></td>
               {% endif %}
               <td>{{ l.alias|default:l.course.code }}</td>
               <td>{{ l.get_day_display }}</td>
@@ -68,7 +68,7 @@
     </div>
     <p class="noprint">
       {% if advanced %}
-        <button type="submit"><i class="icon-ban-circle"></i> {% trans "Hide selected lectures" %}</span></button>
+        <button type="submit" tabindex={{ tabindex|default:0|add:5 }}"><i class="icon-ban-circle"></i> {% trans "Hide selected lectures" %}</span></button>
       {% else %}
         {% url 'schedule-advanced' semester.year semester.slug slug as advanced_url %}
         {% blocktrans %}
