@@ -9,9 +9,11 @@
       group.querySelectorAll('[data-toggle]').forEach(toggle => {
         toggle.style.cursor = 'pointer';
         toggle.addEventListener('click', ((inputs, event) => {
+          event.preventDefault();
+
           inputs.forEach(input => {
             const targetState = event.target.dataset.toggle == "true";
-            if (input.checked != targetState) {
+            if (input.checked != targetState && input.offsetParent !== null) {
               input.click();
             }
           });

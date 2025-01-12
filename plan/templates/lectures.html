@@ -7,11 +7,11 @@
   <form action="{% url 'change-lectures' semester.year semester.slug slug %}" method="post">
     <div id="lectures" class="overflow" data-toggle-container="true">
       {% if advanced %}
-        <div class="toggle">
-          {% trans "Select" %}:
-          <a data-toggle="true">{% trans "All" %}</a> -
-          <a data-toggle="false">{% trans "None" %}</a>
-        </div>
+        <p class="toggle">
+        <button data-toggle="true" tabindex="{{ tabindex|default:0|add:1 }}">{% trans "All" %}</button>
+        <button data-toggle="false" tabindex="{{ tabindex|default:0|add:2 }}">{% trans "None" %}</button>
+        <input data-filter="true" placeholder="{% trans "Filter" %}" tabindex="{{ tabindex|default:0|add:3 }}"/>
+        </p>
       {% endif %}
       <table>
         <thead>
@@ -19,13 +19,13 @@
             {% if advanced %}
               <th></th>
             {% endif %}
-            <th>{% trans "Course" %}</th>
-            <th>{% trans "Day" %}</th>
-            <th>{% trans "Time" %}</th>
-            <th>{% trans "Info" %}</th>
-            <th>{% trans "Rooms" %}</th>
-            <th>{% trans "Type" %}</th>
-            <th>{% trans "Groups" %}</th>
+            <th data-search="course">{% trans "Course" %}</th>
+            <th data-search="day">{% trans "Day" %}</th>
+            <th data-search="time">{% trans "Time" %}</th>
+            <th data-search="info">{% trans "Info" %}</th>
+            <th data-search="rooms">{% trans "Rooms" %}</th>
+            <th data-search="type">{% trans "Type" %}</th>
+            <th data-search="groups">{% trans "Groups" %}</th>
             <th>{% trans "Weeks" %}</th>
           </tr>
         </thead>

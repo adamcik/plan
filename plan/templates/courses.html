@@ -8,11 +8,11 @@
   {% if courses %}
     <div class="overflow" data-toggle-container="true">
       {% if advanced %}
-        <div>
-          {% trans "Select" %}:
-          <a data-toggle="true">{% trans "All" %}</a> -
-          <a data-toggle="false">{% trans "None" %}</a>
-        </div>
+        <p class="toggle">
+        <button data-toggle="true" tabindex="{{ tabindex|default:0|add:1 }}">{% trans "All" %}</button>
+          <button data-toggle="false" tabindex="{{ tabindex|default:0|add:2 }}">{% trans "None" %}</button>
+          <input data-filter="true" placeholder="{% trans "Filter" %}" tabindex="{{ tabindex|default:0|add:3 }}"/>
+        </p>
       {% endif %}
       <table id="courses">
         <thead>
@@ -20,13 +20,13 @@
             {% if advanced %}
               <th></th>
             {% endif %}
-            <th>{% trans "Course" %}</th>
-            <th>{% trans "Alias" %}</th>
-            <th>{% trans "Description" %}</th>
+            <th data-search="course">{% trans "Course" %}</th>
+            <th data-search="alias">{% trans "Alias" %}</th>
+            <th data-search="description">{% trans "Description" %}</th>
             {% if SHOW_SYLLABUS %}
               <th>{% trans "Syllabus" %}</th>
             {% endif %}
-            <th>{% trans "Exams" %}</th>
+            <th data-search="exams">{% trans "Exams" %}</th>
           </tr>
         </thead>
         <tbody>
