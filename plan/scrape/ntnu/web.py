@@ -85,8 +85,9 @@ class Lectures(base.LectureScraper):
                 stream = None
 
                 groups = set(activity.get("studyProgramKeys", []))
-                # TODO: Treat this a group?
-                # disiplin = set(activity.get("disiplin", []))
+
+                if not groups:
+                    groups = set(activity.get("disiplin", []))
 
                 # TODO: migrate `mlreal` to `MLREAL`
                 # TODO: match existing code without looking at case
@@ -135,7 +136,6 @@ class Lectures(base.LectureScraper):
                     tuple(sorted(groups)),
                     tuple(sorted(rooms)),
                     tuple(sorted(staff)),
-                    # tuple(sorted(disiplin)),
                 )
                 groupings.setdefault(key, set()).add(activity["week"])
 
@@ -152,7 +152,6 @@ class Lectures(base.LectureScraper):
                     groups,
                     rooms,
                     lecturers,
-                    # disiplin,
                 ) = key
 
                 yield {
