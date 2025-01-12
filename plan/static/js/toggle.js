@@ -9,11 +9,7 @@
 
     var toggle = function(state) {
       for (var j=0; j < this.length; j++) {
-        if (state) {
-          this[j].setAttribute('checked', 'checked');
-        } else {
-          this[j].removeAttribute('checked');
-        }
+        this[j].checked = state;
       }
     };
 
