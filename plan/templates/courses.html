@@ -3,17 +3,30 @@
 {% load i18n %}
 {% load tabindex %}
 
-<form action="{% url 'change-course' semester.year semester.slug slug %}" method="post">
+<form action="{% url 'change-course' semester.year semester.slug slug %}" method="post" data-toggle-container=="true">
   <h2>{% trans "Courses" %}</h2>
   {% if courses %}
-    <div class="overflow" data-toggle-container="true">
-      {% if advanced %}
-        <p class="toggle">
-        <button data-toggle="true" tabindex="{{ tabindex|default:0|add:1 }}">{% trans "All" %}</button>
-          <button data-toggle="false" tabindex="{{ tabindex|default:0|add:2 }}">{% trans "None" %}</button>
-          <input data-filter="true" placeholder="{% trans "Filter" %}" tabindex="{{ tabindex|default:0|add:3 }}"/>
-        </p>
-      {% endif %}
+    {% if advanced %}
+      <div class="yui-g noprint">
+        <div class="yui-u first">
+          <p>
+            {% trans "Filter" %}:
+            <input data-filter="true" placeholder="..." tabindex="{{ tabindex|default:0|add:3 }}"/>
+            {% trans "Select" %}:
+            <button data-toggle="true" tabindex="{{ tabindex|default:0|add:1 }}">{% trans "All" %}</button>
+            <button data-toggle="false" tabindex="{{ tabindex|default:0|add:2 }}">{% trans "None" %}</button>
+          </p>
+        </div>
+
+        <div class="yui-u">
+          <p class="right">
+            <button name="submit_name" type="submit"><i class="icon-pencil" tabindex="{{ tabindex|default:0|add:6 }}"></i> {% trans "Update names" %}</button>
+            <button name="submit_remove" type="submit" tabindex="{{ tabindex|default:0|add:6 }}"><i class="icon-remove"></i> {% trans "Remove selected" %}</button>
+          </p>
+        </div>
+      </div>
+    {% endif %}
+    <div class="overflow">
       <table id="courses">
         <thead>
           <tr>
@@ -82,13 +95,7 @@
     </div>
   {% endif %}
 
-
-  {% if courses and advanced %}
-    <p class="noprint">
-      <button name="submit_name" type="submit"><i class="icon-pencil" tabindex="{{ tabindex|default:0|add:6 }}"></i> {% trans "Update names" %}</button>
-      <button name="submit_remove" type="submit" tabindex="{{ tabindex|default:0|add:6 }}"><i class="icon-remove"></i> {% trans "Remove selected" %}</button>
-    </p>
-  {% else %}
+  {% if not courses or not advanced %}
     <p class="noprint">
       {% url 'schedule-advanced' semester.year semester.slug slug as advanced_url %}
       {% blocktrans %}

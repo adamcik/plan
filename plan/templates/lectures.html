@@ -4,16 +4,35 @@
 
 {% if lectures %}
   <h2>{% trans "Lecture list" %}</h2>
-  <form action="{% url 'change-lectures' semester.year semester.slug slug %}" method="post">
-    <div id="lectures" class="overflow" data-toggle-container="true">
-      {% if advanced %}
-        <p class="toggle">
-        <button data-toggle="true" tabindex="{{ tabindex|default:0|add:1 }}">{% trans "All" %}</button>
-        <button data-toggle="false" tabindex="{{ tabindex|default:0|add:2 }}">{% trans "None" %}</button>
-        <input data-filter="true" placeholder="{% trans "Filter" %}" tabindex="{{ tabindex|default:0|add:3 }}"/>
-        </p>
-      {% endif %}
-      <table>
+  <form action="{% url 'change-lectures' semester.year semester.slug slug %}" method="post" data-toggle-container="true">
+    {% if advanced %}
+      <div class="yui-g noprint">
+        <div class="yui-u first">
+          <p>
+            {% trans "Filter" %}:
+            <input data-filter="true" placeholder="..." tabindex="{{ tabindex|default:0|add:3 }}"/>
+            {% trans "Select" %}:
+            <button data-toggle="true" tabindex="{{ tabindex|default:0|add:1 }}">{% trans "All" %}</button>
+            <button data-toggle="false" tabindex="{{ tabindex|default:0|add:2 }}">{% trans "None" %}</button>
+          </p>
+        </div>
+        <div class="yui-u">
+          <p class="right">
+            <button type="submit" class="right" tabindex={{ tabindex|default:0|add:5 }}"><i class="icon-ban-circle"></i> {% trans "Hide selected lectures" %}</span></button>
+          </p>
+        </div>
+      </div>
+    {% else %}
+      <p>
+        {% url 'schedule-advanced' semester.year semester.slug slug as advanced_url %}
+        {% blocktrans %}
+          Go to <a href="{{ advanced_url }}#lectures">advanced options</a>
+          to toggle which lectures to hide.
+        {% endblocktrans %}
+      </p>
+    {% endif %}
+    <div class="overflow">
+      <table id="lectures">
         <thead>
           <tr>
             {% if advanced %}
@@ -66,16 +85,5 @@
         </tbody>
       </table>
     </div>
-    <p class="noprint">
-      {% if advanced %}
-        <button type="submit" tabindex={{ tabindex|default:0|add:5 }}"><i class="icon-ban-circle"></i> {% trans "Hide selected lectures" %}</span></button>
-      {% else %}
-        {% url 'schedule-advanced' semester.year semester.slug slug as advanced_url %}
-        {% blocktrans %}
-          Go to <a href="{{ advanced_url }}#lectures">advanced options</a>
-          to toggle which lectures to hide.
-        {% endblocktrans %}
-      {% endif %}
-    </p>
   </form>
 {% endif %}
