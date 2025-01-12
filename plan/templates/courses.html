@@ -5,7 +5,14 @@
 <form action="{% url 'change-course' semester.year semester.slug slug %}" method="post">
   <h2>{% trans "Courses" %}</h2>
   {% if courses %}
-    <div class="overflow">
+    <div class="overflow" data-toggle-container="true">
+      {% if advanced %}
+        <div>
+          {% trans "Select" %}:
+          <a data-toggle="true">{% trans "All" %}</a> -
+          <a data-toggle="false">{% trans "None" %}</a>
+        </div>
+      {% endif %}
       <table id="courses">
         <thead>
           <tr>

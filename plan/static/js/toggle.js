@@ -3,27 +3,20 @@
 (function() {
   function init() {
     document.removeEventListener('DOMContentLoaded', arguments.callee, false);
-    var groups = document.querySelectorAll('#change-groups .groupbox'),
-        template = document.getElementById('toogle-template'),
-        wrapper, inputs;
 
-    var toggle = function(state) {
-      for (var j=0; j < this.length; j++) {
-        this[j].checked = state;
-      }
-    };
-
-    for (var i=0; i < groups.length; i++) {
-      inputs = groups[i].querySelectorAll('input');
-      wrapper = template.cloneNode(true);
-      wrapper.removeAttribute('id');
-      wrapper.removeAttribute('style');
-      wrapper.querySelector('.toogle-all').addEventListener(
-        'click', toggle.bind(inputs, true));
-      wrapper.querySelector('.toogle-none').addEventListener(
-        'click', toggle.bind(inputs, false));
-
-      groups[i].querySelector('strong').parentNode.appendChild(wrapper);
+    for (var group of document.querySelectorAll('[data-toggle-container]')) {
+      group.style.display = 'block';
+      group.querySelectorAll('[data-toggle]').forEach(toggle => {
+        toggle.style.cursor = 'pointer';
+        toggle.addEventListener('click', ((inputs, event) => {
+          inputs.forEach(input => {
+            const targetState = event.target.dataset.toggle == "true";
+            if (input.checked != targetState) {
+              input.click();
+            }
+          });
+        }).bind(null, group.querySelectorAll('input[type="checkbox"]')))
+      })
     }
   }
 

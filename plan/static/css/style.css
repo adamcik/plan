@@ -218,6 +218,10 @@ td.error input, td.error select {
 	opacity: 1;
 }
 
+#toggle-template {
+  display: none;
+}
+
 /* Autocomplete */
 .autocomplete-suggestions {
 	width: auto !important;

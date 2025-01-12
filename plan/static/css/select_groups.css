@@ -11,6 +11,3 @@
 	list-style: none;
 	white-space: nowrap;
 }
-#change-groups .toogle-all, #change-groups .toogle-none {
-	cursor: pointer;
-}

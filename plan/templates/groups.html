@@ -8,33 +8,33 @@
     {% trans "Please choose the course variants you belong to." %}
   </p>
   <div id="change-groups">
-    <div class="toogle tiny" id="toogle-template">
-      <a class="toogle-all">{% trans "All" %}</a> -
-      <a class="toogle-none">{% trans "None" %}</a>
-    </div>
     {% for course in courses %}
-        <div class="course-{{ course.id }} groupbox" title="{{ course.name }}">
-          <p>
-            {# TODO(adamcik): allow users to set alias in this form? #}
-            <strong>{{ course.alias|default:course.code }}</strong>
-            {% if course.name %}
-              <br />
-              <span class="small">{{ course.name }}</span>
-            {% endif %}
-          </p>
-          <div>
-            {% if course.group_form %}
-              {{ course.group_form.groups }}
-            {% else %}
-              <ul>
-                <li>{% trans "No groups" %}</li>
-              </ul>
-            {% endif %}
-          </div>
+      <div class="course-{{ course.id }} groupbox" data-toggle-container="true" title="{{ course.name }}">
+        <div>
+          {# TODO(adamcik): allow users to set alias in this form? #}
+          <strong>{{ course.alias|default:course.code }}</strong>
+          {% if course.name %}
+            <br />
+            <span class="small">{{ course.name }}</span>
+          {% endif %}
         </div>
-        {% if advanced %}
-          {% cycle "" "" "<hr class='clear hidden' />" %}
-        {% endif %}
+        <div class="toggle">
+          <a data-toggle="true">{% trans "All" %}</a> -
+          <a data-toggle="false">{% trans "None" %}</a>
+        </div>
+        <div>
+          {% if course.group_form %}
+            {{ course.group_form.groups }}
+          {% else %}
+            <ul>
+              <li>{% trans "No groups" %}</li>
+            </ul>
+          {% endif %}
+        </div>
+      </div>
+      {% if advanced %}
+        {% cycle "" "" "<hr class='clear hidden' />" %}
+      {% endif %}
     {% endfor %}
   </div>
   <p class="clear">
