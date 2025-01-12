@@ -43,7 +43,7 @@
               <td>{{ l.alias|default:l.course.code }}</td>
               <td>{{ l.get_day_display }}</td>
               <td class="nowrap">{{ l.start|time }}-{{ l.end|time }}</td>
-              <td class="small">{{l.title }}{% if l.title and l.summary %} - {% endif %}{{ l.summary }}</td>
+              <td class="small">{{l.title|default:"" }}{% if l.title and l.summary %} - {% endif %}{{ l.summary|default:"" }}</td>
               <td class="small">
                 {% if l.stream %}
                   <a href="{{ l.stream }}">{% trans "Stream" %}</a>{% if rooms|get:l.id %}, {% endif %}
