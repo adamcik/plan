@@ -24,7 +24,7 @@
   }
 
   function normalize(value) {
-    return value.trim().toLowerCase();
+    return value.trim().toLowerCase().replace(/\s+/, ' ');
   }
 
   function init() {
@@ -43,14 +43,14 @@
       const data = rows.map(tr =>
         [...tr.children].map((child, index) =>
           keys[index] !== null ? normalize(child.textContent) : ''
-        ).filter(d => d.length > 0)
+        ).filter(d => d.length > 0).join(' ')
       );
 
       const update = () => {
-        const needle = normalize(filter.value).split(/\s+/).filter(n => n.length > 0);
+        const needle = normalize(filter.value).split(' ').filter(n => n.length > 0);
 
         const result = data.map((d, index) => {
-          return needle.every(n => d.some(v => v.includes(n))) ? index : null;
+          return needle.every(n => d.includes(n)) ? index : null;
         });
 
         rows.forEach((tr, index) => tr.hidden = !(needle.length == 0 || result.includes(index)));
