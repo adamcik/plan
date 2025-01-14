@@ -115,7 +115,7 @@ Stream: {{ lecture.stream }}
 {% endif %}
 {{ lecture.title }}{% if lecture.summary and lecture.title %} - {% endif %}{{ lecture.summary }}
 {% for room in rooms %}
- - {{ room.name }}{% if room.url %} (kart: {{ room.url }}){% endif %}{% endfor %}
+ - {{ room.name }}{% if room.url %}, kart: {{ room.url }}{% endif %}{% endfor %}
 """.strip()
 )
 
