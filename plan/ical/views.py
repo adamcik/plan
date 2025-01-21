@@ -109,13 +109,13 @@ def ical(request, year, semester_type, slug, ical_type=None):
 # TODO: Consider adding redirect/url-shortner for rooms?
 DESCRIPTION_TEXT = template.Template(
     """
-{{ lecture.course.name }} ({{ lecture.type }})
+{{ lecture.course.name }} ({{ lecture.type|default:"" }})
 {% if lecture.stream %}
 Stream: {{ lecture.stream }}
 {% endif %}
-{{ lecture.title }}{% if lecture.summary and lecture.title %} - {% endif %}{{ lecture.summary }}
+{{ lecture.title|default:"" }}{% if lecture.summary and lecture.title %} - {% endif %}{{ lecture.summary|default:"" }}
 {% for room in rooms %}
- - {{ room.name }}{% if room.url %}, kart: {{ room.url }}{% endif %}{% endfor %}
+ - {{ room.name }}{% if room.url %}, {{ room.url }}{% endif %}{% endfor %}
 """.strip()
 )
 
