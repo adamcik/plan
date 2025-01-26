@@ -37,6 +37,9 @@ class CspMiddleware(MiddlewareMixin):
         if response.status_code in (404, 500) and settings.DEBUG:
             return response
 
+        if "html" not in response["Content-Type"]:
+            return response
+
         policy = [
             "default-src 'self'",
             f"script-src 'self' 'nonce-{request._csp_nonce}'",
