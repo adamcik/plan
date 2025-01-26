@@ -2,7 +2,9 @@
 
 import datetime
 import math
+import random
 import socket
+import time
 
 import vobject
 from dateutil import rrule, tz
@@ -42,16 +44,23 @@ def ical(request, year, semester_type, slug, ical_type=None):
 
     if_modified_since = parse_http_date_safe(request.META.get("HTTP_IF_MODIFIED_SINCE"))
 
-    cache_headers = {
+    if semester.stale:
+        scale = 24 * 60 * 60
+    else:
+        scale = 60
+    cache_timeout = 30 * scale + random.randrange(-scale, scale)
+
+    headers = {
         "X-Robots-Tag": "noindex, nofollow",
-        "Cache-Control": "max-age=%d"
-        % (30 * 60 if not semester.stale else 30 * 24 * 60 * 60),
+        "Cache-Control": "max-age=%d" % cache_timeout,
+        "Expires": http_date(time.time() + cache_timeout),
     }
+
     if last_modified > 0:
-        cache_headers["Last-Modified"] = http_date(last_modified)
+        headers["Last-Modified"] = http_date(last_modified)
 
     if if_modified_since is not None and last_modified <= if_modified_since:
-        return http.HttpResponseNotModified(headers=cache_headers)
+        return http.HttpResponseNotModified(headers=headers)
 
     resources = [_("lectures"), _("exams")]
     if ical_type and ical_type not in resources:
@@ -96,7 +105,7 @@ def ical(request, year, semester_type, slug, ical_type=None):
     )
 
     response = http.HttpResponse(
-        icalstream, content_type="text/calendar", headers=cache_headers
+        icalstream, content_type="text/calendar", headers=headers
     )
     response["Content-Type"] = "text/calendar; charset=utf-8"
     response["Filename"] = filename  # IE needs this
