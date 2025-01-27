@@ -28,11 +28,13 @@ def url_helper(regexp, *args, **kwargs):
     return urls.url(regexp.format(**URL_ALIASES), *args, **kwargs)
 
 
-def expires_in(timeout):
+def expires_in(timeout: datetime.timedelta):
     def decorator(func):
-        def wrapper(*args, **kwargs):
-            response = func(*args, **kwargs)
-            response["Expires"] = http_utils.http_date(time.time() + timeout)
+        def wrapper(*args, **kwargs) -> http.HttpResponse:
+            response: http.HttpResponse = func(*args, **kwargs)
+            response["Expires"] = http_utils.http_date(
+                time.time() + timeout.total_seconds()
+            )
             return response
 
         return wrapper
