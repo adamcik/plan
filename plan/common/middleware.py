@@ -38,7 +38,7 @@ class CspMiddleware(MiddlewareMixin):
         if response.status_code in (404, 500) and settings.DEBUG:
             return response
 
-        if "html" not in response["Content-Type"]:
+        if "html" not in response.get("Content-Type", ""):
             return response
 
         policy = [
