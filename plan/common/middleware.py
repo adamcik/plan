@@ -26,6 +26,7 @@ class HtmlMinifyMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
         if self.should_minify(response):
             response.content = RE_WHITESPACE.sub(b" ", response.content)
+        response.headers["Content-Length"] = len(response.content)
         return response
 
 
