@@ -2,6 +2,7 @@
 
 import datetime
 import operator
+import random
 import re
 import time
 
@@ -26,6 +27,17 @@ URL_ALIASES = {
 def url_helper(regexp, *args, **kwargs):
     """Helper that inserts our url aliases using string formating."""
     return urls.url(regexp.format(**URL_ALIASES), *args, **kwargs)
+
+
+def cache_headers(timeout: datetime.timedelta, jitter: float = 0.0) -> dict[str, str]:
+    seconds = timeout.total_seconds()
+    if jitter > 0:
+        seconds += random.uniform(0, seconds * jitter)
+
+    return {
+        "Expires": http_utils.http_date(time.time() + seconds),
+        "Cache-Control": "max-age=%d" % seconds,
+    }
 
 
 def expires_in(timeout: datetime.timedelta):
