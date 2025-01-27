@@ -5,6 +5,8 @@ import operator
 import random
 import re
 import time
+import typing
+import typing_extensions
 
 from django import http, template
 from django.conf import settings, urls
@@ -40,13 +42,16 @@ def cache_headers(timeout: datetime.timedelta, jitter: float = 0.0) -> dict[str,
     }
 
 
+Params = typing_extensions.ParamSpec("Params")
+ViewDecorator = typing.Callable[Params, http.HttpResponse]
+
+
 def expires_in(timeout: datetime.timedelta):
-    def decorator(func):
-        def wrapper(*args, **kwargs) -> http.HttpResponse:
-            response: http.HttpResponse = func(*args, **kwargs)
-            response["Expires"] = http_utils.http_date(
-                time.time() + timeout.total_seconds()
-            )
+    def decorator(func: ViewDecorator[Params]) -> ViewDecorator[Params]:
+        def wrapper(*args: Params.args, **kwargs: Params.kwargs) -> http.HttpResponse:
+            response = func(*args, **kwargs)
+            for name, value in cache_headers(timeout).items():
+                response.headers[name] = value
             return response
 
         return wrapper
