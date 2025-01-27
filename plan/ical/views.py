@@ -2,9 +2,7 @@
 
 import datetime
 import math
-import random
 import socket
-import time
 
 import vobject
 from dateutil import rrule, tz
@@ -16,6 +14,7 @@ from django.shortcuts import reverse
 from django.utils import translation
 from django.utils.http import parse_http_date_safe
 
+from plan.common import utils
 from plan.common.models import Exam, Lecture, Room, Semester, Subscription, Week
 
 _ = translation.gettext
@@ -23,7 +22,7 @@ _ = translation.gettext
 
 def ical(request, year, semester_type, slug, ical_type=None):
     try:
-        semester = Semester.objects.get(year=year, type=semester_type)
+        semester: Semester = Semester.objects.get(year=year, type=semester_type)
     except Semester.DoesNotExist:
         return http.HttpResponseNotFound()
 
@@ -45,16 +44,12 @@ def ical(request, year, semester_type, slug, ical_type=None):
     if_modified_since = parse_http_date_safe(request.META.get("HTTP_IF_MODIFIED_SINCE"))
 
     if semester.stale:
-        scale = 24 * 60 * 60
+        cache_timeout = datetime.timedelta(days=30)
     else:
-        scale = 60
-    cache_timeout = 30 * scale + random.randrange(-scale, scale)
+        cache_timeout = datetime.timedelta(minutes=30)
 
-    headers = {
-        "X-Robots-Tag": "noindex, nofollow",
-        "Cache-Control": "max-age=%d" % cache_timeout,
-        "Expires": http_date(time.time() + cache_timeout),
-    }
+    headers = utils.cache_headers(cache_timeout, jitter=0.1)
+    headers["X-Robots-Tag"] = "noindex, nofollow"
 
     if last_modified > 0:
         headers["Last-Modified"] = http_date(last_modified)
