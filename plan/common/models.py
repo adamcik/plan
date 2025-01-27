@@ -322,7 +322,7 @@ class Semester(models.Model):
         return f"{self.get_type_display()} {self.year}"
 
     @property
-    def stale(self):
+    def stale(self) -> bool:
         today = datetime.date.today()
         if self.active is None:
             return today.year - self.year > 2
