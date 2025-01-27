@@ -5,10 +5,11 @@ import json
 
 from django import http, shortcuts
 from django.conf import settings
+from django.core.cache import cache
 from django.db import connection, transaction
 from django.utils import html, text, translation
 
-from plan.common import forms, timetable, utils
+from plan.common import encoding, forms, timetable, utils
 from plan.common.models import (
     Course,
     Exam,
@@ -503,51 +504,53 @@ def select_lectures(request, year, semester_type, slug):
 
 
 def api(request):
-    return http.HttpResponse(api_generator(), content_type="text/plain")
+    key = "global-stats"
 
+    response = cache.get(key)
+    if response is not None:
+        return response
 
-def api_generator():
     cursor = connection.cursor()
     cursor.execute(
         """
-        SELECT COUNT(*), added, semester_id FROM (
+        SELECT COUNT(*), date FROM (
             SELECT
-                CAST(EXTRACT(DAYS FROM MIN(s.added) - '2008-01-01') AS INT) AS added,
-                c.semester_id AS semester_id,
-                s.student_id AS student_id
-            FROM common_course c
-            JOIN common_subscription s ON (c.id = s.course_id)
-            GROUP BY 3,2
-        ) AS query GROUP BY 3,2 ORDER BY 3, 2;
+                CAST(MIN(added) AS DATE) AS date,
+                student_id
+            FROM common_subscription
+            GROUP BY student_id
+        ) AS query
+        GROUP BY date
+        ORDER BY date ASC;
         """,
     )
 
-    current = None
-    prev = 0
-    tmp = []
+    count: int
+    date: datetime.date
+    epoch = datetime.datetime.fromtimestamp(0).date()
 
-    for count, added, semester in cursor:
-        if current is None or current != semester:
-            if current:
-                yield ";".join(tmp) + "\n"
+    days_encoder = encoding.DeltaDeltaEncoder()
+    counts_encoder = encoding.DeltaDeltaEncoder()
 
-            current = semester
-            prev = 0
-            tmp = []
+    result: list[str] = []
 
-        if added - prev == 1 and count == 1:
-            tmp.append("")
-        elif added - prev == 1:
-            tmp.append(f"{count}")  # no time = 1
-        elif count == 1:
-            tmp.append(f"{added - prev}-")  # no count = 1
+    for count, date in cursor:
+        d = encoding.zig_zag_encode(days_encoder.encode((date - epoch).days))
+        c = encoding.zig_zag_encode(counts_encoder.encode(count))
+
+        if d == 0:
+            result.append(f"{c}")
         else:
-            tmp.append(f"{added - prev}-{count}")
+            result.append(f"{d}:{c}")
 
-        prev = added
-
-    if tmp is not None:
-        yield ";".join(tmp)
+    cache_timeout = datetime.timedelta(hours=1)
+    response = http.HttpResponse(
+        ",".join(result).encode(),
+        content_type="text/plain",
+        headers=utils.cache_headers(cache_timeout),
+    )
+    cache.set(key, response, cache_timeout.total_seconds())
+    return response
 
 
 def about(request):
