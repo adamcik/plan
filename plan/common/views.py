@@ -37,7 +37,7 @@ _ = translation.gettext_lazy
 get_current_week = lambda: (now() + datetime.timedelta(days=2)).isocalendar()[1]
 
 
-@utils.expires_in(3600)
+@utils.expires_in(datetime.timedelta(hours=1))
 def frontpage(request):
     try:
         semester = Semester.objects.active()
@@ -46,7 +46,7 @@ def frontpage(request):
     return shortcuts.redirect("semester", semester.year, semester.slug)
 
 
-@utils.expires_in(3600)
+@utils.expires_in(datetime.timedelta(hours=1))
 def shortcut(request, slug):
     """Redirect users to their timetable for the current semester"""
     try:
@@ -56,7 +56,7 @@ def shortcut(request, slug):
     return schedule_current(request, semester.year, semester.type, slug)
 
 
-@utils.expires_in(3600)
+@utils.expires_in(datetime.timedelta(hours=1))
 def room_redirect(request, id):
     try:
         room = Room.objects.get(id=id)
@@ -69,9 +69,9 @@ def room_redirect(request, id):
     return shortcuts.redirect(room.url)
 
 
-@utils.expires_in(3600)
+@utils.expires_in(datetime.timedelta(hours=1))
 def getting_started(request, year, semester_type):
-    """Intial top level page that greets users"""
+    """Initial top level page that greets users"""
     try:
         semester = Semester.objects.get(year=year, type=semester_type)
     except Semester.DoesNotExist:
