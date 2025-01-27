@@ -2,7 +2,6 @@
 
 {% load compress %}
 {% load i18n %}
-{% load nonce %}
 {% load static %}
 
 {% block title %}
@@ -20,139 +19,27 @@
 {% endblock %}
 
 {% block extrascript %}
-  {% nonce CSP_NONCE %}
-   {% compress js %}
-     <script type="text/javascript" src="{% static 'js/lib/d3.v7.js' %}"></script>
-   {% endcompress %}
-  {% endnonce %}
+  {% compress js %}
+    <script type="text/javascript" src={% static 'js/lib/d3.v7.js' %}></script>
+    <script type="text/javascript" src={% static 'js/lib/plot.v0.6.js' %}></script>
+    <script type="text/javascript" src={% static 'js/lib/htl.v0.3.1.js' %}></script>
+    <script type="text/javascript" src={% static 'js/calendar.js' %}></script>
+    <script type="text/javascript">
+      (function() {
+        const init = () => {
+          drawCalendar(document.querySelector("#graph"), "{% url 'api' %}");
+        };
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", init, false);
+        } else {
+          init();
+        }
+      })();
+    </script>
+  {% endcompress %}
 {% endblock %}
 
 {% block bd %}
   <div id="graph"></div>
-
-  {% nonce CSP_NONCE %}
-    {% compress js inline %}
-      <script type="text/javascript">
-        (function() {
-          var data = {{ data }};
-          var series = [];
-
-          var re = /^#(([a-f0-9]{2})([a-f0-9]{2})([a-f0-9]{2})|([a-f0-9])([a-f0-9])([a-f0-9])$)/i;
-          var hex = function(i) { return parseInt(i, 16) };
-          function rgba(c, a) {
-            c = re.exec(c);
-            if (!c) return;
-            if (c[1].length == 6)
-              c = c.slice(2,5);
-            else
-              c = c.slice(5,8);
-            return 'rgba(' + c.map(hex).join(',') + ',' + a + ')';
-          }
-
-          for (var i = 0; i < data.series.length; i++) {
-            for (var j = 0; j < data.series[i].length; j++) {
-              data.series[i][j][0] += data.first;
-              data.series[i][j][0] *= 1000 * data.scale;
-            }
-          }
-
-          const width = 920;
-          const height = 600;
-          const marginTop = 20;
-          const marginRight = 20;
-          const marginBottom = 30;
-          const marginLeft = 50;
-
-          const x = d3.scaleUtc()
-              .domain(d3.extent(data.series.flat(), d => d[0]))
-              .range([marginLeft, width - marginRight]);
-
-          const y = d3.scaleLinear()
-              .domain([0, d3.max(data.series.flat(), d => d[1])]).nice()
-              .range([height - marginBottom, marginTop]);
-
-          const area = d3.area()
-            .x(d => d[0])
-            .y0(y(0))
-            .y1(d => d[1]);
-
-          const groups = data.series.map((s, i) => s.map(d => [x(d[0]), y(d[1]), i]));
-
-          const svg = d3.create("svg")
-              .attr("width", width)
-              .attr("height", height)
-              .attr("viewBox", [0, 0, width, height]);
-
-          svg.append("g")
-              .attr("transform", `translate(0,${height - marginBottom})`)
-              .call(d3.axisBottom(x).ticks(width / 80).tickSizeOuter(0));
-
-
-          svg.append("g")
-              .attr("transform", `translate(${marginLeft},0)`)
-              .call(d3.axisLeft(y).ticks(height / 40))
-              .call(g => g.select(".domain").remove())
-              .call(g => g.selectAll(".tick line").clone()
-                  .attr("x2", width - marginLeft - marginRight)
-                  .attr("stroke-opacity", 0.1));
-
-          const color = d3.scaleOrdinal(d3.schemePastel2);
-
-          const path = svg.append("g")
-              .attr("stroke", "#737373")
-              .attr("stroke-width", 1)
-              .attr("stroke-linejoin", "round")
-              .attr("stroke-linecap", "round")
-              .attr("fill-opacity", "0.1")
-            .selectAll("path")
-            .data(groups)
-            .join("path")
-              .style("mix-blend-mode", "multiply")
-              .attr("d", area)
-              .attr("fill", d => color(d[2]));
-
-          const dot = svg.append("g")
-            .attr("display", "none");
-
-          dot.append("circle")
-              .attr("r", 2.5);
-
-          dot.append("text")
-              .attr("text-anchor", "middle")
-              .attr("y", -8);
-
-          /*
-          svg
-              .on("pointerenter", pointerentered)
-              .on("pointermove", pointermoved)
-              .on("pointerleave", pointerleft)
-              .on("touchstart", event => event.preventDefault());
-          */
-
-          document.getElementById("graph").appendChild(svg.node());
-
-          const points = groups.flat();
-
-          function pointermoved(event) {
-            const [xm, ym] = d3.pointer(event);
-            const i = d3.leastIndex(points, ([x,y]) => Math.hypot(x - xm, y - ym));
-            const [x, y, k] = points[i];
-            path.style("stroke", ({z}) => z === k ? null : "#ddd").filter(({z}) => z === k).raise();
-            dot.attr("transform", `translate(${x},${y})`);
-            dot.select("text").text(k);  // So translated value and semester?
-          }
-
-          function pointerentered() {
-            // area.style("mix-blend-mode", null).style("stroke", "#ddd");
-            dot.attr("display", null);
-          }
-
-          function pointerleft() {
-            path.style("mix-blend-mode", "multiply").style("stroke", null);
-            dot.attr("display", "none");
-          }
-        })();
-      </script>
-    {% endcompress %}
-  {% endnonce %}
 {% endblock %}

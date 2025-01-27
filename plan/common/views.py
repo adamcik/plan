@@ -507,7 +507,7 @@ def api(request):
     key = "global-stats"
 
     response = cache.get(key)
-    if response is not None:
+    if response:
         return response
 
     cursor = connection.cursor()
@@ -516,9 +516,11 @@ def api(request):
         SELECT COUNT(*), date FROM (
             SELECT
                 CAST(MIN(added) AS DATE) AS date,
-                student_id
-            FROM common_subscription
-            GROUP BY student_id
+                student_id,
+                semester_id
+            FROM common_subscription s
+            JOIN common_course c ON (c.id = s.course_id)
+            GROUP BY student_id, semester_id
         ) AS query
         GROUP BY date
         ORDER BY date ASC;
@@ -543,7 +545,7 @@ def api(request):
         else:
             result.append(f"{d}:{c}")
 
-    cache_timeout = datetime.timedelta(hours=1)
+    cache_timeout = datetime.timedelta(hours=12)
     response = http.HttpResponse(
         ",".join(result).encode(),
         content_type="text/plain",
