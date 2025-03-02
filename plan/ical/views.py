@@ -20,6 +20,8 @@ from plan.common.models import Exam, Lecture, Room, Semester, Subscription, Week
 _ = translation.gettext
 
 
+# TODO: Put last modified ts a cache key, and delete that on all posts. I.e.
+# the old way of doing it.
 def ical(request, year, semester_type, slug, ical_type=None):
     try:
         semester: Semester = Semester.objects.get(year=year, type=semester_type)
@@ -44,9 +46,9 @@ def ical(request, year, semester_type, slug, ical_type=None):
     if_modified_since = parse_http_date_safe(request.META.get("HTTP_IF_MODIFIED_SINCE"))
 
     if semester.stale:
-        cache_timeout = datetime.timedelta(days=30)
+        cache_timeout = datetime.timedelta(days=90)
     else:
-        cache_timeout = datetime.timedelta(minutes=30)
+        cache_timeout = datetime.timedelta(hours=6)
 
     headers = utils.cache_headers(cache_timeout, jitter=0.1)
     headers["X-Robots-Tag"] = "noindex, nofollow"
