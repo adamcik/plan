@@ -9,6 +9,7 @@ dependencies = [
   "psycopg2~=2.8.6",
   "requests~=2.25.1",
   "tqdm",
+  "typing-extensions>=4.12.2",
   "vobject~=0.9.6.1",
 ]
 name = "plan"

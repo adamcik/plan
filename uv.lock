@@ -155,6 +155,7 @@ dependencies = [
     { name = "psycopg2" },
     { name = "requests" },
     { name = "tqdm" },
+    { name = "typing-extensions" },
     { name = "vobject" },
 ]
 
@@ -171,6 +172,7 @@ requires-dist = [
     { name = "psycopg2", specifier = "~=2.8.6" },
     { name = "requests", specifier = "~=2.25.1" },
     { name = "tqdm" },
+    { name = "typing-extensions", specifier = ">=4.12.2" },
     { name = "vobject", specifier = "~=0.9.6.1" },
 ]
 
