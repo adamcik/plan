@@ -2,6 +2,8 @@
 
 import datetime
 import math
+import gzip
+import re
 import socket
 
 import vobject
@@ -20,6 +22,8 @@ from plan.common.models import Exam, Lecture, Room, Semester, Subscription, Week
 
 _ = translation.gettext
 
+re_accepts_gzip = re.compile(r"\bgzip\b")
+
 
 # TODO: Put last modified ts a cache key, and delete that on all posts. I.e.
 # the old way of doing it.
@@ -35,8 +39,18 @@ def ical(request, year, semester_type, slug, ical_type=None):
     except ValueError:
         return http.HttpResponse(status=400)
 
-    response = cache.get(filename)
+    ae = request.META.get("HTTP_ACCEPT_ENCODING", "")
+    use_gzip = re_accepts_gzip.search(ae)
+
+    key = f"{filename}.gz"
+    response = cache.get(key)
+
     if response is not None:
+        if not use_gzip:
+            response.content = gzip.decompress(response.content)
+            response.headers["Content-Length"] = str(len(response.content))
+            del response.headers["Content-Encoding"]
+
         response["X-Cache"] = "hit"
         return response
 
@@ -115,8 +129,23 @@ def ical(request, year, semester_type, slug, ical_type=None):
     response["Filename"] = filename  # IE needs this
     response["Content-Disposition"] = "attachment; filename=%s" % filename
 
-    cache.set(filename, response, timeout=datetime.timedelta(days=7).total_seconds())
+    original = response.content
+
+    response.content = gzip.compress(original, compresslevel=6, mtime=0)
+    response.headers["Content-Length"] = str(len(response.content))
+    response.headers["Content-Encoding"] = "gzip"
+
+    cache.set(
+        key,
+        response,
+        timeout=settings.TIMETABLE_ICAL_CACHE_DURATION.total_seconds(),
+    )
     response["X-Cache"] = "miss"
+
+    if not use_gzip:
+        response.content = original
+        response.headers["Content-Length"] = str(len(response.content))
+        del response.headers["Content-Encoding"]
 
     # TODO(adamcik): Rate limit remote hosts?
     return response

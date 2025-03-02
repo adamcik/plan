@@ -1,6 +1,7 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 from datetime import time
+from datetime import timedelta
 
 import pkg_resources
 
@@ -234,3 +235,6 @@ TIMETABLE_SHOW_SYLLABUS = True
 
 # The CSP report URI to use.
 TIMETABLE_REPORT_URI = None
+
+# How long to cache ical feeds for in memory (i.e. not HTTP header caching)
+TIMETABLE_ICAL_CACHE_DURATION = timedelta(days=30)
