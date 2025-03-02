@@ -320,12 +320,13 @@ def select_groups(request, year, semester_type, slug):
                     ).get(course=c)
 
                     subscription.groups.set(group_form.cleaned_data["groups"])
-
                     subscription.save()  # Update last modified.
 
-            return shortcuts.redirect(
-                "schedule-advanced", year, Semester.localize(semester_type), slug
-            )
+            utils.clear_cache(year, semester_type, slug)
+
+        return shortcuts.redirect(
+            "schedule-advanced", year, Semester.localize(semester_type), slug
+        )
 
     color_map = utils.ColorMap(hex=True)
     subscription_groups = Subscription.get_groups(year, semester_type, slug)
@@ -422,6 +423,8 @@ def select_course(request, year, semester_type, slug, add=False):
                 except Course.DoesNotExist:
                     errors.append(l)
 
+            utils.clear_cache(year, semester_type, slug)
+
             if errors or to_many_subscriptions:
                 return shortcuts.render(
                     request,
@@ -454,6 +457,8 @@ def select_course(request, year, semester_type, slug, add=False):
                 if Subscription.objects.filter(student__slug=slug).count() == 0:
                     Student.objects.filter(slug=slug).delete()
 
+            utils.clear_cache(year, semester_type, slug)
+
         elif "submit_name" in request.POST:
             subscriptions = Subscription.objects.get_subscriptions(
                 year, semester_type, slug
@@ -471,6 +476,8 @@ def select_course(request, year, semester_type, slug, add=False):
 
                     u.alias = alias
                     u.save()
+
+            utils.clear_cache(year, semester_type, slug)
 
     return shortcuts.redirect(
         "schedule-advanced", year, Semester.localize(semester_type), slug
@@ -497,6 +504,8 @@ def select_lectures(request, year, semester_type, slug):
                     subscription.exclude.clear()
 
                 subscription.save()  # Trigger last_modified update
+
+        utils.clear_cache(year, semester_type, slug)
 
     return shortcuts.redirect(
         "schedule-advanced", year, Semester.localize(semester_type), slug

@@ -8,6 +8,7 @@ import vobject
 from dateutil import rrule, tz
 from django import http, template, urls
 from django.conf import settings
+from django.core.cache import cache
 from django.db.models import Max
 from django.http.response import http_date
 from django.shortcuts import reverse
@@ -23,6 +24,22 @@ _ = translation.gettext
 # TODO: Put last modified ts a cache key, and delete that on all posts. I.e.
 # the old way of doing it.
 def ical(request, year, semester_type, slug, ical_type=None):
+    resources = [_("lectures"), _("exams")]
+    if ical_type and ical_type not in resources:
+        raise ValueError("Invalid ical_type")
+    elif ical_type:
+        resources = [ical_type]
+
+    try:
+        filename = utils.ical_filename(year, semester_type, slug, resources)
+    except ValueError:
+        return http.HttpResponse(status=400)
+
+    response = cache.get(filename)
+    if response is not None:
+        response["X-Cache"] = "hit"
+        return response
+
     try:
         semester: Semester = Semester.objects.get(year=year, type=semester_type)
     except Semester.DoesNotExist:
@@ -59,12 +76,6 @@ def ical(request, year, semester_type, slug, ical_type=None):
     if if_modified_since is not None and last_modified <= if_modified_since:
         return http.HttpResponseNotModified(headers=headers)
 
-    resources = [_("lectures"), _("exams")]
-    if ical_type and ical_type not in resources:
-        return http.HttpResponse(status=400)
-    elif ical_type:
-        resources = [ical_type]
-
     title = urls.reverse("schedule", args=[year, semester_type, slug])
     hostname = settings.TIMETABLE_HOSTNAME or request.headers.get(
         "Host", socket.getfqdn()
@@ -97,16 +108,15 @@ def ical(request, year, semester_type, slug, ical_type=None):
 
     icalstream = cal.serialize()
 
-    filename = "%s.ics" % "-".join(
-        [str(semester.year), semester.type, slug] + resources
-    )
-
     response = http.HttpResponse(
         icalstream, content_type="text/calendar", headers=headers
     )
     response["Content-Type"] = "text/calendar; charset=utf-8"
     response["Filename"] = filename  # IE needs this
     response["Content-Disposition"] = "attachment; filename=%s" % filename
+
+    cache.set(filename, response, timeout=datetime.timedelta(days=7).total_seconds())
+    response["X-Cache"] = "miss"
 
     # TODO(adamcik): Rate limit remote hosts?
     return response

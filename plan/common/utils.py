@@ -10,9 +10,13 @@ import typing_extensions
 
 from django import http, template
 from django.conf import settings, urls
+from django.core.cache import cache
 from django.db import models
 from django.utils import http as http_utils
 from django.utils import text as text_utils
+from django.utils import translation
+
+_ = translation.gettext
 
 # Collection of capture groups used in urls.
 URL_ALIASES = {
@@ -40,6 +44,20 @@ def cache_headers(timeout: datetime.timedelta, jitter: float = 0.0) -> dict[str,
         "Expires": http_utils.http_date(time.time() + seconds),
         "Cache-Control": "max-age=%d" % seconds,
     }
+
+
+def ical_filename(year, semester_type, slug, resources):
+    return "%s.ics" % "-".join([year, semester_type, slug] + resources)
+
+
+def clear_cache(year, semester_type, slug):
+    cache.delete_many(
+        [
+            ical_filename(year, semester_type, slug, [_("lectures"), _("exams")]),
+            ical_filename(year, semester_type, slug, [_("lectures")]),
+            ical_filename(year, semester_type, slug, [_("exams")]),
+        ]
+    )
 
 
 Params = typing_extensions.ParamSpec("Params")
