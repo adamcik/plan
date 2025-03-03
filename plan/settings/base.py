@@ -109,12 +109,22 @@ CACHES = {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
         "KEY_PREFIX": "",
     },
+    "ical": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": "./cache/ical",
+        "TIMEOUT": timedelta(days=90).total_seconds(),
+        "KEY_PREFIX": "ical",
+        "OPTIONS": {
+            "MAX_ENTRIES": 1000000,
+        },
+    },
     "scraper": {
         "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
-        "LOCATION": "./cache",
-        "TIMEOUT": 60 * 60 * 24 * 7,
+        "LOCATION": "./cache/scraper",
+        "TIMEOUT": timedelta(days=7).total_seconds(),
+        "KEY_PREFIX": "scraper",
         "OPTIONS": {
-            "MAX_ENTRIES": 50000,
+            "MAX_ENTRIES": 500000,
         },
     },
 }

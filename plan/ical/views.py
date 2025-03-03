@@ -10,7 +10,7 @@ import vobject
 from dateutil import rrule, tz
 from django import http, template, urls
 from django.conf import settings
-from django.core.cache import cache
+from django.core.cache import caches
 from django.db.models import Max
 from django.http.response import http_date
 from django.shortcuts import reverse
@@ -43,7 +43,7 @@ def ical(request, year, semester_type, slug, ical_type=None):
     use_gzip = re_accepts_gzip.search(ae)
 
     key = f"{filename}.gz"
-    response = cache.get(key)
+    response = caches["ical"].get(key)
 
     if response is not None:
         if not use_gzip:
@@ -135,7 +135,7 @@ def ical(request, year, semester_type, slug, ical_type=None):
     response.headers["Content-Length"] = str(len(response.content))
     response.headers["Content-Encoding"] = "gzip"
 
-    cache.set(
+    caches["ical"].set(
         key,
         response,
         timeout=settings.TIMETABLE_ICAL_CACHE_DURATION.total_seconds(),
