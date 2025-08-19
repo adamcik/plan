@@ -138,7 +138,9 @@ STATICFILES_FINDERS = (
     "compressor.finders.CompressorFinder",
 )
 
-STATICFILES_DIRS = [pkg_resources.resource_filename("plan", "static")]
+STATICFILES_DIRS = [
+    pkg_resources.resource_filename("plan", "static"),
+]
 
 # -- Django compress settings:
 if DEBUG:
