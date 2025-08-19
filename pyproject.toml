@@ -26,6 +26,10 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [dependency-groups]
-dev = [
-    "django-stubs~=4.2.7",
-]
+dev = ["django-stubs~=4.2.7"]
+
+[tool.djlint]
+indent = 2
+custom_blocks = "nonce,compress"
+max_blank_lines = 1
+max_line_length = 120
