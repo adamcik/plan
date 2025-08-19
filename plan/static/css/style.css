@@ -169,8 +169,7 @@ td.error input, td.error select {
 	background: #FFC;
 	padding: 0.5em 0.5em 0;
 	margin-bottom: 1em;
-	-moz-border-radius: 5px;
-	-webkit-border-radius: 5px;
+	border-radius: 5px;
 }
 #help p {
 	margin-bottom: 0.5em;
@@ -204,6 +203,7 @@ td.error input, td.error select {
 #setlang  {
 	float: right;
 }
+
 #share {
 	text-align: center;
 	padding: 0.3em 0;
@@ -216,6 +216,15 @@ td.error input, td.error select {
 }
 #share a:hover {
 	opacity: 1;
+}
+
+#notice {
+	background: #E6F5C9;
+	font-size: 93%;
+	padding: 0.5em;
+	border: 1px solid #CCC;
+	border-radius: 5px;
+	margin-bottom: 1em;
 }
 
 /* Autocomplete */

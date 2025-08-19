@@ -7,8 +7,7 @@
 #stats div {
 	margin-bottom: 1px;
 	padding: 0.1em 0.5em;
-	-moz-border-radius: 0 2px 2px 0;
-	-webkit-border-radius: 0 2px 2px 0;
+	border-radius: 0 2px 2px 0;
 }
 #stats span {
 	float: right;
