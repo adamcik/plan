@@ -22,7 +22,7 @@ from plan.common.models import Exam, Lecture, Room, Semester, Subscription, Week
 
 _ = translation.gettext
 
-re_accepts_gzip = re.compile(r"\bgzip\b")
+RE_ACCEPTS_GZIP = re.compile(r"\bgzip\b")
 
 
 # TODO: Put last modified ts a cache key, and delete that on all posts. I.e.
@@ -40,19 +40,21 @@ def ical(request, year, semester_type, slug, ical_type=None):
         return http.HttpResponse(status=400)
 
     ae = request.META.get("HTTP_ACCEPT_ENCODING", "")
-    use_gzip = re_accepts_gzip.search(ae)
+    use_gzip = RE_ACCEPTS_GZIP.search(ae)
 
     key = f"{filename}.gz"
-    response = caches["ical"].get(key)
 
-    if response is not None:
-        if not use_gzip:
-            response.content = gzip.decompress(response.content)
-            response.headers["Content-Length"] = str(len(response.content))
-            del response.headers["Content-Encoding"]
+    if not settings.DEBUG:
+        response = caches["ical"].get(key)
 
-        response["X-Cache"] = "hit"
-        return response
+        if response is not None:
+            if not use_gzip:
+                response.content = gzip.decompress(response.content)
+                response.headers["Content-Length"] = str(len(response.content))
+                del response.headers["Content-Encoding"]
+
+            response["X-Cache"] = "hit"
+            return response
 
     try:
         semester: Semester = Semester.objects.get(year=year, type=semester_type)
