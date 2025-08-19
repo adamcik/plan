@@ -28,102 +28,109 @@
         }
     },
     {
-        "pk": 1, 
-        "model": "common.subscription", 
+        "pk": 1,
+        "model": "common.subscription",
         "fields": {
-            "added": "2009-01-03 10:13:53", 
-            "alias": "foo", 
-            "course": 1, 
+            "added": "2009-01-03 10:13:53",
+            "last_modified": "2009-01-03 10:13:53",
+            "alias": "foo",
+            "course": 1,
             "groups": [
-                1, 
+                1,
                 2
-            ], 
+            ],
             "exclude": [
                 7
-            ], 
-            "student": "1"
-        }
-    }, 
-    {
-        "pk": 2, 
-        "model": "common.subscription", 
-        "fields": {
-            "added": "2009-01-03 10:16:14", 
-            "alias": "", 
-            "course": 2, 
-            "groups": [
-                1
-            ], 
-            "exclude": [], 
-            "student": "1"
-        }
-    }, 
-    {
-        "pk": 3, 
-        "model": "common.subscription", 
-        "fields": {
-            "added": "2009-01-03 10:16:21", 
-            "alias": "", 
-            "course": 3, 
-            "groups": [
-                2
-            ], 
-            "exclude": [], 
+            ],
             "student": "1"
         }
     },
     {
-        "pk": 4, 
-        "model": "common.subscription", 
+        "pk": 2,
+        "model": "common.subscription",
         "fields": {
-            "added": "2009-01-03 13:41:56", 
-            "alias": "", 
-            "course": 1, 
+            "added": "2009-01-03 10:16:14",
+            "last_modified": "2009-01-03 10:16:14",
+            "alias": "",
+            "course": 2,
             "groups": [
                 1
-            ], 
-            "exclude": [], 
-            "student": "2"
+            ],
+            "exclude": [],
+            "student": "1"
         }
-    }, 
+    },
     {
-        "pk": 5, 
-        "model": "common.subscription", 
+        "pk": 3,
+        "model": "common.subscription",
         "fields": {
-            "added": "2009-01-03 13:42:14", 
-            "alias": "", 
-            "course": 2, 
+            "added": "2009-01-03 10:16:21",
+            "last_modified": "2009-01-03 10:16:21",
+            "alias": "",
+            "course": 3,
             "groups": [
                 2
-            ], 
-            "exclude": [], 
+            ],
+            "exclude": [],
+            "student": "1"
+        }
+    },
+    {
+        "pk": 4,
+        "model": "common.subscription",
+        "fields": {
+            "added": "2009-01-03 13:41:56",
+            "last_modified": "2009-01-03 13:41:56",
+            "alias": "",
+            "course": 1,
+            "groups": [
+                1
+            ],
+            "exclude": [],
             "student": "2"
         }
-    }, 
+    },
     {
-        "pk": 6, 
-        "model": "common.subscription", 
+        "pk": 5,
+        "model": "common.subscription",
         "fields": {
-            "added": "2009-01-03 13:42:14", 
-            "alias": "", 
-            "course": 2, 
+            "added": "2009-01-03 13:42:14",
+            "last_modified": "2009-01-03 13:42:14",
+            "alias": "",
+            "course": 2,
             "groups": [
                 2
-            ], 
-            "exclude": [], 
+            ],
+            "exclude": [],
+            "student": "2"
+        }
+    },
+    {
+        "pk": 6,
+        "model": "common.subscription",
+        "fields": {
+            "added": "2009-01-03 13:42:14",
+            "last_modified": "2009-01-03 13:42:14",
+            "alias": "",
+            "course": 2,
+            "groups": [
+                2
+            ],
+            "exclude": [],
             "student": "3"
         }
-    }, 
+    },
     {
-        "pk": 7, 
-        "model": "common.subscription", 
+        "pk": 7,
+        "model": "common.subscription",
         "fields": {
-            "added": "2009-01-03 13:42:14", 
-            "alias": "", 
-            "course": 5, 
+            "added": "2009-01-03 13:42:14",
+            "last_modified": "2009-01-03 13:42:14",
+            "alias": "",
+            "course": 5,
             "groups": [
-            ], 
-            "exclude": [], 
+            ],
+            "exclude": [],
             "student": "4"
         }
     }
