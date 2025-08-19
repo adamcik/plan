@@ -5,9 +5,10 @@ import math
 import gzip
 import re
 import socket
+import zoneinfo
 
 import vobject
-from dateutil import rrule, tz
+from dateutil import rrule
 from django import http, template, urls
 from django.conf import settings
 from django.core.cache import caches
@@ -23,6 +24,13 @@ from plan.common.models import Exam, Lecture, Room, Semester, Subscription, Week
 _ = translation.gettext
 
 RE_ACCEPTS_GZIP = re.compile(r"\bgzip\b")
+
+TZ = zoneinfo.ZoneInfo(settings.TIME_ZONE)
+UTC = zoneinfo.ZoneInfo("UTC")
+
+
+def _to_utc(dt: datetime.datetime) -> datetime.datetime:
+    return dt.replace(tzinfo=TZ).astimezone(UTC)
 
 
 # TODO: Put last modified ts a cache key, and delete that on all posts. I.e.
@@ -209,15 +217,13 @@ def add_lectutures(lectures, year, cal, request, hostname):
             vevent.add("location").value = ", ".join(r["name"] for r in rooms)
             vevent.add("description").value = desc
 
-            vevent.add("dtstart").value = d.replace(
-                hour=l.start.hour, minute=l.start.minute, tzinfo=tz.tzlocal()
+            vevent.add("dtstart").value = _to_utc(
+                d.replace(hour=l.start.hour, minute=l.start.minute)
             )
-
-            vevent.add("dtend").value = d.replace(
-                hour=l.end.hour, minute=l.end.minute, tzinfo=tz.tzlocal()
+            vevent.add("dtend").value = _to_utc(
+                d.replace(hour=l.end.hour, minute=l.end.minute)
             )
-
-            vevent.add("dtstamp").value = datetime.datetime.now(tz.tzlocal())
+            vevent.add("dtstamp").value = datetime.datetime.utcnow()
 
             vevent.add("uid").value = "lecture-%d-%s@%s" % (
                 l.id,
@@ -249,29 +255,27 @@ def add_exams(exams, cal, hostname):
 
         vevent.add("summary").value = summary
         vevent.add("description").value = desc
-        vevent.add("dtstamp").value = datetime.datetime.now(tz.tzlocal())
+        vevent.add("dtstamp").value = datetime.datetime.utcnow()
 
         vevent.add("uid").value = "exam-%d@%s" % (e.id, hostname)
 
         if e.handout_date:
             if e.handout_time:
-                vevent.add("dtstart").value = datetime.datetime.combine(
-                    e.handout_date, e.handout_time
-                ).replace(tzinfo=tz.tzlocal())
+                vevent.add("dtstart").value = _to_utc(
+                    datetime.datetime.combine(e.handout_date, e.handout_time)
+                )
             else:
                 vevent.add("dtstart").value = e.handout_date
 
             if e.exam_time:
-                vevent.add("dtend").value = datetime.datetime.combine(
-                    e.exam_date, e.exam_time
-                ).replace(tzinfo=tz.tzlocal())
+                vevent.add("dtend").value = _to_utc(
+                    datetime.datetime.combine(e.exam_date, e.exam_time)
+                )
             else:
                 vevent.add("dtend").value = e.exam_date
         else:
             if e.exam_time:
-                start = datetime.datetime.combine(e.exam_date, e.exam_time).replace(
-                    tzinfo=tz.tzlocal()
-                )
+                start = _to_utc(datetime.datetime.combine(e.exam_date, e.exam_time))
             else:
                 start = e.exam_date
 
