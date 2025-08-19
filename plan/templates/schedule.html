@@ -46,10 +46,10 @@
   {{ block.super }}
   <meta name="robots" content="noindex, nofollow, noarchive" />
   {% if next_week %}
-    <link ref="next"  href="{% url 'schedule-week' semester.year semester.slug slug next_week %}" />
+    <link ref="next"
+          href="{% url 'schedule-week' semester.year semester.slug slug next_week %}" />
   {% endif %}
 {% endblock %}
-
 
 {% block extrascript %}
   {% if courses and not advanced %}
@@ -62,7 +62,8 @@
   {% if not courses or advanced %}
     {% nonce CSP_NONCE %}
       {% compress js %}
-        <script type="text/javascript" src="{% static 'js/lib/auto-complete.min.js' %}"></script>
+        <script type="text/javascript"
+                src="{% static 'js/lib/auto-complete.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/autocomplete.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/toggle.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/advanced.js' %}"></script>
@@ -77,9 +78,7 @@
 
 {% block hd %}
   {{ block.super }}
-  <h1>
-    {% title semester slug week %}
-  </h1>
+  <h1>{% title semester slug week %}</h1>
 {% endblock %}
 
 {% block bd %}
@@ -88,9 +87,7 @@
   {% include "notice.html" %}
 
   {% if not courses %}
-    <div id="help">
-      {% include "add_courses.html" %}
-    </div>
+    <div id="help">{% include "add_courses.html" %}</div>
   {% endif %}
 
   {% include "schedule_message.html" %}
@@ -101,12 +98,8 @@
     {% if advanced %}
       {% include "courses.html" with tabindex=10 %}
       <div class="yui-g">
-        <div class="yui-u first">
-          {% include "add_courses.html" with tabindex=20 %}
-        </div>
-        <div class="yui-u">
-          {% include "groups_link.html" %}
-        </div>
+        <div class="yui-u first">{% include "add_courses.html" with tabindex=20 %}</div>
+        <div class="yui-u">{% include "groups_link.html" %}</div>
       </div>
     {% endif %}
   {% endif %}

@@ -4,7 +4,7 @@
 {% url 'course-list' semester.year semester.slug slug as course_list_url %}
 {% url 'schedule-advanced' semester.year semester.slug slug as adavanced_url %}
 
-{% url 'schedule-ical' semester.year semester.slug slug _('lectures') as ical_lectures_url%}
+{% url 'schedule-ical' semester.year semester.slug slug _('lectures') as ical_lectures_url %}
 {% url 'schedule-ical' semester.year semester.slug slug _('exams') as ical_exams_url %}
 {% url 'schedule-ical' semester.year semester.slug slug as ical_all_url %}
 
@@ -62,9 +62,15 @@
       <dt class="icon-external-link"></dt>
       <dd>
         {% trans "Google calendar:" %}
-        <a target="_blank" rel="noreferrer" href="http://www.google.com/calendar/render?cid=http://{{ request.META.HTTP_HOST }}{{ ical_lectures_url }}">{% trans "lectures" %}</a>,
-        <a target="_blank" rel="noreferrer" href="http://www.google.com/calendar/render?cid=http://{{ request.META.HTTP_HOST }}{{ ical_exams_url }}">{% trans "exams" %}</a> {% trans "or" %}
-        <a target="_blank" rel="noreferrer" href="http://www.google.com/calendar/render?cid=http://{{ request.META.HTTP_HOST }}{{ ical_all_url }}">{% trans "both combined" %}</a>.
+        <a target="_blank"
+           rel="noreferrer"
+           href="https://www.google.com/calendar/render?cid=https://{{ request.META.HTTP_HOST }}{{ ical_lectures_url }}">{% trans "lectures" %}</a>,
+        <a target="_blank"
+           rel="noreferrer"
+           href="https://www.google.com/calendar/render?cid=https://{{ request.META.HTTP_HOST }}{{ ical_exams_url }}">{% trans "exams" %}</a> {% trans "or" %}
+        <a target="_blank"
+           rel="noreferrer"
+           href="https://www.google.com/calendar/render?cid=https://{{ request.META.HTTP_HOST }}{{ ical_all_url }}">{% trans "both combined" %}</a>.
         <br />
         {% trans "Simply click the calendar type you want and it will be added to Google calendar." %}
       </dd>

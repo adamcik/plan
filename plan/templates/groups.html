@@ -1,15 +1,17 @@
 {% load i18n %}
 
-<form action="{% url 'change-groups' semester.year semester.slug slug %}" method="post" class="noprint">
+<form action="{% url 'change-groups' semester.year semester.slug slug %}"
+      method="post"
+      class="noprint">
   {% if advanced %}
     <h2 id="groups">{% trans "Change groups" %}</h2>
   {% endif %}
-  <p>
-    {% trans "Please choose the course variants you belong to." %}
-  </p>
+  <p>{% trans "Please choose the course variants you belong to." %}</p>
   <div id="change-groups">
     {% for course in courses %}
-      <div class="course-{{ course.id }} groupbox" data-toggle-container="true" title="{{ course.name }}">
+      <div class="course-{{ course.id }} groupbox"
+           data-toggle-container="true"
+           title="{{ course.name }}">
         <div>
           {# TODO(adamcik): allow users to set alias in this form? #}
           <strong>{{ course.alias|default:course.code }}</strong>
@@ -33,11 +35,13 @@
         </div>
       </div>
       {% if advanced %}
-        {% cycle "" "" "<hr class='clear hidden' />" %}
+        {% cycle "" "" '<hr class="clear hidden" />' %}
       {% endif %}
     {% endfor %}
   </div>
   <p class="clear">
-    <button type="submit"><i class="icon-save"></i> {% trans "Save groups" %}</button>
+    <button type="submit">
+      <i class="icon-save"></i> {% trans "Save groups" %}
+    </button>
   </p>
 </form>

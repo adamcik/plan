@@ -8,14 +8,11 @@
   {% trans "Number of timetables" %}
 {% endblock %}
 
-{% block lang %}
-{% endblock %}
+{% block lang %}{% endblock %}
 
 {% block hd %}
   {{ block.super }}
-  <h1>
-    {% trans "Number of timetables over time" %}
-  </h1>
+  <h1>{% trans "Number of timetables over time" %}</h1>
 {% endblock %}
 
 {% block extrascript %}
@@ -40,6 +37,4 @@
   {% endcompress %}
 {% endblock %}
 
-{% block bd %}
-  <div id="graph"></div>
-{% endblock %}
+{% block bd %}<div id="graph"></div>{% endblock %}

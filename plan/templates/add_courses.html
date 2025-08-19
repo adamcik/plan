@@ -1,7 +1,9 @@
 {% load i18n %}
 
 {% if advanced or not courses %}
-  <form action="{% url 'change-course' semester.year semester.slug slug %}" method="post" class="noprint">
+  <form action="{% url 'change-course' semester.year semester.slug slug %}"
+        method="post"
+        class="noprint">
     {% if courses %}
       <h3>{% trans "Add courses" %}</h3>
     {% endif %}
@@ -9,15 +11,23 @@
       <label for="course">{% trans "Search for courses by code or name" %}</label>
       {% if locations|length > 1 %}
         <label for="location" class="large">{% trans "in" %}</label>
-        <select id="location" name="course_location" tabindex="{{ tabindex|default:0|add:1 }}" >
+        <select id="location"
+                name="course_location"
+                tabindex="{{ tabindex|default:0|add:1 }}">
           <option value="">{% trans "any location" %}</option>
-          {% for l in locations %}
-            <option value="{{ l.id }}">{{ l.name }}</option>
-          {% endfor %}
+          {% for l in locations %}<option value="{{ l.id }}">{{ l.name }}</option>{% endfor %}
         </select>
       {% endif %}
-      <input id="course" type="text" name="course_add" data-autocomplete="{% url 'course-query' semester.year semester.slug %}" tabindex="{{ tabindex|default:0|add:2 }}"/>
-      <button name="submit_add" type="submit" tabindex="{{ tabindex|default:0|add:2 }}"><i class="icon-plus-sign"></i> {% trans "Add course" %}</button>
+      <input id="course"
+             type="text"
+             name="course_add"
+             data-autocomplete="{% url 'course-query' semester.year semester.slug %}"
+             tabindex="{{ tabindex|default:0|add:2 }}" />
+      <button name="submit_add"
+              type="submit"
+              tabindex="{{ tabindex|default:0|add:2 }}">
+        <i class="icon-plus-sign"></i> {% trans "Add course" %}
+      </button>
     </p>
   </form>
 {% endif %}

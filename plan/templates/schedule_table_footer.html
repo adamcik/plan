@@ -27,12 +27,14 @@
     <div class="yui-u">
       <p class="right">
         <i class="icon-list-alt"></i> {% trans "Weeks:" %}
-        <a href="{% url 'schedule' semester.year semester.slug slug %}"{% if all %} class="current"{% endif %}>{% trans "All" %}</a>
+        <a href="{% url 'schedule' semester.year semester.slug slug %}"
+           {% if all %}class="current"{% endif %}>{% trans "All" %}</a>
         {% if not week_is_current %}
           <a href="{% url 'schedule-current' semester.year semester.slug slug %}">{% trans "Current" %}</a>
         {% endif %}
         {% for w in weeks %}
-          <a href="{% url 'schedule-week' semester.year semester.slug slug w %}"{% ifequal w week %} class="current"{% endifequal %}>{{ w }}</a>
+          <a href="{% url 'schedule-week' semester.year semester.slug slug w %}"
+             {% ifequal w week %} class="current"{% endifequal %}>{{ w }}</a>
         {% endfor %}
       </p>
     </div>

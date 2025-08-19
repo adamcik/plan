@@ -3,7 +3,10 @@
 {% load i18n %}
 {% load tabindex %}
 
-<form action="{% url 'change-course' semester.year semester.slug slug %}" method="post" data-toggle-container=="true">
+<form action="{% url 'change-course' semester.year semester.slug slug %}"
+      method="post"
+      data-toggle-container
+      None="true">
   <h2>{% trans "Courses" %}</h2>
   {% if courses %}
     {% if advanced %}
@@ -11,7 +14,9 @@
         <div class="yui-u first">
           <p>
             {% trans "Filter" %}:
-            <input data-filter="true" placeholder="..." tabindex="{{ tabindex|default:0|add:3 }}"/>
+            <input data-filter="true"
+                   placeholder="..."
+                   tabindex="{{ tabindex|default:0|add:3 }}" />
             {% trans "Select" %}:
             <button data-toggle="true" tabindex="{{ tabindex|default:0|add:1 }}">{% trans "All" %}</button>
             <button data-toggle="false" tabindex="{{ tabindex|default:0|add:2 }}">{% trans "None" %}</button>
@@ -20,8 +25,14 @@
 
         <div class="yui-u">
           <p class="right">
-            <button name="submit_name" type="submit"><i class="icon-pencil" tabindex="{{ tabindex|default:0|add:6 }}"></i> {% trans "Update names" %}</button>
-            <button name="submit_remove" type="submit" tabindex="{{ tabindex|default:0|add:6 }}"><i class="icon-remove"></i> {% trans "Remove selected" %}</button>
+            <button name="submit_name" type="submit">
+              <i class="icon-pencil" tabindex="{{ tabindex|default:0|add:6 }}"></i> {% trans "Update names" %}
+            </button>
+            <button name="submit_remove"
+                    type="submit"
+                    tabindex="{{ tabindex|default:0|add:6 }}">
+              <i class="icon-remove"></i> {% trans "Remove selected" %}
+            </button>
           </p>
         </div>
       </div>
@@ -30,9 +41,7 @@
       <table id="courses">
         <thead>
           <tr>
-            {% if advanced %}
-              <th></th>
-            {% endif %}
+            {% if advanced %}<th></th>{% endif %}
             <th data-search="course">{% trans "Course" %}</th>
             <th data-search="alias">{% trans "Alias" %}</th>
             <th data-search="description">{% trans "Description" %}</th>
@@ -48,30 +57,29 @@
             <tr class="course-{{ course.id }}" title="{{ course.name }}">
               {% if advanced %}
                 <td>
-                  <input type="checkbox" name="course_remove" value="{{ course.id }}" class="noprint" title="{{ remove_title }}" tabindex="{{ tabindex|default:0|add:4 }}" />
+                  <input type="checkbox"
+                         name="course_remove"
+                         value="{{ course.id }}"
+                         class="noprint"
+                         title="{{ remove_title }}"
+                         tabindex="{{ tabindex|default:0|add:4 }}" />
                 </td>
               {% endif %}
               <td>
                 {% if course.url %}
-                  <a href="{{ course.url }}">
-                    {{ course.code }}
-                  </a>
+                  <a href="{{ course.url }}">{{ course.code }}</a>
                 {% else %}
                   {{ course.code }}
                 {% endif %}
               </td>
               <td>
                 {% if course.alias_form %}
-                  {% with index=tabindex|default:0|add:5 %}
-                    {{ course.alias_form.alias|tabindex:index }}
-                  {% endwith %}
+                  {% with index=tabindex|default:0|add:5 %}{{ course.alias_form.alias|tabindex:index }}{% endwith %}
                 {% else %}
                   {{ course.alias|default:"-" }}
                 {% endif %}
               </td>
-              <td>
-                {{ course.name }}
-              </td>
+              <td>{{ course.name }}</td>
               {% if SHOW_SYLLABUS %}
                 <td>
                   {% if course.syllabus %}
@@ -83,7 +91,8 @@
               {% endif %}
               <td class="nowrap">
                 {% for exam in exams|get:course.id %}
-                  {{ exam.exam_date }}{% if not forloop.last %},{% endif %}
+                  {{ exam.exam_date }}
+                  {% if not forloop.last %},{% endif %}
                 {% empty %}
                   -
                 {% endfor %}

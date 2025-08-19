@@ -4,13 +4,17 @@
 
 {% if lectures %}
   <h2>{% trans "Lecture list" %}</h2>
-  <form action="{% url 'change-lectures' semester.year semester.slug slug %}" method="post" data-toggle-container="true">
+  <form action="{% url 'change-lectures' semester.year semester.slug slug %}"
+        method="post"
+        data-toggle-container="true">
     {% if advanced %}
       <div class="yui-g noprint">
         <div class="yui-u first">
           <p>
             {% trans "Filter" %}:
-            <input data-filter="true" placeholder="..." tabindex="{{ tabindex|default:0|add:3 }}"/>
+            <input data-filter="true"
+                   placeholder="..."
+                   tabindex="{{ tabindex|default:0|add:3 }}" />
             {% trans "Select" %}:
             <button data-toggle="true" tabindex="{{ tabindex|default:0|add:1 }}">{% trans "All" %}</button>
             <button data-toggle="false" tabindex="{{ tabindex|default:0|add:2 }}">{% trans "None" %}</button>
@@ -18,7 +22,8 @@
         </div>
         <div class="yui-u">
           <p class="right">
-            <button type="submit" class="right" tabindex={{ tabindex|default:0|add:5 }}"><i class="icon-ban-circle"></i> {% trans "Hide selected lectures" %}</span></button>
+            <button type="submit" class="right" tabindex={{ tabindex|default:0|add:5 }}"><i class="icon-ban-circle"></i> {% trans "Hide selected lectures" %}
+            </button>
           </p>
         </div>
       </div>
@@ -35,9 +40,7 @@
       <table id="lectures">
         <thead>
           <tr>
-            {% if advanced %}
-              <th></th>
-            {% endif %}
+            {% if advanced %}<th></th>{% endif %}
             <th data-search="course">{% trans "Course" %}</th>
             <th data-search="day">{% trans "Day" %}</th>
             <th data-search="time">{% trans "Time" %}</th>
@@ -55,29 +58,44 @@
           {% endcomment %}
           {% for l in lectures %}
             {% blocktrans asvar exclude_title %}Hide {{ l }}{% endblocktrans %}
-            <tr class="course-{{ l.course_id }} lecture-{{ l.id }}{% if l.exclude %} excluded{% endif %}" title="{{ l.course.name }}">
+            <tr class="course-{{ l.course_id }} lecture-{{ l.id }}{% if l.exclude %} excluded{% endif %}"
+                title="{{ l.course.name }}">
               {% if advanced %}
-              <td><input type="checkbox" name="exclude" value="{{ l.id }}"{% if l.exclude %} checked="checked"{% endif %} class="noprint" title="{{ exclude_title }}" tabindex="{{ tabindex|default:0|add:4 }}"/></td>
+                <td>
+                  <input type="checkbox"
+                         name="exclude"
+                         value="{{ l.id }}"
+                         {% if l.exclude %}checked="checked"{% endif %}
+                         class="noprint"
+                         title="{{ exclude_title }}"
+                         tabindex="{{ tabindex|default:0|add:4 }}" />
+                </td>
               {% endif %}
               <td>{{ l.alias|default:l.course.code }}</td>
               <td>{{ l.get_day_display }}</td>
               <td class="nowrap">{{ l.start|time }}-{{ l.end|time }}</td>
-              <td class="small">{{l.title|default:"" }}{% if l.title and l.summary %} - {% endif %}{{ l.summary|default:"" }}</td>
+              <td class="small">
+                {{ l.title|default:"" }}
+                {% if l.title and l.summary %}-{% endif %}
+                {{ l.summary|default:"" }}
+              </td>
               <td class="small">
                 {% if l.stream %}
-                  <a href="{{ l.stream }}">{% trans "Stream" %}</a>{% if rooms|get:l.id %}, {% endif %}
+                  <a href="{{ l.stream }}">{% trans "Stream" %}</a>
+                  {% if rooms|get:l.id %},{% endif %}
                 {% endif %}
                 {% for room in rooms|get:l.id %}
                   {% if room.url %}
-                    <a href="{{ room.url }}">
-                      {{ room.name }}</a>{% if not forloop.last %},{% endif %}
+                    <a href="{{ room.url }}">{{ room.name }}</a>
+                    {% if not forloop.last %},{% endif %}
                   {% else %}
-                    {{ room.name }}{% if not forloop.last %},{% endif %}
+                    {{ room.name }}
+                    {% if not forloop.last %},{% endif %}
                   {% endif %}
                 {% endfor %}
                 {% if not rooms|get:l.id %}&nbsp;{% endif %}
               </td>
-              <td class="small">{{l.type|default:"" }}</td>
+              <td class="small">{{ l.type|default:"" }}</td>
               <td class="small">{{ groups|get:l.id|join:", " }}</td>
               <td class="small nowrap">{{ lecture_weeks|get:l.id|compact|join:", " }}</td>
             </tr>

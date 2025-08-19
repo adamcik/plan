@@ -6,7 +6,7 @@
 {% load strip %}
 
 {% block title %}
-    {% blocktrans with INSTITUTION as institution %}
+  {% blocktrans with INSTITUTION as institution %}
       Timetable generator for {{ institution }} students
     {% endblocktrans %}
 {% endblock %}
@@ -24,14 +24,13 @@
 
 {% block extrahead %}
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="{% blocktrans with INSTITUTION as institution %}Timetable generator for {{ institution }} students{% endblocktrans %}" />
+  <meta name="description"
+        content="{% blocktrans with INSTITUTION as institution %}Timetable generator for {{ institution }} students{% endblocktrans %}" />
   <link rel="icon" type="image/png" href="{% static 'gfx/icons/time.png' %}" />
 {% endblock %}
 
 {% block script %}
-  {% if STATIC_DOMAIN %}
-    <link rel="dns-prefetch" href="//{{ STATIC_DOMAIN }}" />
-  {% endif %}
+  {% if STATIC_DOMAIN %}<link rel="dns-prefetch" href="//{{ STATIC_DOMAIN }}" />{% endif %}
   {% compress js inline %}
     {% if ANALYTICS_CODE %}
       <script type="text/javascript">
@@ -43,9 +42,7 @@
     {% endif %}
   {% endcompress %}
   {% block extrascript %}{% endblock %}
-  {% if ANALYTICS_CODE %}
-    <script async src='https://www.google-analytics.com/analytics.js'></script>
-  {% endif %}
+  {% if ANALYTICS_CODE %}<script async src='https://www.google-analytics.com/analytics.js'></script>{% endif %}
 {% endblock %}
 
 {% block hd %}
@@ -55,32 +52,37 @@
 {% block ft %}
   <div class="yui-g">
     <div class="yui-u first">
-    <p>
-      {% blocktrans with INSTITUTION as institution and INSTITUTION_SITE as url %}
+      <p>
+        {% blocktrans with INSTITUTION as institution and INSTITUTION_SITE as url %}
         All lecture times and course data have been automatically retrieved
         from <a href="{{ url }}">{{ institution }}</a>. This data may not
         reflect the actual lecture times due to changes or erroneous imports.
         The service is provided as is, please ensure that the data is correct
         before relying on it.
       {% endblocktrans %}
-    </p>
+      </p>
     </div>
     <div class="yui-u">
-    <p>
-      {% now "Y" as year %}
-      {% blocktrans with INSTITUTION as institution and year as year %}
+      <p>
+        {% now "Y" as year %}
+        {% blocktrans with INSTITUTION as institution and year as year %}
       Code and design &copy; 2008-{{ year }} <b>Thomas Adamcik</b>.
       This site has no official affiliation with {{ institution }}.
       {% endblocktrans %}
-      {% if ADMINS %}
-        <a href="{% url 'frontpage' %}">{{ SITENAME }}</a>
-        {% trans "is run and hosted by" %}
-        {% for name, email in ADMINS %}
-          <b>{{ name }}</b>{% if not forloop.last %},{% else %}.{% endif %}
-        {% endfor %}
+        {% if ADMINS %}
+          <a href="{% url 'frontpage' %}">{{ SITENAME }}</a>
+          {% trans "is run and hosted by" %}
+          {% for name, email in ADMINS %}
+            <b>{{ name }}</b>
+            {% if not forloop.last %}
+              ,
+            {% else %}
+              .
+            {% endif %}
+          {% endfor %}
 
-      {% endif %}
-    </p>
+        {% endif %}
+      </p>
     </div>
   </div>
 
@@ -89,25 +91,23 @@
   <p id="attribution" class="small">
     {% blocktrans %}
     The source code is freely available under the
-    <a href="http://www.gnu.org/licenses/agpl-3.0.html">Affero General Public License</a>
+    <a href="https://www.gnu.org/licenses/agpl-3.0.html">Affero General Public License</a>
     at <a href="{{ SOURCE_URL }}">{{ SOURCE_URL }}</a>.
     {% endblocktrans %}
     <br />
     <span class="small">
-    {% trans "Built using:" %}
-    <a href="http://www.python.org/">Python</a> &bull;
-    <a href="http://www.djangoproject.com/">Django</a> &bull;
-    <a href="http://developer.yahoo.com/yui/">Yahoo! UI Library</a> &bull;
-    <a href="http://fontawesome.io/">Font Awesome</a> &bull;
-    <a href="http://colorbrewer2.org/">ColorBrewer</a>
+      {% trans "Built using:" %}
+      <a href="https://www.python.org/">Python</a> &bull;
+      <a href="https://www.djangoproject.com/">Django</a> &bull;
+      <a href="https://developer.yahoo.com/yui/">Yahoo! UI Library</a> &bull;
+      <a href="https://fontawesome.io/">Font Awesome</a> &bull;
+      <a href="https://colorbrewer2.org/">ColorBrewer</a>
     </span>
   </p>
 
   {% if SHARE_LINKS %}
     <p id="share">
-      {% for icon, name, url in SHARE_LINKS %}
-          <a href="{{ url }}"><i class="{{ icon }}"></i> {{ name }}</a>
-      {% endfor %}
+      {% for icon, name, url in SHARE_LINKS %}<a href="{{ url }}"><i class="{{ icon }}"></i> {{ name }}</a>{% endfor %}
     </p>
   {% endif %}
 {% endblock %}

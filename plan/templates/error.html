@@ -25,9 +25,7 @@
         {% trans "Adding the following courses failed:" %}
       </p>
       <ul>
-        {% for c in courses %}
-          <li>{{ c }}</li>
-        {% endfor %}
+        {% for c in courses %}<li>{{ c }}</li>{% endfor %}
       </ul>
     {% endif %}
     <p class="large">
