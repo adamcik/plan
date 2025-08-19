@@ -1,9 +1,10 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from datetime import time
-from datetime import timedelta
+from datetime import date, time, timedelta
 
 import pkg_resources
+
+from django.utils.safestring import mark_safe
 
 
 def ugettext(s):
@@ -250,3 +251,14 @@ TIMETABLE_REPORT_URI = None
 
 # How long to cache ical feeds for in memory (i.e. not HTTP header caching)
 TIMETABLE_ICAL_CACHE_DURATION = timedelta(days=30)
+
+TIMETABLE_NOTICE_CUTOFF = date(2025, 8, 24)
+
+TIMETABLE_NOTICE_HTML = mark_safe("""
+Vil du drive med IT-systemer på høyt nivå med lav terskel?
+<a href="https://itk.samfundet.no/opptak/?utm_source=timeplan">IT-komiteen</a>
+<a href="https://www.samfundet.no/verv/1963-it-funksjonaer?utm_source=timeplan">søker</a>
+nye medlemmer! Er ikke data noe for deg? Finn andre verv på
+<a href="https://samfundet.no/opptak?utm_source=timeplan">samfundet.no</a>
+eller <a href="https://apps.uka.no/opptak/?utm_source=timeplan">uka.no</a>.
+""")

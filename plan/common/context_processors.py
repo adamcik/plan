@@ -1,5 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from datetime import date
 import socket
 import urllib.parse
 
@@ -25,6 +26,10 @@ def processor(request):
     if static_domain == sitename:
         static_domain = None
 
+    notice = None
+    if date.today() <= settings.TIMETABLE_NOTICE_CUTOFF:
+        notice = settings.TIMETABLE_NOTICE_HTML
+
     return {
         "ANALYTICS_CODE": settings.TIMETABLE_ANALYTICS_CODE,
         "INSTITUTION": settings.TIMETABLE_INSTITUTION,
@@ -36,4 +41,5 @@ def processor(request):
         "STATIC_DOMAIN": static_domain,
         "SITENAME": sitename,
         "CSP_NONCE": getattr(request, "_csp_nonce", None),
+        "NOTICE": notice,
     }
