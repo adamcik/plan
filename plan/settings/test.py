@@ -6,11 +6,15 @@ SECRET_KEY = "test"
 
 COMPRESS_ENABLED = False
 
-DATABASE_ENGINE = "sqlite3"
+# DATABASE_ENGINE = "sqlite3"
 
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
         "KEY_PREFIX": "test",
-    }
+    },
+    "ical": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "KEY_PREFIX": "test-ical",
+    },
 }
