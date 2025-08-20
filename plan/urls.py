@@ -22,5 +22,12 @@ urlpatterns += [
     url(r"^", include("plan.pdf.urls")),
 ]
 
+if "debug_toolbar" in settings.INSTALLED_APPS:
+    import debug_toolbar
+
+    urlpatterns += [
+        url("__debug__/", include(debug_toolbar.urls)),
+    ]
+
 # This will only be active when DEBUG=False or --insecure is set
 urlpatterns += staticfiles_urlpatterns()
