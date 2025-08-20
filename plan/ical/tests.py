@@ -5,13 +5,15 @@ from plan.common import tests
 
 class EmptyViewTestCase(tests.BaseTestCase):
     def test_ical(self):
+        """This covers the semester not existing."""
+
         url = self.url("schedule-ical")
-        self.assertEqual(self.client.get(url).status_code, 204)
+        self.assertEqual(self.client.get(url).status_code, 404)
 
         for arg in ("exams", "lectures"):
             url_args = list(self.default_args) + [arg]
             url = self.url("schedule-ical", *url_args)
-            self.assertEqual(self.client.get(url).status_code, 204)
+            self.assertEqual(self.client.get(url).status_code, 404)
 
         url_args = list(self.default_args) + ["foo"]
         url = self.url("schedule-ical", *url_args)
@@ -33,3 +35,5 @@ class ViewTestCase(tests.BaseTestCase):
         url_args = list(self.default_args) + ["foo"]
         url = self.url("schedule-ical", *url_args)
         self.assertEqual(self.client.get(url).status_code, 400)
+
+        # TODO: Test with slug that does not exist?

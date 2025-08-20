@@ -38,7 +38,7 @@ def _to_utc(dt: datetime.datetime) -> datetime.datetime:
 def ical(request, year, semester_type, slug, ical_type=None):
     resources = [_("lectures"), _("exams")]
     if ical_type and ical_type not in resources:
-        raise ValueError("Invalid ical_type")
+        return http.HttpResponse(status=400)
     elif ical_type:
         resources = [ical_type]
 
