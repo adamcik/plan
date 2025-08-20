@@ -28,7 +28,9 @@ class Nonce(template.Node):
         output = self.nodelist.render(context)
         nonce = self.nonce.resolve(context)
 
-        tag = html.fragment_fromstring(output)
+        tags = html.fragments_fromstring(output)
         if nonce:
-            tag.attrib["nonce"] = nonce
-        return html.tostring(tag).decode("utf-8")
+            for tag in tags:
+                # TODO: assert tag type?
+                tag.attrib["nonce"] = nonce
+        return "".join(html.tostring(tag).decode("utf-8") for tag in tags)
