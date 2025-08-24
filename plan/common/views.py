@@ -161,6 +161,7 @@ def schedule_current(request, year, semester_type, slug):
 
 def schedule(request, year, semester_type, slug, advanced=False, week=None, all=False):
     """Page that handels showing schedules"""
+
     current_week = get_current_week()
     if week:
         week = int(week)
@@ -176,13 +177,6 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
         semester = Semester.objects.get(year=year, type=semester_type)
     except Semester.DoesNotExist:
         raise http.Http404
-
-    try:
-        student = Student.objects.distinct().get(
-            slug=slug, subscription__course__semester=semester
-        )
-    except Student.DoesNotExist:
-        student = None
 
     # Start setting up queries
     courses = Course.objects.get_courses(year, semester.type, slug)
@@ -293,7 +287,6 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
             "groups": groups,
             "lecturers": lecturers,
             "lecture_weeks": weeks,
-            "student": student,
             "locations": locations,
         },
     )
