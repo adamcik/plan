@@ -20,7 +20,15 @@ from django.utils import translation
 from django.utils.http import parse_http_date_safe
 
 from plan.common import utils
-from plan.common.models import Exam, Lecture, Room, Semester, Subscription, Week
+from plan.common.models import (
+    Exam,
+    Lecture,
+    Room,
+    Semester,
+    Student,
+    Subscription,
+    Week,
+)
 
 _ = translation.gettext
 
@@ -70,9 +78,16 @@ def ical(request, year, semester_type, slug, ical_type=None):
     except Semester.DoesNotExist:
         return http.HttpResponseNotFound()
 
+    try:
+        student = Student.objects.get(slug=slug)
+    except Student.DoesNotExist:
+        return http.HttpResponseNotFound()
+
+    # NOTE: Knowning the exact student_id makes this query much faster than
+    # having a single query.
     qs = Subscription.objects.filter(
-        course__semester=semester,
-        student__slug=slug,
+        course__semester_id=semester.id,
+        student_id=student.id,
     ).aggregate(
         subscription_added=Max("added"),
         subscription_last_modified=Max("last_modified"),
