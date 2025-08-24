@@ -7,6 +7,7 @@ import re
 import socket
 import zoneinfo
 
+from django.utils.html import escape
 import vobject
 from dateutil import rrule
 from django import http, template, urls
@@ -132,6 +133,12 @@ def ical(request, year, semester_type, slug, ical_type=None):
 
     icalstream = cal.serialize()
 
+    if settings.DEBUG and "html" in request.GET:
+        content = escape(icalstream).replace("\r\n", "&#10;")
+        return http.HttpResponse(
+            f"<html><head></head><body><pre>{content}</pre></body></html>"
+        )
+
     response = http.HttpResponse(
         icalstream, content_type="text/calendar", headers=headers
     )
@@ -150,8 +157,8 @@ def ical(request, year, semester_type, slug, ical_type=None):
         response,
         timeout=settings.TIMETABLE_ICAL_CACHE_DURATION.total_seconds(),
     )
-    response["X-Cache"] = "miss"
 
+    response["X-Cache"] = "miss"
     if not use_gzip:
         response.content = original
         response.headers["Content-Length"] = str(len(response.content))
