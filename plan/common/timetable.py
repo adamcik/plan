@@ -1,6 +1,7 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import datetime
+import logging
 
 from django.conf import settings
 from django.utils import formats
@@ -9,6 +10,8 @@ from plan.common import utils
 from plan.common.models import Lecture
 
 SLOT_END_TIMES = [s[1] for s in settings.TIMETABLE_SLOTS]
+
+logger = logging.getLogger(__name__)
 
 
 class Timetable:
@@ -39,6 +42,10 @@ class Timetable:
                 continue
 
             start, end = self.map_to_slot(lecture)
+            if start is None or end is None:
+                logger.error("Couldn't map slot for %s, skipping", lecture)
+                continue
+
             rowspan = end - start + 1
 
             first = start
@@ -155,9 +162,5 @@ class Timetable:
 
         if end is None and lecture.end > time:
             end = i
-
-        message = "%s slot for %s could not be set."
-        assert start is not None, message % ("Start", lecture.id)
-        assert end is not None, message % ("End", lecture.id)
 
         return (start, end)
