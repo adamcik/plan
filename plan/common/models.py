@@ -393,6 +393,9 @@ class Exam(models.Model):
     class Meta:
         verbose_name = _("Exam")
         verbose_name_plural = _("Exams")
+        indexes = [
+            models.Index(fields=["course"]),
+        ]
 
     def __str__(self):
         return f"{self.course.code} {self.combination} - {self.exam_date}"
