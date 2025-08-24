@@ -72,6 +72,10 @@ class Subscription(models.Model):
         verbose_name = _("Subscription")
         verbose_name_plural = _("Subscriptions")
 
+        indexes = [
+            models.Index(fields=["added"]),
+        ]
+
     def __str__(self):
         return f"{self.student} - {self.course}"
 
