@@ -244,6 +244,9 @@ TIMETABLE_HOSTNAME = None
 # Where the software can be downloaded.
 TIMETABLE_SOURCE_URL = "https://github.com/adamcik/plan/"
 
+# Source to add to external redirects
+TIMETABLE_UTM_SOURCE = "timeplan"
+
 # If the syllabus column should be displayed for courses
 TIMETABLE_SHOW_SYLLABUS = True
 

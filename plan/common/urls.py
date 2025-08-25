@@ -32,7 +32,17 @@ urlpatterns = [
         r"^{year}/{semester}/{slug}/filter/$", select_lectures, name="change-lectures"
     ),
     url_helper(r"^[+]$", about, name="about"),
-    url_helper(r"^r/{id}/?$", room_redirect, name="room_redirect"),
+    # TODO: consider converter for base58 for id?
+    url_helper(
+        r"^course/{id}/?$", redirect, {"type": "course"}, name="redirect_course"
+    ),
+    url_helper(
+        r"^syllabus/{id}/?$", redirect, {"type": "syllabus"}, name="redirect_syllabus"
+    ),
+    url_helper(r"^room/{id}/?$", redirect, {"type": "room"}, name="redirect_room"),
+    url_helper(
+        r"^stream/{id}/?$", redirect, {"type": "stream"}, name="redirect_stream"
+    ),
     url_helper(r"^stats[+]$", api, name="api"),
     url_helper(r"^{slug}/?$", shortcut, name="shortcut"),
 ]

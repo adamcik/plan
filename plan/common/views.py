@@ -2,11 +2,13 @@
 
 import datetime
 import json
+import urllib.parse
 
 from django import http, shortcuts
 from django.conf import settings
 from django.core.cache import cache
 from django.db import connection, transaction
+from django.db.models import Model
 from django.utils import html, text, translation
 
 from plan.common import encoding, forms, timetable, utils
@@ -58,16 +60,32 @@ def shortcut(request, slug):
 
 
 @utils.expires_in(datetime.timedelta(hours=1))
-def room_redirect(request, id):
+def redirect(request, type, id):
     try:
-        room = Room.objects.get(id=id)
-    except Room.DoesNotExist:
+        if type == "room":
+            url = Room.objects.get(id=id).url
+        elif type == "syllabus":
+            url = Course.objects.get(id=id).syllabus
+        elif type == "course":
+            url = Course.objects.get(id=id).url
+        elif type == "stream":
+            url = Lecture.objects.get(id=id).stream
+        else:
+            raise http.HttpResponseBadRequest()
+    except Model.DoesNotExist:
         raise http.Http404
 
-    if not room.url:
+    if not url:
         raise http.Http404
 
-    return shortcuts.redirect(room.url)
+    if settings.TIMETABLE_UTM_SOURCE:
+        parts = list(urllib.parse.urlparse(url))
+        query = dict(urllib.parse.parse_qsl(parts[4]))
+        query.update({"utm_source": settings.TIMETABLE_UTM_SOURCE})
+        parts[4] = urllib.parse.urlencode(query)
+        url = urllib.parse.urlunparse(parts)
+
+    return shortcuts.redirect(url)
 
 
 @utils.expires_in(datetime.timedelta(hours=1))
