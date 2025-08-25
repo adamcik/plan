@@ -77,26 +77,27 @@ def expires_in(timeout: datetime.timedelta):
     return decorator
 
 
-def build_search(searchstring, filters, max_query_length=4, combine=operator.and_):
-    count = 0
-    search_filter = models.Q()
-
-    for word in text_utils.smart_split(searchstring):
+def parse_query(querystring):
+    terms = []
+    for word in text_utils.smart_split(querystring):
         if word[0] in ['"', "'"]:
             if word[0] == word[-1]:
                 word = word[1:-1]
             else:
                 word = word[1:]
 
-        if count > max_query_length:
-            break
+        terms.append(word)
+    return terms
 
+
+def build_search(terms, filters, max_query_length=4, combine=operator.and_):
+    search_filter = models.Q()
+
+    for term in terms[:max_query_length]:
         local_filter = models.Q()
         for f in filters:
-            local_filter |= models.Q(**{f: word})
-
+            local_filter |= models.Q(**{f: term})
         search_filter = combine(search_filter, local_filter)
-        count += 1
 
     return search_filter
 

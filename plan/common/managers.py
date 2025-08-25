@@ -4,7 +4,7 @@ import datetime
 
 from django.db import connection, models
 
-from plan.common.utils import build_search
+from plan.common.utils import build_search, parse_query
 
 
 class LectureManager(models.Manager):
@@ -158,21 +158,36 @@ class CourseManager(models.Manager):
 
         return cursor.fetchall()
 
-    def search(self, year, semester_type, query, limit=10, location=None):
-        search_filter = build_search(
-            query, ["code__icontains", "name__icontains", "subscription__alias__exact"]
-        )
+    def search(self, year, semester_type, query, limit=100, location=None):
+        from plan.common.models import Semester
 
-        qs = self.get_queryset()
-        qs = qs.filter(search_filter)
-        qs = qs.filter(semester__year__exact=year, semester__type__exact=semester_type)
+        try:
+            semester = Semester.objects.get(year=year, type=semester_type)
+        except Semester.DoesNotExist:
+            return []
+
+        terms = parse_query(query.upper())
+        search_filter = build_search(terms, ["code__icontains", "name__icontains"])
+        alias_filter = build_search(terms, ["subscription__alias__iexact"])
+
+        qs = self.get_queryset().filter(semester=semester)
         if location:
             qs = qs.filter(locations__id=location)
 
-        qs = qs.distinct()
-        qs = qs.order_by("code")
+        # TODO: Consider adding location to output, this would require doing lookup
+        # starting from location instead of course objects to be efficient.
+        qs = qs.values_list("code", "name")
 
-        return qs[:limit]
+        result = {}
+        for code, name in qs.filter(search_filter):
+            result[code.upper()] = (code, name)
+        for code, name in qs.filter(alias_filter):
+            result[code.upper()] = (code, name)
+
+        def priority(pair):
+            return (0 if any(pair[0].startswith(p) for p in terms) else 1, pair[0])
+
+        return [row for (code, row) in sorted(result.items(), key=priority)]
 
 
 class SubscriptionManager(models.Manager):
