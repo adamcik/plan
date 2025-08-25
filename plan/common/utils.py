@@ -43,8 +43,7 @@ def url_helper(regexp, *args, **kwargs):
     return urls.url(regexp.format(**URL_ALIASES), *args, **kwargs)
 
 
-# TODO: Call this in all the post paths or attach to signal?
-def clear_student_semester(year: int, semester_type: str, slug: str):
+def clear_cache(year: int, semester_type: str, slug: str):
     cache.delete(f"last-modified-{year}-{semester_type}-{slug}")
 
 
@@ -190,16 +189,6 @@ def cache_headers(timeout: datetime.timedelta, jitter: float = 0.0) -> dict[str,
 
 def ical_filename(year, semester_type, slug, resources):
     return "%s.ics" % "-".join([year, semester_type, slug] + resources)
-
-
-def clear_cache(year, semester_type, slug):
-    cache.delete_many(
-        [
-            ical_filename(year, semester_type, slug, [_("lectures"), _("exams")]),
-            ical_filename(year, semester_type, slug, [_("lectures")]),
-            ical_filename(year, semester_type, slug, [_("exams")]),
-        ]
-    )
 
 
 Params = typing_extensions.ParamSpec("Params")
