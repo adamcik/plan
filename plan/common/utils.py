@@ -43,8 +43,13 @@ def url_helper(regexp, *args, **kwargs):
     return urls.url(regexp.format(**URL_ALIASES), *args, **kwargs)
 
 
+def _cache_key(year: int, semester_type: str, slug: str):
+    # NOTE: Key is not localized, as last modified is just a number.
+    return f"last-modified-{year}-{semester_type}-{slug}"
+
+
 def clear_cache(year: int, semester_type: str, slug: str):
-    cache.delete(f"last-modified-{year}-{semester_type}-{slug}")
+    cache.delete(_cache_key(year, semester_type, slug))
 
 
 # TODO: See we we can make this into a middleware?
@@ -54,9 +59,7 @@ def fetch_student_semester(
     # TODO: Avoid import loops in a proper way.
     from plan.common.models import Semester, Student, Subscription
 
-    # NOTE: Key is not localized, as last modified is just a number.
-    key = f"last-modified-{year}-{semester_type}-{slug}"
-
+    key = _cache_key(year, semester_type, slug)
     result = cache.get(key)
     if result and not bypass_cache:
         return result
