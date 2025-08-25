@@ -256,6 +256,8 @@ TIMETABLE_REPORT_URI = None
 # How long to cache ical feeds for in memory (i.e. not HTTP header caching)
 TIMETABLE_ICAL_CACHE_DURATION = timedelta(days=30)
 
+TIMETABLE_SCHEDULE_CACHE_DURATION = None
+
 TIMETABLE_NOTICE_CUTOFF = date(2025, 8, 24)
 
 TIMETABLE_NOTICE_HTML = mark_safe("""
