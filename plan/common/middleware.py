@@ -34,6 +34,11 @@ class CspMiddleware(MiddlewareMixin):
     def process_request(self, request):
         request._csp_nonce = secrets.token_urlsafe(16)
 
+    @staticmethod
+    def store_nonce_in_header(request, response):
+        # Hack to make sure caching responses with nonce works
+        response["X-CSP-Nonce"] = request._csp_nonce
+
     def process_response(self, request, response):
         if response.status_code in (404, 500) and settings.DEBUG:
             return response
@@ -41,10 +46,16 @@ class CspMiddleware(MiddlewareMixin):
         if "html" not in response.get("Content-Type", ""):
             return response
 
+        if "X-CSP-Nonce" in response:
+            nonce = response["X-CSP-Nonce"]
+            del response["X-CSP-Nonce"]
+        else:
+            nonce = request._csp_nonce
+
         policy = [
             "default-src 'self'",
-            f"script-src 'self' 'nonce-{request._csp_nonce}'",
-            f"style-src  'self' 'nonce-{request._csp_nonce}'",
+            f"script-src 'self' 'nonce-{nonce}'",
+            f"style-src  'self' 'nonce-{nonce}'",
             "img-src 'self' data:",
             "frame-ancestors *",
         ]
