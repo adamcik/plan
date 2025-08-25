@@ -210,7 +210,7 @@ class Course(models.Model):
 
     # TODO(adamcik): move limit to setting?
     @staticmethod
-    def get_stats(semester=None, limit=None):
+    def get_stats(semester=None, limit=None, bypass_cache=False):
         limit = limit or settings.TIMETABLE_TOP_COURSE_COUNT
         if hasattr(semester, "pk"):
             semester_id = semester.pk
@@ -220,7 +220,7 @@ class Course(models.Model):
         key = "course-semester-stats-%d-%d" % (semester_id, limit)
         result = cache.get(key)
 
-        if result:
+        if result and not bypass_cache:
             return result
 
         slug_count = int(

@@ -115,7 +115,10 @@ def getting_started(request, year, semester_type):
     else:
         schedule_form = forms.ScheduleForm()
 
-    context = Course.get_stats(semester=semester)
+    context = Course.get_stats(
+        semester=semester,
+        bypass_cache=utils.bypass_cache(request),
+    )
     context.update(
         {
             "color_map": utils.ColorMap(hex=True),
