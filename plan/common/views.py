@@ -134,31 +134,34 @@ def course_query(request, year, semester_type):
     try:
         limit = int(request.GET.get("limit", ""))
     except ValueError:
-        limit = 10
+        limit = 100
+
     limit = min(limit, settings.TIMETABLE_AJAX_LIMIT)
     query = request.GET.get("q", "").strip()[:100]
     location = request.GET.get("l", "")
-    send_json = request.headers.get("Accept") == "application/json"
+    course_list = []
 
-    if send_json:
+    if query:
+        course_list = Course.objects.search(
+            year,
+            semester_type,
+            query,
+            limit,
+            location,
+        )
+
+    if request.headers.get("Accept") == "application/json":
         response = http.HttpResponse(content_type="application/json")
-    else:
-        response = http.HttpResponse(content_type="text/plain; charset=utf-8")
-
-    if not query:
-        courses = Course.objects.none()
-    else:
-        courses = Course.objects.search(year, semester_type, query, limit, location)
-
-    course_list = list(courses.values_list("code", "name"))
-
-    if send_json:
         json.dump(course_list, response)
     else:
+        response = http.HttpResponse(content_type="text/plain; charset=utf-8")
         for code, name in course_list:
             code = html.escape(code)
             name = html.escape(text.Truncator(name).words(5, truncate="..."))
-            response.write("{}|{}\n".format(code, name or "?"))
+            response.write("{}|{}\n".format(code, name or ""))
+
+    if settings.DEBUG and "html" in request.GET:
+        return utils.debug_response(response)
     return response
 
 
