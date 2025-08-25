@@ -1,9 +1,15 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from django.core.cache import cache
+
 from plan.common import tests
 
 
 class EmptyViewTestCase(tests.BaseTestCase):
+    def setUp(self):
+        super().setUp()
+        cache.clear()
+
     def test_ical(self):
         """This covers the semester not existing."""
 
@@ -22,6 +28,10 @@ class EmptyViewTestCase(tests.BaseTestCase):
 
 class ViewTestCase(tests.BaseTestCase):
     fixtures = ["test_data.json", "test_user.json"]
+
+    def setUp(self):
+        super().setUp()
+        cache.clear()
 
     def test_ical(self):
         url = self.url("schedule-ical")
