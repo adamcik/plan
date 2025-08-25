@@ -11,8 +11,10 @@ from django.db import connection, transaction
 from django.db.models import Model
 from django.utils import html, text, translation
 from django.utils.cache import patch_vary_headers
+from django.utils.http import http_date
 
 from plan.common import encoding, forms, timetable, utils
+from plan.common.middleware import CspMiddleware
 from plan.common.models import (
     Course,
     Exam,
@@ -186,7 +188,8 @@ def schedule_current(request, year, semester_type, slug):
 
 
 def schedule(request, year, semester_type, slug, advanced=False, week=None, all=False):
-    """Page that handels showing schedules"""
+    """Page that handles showing schedules"""
+    bypass_cache = utils.bypass_cache(request)
 
     current_week = get_current_week()
     if week:
@@ -199,10 +202,33 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
     # Color mapping for the courses
     color_map = utils.ColorMap(hex=True)
 
-    try:
-        semester = Semester.objects.get(year=year, type=semester_type)
-    except Semester.DoesNotExist:
-        raise http.Http404
+    semester, student, last_modified = utils.fetch_student_semester(
+        year, semester_type, slug
+    )
+    if not semester or not student:
+        return http.HttpResponseNotFound()
+
+    not_modified = utils.check_modified_since(request, last_modified)
+    if not_modified:
+        return not_modified
+
+    # TODO: Can we turn this into a middleware? That would allow us to cache
+    # post minification and csp...
+    key = "-".join(
+        str(p)
+        for p in (
+            request.resolver_match.url_name,
+            last_modified,
+            request.path,
+        )
+    )
+    response = cache.get(key)
+    if not bypass_cache and response:
+        response["X-Cache"] = f"hit; key={key}"
+
+        if not utils.accepts_gzip(request):
+            return utils.decompress_response(response)
+        return response
 
     # Start setting up queries
     courses = Course.objects.get_courses(year, semester.type, slug)
@@ -231,7 +257,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
     next_week = None
     prev_week = None
 
-    # TODO(adamcik): lookup actuall valid weeks.
+    # TODO(adamcik): lookup actual valid weeks.
     if week and week < max_week:
         next_week = week + 1
 
@@ -287,7 +313,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
 
     lectures.sort(key=lambda l: (l.course.code, weeks.get(l.id, [None])[0]))
 
-    return shortcuts.render(
+    response = shortcuts.render(
         request,
         "schedule.html",
         {
@@ -316,6 +342,25 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
             "locations": locations,
         },
     )
+
+    if last_modified > 0:
+        response["Last-Modified"] = http_date(last_modified)
+
+    if settings.TIMETABLE_SCHEDULE_CACHE_DURATION:
+        response["X-Cache"] = f"{'miss' if not bypass_cache else 'bypass'}; key={key}"
+        CspMiddleware.store_nonce_in_header(request, response)
+
+        # TODO: It would be nice to have the HTML minified and then stored
+        # pre-compressed in the cache. Size difference is e.g. 6086 vs 77053.
+        cache.set(
+            key,
+            response,
+            timeout=settings.TIMETABLE_SCHEDULE_CACHE_DURATION.total_seconds(),
+        )
+    else:
+        response["X-Cache"] = f"disabled; key={key}"
+
+    return response
 
 
 def select_groups(request, year, semester_type, slug):
