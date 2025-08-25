@@ -576,7 +576,7 @@ def api(request):
     key = "global-stats"
 
     response = cache.get(key)
-    if response:
+    if response and not utils.bypass_cache(request):
         return response
 
     cursor = connection.cursor()
@@ -621,6 +621,9 @@ def api(request):
         headers=utils.cache_headers(cache_timeout),
     )
     cache.set(key, response, cache_timeout.total_seconds())
+
+    if settings.DEBUG and "html" in request.GET:
+        return utils.debug_response(response)
     return response
 
 
