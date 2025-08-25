@@ -27,6 +27,7 @@ URL_ALIASES = {
     "size": r"(?P<size>A\d)",
     "ical": r"(?P<ical_type>\w+)",
     "id": r"(?P<id>\d+)",
+    "redirect_type": r"(?P<type>course|syllabus|room)",
 }
 
 

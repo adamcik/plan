@@ -206,7 +206,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
     # Use get_related to cut query counts
     lecturers = []  # Lecture.get_related(Lecturer, lectures)
     groups = Lecture.get_related(Group, lectures, fields=["code"])
-    rooms = Lecture.get_related(Room, lectures, fields=["name", "url"])
+    rooms = Lecture.get_related(Room, lectures, fields=["id", "name", "url"])
     weeks = Lecture.get_related(Week, lectures, fields=["number"], use_extra=False)
 
     schedule_weeks = set()

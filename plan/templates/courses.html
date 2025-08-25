@@ -67,7 +67,7 @@
               {% endif %}
               <td>
                 {% if course.url %}
-                  <a href="{{ course.url }}">{{ course.code }}</a>
+                  <a href="{% url 'redirect_course' course.id %}">{{ course.code }}</a>
                 {% else %}
                   {{ course.code }}
                 {% endif %}
@@ -83,7 +83,7 @@
               {% if SHOW_SYLLABUS %}
                 <td>
                   {% if course.syllabus %}
-                    <a href="{{ course.syllabus }}">{{ course.syllabus|hostname }}</a>
+                    <a href="{% url 'redirect_syllabus' course.id %}">{{ course.syllabus|hostname }}</a>
                   {% else %}
                     -
                   {% endif %}

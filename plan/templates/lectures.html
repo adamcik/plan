@@ -81,12 +81,12 @@
               </td>
               <td class="small">
                 {% if l.stream %}
-                  <a href="{{ l.stream }}">{% trans "Stream" %}</a>
+                  <a href="{% url 'redirect_stream' l.id %}">{% trans "Stream" %}</a>
                   {% if rooms|get:l.id %},{% endif %}
                 {% endif %}
                 {% for room in rooms|get:l.id %}
                   {% if room.url %}
-                    <a href="{{ room.url }}">{{ room.name }}</a>
+                    <a href="{% url 'redirect_room' room.id %}">{{ room.name }}</a>
                     {% if not forloop.last %},{% endif %}
                   {% else %}
                     {{ room.name }}
