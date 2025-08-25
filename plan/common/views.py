@@ -282,10 +282,6 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
     table.add_markers()
 
     if advanced:
-        subscriptions = Subscription.objects.get_subscriptions(
-            year, semester.type, slug
-        )
-
         # Set up and course name forms
         for course in courses:
             alias = course.alias or ""
