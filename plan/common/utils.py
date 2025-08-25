@@ -36,6 +36,17 @@ def url_helper(regexp, *args, **kwargs):
     return urls.url(regexp.format(**URL_ALIASES), *args, **kwargs)
 
 
+def bypass_cache(request):
+    if "no-cache" in request.GET:
+        return True
+    elif "no-cache" in request.headers.get("Cache-Control", ""):
+        return True
+    elif "no-cache" in request.headers.get("Pragma", ""):
+        return True
+    else:
+        return False
+
+
 def cache_headers(timeout: datetime.timedelta, jitter: float = 0.0) -> dict[str, str]:
     seconds = timeout.total_seconds()
     if jitter > 0:
