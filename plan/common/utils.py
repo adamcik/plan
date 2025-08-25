@@ -7,6 +7,7 @@ import random
 import re
 import time
 import typing
+from django.db.models.aggregates import Max
 from django.utils.html import escape
 import typing_extensions
 
@@ -17,6 +18,8 @@ from django.db import models
 from django.utils import http as http_utils
 from django.utils import text as text_utils
 from django.utils import translation
+from django.utils import cache as cache_utils
+
 
 _ = translation.gettext
 
@@ -38,6 +41,54 @@ RE_ACCEPTS_GZIP = re.compile(r"\bgzip\b")
 def url_helper(regexp, *args, **kwargs):
     """Helper that inserts our url aliases using string formating."""
     return urls.url(regexp.format(**URL_ALIASES), *args, **kwargs)
+
+
+# TODO: Call this in all the post paths or attach to signal?
+def clear_student_semester(year: int, semester_type: str, slug: str):
+    cache.delete(f"last-modified-{year}-{semester_type}-{slug}")
+
+
+# TODO: See we we can make this into a middleware?
+def fetch_student_semester(
+    year: int, semester_type: str, slug: str, bypass_cache=False
+):
+    # TODO: Avoid import loops in a proper way.
+    from plan.common.models import Semester, Student, Subscription
+
+    # NOTE: Key is not localized, as last modified is just a number.
+    key = f"last-modified-{year}-{semester_type}-{slug}"
+
+    result = cache.get(key)
+    if result and not bypass_cache:
+        return result
+
+    try:
+        semester: Semester = Semester.objects.get(year=year, type=semester_type)
+    except Semester.DoesNotExist:
+        return (None, None, 0)
+
+    try:
+        student = Student.objects.get(slug=slug)
+    except Student.DoesNotExist:
+        return (semester, None, 0)
+
+    # NOTE: Knowning the exact student_id makes this query much faster.
+    qs = Subscription.objects.filter(
+        course__semester_id=semester.id,
+        student_id=student.id,
+    ).aggregate(
+        subscription_added=Max("added"),
+        subscription_last_modified=Max("last_modified"),
+        courses_last_modified=Max("course__last_modified"),
+        lectures_last_modified=Max("course__lecture__last_modified"),
+        rooms_last_modified=Max("course__lecture__rooms__last_modified"),
+        exams_last_modified=Max("course__exam__last_modified"),
+    )
+    last_modified = max([0] + [int(agg.timestamp()) for agg in qs.values() if agg])
+
+    result = (semester, student, last_modified)
+    cache.set(key, result, timeout=60)
+    return result
 
 
 def bypass_cache(request):
