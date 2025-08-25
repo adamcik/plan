@@ -2,37 +2,27 @@
 
 import datetime
 import math
-import gzip
-import re
 import socket
 import zoneinfo
 
-from django.utils.html import escape
+from django.utils.http import http_date
 import vobject
 from dateutil import rrule
 from django import http, template, urls
 from django.conf import settings
 from django.core.cache import caches
-from django.db.models import Max
-from django.http.response import http_date
 from django.shortcuts import reverse
 from django.utils import translation
-from django.utils.http import parse_http_date_safe
 
 from plan.common import utils
 from plan.common.models import (
     Exam,
     Lecture,
     Room,
-    Semester,
-    Student,
-    Subscription,
     Week,
 )
 
 _ = translation.gettext
-
-RE_ACCEPTS_GZIP = re.compile(r"\bgzip\b")
 
 TZ = zoneinfo.ZoneInfo(settings.TIME_ZONE)
 UTC = zoneinfo.ZoneInfo("UTC")
@@ -42,8 +32,6 @@ def _to_utc(dt: datetime.datetime) -> datetime.datetime:
     return dt.replace(tzinfo=TZ).astimezone(UTC)
 
 
-# TODO: Put last modified ts a cache key, and delete that on all posts. I.e.
-# the old way of doing it.
 def ical(request, year, semester_type, slug, ical_type=None):
     resources = [_("lectures"), _("exams")]
     if ical_type and ical_type not in resources:
@@ -51,70 +39,40 @@ def ical(request, year, semester_type, slug, ical_type=None):
     elif ical_type:
         resources = [ical_type]
 
-    try:
-        filename = utils.ical_filename(year, semester_type, slug, resources)
-    except ValueError:
-        return http.HttpResponse(status=400)
-
-    ae = request.META.get("HTTP_ACCEPT_ENCODING", "")
-    use_gzip = RE_ACCEPTS_GZIP.search(ae)
-
-    key = f"{filename}.gz"
-
-    if not settings.DEBUG:
-        response = caches["ical"].get(key)
-
-        if response is not None:
-            if not use_gzip:
-                response.content = gzip.decompress(response.content)
-                response.headers["Content-Length"] = str(len(response.content))
-                del response.headers["Content-Encoding"]
-
-            response["X-Cache"] = "hit"
-            return response
-
-    try:
-        semester: Semester = Semester.objects.get(year=year, type=semester_type)
-    except Semester.DoesNotExist:
-        return http.HttpResponseNotFound()
-
-    try:
-        student = Student.objects.get(slug=slug)
-    except Student.DoesNotExist:
-        return http.HttpResponseNotFound()
-
-    # NOTE: Knowning the exact student_id makes this query much faster than
-    # having a single query.
-    qs = Subscription.objects.filter(
-        course__semester_id=semester.id,
-        student_id=student.id,
-    ).aggregate(
-        subscription_added=Max("added"),
-        subscription_last_modified=Max("last_modified"),
-        courses_last_modified=Max("course__last_modified"),
-        lectures_last_modified=Max("course__lecture__last_modified"),
-        rooms_last_modified=Max("course__lecture__rooms__last_modified"),
-        exams_last_modified=Max("course__exam__last_modified"),
+    filename = utils.ical_filename(year, semester_type, slug, resources)
+    semester, student, last_modified = utils.fetch_student_semester(
+        year, semester_type, slug
     )
-    # NOTE: last_modified == 0 implies the slug/subs don't exist.
-    # We could bail here and return a 404, but instead we just give an empty ical.
-    last_modified = max([0] + [int(agg.timestamp()) for agg in qs.values() if agg])
 
-    if_modified_since = parse_http_date_safe(request.META.get("HTTP_IF_MODIFIED_SINCE"))
+    if semester is None or student is None:
+        return http.HttpResponseNotFound()
 
-    if semester.stale:
-        cache_timeout = datetime.timedelta(days=90)
-    else:
-        cache_timeout = datetime.timedelta(hours=6)
+    not_modified = utils.check_modified_since(request, last_modified)
+    if not_modified:
+        not_modified.headers["X-Robots-Tag"] = "noindex, nofollow"
+        return not_modified
 
-    headers = utils.cache_headers(cache_timeout, jitter=0.1)
-    headers["X-Robots-Tag"] = "noindex, nofollow"
+    # TODO: Turn last modified + caching into middleware?
 
-    if last_modified > 0:
-        headers["Last-Modified"] = http_date(last_modified)
+    bypass_cache = utils.bypass_cache(request)
+    key = "-".join(
+        str(p)
+        for p in (
+            request.resolver_match.url_name,
+            last_modified,
+            request.path,
+        )
+    )
 
-    if if_modified_since is not None and last_modified <= if_modified_since:
-        return http.HttpResponseNotModified(headers=headers)
+    response = caches["ical"].get(key)
+    if not bypass_cache and response:
+        response["X-Cache"] = f"hit; key={key}"
+
+        if settings.DEBUG and "html" in request.GET:
+            return utils.debug_response(utils.decompress_response(response))
+        elif not utils.accepts_gzip(request):
+            return utils.decompress_response(response)
+        return response
 
     title = urls.reverse("schedule", args=[year, semester_type, slug])
     hostname = settings.TIMETABLE_HOSTNAME or request.headers.get(
@@ -146,41 +104,48 @@ def ical(request, year, semester_type, slug, ical_type=None):
         exams = Exam.objects.get_exams(year, semester.type, slug)
         add_exams(exams, cal, hostname)
 
-    icalstream = cal.serialize()
-
-    if settings.DEBUG and "html" in request.GET:
-        content = escape(icalstream).replace("\r\n", "&#10;")
-        return http.HttpResponse(
-            f"<html><head></head><body><pre>{content}</pre></body></html>"
-        )
+    if semester.stale:
+        cache_timeout = datetime.timedelta(days=90)
+    else:
+        cache_timeout = datetime.timedelta(hours=6)
 
     response = http.HttpResponse(
-        icalstream, content_type="text/calendar", headers=headers
+        cal.serialize(),
+        content_type="text/calendar; charset=utf-8",
+        headers=utils.cache_headers(cache_timeout, jitter=0.1),
     )
-    response["Content-Type"] = "text/calendar; charset=utf-8"
+
+    if last_modified > 0:
+        response["Last-Modified"] = http_date(last_modified)
+
     response["Filename"] = filename  # IE needs this
     response["Content-Disposition"] = "attachment; filename=%s" % filename
+    response["X-Robots-Tag"] = "noindex, nofollow"
 
-    original = response.content
+    # NOTE: Most consumers will use compressed response, so do this once before
+    # caching to save resources. The alternative is to vary the cache key based
+    # on gzip, or just not bother with the complexity of compressing.
 
-    response.content = gzip.compress(original, compresslevel=6, mtime=0)
-    response.headers["Content-Length"] = str(len(response.content))
-    response.headers["Content-Encoding"] = "gzip"
-
-    caches["ical"].set(
-        key,
-        response,
-        timeout=settings.TIMETABLE_ICAL_CACHE_DURATION.total_seconds(),
-    )
-
-    response["X-Cache"] = "miss"
-    if not use_gzip:
-        response.content = original
-        response.headers["Content-Length"] = str(len(response.content))
-        del response.headers["Content-Encoding"]
+    if settings.TIMETABLE_ICAL_CACHE_DURATION:
+        response["X-Cache"] = f"{'miss' if not bypass_cache else 'bypass'}; key={key}"
+        compressed_response = utils.compress_response(response)
+        caches["ical"].set(
+            key,
+            compressed_response,
+            timeout=settings.TIMETABLE_ICAL_CACHE_DURATION.total_seconds(),
+        )
+    else:
+        response["X-Cache"] = f"disabled; key={key}"
+        compressed_response = None
 
     # TODO(adamcik): Rate limit remote hosts?
-    return response
+
+    if settings.DEBUG and "html" in request.GET:
+        return utils.debug_response(response)
+    elif utils.accepts_gzip(request) and compressed_response:
+        return compressed_response
+    else:
+        return response
 
 
 # TODO: Consider adding redirect/url-shortner for rooms?
@@ -226,7 +191,7 @@ def add_lectutures(lectures, year, cal, request, hostname):
         rooms = []
         for r in all_rooms.get(l.id, []):
             if r["url"]:
-                tmp = reverse("room_redirect", args=(r["id"],))
+                tmp = reverse("redirect_room", args=(r["id"],))
                 r["url"] = request.build_absolute_uri(tmp)
             rooms.append(r)
 
