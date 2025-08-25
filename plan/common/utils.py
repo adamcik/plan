@@ -1,6 +1,7 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import datetime
+import gzip
 import operator
 import random
 import re
@@ -30,6 +31,8 @@ URL_ALIASES = {
     "id": r"(?P<id>\d+)",
     "redirect_type": r"(?P<type>course|syllabus|room)",
 }
+
+RE_ACCEPTS_GZIP = re.compile(r"\bgzip\b")
 
 
 def url_helper(regexp, *args, **kwargs):
@@ -63,6 +66,48 @@ def debug_response(response):
     return http.HttpResponse(
         f"<html><head></head><body><pre>{'<br/>'.join(content)}</pre></body></html>"
     )
+
+
+def accepts_gzip(request):
+    return RE_ACCEPTS_GZIP.search(request.META.get("HTTP_ACCEPT_ENCODING", ""))
+
+
+def compress_response(response, min_size=200):
+    if "Content-Encoding" in response or len(response.content) < min_size:
+        return response
+
+    content = gzip.compress(
+        response.content,
+        compresslevel=6,
+        mtime=0,
+    )
+
+    if len(content) > len(response.content):
+        return response
+
+    result = http.HttpResponse(
+        content, status=response.status_code, headers=response.headers
+    )
+    result.headers["Content-Length"] = str(len(content))
+    result.headers["Content-Encoding"] = "gzip"
+
+    cache_utils.patch_vary_headers(result, ("Accept-Encoding",))
+    return result
+
+
+def decompress_response(response):
+    if response.get("Content-Encoding") != "gzip":
+        return response
+
+    result = http.HttpResponse(
+        gzip.decompress(response.content),
+        status=response.status_code,
+        headers=response.headers,
+    )
+    cache_utils.patch_vary_headers(result, ("Accept-Encoding",))
+    response.headers["Content-Length"] = str(len(response.content))
+    del response.headers["Content-Encoding"]
+    return result
 
 
 def cache_headers(timeout: datetime.timedelta, jitter: float = 0.0) -> dict[str, str]:
