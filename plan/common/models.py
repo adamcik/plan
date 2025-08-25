@@ -74,6 +74,10 @@ class Subscription(models.Model):
 
         indexes = [
             models.Index(fields=["added"]),
+            models.Index(
+                models.functions.Upper("alias"),
+                name="common_subs_alias_upper_idx",
+            ),
         ]
 
     def __str__(self):
