@@ -10,6 +10,7 @@ from django.core.cache import cache
 from django.db import connection, transaction
 from django.db.models import Model
 from django.utils import html, text, translation
+from django.utils.cache import patch_vary_headers
 
 from plan.common import encoding, forms, timetable, utils
 from plan.common.models import (
@@ -160,6 +161,7 @@ def course_query(request, year, semester_type):
             name = html.escape(text.Truncator(name).words(5, truncate="..."))
             response.write("{}|{}\n".format(code, name or ""))
 
+    patch_vary_headers(response, ("Accept",))
     if settings.DEBUG and "html" in request.GET:
         return utils.debug_response(response)
     return response
