@@ -55,12 +55,12 @@ class ManagerTestCase(BaseTestCase):
         self.assertEqual(set(control), set(subscriptions))
 
     def test_search(self):
-        control = Course.objects.exclude(id=5)
+        control = Course.objects.exclude(id=5).values_list("code", "name")
         courses = Course.objects.search(2009, Semester.SPRING, "COURSE")
 
         self.assertEqual(set(control), set(courses))
 
-        control = Course.objects.filter(code="COURSE1")
+        control = Course.objects.filter(code="COURSE1").values_list("code", "name")
         courses = Course.objects.search(2009, Semester.SPRING, "COURSE1")
 
         self.assertEqual(set(control), set(courses))
