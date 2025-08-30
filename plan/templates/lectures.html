@@ -97,7 +97,7 @@
               </td>
               <td class="small">{{ l.type|default:"" }}</td>
               <td class="small">{{ groups|get:l.id|join:", " }}</td>
-              <td class="small nowrap">{{ lecture_weeks|get:l.id|compact|join:", " }}</td>
+              <td class="small nowrap">{{ l.week_numbers|compact|join:", " }}</td>
             </tr>
           {% endfor %}
         </tbody>

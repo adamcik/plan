@@ -231,38 +231,70 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
             return utils.decompress_response(response)
         return response
 
-    # Start setting up queries
-    courses = Course.objects.get_courses(year, semester.type, slug)
-    lectures = Lecture.objects.get_lectures(year, semester.type, slug, week)
-    exams = {}
-    for exam in Exam.objects.get_exams(year, semester.type, slug):
-        exams.setdefault(exam.course_id, []).append(exam)
+    db_key = f"db:{year}-{semester_type}-{slug}-{last_modified}"
+    result = cache.get(db_key)
 
-    # Use get_related to cut query counts
-    lecturers = []  # Lecture.get_related(Lecturer, lectures)
-    groups = Lecture.get_related(Group, lectures, fields=["code"])
-    rooms = Lecture.get_related(Room, lectures, fields=["id", "name", "url"])
-    weeks = Lecture.get_related(Week, lectures, fields=["number"], use_extra=False)
+    if result:
+        lectures, courses, exams, lecturers, groups, rooms, schedule_weeks = result
+    else:
+        lectures = Lecture.objects.get_lectures(semester.id, student.id)
+        courses = Course.objects.get_courses(year, semester.type, slug)
 
-    schedule_weeks = set()
-    for lecture_week_set in weeks.values():
-        for lecture_week in lecture_week_set:
-            schedule_weeks.add(lecture_week)
+        # Most of these could be built into get_lectures with ARRAY_AGG..
+        exams = {}
+        for exam in Exam.objects.get_exams(year, semester.type, slug):
+            exams.setdefault(exam.course_id, []).append(exam)
 
-    schedule_weeks = list(schedule_weeks)
-    schedule_weeks.sort()
+        # Use get_related to cut query counts
+        lecturers = []  # Lecture.get_related(Lecturer, lectures)
+        groups = Lecture.get_related(Group, lectures, fields=["code"])
+        rooms = Lecture.get_related(Room, lectures, fields=["id", "name", "url"])
 
-    if schedule_weeks:
-        schedule_weeks = list(range(schedule_weeks[0], schedule_weeks[-1] + 1))
+        schedule_weeks = set()
+        for l in lectures:
+            schedule_weeks.update(l.week_numbers)
+        if schedule_weeks:
+            schedule_weeks = list(range(min(schedule_weeks), max(schedule_weeks) + 1))
+
+        # NOTE: This data can be used across pages, so cache it.
+
+        # TODO: Should we consider a get_related for courses as well?
+        # TODO: get_related duplicates data, perhaps the exams dict should just
+        # be {lecture_id: exam_id} and then there is a {exam_id: exam} mapping?
+        result = (lectures, courses, exams, lecturers, groups, rooms, schedule_weeks)
+        cache.set(db_key, result, timeout=3600)
+
+    common_key = "common"
+    result = cache.get(common_key)
+    if result:
+        next_semester, next_message, locations = result
+    else:
+        locations = Location.objects.distinct()  # .filter(course__semester=semester)
+
+        try:
+            # TODO: try and turn this into a single query with annotate?
+            next_semester = next(Semester.objects)
+            # TODO: I think we only show the message if there is someone using it?
+            next_message = (
+                Subscription.objects.get_subscriptions(
+                    next_semester.year, next_semester.type, slug
+                ).count()
+                == 0
+            )
+        except Semester.DoesNotExist:
+            next_semester = None
+            next_message = False
+
+        result = (next_semester, next_message, locations)
+        cache.set(common_key, result, timeout=8 * 3600)
 
     next_week = None
     prev_week = None
 
-    # TODO(adamcik): lookup actual valid weeks.
-    if week and week < max_week:
+    if week and week + 1 in schedule_weeks:
         next_week = week + 1
 
-    if week and week > 1:
+    if week and week - 1 in schedule_weeks:
         prev_week = week - 1
 
     # Init colors in predictable maner
@@ -276,7 +308,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
         table.set_week(semester.year, week)
 
     if lectures:
-        table.place_lectures()
+        table.place_lectures(week)
         table.do_expansion()
 
     table.insert_times()
@@ -293,22 +325,10 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
                 "Display %(course)s as:"
             ) % {"course": course.code}
 
-    try:
-        next_semester = next(Semester.objects)
-        next_message = (
-            Subscription.objects.get_subscriptions(
-                next_semester.year, next_semester.type, slug
-            ).count()
-            == 0
-        )
-    except Semester.DoesNotExist:
-        next_semester = None
-        next_message = False
-
     week_is_current = semester.year == today().year and week == current_week
-    locations = Location.objects.distinct()  # .filter(course__semester=semester)
 
-    lectures.sort(key=lambda l: (l.course.code, weeks.get(l.id, [None])[0]))
+    # TODO: Natural sort course code? Why is this needed here?
+    lectures.sort(key=lambda l: (l.course.code, l.week_numbers[0]))
 
     response = shortcuts.render(
         request,
@@ -332,11 +352,10 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
             "next_week": next_week,
             "prev_week": prev_week,
             "rooms": rooms,
-            "weeks": schedule_weeks,
             "groups": groups,
             "lecturers": lecturers,
-            "lecture_weeks": weeks,
             "locations": locations,
+            "weeks": schedule_weeks,
         },
     )
 
