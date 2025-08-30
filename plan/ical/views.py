@@ -97,7 +97,7 @@ def ical(request, year, semester_type, slug, ical_type=None):
     }
 
     if _("lectures") in resources:
-        lectures = Lecture.objects.get_lectures(year, semester.type, slug)
+        lectures = Lecture.objects.get_lectures(semester.id, student.id)
         add_lectutures(lectures, semester.year, cal, request, hostname)
 
     if _("exams") in resources:
