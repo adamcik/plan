@@ -34,11 +34,11 @@ class Timetable:
             (first_day + datetime.timedelta(days=i)) for i, name in Lecture.DAYS
         ]
 
-    def place_lectures(self):
+    def place_lectures(self, week):
         """Add basics to datastructure"""
 
         for i, lecture in enumerate(self.lecture_queryset):
-            if lecture.exclude or not lecture.show_week:
+            if lecture.exclude or (week and week not in lecture.week_numbers):
                 continue
 
             start, end = self.map_to_slot(lecture)
