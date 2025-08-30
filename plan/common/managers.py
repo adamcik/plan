@@ -6,7 +6,7 @@ from django.db import connection, models
 
 
 class LectureManager(models.Manager):
-    def get_lectures(self, year, semester_type, slug=None, week=None, course=None):
+    def get_lectures(self, semester_id, student_id):
         """
         Get all lectures for subscription during given period.
 
@@ -14,11 +14,6 @@ class LectureManager(models.Manager):
         in the where clause. The first element in the custom where is the important
         one that limits our results, the rest are simply meant for joining.
         """
-
-        if not slug and not course:
-            raise Exception("Invalid invocation of get_lectures")
-        elif slug and course:
-            raise Exception("Invalid invocation of get_lectures")
 
         where = [
             "common_subscription_groups.group_id = common_group.id",
@@ -35,34 +30,39 @@ class LectureManager(models.Manager):
                  FROM common_subscription_exclude WHERE
                  common_subscription_exclude.subscription_id = common_subscription.id AND
                  common_subscription_exclude.lecture_id = common_lecture.id)""",
-            "show_week": "%s",
+            "week_numbers": """
+                COALESCE((
+                    SELECT ARRAY_AGG(DISTINCT w.number ORDER BY w.number)
+                    FROM common_week w
+                    WHERE w.lecture_id = common_lecture.id
+                ), '{}'::integer[])""",
         }
 
-        if week:
-            select["show_week"] = """
-                EXISTS (SELECT 1 FROM common_week w WHERE
-                    w.lecture_id = common_lecture.id AND w.number = %s)"""
-
-        if slug:
-            filter_kwargs = {
-                "course__subscription__student__slug": slug,
-                "course__semester__year__exact": year,
-                "course__semester__type__exact": semester_type,
-            }
-        else:
-            filter_kwargs = {
-                "course__name": course,
-                "course__semester__year__exact": year,
-                "course__semester__type__exact": semester_type,
-            }
-            where = []
-            tables = []
-            select["alias"] = "NULL"
-            select["exclude"] = "False"
+        filter_kwargs = {
+            "course__subscription__student_id": student_id,
+            "course__semester_id": semester_id,
+        }
 
         related = [
             "type",
             "course",
+        ]
+
+        fields = [
+            "id",
+            "course_id",
+            "title",
+            "summary",
+            "stream",
+            "day",
+            "start",
+            "end",
+            "course__code",
+            "course__name",
+            "type_id",
+            "type__code",
+            "type__name",
+            "type__optional",
         ]
 
         order = [
@@ -70,16 +70,20 @@ class LectureManager(models.Manager):
             "day",
             "start",
             "type__name",
+            "type__code",
+            "type__optional",
+            "course_id",
+            "type_id",
+            "id",
         ]
-
-        params = [week or True]
 
         return list(
             self.get_queryset()
             .filter(**filter_kwargs)
             .distinct()
             .select_related(*related)
-            .extra(where=where, tables=tables, select=select, select_params=params)
+            .extra(where=where, tables=tables, select=select)
+            .only(*fields)
             .order_by(*order)
         )
 
