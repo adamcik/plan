@@ -4,7 +4,7 @@ import datetime
 
 from django.conf import settings
 from django.core.cache import cache
-from django.db import connection, models
+from django.db import models
 from django.template import defaultfilters as filters
 from django.utils import dates, translation
 
@@ -15,6 +15,7 @@ from plan.common.managers import (
     SemesterManager,
     SubscriptionManager,
 )
+from plan.materialized.models import SemesterAnalytics, TopCourses
 
 # To allow for overriding of the codes idea of now() for tests
 now = datetime.datetime.now
@@ -223,38 +224,28 @@ class Course(models.Model):
         if result and not bypass_cache:
             return result
 
-        slug_count = int(
-            Student.objects.filter(subscription__course__semester=semester)
-            .distinct()
-            .count()
-        )
-        subscription_count = int(
-            Subscription.objects.filter(course__semester=semester).count()
-        )
-        course_count = int(
-            Course.objects.filter(subscription__course__semester=semester)
-            .values("name")
-            .distinct()
-            .count()
-        )
+        try:
+            summary = SemesterAnalytics.objects.get(semester_id=semester_id)
+            slug_count = summary.num_unique_students
+            subscription_count = summary.num_subscriptions
+            course_count = summary.num_courses
+        except SemesterAnalytics.DoesNotExist:
+            slug_count = 0
+            subscription_count = 0
+            course_count = 0
 
-        cursor = connection.cursor()
-        cursor.execute(
-            """
-            SELECT COUNT(*) as num, c.id, c.code, c.name FROM
-                common_subscription u JOIN common_course c ON (c.id = u.course_id)
-            WHERE c.semester_id = %s
-            GROUP BY c.id, c.code, c.name
-            ORDER BY num DESC
-            LIMIT %s""",
-            [semester_id, limit],
-        )
+        try:
+            courses = TopCourses.objects.filter(semester_id=semester_id).values_list(
+                "subscription_count", "course_id", "course_code", "course_name"
+            )[:limit]
+        except TopCourses.DoesNotExist:
+            courses = []
 
         result = {
             "slug_count": slug_count,
             "course_count": course_count,
             "subscription_count": subscription_count,
-            "stats": cursor.fetchall(),
+            "stats": courses,
             "limit": limit,
         }
         cache.set(key, result, 300)

@@ -7,7 +7,7 @@ import urllib.parse
 from django import http, shortcuts
 from django.conf import settings
 from django.core.cache import cache
-from django.db import connection, transaction
+from django.db import transaction
 from django.db.models import Model
 from django.utils import html, text, translation
 from django.utils.cache import patch_vary_headers
@@ -27,6 +27,7 @@ from plan.common.models import (
     Subscription,
     Week,
 )
+from plan.materialized.models import SubscriptionsCount
 
 # FIXME split into frontpage/semester, course, schedule files
 # FIXME Split views that do multiple form handling tasks into seperate views
@@ -579,22 +580,7 @@ def api(request):
     if response and not utils.bypass_cache(request):
         return response
 
-    cursor = connection.cursor()
-    cursor.execute(
-        """
-        SELECT COUNT(*), date FROM (
-            SELECT
-                CAST(MIN(added) AS DATE) AS date,
-                student_id,
-                semester_id
-            FROM common_subscription s
-            JOIN common_course c ON (c.id = s.course_id)
-            GROUP BY student_id, semester_id
-        ) AS query
-        GROUP BY date
-        ORDER BY date ASC;
-        """,
-    )
+    summary = SubscriptionsCount.objects.values_list("count", "date")
 
     count: int
     date: datetime.date
@@ -605,7 +591,7 @@ def api(request):
 
     result: list[str] = []
 
-    for count, date in cursor:
+    for count, date in summary:
         d = encoding.zig_zag_encode(days_encoder.encode((date - epoch).days))
         c = encoding.zig_zag_encode(counts_encoder.encode(count))
 
