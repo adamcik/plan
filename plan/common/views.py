@@ -121,7 +121,7 @@ def getting_started(request, year, semester_type):
 
     context = Course.get_stats(
         semester=semester,
-        bypass_cache=utils.bypass_cache(request),
+        bypass_cache=utils.should_bypass_cache(request),
     )
     context.update(
         {
@@ -190,7 +190,7 @@ def schedule_current(request, year, semester_type, slug):
 
 def schedule(request, year, semester_type, slug, advanced=False, week=None, all=False):
     """Page that handles showing schedules"""
-    bypass_cache = utils.bypass_cache(request)
+    bypass_cache = utils.should_bypass_cache(request)
 
     current_week = get_current_week()
     if week:
@@ -596,7 +596,7 @@ def api(request):
     key = "global-stats"
 
     response = cache.get(key)
-    if response and not utils.bypass_cache(request):
+    if response and not utils.should_bypass_cache(request):
         return response
 
     summary = SubscriptionsCount.objects.values_list("count", "date")

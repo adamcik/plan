@@ -93,7 +93,8 @@ def fetch_student_semester(
     return result
 
 
-def bypass_cache(request):
+# TODO: Only allow bypass in DEBUG?
+def should_bypass_cache(request):
     if "no-cache" in request.GET:
         return True
     elif "no-cache" in request.headers.get("Cache-Control", ""):

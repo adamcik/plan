@@ -54,7 +54,8 @@ def ical(request, year, semester_type, slug, ical_type=None):
 
     # TODO: Turn last modified + caching into middleware?
 
-    bypass_cache = utils.bypass_cache(request)
+    # TODO: Turn caching into middleware
+    bypass_cache = utils.should_bypass_cache(request)
     key = "-".join(
         str(p)
         for p in (
