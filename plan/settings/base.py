@@ -13,6 +13,10 @@ def ugettext(s):
     return s
 
 
+SILENCED_SYSTEM_CHECKS = [
+    "debug_toolbar.W006",  # Silences the warning about APP_DIRS/app_directories.Loader
+]
+
 # -- Debug settings:
 DEBUG = True
 
