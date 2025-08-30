@@ -4,8 +4,6 @@ import datetime
 
 from django.db import connection, models
 
-from plan.common.utils import build_search, parse_query
-
 
 class LectureManager(models.Manager):
     def get_lectures(self, year, semester_type, slug=None, week=None, course=None):
@@ -160,6 +158,7 @@ class CourseManager(models.Manager):
 
     def search(self, year, semester_type, query, limit=100, location=None):
         from plan.common.models import Semester
+        from plan.common.utils import build_search, parse_query
 
         try:
             semester = Semester.objects.get(year=year, type=semester_type)
