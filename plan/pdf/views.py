@@ -55,6 +55,9 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
 
     semester = Semester(year=year, type=semester_type)
 
+    if week:
+        week = int(week)
+
     color_map = ColorMap(hex=True)
 
     margin = 0.5 * units.cm
@@ -74,7 +77,9 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
     response = http.HttpResponse(content_type="application/pdf")
     response["Content-Disposition"] = "attachment; filename=%s.pdf" % filename
 
-    lectures = Lecture.objects.get_lectures(year, semester.type, slug, week)
+    # NOTE: This could be cached, and shared with schedule, but to be honest I
+    # doubt it is worth it for this code path.
+    lectures = Lecture.objects.get_lectures(semester.id, student.id)
     rooms = Lecture.get_related(Room, lectures)
     courses = Course.objects.get_courses(year, semester.type, slug)
 
@@ -83,11 +88,11 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
 
     timetable = Timetable(lectures)
     if lectures:
-        timetable.place_lectures()
+        timetable.place_lectures(week)
         timetable.do_expansion()
     timetable.insert_times()
     if week:
-        timetable.set_week(semester.year, int(week))
+        timetable.set_week(semester.year, week)
 
     paragraph_style = default_styles["Normal"]
     paragraph_style.fontName = "Helvetica-Bold"
