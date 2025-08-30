@@ -2,6 +2,7 @@
 
 from django import http
 from django.utils import dateformat, html, translation
+from django.utils import http as http_utils
 from reportlab import platypus
 from reportlab.lib import colors, pagesizes, styles, units
 from reportlab.pdfgen import canvas
@@ -53,10 +54,25 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
     if size is not None and size not in ["A4", "A5", "A6", "A7"]:
         raise http.Http404
 
-    semester = Semester(year=year, type=semester_type)
+    semester, student, last_modified = utils.fetch_student_semester(
+        year, semester_type, slug
+    )
+    filename = f"{year}-{semester.type}-{slug}"
 
     if week:
         week = int(week)
+        filename += "-%s" % week
+
+    headers = {"X-Robots-Tag": "noindex, nofollow"}
+    if last_modified > 0:
+        headers["Last-Modified"] = http_utils.http_date(last_modified)
+
+    response = utils.check_modified_since(request, last_modified, headers)
+    if response:
+        return response
+
+    response = http.HttpResponse(content_type="application/pdf", headers=headers)
+    response["Content-Disposition"] = "attachment; filename=%s.pdf" % filename
 
     color_map = ColorMap(hex=True)
 
@@ -68,14 +84,6 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
 
     time_width = 0.06 * width
     day_width = (width - time_width) / 5
-
-    filename = f"{year}-{semester.type}-{slug}"
-
-    if week:
-        filename += "-%s" % week
-
-    response = http.HttpResponse(content_type="application/pdf")
-    response["Content-Disposition"] = "attachment; filename=%s.pdf" % filename
 
     # NOTE: This could be cached, and shared with schedule, but to be honest I
     # doubt it is worth it for this code path.
@@ -235,5 +243,6 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
     page.showPage()
     page.save()
 
-    response["X-Robots-Tag"] = "noindex, nofollow"
+    if settings.DEBUG and "html" in request.GET:
+        return utils.debug_response(response)
     return response

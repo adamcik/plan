@@ -164,20 +164,19 @@ def decompress_response(response):
     return result
 
 
-def check_modified_since(request, last_modified):
-    if_modified_since = http_utils.parse_http_date_safe(
-        request.META.get("HTTP_IF_MODIFIED_SINCE"),
-    )
-
-    if (
-        "no-modified-since" in request.GET
-        or if_modified_since is None
-        or last_modified > if_modified_since
-    ):
+def check_modified_since(request, last_modified, headers=None):
+    if "no-modified-since" in request.GET:
         return None
-    return http.HttpResponseNotModified(
-        headers={"Last-Modified": http_utils.http_date(last_modified)}
+
+    if_modified_since = http_utils.parse_http_date_safe(
+        request.META.get("HTTP_IF_MODIFIED_SINCE")
     )
+    if if_modified_since is None:
+        return None
+    if last_modified > if_modified_since:
+        return None
+
+    return http.HttpResponseNotModified(headers=headers or {})
 
 
 def cache_headers(timeout: datetime.timedelta, jitter: float = 0.0) -> dict[str, str]:

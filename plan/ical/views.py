@@ -5,7 +5,6 @@ import math
 import socket
 import zoneinfo
 
-from django.utils.http import http_date
 import vobject
 from dateutil import rrule
 from django import http, template, urls
@@ -13,6 +12,7 @@ from django.conf import settings
 from django.core.cache import caches
 from django.shortcuts import reverse
 from django.utils import translation
+from django.utils import http as http_utils
 
 from plan.common import utils
 from plan.common.models import (
@@ -39,7 +39,6 @@ def ical(request, year, semester_type, slug, ical_type=None):
     elif ical_type:
         resources = [ical_type]
 
-    filename = utils.ical_filename(year, semester_type, slug, resources)
     semester, student, last_modified = utils.fetch_student_semester(
         year, semester_type, slug
     )
@@ -47,12 +46,14 @@ def ical(request, year, semester_type, slug, ical_type=None):
     if semester is None or student is None:
         return http.HttpResponseNotFound()
 
-    not_modified = utils.check_modified_since(request, last_modified)
-    if not_modified:
-        not_modified.headers["X-Robots-Tag"] = "noindex, nofollow"
-        return not_modified
+    # TODO: Turn last modified into middleware?
+    headers = {"X-Robots-Tag": "noindex, nofollow"}
+    if last_modified > 0:
+        headers["Last-Modified"] = http_utils.http_date(last_modified)
 
-    # TODO: Turn last modified + caching into middleware?
+    response = utils.check_modified_since(request, last_modified, headers)
+    if response:
+        return response
 
     # TODO: Turn caching into middleware
     bypass_cache = utils.should_bypass_cache(request)
@@ -74,6 +75,17 @@ def ical(request, year, semester_type, slug, ical_type=None):
         elif not utils.accepts_gzip(request):
             return utils.decompress_response(response)
         return response
+
+    filename = utils.ical_filename(year, semester_type, slug, resources)
+
+    if semester.stale:
+        cache_timeout = datetime.timedelta(days=90)
+    else:
+        cache_timeout = datetime.timedelta(hours=6)
+
+    headers.update(utils.cache_headers(cache_timeout, jitter=0.1))
+    headers["Filename"] = filename  # IE needs this
+    headers["Content-Disposition"] = "attachment; filename=%s" % filename
 
     title = urls.reverse("schedule", args=[year, semester_type, slug])
     hostname = settings.TIMETABLE_HOSTNAME or request.headers.get(
@@ -105,23 +117,11 @@ def ical(request, year, semester_type, slug, ical_type=None):
         exams = Exam.objects.get_exams(year, semester.type, slug)
         add_exams(exams, cal, hostname)
 
-    if semester.stale:
-        cache_timeout = datetime.timedelta(days=90)
-    else:
-        cache_timeout = datetime.timedelta(hours=6)
-
     response = http.HttpResponse(
         cal.serialize(),
         content_type="text/calendar; charset=utf-8",
-        headers=utils.cache_headers(cache_timeout, jitter=0.1),
+        headers=headers,
     )
-
-    if last_modified > 0:
-        response["Last-Modified"] = http_date(last_modified)
-
-    response["Filename"] = filename  # IE needs this
-    response["Content-Disposition"] = "attachment; filename=%s" % filename
-    response["X-Robots-Tag"] = "noindex, nofollow"
 
     # NOTE: Most consumers will use compressed response, so do this once before
     # caching to save resources. The alternative is to vary the cache key based

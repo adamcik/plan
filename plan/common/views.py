@@ -209,9 +209,13 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
     if not semester or not student:
         return http.HttpResponseNotFound()
 
-    not_modified = utils.check_modified_since(request, last_modified)
-    if not_modified:
-        return not_modified
+    headers = {}
+    if last_modified > 0:
+        headers["Last-Modified"] = http_date(last_modified)
+
+    response = utils.check_modified_since(request, last_modified, headers)
+    if response:
+        return response
 
     # TODO: Can we turn this into a middleware? That would allow us to cache
     # post minification and csp...
@@ -358,9 +362,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
             "weeks": schedule_weeks,
         },
     )
-
-    if last_modified > 0:
-        response["Last-Modified"] = http_date(last_modified)
+    response.headers.update(headers)
 
     if settings.TIMETABLE_SCHEDULE_CACHE_DURATION:
         response["X-Cache"] = f"{'miss' if not bypass_cache else 'bypass'}; key={key}"
