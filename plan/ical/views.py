@@ -11,8 +11,8 @@ from django import http, template, urls
 from django.conf import settings
 from django.core.cache import caches
 from django.shortcuts import reverse
-from django.utils import translation
 from django.utils import http as http_utils
+from django.utils import translation
 
 from plan.common import utils
 from plan.common.models import (

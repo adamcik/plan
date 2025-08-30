@@ -1,8 +1,8 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from datetime import date
 import socket
 import urllib.parse
+from datetime import date
 
 from django import urls
 from django.conf import settings

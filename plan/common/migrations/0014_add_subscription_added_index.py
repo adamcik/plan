@@ -4,14 +4,13 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('common', '0013_add_exams_index'),
+        ("common", "0013_add_exams_index"),
     ]
 
     operations = [
         migrations.AddIndex(
-            model_name='subscription',
-            index=models.Index(fields=['added'], name='common_subs_added_9cc901_idx'),
+            model_name="subscription",
+            index=models.Index(fields=["added"], name="common_subs_added_9cc901_idx"),
         ),
     ]

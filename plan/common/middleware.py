@@ -1,7 +1,7 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-import secrets
 import re
+import secrets
 
 from django import http, shortcuts, urls
 from django.conf import settings

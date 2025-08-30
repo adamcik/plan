@@ -4,35 +4,34 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('common', '0011_add_summary_and_stream'),
+        ("common", "0011_add_summary_and_stream"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='course',
-            name='last_modified',
-            field=models.DateTimeField(null=True, verbose_name='Last modified'),
+            model_name="course",
+            name="last_modified",
+            field=models.DateTimeField(null=True, verbose_name="Last modified"),
         ),
         migrations.AddField(
-            model_name='exam',
-            name='last_modified',
-            field=models.DateTimeField(null=True, verbose_name='Last modified'),
+            model_name="exam",
+            name="last_modified",
+            field=models.DateTimeField(null=True, verbose_name="Last modified"),
         ),
         migrations.AddField(
-            model_name='lecture',
-            name='last_modified',
-            field=models.DateTimeField(null=True, verbose_name='Last modified'),
+            model_name="lecture",
+            name="last_modified",
+            field=models.DateTimeField(null=True, verbose_name="Last modified"),
         ),
         migrations.AddField(
-            model_name='room',
-            name='last_modified',
-            field=models.DateTimeField(null=True, verbose_name='Last modified'),
+            model_name="room",
+            name="last_modified",
+            field=models.DateTimeField(null=True, verbose_name="Last modified"),
         ),
         migrations.AddField(
-            model_name='subscription',
-            name='last_modified',
-            field=models.DateTimeField(auto_now=True, verbose_name='Modified'),
+            model_name="subscription",
+            name="last_modified",
+            field=models.DateTimeField(auto_now=True, verbose_name="Modified"),
         ),
     ]

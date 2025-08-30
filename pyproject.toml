@@ -33,3 +33,9 @@ indent = 2
 custom_blocks = "nonce,compress"
 max_blank_lines = 1
 max_line_length = 120
+
+[tool.ruff.lint]
+extend-select = ["I"]
+
+[tool.ruff.lint.isort]
+known-local-folder = ["plan"]

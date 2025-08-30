@@ -7,19 +7,18 @@ import random
 import re
 import time
 import typing
-from django.db.models.aggregates import Max
-from django.utils.html import escape
-import typing_extensions
 
+import typing_extensions
 from django import http, template
 from django.conf import settings, urls
 from django.core.cache import cache
 from django.db import models
+from django.db.models.aggregates import Max
+from django.utils import cache as cache_utils
 from django.utils import http as http_utils
 from django.utils import text as text_utils
 from django.utils import translation
-from django.utils import cache as cache_utils
-
+from django.utils.html import escape
 
 _ = translation.gettext
 

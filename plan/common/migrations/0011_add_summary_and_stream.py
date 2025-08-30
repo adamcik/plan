@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('common', '0010_update_url_type_to_text_field'),
+        ("common", "0010_update_url_type_to_text_field"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='lecture',
-            name='stream',
-            field=models.TextField(null=True, verbose_name='Stream'),
+            model_name="lecture",
+            name="stream",
+            field=models.TextField(null=True, verbose_name="Stream"),
         ),
         migrations.AddField(
-            model_name='lecture',
-            name='summary',
-            field=models.TextField(null=True, verbose_name='Summary'),
+            model_name="lecture",
+            name="summary",
+            field=models.TextField(null=True, verbose_name="Summary"),
         ),
     ]

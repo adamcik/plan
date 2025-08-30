@@ -4,14 +4,15 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('common', '0012_add_last_modified'),
+        ("common", "0012_add_last_modified"),
     ]
 
     operations = [
         migrations.AddIndex(
-            model_name='exam',
-            index=models.Index(fields=['course'], name='common_exam_course__c5a86c_idx'),
+            model_name="exam",
+            index=models.Index(
+                fields=["course"], name="common_exam_course__c5a86c_idx"
+            ),
         ),
     ]
