@@ -228,9 +228,6 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
     response = cache.get(key)
     if not bypass_cache and response:
         response["X-Cache"] = f"hit; key={key}"
-
-        if not utils.accepts_gzip(request):
-            return utils.decompress_response(response)
         return response
 
     db_key = f"db:{year}-{semester_type}-{slug}-{last_modified}"

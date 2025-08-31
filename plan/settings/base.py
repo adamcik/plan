@@ -66,6 +66,7 @@ TEST_RUNNER = "django.test.runner.DiscoverRunner"
 
 # -- App and midleware settings:
 MIDDLEWARE = (
+    "plan.common.middleware.gzip_compatibility_middleware",
     "plan.common.middleware.CspMiddleware",
     "plan.common.middleware.AppendSlashMiddleware",
     "plan.common.middleware.LocaleMiddleware",

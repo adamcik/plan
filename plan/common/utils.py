@@ -148,21 +148,6 @@ def compress_response(response, min_size=200):
     return result
 
 
-def decompress_response(response):
-    if response.get("Content-Encoding") != "gzip":
-        return response
-
-    result = http.HttpResponse(
-        gzip.decompress(response.content),
-        status=response.status_code,
-        headers=response.headers,
-    )
-    cache_utils.patch_vary_headers(result, ("Accept-Encoding",))
-    response.headers["Content-Length"] = str(len(response.content))
-    del response.headers["Content-Encoding"]
-    return result
-
-
 def check_modified_since(request, last_modified, headers=None):
     if "no-modified-since" in request.GET:
         return None

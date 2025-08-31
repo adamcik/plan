@@ -69,9 +69,6 @@ def ical(request, year, semester_type, slug, ical_type=None):
     response = caches["ical"].get(key)
     if not bypass_cache and response:
         response["X-Cache"] = f"hit; key={key}"
-
-        if not utils.accepts_gzip(request):
-            return utils.decompress_response(response)
         return response
 
     filename = utils.ical_filename(year, semester_type, slug, resources)

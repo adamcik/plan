@@ -194,3 +194,36 @@ def text_debug_middleware(get_response):
         )
 
     return middleware
+
+
+def gzip_compatibility_middleware(get_response):
+    """Automatically decode gziped content if not supported by client.
+
+    This allows us to store compressed content in caches which saves space and
+    given how widely supported gzip is, we hardly ever hit this code path.
+    """
+
+    RE_ACCEPTS_GZIP = re.compile(r"\bgzip\b")
+
+    def middleware(request):
+        response = get_response(request)
+        cache.patch_vary_headers(response, ("Accept-Encoding",))
+
+        if response.headers.get("Content-Encoding") != "gzip":
+            return response
+
+        if RE_ACCEPTS_GZIP.search(request.META.get("HTTP_ACCEPT_ENCODING", "")):
+            return response
+
+        response = http.HttpResponse(
+            gzip.decompress(response.content),
+            status=response.status_code,
+            headers=response.headers,
+        )
+
+        response.headers["Content-Length"] = str(len(response.content))
+        del response.headers["Content-Encoding"]
+
+        return response
+
+    return middleware
