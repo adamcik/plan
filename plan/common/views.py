@@ -454,8 +454,6 @@ def select_course(request, year, semester_type, slug, add=False):
     """Handle selecting of courses from course list, change of names and
     removeall of courses"""
 
-    # FIXME split ut three sub functions into seperate functions?
-
     try:
         Semester.objects.get(year=year, type=semester_type)
     except Semester.DoesNotExist:
@@ -463,110 +461,118 @@ def select_course(request, year, semester_type, slug, add=False):
             "schedule", year, Semester.localize(semester_type), slug
         )
 
-    if request.method == "POST":
-        if "submit_add" in request.POST or add:
-            lookup = []
+    if "submit_add" in request.POST or add:
+        response = _add_courses(request, year, semester_type, slug)
+    elif "submit_remove" in request.POST:
+        response = _remove_courses(request, year, semester_type, slug)
+    elif "submit_name" in request.POST:
+        response = _override_name(request, year, semester_type, slug)
+    else:
+        response = None
 
-            for l in request.POST.getlist("course_add"):
-                lookup.extend(l.replace(",", "").split())
-
-            subscriptions = set(
-                Subscription.objects.get_subscriptions(
-                    year, semester_type, slug
-                ).values_list("course__code", flat=True)
-            )
-
-            if not lookup:
-                localized_semester = Semester.localize(semester_type)
-                return shortcuts.redirect(
-                    "schedule-advanced", year, localized_semester, slug
-                )
-
-            errors = []
-            to_many_subscriptions = False
-
-            student, created = Student.objects.get_or_create(slug=slug)
-
-            for l in lookup:
-                try:
-                    if len(subscriptions) > settings.TIMETABLE_MAX_COURSES:
-                        to_many_subscriptions = True
-                        break
-
-                    course = Course.objects.get(
-                        code__iexact=l.strip(),
-                        semester__year__exact=year,
-                        semester__type__exact=semester_type,
-                    )
-
-                    Subscription.objects.get_or_create(
-                        student=student,
-                        course=course,
-                    )
-                    subscriptions.add(course.code)
-
-                except Course.DoesNotExist:
-                    errors.append(l)
-
-            utils.clear_cache(year, semester_type, slug)
-
-            if errors or to_many_subscriptions:
-                return shortcuts.render(
-                    request,
-                    "error.html",
-                    {
-                        "courses": errors,
-                        "max": settings.TIMETABLE_MAX_COURSES,
-                        "slug": slug,
-                        "year": year,
-                        "type": semester_type,
-                        "to_many_subscriptions": to_many_subscriptions,
-                    },
-                )
-
-            return shortcuts.redirect(
-                "change-groups", year, Semester.localize(semester_type), slug
-            )
-
-        elif "submit_remove" in request.POST:
-            with transaction.atomic():
-                courses = []
-                for c in request.POST.getlist("course_remove"):
-                    if c.strip():
-                        courses.append(c.strip())
-
-                Subscription.objects.get_subscriptions(
-                    year, semester_type, slug
-                ).filter(course__id__in=courses).delete()
-
-                if Subscription.objects.filter(student__slug=slug).count() == 0:
-                    Student.objects.filter(slug=slug).delete()
-
-            utils.clear_cache(year, semester_type, slug)
-
-        elif "submit_name" in request.POST:
-            subscriptions = Subscription.objects.get_subscriptions(
-                year, semester_type, slug
-            )
-
-            for u in subscriptions:
-                form = forms.CourseAliasForm(request.POST, prefix=u.course_id)
-
-                if form.is_valid():
-                    alias = form.cleaned_data["alias"].strip()
-
-                    if alias.upper() == u.course.code.upper() or alias == "":
-                        # Leave as blank if we match the current course name
-                        alias = ""
-
-                    u.alias = alias
-                    u.save()
-
-            utils.clear_cache(year, semester_type, slug)
-
+    utils.clear_cache(year, semester_type, slug)
+    if response:
+        return response
     return shortcuts.redirect(
         "schedule-advanced", year, Semester.localize(semester_type), slug
     )
+
+
+def _add_courses(request, year, semester_type, slug):
+    lookup = []
+
+    for l in request.POST.getlist("course_add"):
+        lookup.extend(l.replace(",", "").split())
+
+    subscriptions = set(
+        Subscription.objects.get_subscriptions(year, semester_type, slug).values_list(
+            "course__code", flat=True
+        )
+    )
+
+    if not lookup:
+        localized_semester = Semester.localize(semester_type)
+        return shortcuts.redirect("schedule-advanced", year, localized_semester, slug)
+
+    errors = []
+    too_many_subscriptions = False
+
+    student, created = Student.objects.get_or_create(slug=slug)
+
+    for l in lookup:
+        try:
+            if len(subscriptions) > settings.TIMETABLE_MAX_COURSES:
+                too_many_subscriptions = True
+                break
+
+            course = Course.objects.get(
+                code__iexact=l.strip(),
+                semester__year__exact=year,
+                semester__type__exact=semester_type,
+            )
+
+            Subscription.objects.get_or_create(
+                student=student,
+                course=course,
+            )
+            subscriptions.add(course.code)
+
+        except Course.DoesNotExist:
+            errors.append(l)
+
+    if errors or too_many_subscriptions:
+        return shortcuts.render(
+            request,
+            "error.html",
+            {
+                "courses": errors,
+                "max": settings.TIMETABLE_MAX_COURSES,
+                "slug": slug,
+                "year": year,
+                "type": semester_type,
+                "too_many_subscriptions": too_many_subscriptions,
+            },
+        )
+
+    return shortcuts.redirect(
+        "change-groups", year, Semester.localize(semester_type), slug
+    )
+
+
+def _remove_courses(request, year, semester_type, slug):
+    with transaction.atomic():
+        courses = []
+        for c in request.POST.getlist("course_remove"):
+            if c.strip():
+                courses.append(c.strip())
+
+        Subscription.objects.get_subscriptions(year, semester_type, slug).filter(
+            course__id__in=courses
+        ).delete()
+
+        if Subscription.objects.filter(student__slug=slug).count() == 0:
+            Student.objects.filter(slug=slug).delete()
+
+    return None
+
+
+def _override_name(request, year, semester_type, slug):
+    subscriptions = Subscription.objects.get_subscriptions(year, semester_type, slug)
+
+    for u in subscriptions:
+        form = forms.CourseAliasForm(request.POST, prefix=u.course_id)
+
+        if form.is_valid():
+            alias = form.cleaned_data["alias"].strip()
+
+            if alias.upper() == u.course.code.upper() or alias == "":
+                # Leave as blank if we match the current course name
+                alias = ""
+
+            u.alias = alias
+            u.save()
+
+    return None
 
 
 def select_lectures(request, year, semester_type, slug):
