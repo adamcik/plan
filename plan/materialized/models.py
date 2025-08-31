@@ -1,4 +1,5 @@
-from django.db import models
+from django.db import connection, models
+from psycopg2 import sql
 
 
 class SemesterAnalytics(models.Model):
@@ -6,6 +7,10 @@ class SemesterAnalytics(models.Model):
     num_courses = models.IntegerField()
     num_unique_students = models.IntegerField()
     num_subscriptions = models.IntegerField()
+
+    @classmethod
+    def refresh_view(cls):
+        _refresh_materialized_view(cls._meta.db_table)
 
     class Meta:
         managed = False
@@ -24,6 +29,10 @@ class TopCourses(models.Model):
     # This is a fake key that does not exist in the view.
     django_pk = models.AutoField(primary_key=True)
 
+    @classmethod
+    def refresh_view(cls):
+        _refresh_materialized_view(cls._meta.db_table)
+
     class Meta:
         managed = False
         db_table = "materialized_top_courses"
@@ -35,7 +44,19 @@ class SubscriptionsCount(models.Model):
     count = models.IntegerField()
     date = models.DateField(primary_key=True)
 
+    @classmethod
+    def refresh_view(cls):
+        _refresh_materialized_view(cls._meta.db_table)
+
     class Meta:
         managed = False
         db_table = "materialzed_subscriptions_count"
         ordering = ["date"]
+
+
+def _refresh_materialized_view(name):
+    query = sql.SQL("REFRESH MATERIALIZED VIEW CONCURRENTLY {}")
+    query = query.format(sql.Identifier(name))
+
+    with connection.cursor() as cursor:
+        cursor.execute(query)
