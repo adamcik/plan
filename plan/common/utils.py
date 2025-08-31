@@ -143,7 +143,8 @@ def compress_response(request, response, min_size=200):
 def check_modified_since(request, last_modified, headers=None):
     if "no-modified-since" in request.GET:
         return None
-    if last_modified <= 0:
+
+    if last_modified is None or last_modified <= 0:
         return None
 
     if_modified_since = http_utils.parse_http_date_safe(

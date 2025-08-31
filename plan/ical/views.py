@@ -22,6 +22,7 @@ from plan.common.models import (
     Room,
     Week,
 )
+from plan.common.schedule import Schedule
 
 _ = translation.gettext
 
@@ -83,7 +84,9 @@ def ical(request, year, semester_type, slug, ical_type=None):
     headers["Filename"] = filename  # IE needs this
     headers["Content-Disposition"] = "attachment; filename=%s" % filename
 
-    title = urls.reverse("schedule", args=[year, semester_type, slug])
+    # TODO: Replace with url converter provided schedule
+    schedule = Schedule(semester=semester, student_slug=student.slug)
+    title = urls.reverse("schedule", args=[schedule])
     hostname = settings.TIMETABLE_HOSTNAME or request.headers.get(
         "Host", socket.getfqdn()
     )

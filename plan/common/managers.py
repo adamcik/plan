@@ -5,6 +5,10 @@ import datetime
 from django.db import connection, models
 
 
+def today():
+    return datetime.date.today()
+
+
 class LectureManager(models.Manager):
     def get_lectures(self, semester_id, student_id):
         """
@@ -212,7 +216,7 @@ class SubscriptionManager(models.Manager):
 class SemesterManager(models.Manager):
     def active(self):
         qs = self.get_queryset()
-        qs = qs.filter(active__lt=datetime.date.today())
+        qs = qs.filter(active__lt=today())
         try:
             return qs.order_by("-active")[0]
         except IndexError:
@@ -223,7 +227,7 @@ class SemesterManager(models.Manager):
 
     def next(self):
         qs = self.get_queryset()
-        qs = qs.filter(active__gte=datetime.date.today())
+        qs = qs.filter(active__gte=today())
         try:
             return qs.order_by("active")[0]
         except IndexError:

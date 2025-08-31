@@ -26,6 +26,7 @@ from plan.common.models import (
     Subscription,
     Week,
 )
+from plan.common.schedule import Schedule
 from plan.materialized.models import SubscriptionsCount
 
 # FIXME split into frontpage/semester, course, schedule files
@@ -61,7 +62,7 @@ def shortcut(request, slug):
         semester = Semester.objects.active()
     except Semester.DoesNotExist:
         raise http.Http404
-    return schedule_current(request, semester.year, semester.type, slug)
+    return schedule_current(request, Schedule(semester=semester, student_slug=slug))
 
 
 @utils.expires_in(datetime.timedelta(hours=1))
@@ -166,25 +167,22 @@ def course_query(request, year, semester_type):
     return response
 
 
-def schedule_current(request, year, semester_type, slug):
-    semester = Semester(year=year, type=semester_type)
+def schedule_current(request, schedule: Schedule):
     current_week = get_current_week()
 
+    # NOTE: We use the slug to allow for students that don't yet exist.
     weeks = Week.objects.filter(
-        lecture__course__subscription__student__slug=slug,
-        lecture__course__semester__year__exact=semester.year,
-        lecture__course__semester__type=semester.type,
+        lecture__course__subscription__student__slug=schedule.student_slug,
+        lecture__course__semester=schedule.semester,
     )
     weeks = weeks.distinct().values_list("number", flat=True)
 
-    if current_week in weeks and semester.year == today().year:
-        return shortcuts.redirect(
-            "schedule-week", semester.year, semester.slug, slug, current_week
-        )
-    return shortcuts.redirect("schedule", semester.year, semester.slug, slug)
+    if current_week in weeks and schedule.semester.year == today().year:
+        return shortcuts.redirect("schedule-week", schedule, current_week)
+    return shortcuts.redirect("schedule", schedule)
 
 
-def schedule(request, year, semester_type, slug, advanced=False, week=None, all=False):
+def schedule(request, schedule: Schedule, advanced=False, week=None, all=False):
     """Page that handles showing schedules"""
     bypass_cache = utils.should_bypass_cache(request)
 
@@ -193,17 +191,11 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
     # Color mapping for the courses
     color_map = utils.ColorMap(hex=True)
 
-    semester, student, last_modified = utils.fetch_student_semester(
-        year, semester_type, slug
-    )
-    if not semester:
-        return http.HttpResponseNotFound()
-
     headers = {}
-    if last_modified > 0:
-        headers["Last-Modified"] = http_date(last_modified)
+    if schedule.last_modified is not None:
+        headers["Last-Modified"] = http_date(schedule.last_modified)
 
-    response = utils.check_modified_since(request, last_modified, headers)
+    response = utils.check_modified_since(request, schedule.last_modified, headers)
     if response:
         return response
 
@@ -213,18 +205,18 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
         str(p)
         for p in (
             request.resolver_match.url_name,
-            last_modified,
+            schedule.last_modified,
             request.path,
         )
     )
-    if last_modified:
+    if schedule.last_modified is not None:
         response = cache.get(key)
         if not bypass_cache and response:
             response["X-Cache"] = f"hit; key={key}"
             return response
 
-    db_key = f"db:{year}-{semester_type}-{slug}-{last_modified}"
-    if last_modified:
+    db_key = f"db:{schedule.key()}"
+    if schedule.last_modified is not None:
         result = cache.get(db_key)
     else:
         result = [], [], [], [], [], [], []
@@ -232,12 +224,23 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
     if result:
         lectures, courses, exams, lecturers, groups, rooms, schedule_weeks = result
     else:
-        lectures = Lecture.objects.get_lectures(semester.id, student.id)
-        courses = Course.objects.get_courses(year, semester.type, slug)
+        lectures = Lecture.objects.get_lectures(
+            schedule.semester.id,
+            schedule.student.id,
+        )
+        courses = Course.objects.get_courses(
+            schedule.semester.year,
+            schedule.semester.type,
+            schedule.student_slug,
+        )
 
         # Most of these could be built into get_lectures with ARRAY_AGG..
         exams = {}
-        for exam in Exam.objects.get_exams(year, semester.type, slug):
+        for exam in Exam.objects.get_exams(
+            schedule.semester.year,
+            schedule.semester.type,
+            schedule.student_slug,
+        ):
             exams.setdefault(exam.course_id, []).append(exam)
 
         # Use get_related to cut query counts
@@ -262,25 +265,29 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
     common_key = "common"
     result = cache.get(common_key)
     if result:
-        next_semester, next_message, locations = result
+        next_semester, next_schedule, locations = result
     else:
         locations = Location.objects.distinct()  # .filter(course__semester=semester)
 
         try:
             # TODO: try and turn this into a single query with annotate?
             next_semester = next(Semester.objects)
-            # TODO: I think we only show the message if there is someone using it?
-            next_message = (
-                Subscription.objects.get_subscriptions(
-                    next_semester.year, next_semester.type, slug
-                ).count()
-                == 0
-            )
+            next_semester_has_subscriptions = Subscription.objects.get_subscriptions(
+                next_semester.year, next_semester.type, schedule.student_slug
+            ).exists()
+
+            if next_semester_has_subscriptions:
+                next_schedule = Schedule(
+                    semester=next_semester,
+                    student_slug=schedule.student_slug,
+                )
+            else:
+                next_schedule = None
         except Semester.DoesNotExist:
             next_semester = None
-            next_message = False
+            next_schedule = None
 
-        result = (next_semester, next_message, locations)
+        result = (next_semester, next_schedule, locations)
         cache.set(common_key, result, timeout=8 * 3600)
 
     next_week = None
@@ -300,7 +307,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
     table = timetable.Timetable(lectures)
 
     if week:
-        table.set_week(semester.year, week)
+        table.set_week(schedule.semester.year, week)
 
     if lectures:
         table.place_lectures(week)
@@ -320,7 +327,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
                 "Display %(course)s as:"
             ) % {"course": course.code}
 
-    week_is_current = semester.year == today().year and week == current_week
+    week_is_current = schedule.semester.year == today().year and week == current_week
 
     # TODO: Natural sort course code? Why is this needed here?
     lectures.sort(
@@ -341,12 +348,11 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
             "current": (week == current_week),
             "current_week": current_week,
             "exams": exams,
-            "next_message": next_message,
             "lectures": lectures,
-            "semester": semester,
+            "semester": schedule.semester,
             "week_is_current": week_is_current,
             "next_semester": next_semester,
-            "slug": slug,
+            "slug": schedule.student_slug,
             "timetable": table,
             "week": week,
             "next_week": next_week,
@@ -356,6 +362,8 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
             "lecturers": lecturers,
             "locations": locations,
             "weeks": schedule_weeks,
+            "schedule": schedule,
+            "next_schedule": next_schedule,
         },
     )
     for header, value in headers.items():
@@ -403,9 +411,11 @@ def select_groups(request, year, semester_type, slug):
 
             utils.clear_cache(year, semester_type, slug)
 
-        return shortcuts.redirect(
-            "schedule-advanced", year, Semester.localize(semester_type), slug
+        schedule = Schedule(
+            semester=Semester(year=year, type=semester_type),
+            student_slug=slug,
         )
+        return shortcuts.redirect("schedule-advanced", schedule)
 
     color_map = utils.ColorMap(hex=True)
     subscription_groups = Subscription.get_groups(year, semester_type, slug)
@@ -467,9 +477,12 @@ def select_course(request, year, semester_type, slug, add=False):
     utils.clear_cache(year, semester_type, slug)
     if response:
         return response
-    return shortcuts.redirect(
-        "schedule-advanced", year, Semester.localize(semester_type), slug
+
+    schedule = Schedule(
+        semester=Semester(year=year, type=semester_type),
+        student_slug=slug,
     )
+    return shortcuts.redirect("schedule-advanced", schedule)
 
 
 def _add_courses(request, year, semester_type, slug):
@@ -485,8 +498,11 @@ def _add_courses(request, year, semester_type, slug):
     )
 
     if not lookup:
-        localized_semester = Semester.localize(semester_type)
-        return shortcuts.redirect("schedule-advanced", year, localized_semester, slug)
+        schedule = Schedule(
+            semester=Semester(year=year, type=semester_type),
+            student_slug=slug,
+        )
+        return shortcuts.redirect("schedule-advanced", schedule)
 
     errors = []
     too_many_subscriptions = False
@@ -592,9 +608,11 @@ def select_lectures(request, year, semester_type, slug):
 
         utils.clear_cache(year, semester_type, slug)
 
-    return shortcuts.redirect(
-        "schedule-advanced", year, Semester.localize(semester_type), slug
+    schedule = Schedule(
+        semester=Semester(year=year, type=semester_type),
+        student_slug=slug,
     )
+    return shortcuts.redirect("schedule-advanced", schedule)
 
 
 def about(request):

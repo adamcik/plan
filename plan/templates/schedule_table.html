@@ -4,12 +4,12 @@
 {% load strip %}
 
 {% if prev_week %}
-  <a href="{% url 'schedule-week' semester.year semester.slug slug prev_week %}"
+  <a href="{% url 'schedule-week' schedule prev_week %}"
      id="previous"
      class="noprint">«</a>
 {% endif %}
 {% if next_week %}
-  <a href="{% url 'schedule-week' semester.year semester.slug slug next_week %}"
+  <a href="{% url 'schedule-week' schedule next_week %}"
      id="next"
      class="noprint">»</a>
 {% endif %}

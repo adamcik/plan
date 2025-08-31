@@ -2,7 +2,7 @@
 
 {% url 'shortcut' slug as shortcut_url %}
 {% url 'course-list' semester.year semester.slug slug as course_list_url %}
-{% url 'schedule-advanced' semester.year semester.slug slug as adavanced_url %}
+{% url 'schedule-advanced' schedule as adavanced_url %}
 
 {% url 'schedule-ical' semester.year semester.slug slug _('lectures') as ical_lectures_url %}
 {% url 'schedule-ical' semester.year semester.slug slug _('exams') as ical_exams_url %}

@@ -3,7 +3,77 @@
 
 import re
 
+from django.core.cache import cache
+from django.db.models.aggregates import Max
 from django.http import Http404
+
+from plan.common.models import Semester, Student, Subscription
+from plan.common.schedule import Schedule
+
+
+class ScheduleConverter:
+    regex = r"(\d{4})/([a-z]+)/([a-zA-Z0-9-_]{1,50})"
+    _pattern = re.compile(regex)
+
+    def to_python(self, value: str) -> Schedule:
+        match = self._pattern.match(value)
+        year, semester_type, slug = match.groups()
+
+        key = f"modified-{year}-{semester_type}-{slug}"
+        result = cache.get(key)
+        if result:
+            return result
+
+        try:
+            semester = Semester.objects.get(
+                year=year,
+                type=semester_type,
+            )
+        except Semester.DoesNotExist:
+            raise Http404(f"Semester does not exist, year={year}, type={semester_type}")
+
+        try:
+            student = Student.objects.get(slug=slug)
+        except Student.DoesNotExist:
+            return Schedule(
+                student_slug=slug,
+                semester=semester,
+                student=None,
+            )
+
+        # NOTE: Knowning the exact student_id makes this query much faster.
+        qs = Subscription.objects.filter(
+            course__semester_id=semester.id,
+            student_id=student.id,
+        ).aggregate(
+            subscription_added=Max("added"),
+            subscription_last_modified=Max("last_modified"),
+            courses_last_modified=Max("course__last_modified"),
+            lectures_last_modified=Max("course__lecture__last_modified"),
+            rooms_last_modified=Max("course__lecture__rooms__last_modified"),
+            exams_last_modified=Max("course__exam__last_modified"),
+        )
+        last_modified = max([0] + [int(agg.timestamp()) for agg in qs.values() if agg])
+
+        result = Schedule(
+            student_slug=slug,
+            semester=semester,
+            student=student,
+            last_modified=last_modified,
+        )
+
+        cache.set(key, result, timeout=60)
+        return result
+
+    def to_url(self, schedule: Schedule) -> str:
+        return "/".join(
+            str(v)
+            for v in [
+                schedule.semester.year,
+                Semester.localize(schedule.semester.type),
+                schedule.student_slug,
+            ]
+        )
 
 
 class WeekNumberConverter:

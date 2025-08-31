@@ -9,6 +9,7 @@ from plan.common import converters
 
 handler500 = "plan.common.utils.server_error"
 
+register_converter(converters.ScheduleConverter, "schedule")
 register_converter(converters.WeekNumberConverter, "week_number")
 register_converter(converters.Base58Converter, "base58")
 

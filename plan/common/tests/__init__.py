@@ -6,6 +6,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from plan.common.models import Semester
+from plan.common.schedule import Schedule
 
 
 # TODO(adamcik): switch to proper mock lib.
@@ -14,14 +15,20 @@ class BaseTestCase(TestCase):
         self.set_now_to(2009, 1, 1)
 
         self.semester = Semester(year=2009, type="spring")
-        self.default_args = [self.semester.year, self.semester.type, "adamcik"]
+        self.schedule = Schedule(semester=self.semester, student_slug="adamcik")
+        self.next_schedule = Schedule(
+            semester=Semester(year=2009, type=Semester.FALL),
+            student_slug="adamcik",
+        )
+
+        self.default_args = [2009, "spring", "adamcik"]
 
     def set_now_to(self, year, month, day):
-        from plan.common import models, views
+        from plan.common import managers, models, views
 
         dt = datetime.datetime(year, month, day)
 
-        for cls in models, views:
+        for cls in models, views, managers:
             cls.now = lambda: dt
             cls.today = lambda: dt.date()
 

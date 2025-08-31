@@ -21,24 +21,24 @@ urlpatterns = [
         name="course-query",
     ),
     path(
-        "<int:year>/<str:semester_type>/<slug:slug>/+",
+        "<schedule:schedule>/+",
         views.schedule,
         {"all": True},
         name="schedule",
     ),
     path(
-        "<int:year>/<str:semester_type>/<slug:slug>/+",
+        "<schedule:schedule>/+",
         views.schedule,
         {"advanced": True},
         name="schedule-advanced",
     ),
     path(
-        "<int:year>/<str:semester_type>/<slug:slug>/current/",
+        "<schedule:schedule>/current/",
         views.schedule_current,
         name="schedule-current",
     ),
     path(
-        "<int:year>/<str:semester_type>/<slug:slug>/<week_number:week>/",
+        "<schedule:schedule>/<week_number:week>/",
         views.schedule,
         name="schedule-week",
     ),

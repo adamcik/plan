@@ -29,7 +29,7 @@
       </ul>
     {% endif %}
     <p class="large">
-      {% url 'schedule-advanced' year type slug as adavanced_url %}
+      {% url 'schedule-advanced' schedule as adavanced_url %}
       {% blocktrans %}
         Back to your <a href="{{ adavanced_url }}">schedule</a>.
       {% endblocktrans %}
