@@ -16,9 +16,9 @@ class Migration(migrations.Migration):
                 COUNT(DISTINCT s.student_id) AS num_unique_students,
                 COUNT(s.id) AS num_subscriptions
             FROM
-                common_course AS c
-            LEFT JOIN
-                common_subscription AS s ON c.id = s.course_id
+                common_subscription AS s
+            JOIN
+                common_course AS c ON c.id = s.course_id
             GROUP BY
                 c.semester_id
             ORDER BY
