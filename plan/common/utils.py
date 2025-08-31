@@ -18,7 +18,6 @@ from django.utils import cache as cache_utils
 from django.utils import http as http_utils
 from django.utils import text as text_utils
 from django.utils import translation
-from django.utils.html import escape
 
 _ = translation.gettext
 
@@ -102,23 +101,6 @@ def should_bypass_cache(request):
         return True
     else:
         return False
-
-
-def debug_response(response):
-    content = []
-    for key, value in response.headers.items():
-        content.append(f"{key}: {escape(value)}")
-    content.append("")
-
-    if response.get("Content-Type", "").startswith("text/"):
-        escaped = escape(response.content.decode())
-        content.append(re.sub(r"\r?\n", "&#10;", escaped))
-    else:
-        content.append(f"Response contains {len(response.content)} encoded bytes.")
-
-    return http.HttpResponse(
-        f"<html><head></head><body><pre>{'<br/>'.join(content)}</pre></body></html>"
-    )
 
 
 def accepts_gzip(request):

@@ -1,7 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 from django import http
-from django.conf import settings
 from django.utils import dateformat, html, translation
 from django.utils import http as http_utils
 from reportlab import platypus
@@ -245,6 +244,4 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
     page.showPage()
     page.save()
 
-    if settings.DEBUG and "html" in request.GET:
-        return utils.debug_response(response)
     return response
