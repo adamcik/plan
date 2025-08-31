@@ -1,7 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import datetime
-import gzip
 import operator
 import random
 import re
@@ -34,8 +33,6 @@ URL_ALIASES = {
     "id": r"(?P<id>\d+)",
     "redirect_type": r"(?P<type>course|syllabus|room)",
 }
-
-RE_ACCEPTS_GZIP = re.compile(r"\bgzip\b")
 
 
 def url_helper(regexp, *args, **kwargs):
@@ -72,6 +69,7 @@ def fetch_student_semester(
     try:
         student = Student.objects.get(slug=slug)
     except Student.DoesNotExist:
+        # TODO: Add and use semester last modified instead?
         return (semester, None, 0)
 
     # NOTE: Knowning the exact student_id makes this query much faster.
@@ -105,8 +103,6 @@ def should_bypass_cache(request):
         return False
 
 
-def accepts_gzip(request):
-    return RE_ACCEPTS_GZIP.search(request.META.get("HTTP_ACCEPT_ENCODING", ""))
 def parse_accepts(request):
     accepts = request.META.get("HTTP_ACCEPT_ENCODING", "")
     return {p.split(";")[0].strip().lower() for p in accepts.split(",")}
