@@ -4,6 +4,7 @@ import gzip
 import re
 import secrets
 
+import brotli
 from django import http, shortcuts, urls
 from django.conf import settings
 from django.utils import cache, translation
@@ -13,6 +14,7 @@ from django.utils.html import escape
 from django.utils.translation import trans_real as trans_internals
 
 from plan.common.models import Semester
+from plan.common.utils import parse_accepts
 
 RE_WHITESPACE = re.compile(rb"(\s\s+|\n)")
 
@@ -196,31 +198,30 @@ def text_debug_middleware(get_response):
     return middleware
 
 
-def gzip_compatibility_middleware(get_response):
-    """Automatically decode gziped content if not supported by client.
+def encoding_compatibility_middleware(get_response):
+    """Automatically decode content if not supported by client.
 
     This allows us to store compressed content in caches which saves space and
-    given how widely supported gzip is, we hardly ever hit this code path.
+    given how widely supported br/gzip is, we hardly ever hit this code path.
     """
-
-    RE_ACCEPTS_GZIP = re.compile(r"\bgzip\b")
 
     def middleware(request):
         response = get_response(request)
         cache.patch_vary_headers(response, ("Accept-Encoding",))
 
-        if response.headers.get("Content-Encoding") != "gzip":
-            return response
+        encoding = response.headers.get("Content-Encoding")
+        accepts = parse_accepts(request)
 
-        if RE_ACCEPTS_GZIP.search(request.META.get("HTTP_ACCEPT_ENCODING", "")):
+        if encoding == "br" and "br" not in accepts:
+            content = brotli.decompress(response.content)
+        elif encoding == "gzip" and "gzip" not in accepts:
+            content = gzip.decompress(response.content)
+        else:
             return response
 
         response = http.HttpResponse(
-            gzip.decompress(response.content),
-            status=response.status_code,
-            headers=response.headers,
+            content, status=response.status_code, headers=response.headers
         )
-
         response.headers["Content-Length"] = str(len(response.content))
         del response.headers["Content-Encoding"]
 

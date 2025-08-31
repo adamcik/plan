@@ -8,6 +8,7 @@ import re
 import time
 import typing
 
+import brotli
 import typing_extensions
 from django import http, template
 from django.conf import settings, urls
@@ -105,29 +106,40 @@ def should_bypass_cache(request):
 
 def accepts_gzip(request):
     return RE_ACCEPTS_GZIP.search(request.META.get("HTTP_ACCEPT_ENCODING", ""))
+def parse_accepts(request):
+    accepts = request.META.get("HTTP_ACCEPT_ENCODING", "")
+    return {p.split(";")[0].strip().lower() for p in accepts.split(",")}
 
 
-def compress_response(response, min_size=200):
+def compress_response(request, response, min_size=200):
     if "Content-Encoding" in response or len(response.content) < min_size:
         return response
 
-    content = gzip.compress(
-        response.content,
-        compresslevel=6,
-        mtime=0,
-    )
+    accepts = parse_accepts(request)
+    if "br" in accepts:
+        content = brotli.compress(response.content, brotli.MODE_TEXT)
+        encoding = "br"
+    elif "gzip" in accepts:
+        content = gzip.compress(
+            response.content,
+            compresslevel=6,
+            mtime=0,
+        )
+        encoding = "gzip"
+    else:
+        return response
 
     if len(content) > len(response.content):
         return response
 
-    result = http.HttpResponse(
+    response = http.HttpResponse(
         content, status=response.status_code, headers=response.headers
     )
-    result.headers["Content-Length"] = str(len(content))
-    result.headers["Content-Encoding"] = "gzip"
+    response.headers["Content-Length"] = str(len(content))
+    response.headers["Content-Encoding"] = encoding
 
-    cache_utils.patch_vary_headers(result, ("Accept-Encoding",))
-    return result
+    cache_utils.patch_vary_headers(response, ("Accept-Encoding",))
+    return response
 
 
 def check_modified_since(request, last_modified, headers=None):
@@ -144,7 +156,6 @@ def check_modified_since(request, last_modified, headers=None):
 
     if last_modified > if_modified_since:
         return None
-
     return http.HttpResponseNotModified(headers=headers or {})
 
 
