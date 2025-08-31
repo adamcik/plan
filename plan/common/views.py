@@ -2,7 +2,6 @@
 
 import datetime
 import json
-import urllib.parse
 
 from django import http, shortcuts
 from django.conf import settings
@@ -83,12 +82,9 @@ def redirect(request, type, id):
         raise http.Http404
 
     if settings.TIMETABLE_UTM_SOURCE:
-        parts = list(urllib.parse.urlparse(url))
-        query = dict(urllib.parse.parse_qsl(parts[4]))
-        query.update({"utm_source": settings.TIMETABLE_UTM_SOURCE})
-        parts[4] = urllib.parse.urlencode(query)
-        url = urllib.parse.urlunparse(parts)
-
+        url = utils.update_url_params(
+            url, {"utm_source": settings.TIMETABLE_UTM_SOURCE}
+        )
     return shortcuts.redirect(url)
 
 

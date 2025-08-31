@@ -7,6 +7,7 @@ import random
 import re
 import time
 import typing
+import urllib.parse
 
 import brotli
 import typing_extensions
@@ -317,3 +318,11 @@ def natural_sort(values, key=None):
         values,
         key=lambda v: [convert(p) if isinstance(p, str) else p for p in split(key(v))],
     )
+
+
+def update_url_params(url, params):
+    parts = list(urllib.parse.urlparse(url))
+    query = dict(urllib.parse.parse_qsl(parts[4]))
+    query.update(params)
+    parts[4] = urllib.parse.urlencode(query)
+    return urllib.parse.urlunparse(parts)
