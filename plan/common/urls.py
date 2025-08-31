@@ -62,27 +62,26 @@ urlpatterns = [
         views.about,
         name="about",
     ),
-    # TODO: consider converter for base58 for id?
     path(
-        "course/<int:id>/",
+        "c/<base58:id>",
         views.redirect,
         {"type": "course"},
         name="redirect_course",
     ),
     path(
-        "syllabus/<int:id>/",
+        "s/<base58:id>",
         views.redirect,
         {"type": "syllabus"},
         name="redirect_syllabus",
     ),
     path(
-        "room/<int:id>/",
+        "r/<base58:id>",
         views.redirect,
         {"type": "room"},
         name="redirect_room",
     ),
     path(
-        "stream/<int:id>/",
+        "u/<base58:id>",
         views.redirect,
         {"type": "stream"},
         name="redirect_stream",

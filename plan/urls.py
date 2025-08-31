@@ -10,6 +10,7 @@ from plan.common import converters
 handler500 = "plan.common.utils.server_error"
 
 register_converter(converters.WeekNumberConverter, "week_number")
+register_converter(converters.Base58Converter, "base58")
 
 if settings.DEBUG:
     from django.views.generic.base import TemplateView
