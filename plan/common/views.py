@@ -332,7 +332,12 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
     week_is_current = semester.year == today().year and week == current_week
 
     # TODO: Natural sort course code? Why is this needed here?
-    lectures.sort(key=lambda l: (l.course.code, l.week_numbers[0]))
+    lectures.sort(
+        key=lambda l: (
+            l.course.code,
+            min(l.week_numbers) if l.week_numbers else None,
+        )
+    )
 
     response = shortcuts.render(
         request,
