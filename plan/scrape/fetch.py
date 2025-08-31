@@ -10,12 +10,13 @@ import warnings
 import lxml.etree
 import lxml.html
 import requests
-from django.core import cache
-from django.core.cache import CacheKeyWarning
-from django.db import connections
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.exceptions import MaxRetryError
 from requests.packages.urllib3.util.retry import Retry
+
+from django.core import cache
+from django.core.cache import CacheKeyWarning
+from django.db import connections
 
 warnings.simplefilter("ignore", CacheKeyWarning)
 

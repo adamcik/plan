@@ -1,5 +1,6 @@
-from django.db import connection, models
 from psycopg2 import sql
+
+from django.db import connection, models
 
 
 class SemesterAnalytics(models.Model):

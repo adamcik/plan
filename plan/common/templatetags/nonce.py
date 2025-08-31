@@ -1,8 +1,9 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 
-from django import template
 from lxml import html
+
+from django import template
 
 register = template.Library()
 

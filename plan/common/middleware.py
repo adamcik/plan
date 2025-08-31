@@ -5,6 +5,7 @@ import re
 import secrets
 
 import brotli
+
 from django import http, shortcuts, urls
 from django.conf import settings
 from django.utils import cache, translation

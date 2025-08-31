@@ -6,9 +6,10 @@ import html
 import logging
 
 import tqdm
+from tqdm.contrib.logging import logging_redirect_tqdm
+
 from django import db
 from django.db.models import Count
-from tqdm.contrib.logging import logging_redirect_tqdm
 
 from plan.common.models import (
     Course,

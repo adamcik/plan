@@ -10,6 +10,7 @@ import urllib.parse
 
 import brotli
 import typing_extensions
+
 from django import http, template
 from django.conf import settings, urls
 from django.core.cache import cache

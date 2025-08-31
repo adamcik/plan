@@ -1,12 +1,13 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from django import http
-from django.utils import dateformat, html, translation
-from django.utils import http as http_utils
 from reportlab import platypus
 from reportlab.lib import colors, pagesizes, styles, units
 from reportlab.pdfgen import canvas
 from reportlab.platypus import tables
+
+from django import http
+from django.utils import dateformat, html, translation
+from django.utils import http as http_utils
 
 from plan.common import utils
 from plan.common.models import Course, Lecture, Room
