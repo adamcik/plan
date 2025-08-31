@@ -165,8 +165,6 @@ def course_query(request, year, semester_type):
             response.write("{}|{}\n".format(code, name or ""))
 
     patch_vary_headers(response, ("Accept",))
-    if settings.DEBUG and "html" in request.GET:
-        return utils.debug_response(response)
     return response
 
 
@@ -634,9 +632,6 @@ def api(request):
         headers=utils.cache_headers(cache_timeout),
     )
     cache.set(key, response, cache_timeout.total_seconds())
-
-    if settings.DEBUG and "html" in request.GET:
-        return utils.debug_response(response)
     return response
 
 

@@ -1,5 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+import gzip
 import re
 import secrets
 
@@ -8,6 +9,7 @@ from django.conf import settings
 from django.utils import cache, translation
 from django.utils import http as http_utils
 from django.utils.deprecation import MiddlewareMixin
+from django.utils.html import escape
 from django.utils.translation import trans_real as trans_internals
 
 from plan.common.models import Semester
@@ -158,3 +160,37 @@ class LocaleMiddleware(MiddlewareMixin):
                 kwargs["semester_type"]
             ]
             return shortcuts.redirect(match.url_name, *args, **kwargs)
+
+
+def text_debug_middleware(get_response):
+    """Debug middleware that turns non-html and/or downloads into "HTML"
+
+    This is meant for development and in combination with django debug toolbar.
+    Allowing us to see all the info for e.g. PDF and ICAL views.
+    """
+
+    def middleware(request):
+        response = get_response(request)
+
+        if not settings.DEBUG or "debug" not in request.GET:
+            return response
+
+        content = []
+        for key, value in response.headers.items():
+            content.append(f"{key}: {escape(value)}")
+        content.append("")
+
+        if response.get("Content-Type", "").startswith("text/"):
+            if response.get("Content-Encoding", "") == "gzip":
+                response.content = gzip.decompress(response.content)
+
+            escaped = escape(response.content.decode())
+            content.append(re.sub(r"\r?\n", "&#10;", escaped))
+        else:
+            content.append(f"Response contains {len(response.content)} encoded bytes.")
+
+        return http.HttpResponse(
+            f"<html><head></head><body><pre>{'<br/>'.join(content)}</pre></body></html>"
+        )
+
+    return middleware

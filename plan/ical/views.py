@@ -70,9 +70,7 @@ def ical(request, year, semester_type, slug, ical_type=None):
     if not bypass_cache and response:
         response["X-Cache"] = f"hit; key={key}"
 
-        if settings.DEBUG and "html" in request.GET:
-            return utils.debug_response(utils.decompress_response(response))
-        elif not utils.accepts_gzip(request):
+        if not utils.accepts_gzip(request):
             return utils.decompress_response(response)
         return response
 
@@ -141,9 +139,7 @@ def ical(request, year, semester_type, slug, ical_type=None):
 
     # TODO(adamcik): Rate limit remote hosts?
 
-    if settings.DEBUG and "html" in request.GET:
-        return utils.debug_response(response)
-    elif utils.accepts_gzip(request) and compressed_response:
+    if utils.accepts_gzip(request) and compressed_response:
         return compressed_response
     else:
         return response
