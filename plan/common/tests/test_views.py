@@ -116,7 +116,7 @@ class ViewTestCase(BaseTestCase):
         subscriptions = list(subscriptions)
 
         for data in post_data:
-            original_response = self.client.get(original_url)
+            self.client.get(original_url)
 
             response = self.client.post(url, data)
 
@@ -150,7 +150,7 @@ class ViewTestCase(BaseTestCase):
         )
 
         for data in post_data:
-            original_response = self.client.get(original_url)
+            self.client.get(original_url)
 
             response = self.client.post(url, MultiValueDict(data))
 
@@ -188,7 +188,7 @@ class ViewTestCase(BaseTestCase):
         )
 
         for data in post_data:
-            original_response = self.client.get(original_url)
+            self.client.get(original_url)
 
             response = self.client.post(url, MultiValueDict(data))
 

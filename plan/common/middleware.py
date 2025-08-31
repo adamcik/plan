@@ -85,8 +85,10 @@ class AppendSlashMiddleware(MiddlewareMixin):
             return
 
         urlconf = getattr(request, "urlconf", None)
-        old_is_valid = lambda: urls.is_valid_path(request.path_info, urlconf)
-        new_is_valid = lambda: urls.is_valid_path("%s/" % request.path_info, urlconf)
+        def old_is_valid():
+            return urls.is_valid_path(request.path_info, urlconf)
+        def new_is_valid():
+            return urls.is_valid_path("%s/" % request.path_info, urlconf)
 
         # Bail for valid urls or slash version not being valid.
         if old_is_valid() or not new_is_valid():

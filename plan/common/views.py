@@ -40,7 +40,8 @@ today = datetime.date.today
 _ = translation.gettext_lazy
 
 # Start new week on saturdays
-get_current_week = lambda: (now() + datetime.timedelta(days=2)).isocalendar()[1]
+def get_current_week():
+    return (now() + datetime.timedelta(days=2)).isocalendar()[1]
 
 
 @utils.expires_in(datetime.timedelta(hours=1))
@@ -455,7 +456,7 @@ def select_course(request, year, semester_type, slug, add=False):
     # FIXME split ut three sub functions into seperate functions?
 
     try:
-        semester = Semester.objects.get(year=year, type=semester_type)
+        Semester.objects.get(year=year, type=semester_type)
     except Semester.DoesNotExist:
         return shortcuts.redirect(
             "schedule", year, Semester.localize(semester_type), slug
