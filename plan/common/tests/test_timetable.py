@@ -2,7 +2,7 @@
 
 from copy import copy
 
-from plan.common.models import Lecture, Semester
+from plan.common.models import Lecture, Semester, Student
 from plan.common.tests import BaseTestCase
 from plan.common.timetable import Timetable
 
@@ -16,10 +16,12 @@ class TimetableTestCase(BaseTestCase):
         # FIXME test instert times
         # FIXME test map_to_slot
 
-        lectures = Lecture.objects.get_lectures(2009, Semester.SPRING, "adamcik")
+        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+        student = Student.objects.get(slug="adamcik")
+        lectures = Lecture.objects.get_lectures(semester.id, student.id)
 
         timetable = Timetable(lectures)
-        timetable.place_lectures()
+        timetable.place_lectures(week=None)
         timetable.add_markers()
 
         rows = []
