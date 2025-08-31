@@ -1,15 +1,21 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+
 from plan.common.models import Course, Semester
 from plan.common.tests import BaseTestCase
+from plan.materialized.models import SemesterAnalytics, TopCourses
 
 
 class ModelsTestCase(BaseTestCase):
     fixtures = ["test_data.json", "test_user.json"]
 
     def test_course_get_stats(self):
+        SemesterAnalytics.refresh_view()
+        TopCourses.refresh_view()
+
         semester = Semester.objects.get(year=2009, type=Semester.SPRING)
-        actual = Course.get_stats(semester)
+
+        actual = Course.get_stats(semester, bypass_cache=True)
 
         self.assertEqual(3, actual.pop("slug_count"))
         self.assertEqual(3, actual.pop("course_count"))
