@@ -118,28 +118,24 @@ def ical(request, year, semester_type, slug, ical_type=None):
         headers=headers,
     )
 
-    # NOTE: Most consumers will use compressed response, so do this once before
-    # caching to save resources. The alternative is to vary the cache key based
-    # on gzip, or just not bother with the complexity of compressing.
+    # NOTE: Most consumers will use compressed response, so we make a point of
+    # compressing with the best possible compression that the current client
+    # supports before putting things in the cache. We have compatibility
+    # middleware that will decompress if needed.
 
     if settings.TIMETABLE_ICAL_CACHE_DURATION:
         response["X-Cache"] = f"{'miss' if not bypass_cache else 'bypass'}; key={key}"
-        compressed_response = utils.compress_response(response)
+        response = utils.compress_response(request, response)
         caches["ical"].set(
             key,
-            compressed_response,
+            response,
             timeout=settings.TIMETABLE_ICAL_CACHE_DURATION.total_seconds(),
         )
     else:
         response["X-Cache"] = f"disabled; key={key}"
-        compressed_response = None
 
     # TODO(adamcik): Rate limit remote hosts?
-
-    if utils.accepts_gzip(request) and compressed_response:
-        return compressed_response
-    else:
-        return response
+    return response
 
 
 # TODO: Consider adding redirect/url-shortner for rooms?
