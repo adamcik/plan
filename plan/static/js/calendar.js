@@ -19,10 +19,9 @@
     }
   }
 
-  window.drawCalendar = (container, url) => {
+  window.drawCalendar = (container, content) => {
     // FIXME: Consider show active dates for new semesters?
-    fetch(url)
-      .then((response) => response.text())
+    Promise.resolve(content)
       .then((content) => {
         const data = [];
 

@@ -2,6 +2,7 @@
 
 {% load compress %}
 {% load i18n %}
+{% load nonce %}
 {% load static %}
 
 {% block title %}
@@ -21,20 +22,24 @@
     <script type="text/javascript" src={% static 'js/lib/plot.v0.6.js' %}></script>
     <script type="text/javascript" src={% static 'js/lib/htl.v0.3.1.js' %}></script>
     <script type="text/javascript" src={% static 'js/calendar.js' %}></script>
-    <script type="text/javascript">
-      (function() {
-        const init = () => {
-          drawCalendar(document.querySelector("#graph"), "{% url 'api' %}");
-        };
-
-        if (document.readyState === "loading") {
-          document.addEventListener("DOMContentLoaded", init, false);
-        } else {
-          init();
-        }
-      })();
-    </script>
   {% endcompress %}
+  {% nonce CSP_NONCE %}
+    {% compress js inline %}
+      <script type="text/javascript">
+        (function() {
+          const init = () => {
+            drawCalendar(document.querySelector("#graph"), "{{ data|safe }}");
+          };
+
+          if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", init, false);
+          } else {
+            init();
+          }
+        })();
+      </script>
+    {% endcompress %}
+  {% endnonce %}
 {% endblock %}
 
 {% block bd %}<div id="graph"></div>{% endblock %}

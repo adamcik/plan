@@ -597,13 +597,7 @@ def select_lectures(request, year, semester_type, slug):
     )
 
 
-def api(request):
-    key = "global-stats"
-
-    response = cache.get(key)
-    if response and not utils.should_bypass_cache(request):
-        return response
-
+def about(request):
     summary = SubscriptionsCount.objects.values_list("count", "date")
 
     count: int
@@ -624,15 +618,8 @@ def api(request):
         else:
             result.append(f"{d}:{c}")
 
-    cache_timeout = datetime.timedelta(hours=12)
-    response = http.HttpResponse(
-        ",".join(result).encode(),
-        content_type="text/plain",
-        headers=utils.cache_headers(cache_timeout),
+    return shortcuts.render(
+        request,
+        "about.html",
+        {"data": ",".join(result)},
     )
-    cache.set(key, response, cache_timeout.total_seconds())
-    return response
-
-
-def about(request):
-    return shortcuts.render(request, "about.html")

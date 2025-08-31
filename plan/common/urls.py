@@ -52,6 +52,5 @@ urlpatterns = [
     url_helper(
         r"^stream/{id}/?$", views.redirect, {"type": "stream"}, name="redirect_stream"
     ),
-    url_helper(r"^stats[+]$", views.api, name="api"),
     url_helper(r"^{slug}/?$", views.shortcut, name="shortcut"),
 ]
