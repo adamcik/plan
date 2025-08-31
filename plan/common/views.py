@@ -367,7 +367,8 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
             "weeks": schedule_weeks,
         },
     )
-    response.headers.update(headers)
+    for header, value in headers.items():
+        response.headers[header] = value
 
     if settings.TIMETABLE_SCHEDULE_CACHE_DURATION:
         response["X-Cache"] = f"{'miss' if not bypass_cache else 'bypass'}; key={key}"
