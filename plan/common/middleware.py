@@ -177,19 +177,27 @@ def text_debug_middleware(get_response):
         if not settings.DEBUG or "debug" not in request.GET:
             return response
 
+        content_type = response.get("Content-Type", "")
+        content_encoding = response.get("Content-Encoding", "")
+
+        if content_type.startswith("text/html"):
+            return response
+
         content = []
         for key, value in response.headers.items():
             content.append(f"{key}: {escape(value)}")
         content.append("")
 
-        if response.get("Content-Type", "").startswith("text/"):
-            if response.get("Content-Encoding", "") == "gzip":
+        if content_type.startswith("text/"):
+            if content_encoding == "gzip":
                 response.content = gzip.decompress(response.content)
+            elif content_encoding == "br":
+                response.content = brotli.decompress(response.content)
 
             escaped = escape(response.content.decode())
             content.append(re.sub(r"\r?\n", "&#10;", escaped))
         else:
-            content.append(f"Response contains {len(response.content)} encoded bytes.")
+            content.append(f"Non text response contains {len(response.content)} bytes.")
 
         return http.HttpResponse(
             f"<html><head></head><body><pre>{'<br/>'.join(content)}</pre></body></html>"
