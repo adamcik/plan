@@ -38,7 +38,7 @@ urlpatterns = [
         name="schedule-current",
     ),
     path(
-        "<int:year>/<str:semester_type>/<slug:slug>/<int:week>/",
+        "<int:year>/<str:semester_type>/<slug:slug>/<week_number:week>/",
         views.schedule,
         name="schedule-week",
     ),

@@ -189,11 +189,6 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
     bypass_cache = utils.should_bypass_cache(request)
 
     current_week = get_current_week()
-    if week:
-        max_week = utils.max_number_of_weeks(year)
-    if week is not None:
-        if week <= 0 or week > max_week:
-            raise http.Http404
 
     # Color mapping for the courses
     color_map = utils.ColorMap(hex=True)
