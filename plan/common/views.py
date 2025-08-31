@@ -200,7 +200,7 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
     semester, student, last_modified = utils.fetch_student_semester(
         year, semester_type, slug
     )
-    if not semester or not student:
+    if not semester:
         return http.HttpResponseNotFound()
 
     headers = {}
