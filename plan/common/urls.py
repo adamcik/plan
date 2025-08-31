@@ -1,56 +1,95 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from django.urls import path
+
 from plan.common import views
-from plan.common.utils import url_helper
 
 urlpatterns = [
-    url_helper(r"^$", views.frontpage, name="frontpage"),
-    url_helper(r"^{year}/{semester}/$", views.getting_started, name="semester"),
-    url_helper(r"^{year}/{semester}/\+$", views.course_query, name="course-query"),
-    url_helper(
-        r"^{year}/{semester}/{slug}/$", views.schedule, {"all": True}, name="schedule"
+    path(
+        "",
+        views.frontpage,
+        name="frontpage",
     ),
-    url_helper(
-        r"^{year}/{semester}/{slug}/\+$",
+    path(
+        "<int:year>/<str:semester_type>/",
+        views.getting_started,
+        name="semester",
+    ),
+    path(
+        "<int:year>/<str:semester_type>/+",
+        views.course_query,
+        name="course-query",
+    ),
+    path(
+        "<int:year>/<str:semester_type>/<slug:slug>/+",
+        views.schedule,
+        {"all": True},
+        name="schedule",
+    ),
+    path(
+        "<int:year>/<str:semester_type>/<slug:slug>/+",
         views.schedule,
         {"advanced": True},
         name="schedule-advanced",
     ),
-    url_helper(
-        r"^{year}/{semester}/{slug}/current/$",
+    path(
+        "<int:year>/<str:semester_type>/<slug:slug>/current/",
         views.schedule_current,
         name="schedule-current",
     ),
-    url_helper(
-        r"^{year}/{semester}/{slug}/{week}/$", views.schedule, name="schedule-week"
+    path(
+        "<int:year>/<str:semester_type>/<slug:slug>/<int:week>/",
+        views.schedule,
+        name="schedule-week",
     ),
-    url_helper(
-        r"^{year}/{semester}/{slug}/change/$", views.select_course, name="change-course"
+    path(
+        "<int:year>/<str:semester_type>/<slug:slug>/change/",
+        views.select_course,
+        name="change-course",
     ),
-    url_helper(
-        r"^{year}/{semester}/{slug}/groups/$", views.select_groups, name="change-groups"
+    path(
+        "<int:year>/<str:semester_type>/<slug:slug>/groups/",
+        views.select_groups,
+        name="change-groups",
     ),
-    url_helper(
-        r"^{year}/{semester}/{slug}/filter/$",
+    path(
+        "<int:year>/<str:semester_type>/<slug:slug>/filter/",
         views.select_lectures,
         name="change-lectures",
     ),
-    url_helper(r"^[+]$", views.about, name="about"),
-    # TODO: consider converter for base58 for id?
-    url_helper(
-        r"^course/{id}/?$", views.redirect, {"type": "course"}, name="redirect_course"
+    path(
+        "+",
+        views.about,
+        name="about",
     ),
-    url_helper(
-        r"^syllabus/{id}/?$",
+    # TODO: consider converter for base58 for id?
+    path(
+        "course/<int:id>/",
+        views.redirect,
+        {"type": "course"},
+        name="redirect_course",
+    ),
+    path(
+        "syllabus/<int:id>/",
         views.redirect,
         {"type": "syllabus"},
         name="redirect_syllabus",
     ),
-    url_helper(
-        r"^room/{id}/?$", views.redirect, {"type": "room"}, name="redirect_room"
+    path(
+        "room/<int:id>/",
+        views.redirect,
+        {"type": "room"},
+        name="redirect_room",
     ),
-    url_helper(
-        r"^stream/{id}/?$", views.redirect, {"type": "stream"}, name="redirect_stream"
+    path(
+        "stream/<int:id>/",
+        views.redirect,
+        {"type": "stream"},
+        name="redirect_stream",
     ),
-    url_helper(r"^{slug}/?$", views.shortcut, name="shortcut"),
+    path(
+        "<slug:slug>",
+        views.shortcut,
+        name="shortcut",
+    ),
 ]

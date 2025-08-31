@@ -190,7 +190,6 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
 
     current_week = get_current_week()
     if week:
-        week = int(week)
         max_week = utils.max_number_of_weeks(year)
     if week is not None:
         if week <= 0 or week > max_week:
