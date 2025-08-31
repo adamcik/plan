@@ -66,7 +66,7 @@ TEST_RUNNER = "django.test.runner.DiscoverRunner"
 
 # -- App and midleware settings:
 MIDDLEWARE = (
-    "plan.common.middleware.gzip_compatibility_middleware",
+    "plan.common.middleware.encoding_compatibility_middleware",
     "plan.common.middleware.CspMiddleware",
     "plan.common.middleware.AppendSlashMiddleware",
     "plan.common.middleware.LocaleMiddleware",
@@ -153,6 +153,8 @@ STATICFILES_DIRS = [
 # -- Django compress settings:
 if DEBUG:
     COMPRESS_DEBUG_TOGGLE = "no-cache"
+
+COMPRESS_STORAGE = "compressor.storage.BrotliCompressorFileStorage"
 
 COMPRESS_CSS_FILTERS = (
     "compressor.filters.css_default.CssAbsoluteFilter",
