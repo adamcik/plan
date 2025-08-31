@@ -8,6 +8,7 @@ import brotli
 
 from django import http, shortcuts, urls
 from django.conf import settings
+from django.http.request import HttpRequest
 from django.utils import cache, translation
 from django.utils import http as http_utils
 from django.utils.deprecation import MiddlewareMixin
@@ -106,67 +107,60 @@ class AppendSlashMiddleware(MiddlewareMixin):
         return http.HttpResponsePermanentRedirect(url)
 
 
-class LocaleMiddleware(MiddlewareMixin):
-    def __init__(self, get_response):
-        self.get_response = get_response
+def _guess_language_from_accept_header(request):
+    supported = dict(settings.LANGUAGES)
+    accept = request.headers.get("Accept-Language", "")
 
-        self.languages = {}  # Localised semester type -> lang
-        self.values = {}  # Localised semester type -> db value
+    for lang, unused in trans_internals.parse_accept_lang_header(accept):
+        if lang == "*":
+            break
+        lang = lang.split("-")[0].lower()
+        if settings.LANGUAGE_FALLBACK.get(lang, lang) in supported:
+            return lang
+    return settings.LANGUAGE_CODE
 
-        for lang, name in settings.LANGUAGES:
-            with translation.override(lang):
-                for value, slug in Semester.SEMESTER_SLUG:
-                    self.languages[str(slug)] = lang
-                    self.values[str(slug)] = value
 
-    def process_view(self, request, view, args, kwargs):
-        if "semester_type" not in kwargs:
-            language = self.guess_language_from_accept_header(request)
+def _redirect_to_new_language(request, language):
+    # Support ?lang etc, if this is present we activate the lang and
+    # resolve the current url to get its name and reverse it with a
+    # localised semester type.
+    with translation.override(language, deactivate=True):
+        match = urls.resolve(request.path_info)
+        return shortcuts.redirect(match.url_name, *match.args, **match.kwargs)
+
+
+def locale_middleware(get_response):
+    LANGUAGES = {l for l, _ in settings.LANGUAGES}
+
+    SLUGS = {}  # Map localized slug to language
+    for lang, _ in settings.LANGUAGES:
+        with translation.override(lang):
+            for slug in Semester.SEMESTER_SLUG.values():
+                SLUGS[str(slug)] = lang
+
+    PATTERN = re.compile(rf"^/\d+/({'|'.join(re.escape(s) for s in SLUGS)})/")
+
+    def middleware(request: HttpRequest):
+        lang = request.META["QUERY_STRING"]
+        if lang in LANGUAGES:
+            return _redirect_to_new_language(request, lang)
+
+        match = PATTERN.match(request.path_info)
+        if not match:
+            lang = _guess_language_from_accept_header(request)
         else:
-            # Use semester type to set language, and convert localised value to
-            # db value.
-            try:
-                semester = kwargs["semester_type"]
-                language = self.languages[semester]
-                kwargs["semester_type"] = self.values[semester]
-            except KeyError:
-                raise http.Http404
+            lang = SLUGS[match.group(1)]
 
-            if request.META["QUERY_STRING"] in dict(settings.LANGUAGES):
-                return self.rederict_to_new_language(request, args, kwargs)
+        with translation.override(lang, deactivate=True):
+            response = get_response(request)
+            response["Content-Language"] = lang
 
-        with translation.override(language, deactivate=True):
-            response = view(request, *args, **kwargs)
-            response["Content-Language"] = language
-
-        if "semester_type" not in kwargs:
-            # Only set vary header when we had to guess.
+        if not match:  # Only set vary header when we had to guess.
             cache.patch_vary_headers(response, ("Accept-Language",))
 
         return response
 
-    def guess_language_from_accept_header(self, request):
-        supported = dict(settings.LANGUAGES)
-        accept = request.headers.get("Accept-Language", "")
-
-        for lang, unused in trans_internals.parse_accept_lang_header(accept):
-            if lang == "*":
-                break
-            lang = lang.split("-")[0].lower()
-            if settings.LANGUAGE_FALLBACK.get(lang, lang) in supported:
-                return lang
-        return settings.LANGUAGE_CODE
-
-    def rederict_to_new_language(self, request, args, kwargs):
-        # Support ?lang etc, if this is present we activate the lang and
-        # resolve the current url to get its name and reverse it with a
-        # localised semester type.
-        with translation.override(request.META["QUERY_STRING"], deactivate=True):
-            match = urls.resolve(request.path_info)
-            kwargs["semester_type"] = dict(Semester.SEMESTER_SLUG)[
-                kwargs["semester_type"]
-            ]
-            return shortcuts.redirect(match.url_name, *args, **kwargs)
+    return middleware
 
 
 def text_debug_middleware(get_response):

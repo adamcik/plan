@@ -69,7 +69,7 @@ MIDDLEWARE = (
     "plan.common.middleware.encoding_compatibility_middleware",
     "plan.common.middleware.CspMiddleware",
     "plan.common.middleware.AppendSlashMiddleware",
-    "plan.common.middleware.LocaleMiddleware",
+    "plan.common.middleware.locale_middleware",
     "plan.common.middleware.HtmlMinifyMiddleware",
 )
 
