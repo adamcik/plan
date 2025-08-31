@@ -26,8 +26,10 @@ def columnify(objects, columns=3):
     width = max(list(map(len, objects)))
     border = str("+-" + "-+-".join(["-" * width] * columns) + "-+")
     template = str("| " + " | ".join(["{:%d}" % width] * columns) + " |")
+
     def pad_list(i):
         return i + [""] * (columns - len(i))
+
     lines = []
 
     while objects:

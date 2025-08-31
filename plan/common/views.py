@@ -39,6 +39,7 @@ today = datetime.date.today
 # Setup common alias for translation
 _ = translation.gettext_lazy
 
+
 # Start new week on saturdays
 def get_current_week():
     return (now() + datetime.timedelta(days=2)).isocalendar()[1]
