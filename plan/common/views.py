@@ -221,13 +221,17 @@ def schedule(request, year, semester_type, slug, advanced=False, week=None, all=
             request.path,
         )
     )
-    response = cache.get(key)
-    if not bypass_cache and response:
-        response["X-Cache"] = f"hit; key={key}"
-        return response
+    if last_modified:
+        response = cache.get(key)
+        if not bypass_cache and response:
+            response["X-Cache"] = f"hit; key={key}"
+            return response
 
     db_key = f"db:{year}-{semester_type}-{slug}-{last_modified}"
-    result = cache.get(db_key)
+    if last_modified:
+        result = cache.get(db_key)
+    else:
+        result = [], [], [], [], [], [], []
 
     if result:
         lectures, courses, exams, lecturers, groups, rooms, schedule_weeks = result
