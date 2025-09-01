@@ -4,9 +4,9 @@
 {% url 'course-list' semester.year semester.slug slug as course_list_url %}
 {% url 'schedule-advanced' schedule as adavanced_url %}
 
-{% url 'schedule-ical' semester.year semester.slug slug _('lectures') as ical_lectures_url %}
-{% url 'schedule-ical' semester.year semester.slug slug _('exams') as ical_exams_url %}
-{% url 'schedule-ical' semester.year semester.slug slug as ical_all_url %}
+{% url 'schedule-ical-type' schedule _('lectures') as ical_lectures_url %}
+{% url 'schedule-ical-type' schedule _('exams') as ical_exams_url %}
+{% url 'schedule-ical' schedule as ical_all_url %}
 
 <h2 class="noprint">{% trans "Tips" %}</h2>
 <div class="yui-g noprint" id="tips">

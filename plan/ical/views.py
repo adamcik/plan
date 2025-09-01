@@ -22,7 +22,6 @@ from plan.common.models import (
     Room,
     Week,
 )
-from plan.common.schedule import Schedule
 
 _ = translation.gettext
 
@@ -34,37 +33,38 @@ def _to_utc(dt: datetime.datetime) -> datetime.datetime:
     return dt.replace(tzinfo=TZ).astimezone(UTC)
 
 
-def ical(request, year, semester_type, slug, ical_type=None):
+def ical(request, schedule, ical_type=None):
     resources = [_("lectures"), _("exams")]
     if ical_type and ical_type not in resources:
         return http.HttpResponse(status=400)
     elif ical_type:
         resources = [ical_type]
 
-    semester, student, last_modified = utils.fetch_student_semester(
-        year, semester_type, slug
-    )
-
-    if semester is None or student is None:
+    if schedule.student is None:
         return http.HttpResponseNotFound()
 
     # TODO: Turn last modified into middleware?
     headers = {"X-Robots-Tag": "noindex, nofollow"}
-    if last_modified > 0:
-        headers["Last-Modified"] = http_utils.http_date(last_modified)
+    if schedule.last_modified > 0:
+        headers["Last-Modified"] = http_utils.http_date(schedule.last_modified)
 
-    response = utils.check_modified_since(request, last_modified, headers)
+    response = utils.check_modified_since(
+        request,
+        schedule.last_modified,
+        headers,
+    )
     if response:
         return response
 
     # TODO: Turn caching into middleware
     bypass_cache = utils.should_bypass_cache(request)
-    key = "-".join(
+    key = ":".join(
         str(p)
         for p in (
+            "resp",
             request.resolver_match.url_name,
-            last_modified,
-            request.path,
+            request.path_info,
+            schedule.last_modified,
         )
     )
 
@@ -73,9 +73,14 @@ def ical(request, year, semester_type, slug, ical_type=None):
         response["X-Cache"] = f"hit; key={key}"
         return response
 
-    filename = utils.ical_filename(year, semester_type, slug, resources)
+    filename = utils.ical_filename(
+        schedule.semester.year,
+        schedule.semester.type,
+        schedule.student.slug,
+        resources,
+    )
 
-    if semester.stale:
+    if schedule.semester.stale:
         cache_timeout = datetime.timedelta(days=90)
     else:
         cache_timeout = datetime.timedelta(hours=6)
@@ -84,8 +89,6 @@ def ical(request, year, semester_type, slug, ical_type=None):
     headers["Filename"] = filename  # IE needs this
     headers["Content-Disposition"] = "attachment; filename=%s" % filename
 
-    # TODO: Replace with url converter provided schedule
-    schedule = Schedule(semester=semester, student_slug=student.slug)
     title = urls.reverse("schedule", args=[schedule])
     hostname = settings.TIMETABLE_HOSTNAME or request.headers.get(
         "Host", socket.getfqdn()
@@ -95,25 +98,32 @@ def ical(request, year, semester_type, slug, ical_type=None):
     cal.add("method").value = "PUBLISH"  # IE/Outlook needs this
 
     # TODO(adamcik): use same logic as in common.templatetags.title
-    if slug.lower().endswith("s"):
+    if schedule.student.slug.lower().endswith("s"):
         description = _("%(slug)s' %(semester)s %(year)s schedule for %(resources)s")
     else:
         description = _("%(slug)s's %(semester)s %(year)s schedule for %(resources)s")
 
     cal.add("X-WR-CALNAME").value = title.strip("/")
     cal.add("X-WR-CALDESC").value = description % {
-        "slug": slug,
-        "semester": semester.get_type_display(),
-        "year": semester.year,
+        "slug": schedule.student.slug,
+        "semester": schedule.semester.get_type_display(),
+        "year": schedule.semester.year,
         "resources": ", ".join(resources),
     }
 
     if _("lectures") in resources:
-        lectures = Lecture.objects.get_lectures(semester.id, student.id)
-        add_lectutures(lectures, semester.year, cal, request, hostname)
+        lectures = Lecture.objects.get_lectures(
+            schedule.semester.id,
+            schedule.student.id,
+        )
+        add_lectutures(lectures, schedule.semester.year, cal, request, hostname)
 
     if _("exams") in resources:
-        exams = Exam.objects.get_exams(year, semester.type, slug)
+        exams = Exam.objects.get_exams(
+            schedule.semester.year,
+            schedule.semester.type,
+            schedule.student.slug,
+        )
         add_exams(exams, cal, hostname)
 
     response = http.HttpResponse(
