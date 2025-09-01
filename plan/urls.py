@@ -10,7 +10,9 @@ from plan.common import converters
 handler500 = "plan.common.utils.server_error"
 
 register_converter(converters.ScheduleConverter, "schedule")
-register_converter(converters.WeekNumberConverter, "week_number")
+register_converter(converters.SemesterConverter, "semester")
+register_converter(converters.StudentConverter, "student")
+register_converter(converters.WeekNumberConverter, "week")
 register_converter(converters.Base58Converter, "base58")
 
 if settings.DEBUG:

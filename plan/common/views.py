@@ -112,9 +112,12 @@ def getting_started(request, year, semester_type):
         schedule_form = forms.ScheduleForm(request.POST)
 
         if schedule_form.is_valid():
-            slug = schedule_form.cleaned_data["slug"]
+            schedule = Schedule(
+                semester=semester,
+                student_slug=schedule_form.cleaned_data["slug"],
+            )
             # TODO(adamcik): what should we do if current is empty?
-            return schedule_current(request, semester.year, semester.type, slug)
+            return schedule_current(request, schedule)
     else:
         schedule_form = forms.ScheduleForm()
 
@@ -201,12 +204,12 @@ def schedule(request, schedule: Schedule, advanced=False, week=None, all=False):
 
     # TODO: Can we turn this into a middleware? That would allow us to cache
     # post minification and csp...
-    key = "-".join(
+    key = "http:" + "-".join(
         str(p)
         for p in (
             request.resolver_match.url_name,
+            request.path_info,
             schedule.last_modified,
-            request.path,
         )
     )
     if schedule.last_modified is not None:
@@ -386,10 +389,18 @@ def schedule(request, schedule: Schedule, advanced=False, week=None, all=False):
     return response
 
 
-def select_groups(request, year, semester_type, slug):
+def select_groups(request, schedule):
     """Form handler for selecting groups to use in schedule"""
-    courses = Course.objects.get_courses(year, semester_type, slug)
-    course_groups = Course.get_groups(year, semester_type, [c.id for c in courses])
+    courses = Course.objects.get_courses(
+        schedule.semester.year,
+        schedule.semester.type,
+        schedule.student_slug,
+    )
+    course_groups = Course.get_groups(
+        schedule.semester.year,
+        schedule.semester.type,
+        [c.id for c in courses],
+    )
 
     if request.method == "POST":
         with transaction.atomic():
@@ -403,22 +414,28 @@ def select_groups(request, year, semester_type, slug):
 
                 if group_form.is_valid():
                     subscription = Subscription.objects.get_subscriptions(
-                        year, semester_type, slug
+                        schedule.semester.year,
+                        schedule.semester.type,
+                        schedule.student_slug,
                     ).get(course=c)
 
                     subscription.groups.set(group_form.cleaned_data["groups"])
                     subscription.save()  # Update last modified.
 
-            utils.clear_cache(year, semester_type, slug)
+            utils.clear_cache(
+                schedule.semester.year,
+                schedule.semester.type,
+                schedule.student_slug,
+            )
 
-        schedule = Schedule(
-            semester=Semester(year=year, type=semester_type),
-            student_slug=slug,
-        )
         return shortcuts.redirect("schedule-advanced", schedule)
 
     color_map = utils.ColorMap(hex=True)
-    subscription_groups = Subscription.get_groups(year, semester_type, slug)
+    subscription_groups = Subscription.get_groups(
+        schedule.semester.year,
+        schedule.semester.type,
+        schedule.student_slug,
+    )
     all_subscripted_groups = set()
 
     for groups in subscription_groups.values():
@@ -427,7 +444,9 @@ def select_groups(request, year, semester_type, slug):
 
     for c in courses:
         color_map[c.id]
-        subscription_id = c.subscription_set.get(student__slug=slug).pk
+        subscription_id = c.subscription_set.get(
+            student__slug=schedule.student_slug,
+        ).pk
 
         try:
             groups = course_groups[c.id]
@@ -446,68 +465,58 @@ def select_groups(request, year, semester_type, slug):
         request,
         "select_groups.html",
         {
-            "semester": Semester(year=year, type=semester_type),
-            "slug": slug,
+            "semester": schedule.semester,
+            "slug": schedule.student_slug,
             "courses": courses,
             "color_map": color_map,
         },
     )
 
 
-def select_course(request, year, semester_type, slug, add=False):
+def select_course(request, schedule, add=False):
     """Handle selecting of courses from course list, change of names and
     removeall of courses"""
 
-    try:
-        Semester.objects.get(year=year, type=semester_type)
-    except Semester.DoesNotExist:
-        return shortcuts.redirect(
-            "schedule", year, Semester.localize(semester_type), slug
-        )
-
     if "submit_add" in request.POST or add:
-        response = _add_courses(request, year, semester_type, slug)
+        response = _add_courses(request, schedule)
     elif "submit_remove" in request.POST:
-        response = _remove_courses(request, year, semester_type, slug)
+        response = _remove_courses(request, schedule)
     elif "submit_name" in request.POST:
-        response = _override_name(request, year, semester_type, slug)
+        response = _override_name(request, schedule)
     else:
         response = None
 
-    utils.clear_cache(year, semester_type, slug)
+    utils.clear_cache(
+        schedule.semester.year,
+        schedule.semester.type,
+        schedule.student_slug,
+    )
     if response:
         return response
-
-    schedule = Schedule(
-        semester=Semester(year=year, type=semester_type),
-        student_slug=slug,
-    )
     return shortcuts.redirect("schedule-advanced", schedule)
 
 
-def _add_courses(request, year, semester_type, slug):
+def _add_courses(request, schedule):
     lookup = []
 
     for l in request.POST.getlist("course_add"):
         lookup.extend(l.replace(",", "").split())
 
     subscriptions = set(
-        Subscription.objects.get_subscriptions(year, semester_type, slug).values_list(
-            "course__code", flat=True
-        )
+        Subscription.objects.get_subscriptions(
+            schedule.semester.year,
+            schedule.semester.type,
+            schedule.student_slug,
+        ).values_list("course__code", flat=True)
     )
 
     if not lookup:
-        schedule = Schedule(
-            semester=Semester(year=year, type=semester_type),
-            student_slug=slug,
-        )
         return shortcuts.redirect("schedule-advanced", schedule)
 
     errors = []
     too_many_subscriptions = False
 
-    student, created = Student.objects.get_or_create(slug=slug)
+    student, created = Student.objects.get_or_create(slug=schedule.student_slug)
 
     for l in lookup:
         try:
@@ -517,8 +526,7 @@ def _add_courses(request, year, semester_type, slug):
 
             course = Course.objects.get(
                 code__iexact=l.strip(),
-                semester__year__exact=year,
-                semester__type__exact=semester_type,
+                semester=schedule.semester,
             )
 
             Subscription.objects.get_or_create(
@@ -537,37 +545,42 @@ def _add_courses(request, year, semester_type, slug):
             {
                 "courses": errors,
                 "max": settings.TIMETABLE_MAX_COURSES,
-                "slug": slug,
-                "year": year,
-                "type": semester_type,
+                "slug": schedule.student_slug,
+                "year": schedule.semester.year,
+                "type": schedule.semester.type,
                 "too_many_subscriptions": too_many_subscriptions,
             },
         )
 
-    return shortcuts.redirect(
-        "change-groups", year, Semester.localize(semester_type), slug
-    )
+    return shortcuts.redirect("change-groups", schedule)
 
 
-def _remove_courses(request, year, semester_type, slug):
+def _remove_courses(request, schedule):
     with transaction.atomic():
         courses = []
         for c in request.POST.getlist("course_remove"):
             if c.strip():
                 courses.append(c.strip())
 
-        Subscription.objects.get_subscriptions(year, semester_type, slug).filter(
-            course__id__in=courses
-        ).delete()
+        Subscription.objects.get_subscriptions(
+            schedule.semester.year,
+            schedule.semester.type,
+            schedule.student_slug,
+        ).filter(course__id__in=courses).delete()
 
+        slug = schedule.student_slug
         if Subscription.objects.filter(student__slug=slug).count() == 0:
             Student.objects.filter(slug=slug).delete()
 
     return None
 
 
-def _override_name(request, year, semester_type, slug):
-    subscriptions = Subscription.objects.get_subscriptions(year, semester_type, slug)
+def _override_name(request, schedule):
+    subscriptions = Subscription.objects.get_subscriptions(
+        schedule.semester.year,
+        schedule.semester.type,
+        schedule.student_slug,
+    )
 
     for u in subscriptions:
         form = forms.CourseAliasForm(request.POST, prefix=u.course_id)
@@ -585,7 +598,7 @@ def _override_name(request, year, semester_type, slug):
     return None
 
 
-def select_lectures(request, year, semester_type, slug):
+def select_lectures(request, schedule):
     """Handle selection of lectures to hide"""
 
     if request.method == "POST":
@@ -593,7 +606,9 @@ def select_lectures(request, year, semester_type, slug):
             excludes = request.POST.getlist("exclude")
 
             subscriptions = Subscription.objects.get_subscriptions(
-                year, semester_type, slug
+                schedule.semester.year,
+                schedule.semester.type,
+                schedule.student_slug,
             )
 
             for subscription in subscriptions:
@@ -606,12 +621,12 @@ def select_lectures(request, year, semester_type, slug):
 
                 subscription.save()  # Trigger last_modified update
 
-        utils.clear_cache(year, semester_type, slug)
+        utils.clear_cache(
+            schedule.semester.year,
+            schedule.semester.type,
+            schedule.student_slug,
+        )
 
-    schedule = Schedule(
-        semester=Semester(year=year, type=semester_type),
-        student_slug=slug,
-    )
     return shortcuts.redirect("schedule-advanced", schedule)
 
 

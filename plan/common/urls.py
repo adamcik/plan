@@ -5,27 +5,10 @@ from django.urls import path
 from plan.common import views
 
 urlpatterns = [
-    path(
-        "",
-        views.frontpage,
-        name="frontpage",
-    ),
-    path(
-        "<int:year>/<str:semester_type>/",
-        views.getting_started,
-        name="semester",
-    ),
-    path(
-        "<int:year>/<str:semester_type>/+",
-        views.course_query,
-        name="course-query",
-    ),
-    path(
-        "<schedule:schedule>/+",
-        views.schedule,
-        {"all": True},
-        name="schedule",
-    ),
+    path("", views.frontpage, name="frontpage"),
+    path("<int:year>/<str:semester_type>/", views.getting_started, name="semester"),
+    path("<int:year>/<str:semester_type>/+", views.course_query, name="course-query"),
+    path("<schedule:schedule>/", views.schedule, {"all": True}, name="schedule"),
     path(
         "<schedule:schedule>/+",
         views.schedule,
@@ -33,62 +16,18 @@ urlpatterns = [
         name="schedule-advanced",
     ),
     path(
-        "<schedule:schedule>/current/",
-        views.schedule_current,
-        name="schedule-current",
+        "<schedule:schedule>/current/", views.schedule_current, name="schedule-current"
     ),
+    path("<schedule:schedule>/<week:week>/", views.schedule, name="schedule-week"),
+    path("<schedule:schedule>/change/", views.select_course, name="change-course"),
+    path("<schedule:schedule>/groups/", views.select_groups, name="change-groups"),
+    path("<schedule:schedule>/filter/", views.select_lectures, name="change-lectures"),
+    path("c/<base58:id>", views.redirect, {"type": "course"}, name="redirect_course"),
     path(
-        "<schedule:schedule>/<week_number:week>/",
-        views.schedule,
-        name="schedule-week",
+        "s/<base58:id>", views.redirect, {"type": "syllabus"}, name="redirect_syllabus"
     ),
-    path(
-        "<int:year>/<str:semester_type>/<slug:slug>/change/",
-        views.select_course,
-        name="change-course",
-    ),
-    path(
-        "<int:year>/<str:semester_type>/<slug:slug>/groups/",
-        views.select_groups,
-        name="change-groups",
-    ),
-    path(
-        "<int:year>/<str:semester_type>/<slug:slug>/filter/",
-        views.select_lectures,
-        name="change-lectures",
-    ),
-    path(
-        "+",
-        views.about,
-        name="about",
-    ),
-    path(
-        "c/<base58:id>",
-        views.redirect,
-        {"type": "course"},
-        name="redirect_course",
-    ),
-    path(
-        "s/<base58:id>",
-        views.redirect,
-        {"type": "syllabus"},
-        name="redirect_syllabus",
-    ),
-    path(
-        "r/<base58:id>",
-        views.redirect,
-        {"type": "room"},
-        name="redirect_room",
-    ),
-    path(
-        "u/<base58:id>",
-        views.redirect,
-        {"type": "stream"},
-        name="redirect_stream",
-    ),
-    path(
-        "<slug:slug>",
-        views.shortcut,
-        name="shortcut",
-    ),
+    path("r/<base58:id>", views.redirect, {"type": "room"}, name="redirect_room"),
+    path("u/<base58:id>", views.redirect, {"type": "stream"}, name="redirect_stream"),
+    path("+", views.about, name="about"),
+    path("<student:slug>", views.shortcut, name="shortcut"),
 ]

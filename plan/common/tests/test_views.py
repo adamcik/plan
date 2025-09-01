@@ -78,7 +78,7 @@ class ViewTestCase(BaseTestCase):
         # FIXME test error.html
 
         original_url = reverse("schedule-advanced", args=[self.schedule])
-        url = self.url("change-course")
+        url = reverse("change-course", args=[self.schedule])
 
         post_data = [
             {"submit_add": True, "course_add": "COURSE4"},
@@ -115,7 +115,7 @@ class ViewTestCase(BaseTestCase):
         # FIXME test for courses without groups
 
         original_url = reverse("schedule-advanced", args=[self.schedule])
-        url = self.url("change-groups")
+        url = reverse("change-groups", args=[self.schedule])
 
         post_data = [
             {"1-groups": "1", "2-groups": "", "3-groups": "2"},
@@ -150,7 +150,7 @@ class ViewTestCase(BaseTestCase):
         # FIXME test nulling out excludes
 
         original_url = reverse("schedule-advanced", args=[self.schedule])
-        url = self.url("change-lectures")
+        url = reverse("change-lectures", args=[self.schedule])
 
         post_data = [
             {"exclude": ("2", "3", "8")},
