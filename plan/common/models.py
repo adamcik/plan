@@ -289,10 +289,10 @@ class Semester(models.Model):
         (FALL, _("fall")),
     )
 
-    SEMESTER_SLUG = (
-        (SPRING, translation.pgettext_lazy("slug", "spring")),
-        (FALL, translation.pgettext_lazy("slug", "fall")),
-    )
+    SEMESTER_SLUG = {
+        SPRING: translation.pgettext_lazy("slug", "spring"),
+        FALL: translation.pgettext_lazy("slug", "fall"),
+    }
 
     id = models.AutoField(primary_key=True)
     year = models.PositiveSmallIntegerField(_("Year"))
@@ -310,7 +310,7 @@ class Semester(models.Model):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        slug_map = {v: k for k, v in self.SEMESTER_SLUG}
+        slug_map = {v: k for k, v in self.SEMESTER_SLUG.items()}
 
         if self.year:
             self.year = int(self.year)
@@ -328,12 +328,12 @@ class Semester(models.Model):
         return today - self.active > datetime.timedelta(days=365)
 
     @property
-    def slug(self):
+    def slug(self) -> str:
         return self.localize(self.type)
 
     @classmethod
     def localize(cls, semester_type):
-        return dict(cls.SEMESTER_SLUG)[semester_type]
+        return cls.SEMESTER_SLUG[semester_type]
 
     # TODO(adamcik): this is scraper specific...
     @property
