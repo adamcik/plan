@@ -52,24 +52,26 @@ def _tablestyle():
     return table_style
 
 
-def pdf(request, year, semester_type, slug, size=None, week=None):
+def pdf(request, schedule, size=None, week=None):
     if size is not None and size not in ["A4", "A5", "A6", "A7"]:
+        raise http.Http404()
+
+    if schedule.student is None:
         raise http.Http404
 
-    semester, student, last_modified = utils.fetch_student_semester(
-        year, semester_type, slug
+    filename = (
+        f"{schedule.semester.year}-{schedule.semester.slug}-{schedule.student.slug}"
     )
-    filename = f"{year}-{semester.type}-{slug}"
 
     if week:
         week = int(week)
         filename += "-%s" % week
 
     headers = {"X-Robots-Tag": "noindex, nofollow"}
-    if last_modified > 0:
-        headers["Last-Modified"] = http_utils.http_date(last_modified)
+    if schedule.last_modified is not None:
+        headers["Last-Modified"] = http_utils.http_date(schedule.last_modified)
 
-    response = utils.check_modified_since(request, last_modified, headers)
+    response = utils.check_modified_since(request, schedule.last_modified, headers)
     if response:
         return response
 
@@ -89,9 +91,16 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
 
     # NOTE: This could be cached, and shared with schedule, but to be honest I
     # doubt it is worth it for this code path.
-    lectures = Lecture.objects.get_lectures(semester.id, student.id)
+    lectures = Lecture.objects.get_lectures(
+        schedule.semester.id,
+        schedule.student.id,
+    )
     rooms = Lecture.get_related(Room, lectures)
-    courses = Course.objects.get_courses(year, semester.type, slug)
+    courses = Course.objects.get_courses(
+        schedule.semester.year,
+        schedule.semester.type,
+        schedule.student.slug,
+    )
 
     for course in courses:
         color_map[course.id]
@@ -102,7 +111,7 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
         timetable.do_expansion()
     timetable.insert_times()
     if week:
-        timetable.set_week(semester.year, week)
+        timetable.set_week(schedule.semester.year, week)
 
     paragraph_style = default_styles["Normal"]
     paragraph_style.fontName = "Helvetica-Bold"
@@ -111,7 +120,12 @@ def pdf(request, year, semester_type, slug, size=None, week=None):
 
     table_style = _tablestyle()
 
-    data = [[platypus.Paragraph(render_title(semester, slug, week), paragraph_style)]]
+    title = render_title(
+        schedule.semester,
+        schedule.student.slug,
+        week,
+    )
+    data = [[platypus.Paragraph(title, paragraph_style)]]
     data[-1].extend([""] * sum(timetable.span))
     table_style.add("SPAN", (0, 0), (-1, 0))
 

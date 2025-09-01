@@ -1,12 +1,16 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from plan.common.utils import url_helper
+from django.urls import path
+
 from plan.pdf import views
 
 urlpatterns = [
-    url_helper(
-        r"^{year}/{semester}/{slug}/pdf/(?:{size}/)?(?:{week}/)?$",
+    path("<schedule:schedule>/pdf/", views.pdf, name="schedule-pdf"),
+    path("<schedule:schedule>/pdf/<week:week>/", views.pdf, name="schedule-pdf-week"),
+    path("<schedule:schedule>/pdf/<size>/", views.pdf, name="schedule-pdf-size"),
+    path(
+        "<schedule:schedule>/pdf/<size>/<week:week>/",
         views.pdf,
-        name="schedule-pdf",
+        name="schedule-pdf-size-week",
     ),
 ]

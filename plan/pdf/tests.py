@@ -1,5 +1,7 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from django.urls import reverse
+
 from plan.common.tests import BaseTestCase
 
 
@@ -11,9 +13,9 @@ class EmptyViewTestCase(BaseTestCase):
 
         for size in pdf_args:
             if size:
-                url = self.url("schedule-pdf", *(args + [size]))
+                url = reverse("schedule-pdf-size", args=[self.schedule, size])
             else:
-                url = self.url("schedule-pdf", *args)
+                url = reverse("schedule-pdf", args=[self.schedule])
 
             response = self.client.get(url)
             if size == "A9":
