@@ -3,40 +3,91 @@
 
 import re
 
+from django.conf import settings
 from django.core.cache import cache
 from django.db.models.aggregates import Max
 from django.http import Http404
+from django.utils import translation
 
 from plan.common.models import Semester, Student, Subscription
 from plan.common.schedule import Schedule
 
 
+class SemesterConverter:
+    regex: str = r"(\d{4})/([a-z]+)"
+
+    def __init__(self):
+        self._pattern: re.Pattern[str] = re.compile(self.regex)
+        self._types = {}
+
+        for lang, _ in settings.LANGUAGES:
+            with translation.override(lang):
+                for value, slug in Semester.SEMESTER_SLUG.items():
+                    self._types[str(slug)] = value
+
+    def to_python(self, value: str) -> tuple[int, str]:
+        match = self._pattern.match(value)
+        if not match:
+            raise RuntimeError(
+                f"Matching regexp failed, this should never happen: {value}"
+            )
+        return (int(match.group(1)), self._types[match.group(2)])
+
+    def to_url(self, semester: tuple[int, str]) -> str:
+        if (
+            not isinstance(semester[0], int)
+            or not isinstance(semester[1], str)
+            or semester[1] not in Semester.SEMESTER_SLUG
+        ):
+            raise ValueError(
+                f"Invalid semester: year={semester[0]}, type={semester[1]}"
+            )
+        return f"{semester[0]}/{Semester.localize(semester[1])}"
+
+
+class StudentConverter:
+    regex: str = r"([a-zA-Z0-9-_]{1,50})"
+
+    def to_python(self, value: str) -> str:
+        return value
+
+    def to_url(self, slug: str) -> str:
+        return slug
+
+
 class ScheduleConverter:
-    regex = r"(\d{4})/([a-z]+)/([a-zA-Z0-9-_]{1,50})"
-    _pattern = re.compile(regex)
+    regex: str = r"(\d{4}/[a-z]+)/([a-zA-Z0-9-_]{1,50})"
+
+    _pattern: re.Pattern[str] = re.compile(regex)
+
+    _semester_converter = SemesterConverter()
+    _student_converter = StudentConverter()
 
     def to_python(self, value: str) -> Schedule:
         match = self._pattern.match(value)
-        year, semester_type, slug = match.groups()
+        if not match:
+            raise RuntimeError(
+                f"Matching regexp failed, this should never happen: {value}"
+            )
 
-        key = f"modified-{year}-{semester_type}-{slug}"
+        year, semester_type = self._semester_converter.to_python(match.group(1))
+        student_slug = self._student_converter.to_python(match.group(2))
+
+        key = f"modified:{year}-{semester_type}-{student_slug}"
         result = cache.get(key)
         if result:
             return result
 
         try:
-            semester = Semester.objects.get(
-                year=year,
-                type=semester_type,
-            )
+            semester = Semester.objects.get(year=year, type=semester_type)
         except Semester.DoesNotExist:
-            raise Http404(f"Semester does not exist, year={year}, type={semester_type}")
+            raise Http404(f"Could not find semester: year={year} type={semester_type}")
 
         try:
-            student = Student.objects.get(slug=slug)
+            student = Student.objects.get(slug=student_slug)
         except Student.DoesNotExist:
             return Schedule(
-                student_slug=slug,
+                student_slug=student_slug,
                 semester=semester,
                 student=None,
             )
@@ -56,7 +107,7 @@ class ScheduleConverter:
         last_modified = max([0] + [int(agg.timestamp()) for agg in qs.values() if agg])
 
         result = Schedule(
-            student_slug=slug,
+            student_slug=student.slug,
             semester=semester,
             student=student,
             last_modified=last_modified,
