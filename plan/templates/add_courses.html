@@ -21,7 +21,7 @@
       <input id="course"
              type="text"
              name="course_add"
-             data-autocomplete="{% url 'course-query' semester.year semester.slug %}"
+             data-autocomplete="{% url 'course-query' semester %}"
              tabindex="{{ tabindex|default:0|add:2 }}" />
       <button name="submit_add"
               type="submit"

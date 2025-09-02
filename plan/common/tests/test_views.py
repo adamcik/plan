@@ -3,7 +3,7 @@
 from django.urls import reverse
 from django.utils.datastructures import MultiValueDict
 
-from plan.common.models import Group, Lecture, Semester, Subscription
+from plan.common.models import Group, Lecture, Subscription
 from plan.common.tests import BaseTestCase
 
 
@@ -29,7 +29,7 @@ class ViewTestCase(BaseTestCase):
 
     def test_index(self):
         response = self.client.get(reverse("frontpage"))
-        url = reverse("semester", args=[2009, Semester.SPRING])
+        url = reverse("semester", args=[self.semester])
         self.assertRedirects(response, url)
 
     def test_shortcut(self):
@@ -185,7 +185,7 @@ class ViewTestCase(BaseTestCase):
             lectures = new_lectures
 
     def test_course_query(self):
-        url = reverse("course-query", args=[self.semester.year, self.semester.type])
+        url = reverse("course-query", args=[self.semester])
 
         response = self.client.get(url)
 

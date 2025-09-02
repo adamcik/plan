@@ -92,10 +92,10 @@ def redirect(request, type, id):
 
 
 @utils.expires_in(datetime.timedelta(hours=1))
-def getting_started(request, year, semester_type):
+def getting_started(request, semester):
     """Initial top level page that greets users"""
     try:
-        semester = Semester.objects.get(year=year, type=semester_type)
+        semester = Semester.objects.get(year=semester.year, type=semester.type)
     except Semester.DoesNotExist:
         raise http.Http404
 
@@ -136,7 +136,7 @@ def getting_started(request, year, semester_type):
     return shortcuts.render(request, "start.html", context)
 
 
-def course_query(request, year, semester_type):
+def course_query(request, semester):
     try:
         limit = int(request.GET.get("limit", ""))
     except ValueError:
@@ -149,8 +149,8 @@ def course_query(request, year, semester_type):
 
     if query:
         course_list = Course.objects.search(
-            year,
-            semester_type,
+            semester.year,
+            semester.type,
             query,
             limit,
             location,
@@ -204,9 +204,10 @@ def schedule(request, schedule: Schedule, advanced=False, week=None, all=False):
 
     # TODO: Can we turn this into a middleware? That would allow us to cache
     # post minification and csp...
-    key = "http:" + "-".join(
+    key = ":".join(
         str(p)
         for p in (
+            "resp",
             request.resolver_match.url_name,
             request.path_info,
             schedule.last_modified,

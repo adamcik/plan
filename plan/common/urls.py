@@ -6,8 +6,8 @@ from plan.common import views
 
 urlpatterns = [
     path("", views.frontpage, name="frontpage"),
-    path("<int:year>/<str:semester_type>/", views.getting_started, name="semester"),
-    path("<int:year>/<str:semester_type>/+", views.course_query, name="course-query"),
+    path("<semester:semester>/", views.getting_started, name="semester"),
+    path("<semester:semester>/+", views.course_query, name="course-query"),
     path("<schedule:schedule>/", views.schedule, {"all": True}, name="schedule"),
     path(
         "<schedule:schedule>/+",
