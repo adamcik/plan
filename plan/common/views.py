@@ -52,7 +52,7 @@ def frontpage(request):
         semester = Semester.objects.active()
     except Semester.DoesNotExist:
         raise http.Http404
-    return shortcuts.redirect("semester", semester.year, semester.slug)
+    return shortcuts.redirect("semester", semester)
 
 
 @utils.expires_in(datetime.timedelta(hours=1))
@@ -469,6 +469,7 @@ def select_groups(request, schedule):
             "slug": schedule.student_slug,
             "courses": courses,
             "color_map": color_map,
+            "schedule": schedule,
         },
     )
 

@@ -25,24 +25,19 @@ class SemesterConverter:
                 for value, slug in Semester.SEMESTER_SLUG.items():
                     self._types[str(slug)] = value
 
-    def to_python(self, value: str) -> tuple[int, str]:
+    def to_python(self, value: str) -> Semester:
         match = self._pattern.match(value)
         if not match:
             raise RuntimeError(
                 f"Matching regexp failed, this should never happen: {value}"
             )
-        return (int(match.group(1)), self._types[match.group(2)])
+        return Semester(
+            year=int(match.group(1)),
+            type=self._types[match.group(2)],
+        )
 
-    def to_url(self, semester: tuple[int, str]) -> str:
-        if (
-            not isinstance(semester[0], int)
-            or not isinstance(semester[1], str)
-            or semester[1] not in Semester.SEMESTER_SLUG
-        ):
-            raise ValueError(
-                f"Invalid semester: year={semester[0]}, type={semester[1]}"
-            )
-        return f"{semester[0]}/{Semester.localize(semester[1])}"
+    def to_url(self, semester: Semester) -> str:
+        return f"{semester.year}/{semester.slug}"
 
 
 class StudentConverter:
@@ -70,18 +65,20 @@ class ScheduleConverter:
                 f"Matching regexp failed, this should never happen: {value}"
             )
 
-        year, semester_type = self._semester_converter.to_python(match.group(1))
+        semester = self._semester_converter.to_python(match.group(1))
         student_slug = self._student_converter.to_python(match.group(2))
 
-        key = f"modified:{year}-{semester_type}-{student_slug}"
+        key = f"modified:{semester.year}-{semester.type}-{student_slug}"
         result = cache.get(key)
         if result:
             return result
 
         try:
-            semester = Semester.objects.get(year=year, type=semester_type)
+            semester = Semester.objects.get(year=semester.year, type=semester.type)
         except Semester.DoesNotExist:
-            raise Http404(f"Could not find semester: year={year} type={semester_type}")
+            raise Http404(
+                f"Could not find semester: year={semester.year} type={semester.type}"
+            )
 
         try:
             student = Student.objects.get(slug=student_slug)
@@ -118,17 +115,15 @@ class ScheduleConverter:
 
     def to_url(self, schedule: Schedule) -> str:
         return "/".join(
-            str(v)
-            for v in [
-                schedule.semester.year,
-                Semester.localize(schedule.semester.type),
-                schedule.student_slug,
-            ]
+            (
+                self._semester_converter.to_url(schedule.semester),
+                self._student_converter.to_url(schedule.student_slug),
+            )
         )
 
 
 class WeekNumberConverter:
-    regex = r"\d{1,2}"
+    regex = r"[1-5][0-9]?"
 
     def to_python(self, value: str) -> int:
         try:
