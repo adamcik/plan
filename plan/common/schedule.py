@@ -15,12 +15,14 @@ class Schedule:
     last_modified: Optional[int] = None
 
     def key(self):
-        return "-".join(
-            str(v)
-            for v in [
-                self.semester.year,
-                self.semester.type,
-                self.student_slug,
-                self.last_modified,
-            ]
+        return (
+            "-".join(
+                str(v)
+                for v in [
+                    self.semester.year,
+                    self.semester.type,
+                    self.student_slug,
+                ]
+            )
+            + f":{self.last_modified}"
         )
