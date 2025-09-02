@@ -12,10 +12,9 @@ import brotli
 import typing_extensions
 
 from django import http, template
-from django.conf import settings, urls
+from django.conf import settings
 from django.core.cache import cache
 from django.db import models
-from django.db.models.aggregates import Max
 from django.utils import cache as cache_utils
 from django.utils import http as http_utils
 from django.utils import text as text_utils
@@ -23,73 +22,10 @@ from django.utils import translation
 
 _ = translation.gettext
 
-# Collection of capture groups used in urls.
-URL_ALIASES = {
-    "year": r"(?P<year>\d{4})",
-    "semester": r"(?P<semester_type>\w+)",
-    "slug": r"(?P<slug>[a-z0-9-_]{1,50})",
-    "week": r"(?P<week>\d{1,2})",
-    "size": r"(?P<size>A\d)",
-    "ical": r"(?P<ical_type>\w+)",
-    "id": r"(?P<id>\d+)",
-    "redirect_type": r"(?P<type>course|syllabus|room)",
-}
 
-
-def url_helper(regexp, *args, **kwargs):
-    """Helper that inserts our url aliases using string formating."""
-    return urls.url(regexp.format(**URL_ALIASES), *args, **kwargs)
-
-
-def _cache_key(year: int, semester_type: str, slug: str):
-    # NOTE: Key is not localized, as last modified is just a number.
-    return f"last-modified-{year}-{semester_type}-{slug}"
-
-
+# FIXME: This needs to match the converter, or be property of the schedule?
 def clear_cache(year: int, semester_type: str, slug: str):
-    cache.delete(_cache_key(year, semester_type, slug))
-
-
-# TODO: See we we can make this into a middleware?
-def fetch_student_semester(
-    year: int, semester_type: str, slug: str, bypass_cache=False
-):
-    # TODO: Avoid import loops in a proper way.
-    from plan.common.models import Semester, Student, Subscription
-
-    key = _cache_key(year, semester_type, slug)
-    result = cache.get(key)
-    if result and not bypass_cache:
-        return result
-
-    try:
-        semester: Semester = Semester.objects.get(year=year, type=semester_type)
-    except Semester.DoesNotExist:
-        return (None, None, 0)
-
-    try:
-        student = Student.objects.get(slug=slug)
-    except Student.DoesNotExist:
-        # TODO: Add and use semester last modified instead?
-        return (semester, None, 0)
-
-    # NOTE: Knowning the exact student_id makes this query much faster.
-    qs = Subscription.objects.filter(
-        course__semester_id=semester.id,
-        student_id=student.id,
-    ).aggregate(
-        subscription_added=Max("added"),
-        subscription_last_modified=Max("last_modified"),
-        courses_last_modified=Max("course__last_modified"),
-        lectures_last_modified=Max("course__lecture__last_modified"),
-        rooms_last_modified=Max("course__lecture__rooms__last_modified"),
-        exams_last_modified=Max("course__exam__last_modified"),
-    )
-    last_modified = max([0] + [int(agg.timestamp()) for agg in qs.values() if agg])
-
-    result = (semester, student, last_modified)
-    cache.set(key, result, timeout=60)
-    return result
+    cache.delete(f"modified:{year}-{semester_type}-{slug}")
 
 
 # TODO: Only allow bypass in DEBUG?
@@ -170,7 +106,7 @@ def cache_headers(timeout: datetime.timedelta, jitter: float = 0.0) -> dict[str,
 
 
 def ical_filename(year, semester_type, slug, resources):
-    return "%s.ics" % "-".join([year, semester_type, slug] + resources)
+    return "%s.ics" % "-".join(str(v) for v in [year, semester_type, slug] + resources)
 
 
 Params = typing_extensions.ParamSpec("Params")
