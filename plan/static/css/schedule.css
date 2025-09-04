@@ -72,14 +72,22 @@
 
 /* time col */
 #schedule .time {
+	width: 7.5%;
+	position: sticky;
+	left: 0;
+	background: #fff;
+	padding: 0;
+	border-right: 0 !important;
+}
+#schedule .time .wrapper {
+	border-left: 1px solid #666;
+	border-right: 1px solid #666;
 	text-align: center;
 	vertical-align: middle;
 	font-size: 77%;
-	width: 7.5%;
 	white-space: nowrap;
-}
-#schedule td.time {
-	border-left: 1px solid #666;
+	padding: 0.1em 0.2em;
+	box-sizing: border-box;
 }
 #schedule .date {
 	float: right;
