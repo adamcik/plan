@@ -45,7 +45,7 @@ def ical(request, schedule, ical_type=None):
 
     # TODO: Turn last modified into middleware?
     headers = {"X-Robots-Tag": "noindex, nofollow"}
-    if schedule.last_modified > 0:
+    if schedule.last_modified is not None:
         headers["Last-Modified"] = http_utils.http_date(schedule.last_modified)
 
     response = utils.check_modified_since(

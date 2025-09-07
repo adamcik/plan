@@ -107,7 +107,7 @@ class ScheduleConverter:
             student_slug=student.slug,
             semester=semester,
             student=student,
-            last_modified=last_modified,
+            last_modified=last_modified or None,
         )
 
         cache.set(key, result, timeout=60)
