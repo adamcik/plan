@@ -475,6 +475,20 @@ class Lecture(models.Model):
             filters.time(self.start), filters.time(self.end), self.get_day_display()
         )
 
+    # TODO: just replace this with a groupby helper that can
+    # be passed qs with the first row item as the key?
+    #
+    # qs = Group.objects
+    #    .filter(lectures__in=lectures)
+    #    .values_list('lecture_id', 'code')
+    #
+    # def group_values_list(qs, flat=False):
+    #     result = {}
+    #     for row in qs:
+    #         result.setdefault(row[0], []).append(
+    #             row[1] if flat else row[1:]
+    #         )
+    #     return result
     @staticmethod
     def get_related(model, lectures, fields=None, use_extra=True):
         tmp = {}

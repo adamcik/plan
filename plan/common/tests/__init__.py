@@ -15,10 +15,11 @@ class BaseTestCase(TestCase):
         self.set_now_to(2009, 1, 1)
 
         self.semester = Semester(year=2009, type="spring")
-        self.schedule = Schedule(semester=self.semester, student_slug="adamcik")
+        self.student = Student(slug="adamcik")
+        self.schedule = Schedule(semester=self.semester, student=self.student)
         self.next_schedule = Schedule(
             semester=Semester(year=2009, type=Semester.FALL),
-            student_slug="adamcik",
+            student=self.student,
         )
 
         self.default_args = [2009, "spring", "adamcik"]

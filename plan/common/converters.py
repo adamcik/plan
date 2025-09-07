@@ -84,9 +84,8 @@ class ScheduleConverter:
             student = Student.objects.get(slug=student_slug)
         except Student.DoesNotExist:
             return Schedule(
-                student_slug=student_slug,
                 semester=semester,
-                student=None,
+                student=Student(slug=student_slug),
             )
 
         # NOTE: Knowning the exact student_id makes this query much faster.
@@ -104,7 +103,6 @@ class ScheduleConverter:
         last_modified = max([0] + [int(agg.timestamp()) for agg in qs.values() if agg])
 
         result = Schedule(
-            student_slug=student.slug,
             semester=semester,
             student=student,
             last_modified=last_modified or None,
@@ -117,7 +115,7 @@ class ScheduleConverter:
         return "/".join(
             (
                 self._semester_converter.to_url(schedule.semester),
-                self._student_converter.to_url(schedule.student_slug),
+                self._student_converter.to_url(schedule.student.slug),
             )
         )
 

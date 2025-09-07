@@ -9,20 +9,6 @@ from plan.common.models import Semester, Student
 
 @dataclass
 class Schedule:
-    student_slug: str
     semester: Semester
-    student: Optional[Student] = None
+    student: Student
     last_modified: Optional[int] = None
-
-    def key(self):
-        return (
-            "-".join(
-                str(v)
-                for v in [
-                    self.semester.year,
-                    self.semester.type,
-                    self.student_slug,
-                ]
-            )
-            + f":{self.last_modified}"
-        )

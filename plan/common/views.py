@@ -63,7 +63,9 @@ def shortcut(request, slug):
         semester = Semester.objects.active()
     except Semester.DoesNotExist:
         raise http.Http404
-    return schedule_current(request, Schedule(semester=semester, student_slug=slug))
+    return schedule_current(
+        request, Schedule(semester=semester, student=Student(slug=slug))
+    )
 
 
 @utils.expires_in(datetime.timedelta(hours=1))
@@ -176,7 +178,7 @@ def schedule_current(request, schedule: Schedule):
 
     # NOTE: We use the slug to allow for students that don't yet exist.
     weeks = Week.objects.filter(
-        lecture__course__subscription__student__slug=schedule.student_slug,
+        lecture__course__subscription__student__slug=schedule.student.slug,
         lecture__course__semester=schedule.semester,
     )
     weeks = weeks.distinct().values_list("number", flat=True)
@@ -422,7 +424,7 @@ def schedule(request, schedule: Schedule, advanced=False, week=None, all=False):
             "semester": schedule.semester,
             "week_is_current": week_is_current,
             "next_semester": next_semester,
-            "slug": schedule.student_slug,
+            "slug": schedule.student.slug,
             "timetable": table,
             "week": week,
             "next_week": next_week,
@@ -436,6 +438,7 @@ def schedule(request, schedule: Schedule, advanced=False, week=None, all=False):
             "next_schedule": next_schedule,
         },
     )
+
     for header, value in headers.items():
         response.headers[header] = value
     CspMiddleware.store_nonce_in_header(request, response)
@@ -451,7 +454,7 @@ def select_groups(request, schedule):
     courses = Course.objects.get_courses(
         schedule.semester.year,
         schedule.semester.type,
-        schedule.student_slug,
+        schedule.student.slug,
     )
     course_groups = Course.get_groups(
         schedule.semester.year,
@@ -473,7 +476,7 @@ def select_groups(request, schedule):
                     subscription = Subscription.objects.get_subscriptions(
                         schedule.semester.year,
                         schedule.semester.type,
-                        schedule.student_slug,
+                        schedule.student.slug,
                     ).get(course=c)
 
                     subscription.groups.set(group_form.cleaned_data["groups"])
@@ -482,7 +485,7 @@ def select_groups(request, schedule):
             utils.clear_cache(
                 schedule.semester.year,
                 schedule.semester.type,
-                schedule.student_slug,
+                schedule.student.slug,
             )
 
         return shortcuts.redirect("schedule-advanced", schedule)
@@ -491,7 +494,7 @@ def select_groups(request, schedule):
     subscription_groups = Subscription.get_groups(
         schedule.semester.year,
         schedule.semester.type,
-        schedule.student_slug,
+        schedule.student.slug,
     )
     all_subscripted_groups = set()
 
@@ -502,7 +505,7 @@ def select_groups(request, schedule):
     for c in courses:
         color_map[c.id]
         subscription_id = c.subscription_set.get(
-            student__slug=schedule.student_slug,
+            student__slug=schedule.student.slug,
         ).pk
 
         try:
@@ -523,7 +526,7 @@ def select_groups(request, schedule):
         "select_groups.html",
         {
             "semester": schedule.semester,
-            "slug": schedule.student_slug,
+            "slug": schedule.student.slug,
             "courses": courses,
             "color_map": color_map,
             "schedule": schedule,
@@ -547,7 +550,7 @@ def select_course(request, schedule, add=False):
     utils.clear_cache(
         schedule.semester.year,
         schedule.semester.type,
-        schedule.student_slug,
+        schedule.student.slug,
     )
     if response:
         return response
@@ -564,7 +567,7 @@ def _add_courses(request, schedule):
         Subscription.objects.get_subscriptions(
             schedule.semester.year,
             schedule.semester.type,
-            schedule.student_slug,
+            schedule.student.slug,
         ).values_list("course__code", flat=True)
     )
 
@@ -574,7 +577,7 @@ def _add_courses(request, schedule):
     errors = []
     too_many_subscriptions = False
 
-    student, created = Student.objects.get_or_create(slug=schedule.student_slug)
+    student, created = Student.objects.get_or_create(slug=schedule.student.slug)
 
     for l in lookup:
         try:
@@ -603,7 +606,7 @@ def _add_courses(request, schedule):
             {
                 "courses": errors,
                 "max": settings.TIMETABLE_MAX_COURSES,
-                "slug": schedule.student_slug,
+                "slug": schedule.student.slug,
                 "year": schedule.semester.year,
                 "type": schedule.semester.type,
                 "too_many_subscriptions": too_many_subscriptions,
@@ -623,10 +626,10 @@ def _remove_courses(request, schedule):
         Subscription.objects.get_subscriptions(
             schedule.semester.year,
             schedule.semester.type,
-            schedule.student_slug,
+            schedule.student.slug,
         ).filter(course__id__in=courses).delete()
 
-        slug = schedule.student_slug
+        slug = schedule.student.slug
         if Subscription.objects.filter(student__slug=slug).count() == 0:
             Student.objects.filter(slug=slug).delete()
 
@@ -637,7 +640,7 @@ def _override_name(request, schedule):
     subscriptions = Subscription.objects.get_subscriptions(
         schedule.semester.year,
         schedule.semester.type,
-        schedule.student_slug,
+        schedule.student.slug,
     )
 
     for u in subscriptions:
@@ -666,7 +669,7 @@ def select_lectures(request, schedule):
             subscriptions = Subscription.objects.get_subscriptions(
                 schedule.semester.year,
                 schedule.semester.type,
-                schedule.student_slug,
+                schedule.student.slug,
             )
 
             for subscription in subscriptions:
@@ -682,7 +685,7 @@ def select_lectures(request, schedule):
         utils.clear_cache(
             schedule.semester.year,
             schedule.semester.type,
-            schedule.student_slug,
+            schedule.student.slug,
         )
 
     return shortcuts.redirect("schedule-advanced", schedule)
