@@ -2,6 +2,7 @@
 
 import datetime
 import json
+from typing import Optional
 
 from django import http, shortcuts
 from django.conf import settings
@@ -114,7 +115,7 @@ def getting_started(request, semester):
         if schedule_form.is_valid():
             schedule = Schedule(
                 semester=semester,
-                student_slug=schedule_form.cleaned_data["slug"],
+                student=Student(slug=schedule_form.cleaned_data["slug"]),
             )
             # TODO(adamcik): what should we do if current is empty?
             return schedule_current(request, schedule)
@@ -185,6 +186,145 @@ def schedule_current(request, schedule: Schedule):
     return shortcuts.redirect("schedule", schedule)
 
 
+def _common_data():
+    key = "locations-next_semester"
+    result = cache.get(key)
+    if result:
+        return result
+
+    locations = Location.objects.distinct()  # .filter(course__semester=semester)
+    try:
+        next_semester = next(Semester.objects)
+    except Semester.DoesNotExist:
+        next_semester = None
+
+    cache.set(key, (locations, next_semester), 3600)
+    return locations, next_semester
+
+
+def _schedule_data(s: Schedule, next_semester: Optional[Semester] = None):
+    if s.last_modified is None:
+        return [], [], [], [], [], [], [], []
+
+    key = f"db:{s.semester.year}-{s.semester.type}-{s.student.slug}:{s.last_modified}"
+    result = cache.get(key)
+    if result:
+        return result
+
+    courses = list(
+        Course.objects.filter(
+            subscription__student=s.student.id,
+            subscription__course__semester=s.semester,
+        )
+        .extra(select={"alias": "common_subscription.alias"})
+        .distinct()
+        .order_by("code")
+    )
+
+    lectures = Lecture.objects.get_lectures(
+        s.semester.id,
+        s.student.id,
+    )
+
+    # Most of these could be built into get_lectures with ARRAY_AGG..
+    exams = {}
+    for exam in (
+        Exam.objects.filter(course__in=courses)
+        .select_related("course", "type")
+        .order_by("handout_date", "handout_time", "exam_date", "exam_time")
+    ):
+        exams.setdefault(exam.course_id, []).append(exam)
+
+    # Use get_related to cut query counts
+    lecturers = []  # Lecture.get_related(Lecturer, lectures)
+    groups = Lecture.get_related(Group, lectures, fields=["code"])
+    rooms = Lecture.get_related(Room, lectures, fields=["id", "name", "url"])
+
+    schedule_weeks = set()
+    for l in lectures:
+        schedule_weeks.update(l.week_numbers)
+    if schedule_weeks:
+        schedule_weeks = list(range(min(schedule_weeks), max(schedule_weeks) + 1))
+
+    if (
+        next_semester
+        and not Subscription.objects.get_subscriptions(
+            next_semester.year, next_semester.type, schedule.student.slug
+        ).exists()
+    ):
+        next_schedule = Schedule(
+            semester=next_semester,
+            student=schedule.student,
+        )
+    else:
+        next_schedule = None
+
+    # NOTE: This data can be used across pages, so cache it.
+
+    # TODO: Should we consider a get_related for courses as well?
+    # TODO: get_related duplicates data, perhaps the exams dict should just
+    # be {lecture_id: exam_id} and then there is a {exam_id: exam} mapping?
+
+    result = (
+        lectures,
+        courses,
+        exams,
+        lecturers,
+        groups,
+        rooms,
+        schedule_weeks,
+        next_schedule,
+    )
+    cache.set(key, result, timeout=3600)
+    return result
+
+
+def _response_cache_key(prefix: str, s: Schedule) -> str:
+    return ":".join(
+        (
+            prefix,
+            f"{s.semester.year}-{s.semester.slug}-{s.student.slug}",
+            str(s.last_modified),
+        )
+    )
+
+
+# TODO: Can we turn this into a middleware? That would allow us to cache
+# post minification and csp...
+def _check_response_cache(
+    key: str,
+    timeout: Optional[datetime.timedelta],
+    bypass_cache: bool = False,
+) -> Optional[http.HttpResponse]:
+    if timeout is None or bypass_cache:
+        return None
+
+    response = cache.get(key)
+    if response:
+        response["X-Cache"] = f"hit; key={key}"
+    return response
+
+
+def _store_response_cache(
+    key: str,
+    response: http.HttpResponse,
+    timeout: Optional[datetime.timedelta] = None,
+    bypass_cache: bool = False,
+):
+    if timeout is None:
+        response["X-Cache"] = f"miss; disabled; key={key}"
+        return
+
+    # TODO: It would be nice to have the HTML minified and then stored
+    # pre-compressed in the cache. Size difference is e.g. 6086 vs 77053.
+    cache.set(key, response, timeout=timeout.total_seconds())
+
+    if bypass_cache:
+        response["X-Cache"] = f"miss; bypass; key={key}"
+    else:
+        response["X-Cache"] = f"miss; key={key}"
+
+
 def schedule(request, schedule: Schedule, advanced=False, week=None, all=False):
     """Page that handles showing schedules"""
     bypass_cache = utils.should_bypass_cache(request)
@@ -202,106 +342,35 @@ def schedule(request, schedule: Schedule, advanced=False, week=None, all=False):
     if response:
         return response
 
-    # TODO: Can we turn this into a middleware? That would allow us to cache
-    # post minification and csp...
-    key = ":".join(
-        str(p)
-        for p in (
-            "resp",
-            request.resolver_match.url_name,
-            request.path_info,
-            schedule.last_modified,
-        )
+    key = _response_cache_key("schedule", schedule)
+    response = _check_response_cache(
+        key, settings.TIMETABLE_SCHEDULE_CACHE_DURATION, bypass_cache
     )
-    if schedule.last_modified is not None:
-        response = cache.get(key)
-        if not bypass_cache and response:
-            response["X-Cache"] = f"hit; key={key}"
-            return response
+    if response:
+        return response
 
-    db_key = f"db:{schedule.key()}"
-    if schedule.last_modified is not None:
-        result = cache.get(db_key)
-    else:
-        result = [], [], [], [], [], [], []
+    locations, next_semester = _common_data()
 
-    if result:
-        lectures, courses, exams, lecturers, groups, rooms, schedule_weeks = result
-    else:
-        lectures = Lecture.objects.get_lectures(
-            schedule.semester.id,
-            schedule.student.id,
-        )
-        courses = Course.objects.get_courses(
-            schedule.semester.year,
-            schedule.semester.type,
-            schedule.student_slug,
-        )
+    (
+        lectures,
+        courses,
+        exams,
+        lecturers,
+        groups,
+        rooms,
+        schedule_weeks,
+        next_schedule,
+    ) = _schedule_data(schedule, next_semester)
 
-        # Most of these could be built into get_lectures with ARRAY_AGG..
-        exams = {}
-        for exam in Exam.objects.get_exams(
-            schedule.semester.year,
-            schedule.semester.type,
-            schedule.student_slug,
-        ):
-            exams.setdefault(exam.course_id, []).append(exam)
-
-        # Use get_related to cut query counts
-        lecturers = []  # Lecture.get_related(Lecturer, lectures)
-        groups = Lecture.get_related(Group, lectures, fields=["code"])
-        rooms = Lecture.get_related(Room, lectures, fields=["id", "name", "url"])
-
-        schedule_weeks = set()
-        for l in lectures:
-            schedule_weeks.update(l.week_numbers)
-        if schedule_weeks:
-            schedule_weeks = list(range(min(schedule_weeks), max(schedule_weeks) + 1))
-
-        # NOTE: This data can be used across pages, so cache it.
-
-        # TODO: Should we consider a get_related for courses as well?
-        # TODO: get_related duplicates data, perhaps the exams dict should just
-        # be {lecture_id: exam_id} and then there is a {exam_id: exam} mapping?
-        result = (lectures, courses, exams, lecturers, groups, rooms, schedule_weeks)
-        cache.set(db_key, result, timeout=3600)
-
-    common_key = "common"
-    result = cache.get(common_key)
-    if result:
-        next_semester, next_schedule, locations = result
-    else:
-        locations = Location.objects.distinct()  # .filter(course__semester=semester)
-
-        try:
-            # TODO: try and turn this into a single query with annotate?
-            next_semester = next(Semester.objects)
-            next_semester_has_subscriptions = Subscription.objects.get_subscriptions(
-                next_semester.year, next_semester.type, schedule.student_slug
-            ).exists()
-
-            if next_semester_has_subscriptions:
-                next_schedule = Schedule(
-                    semester=next_semester,
-                    student_slug=schedule.student_slug,
-                )
-            else:
-                next_schedule = None
-        except Semester.DoesNotExist:
-            next_semester = None
-            next_schedule = None
-
-        result = (next_semester, next_schedule, locations)
-        cache.set(common_key, result, timeout=8 * 3600)
-
-    next_week = None
-    prev_week = None
-
+    # Check prev/next weeks:
     if week and week + 1 in schedule_weeks:
         next_week = week + 1
-
+    else:
+        next_week = None
     if week and week - 1 in schedule_weeks:
         prev_week = week - 1
+    else:
+        prev_week = None
 
     # Init colors in predictable maner
     for c in courses:
@@ -309,14 +378,11 @@ def schedule(request, schedule: Schedule, advanced=False, week=None, all=False):
 
     # Create Timetable
     table = timetable.Timetable(lectures)
-
     if week:
         table.set_week(schedule.semester.year, week)
-
     if lectures:
         table.place_lectures(week)
         table.do_expansion()
-
     table.insert_times()
     table.add_markers()
 
@@ -372,21 +438,11 @@ def schedule(request, schedule: Schedule, advanced=False, week=None, all=False):
     )
     for header, value in headers.items():
         response.headers[header] = value
+    CspMiddleware.store_nonce_in_header(request, response)
 
-    if settings.TIMETABLE_SCHEDULE_CACHE_DURATION:
-        response["X-Cache"] = f"{'miss' if not bypass_cache else 'bypass'}; key={key}"
-        CspMiddleware.store_nonce_in_header(request, response)
-
-        # TODO: It would be nice to have the HTML minified and then stored
-        # pre-compressed in the cache. Size difference is e.g. 6086 vs 77053.
-        cache.set(
-            key,
-            response,
-            timeout=settings.TIMETABLE_SCHEDULE_CACHE_DURATION.total_seconds(),
-        )
-    else:
-        response["X-Cache"] = f"disabled; key={key}"
-
+    _store_response_cache(
+        key, response, settings.TIMETABLE_SCHEDULE_CACHE_DURATION, bypass_cache
+    )
     return response
 
 
