@@ -60,7 +60,10 @@
           installPhase = ''
             mkdir -p $out
             cp -r plan manage.py static $out/
-            cp -r cache $out/ || true
+            # Only copy cache if it exists
+            if [ -d cache ]; then
+              cp -r cache $out/
+            fi
           '';
         };
 
@@ -106,7 +109,7 @@
 
         # Container image
         containerImage = inputs'.nix2container.packages.nix2container.buildImage {
-          name = "ghcr.io/adamcik/plan";
+          name = "plan";
           tag = "latest";
           maxLayers = 100;
 
@@ -155,7 +158,9 @@
 
           shellHook = ''
             export DJANGO_SETTINGS_MODULE=plan.settings.local
-            export PYTHONPATH="${venv}/${venv.python.sitePackages}:$PWD"
+            # Add both venv and current directory to PYTHONPATH
+            export PYTHONPATH="${venv}/${venv.python.sitePackages}"
+            [ -n "$PWD" ] && export PYTHONPATH="$PYTHONPATH:$PWD"
             echo "Plan development environment"
             echo "Python: ${venv.python}/bin/python"
             echo "Virtual env: ${venv}"

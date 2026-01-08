@@ -86,6 +86,8 @@ jobs:
           fi
 
       - name: Push to GHCR
+        env:
+          IMAGE_NAME: ghcr.io/${{ github.repository }}
         run: |
           # Load and push the image
-          nix run .#pushToRegistry ghcr.io/adamcik/plan ${{ steps.tag.outputs.tag }}
+          nix run .#pushToRegistry "$IMAGE_NAME" ${{ steps.tag.outputs.tag }}
