@@ -226,7 +226,14 @@
           projectRootFile = "flake.nix";
           programs = {
             alejandra.enable = true; # Nix formatter
-            ruff.enable = true; # Python formatter
+            ruff = {
+              enable = true;
+              format = true; # Use ruff format
+            };
+          };
+          settings.formatter = {
+            # Exclude common non-source directories
+            excludes = ["*.pyc" "__pycache__" "*.sqlite" ".direnv"];
           };
         };
 
