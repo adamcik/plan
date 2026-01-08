@@ -28,7 +28,7 @@ jobs:
 
       - name: Nix Flake Check
         run: |
-          nix flake check --all-systems --show-trace
+          nix flake check --show-trace
 
   build:
     name: Build with nix-fast-build
@@ -86,9 +86,6 @@ jobs:
           fi
 
       - name: Push to GHCR
-        env:
-          REGISTRY_USER: ${{ github.actor }}
-          REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Load the image and push using skopeo
-          nix run .#copyToRegistry ghcr.io/adamcik/plan ${{ steps.tag.outputs.tag }}
+          # Load and push the image
+          nix run .#pushToRegistry ghcr.io/adamcik/plan ${{ steps.tag.outputs.tag }}

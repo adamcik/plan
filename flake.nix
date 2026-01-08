@@ -168,27 +168,28 @@
           '';
         };
 
-        # Container package
+        # Packages and scripts
         packages = {
           default = containerImage;
           container = containerImage;
-
-          # Copy to registry script
-          copyToRegistry = pkgs.writeShellScriptBin "copy-to-registry" ''
+          
+          # Script to load container to docker and push to registry
+          pushToRegistry = pkgs.writeShellScriptBin "push-to-registry" ''
             set -euo pipefail
             
             IMAGE_NAME="''${1:-ghcr.io/adamcik/plan}"
             IMAGE_TAG="''${2:-latest}"
             
-            echo "Copying image to registry: $IMAGE_NAME:$IMAGE_TAG"
+            echo "Loading container image to Docker..."
+            ${containerImage.copyToDockerDaemon}
             
-            # Use skopeo to copy the image
-            ${pkgs.skopeo}/bin/skopeo copy \
-              --dest-creds="$REGISTRY_USER:$REGISTRY_PASSWORD" \
-              "docker-archive:${containerImage}" \
-              "docker://$IMAGE_NAME:$IMAGE_TAG"
+            echo "Tagging image as $IMAGE_NAME:$IMAGE_TAG"
+            ${pkgs.docker}/bin/docker tag ${containerImage.imageName}:${containerImage.imageTag} "$IMAGE_NAME:$IMAGE_TAG"
             
-            echo "Successfully pushed image"
+            echo "Pushing to registry..."
+            ${pkgs.docker}/bin/docker push "$IMAGE_NAME:$IMAGE_TAG"
+            
+            echo "Successfully pushed $IMAGE_NAME:$IMAGE_TAG"
           '';
         };
 
