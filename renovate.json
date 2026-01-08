@@ -1,0 +1,25 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:base"],
+  "packageRules": [
+    {
+      "groupName": "Nix dependencies",
+      "matchManagers": ["nix"],
+      "automerge": false,
+      "schedule": ["before 6am on monday"]
+    },
+    {
+      "groupName": "Python dependencies",
+      "matchManagers": ["pep621"],
+      "automerge": false,
+      "schedule": ["before 6am on monday"]
+    }
+  ],
+  "nix": {
+    "enabled": true
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on monday"]
+  }
+}

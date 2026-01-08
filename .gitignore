@@ -9,3 +9,8 @@
 __pycache__
 .direnv
 .envrc
+
+# Nix
+result
+result-*
+.direnv/
