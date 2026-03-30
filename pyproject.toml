@@ -1,17 +1,15 @@
 [project]
 authors = [{ name = "Thomas Adamcik", email = "thomas@adamcik.no" }]
 license = { text = "AGLv3" }
-requires-python = "<4.0,>=3.9"
+requires-python = "<3.11,>=3.10"
 dependencies = [
   "brotli>=1.1.0",
-  "Django~=3.2.12",
-  "django-compressor~=2.4",
-  "lxml~=4.6.3",
-  "psycopg2~=2.8.6",
-  "requests~=2.25.1",
-  "tqdm",
+  "Django~=3.2.25",
+  "django-compressor~=2.4.1",
+  "psycopg2~=2.9.11",
   "typing-extensions>=4.12.2",
   "vobject~=0.9.6.1",
+  "reportlab~=3.5.59",
 ]
 name = "plan"
 version = "2.0.0"
@@ -21,13 +19,16 @@ description = "Timetable generator for educational institutions."
 [project.urls]
 repository = "https://github.com/adamcik/plan"
 
-# TODO: Is this needed?
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "editables"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build]
+packages = ["plan"]
 
 [dependency-groups]
 dev = ["django-stubs~=4.2.7", "django-debug-toolbar~=3.5.0"]
+scraper = ["lxml~=4.6.3", "requests~=2.25.1", "tqdm"]
 
 [tool.djlint]
 indent = 2
