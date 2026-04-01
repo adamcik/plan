@@ -7,29 +7,33 @@
     pkgs,
     ...
   }: let
-    legacyPkgs = inputs'.nixpkgs-legacy.legacyPackages;
+    pkgsLegacy = inputs'.nixpkgs-legacy.legacyPackages;
+    shrinkPython = false;
+    python =
+      if shrinkPython
+      then
+        pkgsLegacy.python310.override {
+          bluezSupport = false;
+          stripConfig = true;
+          stripIdlelib = true;
+          stripTests = true;
+          stripTkinter = true;
 
-    python = legacyPkgs.python310.override {
-      bluezSupport = false;
-      stripConfig = true;
-      stripIdlelib = true;
-      stripTests = true;
-      stripTkinter = true;
+          rebuildBytecode = false;
+          stripBytecode = true;
 
-      rebuildBytecode = false;
-      stripBytecode = true;
-
-      readline = null;
-      ncurses = null;
-      gdbm = null;
-    };
+          readline = null;
+          ncurses = null;
+          gdbm = null;
+        }
+      else pkgsLegacy.python310;
     editableVenv = config.uv2nix.devVenv;
   in {
     uv2nix = {
       inherit python;
       pyprojectOverrides = final: prev: let
         inherit (final) resolveBuildSystem;
-        overrides = with pkgs; {
+        overrides = with pkgsLegacy; {
           rjsmin.buildInputs = resolveBuildSystem {setuptools = [];};
           rcssmin.buildInputs = resolveBuildSystem {setuptools = [];};
           vobject.buildInputs = resolveBuildSystem {setuptools = [];};
@@ -59,8 +63,8 @@
                 setuptools = [];
                 pybind11 = [];
               }
-              # TODO: add back libavif libtiff
-              ++ [freetype lcms2 libimagequant libjpeg libraqm libxcb openjpeg zlib-ng libwebp];
+              # TODO: add back libavif libtiff libxcb
+              ++ [freetype lcms2 libimagequant libjpeg libraqm openjpeg zlib-ng libwebp];
             nativeBuildInputs = [pkg-config];
           };
           lxml = {

@@ -60,6 +60,14 @@ in {
               type = lib.types.package;
               description = "The python virtual environment for the project.";
             };
+            runtimeVenv = lib.mkOption {
+              type = lib.types.package;
+              description = "The python runtime virtual environment for the project.";
+            };
+            manageVenv = lib.mkOption {
+              type = lib.types.package;
+              description = "The python management-command virtual environment for the project.";
+            };
           };
         };
       };
@@ -130,12 +138,19 @@ in {
       inherit (pkgs.callPackages inputs.pyproject-nix.build.util {}) mkApplication;
     in {
       uv2nix.devVenv = editablePythonSet.mkVirtualEnv "venv" workspace.deps.all;
-      uv2nix.depsVenv = pythonSet.mkVirtualEnv "dev-venv" self'.packages.plan.dependencies;
-      uv2nix.venv = pythonSet.mkVirtualEnv "dev-venv" workspace.deps.default;
+      uv2nix.depsVenv = pythonSet.mkVirtualEnv "deps-venv" self'.packages.plan.dependencies;
+      uv2nix.runtimeVenv = pythonSet.mkVirtualEnv "runtime-venv" workspace.deps.default;
+      uv2nix.manageVenv = pythonSet.mkVirtualEnv "manage-venv" (
+        workspace.deps.default
+        // {
+          ${pyprojectToml.project.name} = (workspace.deps.default.${pyprojectToml.project.name} or []) ++ ["scraper"];
+        }
+      );
+      uv2nix.venv = config.uv2nix.runtimeVenv;
 
       packages.default = self'.packages.${project.pname};
       packages.${project.pname} = mkApplication {
-        venv = pythonSet.mkVirtualEnv "application-env" workspace.deps.default;
+        venv = config.uv2nix.runtimeVenv;
         package = project;
       };
     };

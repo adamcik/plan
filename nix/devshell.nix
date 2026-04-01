@@ -45,5 +45,28 @@
       #    This ensures tests run on your running Postgres instance. No extra scripts or env setup needed.
       # '';
     };
+
+    devShells.playwright = pkgs.mkShell {
+      packages = with pkgs; [
+        nodejs
+        playwright-driver
+        playwright-mcp
+      ];
+
+      env = {
+        PLAYWRIGHT_BROWSERS_PATH = "${pkgs.playwright-driver.browsers}";
+        PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS = "true";
+
+        OPENCODE_CONFIG_CONTENT = builtins.toJSON {
+          mcp = {
+            playwright-mcp = {
+              type = "local";
+              command = ["mcp-server-playwright"];
+              enabled = true;
+            };
+          };
+        };
+      };
+    };
   };
 }

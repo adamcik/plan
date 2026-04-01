@@ -6,6 +6,7 @@ dependencies = [
   "brotli>=1.1.0",
   "Django~=3.2.25",
   "django-compressor~=2.4.1",
+  "lxml~=4.6.3",
   "psycopg2~=2.9.11",
   "typing-extensions>=4.12.2",
   "vobject~=0.9.6.1",
@@ -28,7 +29,7 @@ packages = ["plan"]
 
 [dependency-groups]
 dev = ["django-stubs~=4.2.7", "django-debug-toolbar~=3.5.0"]
-scraper = ["lxml~=4.6.3", "requests~=2.25.1", "tqdm"]
+scraper = ["requests~=2.25.1", "tqdm"]
 
 [tool.djlint]
 indent = 2
