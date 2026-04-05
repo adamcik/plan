@@ -19,6 +19,10 @@ CACHES = {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
         "KEY_PREFIX": "test-ical",
     },
+    "scraper": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "KEY_PREFIX": "test-scraper",
+    },
 }
 
 if os.environ.get("PLAN_TEST_USE_POSTGRES"):
