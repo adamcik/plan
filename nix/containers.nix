@@ -35,7 +35,7 @@
       '';
   in {
     nix2container = {
-      name = "plan";
+      name = "ghcr.io/adamcik/plan";
       tag = "latest";
 
       imageConfig = {
