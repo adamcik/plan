@@ -198,3 +198,14 @@ class ViewTestCase(BaseTestCase):
         self.assertEqual(b"COURSE2|Course 2 full name", lines[1])
         self.assertEqual(b"COURSE3|Course 3 full name", lines[2])
         self.assertEqual(b"COURSE4|Course 4 full name", lines[3])
+
+        response = self.client.get(url, {"q": "COURSE", "limit": 2})
+        lines = [line for line in response.content.split(b"\n") if line]
+        self.assertEqual(2, len(lines))
+
+        response = self.client.get(
+            url,
+            {"q": "COURSE", "limit": 2},
+            HTTP_ACCEPT="application/json",
+        )
+        self.assertEqual(2, len(response.json()))

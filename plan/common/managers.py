@@ -194,7 +194,8 @@ class CourseManager(models.Manager):
         def priority(pair):
             return (0 if any(pair[0].startswith(p) for p in terms) else 1, pair[0])
 
-        return [row for (code, row) in sorted(result.items(), key=priority)]
+        rows = [row for (code, row) in sorted(result.items(), key=priority)]
+        return rows[: max(0, limit)]
 
 
 class SubscriptionManager(models.Manager):
