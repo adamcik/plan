@@ -19,7 +19,7 @@
     }
   }
 
-  window.drawCalendar = (container, content) => {
+  window.drawCalendar = (container, content, styleNonce = null) => {
     // FIXME: Consider show active dates for new semesters?
     Promise.resolve(content)
       .then((content) => {
@@ -171,6 +171,11 @@
         });
       })
       .then((plot) => {
+        if (styleNonce) {
+          plot.querySelectorAll("style").forEach((node) => {
+            node.setAttribute("nonce", styleNonce);
+          });
+        }
         container.appendChild(plot);
       });
   };

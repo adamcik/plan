@@ -37,13 +37,18 @@ class HtmlMinifyMiddleware(MiddlewareMixin):
 
 
 class CspMiddleware(MiddlewareMixin):
+    SCRIPT_NONCE_HEADER = "X-CSP-Script-Nonce"
+    STYLE_NONCE_HEADER = "X-CSP-Style-Nonce"
+
     def process_request(self, request):
-        request._csp_nonce = secrets.token_urlsafe(16)
+        request._csp_script_nonce = secrets.token_urlsafe(16)
+        request._csp_style_nonce = secrets.token_urlsafe(16)
 
     @staticmethod
     def store_nonce_in_header(request, response):
         # Hack to make sure caching responses with nonce works
-        response["X-CSP-Nonce"] = request._csp_nonce
+        response[CspMiddleware.SCRIPT_NONCE_HEADER] = request._csp_script_nonce
+        response[CspMiddleware.STYLE_NONCE_HEADER] = request._csp_style_nonce
 
     def process_response(self, request, response):
         if response.status_code in (404, 500) and settings.DEBUG:
@@ -52,16 +57,22 @@ class CspMiddleware(MiddlewareMixin):
         if "html" not in response.get("Content-Type", ""):
             return response
 
-        if "X-CSP-Nonce" in response:
-            nonce = response["X-CSP-Nonce"]
-            del response["X-CSP-Nonce"]
+        if CspMiddleware.SCRIPT_NONCE_HEADER in response:
+            script_nonce = response[CspMiddleware.SCRIPT_NONCE_HEADER]
+            del response[CspMiddleware.SCRIPT_NONCE_HEADER]
         else:
-            nonce = request._csp_nonce
+            script_nonce = request._csp_script_nonce
+
+        if CspMiddleware.STYLE_NONCE_HEADER in response:
+            style_nonce = response[CspMiddleware.STYLE_NONCE_HEADER]
+            del response[CspMiddleware.STYLE_NONCE_HEADER]
+        else:
+            style_nonce = request._csp_style_nonce
 
         policy = [
             "default-src 'self'",
-            f"script-src 'self' 'nonce-{nonce}'",
-            f"style-src  'self' 'nonce-{nonce}'",
+            f"script-src 'self' 'nonce-{script_nonce}'",
+            f"style-src  'self' 'nonce-{style_nonce}'",
             "img-src 'self' data:",
             "frame-ancestors *",
         ]

@@ -28,7 +28,11 @@
       <script type="text/javascript">
         (function() {
           const init = () => {
-            drawCalendar(document.querySelector("#graph"), "{{ data|safe }}");
+            drawCalendar(
+              document.querySelector("#graph"),
+              "{{ data|safe }}",
+              "{{ CSP_STYLE_NONCE }}",
+            );
           };
 
           if (document.readyState === "loading") {
