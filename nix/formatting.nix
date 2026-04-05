@@ -7,6 +7,13 @@
 
       programs = {
         alejandra.enable = true;
+        oxfmt = {
+          enable = true;
+          excludes = [
+            "plan/templates/**"
+            "plan/static/js/lib/**"
+          ];
+        };
         # ruff-check.enable = true;
         ruff-format.enable = true;
       };
