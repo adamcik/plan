@@ -128,7 +128,23 @@
           src = ../.;
         } ''
           cd $src
+          export PGDATA="$TMPDIR/pgdata"
+          export PGHOST="$TMPDIR"
+          export PGPORT=55432
+          export PGDATABASE=plan
+          export PGUSER="$(id -un)"
+          export PGPASSWORD=""
+
+          initdb --locale=C --encoding=UTF8 "$PGDATA" >/dev/null
+          pg_ctl -D "$PGDATA" -o "-k $PGHOST -p $PGPORT" -w start >/dev/null
+          trap 'pg_ctl -D "$PGDATA" -w stop >/dev/null' EXIT
+
+          createdb -h "$PGHOST" -p "$PGPORT" "$PGDATABASE"
+
           export DJANGO_SETTINGS_MODULE="plan.settings.test"
+          export PLAN_TEST_USE_POSTGRES=1
+          export DJANGO_SECRET_KEY="test"
+          export PLAN_BASE_DIR="$TMPDIR/plan"
           python manage.py test --noinput
           touch $out
         '';
