@@ -9,7 +9,8 @@
         uv
         ruff
         basedpyright
-        taplo
+        tombi
+        djlint
         config.uv2nix.devVenv
         # self'.packages.start-db
         postgresql
