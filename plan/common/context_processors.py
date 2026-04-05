@@ -40,7 +40,7 @@ def processor(request):
         "SOURCE_URL": settings.TIMETABLE_SOURCE_URL,
         "STATIC_DOMAIN": static_domain,
         "SITENAME": sitename,
-        "CSP_NONCE": getattr(request, "_csp_script_nonce", None),
+        "CSP_SCRIPT_NONCE": getattr(request, "_csp_script_nonce", None),
         "CSP_STYLE_NONCE": getattr(request, "_csp_style_nonce", None),
         "NOTICE": notice,
     }

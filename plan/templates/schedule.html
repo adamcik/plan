@@ -9,7 +9,7 @@
 
 {% block extrastyle %}
   {{ block.super }}
-  {% nonce CSP_NONCE %}
+  {% nonce style %}
     {% compress css inline %}
       <link rel="stylesheet" href="{% static 'css/schedule.css' %}" />
       {% if courses %}
@@ -53,14 +53,14 @@
 
 {% block extrascript %}
   {% if courses and not advanced %}
-    {% nonce CSP_NONCE %}
+    {% nonce script %}
       {% compress js inline %}
         <script type="text/javascript" src="{% static 'js/navigation.js' %}"></script>
       {% endcompress %}
     {% endnonce %}
   {% endif %}
   {% if not courses or advanced %}
-    {% nonce CSP_NONCE %}
+    {% nonce script %}
       {% compress js %}
         <script type="text/javascript"
                 src="{% static 'js/lib/auto-complete.min.js' %}"></script>

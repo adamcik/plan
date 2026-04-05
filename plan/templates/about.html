@@ -23,7 +23,7 @@
     <script type="text/javascript" src={% static 'js/lib/htl.v0.3.1.js' %}></script>
     <script type="text/javascript" src={% static 'js/calendar.js' %}></script>
   {% endcompress %}
-  {% nonce CSP_NONCE %}
+  {% nonce script %}
     {% compress js inline %}
       <script type="text/javascript">
         (function() {

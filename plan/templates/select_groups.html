@@ -7,7 +7,7 @@
 {% load static %}
 
 {% block extrastyle %}
-  {% nonce CSP_NONCE %}
+  {% nonce style %}
     {% compress css inline %}
       {% if courses %}
         <style type="text/css">

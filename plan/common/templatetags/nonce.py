@@ -2,6 +2,7 @@
 
 
 from lxml import html
+from lxml.etree import ParserError
 
 from django import template
 
@@ -10,28 +11,53 @@ register = template.Library()
 
 @register.tag(name="nonce")
 def do_nonce(parser, token):
-    try:
-        name, nonce = token.split_contents()
-    except ValuerError:
-        raise template.TemplateSyntaxError("'nonce' tag requires a single argument")
+    parts = token.split_contents()
+    if len(parts) != 2:
+        raise template.TemplateSyntaxError(
+            "'nonce' tag usage: {% nonce script|style %}"
+        )
+
+    _, target = parts
+
+    target = target.lower()
+    if target not in ("script", "style"):
+        raise template.TemplateSyntaxError(
+            "'nonce' tag type must be 'script' or 'style'"
+        )
 
     nodelist = parser.parse(("endnonce",))
     parser.delete_first_token()
-    return Nonce(nonce, nodelist)
+    return Nonce(target, nodelist)
 
 
 class Nonce(template.Node):
-    def __init__(self, nonce, nodelist) -> None:
-        self.nonce = template.Variable(nonce)
+    def __init__(self, target, nodelist) -> None:
+        self.target = target
         self.nodelist = nodelist
 
     def render(self, context):
         output = self.nodelist.render(context)
-        nonce = self.nonce.resolve(context)
+        if not output.strip():
+            return output
 
-        tags = html.fragments_fromstring(output)
-        if nonce:
-            for tag in tags:
-                # TODO: assert tag type?
+        nonce = context.get(f"CSP_{self.target.upper()}_NONCE")
+        if not nonce:
+            return output
+
+        try:
+            tags = html.fragments_fromstring(output)
+        except ParserError:
+            return output
+
+        rendered = []
+        for tag in tags:
+            if isinstance(tag, str):
+                rendered.append(tag)
+                continue
+
+            name = str(getattr(tag, "tag", "")).lower()
+            if name == self.target:
                 tag.attrib["nonce"] = nonce
-        return "".join(html.tostring(tag).decode("utf-8") for tag in tags)
+            rendered.append(html.tostring(tag, encoding="unicode"))
+
+        return "".join(rendered)
