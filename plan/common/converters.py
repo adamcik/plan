@@ -121,7 +121,7 @@ class ScheduleConverter:
 
 
 class WeekNumberConverter:
-    regex = r"[1-5][0-9]?"
+    regex = r"([1-9]|[1-4][0-9]|5[0-3])"
 
     def to_python(self, value: str) -> int:
         try:
