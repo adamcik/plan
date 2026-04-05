@@ -5,7 +5,7 @@ import datetime
 from django.test import TestCase
 from django.urls import reverse
 
-from plan.common.models import Semester
+from plan.common.models import Semester, Student
 from plan.common.schedule import Schedule
 
 

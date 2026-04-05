@@ -22,7 +22,7 @@ class EmptyViewTestCase(tests.BaseTestCase):
             self.assertEqual(self.client.get(url).status_code, 404)
 
         url = reverse("schedule-ical-type", args=[self.schedule, "foo"])
-        self.assertEqual(self.client.get(url).status_code, 400)
+        self.assertEqual(self.client.get(url).status_code, 404)
 
 
 class ViewTestCase(tests.BaseTestCase):

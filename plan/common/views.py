@@ -251,12 +251,12 @@ def _schedule_data(s: Schedule, next_semester: Optional[Semester] = None):
     if (
         next_semester
         and not Subscription.objects.get_subscriptions(
-            next_semester.year, next_semester.type, schedule.student.slug
+            next_semester.year, next_semester.type, s.student.slug
         ).exists()
     ):
         next_schedule = Schedule(
             semester=next_semester,
-            student=schedule.student,
+            student=s.student,
         )
     else:
         next_schedule = None
