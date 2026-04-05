@@ -27,20 +27,21 @@ version: 2.9.0
  */
 
 body {
-	text-align: center;
+  text-align: center;
 }
 
-#doc2,.yui-t4 {
-	margin: auto;
-	text-align: left;
-	width: 57.69em;
-	*width: 56.25em;
+#doc2,
+.yui-t4 {
+  margin: auto;
+  text-align: left;
+  width: 57.69em;
+  *width: 56.25em;
 }
 
 /* 950 Centered (doc2) */
 #doc2 {
-	width: 73.076em;
-	*width: 71.25em;
+  width: 73.076em;
+  *width: 71.25em;
 }
 
 /**
@@ -49,7 +50,7 @@ body {
 
 /* Float units (and sub grids) to the right */
 .yui-g .yui-u {
-	float: right;
+  float: right;
 }
 
 /*Float units (and sub grids) to the left */
@@ -58,7 +59,7 @@ body {
 }
 
 .yui-g .yui-u {
-	width: 49.1%;
+  width: 49.1%;
 }
 
 /* @group Clearing */
@@ -66,14 +67,14 @@ body {
 #bd:after,
 #ft:after,
 .yui-g:after {
-	content: "";
-	display: block;
-	clear: both;
+  content: "";
+  display: block;
+  clear: both;
 }
 
 #hd,
 #bd,
 #ft,
 .yui-g {
-	zoom: 1;
+  zoom: 1;
 }

@@ -5,9 +5,7 @@ document.addEventListener(
   function (e) {
     var link,
       inputs = ["INPUT", "TEXTAREA", "BUTTON", "SELECT"],
-      scroll =
-        document.documentElement.scrollWidth >
-        document.documentElement.clientWidth;
+      scroll = document.documentElement.scrollWidth > document.documentElement.clientWidth;
     if (inputs.indexOf(event.target.tagName) >= 0) {
       return true;
     }

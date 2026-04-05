@@ -1,548 +1,516 @@
 [
-    {
-        "pk": 1, 
-        "model": "common.semester", 
-        "fields": {
-            "type": "spring", 
-            "year": 2009, 
-            "active": "2008-12-20"
-        }
-    }, 
-    {
-        "pk": 2, 
-        "model": "common.semester", 
-        "fields": {
-            "type": "fall", 
-            "year": 2009, 
-            "active": "2009-06-20"
-        }
-    }, 
-    {
-        "pk": 3, 
-        "model": "common.semester", 
-        "fields": {
-            "type": "spring", 
-            "year": 2010, 
-            "active": "2009-12-20"
-        }
-    }, 
-    {
-        "pk": 1, 
-        "model": "common.lecturetype", 
-        "fields": {
-            "optional": false, 
-            "name": "Type 1"
-        }
-    }, 
-    {
-        "pk": 2, 
-        "model": "common.lecturetype", 
-        "fields": {
-            "optional": false, 
-            "name": "Type 2"
-        }
-    }, 
-    {
-        "pk": 3, 
-        "model": "common.lecturetype", 
-        "fields": {
-            "optional": true, 
-            "name": "Type 3"
-        }
-    }, 
-    {
-        "pk": 1, 
-        "model": "common.room", 
-        "fields": {
-            "last_import": "2015-09-10",
-            "name": "Room 1"
-        }
-    }, 
-    {
-        "pk": 2, 
-        "model": "common.room", 
-        "fields": {
-            "last_import": "2015-09-10",
-            "name": "Room 2"
-        }
-    }, 
-    {
-        "pk": 3, 
-        "model": "common.room", 
-        "fields": {
-            "last_import": "2015-09-10",
-            "name": "Room 3"
-        }
-    }, 
-    {
-        "pk": 1, 
-        "model": "common.lecturer", 
-        "fields": {
-            "name": "Person 1"
-        }
-    }, 
-    {
-        "pk": 2, 
-        "model": "common.lecturer", 
-        "fields": {
-            "name": "Person 2"
-        }
-    }, 
-    {
-        "pk": 3, 
-        "model": "common.lecturer", 
-        "fields": {
-            "name": "Person 3"
-        }
-    }, 
-    {
-        "pk": 1, 
-        "model": "common.group", 
-        "fields": {
-            "name": "Unknown"
-        }
-    }, 
-    {
-        "pk": 2, 
-        "model": "common.group", 
-        "fields": {
-            "name": "Group 1"
-        }
-    }, 
-    {
-        "pk": 3, 
-        "model": "common.group", 
-        "fields": {
-            "name": "Group 2"
-        }
-    }, 
-    {
-        "pk": 1, 
-        "model": "common.course", 
-        "fields": {
-            "url": "", 
-            "points": "1", 
-            "semester": 1,
-            "code": "COURSE1", 
-            "last_import": "2015-09-10",
-            "name": "Course 1 full name"
-        }
-    }, 
-    {
-        "pk": 2, 
-        "model": "common.course", 
-        "fields": {
-            "url": "", 
-            "points": "1", 
-            "semester": 1, 
-            "code": "COURSE2", 
-            "last_import": "2015-09-10",
-            "name": "Course 2 full name"
-        }
-    }, 
-    {
-        "pk": 3, 
-        "model": "common.course", 
-        "fields": {
-            "url": "", 
-            "points": "1", 
-            "semester": 1, 
-            "code": "COURSE3", 
-            "last_import": "2015-09-10",
-            "name": "Course 3 full name"
-        }
-    }, 
-    {
-        "pk": 4, 
-        "model": "common.course", 
-        "fields": {
-            "url": "", 
-            "points": "1", 
-            "semester": 1, 
-            "code": "COURSE4", 
-            "last_import": "2015-09-10",
-            "name": "Course 4 full name"
-        }
-    }, 
-    {
-        "pk": 5, 
-        "model": "common.course", 
-        "fields": {
-            "url": "", 
-            "points": "1", 
-            "semester": 2, 
-            "code": "COURSE4", 
-            "last_import": "2015-09-10",
-            "name": "Course 4 full name"
-        }
-    }, 
-    {
-        "pk": 1, 
-        "model": "common.examtype", 
-        "fields": {
-            "code": "E",
-            "last_import": "2015-09-10",
-            "name": "Written exam"
-        }
-    }, 
-    {
-        "pk": 2, 
-        "model": "common.examtype", 
-        "fields": {
-            "code": "H",
-            "last_import": "2015-09-10",
-            "name": "Home exam"
-        }
-    }, 
-    {
-        "pk": 1, 
-        "model": "common.exam", 
-        "fields": {
-            "handout_time": null, 
-            "exam_time": "09:00:00", 
-            "course": 1, 
-            "handout_date": null, 
-            "duration": null, 
-            "type": 1,
-            "last_import": "2015-09-10",
-            "exam_date": "2009-05-05" 
-        }
-    }, 
-    {
-        "pk": 5, 
-        "model": "common.exam", 
-        "fields": {
-            "handout_time": null, 
-            "exam_time": "09:00:00", 
-            "course": 1, 
-            "handout_date": null, 
-            "duration": "3", 
-            "type": 1,
-            "last_import": "2015-09-10",
-            "exam_date": "2009-05-15"
-        }
-    }, 
-    {
-        "pk": 6, 
-        "model": "common.exam", 
-        "fields": {
-            "handout_time": null, 
-            "exam_time": null, 
-            "course": 1, 
-            "handout_date": "2009-05-02", 
-            "duration": "1", 
-            "type": 1,
-            "last_import": "2015-09-10",
-            "exam_date": "2009-05-15" 
-        }
-    }, 
-    {
-        "pk": 7, 
-        "model": "common.exam", 
-        "fields": {
-            "handout_time": null, 
-            "exam_time": null, 
-            "course": 1, 
-            "handout_date": null, 
-            "duration": "1", 
-            "type": 1,
-            "last_import": "2015-09-10",
-            "exam_date": "2009-05-15" 
-        }
-    }, 
-    {
-        "pk": 2, 
-        "model": "common.exam", 
-        "fields": {
-            "handout_time": "09:00:00", 
-            "exam_time": "14:00:00", 
-            "course": 2, 
-            "handout_date": "2009-05-01", 
-            "duration": 1, 
-            "type": 1,
-            "last_import": "2015-09-10",
-            "exam_date": "2009-05-06" 
-        }
-    }, 
-    {
-        "pk": 3, 
-        "model": "common.exam", 
-        "fields": {
-            "handout_time": null, 
-            "exam_time": "09:00:00", 
-            "course": 4, 
-            "handout_date": null, 
-            "duration": null, 
-            "type": 1,
-            "last_import": "2015-09-10",
-            "exam_date": "2009-05-03" 
-        }
-    }, 
-    {
-        "pk": 4, 
-        "model": "common.exam", 
-        "fields": {
-            "handout_time": null, 
-            "exam_time": "09:00:00", 
-            "course": 4, 
-            "handout_date": null, 
-            "duration": 4, 
-            "type": 2,
-            "last_import": "2015-09-10",
-            "exam_date": "2009-05-15" 
-        }
-    }, 
-    {
-        "pk": 2, 
-        "model": "common.lecture", 
-        "fields": {
-            "last_import": "2015-09-10",
-            "lecturers": [
-                1
-            ], 
-            "end": "10:00:00", 
-            "start": "08:15:00", 
-            "course": 1, 
-            "groups": [
-                1
-            ], 
-            "type": 1, 
-            "day": 0, 
-            "rooms": [
-                1
-            ]
-        }
-    }, 
-    {
-        "pk": 3, 
-        "model": "common.lecture", 
-        "fields": {
-            "last_import": "2015-09-10",
-            "lecturers": [
-                2
-            ], 
-            "end": "12:00:00", 
-            "start": "10:15:00", 
-            "course": 1, 
-            "groups": [
-                2
-            ], 
-            "type": 2, 
-            "day": 0, 
-            "rooms": [
-                2
-            ]
-        }
-    }, 
-    {
-        "pk": 7, 
-        "model": "common.lecture", 
-        "fields": {
-            "last_import": "2015-09-10",
-            "lecturers": [], 
-            "end": "12:00:00", 
-            "start": "08:15:00", 
-            "course": 1, 
-            "groups": [
-                1
-            ], 
-            "type": null, 
-            "day": 1, 
-            "rooms": []
-        }
-    }, 
-    {
-        "pk": 4, 
-        "model": "common.lecture", 
-        "fields": {
-            "last_import": "2015-09-10",
-            "lecturers": [
-                3
-            ], 
-            "end": "14:00:00", 
-            "start": "08:15:00", 
-            "course": 2, 
-            "groups": [
-                1
-            ], 
-            "type": 3, 
-            "day": 0, 
-            "rooms": [
-                2
-            ]
-        }
-    }, 
-    {
-        "pk": 5, 
-        "model": "common.lecture", 
-        "fields": {
-            "last_import": "2015-09-10",
-            "lecturers": [], 
-            "end": "11:00:00", 
-            "start": "09:15:00", 
-            "course": 3, 
-            "groups": [
-                2
-            ], 
-            "day": 0, 
-            "rooms": []
-        }
-    }, 
-    {
-        "pk": 6, 
-        "model": "common.lecture", 
-        "fields": {
-            "last_import": "2015-09-10",
-            "lecturers": [], 
-            "end": "12:00:00", 
-            "start": "08:15:00", 
-            "course": 4, 
-            "groups": [
-                2
-            ], 
-            "type": null, 
-            "day": 0, 
-            "rooms": []
-        }
-    }, 
-    {
-        "pk": 8, 
-        "model": "common.lecture", 
-        "fields": {
-            "last_import": "2015-09-10",
-            "lecturers": [], 
-            "end": "16:00:00", 
-            "start": "15:15:00", 
-            "course": 1, 
-            "groups": [
-                1
-            ], 
-            "type": null, 
-            "day": 0, 
-            "rooms": []
-        }
-    }, 
-    {
-        "pk": 9, 
-        "model": "common.lecture", 
-        "fields": {
-            "last_import": "2015-09-10",
-            "lecturers": [], 
-            "end": "21:00:00", 
-            "start": "07:00:00", 
-            "course": 1, 
-            "groups": [
-                1
-            ], 
-            "type": null, 
-            "day": 1, 
-            "rooms": []
-        }
-    }, 
-    {
-        "pk": 10,
-        "model": "common.lecture",
-        "fields": {
-            "last_import": "2015-09-10",
-            "lecturers": [],
-            "end": "08:30:00",
-            "start": "08:15:00",
-            "course": 1,
-            "groups": [
-                1
-            ],
-            "type": null, 
-            "day": 2, 
-            "rooms": []
-        }
-    },
-    {
-        "pk": 11, 
-        "model": "common.lecture", 
-        "fields": {
-            "last_import": "2015-09-10",
-            "lecturers": [], 
-            "end": "23:00:00", 
-            "start": "19:15:00", 
-            "course": 1, 
-            "groups": [
-                1
-            ], 
-            "type": null, 
-            "day": 2, 
-            "rooms": []
-        }
-    },
-    {
-        "pk": 1,
-        "model": "common.week",
-        "fields": {
-            "lecture": 2,
-            "number": 1
-        }
-    },
-    {
-        "pk": 2,
-        "model": "common.week",
-        "fields": {
-            "lecture": 3,
-            "number": 2
-        }
-    },
-    {
-        "pk": 3,
-        "model": "common.week",
-        "fields": {
-            "lecture": 7,
-            "number": 2
-        }
-    },
-    {
-        "pk": 4,
-        "model": "common.week",
-        "fields": {
-            "lecture": 4,
-            "number": 2
-        }
-    },
-    {
-        "pk": 5,
-        "model": "common.week",
-        "fields": {
-            "lecture": 6,
-            "number": 2
-        }
-    },
-    {
-        "pk": 6,
-        "model": "common.week",
-        "fields": {
-            "lecture": 8,
-            "number": 1
-        }
-    },
-    {
-        "pk": 7,
-        "model": "common.week",
-        "fields": {
-            "lecture": 9,
-            "number": 1
-        }
-    },
-    {
-        "pk": 8,
-        "model": "common.week",
-        "fields": {
-            "lecture": 10,
-            "number": 1
-        }
-    },
-    {
-        "pk": 9,
-        "model": "common.week",
-        "fields": {
-            "lecture": 11,
-            "number": 1
-        }
+  {
+    "pk": 1,
+    "model": "common.semester",
+    "fields": {
+      "type": "spring",
+      "year": 2009,
+      "active": "2008-12-20"
     }
+  },
+  {
+    "pk": 2,
+    "model": "common.semester",
+    "fields": {
+      "type": "fall",
+      "year": 2009,
+      "active": "2009-06-20"
+    }
+  },
+  {
+    "pk": 3,
+    "model": "common.semester",
+    "fields": {
+      "type": "spring",
+      "year": 2010,
+      "active": "2009-12-20"
+    }
+  },
+  {
+    "pk": 1,
+    "model": "common.lecturetype",
+    "fields": {
+      "optional": false,
+      "name": "Type 1"
+    }
+  },
+  {
+    "pk": 2,
+    "model": "common.lecturetype",
+    "fields": {
+      "optional": false,
+      "name": "Type 2"
+    }
+  },
+  {
+    "pk": 3,
+    "model": "common.lecturetype",
+    "fields": {
+      "optional": true,
+      "name": "Type 3"
+    }
+  },
+  {
+    "pk": 1,
+    "model": "common.room",
+    "fields": {
+      "last_import": "2015-09-10",
+      "name": "Room 1"
+    }
+  },
+  {
+    "pk": 2,
+    "model": "common.room",
+    "fields": {
+      "last_import": "2015-09-10",
+      "name": "Room 2"
+    }
+  },
+  {
+    "pk": 3,
+    "model": "common.room",
+    "fields": {
+      "last_import": "2015-09-10",
+      "name": "Room 3"
+    }
+  },
+  {
+    "pk": 1,
+    "model": "common.lecturer",
+    "fields": {
+      "name": "Person 1"
+    }
+  },
+  {
+    "pk": 2,
+    "model": "common.lecturer",
+    "fields": {
+      "name": "Person 2"
+    }
+  },
+  {
+    "pk": 3,
+    "model": "common.lecturer",
+    "fields": {
+      "name": "Person 3"
+    }
+  },
+  {
+    "pk": 1,
+    "model": "common.group",
+    "fields": {
+      "name": "Unknown"
+    }
+  },
+  {
+    "pk": 2,
+    "model": "common.group",
+    "fields": {
+      "name": "Group 1"
+    }
+  },
+  {
+    "pk": 3,
+    "model": "common.group",
+    "fields": {
+      "name": "Group 2"
+    }
+  },
+  {
+    "pk": 1,
+    "model": "common.course",
+    "fields": {
+      "url": "",
+      "points": "1",
+      "semester": 1,
+      "code": "COURSE1",
+      "last_import": "2015-09-10",
+      "name": "Course 1 full name"
+    }
+  },
+  {
+    "pk": 2,
+    "model": "common.course",
+    "fields": {
+      "url": "",
+      "points": "1",
+      "semester": 1,
+      "code": "COURSE2",
+      "last_import": "2015-09-10",
+      "name": "Course 2 full name"
+    }
+  },
+  {
+    "pk": 3,
+    "model": "common.course",
+    "fields": {
+      "url": "",
+      "points": "1",
+      "semester": 1,
+      "code": "COURSE3",
+      "last_import": "2015-09-10",
+      "name": "Course 3 full name"
+    }
+  },
+  {
+    "pk": 4,
+    "model": "common.course",
+    "fields": {
+      "url": "",
+      "points": "1",
+      "semester": 1,
+      "code": "COURSE4",
+      "last_import": "2015-09-10",
+      "name": "Course 4 full name"
+    }
+  },
+  {
+    "pk": 5,
+    "model": "common.course",
+    "fields": {
+      "url": "",
+      "points": "1",
+      "semester": 2,
+      "code": "COURSE4",
+      "last_import": "2015-09-10",
+      "name": "Course 4 full name"
+    }
+  },
+  {
+    "pk": 1,
+    "model": "common.examtype",
+    "fields": {
+      "code": "E",
+      "last_import": "2015-09-10",
+      "name": "Written exam"
+    }
+  },
+  {
+    "pk": 2,
+    "model": "common.examtype",
+    "fields": {
+      "code": "H",
+      "last_import": "2015-09-10",
+      "name": "Home exam"
+    }
+  },
+  {
+    "pk": 1,
+    "model": "common.exam",
+    "fields": {
+      "handout_time": null,
+      "exam_time": "09:00:00",
+      "course": 1,
+      "handout_date": null,
+      "duration": null,
+      "type": 1,
+      "last_import": "2015-09-10",
+      "exam_date": "2009-05-05"
+    }
+  },
+  {
+    "pk": 5,
+    "model": "common.exam",
+    "fields": {
+      "handout_time": null,
+      "exam_time": "09:00:00",
+      "course": 1,
+      "handout_date": null,
+      "duration": "3",
+      "type": 1,
+      "last_import": "2015-09-10",
+      "exam_date": "2009-05-15"
+    }
+  },
+  {
+    "pk": 6,
+    "model": "common.exam",
+    "fields": {
+      "handout_time": null,
+      "exam_time": null,
+      "course": 1,
+      "handout_date": "2009-05-02",
+      "duration": "1",
+      "type": 1,
+      "last_import": "2015-09-10",
+      "exam_date": "2009-05-15"
+    }
+  },
+  {
+    "pk": 7,
+    "model": "common.exam",
+    "fields": {
+      "handout_time": null,
+      "exam_time": null,
+      "course": 1,
+      "handout_date": null,
+      "duration": "1",
+      "type": 1,
+      "last_import": "2015-09-10",
+      "exam_date": "2009-05-15"
+    }
+  },
+  {
+    "pk": 2,
+    "model": "common.exam",
+    "fields": {
+      "handout_time": "09:00:00",
+      "exam_time": "14:00:00",
+      "course": 2,
+      "handout_date": "2009-05-01",
+      "duration": 1,
+      "type": 1,
+      "last_import": "2015-09-10",
+      "exam_date": "2009-05-06"
+    }
+  },
+  {
+    "pk": 3,
+    "model": "common.exam",
+    "fields": {
+      "handout_time": null,
+      "exam_time": "09:00:00",
+      "course": 4,
+      "handout_date": null,
+      "duration": null,
+      "type": 1,
+      "last_import": "2015-09-10",
+      "exam_date": "2009-05-03"
+    }
+  },
+  {
+    "pk": 4,
+    "model": "common.exam",
+    "fields": {
+      "handout_time": null,
+      "exam_time": "09:00:00",
+      "course": 4,
+      "handout_date": null,
+      "duration": 4,
+      "type": 2,
+      "last_import": "2015-09-10",
+      "exam_date": "2009-05-15"
+    }
+  },
+  {
+    "pk": 2,
+    "model": "common.lecture",
+    "fields": {
+      "last_import": "2015-09-10",
+      "lecturers": [1],
+      "end": "10:00:00",
+      "start": "08:15:00",
+      "course": 1,
+      "groups": [1],
+      "type": 1,
+      "day": 0,
+      "rooms": [1]
+    }
+  },
+  {
+    "pk": 3,
+    "model": "common.lecture",
+    "fields": {
+      "last_import": "2015-09-10",
+      "lecturers": [2],
+      "end": "12:00:00",
+      "start": "10:15:00",
+      "course": 1,
+      "groups": [2],
+      "type": 2,
+      "day": 0,
+      "rooms": [2]
+    }
+  },
+  {
+    "pk": 7,
+    "model": "common.lecture",
+    "fields": {
+      "last_import": "2015-09-10",
+      "lecturers": [],
+      "end": "12:00:00",
+      "start": "08:15:00",
+      "course": 1,
+      "groups": [1],
+      "type": null,
+      "day": 1,
+      "rooms": []
+    }
+  },
+  {
+    "pk": 4,
+    "model": "common.lecture",
+    "fields": {
+      "last_import": "2015-09-10",
+      "lecturers": [3],
+      "end": "14:00:00",
+      "start": "08:15:00",
+      "course": 2,
+      "groups": [1],
+      "type": 3,
+      "day": 0,
+      "rooms": [2]
+    }
+  },
+  {
+    "pk": 5,
+    "model": "common.lecture",
+    "fields": {
+      "last_import": "2015-09-10",
+      "lecturers": [],
+      "end": "11:00:00",
+      "start": "09:15:00",
+      "course": 3,
+      "groups": [2],
+      "day": 0,
+      "rooms": []
+    }
+  },
+  {
+    "pk": 6,
+    "model": "common.lecture",
+    "fields": {
+      "last_import": "2015-09-10",
+      "lecturers": [],
+      "end": "12:00:00",
+      "start": "08:15:00",
+      "course": 4,
+      "groups": [2],
+      "type": null,
+      "day": 0,
+      "rooms": []
+    }
+  },
+  {
+    "pk": 8,
+    "model": "common.lecture",
+    "fields": {
+      "last_import": "2015-09-10",
+      "lecturers": [],
+      "end": "16:00:00",
+      "start": "15:15:00",
+      "course": 1,
+      "groups": [1],
+      "type": null,
+      "day": 0,
+      "rooms": []
+    }
+  },
+  {
+    "pk": 9,
+    "model": "common.lecture",
+    "fields": {
+      "last_import": "2015-09-10",
+      "lecturers": [],
+      "end": "21:00:00",
+      "start": "07:00:00",
+      "course": 1,
+      "groups": [1],
+      "type": null,
+      "day": 1,
+      "rooms": []
+    }
+  },
+  {
+    "pk": 10,
+    "model": "common.lecture",
+    "fields": {
+      "last_import": "2015-09-10",
+      "lecturers": [],
+      "end": "08:30:00",
+      "start": "08:15:00",
+      "course": 1,
+      "groups": [1],
+      "type": null,
+      "day": 2,
+      "rooms": []
+    }
+  },
+  {
+    "pk": 11,
+    "model": "common.lecture",
+    "fields": {
+      "last_import": "2015-09-10",
+      "lecturers": [],
+      "end": "23:00:00",
+      "start": "19:15:00",
+      "course": 1,
+      "groups": [1],
+      "type": null,
+      "day": 2,
+      "rooms": []
+    }
+  },
+  {
+    "pk": 1,
+    "model": "common.week",
+    "fields": {
+      "lecture": 2,
+      "number": 1
+    }
+  },
+  {
+    "pk": 2,
+    "model": "common.week",
+    "fields": {
+      "lecture": 3,
+      "number": 2
+    }
+  },
+  {
+    "pk": 3,
+    "model": "common.week",
+    "fields": {
+      "lecture": 7,
+      "number": 2
+    }
+  },
+  {
+    "pk": 4,
+    "model": "common.week",
+    "fields": {
+      "lecture": 4,
+      "number": 2
+    }
+  },
+  {
+    "pk": 5,
+    "model": "common.week",
+    "fields": {
+      "lecture": 6,
+      "number": 2
+    }
+  },
+  {
+    "pk": 6,
+    "model": "common.week",
+    "fields": {
+      "lecture": 8,
+      "number": 1
+    }
+  },
+  {
+    "pk": 7,
+    "model": "common.week",
+    "fields": {
+      "lecture": 9,
+      "number": 1
+    }
+  },
+  {
+    "pk": 8,
+    "model": "common.week",
+    "fields": {
+      "lecture": 10,
+      "number": 1
+    }
+  },
+  {
+    "pk": 9,
+    "model": "common.week",
+    "fields": {
+      "lecture": 11,
+      "number": 1
+    }
+  }
 ]

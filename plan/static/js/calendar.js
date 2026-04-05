@@ -47,16 +47,11 @@
         const iso_week = (d) => Number(d3.timeFormat("%V")(d));
         const iso_dow = (d) => Number(d3.timeFormat("%u")(d));
 
-        function calendar({
-          date = Plot.identity,
-          inset = 0.5,
-          ...options
-        } = {}) {
+        function calendar({ date = Plot.identity, inset = 0.5, ...options } = {}) {
           let D;
           return {
             fy: {
-              transform: (data) =>
-                (D = Plot.valueof(data, date, Array)).map((d) => iso_year(d)),
+              transform: (data) => (D = Plot.valueof(data, date, Array)).map((d) => iso_year(d)),
             },
             x: {
               transform: () => D.map((d) => iso_week(d) - 1),
@@ -126,8 +121,7 @@
               calendar({
                 date: "date",
                 fill: (d) => d.value,
-                title: (d) =>
-                  `${d3.utcFormat("%Y-%m-%d")(d.date)}\n${d.value} new timetables`,
+                title: (d) => `${d3.utcFormat("%Y-%m-%d")(d.date)}\n${d.value} new timetables`,
               }),
             ),
             new MonthLine(
@@ -149,10 +143,7 @@
                 ...d3.rollup(
                   data,
                   (v) => d3.sum(v, (d) => d.value),
-                  (d) =>
-                    d3.utcThursday.floor(
-                      d3.utcDay.offset(d3.utcMonth.ceil(d.date), -1),
-                    ),
+                  (d) => d3.utcThursday.floor(d3.utcDay.offset(d3.utcMonth.ceil(d.date), -1)),
                 ),
               ].map(([date, value]) => ({ date, value })),
               calendar({

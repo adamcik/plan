@@ -1,255 +1,271 @@
 /* This file is part of the plan timetable generator, see LICENSE for details. */
 
 /* Basic block elements */
-h1,h2,h3 {
-	font-family: Georgia;
+h1,
+h2,
+h3 {
+  font-family: Georgia;
 }
 h1 {
-	padding: 0 0.6em;
-	font-size: 167%;
-	margin-top: 0;
-	margin-bottom: -0.25em;
-	border-bottom: 2px solid #D3D7CF;
+  padding: 0 0.6em;
+  font-size: 167%;
+  margin-top: 0;
+  margin-bottom: -0.25em;
+  border-bottom: 2px solid #d3d7cf;
 }
 h2 {
-	border-bottom: 1px solid #D3D7CF;
-	padding-left: 0.5em;
-	margin-left: -0.5em;
-	margin-top: 0;
+  border-bottom: 1px solid #d3d7cf;
+  padding-left: 0.5em;
+  margin-left: -0.5em;
+  margin-top: 0;
 }
 h3 {
-	border-bottom: 1px solid #EEEEEC;
-	padding-left: 0.5em;
-	margin-left: -0.5em;
-	margin-top: 0;
+  border-bottom: 1px solid #eeeeec;
+  padding-left: 0.5em;
+  margin-left: -0.5em;
+  margin-top: 0;
 }
 
 hr {
-	color: #D3D7CF;
-	background: #D3D7CF;
-	border: 0;
-	height: 1px;
+  color: #d3d7cf;
+  background: #d3d7cf;
+  border: 0;
+  height: 1px;
 }
 
 /* Tables */
 table {
-	width: 100%;
+  width: 100%;
 }
 tr {
-	vertical-align: top;
+  vertical-align: top;
 }
-td, th {
-	border: 0;
+td,
+th {
+  border: 0;
 }
 th {
-	text-align: left;
-	padding: 0 0.5em;
-	font-size: 93%;
+  text-align: left;
+  padding: 0 0.5em;
+  font-size: 93%;
 }
 td {
-	border-top: 1px solid #666;
-	border-bottom: 1px solid #666;
+  border-top: 1px solid #666;
+  border-bottom: 1px solid #666;
 }
 
 /* Basic inline elements */
 a {
-	color: #333;
-	text-decoration: underline;
+  color: #333;
+  text-decoration: underline;
 }
 
 img {
-	vertical-align: text-bottom;
+  vertical-align: text-bottom;
 }
 
 /* Form elements */
 button {
-	font-size: 100%;
-	font-family: inherit;
-	padding: 0.09em 0.2em;
-	vertical-align: bottom;
-	/* Magic to check buttons the correct size in IE6 */
-	width: auto;
-	overflow:visible;
+  font-size: 100%;
+  font-family: inherit;
+  padding: 0.09em 0.2em;
+  vertical-align: bottom;
+  /* Magic to check buttons the correct size in IE6 */
+  width: auto;
+  overflow: visible;
 }
 button.link {
-	background: none;
-	margin: 0;
-	padding: 0;
-	border: none;
-	cursor: pointer;
-	text-decoration: underline;
-	color: #204A87;
-	display: inline;
+  background: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  color: #204a87;
+  display: inline;
 }
 
 input {
-	padding: 0.15em;
+  padding: 0.15em;
 }
-textarea[cols], input[size] {
-	width: auto; /* Don't override sizes set in html */
+textarea[cols],
+input[size] {
+  width: auto; /* Don't override sizes set in html */
 }
 label {
-	cursor: pointer;
+  cursor: pointer;
 }
 
 /* Generic classes */
 .large {
-	font-size: 116%; /* 15px */
+  font-size: 116%; /* 15px */
 }
 .small {
-	font-size: 93%; /* 12px */
+  font-size: 93%; /* 12px */
 }
 .tiny {
-	font-size: 77%;  /* 10px */
+  font-size: 77%; /* 10px */
 }
 
 .odd {
-	background: #fafafa;
+  background: #fafafa;
 }
 p.right {
-	text-align: right;
+  text-align: right;
 }
 
 .current {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .hidden {
-	visibility: hidden;
+  visibility: hidden;
 }
 
 .clear {
-	clear: both;
+  clear: both;
 }
 
 .nowrap {
-	white-space: nowrap;
+  white-space: nowrap;
 }
 
 /* error classes */
 .errorlist {
-	color: #A00000;
-	font-size: 85%;
+  color: #a00000;
+  font-size: 85%;
 }
 .error {
-	margin: 0;
+  margin: 0;
 }
-td.error input, td.error select {
-	background: #FCC;
+td.error input,
+td.error select {
+  background: #fcc;
 }
 /* Indicate that things have expired or are excluded */
-.expired td, .hide td, .hide .course, .hide .type, .hide .room {
-	color: #555753;
+.expired td,
+.hide td,
+.hide .course,
+.hide .type,
+.hide .room {
+  color: #555753;
 }
-.delete td, .delete p, .delete .course, .delete .type, .delete .room {
-	text-decoration: line-through;
+.delete td,
+.delete p,
+.delete .course,
+.delete .type,
+.delete .room {
+  text-decoration: line-through;
 }
 
 /* header/body/footer */
 #hd {
-	margin-top: 0.5em;
-	margin-bottom: 1em;
+  margin-top: 0.5em;
+  margin-bottom: 1em;
 }
 #bd {
-	padding: 0 1em;
-	margin-bottom: 1em;
-	position: relative;
+  padding: 0 1em;
+  margin-bottom: 1em;
+  position: relative;
 }
 #ft {
-	padding: 1em 0.5em 0;
-	color: #2E3436;
-	margin-bottom: 1em;
-	border-top: 1px solid #D3D7CF;
+  padding: 1em 0.5em 0;
+  color: #2e3436;
+  margin-bottom: 1em;
+  border-top: 1px solid #d3d7cf;
 }
 
 /* Specialcased elements */
 
 #help {
-	border: 1px solid #CCC;
-	background: #FFC;
-	padding: 0.5em 0.5em 0;
-	margin-bottom: 1em;
-	border-radius: 5px;
+  border: 1px solid #ccc;
+  background: #ffc;
+  padding: 0.5em 0.5em 0;
+  margin-bottom: 1em;
+  border-radius: 5px;
 }
 #help p {
-	margin-bottom: 0.5em;
+  margin-bottom: 0.5em;
 }
 
 #tips dt {
-	width: 16px;
-	float: left;
+  width: 16px;
+  float: left;
 }
 #tips dd {
-	margin-left: 20px;
-	line-height: 16px;
-	margin-bottom: 0.8em;
+  margin-left: 20px;
+  line-height: 16px;
+  margin-bottom: 0.8em;
 }
 
 #attribution {
-	text-align: center;
+  text-align: center;
 }
 
 @media print {
-	/* FIXME dont like noprint :( */
-	#ft, .noprint {
-		display: none;
-	}
-	table a {
-		text-decoration: none;
-	}
+  /* FIXME dont like noprint :( */
+  #ft,
+  .noprint {
+    display: none;
+  }
+  table a {
+    text-decoration: none;
+  }
 }
 
 /* Language selector */
-#setlang  {
-	float: right;
+#setlang {
+  float: right;
 }
 
 #share {
-	text-align: center;
-	padding: 0.3em 0;
+  text-align: center;
+  padding: 0.3em 0;
 }
 #share a {
-	opacity: 0.7;
-	font-size: 116%; /* 15px */
-	text-decoration: none;
-	margin: 0 3px;
+  opacity: 0.7;
+  font-size: 116%; /* 15px */
+  text-decoration: none;
+  margin: 0 3px;
 }
 #share a:hover {
-	opacity: 1;
+  opacity: 1;
 }
 
 #notice {
-	background: #E6F5C9;
-	font-size: 93%;
-	padding: 0.5em;
-	border: 1px solid #CCC;
-	border-radius: 5px;
-	margin-bottom: 1em;
+  background: #e6f5c9;
+  font-size: 93%;
+  padding: 0.5em;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 1em;
 }
 
 /* Autocomplete */
 .autocomplete-suggestions {
-	width: auto !important;
-	max-width: 90%;
-	border: 1px solid #ccc !important;
+  width: auto !important;
+  max-width: 90%;
+  border: 1px solid #ccc !important;
 }
 
 /* Switch behavior on "small" screens */
 @media screen and (max-width: 1023px) {
-	#doc2, .yui-g .yui-u, .yui-g div.first, .yui-g .yui-u {
-		float: none;
-		width: auto;
-	}
-	.overflow {
-		overflow-x: auto;
-	}
-	#schedule {
-		width: 73.076em;
-		*width: 71.25em;
-	}
-	#next, #previous {
-		display: none;
-	}
+  #doc2,
+  .yui-g .yui-u,
+  .yui-g div.first,
+  .yui-g .yui-u {
+    float: none;
+    width: auto;
+  }
+  .overflow {
+    overflow-x: auto;
+  }
+  #schedule {
+    width: 73.076em;
+    *width: 71.25em;
+  }
+  #next,
+  #previous {
+    display: none;
+  }
 }
-
-
