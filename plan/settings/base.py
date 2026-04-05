@@ -1,10 +1,12 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 from datetime import date, time, timedelta
-
-import pkg_resources
+from importlib.resources import files
 
 from django.utils.safestring import mark_safe
+
+
+PLAN_PACKAGE_ROOT = files("plan")
 
 
 def ugettext(s):
@@ -58,7 +60,7 @@ LANGUAGE_FALLBACK = {
     "no": "nb",  # "Norsk" -> Bokmaal
 }
 
-LOCALE_PATHS = [pkg_resources.resource_filename("plan", "locales")]
+LOCALE_PATHS = [str(PLAN_PACKAGE_ROOT / "locales")]
 
 # -- Test:
 
@@ -90,7 +92,7 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            pkg_resources.resource_filename("plan", "templates"),
+            str(PLAN_PACKAGE_ROOT / "templates"),
         ],
         "OPTIONS": {
             "loaders": (
@@ -147,7 +149,7 @@ STATICFILES_FINDERS = (
 )
 
 STATICFILES_DIRS = [
-    pkg_resources.resource_filename("plan", "static"),
+    str(PLAN_PACKAGE_ROOT / "static"),
 ]
 
 # -- Django compress settings:
