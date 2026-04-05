@@ -46,8 +46,7 @@
   {{ block.super }}
   <meta name="robots" content="noindex, nofollow, noarchive" />
   {% if next_week %}
-    <link ref="next"
-          href="{% url 'schedule-week' schedule next_week %}" />
+    <link ref="next" href="{% url 'schedule-week' schedule next_week %}" />
   {% endif %}
 {% endblock %}
 

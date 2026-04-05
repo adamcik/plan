@@ -12,6 +12,14 @@
       };
 
       settings.formatter = {
+        djlint = {
+          command = "${pkgs.djlint}/bin/djlint";
+          includes = [
+            "plan/templates/*.html"
+            "plan/templates/**/*.html"
+          ];
+          options = ["--reformat" "--configuration" "pyproject.toml"];
+        };
         tombi-format = {
           command = "${pkgs.tombi}/bin/tombi";
           includes = ["*.toml"];
