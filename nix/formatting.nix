@@ -1,7 +1,7 @@
 {inputs, ...}: {
   imports = [inputs.treefmt-nix.flakeModule];
 
-  perSystem = {...}: {
+  perSystem = {pkgs, ...}: {
     treefmt = {
       projectRootFile = "flake.nix";
 
@@ -9,7 +9,19 @@
         alejandra.enable = true;
         # ruff-check.enable = true;
         ruff-format.enable = true;
-        taplo.enable = true;
+      };
+
+      settings.formatter = {
+        tombi-format = {
+          command = "${pkgs.tombi}/bin/tombi";
+          includes = ["*.toml"];
+          options = ["format" "--offline"];
+        };
+        tombi-lint = {
+          command = "${pkgs.tombi}/bin/tombi";
+          includes = ["*.toml"];
+          options = ["lint" "--offline"];
+        };
       };
 
       # settings.formatter.excludes = [
