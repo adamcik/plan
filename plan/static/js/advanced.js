@@ -37,10 +37,16 @@
       .querySelectorAll("[data-toggle-container]")
       .forEach((container) => {
         const filter = container.querySelector("[data-filter]");
+        const header = container.querySelector("thead tr");
+
+        if (!filter || !header) {
+          return;
+        }
+
         const rows = [...container.querySelectorAll("tbody tr")];
 
-        const keys = [...container.querySelector("thead tr").children].map(
-          (th, index) => th.dataset.search ?? null,
+        const keys = [...header.children].map((th, index) =>
+          th.dataset.search ?? null,
         );
 
         const data = rows.map((tr) =>
