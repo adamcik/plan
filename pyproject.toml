@@ -3,14 +3,14 @@ authors = [{ name = "Thomas Adamcik", email = "thomas@adamcik.no" }]
 license = { text = "AGLv3" }
 requires-python = "<3.11,>=3.10"
 dependencies = [
-  "brotli>=1.1.0",
   "Django~=3.2.25",
+  "brotli>=1.1.0",
   "django-compressor~=2.4.1",
   "lxml~=4.6.3",
   "psycopg2~=2.9.11",
+  "reportlab~=3.5.59",
   "typing-extensions>=4.12.2",
   "vobject~=0.9.6.1",
-  "reportlab~=3.5.59",
 ]
 name = "plan"
 version = "2.0.0"
@@ -20,22 +20,22 @@ description = "Timetable generator for educational institutions."
 [project.urls]
 repository = "https://github.com/adamcik/plan"
 
-[build-system]
-requires = ["hatchling", "editables"]
-build-backend = "hatchling.build"
-
-[tool.hatch.build]
-packages = ["plan"]
-
 [dependency-groups]
-dev = ["django-stubs~=4.2.7", "django-debug-toolbar~=3.5.0"]
+dev = ["django-debug-toolbar~=3.5.0", "django-stubs~=4.2.7"]
 scraper = ["requests~=2.25.1", "tqdm"]
+
+[build-system]
+requires = ["editables", "hatchling"]
+build-backend = "hatchling.build"
 
 [tool.djlint]
 indent = 2
 custom_blocks = "nonce,compress"
 max_blank_lines = 1
 max_line_length = 120
+
+[tool.hatch.build]
+packages = ["plan"]
 
 [tool.ruff.lint]
 extend-select = ["I"]
