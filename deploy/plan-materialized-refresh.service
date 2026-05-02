@@ -1,0 +1,11 @@
+[Unit]
+Description=Refresh Plan materialized views
+After=container-plan-ntnu.service
+Requires=container-plan-ntnu.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/podman exec plan-ntnu /bin/manage refresh_materialized_views
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,12 @@
+[Unit]
+Description=Periodic refresh of Plan materialized views
+
+[Timer]
+OnBootSec=5m
+OnUnitActiveSec=30m
+RandomizedDelaySec=3m
+Persistent=true
+Unit=plan-materialized-refresh.service
+
+[Install]
+WantedBy=timers.target
