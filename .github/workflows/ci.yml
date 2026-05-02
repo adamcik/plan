@@ -3,6 +3,9 @@ name: CI
 on:
   pull_request:
   push:
+  release:
+    types:
+      - published
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -35,9 +38,20 @@ jobs:
         run: nix build .#image
 
       - name: Login to GHCR
-        if: github.event_name == 'push' && github.ref_name == github.event.repository.default_branch
-        run: echo "${{ github.token }}" | skopeo login ghcr.io -u "${{ github.actor }}" --password-stdin
+        if: |
+          (github.event_name == 'push' && github.ref_name == github.event.repository.default_branch) ||
+          github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_ACTOR: ${{ github.actor }}
+        run: echo "${GH_TOKEN}" | skopeo login ghcr.io -u "${GH_ACTOR}" --password-stdin
 
       - name: Push image to GHCR
         if: github.event_name == 'push' && github.ref_name == github.event.repository.default_branch
         run: nix run .#image.copyToRegistry
+
+      - name: Push release-tagged image to GHCR
+        if: github.event_name == 'release'
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: nix run .#image.copyTo -- "docker://ghcr.io/adamcik/plan:${RELEASE_TAG}"
