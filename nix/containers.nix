@@ -12,6 +12,52 @@
       python3 = config.uv2nix.python;
       plugins = ["python3"];
     };
+    serveScript = pkgs.writeShellScriptBin "plan-uwsgi" ''
+      set -eu
+
+      listener="''${PLAN_UWSGI_LISTENER:-socket}"
+      socket_path="''${PLAN_UWSGI_SOCKET:-/run/uwsgi/uwsgi.sock}"
+      http_bind="''${PLAN_UWSGI_HTTP:-0.0.0.0:8080}"
+      processes="''${PLAN_UWSGI_PROCESSES:-4}"
+      threads="''${PLAN_UWSGI_THREADS:-4}"
+
+      uwsgi_args=(
+        "--plugin" "python3"
+        "--log-format" "%(addr) - %(user) [%(ltime)] \"%(method) %(uri) %(proto)\" %(status) %(size) \"%(referer)\" \"%(uagent)\""
+        "--ignore-sigpipe"
+        "--ignore-write-errors"
+        "--disable-write-exception"
+        "--env" "DJANGO_SETTINGS_MODULE=''${DJANGO_SETTINGS_MODULE:-plan.settings.container}"
+        "--env" "PLAN_BASE_DIR=''${PLAN_BASE_DIR:-/var/lib/plan}"
+        "--static-map" "/static/CACHE=/var/lib/plan/static/CACHE"
+        "--static-map" "/static=${staticAssets}/static"
+        "--module" "plan.wsgi"
+        "--virtualenv" "${config.uv2nix.runtimeVenv}"
+        "--master"
+        "--processes" "$processes"
+        "--threads" "$threads"
+        "--show-config"
+        "--need-app"
+      )
+
+      case "$listener" in
+        socket)
+          uwsgi_args+=("--socket" "$socket_path" "--chmod-socket=660" "--vacuum")
+          ;;
+        http)
+          uwsgi_args+=("--http" "$http_bind")
+          ;;
+        both)
+          uwsgi_args+=("--socket" "$socket_path" "--chmod-socket=660" "--vacuum" "--http" "$http_bind")
+          ;;
+        *)
+          echo "Unsupported PLAN_UWSGI_LISTENER: $listener" >&2
+          exit 2
+          ;;
+      esac
+
+      exec ${pkgs.lib.getExe uwsgiPkg} "''${uwsgi_args[@]}"
+    '';
     manageScript = pkgs.writeShellScriptBin "manage" ''
       export DJANGO_SETTINGS_MODULE="''${DJANGO_SETTINGS_MODULE:-plan.settings.container}"
       export PLAN_BASE_DIR="''${PLAN_BASE_DIR:-/var/lib/plan}"
@@ -39,40 +85,9 @@
       tag = "latest";
 
       imageConfig = {
-        Cmd = [
-          (pkgs.lib.getExe uwsgiPkg)
-          "--plugin"
-          "python3"
-          "--log-format"
-          "%(addr) - %(user) [%(ltime)] \"%(method) %(uri) %(proto)\" %(status) %(size) \"%(referer)\" \"%(uagent)\""
-          "--ignore-sigpipe"
-          "--ignore-write-errors"
-          "--disable-write-exception"
-          "--http"
-          "0.0.0.0:8080"
-          "--env"
-          "DJANGO_SETTINGS_MODULE=plan.settings.container"
-          "--env"
-          "PLAN_BASE_DIR=/var/lib/plan"
-          "--static-map"
-          "/static/CACHE=/var/lib/plan/static/CACHE"
-          "--static-map"
-          "/static=${staticAssets}/static"
-          "--module"
-          "plan.wsgi"
-          "--virtualenv"
-          "${config.uv2nix.runtimeVenv}"
-          "--master"
-          "--processes"
-          "4"
-          "--threads"
-          "4"
-          "--show-config"
-          "--need-app"
-        ];
+        Cmd = [(pkgs.lib.getExe serveScript)];
         WorkingDir = "/app";
         User = "1234:1234";
-        ExposedPorts = {"8080/tcp" = {};};
         Env = ["SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"];
       };
 
@@ -85,7 +100,10 @@
           copyToRoot = [
             (pkgs.buildEnv {
               name = "plan-root-bin";
-              paths = [manageScript];
+              paths = [
+                manageScript
+                serveScript
+              ];
               pathsToLink = ["/bin"];
             })
           ];
