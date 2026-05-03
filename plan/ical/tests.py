@@ -1,6 +1,7 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import datetime
+import hashlib
 
 from django.core.cache import caches
 from django.urls import reverse
@@ -78,6 +79,114 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertIn("Last-Modified", second.headers)
         self.assertIn("Cache-Control", second.headers)
         self.assertIn("Expires", second.headers)
+
+    def test_ical_get_includes_etag_and_last_modified(self):
+        url = reverse("schedule-ical", args=[self.schedule])
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("ETag", response.headers)
+        self.assertIn("Last-Modified", response.headers)
+
+    def test_ical_if_none_match_matching_returns_304_with_no_body(self):
+        url = reverse("schedule-ical", args=[self.schedule])
+        first = self.client.get(url)
+
+        second = self.client.get(
+            f"{url}?no-cache=1",
+            HTTP_IF_NONE_MATCH=first.headers["ETag"],
+        )
+
+        self.assertEqual(second.status_code, 304)
+        self.assertEqual(second.content, b"")
+        self.assertEqual(second.headers["ETag"], first.headers["ETag"])
+        self.assertIn("Last-Modified", second.headers)
+        self.assertIn("Cache-Control", second.headers)
+        self.assertNotIn("X-Cache", second.headers)
+
+    def test_ical_if_none_match_non_matching_returns_200(self):
+        url = reverse("schedule-ical", args=[self.schedule])
+
+        response = self.client.get(url, HTTP_IF_NONE_MATCH='"not-the-tag"')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotEqual(response.headers["ETag"], '"not-the-tag"')
+
+    def test_ical_if_none_match_multiple_values_returns_304_on_match(self):
+        url = reverse("schedule-ical", args=[self.schedule])
+        first = self.client.get(url)
+
+        response = self.client.get(
+            url,
+            HTTP_IF_NONE_MATCH=f'"foo", {first.headers["ETag"]}, "bar"',
+        )
+
+        self.assertEqual(response.status_code, 304)
+        self.assertEqual(response.content, b"")
+
+    def test_ical_if_none_match_wildcard_returns_304(self):
+        url = reverse("schedule-ical", args=[self.schedule])
+
+        response = self.client.get(url, HTTP_IF_NONE_MATCH="*")
+
+        self.assertEqual(response.status_code, 304)
+        self.assertEqual(response.content, b"")
+
+    def test_if_none_match_takes_precedence_over_if_modified_since(self):
+        url = reverse("schedule-ical", args=[self.schedule])
+        first = self.client.get(url)
+
+        response = self.client.get(
+            url,
+            HTTP_IF_NONE_MATCH='"does-not-match"',
+            HTTP_IF_MODIFIED_SINCE=first.headers["Last-Modified"],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_ical_head_matches_get_status_and_headers_with_no_body(self):
+        url = reverse("schedule-ical", args=[self.schedule])
+        get_response = self.client.get(url)
+
+        head_response = self.client.head(url)
+
+        self.assertEqual(head_response.status_code, get_response.status_code)
+        self.assertEqual(head_response.headers["ETag"], get_response.headers["ETag"])
+        self.assertEqual(
+            head_response.headers["Last-Modified"],
+            get_response.headers["Last-Modified"],
+        )
+        self.assertEqual(head_response.content, b"")
+
+        conditional_head = self.client.head(
+            url, HTTP_IF_NONE_MATCH=get_response.headers["ETag"]
+        )
+
+        self.assertEqual(conditional_head.status_code, 304)
+        self.assertEqual(conditional_head.content, b"")
+        self.assertEqual(conditional_head.headers["ETag"], get_response.headers["ETag"])
+
+    def test_ical_etag_changes_when_cache_key_changes(self):
+        url = reverse("schedule-ical", args=[self.schedule])
+
+        identity = self.client.get(url, HTTP_ACCEPT_ENCODING="")
+        gzip = self.client.get(url, HTTP_ACCEPT_ENCODING="gzip")
+
+        self.assertEqual(identity.status_code, 200)
+        self.assertEqual(gzip.status_code, 200)
+        self.assertNotEqual(identity.headers["ETag"], gzip.headers["ETag"])
+
+    def test_ical_etag_is_sha256_of_cache_key_not_raw_key(self):
+        url = reverse("schedule-ical", args=[self.schedule])
+
+        response = self.client.get(url, HTTP_ACCEPT_ENCODING="")
+
+        key = response.headers["X-Cache"].split("key=", 1)[1]
+        expected = f'"{hashlib.sha256(key.encode()).hexdigest()}"'
+
+        self.assertEqual(response.headers["ETag"], expected)
+        self.assertNotEqual(response.headers["ETag"], f'"{key}"')
 
     def test_ical_uses_last_modified_for_dtstamp(self):
         url = reverse("schedule-ical", args=[self.schedule])

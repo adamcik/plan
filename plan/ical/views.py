@@ -2,6 +2,7 @@
 
 import datetime
 import gzip
+import hashlib
 import math
 import socket
 import zoneinfo
@@ -79,6 +80,32 @@ def _response_cache_key(request, schedule, encoding: str) -> str:
             encoding,
         )
     )
+
+
+def _etag_from_cache_key(cache_key: str) -> str:
+    digest = hashlib.sha256(cache_key.encode()).hexdigest()
+    return f'"{digest}"'
+
+
+def _if_none_match_matches(request, etag: str) -> bool:
+    if_none_match = request.META.get("HTTP_IF_NONE_MATCH")
+    if if_none_match is None:
+        return False
+
+    # RFC: `If-None-Match: *` matches any current representation.
+    etags = http_utils.parse_etags(if_none_match)
+    return "*" in etags or etag in etags
+
+
+def _conditional_not_modified_response(request, last_modified, headers):
+    if "HTTP_IF_NONE_MATCH" in request.META:
+        # RFC: `If-None-Match` takes precedence over `If-Modified-Since`.
+        # A non-match must continue to normal 200 generation path.
+        if _if_none_match_matches(request, headers["ETag"]):
+            return http.HttpResponseNotModified(headers=headers)
+        return None
+
+    return utils.check_modified_since(request, last_modified, headers)
 
 
 def _requested_encoding(request) -> str:
@@ -181,22 +208,27 @@ def ical(request, schedule, ical_type=None):
 
     headers.update(utils.cache_headers(cache_timeout, jitter=0.1))
 
-    response = utils.check_modified_since(
+    encoding = _requested_encoding(request)
+    key = _response_cache_key(request, schedule, encoding)
+    legacy_key = _legacy_cache_key(request, schedule)
+    headers["ETag"] = _etag_from_cache_key(key)
+
+    response = _conditional_not_modified_response(
         request,
         schedule.last_modified,
         headers,
     )
     if response:
+        # This may return 304 before internal cache lookup/bypass.
+        # `no-cache` requests still permit conditional 304 responses.
         return response
 
     # TODO: Turn caching into middleware
     bypass_cache = utils.should_bypass_cache(request)
-    encoding = _requested_encoding(request)
-    key = _response_cache_key(request, schedule, encoding)
-    legacy_key = _legacy_cache_key(request, schedule)
 
     response = caches["ical"].get(key)
     if not bypass_cache and response:
+        response["ETag"] = headers["ETag"]
         response["X-Cache"] = f"hit; key={key}"
         return response
 
@@ -207,6 +239,7 @@ def ical(request, schedule, ical_type=None):
             continue
 
         response = _legacy_upgrade_response(fallback_response, encoding)
+        response["ETag"] = headers["ETag"]
         response["X-Cache"] = f"hit; key={key}; fallback={fallback_key}"
 
         if settings.TIMETABLE_ICAL_CACHE_DURATION is not None:
@@ -221,6 +254,7 @@ def ical(request, schedule, ical_type=None):
     legacy_response = caches["ical"].get(legacy_key)
     if not bypass_cache and legacy_response:
         response = _legacy_upgrade_response(legacy_response, encoding)
+        response["ETag"] = headers["ETag"]
         response["X-Cache"] = f"hit; legacy=1; key={legacy_key}; upgraded={key}"
 
         if settings.TIMETABLE_ICAL_CACHE_DURATION is not None:
