@@ -188,6 +188,8 @@ def ical(request, schedule, ical_type=None):
                 timeout=internal_cache_timeout,
             )
 
+        caches["ical"].delete(legacy_key)
+
         return response
 
     filename = utils.ical_filename(
