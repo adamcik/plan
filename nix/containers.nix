@@ -110,16 +110,6 @@
             uwsgiPkg
             config.uv2nix.python
           ];
-          copyToRoot = [
-            (pkgs.buildEnv {
-              name = "plan-root-bin";
-              paths = [
-                manageScript
-                serveScript
-              ];
-              pathsToLink = ["/bin"];
-            })
-          ];
         };
         depsLayer = nix2containerPkgs.buildLayer {
           deps = [config.uv2nix.depsVenv];
@@ -130,6 +120,14 @@
             config.uv2nix.runtimeVenv
             config.uv2nix.manageVenv
             staticAssets
+            (pkgs.buildEnv {
+              name = "plan-root-bin";
+              paths = [
+                manageScript
+                serveScript
+              ];
+              pathsToLink = ["/bin"];
+            })
           ];
           layers = [baseLayer depsLayer];
         };
