@@ -1,6 +1,7 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import datetime
+import gzip
 import operator
 import random
 import re

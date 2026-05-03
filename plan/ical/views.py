@@ -1,10 +1,12 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import datetime
+import gzip
 import math
 import socket
 import zoneinfo
 
+import brotli
 import vobject
 from dateutil import rrule
 
@@ -12,6 +14,7 @@ from django import http, template, urls
 from django.conf import settings
 from django.core.cache import caches
 from django.shortcuts import reverse
+from django.utils import cache as cache_utils
 from django.utils import http as http_utils
 from django.utils import translation
 
@@ -31,6 +34,96 @@ UTC = zoneinfo.ZoneInfo("UTC")
 
 def _to_utc(dt: datetime.datetime) -> datetime.datetime:
     return dt.replace(tzinfo=TZ).astimezone(UTC)
+
+
+def _legacy_cache_key(request, schedule) -> str:
+    return ":".join(
+        str(p)
+        for p in (
+            "resp",
+            request.resolver_match.url_name,
+            request.path_info,
+            schedule.last_modified,
+        )
+    )
+
+
+def _response_cache_key(request, schedule, encoding: str) -> str:
+    return ":".join(
+        str(p)
+        for p in (
+            "resp",
+            "v2",
+            request.resolver_match.url_name,
+            request.path_info,
+            schedule.last_modified,
+            encoding,
+        )
+    )
+
+
+def _requested_encoding(request) -> str:
+    accepts = utils.parse_accepts(request)
+    if "br" in accepts:
+        return "br"
+    elif "gzip" in accepts:
+        return "gzip"
+    else:
+        return "identity"
+
+
+def _legacy_upgrade_response(response, encoding: str):
+    current_encoding = response.headers.get("Content-Encoding")
+    if encoding == "br" and current_encoding == "br":
+        return response
+    if encoding == "gzip" and current_encoding == "gzip":
+        return response
+    if encoding == "identity" and current_encoding is None:
+        return response
+
+    if current_encoding == "br":
+        content = brotli.decompress(response.content)
+    elif current_encoding == "gzip":
+        content = gzip.decompress(response.content)
+    else:
+        content = response.content
+
+    if encoding == "br":
+        compressed = brotli.compress(content, brotli.MODE_TEXT)
+        if len(compressed) < len(content):
+            result = http.HttpResponse(
+                compressed,
+                status=response.status_code,
+                headers=response.headers,
+            )
+            result["Content-Encoding"] = "br"
+            result["Content-Length"] = str(len(compressed))
+            cache_utils.patch_vary_headers(result, ("Accept-Encoding",))
+            return result
+
+    if encoding == "gzip":
+        compressed = gzip.compress(content, compresslevel=6, mtime=0)
+        if len(compressed) < len(content):
+            result = http.HttpResponse(
+                compressed,
+                status=response.status_code,
+                headers=response.headers,
+            )
+            result["Content-Encoding"] = "gzip"
+            result["Content-Length"] = str(len(compressed))
+            cache_utils.patch_vary_headers(result, ("Accept-Encoding",))
+            return result
+
+    result = http.HttpResponse(
+        content,
+        status=response.status_code,
+        headers=response.headers,
+    )
+    if "Content-Encoding" in result:
+        del result["Content-Encoding"]
+    result["Content-Length"] = str(len(content))
+    cache_utils.patch_vary_headers(result, ("Accept-Encoding",))
+    return result
 
 
 def ical(request, schedule, ical_type=None):
@@ -53,6 +146,15 @@ def ical(request, schedule, ical_type=None):
     else:
         cache_timeout = datetime.timedelta(hours=6)
 
+    if settings.TIMETABLE_ICAL_CACHE_DURATION is not None:
+        internal_cache_timeout = (
+            None
+            if schedule.semester.stale
+            else settings.TIMETABLE_ICAL_CACHE_DURATION.total_seconds()
+        )
+    else:
+        internal_cache_timeout = None
+
     headers.update(utils.cache_headers(cache_timeout, jitter=0.1))
 
     response = utils.check_modified_since(
@@ -65,19 +167,27 @@ def ical(request, schedule, ical_type=None):
 
     # TODO: Turn caching into middleware
     bypass_cache = utils.should_bypass_cache(request)
-    key = ":".join(
-        str(p)
-        for p in (
-            "resp",
-            request.resolver_match.url_name,
-            request.path_info,
-            schedule.last_modified,
-        )
-    )
+    encoding = _requested_encoding(request)
+    key = _response_cache_key(request, schedule, encoding)
+    legacy_key = _legacy_cache_key(request, schedule)
 
     response = caches["ical"].get(key)
     if not bypass_cache and response:
         response["X-Cache"] = f"hit; key={key}"
+        return response
+
+    legacy_response = caches["ical"].get(legacy_key)
+    if not bypass_cache and legacy_response:
+        response = _legacy_upgrade_response(legacy_response, encoding)
+        response["X-Cache"] = f"hit; legacy=1; key={legacy_key}; upgraded={key}"
+
+        if settings.TIMETABLE_ICAL_CACHE_DURATION is not None:
+            caches["ical"].set(
+                key,
+                response,
+                timeout=internal_cache_timeout,
+            )
+
         return response
 
     filename = utils.ical_filename(
@@ -150,13 +260,13 @@ def ical(request, schedule, ical_type=None):
     # supports before putting things in the cache. We have compatibility
     # middleware that will decompress if needed.
 
-    if settings.TIMETABLE_ICAL_CACHE_DURATION:
+    if settings.TIMETABLE_ICAL_CACHE_DURATION is not None:
         response["X-Cache"] = f"{'miss' if not bypass_cache else 'bypass'}; key={key}"
         response = utils.compress_response(request, response)
         caches["ical"].set(
             key,
             response,
-            timeout=settings.TIMETABLE_ICAL_CACHE_DURATION.total_seconds(),
+            timeout=internal_cache_timeout,
         )
     else:
         response["X-Cache"] = f"disabled; key={key}"
