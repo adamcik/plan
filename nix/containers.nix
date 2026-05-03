@@ -20,7 +20,7 @@
       http_bind="''${PLAN_UWSGI_HTTP:-0.0.0.0:8080}"
       processes="''${PLAN_UWSGI_PROCESSES:-4}"
       threads="''${PLAN_UWSGI_THREADS:-4}"
-      default_log_format="%(addr) - - [%(ltime)] \"%(var.REQUEST_METHOD) %(var.PATH_INFO)?%(var.QUERY_STRING) %(var.SERVER_PROTOCOL)\" %(status) %(size) \"%(var.HTTP_REFERER)\" \"%(var.HTTP_USER_AGENT)\" host=\"%(var.HTTP_HOST)\" xfp=\"%(var.HTTP_X_FORWARDED_PROTO)\""
+      default_log_format="%(addr) - - [%(ltime)] \"%(var.REQUEST_METHOD) %(var.REQUEST_URI) %(var.SERVER_PROTOCOL)\" %(status) %(size) \"%(var.HTTP_REFERER)\" \"%(var.HTTP_USER_AGENT)\" host=\"%(var.HTTP_HOST)\" xfp=\"%(var.HTTP_X_FORWARDED_PROTO)\""
       log_format="''${PLAN_UWSGI_LOG_FORMAT-__DEFAULT__}"
 
       if [ "$log_format" = "__DEFAULT__" ]; then
