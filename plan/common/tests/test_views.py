@@ -129,6 +129,17 @@ class ViewTestCase(BaseTestCase):
 
             subscriptions = new_subscriptions
 
+    def test_change_course_invalid_course_renders_error(self):
+        url = reverse("change-course", args=[self.schedule])
+
+        response = self.client.post(
+            url,
+            {"submit_add": True, "course_add": "NOT_A_REAL_COURSE"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "error.html")
+
     def test_change_groups(self):
         # FIXME test for courses without groups
 

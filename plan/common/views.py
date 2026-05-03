@@ -605,6 +605,7 @@ def _add_courses(request, schedule):
             {
                 "courses": errors,
                 "max": settings.TIMETABLE_MAX_COURSES,
+                "schedule": schedule,
                 "slug": schedule.student.slug,
                 "year": schedule.semester.year,
                 "type": schedule.semester.type,
