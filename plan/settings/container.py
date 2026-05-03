@@ -75,7 +75,7 @@ CACHES = {
         "TIMEOUT": timedelta(days=90).total_seconds(),
         "KEY_PREFIX": "container-ical",
         "OPTIONS": {
-            "MAX_ENTRIES": 1000000,
+            "MAX_ENTRIES": 150000,
         },
     },
     "scraper": {

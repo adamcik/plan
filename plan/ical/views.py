@@ -72,6 +72,15 @@ def _requested_encoding(request) -> str:
         return "identity"
 
 
+def _fallback_encodings(encoding: str) -> list[str]:
+    if encoding == "br":
+        return ["gzip", "identity"]
+    elif encoding == "gzip":
+        return ["br", "identity"]
+    else:
+        return ["gzip", "br"]
+
+
 def _legacy_upgrade_response(response, encoding: str):
     current_encoding = response.headers.get("Content-Encoding")
     if encoding == "br" and current_encoding == "br":
@@ -144,14 +153,10 @@ def ical(request, schedule, ical_type=None):
     if schedule.semester.stale:
         cache_timeout = datetime.timedelta(days=90)
     else:
-        cache_timeout = datetime.timedelta(hours=6)
+        cache_timeout = datetime.timedelta(hours=1)
 
     if settings.TIMETABLE_ICAL_CACHE_DURATION is not None:
-        internal_cache_timeout = (
-            None
-            if schedule.semester.stale
-            else settings.TIMETABLE_ICAL_CACHE_DURATION.total_seconds()
-        )
+        internal_cache_timeout = settings.TIMETABLE_ICAL_CACHE_DURATION.total_seconds()
     else:
         internal_cache_timeout = None
 
@@ -174,6 +179,24 @@ def ical(request, schedule, ical_type=None):
     response = caches["ical"].get(key)
     if not bypass_cache and response:
         response["X-Cache"] = f"hit; key={key}"
+        return response
+
+    for fallback_encoding in _fallback_encodings(encoding):
+        fallback_key = _response_cache_key(request, schedule, fallback_encoding)
+        fallback_response = caches["ical"].get(fallback_key)
+        if bypass_cache or not fallback_response:
+            continue
+
+        response = _legacy_upgrade_response(fallback_response, encoding)
+        response["X-Cache"] = f"hit; key={key}; fallback={fallback_key}"
+
+        if settings.TIMETABLE_ICAL_CACHE_DURATION is not None:
+            caches["ical"].set(
+                key,
+                response,
+                timeout=internal_cache_timeout,
+            )
+
         return response
 
     legacy_response = caches["ical"].get(legacy_key)

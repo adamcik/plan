@@ -3,11 +3,12 @@
 import datetime
 
 from django.core.cache import caches
-from django.test import override_settings
 from django.urls import reverse
 from django.utils import http as http_utils
 
 from plan.common import tests
+from plan.common.models import Semester
+from plan.common.schedule import Schedule
 
 
 class EmptyViewTestCase(tests.BaseTestCase):
@@ -99,7 +100,7 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertIn(":br", br_first.headers["X-Cache"])
         self.assertIn(":identity", identity_first.headers["X-Cache"])
         self.assertIn("miss", br_first.headers["X-Cache"])
-        self.assertIn("miss", identity_first.headers["X-Cache"])
+        self.assertIn("hit", identity_first.headers["X-Cache"])
 
         br_second = self.client.get(url, HTTP_ACCEPT_ENCODING="br")
         identity_second = self.client.get(url, HTTP_ACCEPT_ENCODING="")
@@ -110,23 +111,47 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertIn(":br", br_second.headers["X-Cache"])
         self.assertIn("hit", identity_second.headers["X-Cache"])
         self.assertIn(":identity", identity_second.headers["X-Cache"])
-        self.assertIn("miss", gzip_first.headers["X-Cache"])
+        self.assertIn("hit", gzip_first.headers["X-Cache"])
         self.assertIn(":gzip", gzip_first.headers["X-Cache"])
         self.assertIn("hit", gzip_second.headers["X-Cache"])
         self.assertIn(":gzip", gzip_second.headers["X-Cache"])
 
-    @override_settings(TIMETABLE_ICAL_CACHE_DURATION=datetime.timedelta(microseconds=1))
-    def test_ical_stale_semester_cache_does_not_expire_with_short_global_ttl(self):
-        self.set_now_to(2026, 1, 1)
-        caches["ical"].clear()
-
+    def test_ical_cache_falls_back_to_other_variant_before_regeneration(self):
         url = reverse("schedule-ical", args=[self.schedule])
-        first = self.client.get(url, HTTP_ACCEPT_ENCODING="")
 
-        self.assertEqual(first.status_code, 200)
-        self.assertIn("miss", first.headers["X-Cache"])
+        identity_first = self.client.get(url, HTTP_ACCEPT_ENCODING="")
+        self.assertEqual(identity_first.status_code, 200)
+        self.assertIn("miss", identity_first.headers["X-Cache"])
+        self.assertIn(":identity", identity_first.headers["X-Cache"])
 
-        second = self.client.get(url, HTTP_ACCEPT_ENCODING="")
+        br_after_identity = self.client.get(url, HTTP_ACCEPT_ENCODING="br")
+        self.assertEqual(br_after_identity.status_code, 200)
+        self.assertIn("hit", br_after_identity.headers["X-Cache"])
+        self.assertIn(":br", br_after_identity.headers["X-Cache"])
 
-        self.assertEqual(second.status_code, 200)
-        self.assertIn("hit", second.headers["X-Cache"])
+        gzip_after_identity = self.client.get(url, HTTP_ACCEPT_ENCODING="gzip")
+        self.assertEqual(gzip_after_identity.status_code, 200)
+        self.assertIn("hit", gzip_after_identity.headers["X-Cache"])
+        self.assertIn(":gzip", gzip_after_identity.headers["X-Cache"])
+
+    def test_ical_cache_control_uses_stale_only_for_http_window(self):
+        current_year = datetime.date.today().year
+        semester = Semester.objects.create(year=current_year, type=Semester.SPRING)
+        current_schedule = Schedule(semester=semester, student=self.student)
+        current_url = reverse("schedule-ical", args=[current_schedule])
+        stale_url = reverse("schedule-ical", args=[self.schedule])
+
+        current = self.client.get(f"{current_url}?no-cache=1", HTTP_ACCEPT_ENCODING="")
+        self.assertEqual(current.status_code, 200)
+
+        stale = self.client.get(f"{stale_url}?no-cache=1", HTTP_ACCEPT_ENCODING="")
+        self.assertEqual(stale.status_code, 200)
+
+        current_max_age = int(current.headers["Cache-Control"].split("=")[1])
+        stale_max_age = int(stale.headers["Cache-Control"].split("=")[1])
+
+        self.assertGreaterEqual(current_max_age, 3600)
+        self.assertLessEqual(current_max_age, 3960)
+        self.assertGreaterEqual(stale_max_age, 7776000)
+        self.assertLessEqual(stale_max_age, 8553600)
+        self.assertGreater(stale_max_age, current_max_age)
