@@ -20,10 +20,15 @@
       http_bind="''${PLAN_UWSGI_HTTP:-0.0.0.0:8080}"
       processes="''${PLAN_UWSGI_PROCESSES:-4}"
       threads="''${PLAN_UWSGI_THREADS:-4}"
+      default_log_format="%(addr) - - [%(ltime)] \"%(var.REQUEST_METHOD) %(var.PATH_INFO)?%(var.QUERY_STRING) %(var.SERVER_PROTOCOL)\" %(status) %(size) \"%(var.HTTP_REFERER)\" \"%(var.HTTP_USER_AGENT)\" host=\"%(var.HTTP_HOST)\" xfp=\"%(var.HTTP_X_FORWARDED_PROTO)\""
+      log_format="''${PLAN_UWSGI_LOG_FORMAT-__DEFAULT__}"
+
+      if [ "$log_format" = "__DEFAULT__" ]; then
+        log_format="$default_log_format"
+      fi
 
       uwsgi_args=(
         "--plugin" "python3"
-        "--log-format" "%(addr) - %(user) [%(ltime)] \"%(method) %(uri) %(proto)\" %(status) %(size) \"%(referer)\" \"%(uagent)\""
         "--ignore-sigpipe"
         "--ignore-write-errors"
         "--disable-write-exception"
@@ -39,6 +44,14 @@
         "--show-config"
         "--need-app"
       )
+
+      case "$log_format" in
+        ""|off|OFF|disabled|DISABLED)
+          ;;
+        *)
+          uwsgi_args+=("--log-format" "$log_format")
+          ;;
+      esac
 
       case "$listener" in
         socket)
