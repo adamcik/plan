@@ -9,6 +9,7 @@ dependencies = [
   "lxml~=4.6.3",
   "psycopg2~=2.9.11",
   "reportlab~=3.5.59",
+  "sentry-sdk>=2.0.0,<3",
   "typing-extensions>=4.12.2",
   "vobject~=0.9.6.1",
 ]
