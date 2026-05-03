@@ -8,7 +8,6 @@ from django import http, shortcuts
 from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
-from django.db.models import Model
 from django.utils import html, text, translation
 from django.utils.cache import patch_vary_headers
 from django.utils.http import http_date
@@ -81,7 +80,7 @@ def redirect(request, type, id):
             url = Lecture.objects.get(id=id).stream
         else:
             raise http.HttpResponseBadRequest()
-    except Model.DoesNotExist:
+    except (Room.DoesNotExist, Course.DoesNotExist, Lecture.DoesNotExist):
         raise http.Http404
 
     if not url:

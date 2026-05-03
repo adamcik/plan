@@ -39,6 +39,24 @@ class ViewTestCase(BaseTestCase):
 
         # TODO: Check with other times.
 
+    def test_redirect_room_missing_returns_404(self):
+        response = self.client.get(reverse("redirect_room", args=[999999]))
+
+        self.assertEqual(response.status_code, 404)
+        self.assertTemplateUsed(response, "404.html")
+
+    def test_redirect_missing_returns_404_for_all_types(self):
+        for name in (
+            "redirect_room",
+            "redirect_course",
+            "redirect_syllabus",
+            "redirect_stream",
+        ):
+            response = self.client.get(reverse(name, args=[999999]))
+
+            self.assertEqual(response.status_code, 404)
+            self.assertTemplateUsed(response, "404.html")
+
     def test_schedule_current(self):
         url = reverse("schedule-current", args=[self.schedule])
         response = self.client.get(url)
