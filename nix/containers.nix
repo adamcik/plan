@@ -120,6 +120,11 @@
             config.uv2nix.runtimeVenv
             config.uv2nix.manageVenv
             staticAssets
+          ];
+          layers = [baseLayer depsLayer];
+        };
+        metadataLayer = nix2containerPkgs.buildLayer {
+          copyToRoot = [
             (pkgs.buildEnv {
               name = "plan-root-bin";
               paths = [
@@ -129,12 +134,13 @@
               pathsToLink = ["/bin"];
             })
           ];
-          layers = [baseLayer depsLayer];
+          layers = [baseLayer depsLayer appLayer];
         };
       in [
         baseLayer
         depsLayer
         appLayer
+        metadataLayer
       ];
     };
   };
