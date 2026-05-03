@@ -1,0 +1,11 @@
+[Unit]
+Description=Collect static files for Plan
+After=container-plan-ntnu.service
+Requires=container-plan-ntnu.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/podman exec plan-ntnu /bin/manage collectstatic --noinput
+
+[Install]
+WantedBy=multi-user.target

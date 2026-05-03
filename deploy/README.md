@@ -12,6 +12,7 @@ Scraper jobs are intentionally out of scope here.
 ## Files in this directory
 
 - `plan.env.example`
+- `plan-collectstatic.service`
 - `plan-materialized-refresh.service`
 - `plan-materialized-refresh.timer`
 
@@ -83,7 +84,7 @@ sudo install -D -m 0644 pod-plan.service /etc/systemd/system/pod-plan.service
 sudo install -D -m 0644 container-plan-ntnu.service /etc/systemd/system/container-plan-ntnu.service
 ```
 
-## 4) Add path ownership override
+## 4) Add service drop-ins (paths + stop behavior)
 
 ```bash
 sudo mkdir -p /etc/systemd/system/container-plan-ntnu.service.d
@@ -92,15 +93,23 @@ sudo tee /etc/systemd/system/container-plan-ntnu.service.d/paths.conf >/dev/null
 ExecStartPre=/usr/bin/install -d -o www-data -g www-data -m 0750 /var/lib/plan
 ExecStartPre=/usr/bin/install -d -o root -g www-data -m 2775 /run/plan
 EOF
+
+sudo tee /etc/systemd/system/container-plan-ntnu.service.d/stop.conf >/dev/null <<'EOF'
+[Service]
+ExecStop=
+ExecStop=/usr/bin/podman kill --signal QUIT --cidfile /run/container-plan-ntnu.ctr-id
+ExecStop=-/usr/bin/podman wait --cidfile /run/container-plan-ntnu.ctr-id
+TimeoutStopSec=45
+EOF
 ```
 
 `/run/plan` uses setgid (`2775`) so socket group ownership stays compatible with reverse proxy access.
+`stop.conf` avoids TERM-timeout restarts on older Podman by using QUIT + wait.
 
-## 5) Enable and start
+## 5) Reload systemd
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable --now pod-plan.service container-plan-ntnu.service
 ```
 
 ## 6) Install materialized-view refresh timer
@@ -119,11 +128,34 @@ This timer runs:
 podman exec plan-ntnu /bin/manage refresh_materialized_views
 ```
 
-## 7) Verify
+## 7) Install collectstatic service (manual on-demand)
+
+```bash
+sudo install -D -m 0644 deploy/plan-collectstatic.service /etc/systemd/system/plan-collectstatic.service
+
+sudo systemctl daemon-reload
+sudo systemctl enable plan-collectstatic.service
+```
+
+Run when needed (for example after deploying a new image version):
+
+```bash
+sudo systemctl start plan-collectstatic.service
+sudo systemctl status plan-collectstatic.service --no-pager
+```
+
+## 8) Enable and start services
+
+```bash
+sudo systemctl enable --now pod-plan.service container-plan-ntnu.service
+```
+
+## 9) Verify
 
 ```bash
 sudo systemctl status pod-plan.service --no-pager
 sudo systemctl status container-plan-ntnu.service --no-pager
+sudo systemctl status plan-collectstatic.service --no-pager
 sudo systemctl status plan-materialized-refresh.timer --no-pager
 
 sudo podman ps --filter name=plan-ntnu
@@ -133,14 +165,17 @@ sudo podman logs --tail 100 plan-ntnu
 sudo systemctl list-timers --all | grep plan-materialized-refresh
 ```
 
-Run one manual refresh test:
+Run manual maintenance tests:
 
 ```bash
+sudo systemctl start plan-collectstatic.service
+sudo systemctl status plan-collectstatic.service --no-pager
+
 sudo systemctl start plan-materialized-refresh.service
 sudo systemctl status plan-materialized-refresh.service --no-pager
 ```
 
-## 8) Reverse proxy (Caddy)
+## 10) Reverse proxy (Caddy)
 
 Use the socket path `/run/plan/uwsgi.sock`.
 
