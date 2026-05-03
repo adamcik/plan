@@ -12,7 +12,6 @@ Scraper jobs are intentionally out of scope here.
 ## Files in this directory
 
 - `plan.env.example`
-- `settings.py.example`
 - `plan-materialized-refresh.service`
 - `plan-materialized-refresh.timer`
 
@@ -24,16 +23,15 @@ sudo install -d -o www-data -g www-data -m 0750 /var/lib/plan
 sudo install -d -o root -g www-data -m 2775 /run/plan
 
 sudo cp deploy/plan.env.example /etc/plan/plan.env
-sudo cp deploy/settings.py.example /etc/plan/settings.py
 
 sudo editor /etc/plan/plan.env
-sudo editor /etc/plan/settings.py
 ```
 
 Required in `/etc/plan/plan.env`:
 
 - `DJANGO_SECRET_KEY`
-- `PGDATABASE`, `PGUSER`, `PGPASSWORD`, `PGHOST`, `PGPORT`
+- `DJANGO_ALLOWED_HOSTS`
+- `PGDATABASE`, `PGUSER`, `PGPASSWORD`, `PGHOST`, `PGPORT`, `PGCONN_MAX_AGE`
 - `PLAN_BASE_DIR=/var/lib/plan`
 - `PLAN_UWSGI_LISTENER=socket`
 - `PLAN_UWSGI_SOCKET=/run/uwsgi/uwsgi.sock`
@@ -44,8 +42,6 @@ Note: `/var/lib/plan` stores writable app state:
 - `cache/default`
 - `cache/ical`
 - `cache/scraper`
-
-`/etc/plan/settings.py` is mounted read-only and loaded through `plan.settings.external`.
 
 ## 2) Pull image + create pod + container
 
@@ -62,12 +58,10 @@ sudo podman create \
   --name plan-ntnu \
   --pod plan \
   --user 33:33 \
-  --env DJANGO_SETTINGS_MODULE=plan.settings.external \
-  --env EXTERNAL_SETTINGS_FILE=/config/settings.py \
+  --env DJANGO_SETTINGS_MODULE=plan.settings.container \
   --env-file /etc/plan/plan.env \
   -v /var/lib/plan:/var/lib/plan \
   -v /run/plan:/run/uwsgi \
-  -v /etc/plan:/config:ro \
   ghcr.io/adamcik/plan:latest
 ```
 
@@ -181,4 +175,4 @@ Host bind mount is still recommended when you want straightforward backups and h
 ## Notes
 
 - Static assets are collected at image build time already. Runtime writes are mainly cache/compressor output under `/var/lib/plan`.
-- `DJANGO_SETTINGS_MODULE` and `EXTERNAL_SETTINGS_FILE` are intentionally pinned in container args, not env file, to reduce accidental drift.
+- `DJANGO_SETTINGS_MODULE` is pinned to `plan.settings.container` in container args to reduce accidental drift.
