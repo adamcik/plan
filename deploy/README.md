@@ -34,9 +34,12 @@ Required in `/etc/plan/plan.env`:
 - `DJANGO_SECRET_KEY`
 - `DJANGO_ALLOWED_HOSTS`
 - `PGDATABASE`, `PGUSER`, `PGPASSWORD`, `PGHOST`, `PGPORT`, `PGCONN_MAX_AGE`
-- `PLAN_BASE_DIR=/var/lib/plan`
 - `PLAN_UWSGI_LISTENER=socket`
 - `PLAN_UWSGI_SOCKET=/run/uwsgi/uwsgi.sock`
+
+Image defaults already provide `DJANGO_SETTINGS_MODULE=plan.settings.container` and
+`PLAN_BASE_DIR=/var/lib/plan`. This deploy flow still sets socket listener vars in
+`/etc/plan/plan.env` to override image default HTTP mode.
 
 Note: `/var/lib/plan` stores writable app state:
 
@@ -63,7 +66,6 @@ sudo podman create \
   --name plan-ntnu \
   --network host \
   --user 33:33 \
-  --env DJANGO_SETTINGS_MODULE=plan.settings.container \
   --env-file /etc/plan/plan.env \
   -v /var/lib/plan:/var/lib/plan \
   -v /run/plan:/run/uwsgi \
