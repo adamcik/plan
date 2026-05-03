@@ -6,6 +6,7 @@ This deployment flow is for hosts without Quadlet support.
 - Podman 3.x
 - systemd units generated with `podman generate systemd --new`
 - Socket-based app traffic (no published HTTP port)
+- Host networking on the app container (`--network host`)
 
 Scraper jobs are intentionally out of scope here.
 
@@ -44,20 +45,23 @@ Note: `/var/lib/plan` stores writable app state:
 - `cache/ical`
 - `cache/scraper`
 
-## 2) Pull image + create pod + container
+## 2) Pull image + create container
 
-Use a pod even with one app container so additional sidecars can be added later.
+If migrating from a running pod-based setup, remove pod + old container first:
 
 ```bash
-sudo podman pod rm -f plan || true
+sudo systemctl stop container-plan-ntnu.service pod-plan.service || true
+sudo systemctl disable pod-plan.service || true
 sudo podman rm -f plan-ntnu || true
+sudo podman pod rm -f plan || true
+```
 
+```bash
 sudo podman pull ghcr.io/adamcik/plan:latest
-sudo podman pod create --name plan
 
 sudo podman create \
   --name plan-ntnu \
-  --pod plan \
+  --network host \
   --user 33:33 \
   --env DJANGO_SETTINGS_MODULE=plan.settings.container \
   --env-file /etc/plan/plan.env \
@@ -68,20 +72,13 @@ sudo podman create \
 
 No `-p/--publish` is needed. Traffic is through unix socket only.
 
-If old Podman bridge networking is flaky for outbound traffic, recreate pod with host networking:
-
-```bash
-sudo podman pod rm -f plan
-sudo podman pod create --name plan --network host
-```
-
 ## 3) Generate + install systemd units
 
 ```bash
-sudo podman generate systemd --name plan --files --new
+sudo podman generate systemd --name plan-ntnu --files --new
 
-sudo install -D -m 0644 pod-plan.service /etc/systemd/system/pod-plan.service
 sudo install -D -m 0644 container-plan-ntnu.service /etc/systemd/system/container-plan-ntnu.service
+sudo rm -f /etc/systemd/system/pod-plan.service
 ```
 
 ## 4) Add service drop-ins (paths + stop behavior)
@@ -147,13 +144,12 @@ sudo systemctl status plan-collectstatic.service --no-pager
 ## 8) Enable and start services
 
 ```bash
-sudo systemctl enable --now pod-plan.service container-plan-ntnu.service
+sudo systemctl enable --now container-plan-ntnu.service
 ```
 
 ## 9) Verify
 
 ```bash
-sudo systemctl status pod-plan.service --no-pager
 sudo systemctl status container-plan-ntnu.service --no-pager
 sudo systemctl status plan-collectstatic.service --no-pager
 sudo systemctl status plan-materialized-refresh.timer --no-pager
