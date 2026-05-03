@@ -25,7 +25,10 @@ class EmptyViewTestCase(tests.BaseTestCase):
 
         for arg in ("exams", "lectures"):
             url = reverse("schedule-ical-type", args=[self.schedule, arg])
-            self.assertEqual(self.client.get(url).status_code, 404)
+            no_slash = url.rstrip("/")
+            with_slash = f"{no_slash}/"
+            self.assertEqual(self.client.get(no_slash).status_code, 404)
+            self.assertEqual(self.client.get(with_slash).status_code, 404)
 
         url = reverse("schedule-ical-type", args=[self.schedule, "foo"])
         self.assertEqual(self.client.get(url).status_code, 404)
@@ -45,10 +48,16 @@ class ViewTestCase(tests.BaseTestCase):
 
         for arg in ("exams", "lectures"):
             url = reverse("schedule-ical-type", args=[self.schedule, arg])
-            self.assertEqual(self.client.get(url).status_code, 200)
+            no_slash = url.rstrip("/")
+            with_slash = f"{no_slash}/"
+            self.assertEqual(self.client.get(no_slash).status_code, 200)
+            self.assertEqual(self.client.get(with_slash).status_code, 200)
 
         url = reverse("schedule-ical-type", args=[self.schedule, "foo"])
-        self.assertEqual(self.client.get(url).status_code, 400)
+        no_slash = url.rstrip("/")
+        with_slash = f"{no_slash}/"
+        self.assertEqual(self.client.get(no_slash).status_code, 400)
+        self.assertEqual(self.client.get(with_slash).status_code, 400)
 
         # TODO: Test with slug that does not exist?
 
@@ -133,6 +142,24 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertEqual(gzip_after_identity.status_code, 200)
         self.assertIn("hit", gzip_after_identity.headers["X-Cache"])
         self.assertIn(":gzip", gzip_after_identity.headers["X-Cache"])
+
+    def test_ical_cache_key_is_same_for_type_with_and_without_trailing_slash(self):
+        url = reverse("schedule-ical-type", args=[self.schedule, "lectures"])
+        no_slash = url.rstrip("/")
+        with_slash = f"{no_slash}/"
+
+        first = self.client.get(no_slash, HTTP_ACCEPT_ENCODING="")
+        second = self.client.get(with_slash, HTTP_ACCEPT_ENCODING="")
+
+        self.assertEqual(first.status_code, 200)
+        self.assertEqual(second.status_code, 200)
+        self.assertIn("miss", first.headers["X-Cache"])
+        self.assertIn("hit", second.headers["X-Cache"])
+
+        first_key = first.headers["X-Cache"].split("key=", 1)[1]
+        second_key = second.headers["X-Cache"].split("key=", 1)[1]
+
+        self.assertEqual(first_key, second_key)
 
     def test_ical_cache_control_uses_stale_only_for_http_window(self):
         current_year = datetime.date.today().year

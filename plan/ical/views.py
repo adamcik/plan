@@ -36,26 +36,45 @@ def _to_utc(dt: datetime.datetime) -> datetime.datetime:
     return dt.replace(tzinfo=TZ).astimezone(UTC)
 
 
+def _normalized_path(path: str) -> str:
+    if path == "/":
+        return path
+    return path.rstrip("/")
+
+
+def _cache_route_name(request) -> str:
+    # Keep cache key stable across canonical `/ical/<type>/` and legacy
+    # `/ical/<type>` fallback routes so both URL shapes share one entry.
+    name = request.resolver_match.url_name
+    if name == "schedule-ical-type-fallback":
+        return "schedule-ical-type"
+    return str(name)
+
+
 def _legacy_cache_key(request, schedule) -> str:
+    path = _normalized_path(request.path_info)
+    route_name = _cache_route_name(request)
     return ":".join(
         str(p)
         for p in (
             "resp",
-            request.resolver_match.url_name,
-            request.path_info,
+            route_name,
+            path,
             schedule.last_modified,
         )
     )
 
 
 def _response_cache_key(request, schedule, encoding: str) -> str:
+    path = _normalized_path(request.path_info)
+    route_name = _cache_route_name(request)
     return ":".join(
         str(p)
         for p in (
             "resp",
             "v2",
-            request.resolver_match.url_name,
-            request.path_info,
+            route_name,
+            path,
             schedule.last_modified,
             encoding,
         )
