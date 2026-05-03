@@ -48,6 +48,13 @@ def ical(request, schedule, ical_type=None):
     if schedule.last_modified is not None:
         headers["Last-Modified"] = http_utils.http_date(schedule.last_modified)
 
+    if schedule.semester.stale:
+        cache_timeout = datetime.timedelta(days=90)
+    else:
+        cache_timeout = datetime.timedelta(hours=6)
+
+    headers.update(utils.cache_headers(cache_timeout, jitter=0.1))
+
     response = utils.check_modified_since(
         request,
         schedule.last_modified,
@@ -80,12 +87,6 @@ def ical(request, schedule, ical_type=None):
         resources,
     )
 
-    if schedule.semester.stale:
-        cache_timeout = datetime.timedelta(days=90)
-    else:
-        cache_timeout = datetime.timedelta(hours=6)
-
-    headers.update(utils.cache_headers(cache_timeout, jitter=0.1))
     headers["Filename"] = filename  # IE needs this
     headers["Content-Disposition"] = "attachment; filename=%s" % filename
 
@@ -111,12 +112,24 @@ def ical(request, schedule, ical_type=None):
         "resources": ", ".join(resources),
     }
 
+    if schedule.last_modified is not None:
+        dtstamp = datetime.datetime.fromtimestamp(schedule.last_modified, tz=UTC)
+    else:
+        dtstamp = datetime.datetime.now(tz=UTC)
+
     if _("lectures") in resources:
         lectures = Lecture.objects.get_lectures(
             schedule.semester.id,
             schedule.student.id,
         )
-        add_lectutures(lectures, schedule.semester.year, cal, request, hostname)
+        add_lectutures(
+            lectures,
+            schedule.semester.year,
+            cal,
+            request,
+            hostname,
+            dtstamp,
+        )
 
     if _("exams") in resources:
         exams = Exam.objects.get_exams(
@@ -124,7 +137,7 @@ def ical(request, schedule, ical_type=None):
             schedule.semester.type,
             schedule.student.slug,
         )
-        add_exams(exams, cal, hostname)
+        add_exams(exams, cal, hostname, dtstamp)
 
     response = http.HttpResponse(
         cal.serialize(),
@@ -166,7 +179,7 @@ Stream: {{ lecture.stream }}
 )
 
 
-def add_lectutures(lectures, year, cal, request, hostname):
+def add_lectutures(lectures, year, cal, request, hostname, dtstamp):
     """Adds lectures to cal object for current semester"""
 
     all_rooms = Lecture.get_related(Room, lectures, fields=["id", "name", "url"])
@@ -214,7 +227,7 @@ def add_lectutures(lectures, year, cal, request, hostname):
             vevent.add("dtend").value = _to_utc(
                 d.replace(hour=l.end.hour, minute=l.end.minute)
             )
-            vevent.add("dtstamp").value = datetime.datetime.utcnow()
+            vevent.add("dtstamp").value = dtstamp
 
             vevent.add("uid").value = "lecture-%d-%s@%s" % (
                 l.id,
@@ -226,7 +239,7 @@ def add_lectutures(lectures, year, cal, request, hostname):
                 vevent.add("transp").value = "TRANSPARENT"
 
 
-def add_exams(exams, cal, hostname):
+def add_exams(exams, cal, hostname, dtstamp):
     for e in exams:
         vevent = cal.add("vevent")
 
@@ -246,7 +259,7 @@ def add_exams(exams, cal, hostname):
 
         vevent.add("summary").value = summary
         vevent.add("description").value = desc
-        vevent.add("dtstamp").value = datetime.datetime.utcnow()
+        vevent.add("dtstamp").value = dtstamp
 
         vevent.add("uid").value = "exam-%d@%s" % (e.id, hostname)
 
