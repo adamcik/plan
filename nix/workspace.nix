@@ -12,7 +12,7 @@
     python =
       if shrinkPython
       then
-        pkgsLegacy.python310.override {
+        pkgsLegacy.python312.override {
           bluezSupport = false;
           stripConfig = true;
           stripIdlelib = true;
@@ -26,7 +26,7 @@
           ncurses = null;
           gdbm = null;
         }
-      else pkgsLegacy.python310;
+      else pkgsLegacy.python312;
     editableVenv = config.uv2nix.devVenv;
     overrideMetadata = builtins.fromJSON (builtins.readFile inputs.build-overrides);
   in {

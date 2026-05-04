@@ -34,7 +34,7 @@
         {% endif %}
         {% for w in weeks %}
           <a href="{% url 'schedule-week' schedule w %}"
-             {% ifequal w week %} class="current"{% endifequal %}>{{ w }}</a>
+             {% if w == week %}class="current"{% endif %}>{{ w }}</a>
         {% endfor %}
       </p>
     </div>
