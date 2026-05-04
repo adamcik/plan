@@ -67,6 +67,8 @@ sudo podman create \
   --network host \
   --user 33:33 \
   --env-file /etc/plan/plan.env \
+  --read-only \
+  --tmpfs /tmp:rw,nosuid,nodev,noexec,size=256m,mode=1777 \
   -v /var/lib/plan:/var/lib/plan \
   -v /run/plan:/run/uwsgi \
   ghcr.io/adamcik/plan:latest

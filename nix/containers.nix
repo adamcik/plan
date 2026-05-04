@@ -115,6 +115,7 @@
         User = "65532:65532";
         Env = [
           "SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+          "PYTHONDONTWRITEBYTECODE=1"
           "DJANGO_SETTINGS_MODULE=plan.settings.container"
           "PLAN_BASE_DIR=/var/lib/plan"
           "PLAN_UWSGI_LISTENER=http"
