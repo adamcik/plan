@@ -1,11 +1,19 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 from django.urls import path
+from django.views.generic.base import RedirectView
+from django.templatetags.static import static
 
 from plan.common import views
 
 urlpatterns = [
     path("", views.frontpage, name="frontpage"),
+    path("robots.txt", views.robots_txt, name="robots-txt"),
+    path(
+        "favicon.ico",
+        RedirectView.as_view(url=static("gfx/icons/calendar.png"), permanent=True),
+        name="favicon",
+    ),
     path("<semester:semester>/", views.getting_started, name="semester"),
     path("<semester:semester>/+", views.course_query, name="course-query"),
     path("<schedule:schedule>/", views.schedule, {"all": True}, name="schedule"),

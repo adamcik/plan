@@ -41,6 +41,17 @@ today = datetime.date.today
 _ = translation.gettext_lazy
 
 
+def robots_txt(request):
+    content = "\n".join(
+        [
+            "User-agent: *",
+            "Disallow: /*/*/*/",
+            "Disallow: /*/*/*/*",
+        ]
+    )
+    return http.HttpResponse(f"{content}\n", content_type="text/plain")
+
+
 # Start new week on saturdays
 def get_current_week():
     return (now() + datetime.timedelta(days=2)).isocalendar()[1]
@@ -335,7 +346,7 @@ def schedule(request, schedule: Schedule, advanced=False, week=None, all=False):
     # Color mapping for the courses
     color_map = utils.ColorMap(hex=True)
 
-    headers = {}
+    headers = {"X-Robots-Tag": "noindex, nofollow, noarchive"}
     if schedule.last_modified is not None:
         headers["Last-Modified"] = http_date(schedule.last_modified)
 

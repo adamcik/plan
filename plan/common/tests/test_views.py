@@ -20,6 +20,20 @@ class EmptyViewTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 404)
         self.assertTemplateUsed(response, "404.html")
 
+    def test_robots_txt(self):
+        response = self.client.get("/robots.txt")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "User-agent: *")
+        self.assertContains(response, "Disallow: /*/*/*/")
+        self.assertContains(response, "Disallow: /*/*/*/*")
+
+    def test_favicon(self):
+        response = self.client.get("/favicon.ico")
+
+        self.assertEqual(response.status_code, 301)
+        self.assertTrue(response["Location"].endswith("/static/gfx/icons/calendar.png"))
+
 
 class ViewTestCase(BaseTestCase):
     fixtures = ["test_data.json", "test_user.json"]
@@ -86,6 +100,14 @@ class ViewTestCase(BaseTestCase):
             response = self.client.get(url)
             self.assertEqual(response.status_code, 200)
             self.assertTemplateUsed(response, "schedule.html")
+
+    def test_schedule_sets_robots_header(self):
+        response = self.client.get(reverse("schedule", args=[self.schedule]))
+
+        self.assertEqual(
+            response.headers["X-Robots-Tag"],
+            "noindex, nofollow, noarchive",
+        )
 
     def test_change_course(self):
         # FIXME test semester does not exist
