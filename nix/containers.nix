@@ -23,18 +23,9 @@
       export PLAN_UWSGI_PROCESSES="''${PLAN_UWSGI_PROCESSES:?PLAN_UWSGI_PROCESSES is required}"
       export PLAN_UWSGI_THREADS="''${PLAN_UWSGI_THREADS:?PLAN_UWSGI_THREADS is required}"
 
-      default_log_format="%(addr) - - [%(ltime)] \"%(var.REQUEST_METHOD) %(var.REQUEST_URI) %(var.SERVER_PROTOCOL)\" %(status) %(size) \"%(var.HTTP_REFERER)\" \"%(var.HTTP_USER_AGENT)\" host=\"%(var.HTTP_HOST)\" xfp=\"%(var.HTTP_X_FORWARDED_PROTO)\""
-      log_format="''${PLAN_UWSGI_LOG_FORMAT-__DEFAULT__}"
-
-      if [ "$log_format" = "__DEFAULT__" ]; then
-        log_format="$default_log_format"
-      fi
-
       uwsgi_args=(
         "--plugin" "python3"
-        "--ignore-sigpipe"
-        "--ignore-write-errors"
-        "--disable-write-exception"
+        "--disable-logging"
         "--enable-threads"
         "--py-call-uwsgi-fork-hooks"
         "--catch-exceptions"
@@ -50,14 +41,6 @@
         "--show-config"
         "--need-app"
       )
-
-      case "$log_format" in
-        ""|off|OFF|disabled|DISABLED)
-          ;;
-        *)
-          uwsgi_args+=("--log-format" "$log_format")
-          ;;
-      esac
 
       case "$PLAN_UWSGI_LISTENER" in
         socket)
@@ -128,7 +111,6 @@
           "PLAN_UWSGI_SOCKET=/run/uwsgi/uwsgi.sock"
           "PLAN_UWSGI_PROCESSES=4"
           "PLAN_UWSGI_THREADS=1"
-          "PLAN_UWSGI_LOG_FORMAT=off"
         ];
       };
 
