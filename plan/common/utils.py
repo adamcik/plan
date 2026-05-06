@@ -78,6 +78,9 @@ def compress_response(request, response, min_size=200):
 
 
 def check_modified_since(request, last_modified, headers=None):
+    if not settings.TIMETABLE_ENABLE_IF_MODIFIED_SINCE:
+        return None
+
     if "no-modified-since" in request.GET:
         return None
 

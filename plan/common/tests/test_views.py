@@ -1,7 +1,11 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+import datetime
+
+from django.core.cache import cache
 from django.urls import reverse
 from django.utils.datastructures import MultiValueDict
+from django.utils import timezone
 
 from plan.common.models import Group, Lecture, Subscription
 from plan.common.tests import BaseTestCase
@@ -150,6 +154,47 @@ class ViewTestCase(BaseTestCase):
             self.assertTrue(new_subscriptions != subscriptions)
 
             subscriptions = new_subscriptions
+
+    def test_change_course_remove_invalidates_schedule_data_cache(self):
+        schedule_url = reverse("schedule-advanced", args=[self.schedule])
+        change_url = reverse("change-course", args=[self.schedule])
+
+        subscriptions = Subscription.objects.filter(
+            student__slug="adamcik",
+            course__semester__year=2009,
+            course__semester__type="spring",
+        ).order_by("course__id")
+
+        self.assertGreaterEqual(subscriptions.count(), 2)
+
+        remove_course_id = subscriptions.last().course_id
+        remove_course_code = subscriptions.last().course.code
+
+        shared_last_modified = timezone.make_aware(
+            datetime.datetime(2009, 1, 1, 12, 0, 0)
+        )
+        subscriptions.update(last_modified=shared_last_modified)
+
+        cache.clear()
+
+        response = self.client.get(schedule_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, remove_course_code)
+        self.assertIn("Last-Modified", response.headers)
+        if_modified_since = response.headers["Last-Modified"]
+
+        response = self.client.post(
+            change_url,
+            {"submit_remove": True, "course_remove": str(remove_course_id)},
+        )
+        self.assertEqual(response.status_code, 302)
+
+        response = self.client.get(
+            schedule_url,
+            HTTP_IF_MODIFIED_SINCE=if_modified_since,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, remove_course_code)
 
     def test_change_course_invalid_course_renders_error(self):
         url = reverse("change-course", args=[self.schedule])

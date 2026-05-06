@@ -4,6 +4,7 @@ import datetime
 import hashlib
 
 from django.core.cache import caches
+from django.test import override_settings
 from django.urls import reverse
 from django.utils import http as http_utils
 
@@ -62,6 +63,7 @@ class ViewTestCase(tests.BaseTestCase):
 
         # TODO: Test with slug that does not exist?
 
+    @override_settings(TIMETABLE_ENABLE_IF_MODIFIED_SINCE=True)
     def test_ical_not_modified_returns_304_with_cache_headers(self):
         url = reverse("schedule-ical", args=[self.schedule])
         first = self.client.get(url)

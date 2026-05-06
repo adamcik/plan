@@ -587,7 +587,7 @@ def _add_courses(request, schedule):
     errors = []
     too_many_subscriptions = False
 
-    student, created = Student.objects.get_or_create(slug=schedule.student.slug)
+    student, _ = Student.objects.get_or_create(slug=schedule.student.slug)
 
     for l in lookup:
         try:

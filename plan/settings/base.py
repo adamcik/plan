@@ -268,6 +268,11 @@ TIMETABLE_ICAL_CACHE_DURATION = timedelta(days=30)
 
 TIMETABLE_SCHEDULE_CACHE_DURATION = None
 
+# NOTE: Temporary mitigation for stale pages after mutations.
+# Disable If-Modified-Since revalidation globally until freshness tokens are
+# made robust for all mutation paths (especially deletes).
+TIMETABLE_ENABLE_IF_MODIFIED_SINCE = False
+
 TIMETABLE_NOTICE_CUTOFF = date(2025, 8, 24)
 
 TIMETABLE_NOTICE_HTML = mark_safe("""
