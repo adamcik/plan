@@ -35,6 +35,11 @@
         "--ignore-sigpipe"
         "--ignore-write-errors"
         "--disable-write-exception"
+        "--enable-threads"
+        "--py-call-uwsgi-fork-hooks"
+        "--catch-exceptions"
+        "--log-5xx"
+        "--log-master"
         "--static-map" "/static/CACHE=/var/lib/plan/static/CACHE"
         "--static-map" "/static=${staticAssets}/static"
         "--module" "plan.wsgi"
@@ -123,6 +128,7 @@
           "PLAN_UWSGI_SOCKET=/run/uwsgi/uwsgi.sock"
           "PLAN_UWSGI_PROCESSES=4"
           "PLAN_UWSGI_THREADS=1"
+          "PLAN_UWSGI_LOG_FORMAT=off"
         ];
       };
 
