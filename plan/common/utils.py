@@ -21,12 +21,32 @@ from django.utils import http as http_utils
 from django.utils import text as text_utils
 from django.utils import translation
 
+from plan.common.schedule import Schedule
+
 _ = translation.gettext
 
 
 # FIXME: This needs to match the converter, or be property of the schedule?
-def clear_cache(year: int, semester_type: str, slug: str):
+def clear_cache(
+    schedule: Schedule,
+):
+    year = schedule.semester.year
+    semester_type = schedule.semester.type
+    slug = schedule.student.slug
+
     cache.delete(f"modified:{year}-{semester_type}-{slug}")
+
+    if schedule.last_modified is None:
+        return
+
+    # WARNING: Mitigation-level coupling to concrete cache keys.
+    # We explicitly drop payload/response entries bound to the previous
+    # last_modified token because delete mutations may leave the recomputed
+    # timestamp unchanged, causing stale cache reuse.
+    # NOTE: This does not solve stale 304 with If-Modified-Since when the
+    # freshness token itself does not advance.
+    cache.delete(f"db:{year}-{semester_type}-{slug}:{schedule.last_modified}")
+    cache.delete(f"schedule:{year}-{semester_type}-{slug}:{schedule.last_modified}")
 
 
 # TODO: Only allow bypass in DEBUG?

@@ -492,11 +492,7 @@ def select_groups(request, schedule):
                     subscription.groups.set(group_form.cleaned_data["groups"])
                     subscription.save()  # Update last modified.
 
-            utils.clear_cache(
-                schedule.semester.year,
-                schedule.semester.type,
-                schedule.student.slug,
-            )
+            utils.clear_cache(schedule)
 
         return shortcuts.redirect("schedule-advanced", schedule)
 
@@ -557,11 +553,7 @@ def select_course(request, schedule, add=False):
     else:
         response = None
 
-    utils.clear_cache(
-        schedule.semester.year,
-        schedule.semester.type,
-        schedule.student.slug,
-    )
+    utils.clear_cache(schedule)
     if response:
         return response
     return shortcuts.redirect("schedule-advanced", schedule)
@@ -693,11 +685,7 @@ def select_lectures(request, schedule):
 
                 subscription.save()  # Trigger last_modified update
 
-        utils.clear_cache(
-            schedule.semester.year,
-            schedule.semester.type,
-            schedule.student.slug,
-        )
+        utils.clear_cache(schedule)
 
     return shortcuts.redirect("schedule-advanced", schedule)
 
