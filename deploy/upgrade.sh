@@ -10,6 +10,7 @@ Options:
   --image <ref>       Image ref to pull (default: ghcr.io/adamcik/plan:latest)
   --unit <name>       systemd unit (default: container-plan-ntnu.service)
   --container <name>  container name (default: plan-ntnu)
+  --env-file <path>   env file for --recreate (default: /etc/plan/env)
   --recreate          Recreate container + regenerate systemd unit
   --check             Pull and compare only; do not restart/recreate
   -h, --help          Show this help
@@ -24,6 +25,7 @@ EOF
 IMAGE_REF="ghcr.io/adamcik/plan:latest"
 UNIT_NAME="container-plan-ntnu.service"
 CONTAINER_NAME="plan-ntnu"
+ENV_FILE="/etc/plan/env"
 DO_RECREATE=0
 CHECK_ONLY=0
 
@@ -39,6 +41,10 @@ while [ "$#" -gt 0 ]; do
       ;;
     --container)
       CONTAINER_NAME="$2"
+      shift 2
+      ;;
+    --env-file)
+      ENV_FILE="$2"
       shift 2
       ;;
     --recreate)
@@ -121,7 +127,7 @@ else
     --name "$CONTAINER_NAME" \
     --network host \
     --user 33:33 \
-    --env-file /etc/plan/plan.env \
+    --env-file "$ENV_FILE" \
     --read-only \
     --tmpfs /tmp:rw,nosuid,nodev,noexec,size=256m,mode=1777 \
     --cap-drop=ALL \

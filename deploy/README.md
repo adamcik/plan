@@ -24,12 +24,12 @@ sudo install -d -m 0750 /etc/plan
 sudo install -d -o www-data -g www-data -m 0750 /var/lib/plan
 sudo install -d -o root -g www-data -m 2775 /run/plan
 
-sudo cp deploy/plan.env.example /etc/plan/plan.env
+sudo install -m 0640 deploy/plan.env.example /etc/plan/env
 
-sudo editor /etc/plan/plan.env
+sudo editor /etc/plan/env
 ```
 
-Required in `/etc/plan/plan.env`:
+Required in `/etc/plan/env`:
 
 - `DJANGO_SECRET_KEY`
 - `DJANGO_ALLOWED_HOSTS`
@@ -39,7 +39,7 @@ Required in `/etc/plan/plan.env`:
 
 Image defaults already provide `DJANGO_SETTINGS_MODULE=plan.settings.container` and
 `PLAN_BASE_DIR=/var/lib/plan`. This deploy flow still sets socket listener vars in
-`/etc/plan/plan.env` to override image default HTTP mode.
+`/etc/plan/env` to override image default HTTP mode.
 
 Note: `/var/lib/plan` stores writable app state:
 
@@ -66,7 +66,7 @@ sudo podman create \
   --name plan-ntnu \
   --network host \
   --user 33:33 \
-  --env-file /etc/plan/plan.env \
+  --env-file /etc/plan/env \
   --read-only \
   --tmpfs /tmp:rw,nosuid,nodev,noexec,size=256m,mode=1777 \
   -v /var/lib/plan:/var/lib/plan \
@@ -210,4 +210,4 @@ Host bind mount is still recommended when you want straightforward backups and h
 ## Notes
 
 - Static assets are collected at image build time already. Runtime writes are mainly cache/compressor output under `/var/lib/plan`.
-- `DJANGO_SETTINGS_MODULE` is pinned to `plan.settings.container` in container args to reduce accidental drift.
+- `DJANGO_SETTINGS_MODULE` defaults to `plan.settings.container` in the image to reduce accidental drift.
