@@ -474,6 +474,7 @@ def select_groups(request, schedule):
 
     if request.method == "POST":
         with transaction.atomic():
+            changed = False
             for c in courses:
                 try:
                     groups = course_groups[c.id]
@@ -489,8 +490,16 @@ def select_groups(request, schedule):
                         schedule.student.slug,
                     ).get(course=c)
 
-                    subscription.groups.set(group_form.cleaned_data["groups"])
-                    subscription.save()  # Update last modified.
+                    selected_groups = set(group_form.cleaned_data["groups"])
+                    current_groups = set(subscription.groups.all())
+
+                    if selected_groups != current_groups:
+                        subscription.groups.set(group_form.cleaned_data["groups"])
+                        subscription.save()  # Update last modified.
+                        changed = True
+
+            if changed:
+                schedule.bump_last_modified()
 
             utils.clear_cache(schedule)
 
@@ -581,6 +590,8 @@ def _add_courses(request, schedule):
 
     student, _ = Student.objects.get_or_create(slug=schedule.student.slug)
 
+    changed = False
+
     for l in lookup:
         try:
             if len(subscriptions) > settings.TIMETABLE_MAX_COURSES:
@@ -592,10 +603,11 @@ def _add_courses(request, schedule):
                 semester=schedule.semester,
             )
 
-            Subscription.objects.get_or_create(
+            _, created = Subscription.objects.get_or_create(
                 student=student,
                 course=course,
             )
+            changed = changed or created
             subscriptions.add(course.code)
 
         except Course.DoesNotExist:
@@ -616,6 +628,9 @@ def _add_courses(request, schedule):
             },
         )
 
+    if changed:
+        schedule.bump_last_modified()
+
     return shortcuts.redirect("change-groups", schedule)
 
 
@@ -626,11 +641,18 @@ def _remove_courses(request, schedule):
             if c.strip():
                 courses.append(c.strip())
 
-        Subscription.objects.get_subscriptions(
-            schedule.semester.year,
-            schedule.semester.type,
-            schedule.student.slug,
-        ).filter(course__id__in=courses).delete()
+        deleted_count, _ = (
+            Subscription.objects.get_subscriptions(
+                schedule.semester.year,
+                schedule.semester.type,
+                schedule.student.slug,
+            )
+            .filter(course__id__in=courses)
+            .delete()
+        )
+
+        if deleted_count > 0:
+            schedule.bump_last_modified()
 
         slug = schedule.student.slug
         if Subscription.objects.filter(student__slug=slug).count() == 0:
@@ -646,6 +668,8 @@ def _override_name(request, schedule):
         schedule.student.slug,
     )
 
+    changed = False
+
     for u in subscriptions:
         form = forms.CourseAliasForm(request.POST, prefix=u.course_id)
 
@@ -656,8 +680,13 @@ def _override_name(request, schedule):
                 # Leave as blank if we match the current course name
                 alias = ""
 
-            u.alias = alias
-            u.save()
+            if u.alias != alias:
+                u.alias = alias
+                u.save()
+                changed = True
+
+    if changed:
+        schedule.bump_last_modified()
 
     return None
 
@@ -686,6 +715,7 @@ def select_lectures(request, schedule):
                 subscription.save()  # Trigger last_modified update
 
         utils.clear_cache(schedule)
+        schedule.bump_last_modified()
 
     return shortcuts.redirect("schedule-advanced", schedule)
 

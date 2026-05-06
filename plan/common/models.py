@@ -533,3 +533,19 @@ class Deadline(models.Model):
     date = models.DateField(_("Due date"))
     time = models.TimeField(_("Time"), null=True)
     done = models.DateTimeField(_("Done"), null=True)
+
+
+# TODO(adamcik): Turn this into Schedule and absorb the student slug?
+class Schedule(models.Model):
+    id = models.AutoField(primary_key=True)
+    semester = models.ForeignKey(Semester, on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+
+    last_modified = models.DateTimeField(_("Last modified"), auto_now=True)
+    version = models.BigIntegerField(_("Version"), default=0)
+
+    class Meta:
+        unique_together = (("semester", "student"),)
+
+    def __str__(self):
+        return f"{self.semester} - {self.student}"

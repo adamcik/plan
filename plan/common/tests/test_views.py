@@ -3,11 +3,12 @@
 import datetime
 
 from django.core.cache import cache
+from django.test import override_settings
 from django.urls import reverse
-from django.utils.datastructures import MultiValueDict
 from django.utils import timezone
+from django.utils.datastructures import MultiValueDict
 
-from plan.common.models import Group, Lecture, Subscription
+from plan.common.models import Group, Lecture, Schedule, Subscription
 from plan.common.tests import BaseTestCase
 
 
@@ -155,6 +156,7 @@ class ViewTestCase(BaseTestCase):
 
             subscriptions = new_subscriptions
 
+    @override_settings(TIMETABLE_ENABLE_IF_MODIFIED_SINCE=True)
     def test_change_course_remove_invalidates_schedule_data_cache(self):
         schedule_url = reverse("schedule-advanced", args=[self.schedule])
         change_url = reverse("change-course", args=[self.schedule])
@@ -195,6 +197,60 @@ class ViewTestCase(BaseTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, remove_course_code)
+
+    @override_settings(TIMETABLE_ENABLE_IF_MODIFIED_SINCE=True)
+    def test_change_course_in_other_semester_does_not_invalidate_current_schedule(self):
+        spring_schedule_url = reverse("schedule-advanced", args=[self.schedule])
+        fall_change_url = reverse("change-course", args=[self.next_schedule])
+
+        response = self.client.get(spring_schedule_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Last-Modified", response.headers)
+        if_modified_since = response.headers["Last-Modified"]
+
+        response = self.client.post(
+            fall_change_url,
+            {"submit_add": True, "course_add": "COURSE4"},
+        )
+        self.assertEqual(response.status_code, 302)
+
+        response = self.client.get(
+            spring_schedule_url,
+            HTTP_IF_MODIFIED_SINCE=if_modified_since,
+        )
+        self.assertEqual(response.status_code, 304)
+
+    @override_settings(TIMETABLE_ENABLE_IF_MODIFIED_SINCE=True)
+    def test_schedule_works_when_schedule_last_modified_row_is_missing(self):
+        schedule_url = reverse("schedule-advanced", args=[self.schedule])
+
+        Schedule.objects.filter(
+            semester__year=2009,
+            semester__type="spring",
+            student__slug="adamcik",
+        ).delete()
+
+        shared_last_modified = timezone.make_aware(
+            datetime.datetime(2009, 1, 1, 12, 0, 0)
+        )
+        Subscription.objects.filter(
+            student__slug="adamcik",
+            course__semester__year=2009,
+            course__semester__type="spring",
+        ).update(last_modified=shared_last_modified)
+
+        cache.clear()
+
+        response = self.client.get(schedule_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Last-Modified", response.headers)
+        if_modified_since = response.headers["Last-Modified"]
+
+        response = self.client.get(
+            schedule_url,
+            HTTP_IF_MODIFIED_SINCE=if_modified_since,
+        )
+        self.assertEqual(response.status_code, 304)
 
     def test_change_course_invalid_course_renders_error(self):
         url = reverse("change-course", args=[self.schedule])
