@@ -1,5 +1,17 @@
 {
   "nodes": {
+    "build-overrides": {
+      "flake": false,
+      "locked": {
+        "path": "./.build-overrides",
+        "type": "path"
+      },
+      "original": {
+        "path": "./.build-overrides",
+        "type": "path"
+      },
+      "parent": []
+    },
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": "nixpkgs-lib"
@@ -133,6 +145,7 @@
     },
     "root": {
       "inputs": {
+        "build-overrides": "build-overrides",
         "flake-parts": "flake-parts",
         "nix2container": "nix2container",
         "nixpkgs": "nixpkgs",

@@ -1,4 +1,8 @@
-{...}: {
+{
+  inputs,
+  self,
+  ...
+}: {
   imports = [./modules/nix2container.nix];
 
   perSystem = {
@@ -8,6 +12,13 @@
     ...
   }: let
     nix2containerPkgs = inputs'.nix2container.packages.nix2container;
+    overrideMetadata = builtins.fromJSON (builtins.readFile inputs.build-overrides);
+    fallbackCreated = let
+      d = self.lastModifiedDate or "";
+    in
+      if d == "" || builtins.stringLength d < 14
+      then "0001-01-01T00:00:00Z"
+      else "${builtins.substring 0 4 d}-${builtins.substring 4 2 d}-${builtins.substring 6 2 d}T${builtins.substring 8 2 d}:${builtins.substring 10 2 d}:${builtins.substring 12 2 d}Z";
     uwsgiPkg = pkgs.uwsgi.override {
       python3 = config.uv2nix.python;
       plugins = ["python3"];
@@ -96,6 +107,10 @@
     nix2container = {
       name = "ghcr.io/adamcik/plan";
       tag = "latest";
+      created =
+        if ((overrideMetadata.created or null) != null)
+        then overrideMetadata.created
+        else fallbackCreated;
 
       imageConfig = {
         Cmd = [(pkgs.lib.getExe serveScript)];
@@ -112,6 +127,24 @@
           "PLAN_UWSGI_PROCESSES=4"
           "PLAN_UWSGI_THREADS=1"
         ];
+        Labels = let
+          created =
+            if ((overrideMetadata.created or null) != null)
+            then overrideMetadata.created
+            else fallbackCreated;
+        in
+          {
+            "org.opencontainers.image.created" = created;
+            "org.opencontainers.image.description" = "Timetable generator for educational institutions.";
+            "org.opencontainers.image.source" = "https://github.com/adamcik/plan";
+            "org.opencontainers.image.title" = "plan";
+          }
+          // pkgs.lib.optionalAttrs ((overrideMetadata.revision or null) != null) {
+            "org.opencontainers.image.revision" = overrideMetadata.revision;
+          }
+          // pkgs.lib.optionalAttrs ((overrideMetadata.version or null) != null) {
+            "org.opencontainers.image.version" = overrideMetadata.version;
+          };
       };
 
       layers = let

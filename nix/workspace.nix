@@ -1,4 +1,4 @@
-{...}: {
+{inputs, ...}: {
   imports = [./modules/uv2nix.nix];
   perSystem = {
     config,
@@ -28,6 +28,7 @@
         }
       else pkgsLegacy.python310;
     editableVenv = config.uv2nix.devVenv;
+    overrideMetadata = builtins.fromJSON (builtins.readFile inputs.build-overrides);
   in {
     uv2nix = {
       inherit python;
@@ -80,6 +81,9 @@
               "-Wno-error=int-conversion"
               "-fpermissive"
             ];
+          };
+          plan.env = lib.optionalAttrs ((overrideMetadata.version or null) != null) {
+            SETUPTOOLS_SCM_PRETEND_VERSION = overrideMetadata.version;
           };
         };
       in

@@ -35,6 +35,11 @@ in {
               default = "latest";
               description = "Container image tag/version.";
             };
+            created = lib.mkOption {
+              type = lib.types.nullOr lib.types.str;
+              default = null;
+              description = "OCI image creation timestamp.";
+            };
             maxLayers = lib.mkOption {
               type = lib.types.int;
               default = 1;
@@ -54,17 +59,18 @@ in {
       ...
     }: let
       cfg = config.nix2container;
-      image = inputs'.nix2container.packages.nix2container.buildImage {
-        inherit (cfg) name tag;
-        maxLayers = cfg.maxLayers;
-        copyToRoot = pkgs.buildEnv {
-          name = cfg.name + "-root";
-          paths = cfg.copyToRoot;
-          pathsToLink = ["/bin" "/lib" "/share" "/etc" "/app"];
-        };
-        config = cfg.imageConfig;
-        layers = cfg.layers;
-      };
+      image = inputs'.nix2container.packages.nix2container.buildImage ({
+          inherit (cfg) name tag;
+          maxLayers = cfg.maxLayers;
+          copyToRoot = pkgs.buildEnv {
+            name = cfg.name + "-root";
+            paths = cfg.copyToRoot;
+            pathsToLink = ["/bin" "/lib" "/share" "/etc" "/app"];
+          };
+          config = cfg.imageConfig;
+          layers = cfg.layers;
+        }
+        // lib.optionalAttrs (cfg.created != null) {inherit (cfg) created;});
     in {
       packages.image = image;
     };

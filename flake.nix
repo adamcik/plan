@@ -38,6 +38,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    build-overrides = {
+      url = "path:./.build-overrides";
+      flake = false;
+    };
+
     systems.url = "github:nix-systems/default";
   };
 
