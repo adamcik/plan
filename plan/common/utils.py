@@ -35,6 +35,7 @@ def clear_cache(
     slug = schedule.student.slug
 
     cache.delete(f"modified:{year}-{semester_type}-{slug}")
+    cache.delete(f"schedule-data:{year}-{semester_type}-{slug}")
 
     if schedule.last_modified is None:
         return

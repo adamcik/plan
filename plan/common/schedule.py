@@ -14,6 +14,8 @@ class Schedule:
     semester: Semester
     student: Student
     last_modified: Optional[int] = None
+    version: int = 0
+    semester_version: int = 0
 
     def bump_last_modified(self):
         if self.student.id is None:
@@ -26,6 +28,8 @@ class Schedule:
 
         if created:
             ScheduleModel.objects.filter(id=row.id).update(version=1)
+            self.version = 1
             return
 
         ScheduleModel.objects.filter(id=row.id).update(version=F("version") + 1)
+        self.version += 1
