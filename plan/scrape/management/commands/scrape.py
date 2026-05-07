@@ -6,6 +6,8 @@ import logging
 from django.conf import settings
 from django.core.management import base as management
 from django.db import transaction
+from django.db.models import F
+from django.utils import timezone
 
 from plan.common.models import Semester
 from plan.scrape import fetch, utils
@@ -92,6 +94,7 @@ class Command(management.LabelCommand):
                 transaction.savepoint_rollback(sid)
                 print("No changes, rolled back.")
             elif utils.prompt("Commit changes?"):
+                self.bump_semester_freshness(semester)
                 transaction.savepoint_commit(sid)
                 print("Commiting changes.")
             else:
@@ -137,3 +140,9 @@ class Command(management.LabelCommand):
             raise management.CommandError(f"Couldn't import {module}: {e}")
         except AttributeError:
             raise management.CommandError(f"Scraper {cls} not found in {module}")
+
+    def bump_semester_freshness(self, semester):
+        Semester.objects.filter(id=semester.id).update(
+            version=F("version") + 1,
+            last_modified=timezone.now(),
+        )
