@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.datastructures import MultiValueDict
 
-from plan.common.models import Group, Lecture, Schedule, Subscription
+from plan.common.models import Group, Lecture, Schedule, Semester, Student, Subscription
 from plan.common.tests import BaseTestCase
 
 
@@ -251,6 +251,71 @@ class ViewTestCase(BaseTestCase):
             HTTP_IF_MODIFIED_SINCE=if_modified_since,
         )
         self.assertEqual(response.status_code, 304)
+
+    def test_change_course_creates_schedule_row_with_version_bump(self):
+        schedule_url = reverse("schedule-advanced", args=[self.schedule])
+        change_url = reverse("change-course", args=[self.schedule])
+
+        Schedule.objects.filter(
+            semester__year=2009,
+            semester__type="spring",
+            student__slug="adamcik",
+        ).delete()
+
+        self.client.get(schedule_url)
+        response = self.client.post(
+            change_url,
+            {"submit_add": True, "course_add": "COURSE4"},
+        )
+        self.assertEqual(response.status_code, 302)
+
+        row = Schedule.objects.get(
+            semester__year=2009,
+            semester__type="spring",
+            student__slug="adamcik",
+        )
+        self.assertEqual(row.version, 1)
+
+    def test_change_course_increments_schedule_version_on_each_mutation(self):
+        schedule_url = reverse("schedule-advanced", args=[self.schedule])
+        change_url = reverse("change-course", args=[self.schedule])
+
+        student = Student.objects.get(slug="adamcik")
+        semester = Semester.objects.get(year=2009, type="spring")
+        row, _ = Schedule.objects.get_or_create(
+            semester_id=semester.id,
+            student_id=student.id,
+            defaults={"version": 0},
+        )
+        row.version = 0
+        row.save(update_fields=["version"])
+
+        self.client.get(schedule_url)
+
+        response = self.client.post(
+            change_url,
+            {"submit_add": True, "course_add": "COURSE4"},
+        )
+        self.assertEqual(response.status_code, 302)
+
+        row.refresh_from_db()
+        self.assertEqual(row.version, 1)
+
+        remove_course_id = Subscription.objects.get(
+            student__slug="adamcik",
+            course__semester__year=2009,
+            course__semester__type="spring",
+            course__code="COURSE4",
+        ).course_id
+
+        response = self.client.post(
+            change_url,
+            {"submit_remove": True, "course_remove": str(remove_course_id)},
+        )
+        self.assertEqual(response.status_code, 302)
+
+        row.refresh_from_db()
+        self.assertEqual(row.version, 2)
 
     def test_change_course_invalid_course_renders_error(self):
         url = reverse("change-course", args=[self.schedule])

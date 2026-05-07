@@ -4,6 +4,8 @@
 from dataclasses import dataclass
 from typing import Optional
 
+from django.db.models import F
+
 from plan.common.models import Schedule as ScheduleModel, Semester, Student
 
 
@@ -17,7 +19,13 @@ class Schedule:
         if self.student.id is None:
             self.student = Student.objects.get(slug=self.student.slug)
 
-        ScheduleModel.objects.update_or_create(
+        row, created = ScheduleModel.objects.get_or_create(
             semester_id=self.semester.id,
             student_id=self.student.id,
         )
+
+        if created:
+            ScheduleModel.objects.filter(id=row.id).update(version=1)
+            return
+
+        ScheduleModel.objects.filter(id=row.id).update(version=F("version") + 1)
