@@ -27,6 +27,13 @@ This repo is Nix-first. Use Nix entrypoints for formatting, checks, and tests.
 - Format: `nix fmt`
 - Full validation: `nix flake check`
 - Interactive shell: `nix develop`
+- Django migrations (inside devshell): `nix develop -c django-admin makemigrations <app>`
+
+## Version control + Nix visibility
+
+- Ensure newly created files are tracked before running Nix checks/builds.
+- For Git workflows, stage new files (especially migrations) with `git add`.
+- For Jujutsu workflows, track new files with `jj file track` so Nix sees them in the working tree.
 
 ## Useful targeted builds
 
