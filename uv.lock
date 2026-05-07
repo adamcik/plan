@@ -213,7 +213,6 @@ wheels = [
 
 [[package]]
 name = "plan"
-version = "2.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "brotli" },
@@ -246,7 +245,7 @@ requires-dist = [
     { name = "lxml", specifier = "~=6.1.0" },
     { name = "psycopg2", specifier = "~=2.9.11" },
     { name = "python-memcached", specifier = ">=1.58,<1.60" },
-    { name = "reportlab", specifier = "~=3.5.59" },
+    { name = "reportlab", specifier = "~=3.6.13" },
     { name = "sentry-sdk", specifier = ">=2.0.0,<3" },
     { name = "typing-extensions", specifier = ">=4.12.2" },
     { name = "vobject", specifier = "~=0.9.6.1" },
@@ -312,12 +311,23 @@ sdist = { url = "https://files.pythonhosted.org/packages/e2/5f/852be8aa80d1c24de
 
 [[package]]
 name = "reportlab"
-version = "3.5.68"
+version = "3.6.13"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pillow" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f8/3b/3684a3414cde1626be5245af21ace0629ceb1e38ff745a84e07349505827/reportlab-3.5.68.tar.gz", hash = "sha256:efef6a97e3ab49f3f40037dbf9a4166668a17cc6aaba13d5ecbabdf854a9b332", size = 4512985, upload-time = "2021-06-27T08:16:30.935Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/65/82/45b443db5acaf7edb471be57335a22d9f3bb6e4e9c9133ffa926f8ecdf2a/reportlab-3.6.13.tar.gz", hash = "sha256:6f75d33f7a3720cf47371ab63ced0f0ebd1aeb6db19386ae92f8977a09be9611", size = 4035524, upload-time = "2023-04-27T09:46:23.711Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/50/7c/21b6b6b0f722172b8ea97d9a4eab11abaadf88d12a931b02a18c175025fe/reportlab-3.6.13-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:a0330322c6c8123745ac7667fcc6ae3e0de3b73c15bdfaa28c788a9eaa0f50da", size = 2443846, upload-time = "2023-04-27T09:44:12.5Z" },
+    { url = "https://files.pythonhosted.org/packages/af/6d/5bb7334b209940f0b102474b2aef45bd6caf0c6b0ee9fefbeb0f894f5591/reportlab-3.6.13-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:753485bb2b18cbd11340e227e4aaf9bde3bb64f83406dfa011e92ad0231a42c9", size = 2411527, upload-time = "2023-04-27T09:44:16.297Z" },
+    { url = "https://files.pythonhosted.org/packages/9f/2c/f8a92c8a005c026200ad6fec291f5176d737696cf6a1867873135f7b2694/reportlab-3.6.13-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:58ea3471b9b4b8e7952bd357e8487789da11213470be328ffb3e5b7d7690c2c7", size = 2746122, upload-time = "2023-04-27T09:44:19.263Z" },
+    { url = "https://files.pythonhosted.org/packages/c9/35/d50592a1303eebdc30891df0353dd8c6f5b1ad65ba564d5927f19526071a/reportlab-3.6.13-cp310-cp310-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:f1993a68c0edc45895d3df350d01b0456efe79aaf309cef777762742be501f2a", size = 2737078, upload-time = "2023-04-27T09:44:21.579Z" },
+    { url = "https://files.pythonhosted.org/packages/21/2c/82b5c5c176e4111efa77aca5ff1b3dc6303139ac94cf09ac89b471b6b423/reportlab-3.6.13-cp310-cp310-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:ca8eb7a6607f8a664187a330bab9f8d11c9f81ed885e063dfbb29a130944a72a", size = 2839178, upload-time = "2023-04-27T09:44:24.98Z" },
+    { url = "https://files.pythonhosted.org/packages/7e/d8/bc7d3154e4d3a4132a43a01abd137c791de87ba4c52e94d064598a76515f/reportlab-3.6.13-cp310-cp310-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:57add04824bca89a130f9d428ace1b003cce4061386e0ec2a1b45b554ffe7aa3", size = 2779337, upload-time = "2023-04-27T09:44:28.516Z" },
+    { url = "https://files.pythonhosted.org/packages/d9/66/235944345eda71bac79a11890c38cc2f9eaa931a71c30f61c7d3fee2ace5/reportlab-3.6.13-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e98965c6e60d76ff63989d9400ae8e65efd67c665d785b377f438f166a57c053", size = 2762054, upload-time = "2023-04-27T09:44:31.417Z" },
+    { url = "https://files.pythonhosted.org/packages/09/79/a64dc496e03788a6fd2d4bdef442202553855ec4f3d2bea2465bc76b0c28/reportlab-3.6.13-cp310-cp310-win32.whl", hash = "sha256:3cb0da4975dbade6cc2ea6b0b0b17578af266dc3f669e959648f3306af993369", size = 2280140, upload-time = "2023-04-27T09:44:34.6Z" },
+    { url = "https://files.pythonhosted.org/packages/29/6d/d4aff5ba45ee541c82b1e1fed428c7dd9ebdefc5e3c0007b068d115ffcf0/reportlab-3.6.13-cp310-cp310-win_amd64.whl", hash = "sha256:65b441e22d8fe93154567a30662d8539e639b78142815afcaf92b388846eb3c1", size = 2339087, upload-time = "2023-04-27T09:44:37.671Z" },
+]
 
 [[package]]
 name = "requests"
