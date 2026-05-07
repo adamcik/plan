@@ -298,6 +298,8 @@ class Semester(models.Model):
     year = models.PositiveSmallIntegerField(_("Year"))
     type = models.CharField(_("Type"), max_length=10, choices=SEMESTER_TYPES)
     active = models.DateField(_("Active"), null=True)
+    version = models.BigIntegerField(_("Version"), default=0)
+    last_modified = models.DateTimeField(_("Last modified"), null=True)
 
     objects = SemesterManager()
 
