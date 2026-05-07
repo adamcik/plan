@@ -33,14 +33,18 @@ class ManagmentTestCase(BaseTestCase):
         options.update(overrides)
         return options
 
-    def _run_with_scraper(self, needs_commit, **overrides):
+    def _run_with_scraper(self, outcome, **overrides):
         class FakeScraper:
             def __init__(self, semester, prefix):
                 self.semester = semester
                 self.prefix = prefix
 
             def run(self):
-                return needs_commit
+                if outcome == "noop":
+                    return False
+                if outcome in {"changed", "delete-only"}:
+                    return True
+                raise AssertionError(f"Unknown fake scrape outcome: {outcome}")
 
         command = Command()
         with mock.patch.object(command, "load_scraper", return_value=FakeScraper):
@@ -55,7 +59,19 @@ class ManagmentTestCase(BaseTestCase):
         semester.last_modified = None
         semester.save(update_fields=["version", "last_modified"])
 
-        self._run_with_scraper(needs_commit=True)
+        self._run_with_scraper(outcome="changed")
+
+        semester.refresh_from_db()
+        self.assertEqual(1, semester.version)
+        self.assertIsNotNone(semester.last_modified)
+
+    def test_delete_only_committed_scrape_bumps_semester_freshness(self):
+        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+        semester.version = 0
+        semester.last_modified = None
+        semester.save(update_fields=["version", "last_modified"])
+
+        self._run_with_scraper(outcome="delete-only")
 
         semester.refresh_from_db()
         self.assertEqual(1, semester.version)
@@ -67,7 +83,7 @@ class ManagmentTestCase(BaseTestCase):
         semester.last_modified = None
         semester.save(update_fields=["version", "last_modified"])
 
-        self._run_with_scraper(needs_commit=False)
+        self._run_with_scraper(outcome="noop")
 
         semester.refresh_from_db()
         self.assertEqual(0, semester.version)
@@ -79,7 +95,7 @@ class ManagmentTestCase(BaseTestCase):
         semester.last_modified = None
         semester.save(update_fields=["version", "last_modified"])
 
-        self._run_with_scraper(needs_commit=True, dry_run=True)
+        self._run_with_scraper(outcome="changed", dry_run=True)
 
         semester.refresh_from_db()
         self.assertEqual(0, semester.version)
