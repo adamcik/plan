@@ -5,12 +5,16 @@ import re
 
 from django.conf import settings
 from django.core.cache import cache
-from django.db.models import Q
 from django.db.models.aggregates import Max
 from django.http import Http404
 from django.utils import translation
 
-from plan.common.models import Semester, Student, Subscription
+from plan.common.models import (
+    Schedule as ScheduleModel,
+    Semester,
+    Student,
+    Subscription,
+)
 from plan.common.schedule import Schedule
 
 
@@ -100,17 +104,30 @@ class ScheduleConverter:
             lectures_last_modified=Max("course__lecture__last_modified"),
             rooms_last_modified=Max("course__lecture__rooms__last_modified"),
             exams_last_modified=Max("course__exam__last_modified"),
-            schedule_last_modified=Max(
-                "student__schedule__last_modified",
-                filter=Q(student__schedule__semester_id=semester.id),
-            ),
         )
-        last_modified = max([0] + [int(agg.timestamp()) for agg in qs.values() if agg])
+
+        try:
+            schedule_row = ScheduleModel.objects.get(
+                semester_id=semester.id,
+                student_id=student.id,
+            )
+        except ScheduleModel.DoesNotExist:
+            schedule_row = None
+
+        timestamps = [int(agg.timestamp()) for agg in qs.values() if agg]
+        if semester.last_modified:
+            timestamps.append(int(semester.last_modified.timestamp()))
+        if schedule_row and schedule_row.last_modified:
+            timestamps.append(int(schedule_row.last_modified.timestamp()))
+
+        last_modified = max([0] + timestamps)
 
         result = Schedule(
             semester=semester,
             student=student,
             last_modified=last_modified or None,
+            version=schedule_row.version if schedule_row else 0,
+            semester_version=semester.version,
         )
 
         cache.set(key, result, timeout=60)
