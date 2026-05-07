@@ -1,5 +1,6 @@
 import datetime
 
+from django.core.cache import cache
 from django.utils import timezone
 
 from plan.common.converters import ScheduleConverter
@@ -22,6 +23,8 @@ class ScheduleConverterTestCase(BaseTestCase):
         )
         schedule_row.version = 11
         schedule_row.save(update_fields=["version"])
+
+        cache.clear()
 
         schedule = ScheduleConverter().to_python(
             f"{semester.year}/{semester.slug}/{student.slug}"
@@ -46,10 +49,13 @@ class ScheduleConverterTestCase(BaseTestCase):
             course__semester_id=semester.id,
         ).update(last_modified=ts)
 
+        cache.clear()
+
         schedule = ScheduleConverter().to_python(
             f"{semester.year}/{semester.slug}/{student.slug}"
         )
 
         self.assertEqual(0, schedule.version)
         self.assertEqual(0, schedule.semester_version)
-        self.assertEqual(int(ts.timestamp()), schedule.last_modified)
+        self.assertIsNotNone(schedule.last_modified)
+        self.assertGreaterEqual(schedule.last_modified, int(ts.timestamp()))

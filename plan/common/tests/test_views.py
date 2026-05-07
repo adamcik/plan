@@ -317,18 +317,114 @@ class ViewTestCase(BaseTestCase):
         row.refresh_from_db()
         self.assertEqual(row.version, 2)
 
+    def test_change_course_updates_schedule_last_modified_on_existing_row(self):
+        schedule_url = reverse("schedule-advanced", args=[self.schedule])
+        change_url = reverse("change-course", args=[self.schedule])
+
+        student = Student.objects.get(slug="adamcik")
+        semester = Semester.objects.get(year=2009, type="spring")
+        row, _ = Schedule.objects.get_or_create(
+            semester_id=semester.id,
+            student_id=student.id,
+            defaults={"version": 0},
+        )
+
+        baseline = datetime.datetime(2009, 1, 1, 12, 0, 0)
+        Schedule.objects.filter(id=row.id).update(version=0, last_modified=baseline)
+
+        self.client.get(schedule_url)
+        response = self.client.post(
+            change_url,
+            {"submit_add": True, "course_add": "COURSE4"},
+        )
+        self.assertEqual(response.status_code, 302)
+
+        row.refresh_from_db()
+        self.assertEqual(row.version, 1)
+        self.assertGreater(row.last_modified, baseline)
+
+    @override_settings(TIMETABLE_ENABLE_IF_MODIFIED_SINCE=True)
+    def test_delete_mutation_does_not_return_stale_304_for_old_ims(self):
+        schedule_url = reverse("schedule-advanced", args=[self.schedule])
+        change_url = reverse("change-course", args=[self.schedule])
+
+        student = Student.objects.get(slug="adamcik")
+        semester = Semester.objects.get(year=2009, type="spring")
+
+        baseline = datetime.datetime(2009, 1, 1, 12, 0, 0)
+        Subscription.objects.filter(
+            student_id=student.id,
+            course__semester_id=semester.id,
+        ).update(last_modified=baseline)
+
+        row, _ = Schedule.objects.get_or_create(
+            semester_id=semester.id,
+            student_id=student.id,
+            defaults={"version": 0},
+        )
+        Schedule.objects.filter(id=row.id).update(version=0, last_modified=baseline)
+
+        response = self.client.get(schedule_url)
+        self.assertEqual(response.status_code, 200)
+        old_if_modified_since = response.headers["Last-Modified"]
+
+        remove_course_id = (
+            Subscription.objects.filter(
+                student_id=student.id,
+                course__semester_id=semester.id,
+            )
+            .order_by("course_id")
+            .values_list("course_id", flat=True)
+            .first()
+        )
+        self.assertIsNotNone(remove_course_id)
+
+        response = self.client.post(
+            change_url,
+            {"submit_remove": True, "course_remove": str(remove_course_id)},
+        )
+        self.assertEqual(response.status_code, 302)
+
+        response = self.client.get(
+            schedule_url,
+            HTTP_IF_MODIFIED_SINCE=old_if_modified_since,
+        )
+        self.assertEqual(response.status_code, 200)
+
     @override_settings(TIMETABLE_ENABLE_IF_MODIFIED_SINCE=True)
     def test_schedule_cache_identity_changes_when_schedule_version_changes(self):
         schedule_url = reverse("schedule-advanced", args=[self.schedule])
         change_url = reverse("change-course", args=[self.schedule])
+        cache.clear()
+
+        student = Student.objects.get(slug="adamcik")
+        semester = Semester.objects.get(year=2009, type="spring")
+        row, _ = Schedule.objects.get_or_create(
+            semester_id=semester.id,
+            student_id=student.id,
+            defaults={"version": 0},
+        )
+        row.version = 0
+        row.save(update_fields=["version"])
 
         response = self.client.get(schedule_url)
         self.assertEqual(response.status_code, 200)
         first_key = response.headers["X-Cache"]
 
+        remove_course_id = (
+            Subscription.objects.filter(
+                student_id=student.id,
+                course__semester_id=semester.id,
+            )
+            .order_by("course_id")
+            .values_list("course_id", flat=True)
+            .first()
+        )
+        self.assertIsNotNone(remove_course_id)
+
         response = self.client.post(
             change_url,
-            {"submit_add": True, "course_add": "COURSE4"},
+            {"submit_remove": True, "course_remove": str(remove_course_id)},
         )
         self.assertEqual(response.status_code, 302)
 

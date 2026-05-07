@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from django.db.models import F
+from django.utils import timezone
 
 from plan.common.models import Schedule as ScheduleModel, Semester, Student
 
@@ -31,5 +32,9 @@ class Schedule:
             self.version = 1
             return
 
-        ScheduleModel.objects.filter(id=row.id).update(version=F("version") + 1)
-        self.version += 1
+        ScheduleModel.objects.filter(id=row.id).update(
+            version=F("version") + 1,
+            last_modified=timezone.now(),
+        )
+        row.refresh_from_db(fields=["version"])
+        self.version = row.version
