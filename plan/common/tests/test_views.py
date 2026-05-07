@@ -317,6 +317,27 @@ class ViewTestCase(BaseTestCase):
         row.refresh_from_db()
         self.assertEqual(row.version, 2)
 
+    @override_settings(TIMETABLE_ENABLE_IF_MODIFIED_SINCE=True)
+    def test_schedule_cache_identity_changes_when_schedule_version_changes(self):
+        schedule_url = reverse("schedule-advanced", args=[self.schedule])
+        change_url = reverse("change-course", args=[self.schedule])
+
+        response = self.client.get(schedule_url)
+        self.assertEqual(response.status_code, 200)
+        first_key = response.headers["X-Cache"]
+
+        response = self.client.post(
+            change_url,
+            {"submit_add": True, "course_add": "COURSE4"},
+        )
+        self.assertEqual(response.status_code, 302)
+
+        response = self.client.get(schedule_url)
+        self.assertEqual(response.status_code, 200)
+        second_key = response.headers["X-Cache"]
+
+        self.assertNotEqual(first_key, second_key)
+
     def test_change_course_invalid_course_renders_error(self):
         url = reverse("change-course", args=[self.schedule])
 

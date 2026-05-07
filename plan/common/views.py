@@ -218,7 +218,8 @@ def _schedule_data(s: Schedule, next_semester: Optional[Semester] = None):
     if s.last_modified is None:
         return [], [], [], [], [], [], [], []
 
-    key = f"db:{s.semester.year}-{s.semester.type}-{s.student.slug}:{s.last_modified}"
+    token = _schedule_freshness_token(s)
+    key = f"db:{s.semester.year}-{s.semester.type}-{s.student.slug}:{token}"
     result = cache.get(key)
     if result:
         return result
@@ -292,13 +293,20 @@ def _schedule_data(s: Schedule, next_semester: Optional[Semester] = None):
 
 
 def _response_cache_key(prefix: str, s: Schedule) -> str:
+    token = _schedule_freshness_token(s)
     return ":".join(
         (
             prefix,
             f"{s.semester.year}-{s.semester.slug}-{s.student.slug}",
-            str(s.last_modified),
+            token,
         )
     )
+
+
+def _schedule_freshness_token(s: Schedule) -> str:
+    if s.version > 0 or s.semester_version > 0:
+        return f"v{s.version}-sv{s.semester_version}"
+    return f"lm:{s.last_modified}"
 
 
 # TODO: Can we turn this into a middleware? That would allow us to cache
