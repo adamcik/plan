@@ -60,18 +60,23 @@ DATABASES = {
 }
 
 BASE_DIR = os.environ.get("PLAN_BASE_DIR", "/var/lib/plan")
+CACHE_DIR = os.environ.get("PLAN_CACHE_DIR", "/var/cache/plan")
 
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_ROOT = os.environ.get("PLAN_STATIC_ROOT", "/static")
+COMPRESS_ROOT = os.environ.get(
+    "PLAN_COMPRESS_ROOT",
+    os.path.join(CACHE_DIR, "static"),
+)
 
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
-        "LOCATION": os.path.join(BASE_DIR, "cache", "default"),
+        "LOCATION": os.path.join(CACHE_DIR, "default"),
         "KEY_PREFIX": "container",
     },
     "ical": {
         "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
-        "LOCATION": os.path.join(BASE_DIR, "cache", "ical"),
+        "LOCATION": os.path.join(CACHE_DIR, "ical"),
         "TIMEOUT": timedelta(days=90).total_seconds(),
         "KEY_PREFIX": "container-ical",
         "OPTIONS": {
@@ -80,7 +85,7 @@ CACHES = {
     },
     "scraper": {
         "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
-        "LOCATION": os.path.join(BASE_DIR, "cache", "scraper"),
+        "LOCATION": os.path.join(CACHE_DIR, "scraper"),
         "TIMEOUT": timedelta(days=7).total_seconds(),
         "KEY_PREFIX": "container-scraper",
         "OPTIONS": {
@@ -112,6 +117,7 @@ if secure_proxy:
 EMAIL_SUBJECT_PREFIX = os.environ.get("EMAIL_SUBJECT_PREFIX", "")
 TIMETABLE_INSTITUTION = os.environ.get("TIMETABLE_INSTITUTION", TIMETABLE_INSTITUTION)
 STATIC_URL = os.environ.get("STATIC_URL", STATIC_URL)
+COMPRESS_URL = os.environ.get("COMPRESS_URL", STATIC_URL)
 
 
 LOGGING = {

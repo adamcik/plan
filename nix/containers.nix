@@ -33,6 +33,10 @@
       export PLAN_UWSGI_HTTP="''${PLAN_UWSGI_HTTP:?PLAN_UWSGI_HTTP is required}"
       export PLAN_UWSGI_PROCESSES="''${PLAN_UWSGI_PROCESSES:?PLAN_UWSGI_PROCESSES is required}"
       export PLAN_UWSGI_THREADS="''${PLAN_UWSGI_THREADS:?PLAN_UWSGI_THREADS is required}"
+      export PLAN_UWSGI_STATIC_URL="''${PLAN_UWSGI_STATIC_URL:-/_/static}"
+      export PLAN_UWSGI_STATIC_ROOT="''${PLAN_UWSGI_STATIC_ROOT:-${staticAssets}/static}"
+      export PLAN_UWSGI_CACHE_URL="''${PLAN_UWSGI_CACHE_URL:-/_/cache}"
+      export PLAN_UWSGI_CACHE_ROOT="''${PLAN_UWSGI_CACHE_ROOT:-/var/cache/plan/static}"
 
       uwsgi_args=(
         "--plugin" "python3"
@@ -42,8 +46,8 @@
         "--catch-exceptions"
         "--log-5xx"
         "--log-master"
-        "--static-map" "/static/CACHE=/var/lib/plan/static/CACHE"
-        "--static-map" "/static=${staticAssets}/static"
+        "--static-map" "$PLAN_UWSGI_CACHE_URL=$PLAN_UWSGI_CACHE_ROOT"
+        "--static-map" "$PLAN_UWSGI_STATIC_URL=$PLAN_UWSGI_STATIC_ROOT"
         "--module" "plan.wsgi"
         "--virtualenv" "${config.uv2nix.runtimeVenv}"
         "--master"
@@ -95,13 +99,18 @@
       '';
 
     runtimeDirs = pkgs.runCommand "plan-runtime-dirs" {} ''
-      mkdir -p "$out/run/uwsgi"
-      mkdir -p "$out/tmp"
-      mkdir -p "$out/var/lib/plan"
-
-      chmod 0777 "$out/run/uwsgi"
-      chmod 1777 "$out/tmp"
-      chmod 0777 "$out/var/lib/plan"
+      for path in \
+        "$out/run/uwsgi" \
+        "$out/var/lib/plan" \
+        "$out/var/cache/plan" \
+        "$out/var/cache/plan/static" \
+        "$out/var/cache/plan/default" \
+        "$out/var/cache/plan/ical" \
+        "$out/var/cache/plan/scraper"
+      do
+        install -d -o 65532 -g 65532 -m 0750 "$path"
+      done
+      install -d -m 1777 "$out/tmp"
     '';
   in {
     nix2container = {
@@ -121,6 +130,10 @@
           "PYTHONDONTWRITEBYTECODE=1"
           "DJANGO_SETTINGS_MODULE=plan.settings.container"
           "PLAN_BASE_DIR=/var/lib/plan"
+          "PLAN_CACHE_DIR=/var/cache/plan"
+          "PLAN_COMPRESS_ROOT=/var/cache/plan/static"
+          "STATIC_URL=/_/static/"
+          "COMPRESS_URL=/_/cache/"
           "PLAN_UWSGI_LISTENER=http"
           "PLAN_UWSGI_HTTP=0.0.0.0:8080"
           "PLAN_UWSGI_SOCKET=/run/uwsgi/uwsgi.sock"
