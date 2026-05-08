@@ -91,6 +91,7 @@
         cd "$src"
         export DJANGO_SETTINGS_MODULE="plan.settings.container"
         export PLAN_BASE_DIR="$TMPDIR"
+        export PLAN_STATIC_ROOT="$TMPDIR/static"
         export DJANGO_SECRET_KEY="nix-build-static"
         python manage.py collectstatic --noinput
 
@@ -98,6 +99,9 @@
         cp -r "$TMPDIR/static"/. "$out/static"
       '';
 
+    # Keep fallback runtime paths writable for rootless runs without host mounts.
+    # Most deployments bind-mount /var/lib/plan, /var/cache/plan, and /run/uwsgi
+    # with tighter host-managed ownership/permissions, which override these modes.
     runtimeDirs = pkgs.runCommand "plan-runtime-dirs" {} ''
       for path in \
         "$out/run/uwsgi" \
@@ -108,7 +112,7 @@
         "$out/var/cache/plan/ical" \
         "$out/var/cache/plan/scraper"
       do
-        install -d -o 65532 -g 65532 -m 0750 "$path"
+        install -d -m 1777 "$path"
       done
       install -d -m 1777 "$out/tmp"
     '';
