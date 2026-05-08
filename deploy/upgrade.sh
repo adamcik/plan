@@ -11,6 +11,13 @@ Options:
   --unit <name>       systemd unit (default: container-plan-ntnu.service)
   --container <name>  container name (default: plan-ntnu)
   --env-file <path>   env file for --recreate (default: /etc/plan/env)
+  --extract-static    Extract /static from pulled image before flip (default)
+  --no-extract-static Skip static extraction step
+  --static-from <p>   Path inside image to extract (default: /static)
+  --static-releases <p>
+                      Host dir for versioned static releases (default: /var/lib/plan/static/releases)
+  --static-current <p>
+                      Host symlink for active static release (default: /var/lib/plan/static/current)
   --recreate          Recreate container + regenerate systemd unit
   --check             Pull and compare only; do not restart/recreate
   -h, --help          Show this help
@@ -26,6 +33,10 @@ IMAGE_REF="ghcr.io/adamcik/plan:latest"
 UNIT_NAME="container-plan-ntnu.service"
 CONTAINER_NAME="plan-ntnu"
 ENV_FILE="/etc/plan/env"
+EXTRACT_STATIC=1
+STATIC_FROM="/static"
+STATIC_RELEASES_DIR="/var/lib/plan/static/releases"
+STATIC_CURRENT_LINK="/var/lib/plan/static/current"
 DO_RECREATE=0
 CHECK_ONLY=0
 
@@ -45,6 +56,26 @@ while [ "$#" -gt 0 ]; do
       ;;
     --env-file)
       ENV_FILE="$2"
+      shift 2
+      ;;
+    --extract-static)
+      EXTRACT_STATIC=1
+      shift
+      ;;
+    --no-extract-static)
+      EXTRACT_STATIC=0
+      shift
+      ;;
+    --static-from)
+      STATIC_FROM="$2"
+      shift 2
+      ;;
+    --static-releases)
+      STATIC_RELEASES_DIR="$2"
+      shift 2
+      ;;
+    --static-current)
+      STATIC_CURRENT_LINK="$2"
       shift 2
       ;;
     --recreate)
@@ -69,6 +100,47 @@ done
 
 log() {
   printf '\n==> %s\n' "$*"
+}
+
+extract_static_release() {
+  local image_ref="$1"
+  local image_id="$2"
+  local release_id
+  release_id="${image_id#sha256:}"
+
+  local release_dir="${STATIC_RELEASES_DIR}/${release_id}"
+  local parent_dir
+  parent_dir="$(dirname "$STATIC_CURRENT_LINK")"
+
+  if sudo test -d "$release_dir"; then
+    log "Static release already present"
+    echo "ReleaseDir: $release_dir"
+  else
+    log "Extract static release from image"
+    local ctr
+    ctr="plan-static-${release_id}"
+    local tmp_dir
+    tmp_dir="${release_dir}.tmp"
+
+    sudo install -d -m 0755 "$STATIC_RELEASES_DIR"
+    sudo rm -rf "$tmp_dir"
+    sudo install -d -m 0755 "$tmp_dir"
+
+    sudo podman create --name "$ctr" "$image_ref" >/dev/null
+    trap 'sudo podman rm -f "$ctr" >/dev/null 2>&1 || true' RETURN
+    sudo podman cp "$ctr":"$STATIC_FROM"/. "$tmp_dir"/
+    sudo podman rm -f "$ctr" >/dev/null
+    trap - RETURN
+
+    sudo mv "$tmp_dir" "$release_dir"
+    echo "ReleaseDir: $release_dir"
+  fi
+
+  log "Atomically switch static current symlink"
+  sudo install -d -m 0755 "$parent_dir"
+  sudo ln -sfn "$release_dir" "${STATIC_CURRENT_LINK}.new"
+  sudo mv -Tf "${STATIC_CURRENT_LINK}.new" "$STATIC_CURRENT_LINK"
+  echo "CurrentLink: $STATIC_CURRENT_LINK -> $release_dir"
 }
 
 revert_image_ref() {
@@ -114,6 +186,10 @@ if [ "$CHECK_ONLY" -eq 1 ]; then
   fi
 fi
 
+if [ "$EXTRACT_STATIC" -eq 1 ]; then
+  extract_static_release "$IMAGE_REF" "$target_id"
+fi
+
 if [ "$DO_RECREATE" -eq 0 ]; then
   log "Restart unit (default mode; no recreate)"
   sudo systemctl restart "$UNIT_NAME"
@@ -122,6 +198,14 @@ else
   log "Recreate container + regenerate unit"
   sudo systemctl stop "$UNIT_NAME" || true
   sudo podman rm -f "$CONTAINER_NAME" || true
+
+  log "Ensure host runtime/cache paths exist"
+  sudo install -d -o www-data -g www-data -m 0750 /var/lib/plan
+  sudo install -d -o www-data -g www-data -m 0750 /var/lib/plan/static
+  sudo install -d -o www-data -g www-data -m 0750 /var/lib/plan/static/releases
+  sudo install -d -o www-data -g www-data -m 0750 /var/cache/plan
+  sudo install -d -o www-data -g www-data -m 0750 /var/cache/plan/static
+  sudo install -d -o root -g www-data -m 2775 /run/plan
 
   sudo podman create \
     --name "$CONTAINER_NAME" \
@@ -133,6 +217,7 @@ else
     --cap-drop=ALL \
     --security-opt no-new-privileges \
     -v /var/lib/plan:/var/lib/plan:rw,nosuid,nodev,noexec \
+    -v /var/cache/plan:/var/cache/plan:rw,nosuid,nodev,noexec \
     -v /run/plan:/run/uwsgi:rw,nosuid,nodev,noexec \
     "$IMAGE_REF"
 
