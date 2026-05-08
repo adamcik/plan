@@ -235,6 +235,7 @@ dev = [
 scraper = [
     { name = "requests" },
     { name = "tqdm" },
+    { name = "urllib3" },
 ]
 
 [package.metadata]
@@ -259,6 +260,7 @@ dev = [
 scraper = [
     { name = "requests", specifier = "~=2.33.0" },
     { name = "tqdm" },
+    { name = "urllib3", specifier = ">=1.26.0" },
 ]
 
 [[package]]

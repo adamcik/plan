@@ -32,7 +32,7 @@ adapter = HTTPAdapter(
     max_retries=Retry(
         total=3,
         status_forcelist=[429, 502, 503, 504],
-        method_whitelist=["GET", "POST"],
+        allowed_methods=["GET", "POST"],
         backoff_factor=1,
     )
 )
