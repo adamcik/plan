@@ -116,6 +116,11 @@
       done
       install -d -m 1777 "$out/tmp"
     '';
+
+    staticLink = pkgs.runCommand "plan-static-link" {} ''
+      install -d -m 0755 "$out/var/lib/plan"
+      ln -s "${staticAssets}/static" "$out/var/lib/plan/static"
+    '';
   in {
     nix2container = {
       name = "ghcr.io/adamcik/plan";
@@ -135,6 +140,7 @@
           "DJANGO_SETTINGS_MODULE=plan.settings.container"
           "PLAN_BASE_DIR=/var/lib/plan"
           "PLAN_CACHE_DIR=/var/cache/plan"
+          "PLAN_UWSGI_STATIC_ROOT=/var/lib/plan/static"
           "PLAN_COMPRESS_ROOT=/var/cache/plan/static"
           "STATIC_URL=/_/static/"
           "COMPRESS_URL=/_/cache/"
@@ -193,6 +199,7 @@
               ];
               pathsToLink = ["/bin"];
             })
+            staticLink
             runtimeDirs
           ];
           layers = [baseLayer depsLayer appLayer];

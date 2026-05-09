@@ -2,24 +2,25 @@
 set -euo pipefail
 
 usage() {
-  cat <<'EOF'
+  cat <<EOF
 Usage:
-  deploy/migrate.sh [options]
+  $0 [options]
 
 Options:
   --image <ref>         Image ref to run (default: runtime image of --container)
   --container <name>    Existing runtime container name (default: plan-ntnu)
   --env-file <path>     Env file for migration run (default: /etc/plan/env)
   --no-mount-state      Do not mount /var/lib/plan and /var/cache/plan
-  --show-plan           Show migration plan before applying
-  --check               Run migrate --check only (no apply)
+  --show-plan           Show migration plan
+  --check               Run migrate --check
+  --apply               Apply migrations (explicitly required)
   -h, --help            Show this help
 
 Examples:
-  deploy/migrate.sh
-  deploy/migrate.sh --show-plan
-  deploy/migrate.sh --image ghcr.io/adamcik/plan:latest
-  deploy/migrate.sh --check
+  $0                     # default: show plan + check
+  $0 --show-plan --check
+  $0 --image ghcr.io/adamcik/plan:latest
+  $0 --apply --image ghcr.io/adamcik/plan:latest
 EOF
 }
 
@@ -27,8 +28,9 @@ IMAGE_REF=""
 CONTAINER_NAME="plan-ntnu"
 ENV_FILE="/etc/plan/env"
 MOUNT_STATE=1
-SHOW_PLAN=0
-CHECK_ONLY=0
+SHOW_PLAN=1
+CHECK_ONLY=1
+APPLY=0
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -54,6 +56,10 @@ while [ "$#" -gt 0 ]; do
       ;;
     --check)
       CHECK_ONLY=1
+      shift
+      ;;
+    --apply)
+      APPLY=1
       shift
       ;;
     -h|--help)
@@ -114,9 +120,16 @@ fi
 if [ "$CHECK_ONLY" -eq 1 ]; then
   log "Check unapplied migrations"
   sudo podman run "${run_args[@]}" "$IMAGE_REF" /bin/manage migrate --check --noinput
-else
+fi
+
+if [ "$APPLY" -eq 1 ]; then
   log "Apply migrations"
   sudo podman run "${run_args[@]}" "$IMAGE_REF" /bin/manage migrate --noinput
+fi
+
+if [ "$SHOW_PLAN" -eq 0 ] && [ "$CHECK_ONLY" -eq 0 ] && [ "$APPLY" -eq 0 ]; then
+  echo "Nothing to do. Use --show-plan, --check, and/or --apply." >&2
+  exit 2
 fi
 
 log "Done"

@@ -2,18 +2,18 @@
 set -euo pipefail
 
 usage() {
-  cat <<'EOF'
+  cat <<EOF
 Usage:
-  deploy/upgrade.sh [options]
+  $0 [options]
 
 Options:
   --image <ref>       Image ref to pull (default: ghcr.io/adamcik/plan:latest)
   --unit <name>       systemd unit (default: container-plan-ntnu.service)
   --container <name>  container name (default: plan-ntnu)
   --env-file <path>   env file for --recreate (default: /etc/plan/env)
-  --extract-static    Extract /static from pulled image before flip (default)
+  --extract-static    Extract static from pulled image before flip (default)
   --no-extract-static Skip static extraction step
-  --static-from <p>   Path inside image to extract (default: /static)
+  --static-from <p>   Path inside image to extract (default: /var/lib/plan/static)
   --static-releases <p>
                       Host dir for versioned static releases (default: /var/lib/plan/static/releases)
   --static-current <p>
@@ -23,9 +23,9 @@ Options:
   -h, --help          Show this help
 
 Examples:
-  deploy/upgrade.sh
-  deploy/upgrade.sh --image ghcr.io/adamcik/plan@sha256:abcd...
-  deploy/upgrade.sh --recreate
+  $0
+  $0 --image ghcr.io/adamcik/plan@sha256:abcd...
+  $0 --recreate
 EOF
 }
 
@@ -34,7 +34,7 @@ UNIT_NAME="container-plan-ntnu.service"
 CONTAINER_NAME="plan-ntnu"
 ENV_FILE="/etc/plan/env"
 EXTRACT_STATIC=1
-STATIC_FROM="/static"
+STATIC_FROM="/var/lib/plan/static"
 STATIC_RELEASES_DIR="/var/lib/plan/static/releases"
 STATIC_CURRENT_LINK="/var/lib/plan/static/current"
 DO_RECREATE=0

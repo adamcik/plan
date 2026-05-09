@@ -233,7 +233,7 @@ Host bind mount is still recommended when you want straightforward backups and h
 
 ## Notes
 
-- Static assets are collected at image build time. `deploy/upgrade.sh` can extract `/static` from the pulled image into `/var/lib/plan/static/releases/<image-id>` and atomically switch `/var/lib/plan/static/current`.
+- Static assets are collected at image build time. `deploy/upgrade.sh` extracts `/var/lib/plan/static` from the pulled image into `/var/lib/plan/static/releases/<image-id>` and atomically switches `/var/lib/plan/static/current`.
 - Keep symlink switching on the host (outside the container) for atomicity and least privilege.
 - Runtime writes are mainly cache/compressor output under `/var/cache/plan`.
 - `DJANGO_SETTINGS_MODULE` defaults to `plan.settings.container` in the image to reduce accidental drift.
@@ -243,9 +243,12 @@ Host bind mount is still recommended when you want straightforward backups and h
 Run schema migrations as an explicit pre-flip step:
 
 ```bash
-deploy/migrate.sh --show-plan
 deploy/migrate.sh --image ghcr.io/adamcik/plan:<tag>
+deploy/migrate.sh --apply --image ghcr.io/adamcik/plan:<tag>
 ```
+
+`deploy/migrate.sh` defaults to `showmigrations --plan` and `migrate --check`.
+Applying migrations now requires explicit `--apply`.
 
 Default behavior uses `/etc/plan/env` and mounts `/var/lib/plan` + `/var/cache/plan`.
 
@@ -253,7 +256,7 @@ Default behavior uses `/etc/plan/env` and mounts `/var/lib/plan` + `/var/cache/p
 
 ```bash
 deploy/upgrade.sh --check
-deploy/migrate.sh --image ghcr.io/adamcik/plan:<tag>
+deploy/migrate.sh --apply --image ghcr.io/adamcik/plan:<tag>
 deploy/upgrade.sh --image ghcr.io/adamcik/plan:<tag>
 ```
 
