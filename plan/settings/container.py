@@ -43,7 +43,12 @@ if sentry_dsn:
     sentry_sdk.init(
         dsn=sentry_dsn,
         environment=os.environ.get("SENTRY_ENVIRONMENT", "production"),
-        integrations=[DjangoIntegration()],
+        integrations=[
+            DjangoIntegration(
+                middleware_spans=True,
+                cache_spans=True,
+            )
+        ],
         traces_sample_rate=_env_float("SENTRY_TRACES_SAMPLE_RATE", 0.001),
     )
 
