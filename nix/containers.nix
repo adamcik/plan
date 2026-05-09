@@ -43,7 +43,6 @@
         "--disable-logging"
         "--enable-threads"
         "--py-call-uwsgi-fork-hooks"
-        "--catch-exceptions"
         "--log-5xx"
         "--log-master"
         "--static-map" "$PLAN_UWSGI_CACHE_URL=$PLAN_UWSGI_CACHE_ROOT"

@@ -145,28 +145,46 @@ extract_static_release() {
 
 revert_image_ref() {
   local image_name="$1"
-  local image_id="$2"
-  if [[ "$image_name" == *@* ]]; then
-    printf '%s\n' "$image_name"
+  local repo_digest="$2"
+  if [[ -n "$repo_digest" ]]; then
+    printf '%s\n' "$repo_digest"
   else
-    printf '%s@%s\n' "${image_name%%:*}" "$image_id"
+    printf '%s\n' "$image_name"
   fi
 }
 
-if ! sudo podman container exists "$CONTAINER_NAME"; then
-  echo "Container does not exist: $CONTAINER_NAME" >&2
-  exit 1
+HAS_CONTAINER=0
+if sudo podman container exists "$CONTAINER_NAME"; then
+  HAS_CONTAINER=1
 fi
 
-before_name="$(sudo podman inspect "$CONTAINER_NAME" --format '{{.ImageName}}')"
-before_id="$(sudo podman inspect "$CONTAINER_NAME" --format '{{.Image}}')"
-revert_ref="$(revert_image_ref "$before_name" "$before_id")"
+before_name=""
+before_id=""
+before_repo_digest=""
+revert_ref=""
 
-log "Current runtime image"
-echo "ImageName: $before_name"
-echo "ImageID:   $before_id"
-echo "Rollback (restart mode): $0 --image $revert_ref"
-echo "Rollback (recreate mode): $0 --recreate --image $revert_ref"
+if [ "$HAS_CONTAINER" -eq 1 ]; then
+  before_name="$(sudo podman inspect "$CONTAINER_NAME" --format '{{.ImageName}}')"
+  before_id="$(sudo podman inspect "$CONTAINER_NAME" --format '{{.Image}}')"
+  before_repo_digest="$(sudo podman image inspect "$before_name" --format '{{index .RepoDigests 0}}' 2>/dev/null || true)"
+  revert_ref="$(revert_image_ref "$before_name" "$before_repo_digest")"
+
+  log "Current runtime image"
+  echo "ImageName: $before_name"
+  echo "ImageID:   $before_id"
+  echo "RepoDigest:${before_repo_digest:+ }${before_repo_digest:- <none>}"
+  echo "Rollback (restart mode): $0 --image $revert_ref"
+  echo "Rollback (recreate mode): $0 --recreate --image $revert_ref"
+else
+  log "Current runtime image"
+  echo "Container not found: $CONTAINER_NAME"
+  if [ "$DO_RECREATE" -eq 1 ]; then
+    echo "Proceeding with --recreate bootstrap mode"
+  else
+    echo "Use --recreate to bootstrap the runtime container" >&2
+    exit 1
+  fi
+fi
 
 log "Pull image"
 sudo podman pull "$IMAGE_REF"
@@ -177,6 +195,10 @@ echo "TargetRef: $IMAGE_REF"
 echo "TargetID:  $target_id"
 
 if [ "$CHECK_ONLY" -eq 1 ]; then
+  if [ "$HAS_CONTAINER" -eq 0 ]; then
+    echo "Status: runtime container missing" >&2
+    exit 1
+  fi
   if [ "$before_id" = "$target_id" ]; then
     echo "Status: up to date"
     exit 0
@@ -246,8 +268,10 @@ else
   exit 1
 fi
 
-log "Revert command"
-echo "$0 --recreate --image $revert_ref"
+if [ -n "$revert_ref" ]; then
+  log "Revert command"
+  echo "$0 --recreate --image $revert_ref"
+fi
 
 log "Recent logs"
 sudo podman logs --tail 50 "$CONTAINER_NAME" || true
