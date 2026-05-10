@@ -12,14 +12,10 @@
         tombi
         djlint
         config.uv2nix.devVenv
-        # self'.packages.start-db
         postgresql
       ];
       env = {
         "DJANGO_SETTINGS_MODULE" = "plan.settings.test";
-        # FIXME: uv never download...
-        "PGHOST" = "$PWD/data/pgdata";
-        "PGDATABASE" = "plan";
       };
 
       shellHook = ''
@@ -41,10 +37,10 @@
       #      ruff check .                - Lint Python code
       #      basedpyright                - Type check Python code
       #
-      #    {bold}To run tests with Postgres:{reset}
-      #      DJANGO_SETTINGS_MODULE=plan.settings.test nix develop --command "./manage.py test"
+      #    {bold}To run tests:{reset}
+      #      nix develop --command "./manage.py test"
       #
-      #    This ensures tests run on your running Postgres instance. No extra scripts or env setup needed.
+      #    Tests automatically run against an ephemeral PostgreSQL instance.
       # '';
     };
 

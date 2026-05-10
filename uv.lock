@@ -15,6 +15,15 @@ wheels = [
 ]
 
 [[package]]
+name = "asn1crypto"
+version = "1.5.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/de/cf/d547feed25b5244fcb9392e288ff9fdc3280b10260362fc45d37a798a6ee/asn1crypto-1.5.1.tar.gz", hash = "sha256:13ae38502be632115abf8a24cbe5f4da52e3b5231990aff31123c805306ccb9c", size = 121080, upload-time = "2022-03-15T14:46:52.889Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c9/7f/09065fd9e27da0eda08b4d6897f1c13535066174cc023af248fc2a8d5e5a/asn1crypto-1.5.1-py2.py3-none-any.whl", hash = "sha256:db4e40728b728508912cbb3d44f19ce188f218e9eba635821bb4b68564f8fd67", size = 105045, upload-time = "2022-03-15T14:46:51.055Z" },
+]
+
+[[package]]
 name = "brotli"
 version = "1.2.0"
 source = { registry = "https://pypi.org/simple" }
@@ -193,6 +202,19 @@ wheels = [
 ]
 
 [[package]]
+name = "pg8000"
+version = "1.31.5"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "python-dateutil" },
+    { name = "scramp" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c8/9a/077ab21e700051e03d8c5232b6bcb9a1a4d4b6242c9a0226df2cfa306414/pg8000-1.31.5.tar.gz", hash = "sha256:46ebb03be52b7a77c03c725c79da2ca281d6e8f59577ca66b17c9009618cae78", size = 118933, upload-time = "2025-09-14T09:16:49.748Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/45/07/5fd183858dff4d24840f07fc845f213cd371a19958558607ba22035dadd7/pg8000-1.31.5-py3-none-any.whl", hash = "sha256:0af2c1926b153307639868d2ee5cef6cd3a7d07448e12736989b10e1d491e201", size = 57816, upload-time = "2025-09-14T09:16:47.798Z" },
+]
+
+[[package]]
 name = "pillow"
 version = "12.2.0"
 source = { registry = "https://pypi.org/simple" }
@@ -223,6 +245,7 @@ dependencies = [
     { name = "python-memcached" },
     { name = "reportlab" },
     { name = "sentry-sdk" },
+    { name = "testing-postgresql" },
     { name = "typing-extensions" },
     { name = "vobject" },
 ]
@@ -248,6 +271,7 @@ requires-dist = [
     { name = "python-memcached", specifier = ">=1.58,<1.60" },
     { name = "reportlab", specifier = "~=3.6.13" },
     { name = "sentry-sdk", specifier = ">=2.0.0,<3" },
+    { name = "testing-postgresql", specifier = "~=1.3.0" },
     { name = "typing-extensions", specifier = ">=4.12.2" },
     { name = "vobject", specifier = "~=0.9.6.1" },
 ]
@@ -353,6 +377,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/a2/ba/0fa30f7ec949714b8397e80ee2057d1a7e77b3a9f1b94c1ece93586cf34f/rjsmin-1.1.0.tar.gz", hash = "sha256:b15dc75c71f65d9493a8c7fa233fdcec823e3f1b88ad84a843ffef49b338ac32", size = 412426, upload-time = "2019-03-06T17:20:54.635Z" }
 
 [[package]]
+name = "scramp"
+version = "1.4.8"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "asn1crypto" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/98/52/a866f1ac9ae9025ec7f9bea803bba9d54796f8a84236165a700831f61b27/scramp-1.4.8.tar.gz", hash = "sha256:bd018fabfe46343cceeb9f1c3e8d23f55770271e777e3accbfaee3ff0a316e71", size = 16630, upload-time = "2026-01-06T21:01:01.083Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/90/07/a962d2477331abfdb2c6a8251b65c673dbb07ad707d1882d61562b8b9147/scramp-1.4.8-py3-none-any.whl", hash = "sha256:87c2f15976845a2872fe5490a06097f0d01813cceb53774ea168c911f2ad025c", size = 13121, upload-time = "2026-01-06T21:00:59.474Z" },
+]
+
+[[package]]
 name = "sentry-sdk"
 version = "2.58.0"
 source = { registry = "https://pypi.org/simple" }
@@ -381,6 +417,28 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/90/76/437d71068094df0726366574cf3432a4ed754217b436eb7429415cf2d480/sqlparse-0.5.5.tar.gz", hash = "sha256:e20d4a9b0b8585fdf63b10d30066c7c94c5d7a7ec47c889a2d83a3caa93ff28e", size = 120815, upload-time = "2025-12-19T07:17:45.073Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/49/4b/359f28a903c13438ef59ebeee215fb25da53066db67b305c125f1c6d2a25/sqlparse-0.5.5-py3-none-any.whl", hash = "sha256:12a08b3bf3eec877c519589833aed092e2444e68240a3577e8e26148acc7b1ba", size = 46138, upload-time = "2025-12-19T07:17:46.573Z" },
+]
+
+[[package]]
+name = "testing-common-database"
+version = "2.0.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/25/3c/5f7eef6ce8a16314a39f2b905ebd5cd2bfdcbaabafb7fd71dc10c3f32c4d/testing.common.database-2.0.3.tar.gz", hash = "sha256:965d80b2985315325dc358c3061b174a712f4d4d5bf6a80b58b11f9a1dd86d73", size = 11535, upload-time = "2017-10-23T15:02:37.347Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a7/1a/ca1c39544ed92fa8ea121ff3bf05bb4838520c498942054235ebc4a83b36/testing.common.database-2.0.3-py2.py3-none-any.whl", hash = "sha256:e3ed492bf480a87f271f74c53b262caf5d85c8bc09989a8f534fa2283ec52492", size = 10500, upload-time = "2017-10-23T15:02:40.781Z" },
+]
+
+[[package]]
+name = "testing-postgresql"
+version = "1.3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pg8000" },
+    { name = "testing-common-database" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/3a/5b/3bf1323697c4f4f0e8fb5c14d082dc2f005385ea139b19646c0fc9f1dbb7/testing.postgresql-1.3.0.tar.gz", hash = "sha256:8e1a69760369a7a8ffe63a66b6d95a5cd82db2fb976e4a8f85ffd24fbfc447d8", size = 11000, upload-time = "2016-02-04T13:57:05.396Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/11/76/d614d4bc950d961a73c952e9a2e0956d02d0869a86d3dfad070376863988/testing.postgresql-1.3.0-py2.py3-none-any.whl", hash = "sha256:1b41daeb98dfc8cd4a584bb91e8f5f4ab182993870f95257afe5f1ba6151a598", size = 8901, upload-time = "2016-02-04T13:57:11.857Z" },
 ]
 
 [[package]]

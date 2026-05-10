@@ -1,6 +1,6 @@
 # Agent Guide (Nix-first workflow)
 
-This repo is Nix-first. Use Nix entrypoints for formatting, checks, and tests.
+This repo is Nix-first. Use Nix entrypoints for formatting and full validation.
 
 ## Required workflow
 
@@ -11,16 +11,14 @@ This repo is Nix-first. Use Nix entrypoints for formatting, checks, and tests.
 
 ## Tests and database behavior
 
-- Test verification should use `nix flake check`.
-- `nix flake check` includes `checks.django-test`, which runs `manage.py test`.
-- That check automatically starts an ephemeral PostgreSQL instance for tests.
-- You usually do not need to provision Postgres manually when using flake checks.
+- Quick test runs can use `python manage.py test` or `django-admin test`.
+- `plan.settings.test` uses a custom Django test runner that provisions an ephemeral PostgreSQL instance automatically.
+- Full test verification should still use `nix flake check`.
 
 ## Django test settings expectations
 
 - Test checks run with `DJANGO_SETTINGS_MODULE=plan.settings.test`.
-- Postgres-backed tests are enabled in checks (`PLAN_TEST_USE_POSTGRES=1`).
-- Keep changes compatible with this test mode.
+- Keep changes compatible with ephemeral Postgres-backed test runs.
 
 ## Practical commands
 
