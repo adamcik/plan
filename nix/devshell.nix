@@ -25,6 +25,7 @@
       shellHook = ''
         unset PYTHONPATH
         export REPO_ROOT=$(jj root 2> /dev/null || git rev-parse --show-toplevel)
+        export PATH="${config.uv2nix.devVenv}/bin:$PATH"
       '';
 
       # motd = ''
