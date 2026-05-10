@@ -25,6 +25,7 @@ from plan.common.models import (
     Room,
     Week,
 )
+from plan.ical.queue import enqueue_cache_set
 
 _ = translation.gettext
 
@@ -265,7 +266,7 @@ def ical(request, schedule, ical_type=None):
                 response["X-Cache"] = f"hit; key={key}; fallback={candidate_key}"
 
             if settings.TIMETABLE_ICAL_CACHE_DURATION is not None:
-                caches["ical"].set(
+                enqueue_cache_set(
                     key,
                     response,
                     timeout=internal_cache_timeout,
@@ -284,7 +285,7 @@ def ical(request, schedule, ical_type=None):
             response["X-Cache"] = f"hit; key={candidate_key}; upgraded={key}"
 
             if settings.TIMETABLE_ICAL_CACHE_DURATION is not None:
-                caches["ical"].set(
+                enqueue_cache_set(
                     key,
                     response,
                     timeout=internal_cache_timeout,
@@ -367,7 +368,7 @@ def ical(request, schedule, ical_type=None):
     if settings.TIMETABLE_ICAL_CACHE_DURATION is not None:
         response["X-Cache"] = f"{'miss' if not bypass_cache else 'bypass'}; key={key}"
         response = utils.compress_response(request, response)
-        caches["ical"].set(
+        enqueue_cache_set(
             key,
             response,
             timeout=internal_cache_timeout,

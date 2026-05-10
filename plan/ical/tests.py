@@ -15,12 +15,14 @@ from plan.common import tests, utils
 from plan.common.converters import ScheduleConverter
 from plan.common.models import Semester
 from plan.common.schedule import Schedule
+from plan.ical import queue
 from plan.ical import views
 
 
 class EmptyViewTestCase(tests.BaseTestCase):
     def setUp(self):
         super().setUp()
+        queue.flush_for_tests()
         caches["default"].clear()
         caches["ical"].clear()
 
@@ -46,6 +48,7 @@ class ViewTestCase(tests.BaseTestCase):
 
     def setUp(self):
         super().setUp()
+        queue.flush_for_tests()
         caches["default"].clear()
         caches["ical"].clear()
 
@@ -224,7 +227,9 @@ class ViewTestCase(tests.BaseTestCase):
         url = reverse("schedule-ical", args=[self.schedule])
 
         br_first = self.client.get(url, HTTP_ACCEPT_ENCODING="br")
+        queue.flush_for_tests()
         identity_first = self.client.get(url, HTTP_ACCEPT_ENCODING="")
+        queue.flush_for_tests()
 
         self.assertEqual(br_first.status_code, 200)
         self.assertEqual(identity_first.status_code, 200)
@@ -236,8 +241,11 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertIn("hit", identity_first.headers["X-Cache"])
 
         br_second = self.client.get(url, HTTP_ACCEPT_ENCODING="br")
+        queue.flush_for_tests()
         identity_second = self.client.get(url, HTTP_ACCEPT_ENCODING="")
+        queue.flush_for_tests()
         gzip_first = self.client.get(url, HTTP_ACCEPT_ENCODING="gzip")
+        queue.flush_for_tests()
         gzip_second = self.client.get(url, HTTP_ACCEPT_ENCODING="gzip")
 
         self.assertIn("hit", br_second.headers["X-Cache"])
@@ -253,6 +261,7 @@ class ViewTestCase(tests.BaseTestCase):
         url = reverse("schedule-ical", args=[self.schedule])
 
         identity_first = self.client.get(url, HTTP_ACCEPT_ENCODING="")
+        queue.flush_for_tests()
         self.assertEqual(identity_first.status_code, 200)
         self.assertIn("miss", identity_first.headers["X-Cache"])
         self.assertIn(":identity", identity_first.headers["X-Cache"])
@@ -429,6 +438,7 @@ class ViewTestCase(tests.BaseTestCase):
         ]
 
         for case in cases:
+            queue.flush_for_tests()
             caches["ical"].clear()
             url = reverse(case["url_name"], args=case["url_args"])
             no_slash = url.rstrip("/")
@@ -544,6 +554,7 @@ class ViewTestCase(tests.BaseTestCase):
         )
 
         first = self.client.get(url, HTTP_ACCEPT_ENCODING="")
+        queue.flush_for_tests()
         second = self.client.get(url, HTTP_ACCEPT_ENCODING="")
 
         self.assertEqual(first.status_code, 200)
@@ -559,6 +570,7 @@ class ViewTestCase(tests.BaseTestCase):
         with_slash = f"{no_slash}/"
 
         first = self.client.get(no_slash, HTTP_ACCEPT_ENCODING="")
+        queue.flush_for_tests()
         second = self.client.get(with_slash, HTTP_ACCEPT_ENCODING="")
 
         self.assertEqual(first.status_code, 200)
