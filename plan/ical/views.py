@@ -2,7 +2,6 @@
 
 import datetime
 import gzip
-import hashlib
 import math
 import socket
 import zoneinfo
@@ -66,7 +65,7 @@ def _legacy_cache_key(request, schedule) -> str:
     )
 
 
-def _response_cache_key(request, schedule, encoding: str) -> str:
+def _legacy_v2_cache_key(request, schedule, encoding: str) -> str:
     path = _normalized_path(request.path_info)
     route_name = _cache_route_name(request)
     return ":".join(
@@ -82,30 +81,15 @@ def _response_cache_key(request, schedule, encoding: str) -> str:
     )
 
 
-def _etag_from_cache_key(cache_key: str) -> str:
-    digest = hashlib.sha256(cache_key.encode()).hexdigest()
-    return f'"{digest}"'
-
-
-def _if_none_match_matches(request, etag: str) -> bool:
-    if_none_match = request.META.get("HTTP_IF_NONE_MATCH")
-    if if_none_match is None:
-        return False
-
-    # RFC: `If-None-Match: *` matches any current representation.
-    etags = http_utils.parse_etags(if_none_match)
-    return "*" in etags or etag in etags
+def _legacy_cache_keys(request, schedule, encoding: str) -> list[str]:
+    return [
+        _legacy_v2_cache_key(request, schedule, encoding),
+        _legacy_cache_key(request, schedule),
+    ]
 
 
 def _conditional_not_modified_response(request, last_modified, headers):
-    if "HTTP_IF_NONE_MATCH" in request.META:
-        # RFC: `If-None-Match` takes precedence over `If-Modified-Since`.
-        # A non-match must continue to normal 200 generation path.
-        if _if_none_match_matches(request, headers["ETag"]):
-            return http.HttpResponseNotModified(headers=headers)
-        return None
-
-    return utils.check_modified_since(request, last_modified, headers)
+    return utils.check_not_modified(request, last_modified, headers)
 
 
 def _requested_encoding(request) -> str:
@@ -209,9 +193,13 @@ def ical(request, schedule, ical_type=None):
     headers.update(utils.cache_headers(cache_timeout, jitter=0.1))
 
     encoding = _requested_encoding(request)
-    key = _response_cache_key(request, schedule, encoding)
-    legacy_key = _legacy_cache_key(request, schedule)
-    headers["ETag"] = _etag_from_cache_key(key)
+    key = utils.response_cache_key(
+        _cache_route_name(request),
+        schedule.freshness_key(),
+        _normalized_path(request.path_info),
+        encoding,
+    )
+    headers["ETag"] = utils.etag_for_key(key)
 
     response = _conditional_not_modified_response(
         request,
@@ -233,7 +221,12 @@ def ical(request, schedule, ical_type=None):
         return response
 
     for fallback_encoding in _fallback_encodings(encoding):
-        fallback_key = _response_cache_key(request, schedule, fallback_encoding)
+        fallback_key = utils.response_cache_key(
+            _cache_route_name(request),
+            schedule.freshness_key(),
+            _normalized_path(request.path_info),
+            fallback_encoding,
+        )
         fallback_response = caches["ical"].get(fallback_key)
         if bypass_cache or not fallback_response:
             continue
@@ -251,22 +244,26 @@ def ical(request, schedule, ical_type=None):
 
         return response
 
-    legacy_response = caches["ical"].get(legacy_key)
-    if not bypass_cache and legacy_response:
-        response = _legacy_upgrade_response(legacy_response, encoding)
-        response["ETag"] = headers["ETag"]
-        response["X-Cache"] = f"hit; legacy=1; key={legacy_key}; upgraded={key}"
+    if not bypass_cache:
+        for legacy_key in _legacy_cache_keys(request, schedule, encoding):
+            legacy_response = caches["ical"].get(legacy_key)
+            if not legacy_response:
+                continue
 
-        if settings.TIMETABLE_ICAL_CACHE_DURATION is not None:
-            caches["ical"].set(
-                key,
-                response,
-                timeout=internal_cache_timeout,
-            )
+            response = _legacy_upgrade_response(legacy_response, encoding)
+            response["ETag"] = headers["ETag"]
+            response["X-Cache"] = f"hit; legacy=1; key={legacy_key}; upgraded={key}"
 
-        caches["ical"].delete(legacy_key)
+            if settings.TIMETABLE_ICAL_CACHE_DURATION is not None:
+                caches["ical"].set(
+                    key,
+                    response,
+                    timeout=internal_cache_timeout,
+                )
 
-        return response
+            caches["ical"].delete(legacy_key)
+
+            return response
 
     filename = utils.ical_filename(
         schedule.semester.year,

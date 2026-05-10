@@ -2,8 +2,9 @@
 
 from django.conf import settings
 
+from plan.common.schedule import Schedule
 from plan.common.tests import BaseTestCase
-from plan.common.utils import ColorMap, compact_sequence
+from plan.common.utils import ColorMap, clear_cache, compact_sequence
 
 
 class UtilTestCase(BaseTestCase):
@@ -33,3 +34,25 @@ class UtilTestCase(BaseTestCase):
 
         seq = compact_sequence([])
         self.assertEqual(seq, [])
+
+    def test_clear_cache_deletes_only_schedule_dto_key(self):
+        schedule = Schedule(semester=self.semester, student=self.student)
+        freshness = schedule.freshness_key()
+
+        dto_key = (
+            f"schedule:{self.semester.year}-{self.semester.type}-{self.student.slug}"
+        )
+        db_key = f"db:schedule:{freshness}"
+        resp_key = f"resp:schedule:{freshness}:/"
+
+        from django.core.cache import cache
+
+        cache.set(dto_key, "dto", timeout=60)
+        cache.set(db_key, "db", timeout=60)
+        cache.set(resp_key, "resp", timeout=60)
+
+        clear_cache(schedule)
+
+        self.assertIsNone(cache.get(dto_key))
+        self.assertEqual("db", cache.get(db_key))
+        self.assertEqual("resp", cache.get(resp_key))

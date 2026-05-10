@@ -71,7 +71,24 @@ def pdf(request, schedule, size=None, week=None):
     if schedule.last_modified is not None:
         headers["Last-Modified"] = http_utils.http_date(schedule.last_modified)
 
-    response = utils.check_modified_since(request, schedule.last_modified, headers)
+    variant = "pdf"
+    route = str(request.resolver_match.url_name)
+    week_part = str(week or 0)
+    size_part = str(size or "")
+    key = utils.response_cache_key(
+        route,
+        schedule.freshness_key(),
+        variant,
+        size_part,
+        week_part,
+    )
+    headers["ETag"] = utils.etag_for_key(key)
+
+    response = utils.check_not_modified(
+        request,
+        schedule.last_modified,
+        headers,
+    )
     if response:
         return response
 

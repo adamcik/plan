@@ -18,6 +18,13 @@ class Schedule:
     version: int = 0
     semester_version: int = 0
 
+    def freshness_key(self) -> str:
+        return (
+            f"{self.semester.year}-{self.semester.type}:"
+            f"{self.semester_version}-{self.student.slug}:"
+            f"{self.version}-{self.last_modified or 0}"
+        )
+
     def bump_last_modified(self):
         if self.student.id is None:
             self.student = Student.objects.get(slug=self.student.slug)

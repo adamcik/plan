@@ -218,8 +218,7 @@ def _schedule_data(s: Schedule, next_semester: Optional[Semester] = None):
     if s.last_modified is None:
         return [], [], [], [], [], [], [], []
 
-    token = _schedule_freshness_token(s)
-    key = f"db:{s.semester.year}-{s.semester.type}-{s.student.slug}:{token}"
+    key = f"db:schedule:{s.freshness_key()}"
     result = cache.get(key)
     if result:
         return result
@@ -292,23 +291,6 @@ def _schedule_data(s: Schedule, next_semester: Optional[Semester] = None):
     return result
 
 
-def _response_cache_key(prefix: str, s: Schedule) -> str:
-    token = _schedule_freshness_token(s)
-    return ":".join(
-        (
-            prefix,
-            f"{s.semester.year}-{s.semester.slug}-{s.student.slug}",
-            token,
-        )
-    )
-
-
-def _schedule_freshness_token(s: Schedule) -> str:
-    if s.version > 0 or s.semester_version > 0:
-        return f"v{s.version}-sv{s.semester_version}"
-    return f"lm:{s.last_modified}"
-
-
 # TODO: Can we turn this into a middleware? That would allow us to cache
 # post minification and csp...
 def _check_response_cache(
@@ -358,11 +340,27 @@ def schedule(request, schedule: Schedule, advanced=False, week=None, all=False):
     if schedule.last_modified is not None:
         headers["Last-Modified"] = http_date(schedule.last_modified)
 
-    response = utils.check_modified_since(request, schedule.last_modified, headers)
+    variant = "html"
+    route = str(request.resolver_match.url_name)
+    path = request.path_info.rstrip("/") or "/"
+    key = utils.response_cache_key(route, schedule.freshness_key(), variant, path)
+    headers["ETag"] = utils.etag_for_key(key)
+
+    response = utils.check_not_modified(
+        request,
+        schedule.last_modified,
+        headers,
+    )
     if response:
         return response
 
-    key = _response_cache_key("schedule", schedule)
+    key = utils.response_cache_key(
+        route,
+        schedule.freshness_key(),
+        variant,
+        "identity",
+        path,
+    )
     response = _check_response_cache(
         key, settings.TIMETABLE_SCHEDULE_CACHE_DURATION, bypass_cache
     )

@@ -73,7 +73,7 @@ class ScheduleConverter:
         semester = self._semester_converter.to_python(match.group(1))
         student_slug = self._student_converter.to_python(match.group(2))
 
-        key = f"schedule-data:{semester.year}-{semester.type}-{student_slug}"
+        key = f"schedule:{semester.year}-{semester.type}-{student_slug}"
         result = cache.get(key)
         if result:
             return result

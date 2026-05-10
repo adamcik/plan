@@ -1,14 +1,15 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import datetime
-import hashlib
 
 from django.core.cache import caches
+from django.http import HttpResponse
 from django.test import override_settings
 from django.urls import reverse
 from django.utils import http as http_utils
 
-from plan.common import tests
+from plan.common import tests, utils
+from plan.common.converters import ScheduleConverter
 from plan.common.models import Semester
 from plan.common.schedule import Schedule
 
@@ -179,16 +180,24 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertEqual(gzip.status_code, 200)
         self.assertNotEqual(identity.headers["ETag"], gzip.headers["ETag"])
 
-    def test_ical_etag_is_sha256_of_cache_key_not_raw_key(self):
+    def test_ical_etag_is_hashed_not_raw(self):
         url = reverse("schedule-ical", args=[self.schedule])
+        resolved = ScheduleConverter().to_python(
+            f"{self.semester.year}/{self.semester.slug}/{self.student.slug}"
+        )
 
         response = self.client.get(url, HTTP_ACCEPT_ENCODING="")
 
-        key = response.headers["X-Cache"].split("key=", 1)[1]
-        expected = f'"{hashlib.sha256(key.encode()).hexdigest()}"'
-
-        self.assertEqual(response.headers["ETag"], expected)
-        self.assertNotEqual(response.headers["ETag"], f'"{key}"')
+        etag = response.headers["ETag"]
+        key = utils.response_cache_key(
+            "schedule-ical",
+            resolved.freshness_key(),
+            url.rstrip("/"),
+            "identity",
+        )
+        self.assertTrue(etag.startswith('"') and etag.endswith('"'))
+        self.assertEqual(len(etag), 66)
+        self.assertEqual(etag, utils.etag_for_key(key))
 
     def test_ical_uses_last_modified_for_dtstamp(self):
         url = reverse("schedule-ical", args=[self.schedule])
@@ -253,6 +262,60 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertEqual(gzip_after_identity.status_code, 200)
         self.assertIn("hit", gzip_after_identity.headers["X-Cache"])
         self.assertIn(":gzip", gzip_after_identity.headers["X-Cache"])
+
+    def test_ical_reads_and_migrates_legacy_v2_cache_key(self):
+        url = reverse("schedule-ical", args=[self.schedule])
+        path = url.rstrip("/")
+        resolved = ScheduleConverter().to_python(
+            f"{self.semester.year}/{self.semester.slug}/{self.student.slug}"
+        )
+        legacy_v2_key = ":".join(
+            (
+                "resp",
+                "v2",
+                "schedule-ical",
+                path,
+                str(resolved.last_modified),
+                "identity",
+            )
+        )
+        caches["ical"].set(
+            legacy_v2_key,
+            HttpResponse("legacy-v2", content_type="text/calendar; charset=utf-8"),
+        )
+
+        response = self.client.get(url, HTTP_ACCEPT_ENCODING="")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("legacy=1", response.headers["X-Cache"])
+        self.assertIn(f"key={legacy_v2_key}", response.headers["X-Cache"])
+        self.assertEqual(response.content, b"legacy-v2")
+
+    def test_ical_reads_and_migrates_legacy_v1_cache_key(self):
+        url = reverse("schedule-ical", args=[self.schedule])
+        path = url.rstrip("/")
+        resolved = ScheduleConverter().to_python(
+            f"{self.semester.year}/{self.semester.slug}/{self.student.slug}"
+        )
+        legacy_v1_key = ":".join(
+            (
+                "resp",
+                "schedule-ical",
+                path,
+                str(resolved.last_modified),
+            )
+        )
+        caches["ical"].set(
+            legacy_v1_key,
+            HttpResponse("legacy-v1", content_type="text/calendar; charset=utf-8"),
+        )
+
+        response = self.client.get(url, HTTP_ACCEPT_ENCODING="")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("legacy=1", response.headers["X-Cache"])
+        self.assertIn(f"key={legacy_v1_key}", response.headers["X-Cache"])
+        self.assertEqual(response.content, b"legacy-v1")
 
     def test_ical_cache_key_is_same_for_type_with_and_without_trailing_slash(self):
         url = reverse("schedule-ical-type", args=[self.schedule, "lectures"])

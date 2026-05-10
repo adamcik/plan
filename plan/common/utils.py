@@ -2,6 +2,7 @@
 
 import datetime
 import gzip
+import hashlib
 import operator
 import random
 import re
@@ -34,20 +35,7 @@ def clear_cache(
     semester_type = schedule.semester.type
     slug = schedule.student.slug
 
-    cache.delete(f"modified:{year}-{semester_type}-{slug}")
-    cache.delete(f"schedule-data:{year}-{semester_type}-{slug}")
-
-    if schedule.last_modified is None:
-        return
-
-    # WARNING: Mitigation-level coupling to concrete cache keys.
-    # We explicitly drop payload/response entries bound to the previous
-    # last_modified token because delete mutations may leave the recomputed
-    # timestamp unchanged, causing stale cache reuse.
-    # NOTE: This does not solve stale 304 with If-Modified-Since when the
-    # freshness token itself does not advance.
-    cache.delete(f"db:{year}-{semester_type}-{slug}:{schedule.last_modified}")
-    cache.delete(f"schedule:{year}-{semester_type}-{slug}:{schedule.last_modified}")
+    cache.delete(f"schedule:{year}-{semester_type}-{slug}")
 
 
 # TODO: Only allow bypass in DEBUG?
@@ -117,6 +105,36 @@ def check_modified_since(request, last_modified, headers=None):
     if last_modified > if_modified_since:
         return None
     return http.HttpResponseNotModified(headers=headers or {})
+
+
+def etag_for_key(key: str) -> str:
+    return f'"{hashlib.sha256(key.encode()).hexdigest()}"'
+
+
+def response_cache_key(route: str, freshness: str, *parts: str) -> str:
+    return ":".join(("resp", route, freshness, *parts))
+
+
+def if_none_match_matches(request, etag: str) -> bool:
+    if_none_match = request.META.get("HTTP_IF_NONE_MATCH")
+    if if_none_match is None:
+        return False
+
+    etags = http_utils.parse_etags(if_none_match)
+    return "*" in etags or etag in etags
+
+
+def check_not_modified(request, last_modified, response_headers=None):
+    if response_headers is None:
+        response_headers = {}
+    etag = response_headers.get("ETag")
+
+    if "HTTP_IF_NONE_MATCH" in request.META:
+        if etag and if_none_match_matches(request, etag):
+            return http.HttpResponseNotModified(headers=response_headers)
+        return None
+
+    return check_modified_since(request, last_modified, response_headers)
 
 
 def cache_headers(timeout: datetime.timedelta, jitter: float = 0.0) -> dict[str, str]:

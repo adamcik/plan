@@ -8,6 +8,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.datastructures import MultiValueDict
 
+from plan.common import utils
 from plan.common.models import Group, Lecture, Schedule, Semester, Student, Subscription
 from plan.common.tests import BaseTestCase
 
@@ -113,6 +114,33 @@ class ViewTestCase(BaseTestCase):
             response.headers["X-Robots-Tag"],
             "noindex, nofollow, noarchive",
         )
+
+    def test_schedule_sets_etag_header(self):
+        response = self.client.get(reverse("schedule", args=[self.schedule]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("ETag", response.headers)
+
+    def test_schedule_if_none_match_returns_304(self):
+        url = reverse("schedule", args=[self.schedule])
+        first = self.client.get(url)
+
+        second = self.client.get(url, HTTP_IF_NONE_MATCH=first.headers["ETag"])
+
+        self.assertEqual(second.status_code, 304)
+        self.assertEqual(second.content, b"")
+
+    def test_schedule_if_none_match_takes_precedence_over_if_modified_since(self):
+        url = reverse("schedule", args=[self.schedule])
+        first = self.client.get(url)
+
+        response = self.client.get(
+            url,
+            HTTP_IF_NONE_MATCH='"does-not-match"',
+            HTTP_IF_MODIFIED_SINCE=first.headers.get("Last-Modified", ""),
+        )
+
+        self.assertEqual(response.status_code, 200)
 
     def test_change_course(self):
         # FIXME test semester does not exist
@@ -251,6 +279,83 @@ class ViewTestCase(BaseTestCase):
             HTTP_IF_MODIFIED_SINCE=if_modified_since,
         )
         self.assertEqual(response.status_code, 304)
+
+    def test_schedule_etag_changes_for_legacy_semester_without_schedule_row(self):
+        schedule_url = reverse("schedule", args=[self.schedule])
+
+        student = Student.objects.get(slug="adamcik")
+        semester = Semester.objects.get(year=2009, type="spring")
+
+        semester.version = 0
+        semester.last_modified = None
+        semester.save(update_fields=["version", "last_modified"])
+
+        Schedule.objects.filter(
+            semester_id=semester.id,
+            student_id=student.id,
+        ).delete()
+
+        baseline = timezone.make_aware(datetime.datetime(2009, 1, 1, 12, 0, 0))
+        updated = timezone.make_aware(datetime.datetime(2100, 1, 1, 12, 0, 0))
+
+        Subscription.objects.filter(
+            student_id=student.id,
+            course__semester_id=semester.id,
+        ).update(last_modified=baseline)
+
+        utils.clear_cache(self.schedule)
+        first = self.client.get(schedule_url)
+        self.assertEqual(first.status_code, 200)
+        self.assertIn("ETag", first.headers)
+
+        Subscription.objects.filter(
+            student_id=student.id,
+            course__semester_id=semester.id,
+        ).update(last_modified=updated)
+
+        utils.clear_cache(self.schedule)
+        second = self.client.get(schedule_url)
+        self.assertEqual(second.status_code, 200)
+        self.assertIn("ETag", second.headers)
+        self.assertNotEqual(first.headers["ETag"], second.headers["ETag"])
+
+    def test_legacy_schedule_etag_changes_after_post_mutation(self):
+        schedule_url = reverse("schedule", args=[self.schedule])
+        change_url = reverse("change-course", args=[self.schedule])
+
+        student = Student.objects.get(slug="adamcik")
+        semester = Semester.objects.get(year=2009, type="spring")
+
+        semester.version = 0
+        semester.last_modified = None
+        semester.save(update_fields=["version", "last_modified"])
+
+        Schedule.objects.filter(
+            semester_id=semester.id,
+            student_id=student.id,
+        ).delete()
+
+        baseline = timezone.make_aware(datetime.datetime(2009, 1, 1, 12, 0, 0))
+        Subscription.objects.filter(
+            student_id=student.id,
+            course__semester_id=semester.id,
+        ).update(last_modified=baseline)
+
+        utils.clear_cache(self.schedule)
+        first = self.client.get(schedule_url)
+        self.assertEqual(first.status_code, 200)
+        self.assertIn("ETag", first.headers)
+
+        response = self.client.post(
+            change_url,
+            {"submit_add": True, "course_add": "COURSE4"},
+        )
+        self.assertEqual(response.status_code, 302)
+
+        second = self.client.get(schedule_url)
+        self.assertEqual(second.status_code, 200)
+        self.assertIn("ETag", second.headers)
+        self.assertNotEqual(first.headers["ETag"], second.headers["ETag"])
 
     def test_change_course_creates_schedule_row_with_version_bump(self):
         schedule_url = reverse("schedule-advanced", args=[self.schedule])

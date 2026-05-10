@@ -30,3 +30,32 @@ class EmptyViewTestCase(BaseTestCase):
 
 class ViewTestCase(EmptyViewTestCase):
     fixtures = ["test_data.json", "test_user.json"]
+
+    def test_pdf_sets_etag_header(self):
+        url = reverse("schedule-pdf", args=[self.schedule])
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("ETag", response.headers)
+
+    def test_pdf_if_none_match_returns_304(self):
+        url = reverse("schedule-pdf", args=[self.schedule])
+        first = self.client.get(url)
+
+        second = self.client.get(url, HTTP_IF_NONE_MATCH=first.headers["ETag"])
+
+        self.assertEqual(second.status_code, 304)
+        self.assertEqual(second.content, b"")
+
+    def test_pdf_if_none_match_takes_precedence_over_if_modified_since(self):
+        url = reverse("schedule-pdf", args=[self.schedule])
+        first = self.client.get(url)
+
+        response = self.client.get(
+            url,
+            HTTP_IF_NONE_MATCH='"does-not-match"',
+            HTTP_IF_MODIFIED_SINCE=first.headers.get("Last-Modified", ""),
+        )
+
+        self.assertEqual(response.status_code, 200)
