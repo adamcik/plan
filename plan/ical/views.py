@@ -51,9 +51,28 @@ def _cache_route_name(request) -> str:
     return str(name)
 
 
-def _legacy_cache_key(request, schedule) -> str:
-    path = _normalized_path(request.path_info)
+def _legacy_route_names(request) -> list[str]:
     route_name = _cache_route_name(request)
+    names = [route_name]
+    if route_name == "schedule-ical-type":
+        names.append("schedule-ical-type-fallback")
+    return names
+
+
+def _legacy_paths(request) -> list[str]:
+    path = request.path_info
+    normalized = _normalized_path(path)
+    paths = [normalized]
+    if path not in paths:
+        paths.append(path)
+    if normalized != "/":
+        with_slash = f"{normalized}/"
+        if with_slash not in paths:
+            paths.append(with_slash)
+    return paths
+
+
+def _legacy_cache_key(path: str, route_name: str, schedule) -> str:
     return ":".join(
         str(p)
         for p in (
@@ -65,9 +84,7 @@ def _legacy_cache_key(request, schedule) -> str:
     )
 
 
-def _legacy_v2_cache_key(request, schedule, encoding: str) -> str:
-    path = _normalized_path(request.path_info)
-    route_name = _cache_route_name(request)
+def _legacy_v2_cache_key(path: str, route_name: str, schedule, encoding: str) -> str:
     return ":".join(
         str(p)
         for p in (
@@ -82,14 +99,36 @@ def _legacy_v2_cache_key(request, schedule, encoding: str) -> str:
 
 
 def _legacy_cache_keys(request, schedule, encoding: str) -> list[str]:
-    return [
-        _legacy_v2_cache_key(request, schedule, encoding),
-        _legacy_cache_key(request, schedule),
-    ]
+    keys = []
+    seen = set()
+
+    def _append(key: str):
+        if key in seen:
+            return
+        seen.add(key)
+        keys.append(key)
+
+    for route_name in _legacy_route_names(request):
+        for path in _legacy_paths(request):
+            _append(_legacy_v2_cache_key(path, route_name, schedule, encoding))
+            _append(_legacy_cache_key(path, route_name, schedule))
+    return keys
 
 
-def _conditional_not_modified_response(request, last_modified, headers):
-    return utils.check_not_modified(request, last_modified, headers)
+def _current_cache_key(request, schedule, encoding: str) -> str:
+    return utils.response_cache_key(
+        _cache_route_name(request),
+        schedule.freshness_key(),
+        _normalized_path(request.path_info),
+        encoding,
+    )
+
+
+def _current_cache_keys(request, schedule, encoding: str) -> list[str]:
+    keys = [_current_cache_key(request, schedule, encoding)]
+    for fallback_encoding in _fallback_encodings(encoding):
+        keys.append(_current_cache_key(request, schedule, fallback_encoding))
+    return keys
 
 
 def _requested_encoding(request) -> str:
@@ -193,15 +232,10 @@ def ical(request, schedule, ical_type=None):
     headers.update(utils.cache_headers(cache_timeout, jitter=0.1))
 
     encoding = _requested_encoding(request)
-    key = utils.response_cache_key(
-        _cache_route_name(request),
-        schedule.freshness_key(),
-        _normalized_path(request.path_info),
-        encoding,
-    )
+    key = _current_cache_key(request, schedule, encoding)
     headers["ETag"] = utils.etag_for_key(key)
 
-    response = _conditional_not_modified_response(
+    response = utils.check_not_modified(
         request,
         schedule.last_modified,
         headers,
@@ -214,45 +248,21 @@ def ical(request, schedule, ical_type=None):
     # TODO: Turn caching into middleware
     bypass_cache = utils.should_bypass_cache(request)
 
-    response = caches["ical"].get(key)
-    if not bypass_cache and response:
-        response["ETag"] = headers["ETag"]
-        response["X-Cache"] = f"hit; key={key}"
-        return response
-
-    for fallback_encoding in _fallback_encodings(encoding):
-        fallback_key = utils.response_cache_key(
-            _cache_route_name(request),
-            schedule.freshness_key(),
-            _normalized_path(request.path_info),
-            fallback_encoding,
-        )
-        fallback_response = caches["ical"].get(fallback_key)
-        if bypass_cache or not fallback_response:
-            continue
-
-        response = _legacy_upgrade_response(fallback_response, encoding)
-        response["ETag"] = headers["ETag"]
-        response["X-Cache"] = f"hit; key={key}; fallback={fallback_key}"
-
-        if settings.TIMETABLE_ICAL_CACHE_DURATION is not None:
-            caches["ical"].set(
-                key,
-                response,
-                timeout=internal_cache_timeout,
-            )
-
-        return response
-
     if not bypass_cache:
-        for legacy_key in _legacy_cache_keys(request, schedule, encoding):
-            legacy_response = caches["ical"].get(legacy_key)
-            if not legacy_response:
+        current_keys = _current_cache_keys(request, schedule, encoding)
+        legacy_keys = _legacy_cache_keys(request, schedule, encoding)
+        current_cached = caches["ical"].get_many(current_keys)
+        for index, candidate_key in enumerate(current_keys):
+            candidate_response = current_cached.get(candidate_key)
+            if not candidate_response:
                 continue
 
-            response = _legacy_upgrade_response(legacy_response, encoding)
+            response = _legacy_upgrade_response(candidate_response, encoding)
             response["ETag"] = headers["ETag"]
-            response["X-Cache"] = f"hit; legacy=1; key={legacy_key}; upgraded={key}"
+            if index == 0:
+                response["X-Cache"] = f"hit; key={key}"
+            else:
+                response["X-Cache"] = f"hit; key={key}; fallback={candidate_key}"
 
             if settings.TIMETABLE_ICAL_CACHE_DURATION is not None:
                 caches["ical"].set(
@@ -261,7 +271,26 @@ def ical(request, schedule, ical_type=None):
                     timeout=internal_cache_timeout,
                 )
 
-            caches["ical"].delete(legacy_key)
+            return response
+
+        legacy_cached = caches["ical"].get_many(legacy_keys)
+        for candidate_key in legacy_keys:
+            candidate_response = legacy_cached.get(candidate_key)
+            if not candidate_response:
+                continue
+
+            response = _legacy_upgrade_response(candidate_response, encoding)
+            response["ETag"] = headers["ETag"]
+            response["X-Cache"] = f"hit; key={candidate_key}; upgraded={key}"
+
+            if settings.TIMETABLE_ICAL_CACHE_DURATION is not None:
+                caches["ical"].set(
+                    key,
+                    response,
+                    timeout=internal_cache_timeout,
+                )
+
+            caches["ical"].delete(candidate_key)
 
             return response
 
