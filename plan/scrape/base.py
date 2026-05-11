@@ -9,6 +9,7 @@ import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
 
 from django import db
+from django.db import IntegrityError
 from django.db.models import Count
 
 from plan.common.models import (
@@ -179,7 +180,11 @@ class Scraper:
         some cases of stepping on our own toes during updates.
         """
         qs = self.queryset().filter(last_import__lt=self.import_time)
-        return qs.get_or_create(**kwargs)
+        try:
+            return qs.get_or_create(**kwargs)
+        except IntegrityError:
+            lookup = {key: value for key, value in kwargs.items() if key != "defaults"}
+            return self.queryset().get(**lookup), False
 
     def update_m2m(self, obj, data):
         changes = {}

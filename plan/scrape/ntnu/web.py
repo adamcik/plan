@@ -15,18 +15,34 @@ from plan.scrape import base, fetch, utils
 
 class Courses(base.CourseScraper):
     def scrape(self):
+        merged = {}
         for course in fetch_courses(self.semester):
             code = course["courseCode"]
             version = course["courseVersion"]
-            location = course["location"].split(",")
+            key = (code, version)
 
-            yield {
-                "code": code,
-                "name": course["courseName"],
-                "version": version,
-                "url": course["courseUrl"],
-                "locations": location,
-            }
+            if key not in merged:
+                merged[key] = {
+                    "code": code,
+                    "name": course["courseName"],
+                    "version": version,
+                    "url": course["courseUrl"],
+                    "locations": set(),
+                }
+            elif (
+                merged[key]["name"] != course["courseName"]
+                or merged[key]["url"] != course["courseUrl"]
+            ):
+                logging.warning("Conflicting course metadata for %s-%s", code, version)
+
+            merged[key]["locations"].update(
+                loc.strip() for loc in course["location"].split(",") if loc.strip()
+            )
+
+        for key in sorted(merged):
+            row = merged[key]
+            row["locations"] = sorted(row["locations"])
+            yield row
 
 
 class Exams(base.ExamScraper):

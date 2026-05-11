@@ -2,9 +2,14 @@
 
 from unittest import mock
 
+from django.utils import timezone
+
+from plan.common.models import Course
 from plan.common.models import Semester
 from plan.common.tests import BaseTestCase
+from plan.scrape.base import CourseScraper
 from plan.scrape.management.commands.scrape import Command
+from plan.scrape.ntnu.web import Courses
 
 
 class DBTestCase(BaseTestCase):
@@ -100,3 +105,72 @@ class ManagmentTestCase(BaseTestCase):
         semester.refresh_from_db()
         self.assertEqual(0, semester.version)
         self.assertIsNone(semester.last_modified)
+
+
+class CourseScraperTestCase(BaseTestCase):
+    fixtures = ["test_data.json", "test_user.json"]
+
+    def test_save_handles_duplicate_course_in_same_import(self):
+        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+        scraper = CourseScraper(semester)
+        scraper.import_time = timezone.now()
+
+        kwargs = {
+            "code": "MAST2009",
+            "version": "1",
+            "semester": semester,
+            "defaults": {
+                "name": "Test Course",
+                "url": "https://example.invalid",
+                "points": "7.5",
+                "last_modified": timezone.now(),
+            },
+        }
+
+        first_obj, first_created = scraper.save({}, kwargs)
+        second_obj, second_created = scraper.save({}, kwargs)
+
+        self.assertTrue(first_created)
+        self.assertFalse(second_created)
+        self.assertEqual(first_obj.pk, second_obj.pk)
+        self.assertEqual(
+            1,
+            Course.objects.filter(
+                code="MAST2009", semester=semester, version="1"
+            ).count(),
+        )
+
+
+class CoursesInputMergeTestCase(BaseTestCase):
+    fixtures = ["test_data.json", "test_user.json"]
+
+    def test_scrape_merges_duplicate_code_and_version_locations(self):
+        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+        scraper = Courses(semester)
+
+        duplicate_rows = [
+            {
+                "courseCode": "TST1001",
+                "courseVersion": "1",
+                "courseName": "Test Course",
+                "courseUrl": "https://example.invalid/TST1001",
+                "location": "Trondheim",
+            },
+            {
+                "courseCode": "TST1001",
+                "courseVersion": "1",
+                "courseName": "Test Course",
+                "courseUrl": "https://example.invalid/TST1001",
+                "location": "Gjovik,Trondheim",
+            },
+        ]
+
+        with mock.patch(
+            "plan.scrape.ntnu.web.fetch_courses", return_value=duplicate_rows
+        ):
+            emitted = list(scraper.scrape())
+
+        self.assertEqual(1, len(emitted))
+        self.assertEqual("TST1001", emitted[0]["code"])
+        self.assertEqual("1", emitted[0]["version"])
+        self.assertEqual(["Gjovik", "Trondheim"], emitted[0]["locations"])
