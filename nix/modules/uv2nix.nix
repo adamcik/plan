@@ -88,11 +88,6 @@ in {
         workspaceRoot =
           # Workaround for https://github.com/pyproject-nix/uv2nix/issues/179
           /. + (builtins.unsafeDiscardStringContext cfg.workspaceRoot);
-
-        config = {
-          # FIXME: move
-          no-binary-package = ["pillow" "lxml" "brotli"];
-        };
       };
 
       pyprojectToml = lib.importTOML (cfg.workspaceRoot + "/pyproject.toml");
