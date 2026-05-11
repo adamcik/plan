@@ -6,11 +6,11 @@ import re
 import zoneinfo
 from urllib.parse import quote_plus
 
-import tqdm
 from django.conf import settings
 
 from plan.common.models import Course, Semester
 from plan.scrape import base, fetch, utils
+from plan.scrape.progress import progress
 
 TZ = zoneinfo.ZoneInfo(settings.TIME_ZONE)
 
@@ -90,107 +90,110 @@ class Lectures(base.LectureScraper):
         else:
             ntnu_semeter = "%d_VÅR" % self.semester.year
 
-        for c in tqdm.tqdm(self.course_queryset(), unit="courses"):
-            course = fetch_course_lectures(self.semester, c)
-            groupings = {}
-            for activity in course.get("schedules", []):
-                if activity["artermin"] != ntnu_semeter:
-                    continue
-
-                start = datetime.datetime.fromtimestamp(activity["from"] / 1000, tz=TZ)
-                end = datetime.datetime.fromtimestamp(activity["to"] / 1000, tz=TZ)
-                lecture_type = activity.get("name", activity["acronym"]).strip()
-                title = re.sub(r"^\d+(-\d*)?\s?", "", activity["title"]).strip()
-                summary = activity["summary"].strip()
-                stream = None
-
-                groups = set(activity.get("studyProgramKeys", []))
-
-                if not groups:
-                    groups = set(activity.get("disiplin", []))
-
-                # TODO: migrate `mlreal` to `MLREAL`
-                # TODO: match existing code without looking at case
-
-                # Remove these if the are equal course code or type
-                if not title or title == c.code or lecture_type == title:
-                    title = None
-                if (
-                    not summary
-                    or summary == c.code
-                    or summary == lecture_type
-                    or summary == title
-                ):
-                    summary = None
-
-                rooms = set()
-                for r in activity["rooms"]:
-                    room_code = r["id"]
-                    room_name = r["room"]
-                    room_url = r.get("url", "")
-
-                    if r["building"] == "Digital undervisning":
-                        # Try to store stream links on the lectures:
-                        assert stream is None
-                        stream = room_url
+        with progress(self.course_queryset(), unit="courses") as courses:
+            for c in courses:
+                course = fetch_course_lectures(self.semester, c)
+                groupings = {}
+                for activity in course.get("schedules", []):
+                    if activity["artermin"] != ntnu_semeter:
                         continue
-                    elif not room_url:
-                        # Fallback to searching if not known:
-                        room_url = (
-                            "https://use.mazemap.com/#v=1&config=ntnu&search=%s"
-                            % quote_plus(room_name)
-                        )
 
-                    rooms.add((room_code, room_name, room_url))
+                    start = datetime.datetime.fromtimestamp(
+                        activity["from"] / 1000, tz=TZ
+                    )
+                    end = datetime.datetime.fromtimestamp(activity["to"] / 1000, tz=TZ)
+                    lecture_type = activity.get("name", activity["acronym"]).strip()
+                    title = re.sub(r"^\d+(-\d*)?\s?", "", activity["title"]).strip()
+                    summary = activity["summary"].strip()
+                    stream = None
 
-                staff = {(s["name"], s.get("url", "")) for s in activity["staff"]}
+                    groups = set(activity.get("studyProgramKeys", []))
 
-                key = (
-                    start.weekday(),
-                    start.time(),
-                    end.time(),
-                    lecture_type,
-                    title or "",
-                    summary or "",
-                    stream or "",
-                    tuple(sorted(groups)),
-                    tuple(sorted(rooms)),
-                    tuple(sorted(staff)),
-                )
-                groupings.setdefault(key, set()).add(activity["week"])
+                    if not groups:
+                        groups = set(activity.get("disiplin", []))
 
-            # TODO: see if we can move the grouping to the base scraper?
-            for key, weeks in sorted(groupings.items()):
-                (
-                    day,
-                    start,
-                    end,
-                    lecture_type,
-                    title,
-                    summary,
-                    stream,
-                    groups,
-                    rooms,
-                    lecturers,
-                ) = key
+                    # TODO: migrate `mlreal` to `MLREAL`
+                    # TODO: match existing code without looking at case
 
-                yield {
-                    "course": c,
-                    "type": lecture_type,
-                    "day": day,
-                    "start": start,
-                    "end": end,
-                    "weeks": weeks,
-                    "rooms": rooms,
-                    "groups": groups,
-                    # FIXME: Why is staff dropped?
-                    "lecturers": tuple(),
-                    # TODO: Pass through displin to use as groups for med students?
-                    # "disiplin": disiplin,
-                    "title": title,
-                    "summary": summary or None,
-                    "stream": stream or None,
-                }
+                    # Remove these if the are equal course code or type
+                    if not title or title == c.code or lecture_type == title:
+                        title = None
+                    if (
+                        not summary
+                        or summary == c.code
+                        or summary == lecture_type
+                        or summary == title
+                    ):
+                        summary = None
+
+                    rooms = set()
+                    for r in activity["rooms"]:
+                        room_code = r["id"]
+                        room_name = r["room"]
+                        room_url = r.get("url", "")
+
+                        if r["building"] == "Digital undervisning":
+                            # Try to store stream links on the lectures:
+                            assert stream is None
+                            stream = room_url
+                            continue
+                        elif not room_url:
+                            # Fallback to searching if not known:
+                            room_url = (
+                                "https://use.mazemap.com/#v=1&config=ntnu&search=%s"
+                                % quote_plus(room_name)
+                            )
+
+                        rooms.add((room_code, room_name, room_url))
+
+                    staff = {(s["name"], s.get("url", "")) for s in activity["staff"]}
+
+                    key = (
+                        start.weekday(),
+                        start.time(),
+                        end.time(),
+                        lecture_type,
+                        title or "",
+                        summary or "",
+                        stream or "",
+                        tuple(sorted(groups)),
+                        tuple(sorted(rooms)),
+                        tuple(sorted(staff)),
+                    )
+                    groupings.setdefault(key, set()).add(activity["week"])
+
+                # TODO: see if we can move the grouping to the base scraper?
+                for key, weeks in sorted(groupings.items()):
+                    (
+                        day,
+                        start,
+                        end,
+                        lecture_type,
+                        title,
+                        summary,
+                        stream,
+                        groups,
+                        rooms,
+                        lecturers,
+                    ) = key
+
+                    yield {
+                        "course": c,
+                        "type": lecture_type,
+                        "day": day,
+                        "start": start,
+                        "end": end,
+                        "weeks": weeks,
+                        "rooms": rooms,
+                        "groups": groups,
+                        # FIXME: Why is staff dropped?
+                        "lecturers": tuple(),
+                        # TODO: Pass through displin to use as groups for med students?
+                        # "disiplin": disiplin,
+                        "title": title,
+                        "summary": summary or None,
+                        "stream": stream or None,
+                    }
 
 
 class Rooms(base.RoomScraper):

@@ -12,6 +12,7 @@ from plan.common.models import Course
 from plan.common.models import Semester
 from plan.common.tests import BaseTestCase
 from plan.scrape.base import CourseScraper
+from plan.scrape.base import Scraper
 from plan.scrape.management.commands.scrape import Command
 from plan.scrape.ntnu.web import Courses
 from plan.scrape.ntnu.web import Lectures
@@ -19,6 +20,25 @@ from plan.scrape.ntnu.web import Lectures
 
 class DBTestCase(BaseTestCase):
     pass
+
+
+class ScraperRunTestCase(BaseTestCase):
+    fixtures = ["test_data.json", "test_user.json"]
+
+    def test_run_with_progress_wrapper_does_not_raise(self):
+        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+
+        class DummyScraper(Scraper):
+            def queryset(self):
+                return Course.objects.none()
+
+            def scrape(self):
+                return iter(())
+
+        scraper = DummyScraper(semester)
+        needs_commit = scraper.run()
+
+        self.assertFalse(needs_commit)
 
 
 class StudwebTestCase(BaseTestCase):

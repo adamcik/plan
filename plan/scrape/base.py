@@ -5,8 +5,6 @@ import datetime
 import html
 import logging
 
-import tqdm
-from tqdm.contrib.logging import logging_redirect_tqdm
 
 from django import db
 from django.db import IntegrityError
@@ -25,6 +23,7 @@ from plan.common.models import (
     Room,
     Week,
 )
+from plan.scrape.progress import progress as progress_bar
 from plan.scrape import utils
 
 
@@ -110,50 +109,49 @@ class Scraper:
         does not match this pattern.
         """
 
-        with logging_redirect_tqdm():
-            with tqdm.tqdm(total=self.estimate_count(), unit="items") as progress:
-                self.log_initial()
+        with progress_bar(total=self.estimate_count(), unit="items") as progress:
+            self.log_initial()
 
-                # TODO: Always scrape in terms of courses? This would allow us
-                # to base an outer progress bar on the number of courses, but
-                # have an inner one without a known total for e.g. lectures.
-                for data in self.scrape():
-                    try:
-                        self.log_scraped(data)
+            # TODO: Always scrape in terms of courses? This would allow us
+            # to base an outer progress bar on the number of courses, but
+            # have an inner one without a known total for e.g. lectures.
+            for data in self.scrape():
+                try:
+                    self.log_scraped(data)
 
-                        data = self.prepare_data(data)
-                        if not data:
-                            continue
-                        self.log_processed(data)
+                    data = self.prepare_data(data)
+                    if not data:
+                        continue
+                    self.log_processed(data)
 
-                        kwargs = self.prepare_save(data)
-                        if not kwargs:
-                            continue
+                    kwargs = self.prepare_save(data)
+                    if not kwargs:
+                        continue
 
-                        obj, created = self.save(data, kwargs)
-                        self.log_persisted(obj)
+                    obj, created = self.save(data, kwargs)
+                    self.log_persisted(obj)
 
-                        changes = self.update_m2m(obj, data)
+                    changes = self.update_m2m(obj, data)
 
-                        if created:
-                            self.log_created(obj)
-                            continue
+                    if created:
+                        self.log_created(obj)
+                        continue
 
-                        changes.update(self.update(obj, data, kwargs["defaults"]))
+                    changes.update(self.update(obj, data, kwargs["defaults"]))
 
-                        if changes:
-                            self.log_updated(obj, changes)
-                            continue
+                    if changes:
+                        self.log_updated(obj, changes)
+                        continue
 
-                        self.log_unaltered(obj)
-                    finally:
-                        db.reset_queries()
-                        progress.update(1)
+                    self.log_unaltered(obj)
+                finally:
+                    db.reset_queries()
+                    progress.update(1)
 
-                self.delete(self.prepare_delete())
-                self.log_stats()
+            self.delete(self.prepare_delete())
+            self.log_stats()
 
-                return self.needs_commit()
+            return self.needs_commit()
 
     def prepare_data(self, data):
         """Clean and/or validate data from scrape method.

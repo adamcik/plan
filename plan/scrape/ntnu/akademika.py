@@ -1,8 +1,7 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-import tqdm
-
 from plan.scrape import base, fetch
+from plan.scrape.progress import progress
 
 
 def fetch_syllabus(code):
@@ -20,5 +19,6 @@ def fetch_syllabus(code):
 
 class Syllabus(base.SyllabusScraper):
     def scrape(self):
-        for c in tqdm.tqdm(self.queryset(), unit="courses"):
-            yield {"code": c.code, "syllabus": fetch_syllabus(c.code)}
+        with progress(self.queryset(), unit="courses") as courses:
+            for c in courses:
+                yield {"code": c.code, "syllabus": fetch_syllabus(c.code)}
