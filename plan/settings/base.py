@@ -158,11 +158,13 @@ if DEBUG:
 
 COMPRESS_STORAGE = "compressor.storage.BrotliCompressorFileStorage"
 
-COMPRESS_CSS_FILTERS = (
-    "compressor.filters.css_default.CssAbsoluteFilter",
-    "compressor.filters.datauri.CssDataUriFilter",
-    "compressor.filters.cssmin.CSSMinFilter",
-)
+COMPRESS_FILTERS = {
+    "css": (
+        "compressor.filters.css_default.CssAbsoluteFilter",
+        "compressor.filters.datauri.CssDataUriFilter",
+        "compressor.filters.cssmin.CSSMinFilter",
+    ),
+}
 
 COMPRESS_DATA_URI_MAX_SIZE = 5 << 10
 
