@@ -153,7 +153,7 @@ class Group(models.Model):
     DEFAULT = "Other"
 
     id = models.AutoField(primary_key=True)
-    code = models.CharField(_("Code"), max_length=20, unique=True, null=True)
+    code = models.CharField(_("Code"), max_length=100, unique=True, null=True)
     name = models.CharField(_("Name"), max_length=100, null=True)
     url = models.TextField(_("URL"), default="")
 
