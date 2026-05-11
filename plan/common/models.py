@@ -5,7 +5,6 @@ import datetime
 from django.conf import settings
 from django.core.cache import cache
 from django.db import models
-from django.template import defaultfilters as filters
 from django.utils import dates, translation
 
 from plan.common.managers import (
@@ -463,19 +462,16 @@ class Lecture(models.Model):
         verbose_name_plural = _("Lecture")
 
     def __str__(self):
-        return "{} {}-{} on {} for {}".format(
-            self.type,
-            filters.time(self.start),
-            filters.time(self.end),
-            self.get_day_display()[:3],
-            self.course.code,
-        )
+        start = self.start.strftime("%H:%M")
+        end = self.end.strftime("%H:%M")
+        day = self.get_day_display()[:3]
+        return f"{self.type} {start}-{end} on {day} for {self.course.code}"
 
     @property
     def short_name(self):
-        return "{}-{} on {}".format(
-            filters.time(self.start), filters.time(self.end), self.get_day_display()
-        )
+        start = self.start.strftime("%H:%M")
+        end = self.end.strftime("%H:%M")
+        return f"{start}-{end} on {self.get_day_display()}"
 
     # TODO: just replace this with a groupby helper that can
     # be passed qs with the first row item as the key?
