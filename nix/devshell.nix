@@ -1,9 +1,29 @@
 {...}: {
   perSystem = {
     config,
+    lib,
     pkgs,
     ...
-  }: {
+  }: let
+    runDb = pkgs.writeShellScriptBin "run-db" ''
+      set -euo pipefail
+
+      REPO_ROOT=''${REPO_ROOT:-$(jj root 2>/dev/null || git rev-parse --show-toplevel)}
+      PGDATA=''${PGDATA:-$REPO_ROOT/data/pgdata}
+      PGHOST=''${PGHOST:-$PGDATA}
+      PGDATABASE=''${PGDATABASE:-plan}
+      PGUSER=''${PGUSER:-$(whoami)}
+      PGLOG=''${PGLOG:-$REPO_ROOT/data/postgres.log}
+
+      mkdir -p "$PGDATA"
+
+      if [ ! -f "$PGDATA/PG_VERSION" ]; then
+        initdb -D "$PGDATA" >/dev/null
+      fi
+
+      exec postgres -D "$PGDATA" -k "$PGHOST" -h ""
+    '';
+  in {
     devShells.default = pkgs.mkShell {
       packages = with pkgs; [
         uv
@@ -13,9 +33,10 @@
         djlint
         config.uv2nix.devVenv
         postgresql
+        runDb
       ];
       env = {
-        "DJANGO_SETTINGS_MODULE" = "plan.settings.test";
+        "DJANGO_SETTINGS_MODULE" = "plan.settings.default";
       };
 
       shellHook = ''

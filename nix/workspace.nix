@@ -81,7 +81,10 @@
           src = ../.;
         } ''
           cd $src
-          export DJANGO_SETTINGS_MODULE="plan.settings.test"
+          export DJANGO_SETTINGS_MODULE="plan.settings.default"
+          export DJANGO_SECRET_KEY="test"
+          export PLAN_BASE_DIR="$TMPDIR/plan"
+          mkdir -p "$PLAN_BASE_DIR"
           python manage.py check
           touch $out
         '';
@@ -91,10 +94,11 @@
           nativeBuildInputs = [editableVenv pkgs.postgresql_16];
           src = ../.;
         } ''
-          cd $src
-          export DJANGO_SETTINGS_MODULE="plan.settings.test"
+           cd $src
+          export DJANGO_SETTINGS_MODULE="plan.settings.default"
           export DJANGO_SECRET_KEY="test"
           export PLAN_BASE_DIR="$TMPDIR/plan"
+          mkdir -p "$PLAN_BASE_DIR"
           python manage.py test --noinput
           touch $out
         '';
