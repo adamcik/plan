@@ -1,6 +1,10 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 from unittest import mock
+import datetime
+import os
+import time
+import zoneinfo
 
 from django.utils import timezone
 
@@ -10,6 +14,7 @@ from plan.common.tests import BaseTestCase
 from plan.scrape.base import CourseScraper
 from plan.scrape.management.commands.scrape import Command
 from plan.scrape.ntnu.web import Courses
+from plan.scrape.ntnu.web import Lectures
 
 
 class DBTestCase(BaseTestCase):
@@ -183,3 +188,63 @@ class CoursesInputMergeTestCase(BaseTestCase):
         self.assertEqual("TST1001", emitted[0]["code"])
         self.assertEqual("1", emitted[0]["version"])
         self.assertEqual(["Gjovik", "Trondheim"], emitted[0]["locations"])
+
+
+class LecturesTimezoneParsingTestCase(BaseTestCase):
+    fixtures = ["test_data.json", "test_user.json"]
+
+    def test_lecture_timestamps_are_parsed_in_configured_timezone(self):
+        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+        course = Course.objects.filter(semester=semester).order_by("id").first()
+        self.assertIsNotNone(course)
+
+        oslo = zoneinfo.ZoneInfo("Europe/Oslo")
+        start_local = datetime.datetime(2009, 2, 2, 9, 15, tzinfo=oslo)
+        end_local = datetime.datetime(2009, 2, 2, 10, 0, tzinfo=oslo)
+
+        payload = {
+            "schedules": [
+                {
+                    "artermin": "2009_VÅR",
+                    "from": int(start_local.timestamp() * 1000),
+                    "to": int(end_local.timestamp() * 1000),
+                    "name": "Lecture",
+                    "acronym": "L",
+                    "title": "Test",
+                    "summary": "Summary",
+                    "studyProgramKeys": ["ABC"],
+                    "disiplin": [],
+                    "rooms": [],
+                    "staff": [],
+                    "week": 6,
+                }
+            ]
+        }
+
+        old_tz = os.environ.get("TZ")
+        try:
+            os.environ["TZ"] = "UTC"
+            time.tzset()
+
+            scraper = Lectures(semester)
+            with mock.patch.object(
+                Lectures,
+                "course_queryset",
+                return_value=[course],
+            ):
+                with mock.patch(
+                    "plan.scrape.ntnu.web.fetch_course_lectures",
+                    return_value=payload,
+                ):
+                    emitted = list(scraper.scrape())
+        finally:
+            if old_tz is None:
+                del os.environ["TZ"]
+            else:
+                os.environ["TZ"] = old_tz
+            time.tzset()
+
+        self.assertEqual(1, len(emitted))
+        self.assertEqual(0, emitted[0]["day"])
+        self.assertEqual(start_local.time(), emitted[0]["start"])
+        self.assertEqual(end_local.time(), emitted[0]["end"])

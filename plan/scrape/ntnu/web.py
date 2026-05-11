@@ -3,12 +3,16 @@
 import datetime
 import logging
 import re
+import zoneinfo
 from urllib.parse import quote_plus
 
 import tqdm
+from django.conf import settings
 
 from plan.common.models import Course, Semester
 from plan.scrape import base, fetch, utils
+
+TZ = zoneinfo.ZoneInfo(settings.TIME_ZONE)
 
 # TODO(adamcik): link to http://www.ntnu.no/eksamen/sted/?dag=120809 for exams?
 
@@ -93,8 +97,8 @@ class Lectures(base.LectureScraper):
                 if activity["artermin"] != ntnu_semeter:
                     continue
 
-                start = datetime.datetime.fromtimestamp(activity["from"] / 1000)
-                end = datetime.datetime.fromtimestamp(activity["to"] / 1000)
+                start = datetime.datetime.fromtimestamp(activity["from"] / 1000, tz=TZ)
+                end = datetime.datetime.fromtimestamp(activity["to"] / 1000, tz=TZ)
                 lecture_type = activity.get("name", activity["acronym"]).strip()
                 title = re.sub(r"^\d+(-\d*)?\s?", "", activity["title"]).strip()
                 summary = activity["summary"].strip()
