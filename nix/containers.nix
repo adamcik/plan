@@ -22,6 +22,9 @@
     uwsgiPkg = pkgs.uwsgi.override {
       python3 = config.uv2nix.python;
       plugins = ["python3"];
+      withPAM = false;
+      withSystemd = false;
+      withCap = false;
     };
     serveScript = pkgs.writeShellScriptBin "plan-uwsgi" ''
       set -eu

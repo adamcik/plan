@@ -110,7 +110,7 @@
         tombi
         djlint
         config.uv2nix.devVenv
-        postgresql
+        postgresql_17
         runDb
         runContainer
       ];

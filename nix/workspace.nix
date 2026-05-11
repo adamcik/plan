@@ -1,62 +1,146 @@
 {inputs, ...}: {
   imports = [./modules/uv2nix.nix];
+
   perSystem = {
     config,
     lib,
     pkgs,
     ...
   }: let
-    basePython = pkgs.python312;
-    shrinkPython = false;
-    python =
-      if shrinkPython
-      then
-        basePython.override {
-          bluezSupport = false;
-          stripConfig = true;
-          stripIdlelib = true;
-          stripTests = true;
-          stripTkinter = true;
+    python = pkgs.python312.override {
+      bluezSupport = false;
+      stripConfig = true;
+      stripIdlelib = true;
+      stripTests = true;
+      stripTkinter = true;
 
-          rebuildBytecode = false;
-          stripBytecode = true;
+      rebuildBytecode = false;
+      stripBytecode = true;
 
-          readline = null;
-          ncurses = null;
-          gdbm = null;
-        }
-      else basePython;
+      readline = null;
+      ncurses = null;
+      gdbm = null;
+      withSqlite = false;
+    };
+
     editableVenv = config.uv2nix.devVenv;
     overrideMetadata = builtins.fromJSON (builtins.readFile inputs.build-overrides);
-    hacks = pkgs.callPackage inputs.pyproject-nix.build.hacks {};
   in {
     uv2nix = {
       inherit python;
-      pyprojectOverrides = final: prev: {
-        brotli = hacks.nixpkgsPrebuilt {
-          from = pkgs.python312Packages.brotli;
-          prev = prev.brotli;
-        };
-        lxml = hacks.nixpkgsPrebuilt {
-          from = pkgs.python312Packages.lxml;
-          prev = prev.lxml;
-        };
-        pillow = hacks.nixpkgsPrebuilt {
-          from = pkgs.python312Packages.pillow;
-          prev = prev.pillow;
-        };
-        pylibmc = hacks.nixpkgsPrebuilt {
-          from = pkgs.python312Packages.pylibmc;
-          prev = prev.pylibmc;
-        };
-        psycopg2 = hacks.nixpkgsPrebuilt {
-          from = pkgs.python312Packages.psycopg2;
-          prev = prev.psycopg2;
-        };
-        reportlab = hacks.nixpkgsPrebuilt {
-          from = pkgs.python312Packages.reportlab;
-          prev = prev.reportlab;
-        };
+      pyprojectOverrides = final: prev: let
+        inherit (final) resolveBuildSystem;
+      in {
+        django = prev.django.overrideAttrs (old: {
+          postInstall = builtins.concatStringsSep "\n" [
+            (old.postInstall or "")
+            ''
+              set -eu
+
+              # This app only needs staticfiles/contenttypes from django.contrib.
+              CONTRIB="$out/${final.python.sitePackages}/django/contrib"
+              if [ -d "$CONTRIB" ]; then
+                KEEP="staticfiles|contenttypes|__init__.py"
+                ls -1 "$CONTRIB" | grep -vE "^($KEEP)$" | xargs -r -I {} rm -rf "$CONTRIB/{}"
+              fi
+
+              # Keep only locales supported by the application.
+              find $out -name "locale" -type d -exec sh -c '
+                set -eu
+                cd "$1"
+                for d in */; do
+                  lang="''${d%/}"
+                  case "$lang" in
+                    en|no|nb|nn) ;;
+                    *) rm -rf "$lang" ;;
+                  esac
+                done
+              ' -- {} \;
+            ''
+          ];
+        });
+
+        # These are somewhat heavy, ideally we would use prebuilt nixpkgs, but
+        # since we shrink our python we need to build them to ensure ABI
+        # matches.
+
+        brotli = prev.brotli.overrideAttrs (old: {
+          buildInputs =
+            (old.buildInputs or [])
+            ++ (resolveBuildSystem {
+              setuptools = [];
+              pkgconfig = [];
+            })
+            ++ [pkgs.brotli];
+          nativeBuildInputs =
+            (old.nativeBuildInputs or [])
+            ++ [pkgs.pkg-config pkgs.coreutils];
+          env = (old.env or {}) // {USE_SYSTEM_BROTLI = 1;};
+        });
+
+        lxml = prev.lxml.overrideAttrs (old: {
+          buildInputs =
+            (old.buildInputs or [])
+            ++ (resolveBuildSystem {
+              cython = [];
+              setuptools = [];
+            })
+            ++ [pkgs.libxml2 pkgs.libxslt pkgs.zlib];
+          nativeBuildInputs =
+            (old.nativeBuildInputs or [])
+            ++ [pkgs.coreutils pkgs.findutils];
+        });
+
+        pillow = prev.pillow.overrideAttrs (old: {
+          buildInputs =
+            (old.buildInputs or [])
+            ++ (resolveBuildSystem {
+              setuptools = [];
+              pybind11 = [];
+            })
+            ++ [
+              pkgs.libjpeg
+              pkgs.zlib
+              pkgs.libwebp
+            ];
+          nativeBuildInputs =
+            (old.nativeBuildInputs or [])
+            ++ [pkgs.pkg-config pkgs.coreutils];
+        });
+
+        psycopg2 = prev.psycopg2.overrideAttrs (old: {
+          buildInputs =
+            (old.buildInputs or [])
+            ++ (resolveBuildSystem {setuptools = [];})
+            ++ [pkgs.libpq.pg_config];
+        });
+
+        pylibmc = prev.pylibmc.overrideAttrs (old: {
+          buildInputs =
+            (old.buildInputs or [])
+            ++ (resolveBuildSystem {setuptools = [];})
+            ++ [
+              pkgs.libmemcached
+              pkgs.zlib
+            ];
+        });
+
+        reportlab = prev.reportlab.overrideAttrs (old: {
+          buildInputs =
+            (old.buildInputs or [])
+            ++ (resolveBuildSystem {setuptools = [];})
+            ++ [
+              pkgs.freetype
+              pkgs.libjpeg
+              pkgs.zlib
+            ];
+          nativeBuildInputs =
+            (old.nativeBuildInputs or [])
+            ++ [pkgs.pkg-config pkgs.coreutils];
+        });
+
+        # Inject SETUPTOOLS_SCM_PRETEND_VERSION since we don't have access to
+        # VCS info in nix builds.
         plan = prev.plan.overrideAttrs (old: {
           env =
             (old.env or {})
@@ -65,6 +149,7 @@
             };
         });
       };
+
       workspaceRoot = toString (
         lib.fileset.toSource {
           root = ../.;
@@ -92,13 +177,14 @@
           export PLAN_CACHE_DIR="$TMPDIR/cache"
           export PGHOST="$TMPDIR/pgsocket"
           mkdir -p "$PLAN_BASE_DIR"
+
           python manage.py check
           touch $out
         '';
 
       django-test =
         pkgs.runCommand "django-test" {
-          nativeBuildInputs = [editableVenv pkgs.postgresql_16];
+          nativeBuildInputs = [editableVenv pkgs.postgresql_17];
           src = ../.;
         } ''
            cd $src
@@ -109,6 +195,7 @@
           export PLAN_CACHE_DIR="$TMPDIR/cache"
           export PGHOST="$TMPDIR/pgsocket"
           mkdir -p "$PLAN_BASE_DIR"
+
           python manage.py test --noinput
           touch $out
         '';

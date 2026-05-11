@@ -1,4 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.12,<3.13"
+# dependencies = ["pillow==12.1.1"]
+# ///
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 """Minimal binary to generate and optimize sprites for css."""

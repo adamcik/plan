@@ -88,6 +88,18 @@ in {
         workspaceRoot =
           # Workaround for https://github.com/pyproject-nix/uv2nix/issues/179
           /. + (builtins.unsafeDiscardStringContext cfg.workspaceRoot);
+        config = {
+          # These are locally override-built C-extension packages in workspace.nix.
+          # Keep them on sdist so overrides control features and ABI consistently.
+          no-binary-package = [
+            "brotli"
+            "lxml"
+            "pillow"
+            "pylibmc"
+            "psycopg2"
+            "reportlab"
+          ];
+        };
       };
 
       pyprojectToml = lib.importTOML (cfg.workspaceRoot + "/pyproject.toml");
