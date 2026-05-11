@@ -28,32 +28,39 @@
       else basePython;
     editableVenv = config.uv2nix.devVenv;
     overrideMetadata = builtins.fromJSON (builtins.readFile inputs.build-overrides);
+    hacks = pkgs.callPackage inputs.pyproject-nix.build.hacks {};
   in {
     uv2nix = {
       inherit python;
-      pyprojectOverrides = final: prev: let
-        inherit (final) resolveBuildSystem;
-        overrides = with pkgs; {
-          psycopg2.buildInputs = resolveBuildSystem {setuptools = [];} ++ [libpq.pg_config];
-          plan.env = lib.optionalAttrs ((overrideMetadata.version or null) != null) {
-            SETUPTOOLS_SCM_PRETEND_VERSION = overrideMetadata.version;
-          };
+      pyprojectOverrides = final: prev: {
+        brotli = hacks.nixpkgsPrebuilt {
+          from = pkgs.python312Packages.brotli;
+          prev = prev.brotli;
         };
-      in
-        builtins.mapAttrs (
-          name: {
-            buildInputs ? [],
-            nativeBuildInputs ? [],
-            compile_flags ? [],
-            env ? {},
-          }:
-            prev.${name}.overrideAttrs (old: {
-              buildInputs = (old.buildInputs or []) ++ buildInputs;
-              nativeBuildInputs = (old.nativeBuildInputs or []) ++ nativeBuildInputs;
-              env = env // {NIX_CFLAGS_COMPILE = builtins.concatStringsSep " " compile_flags;};
-            })
-        )
-        overrides;
+        lxml = hacks.nixpkgsPrebuilt {
+          from = pkgs.python312Packages.lxml;
+          prev = prev.lxml;
+        };
+        pillow = hacks.nixpkgsPrebuilt {
+          from = pkgs.python312Packages.pillow;
+          prev = prev.pillow;
+        };
+        psycopg2 = hacks.nixpkgsPrebuilt {
+          from = pkgs.python312Packages.psycopg2;
+          prev = prev.psycopg2;
+        };
+        reportlab = hacks.nixpkgsPrebuilt {
+          from = pkgs.python312Packages.reportlab;
+          prev = prev.reportlab;
+        };
+        plan = prev.plan.overrideAttrs (old: {
+          env =
+            (old.env or {})
+            // lib.optionalAttrs ((overrideMetadata.version or null) != null) {
+              SETUPTOOLS_SCM_PRETEND_VERSION = overrideMetadata.version;
+            };
+        });
+      };
       workspaceRoot = toString (
         lib.fileset.toSource {
           root = ../.;
