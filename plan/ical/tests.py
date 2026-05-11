@@ -13,6 +13,7 @@ from django.utils import http as http_utils
 
 from plan.common import tests, utils
 from plan.common.converters import ScheduleConverter
+from plan.common.models import Exam
 from plan.common.models import Semester
 from plan.common.schedule import Schedule
 from plan.ical import queue
@@ -222,6 +223,32 @@ class ViewTestCase(tests.BaseTestCase):
 
         body = response.content.decode()
         self.assertIn(f"DTSTAMP:{dtstamp}", body)
+
+    def test_ical_exam_event_timestamps_are_stable(self):
+        url = reverse("schedule-ical-type", args=[self.schedule, "exams"])
+        response = self.client.get(f"{url}?no-cache=1", HTTP_ACCEPT_ENCODING="")
+        self.assertEqual(response.status_code, 200)
+
+        exam = Exam.objects.get_exams(
+            self.semester.year,
+            self.semester.type,
+            self.student.slug,
+        ).filter(exam_time__isnull=False, handout_date__isnull=True)[0]
+
+        expected_start = datetime.datetime.combine(
+            exam.exam_date,
+            exam.exam_time,
+            tzinfo=views.TZ,
+        ).astimezone(datetime.timezone.utc)
+
+        body = response.content.decode()
+        event_start = body.index(f"UID:exam-{exam.id}@")
+        event_end = body.index("END:VEVENT", event_start)
+        event = body[event_start:event_end]
+        self.assertIn(
+            f"DTSTART:{expected_start.strftime('%Y%m%dT%H%M%SZ')}",
+            event,
+        )
 
     def test_ical_cache_uses_encoding_variants(self):
         url = reverse("schedule-ical", args=[self.schedule])

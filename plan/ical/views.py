@@ -34,7 +34,9 @@ UTC = zoneinfo.ZoneInfo("UTC")
 
 
 def _to_utc(dt: datetime.datetime) -> datetime.datetime:
-    return dt.replace(tzinfo=TZ).astimezone(UTC)
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=TZ).astimezone(UTC)
+    return dt.astimezone(UTC)
 
 
 def _normalized_path(path: str) -> str:
