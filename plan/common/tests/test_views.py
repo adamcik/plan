@@ -434,7 +434,7 @@ class ViewTestCase(BaseTestCase):
             defaults={"version": 0},
         )
 
-        baseline = datetime.datetime(2009, 1, 1, 12, 0, 0)
+        baseline = timezone.make_aware(datetime.datetime(2009, 1, 1, 12, 0, 0))
         Schedule.objects.filter(id=row.id).update(version=0, last_modified=baseline)
 
         self.client.get(schedule_url)
