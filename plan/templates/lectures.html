@@ -73,7 +73,7 @@
               {% endif %}
               <td>{{ l.alias|default:l.course.code }}</td>
               <td>{{ l.get_day_display }}</td>
-              <td class="nowrap">{{ l.start|time }}-{{ l.end|time }}</td>
+              <td class="nowrap">{{ l.start|time:"H:i" }}-{{ l.end|time:"H:i" }}</td>
               <td class="small">
                 {{ l.title|default:"" }}
                 {% if l.title and l.summary %}-{% endif %}

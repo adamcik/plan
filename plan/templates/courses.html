@@ -91,7 +91,7 @@
               {% endif %}
               <td class="nowrap">
                 {% for exam in exams|get:course.id %}
-                  {{ exam.exam_date }}
+                  {{ exam.exam_date|date:"Y-m-d" }}
                   {% if not forloop.last %},{% endif %}
                 {% empty %}
                   -

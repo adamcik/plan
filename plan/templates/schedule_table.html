@@ -44,7 +44,7 @@
                       {% endstripspace %}
                       "
                       {% endif %}
-                      {% if c.lecture %}title="{{ c.lecture.course.name }} {{ c.lecture.start|time }}-{{ c.lecture.end|time }}{% if c.lecture.title %}: {{ c.lecture.title }}{% endif %}
+                      {% if c.lecture %}title="{{ c.lecture.course.name }} {{ c.lecture.start|time:"H:i" }}-{{ c.lecture.end|time:"H:i" }}{% if c.lecture.title %}: {{ c.lecture.title }}{% endif %}
                       "
                       {% endif %}>
                     <div class="wrapper">

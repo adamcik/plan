@@ -42,7 +42,9 @@ DATABASES = {
 TIME_ZONE = "Europe/Oslo"
 
 TIME_FORMAT = "H:i"
+SHORT_TIME_FORMAT = "H:i"
 DATE_FORMAT = "Y-m-d"
+SHORT_DATETIME_FORMAT = "Y-m-d H:i"
 
 # -- Internationalization settings:
 USE_I18N = True
