@@ -456,7 +456,7 @@ class ViewTestCase(BaseTestCase):
         student = Student.objects.get(slug="adamcik")
         semester = Semester.objects.get(year=2009, type="spring")
 
-        baseline = datetime.datetime(2009, 1, 1, 12, 0, 0)
+        baseline = timezone.make_aware(datetime.datetime(2009, 1, 1, 12, 0, 0))
         Subscription.objects.filter(
             student_id=student.id,
             course__semester_id=semester.id,
