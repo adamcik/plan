@@ -28,12 +28,45 @@
       else basePython;
     editableVenv = config.uv2nix.devVenv;
     overrideMetadata = builtins.fromJSON (builtins.readFile inputs.build-overrides);
+    uvLock = inputs.uv2nix.lib.lock1.parseLock (lib.importTOML ../uv.lock);
+
+    normalizeVersion = version: builtins.head (lib.splitString "+" version);
+    packageFromLock = name: lib.findFirst (pkg: pkg.name == name) null uvLock.package;
+    lockVersion = name: let
+      pkg = packageFromLock name;
+    in
+      if pkg == null
+      then null
+      else normalizeVersion pkg.version;
+
+    heavyDeps = {
+      brotli = pkgs.python312Packages.brotli.version;
+      lxml = pkgs.python312Packages.lxml.version;
+      pillow = pkgs.python312Packages.pillow.version;
+      psycopg2 = pkgs.python312Packages.psycopg2.version;
+      reportlab = pkgs.python312Packages.reportlab.version;
+    };
+
+    heavyDepMismatches = lib.filter (line: line != null) (
+      lib.mapAttrsToList (
+        name: nixVersion: let
+          normalizedNixVersion = normalizeVersion nixVersion;
+          uvVersion = lockVersion name;
+        in
+          if uvVersion == null
+          then "missing in uv.lock: ${name}"
+          else if uvVersion != normalizedNixVersion
+          then "version mismatch for ${name}: uv.lock=${uvVersion} nixpkgs=${normalizedNixVersion}"
+          else null
+      )
+      heavyDeps
+    );
   in {
     uv2nix = {
       inherit python;
       pyprojectOverrides = final: prev: let
         inherit (final) resolveBuildSystem;
-        overrides = with pkgsLegacy; {
+        overrides = with pkgs; {
           rjsmin.buildInputs = resolveBuildSystem {setuptools = [];};
           rcssmin.buildInputs = resolveBuildSystem {setuptools = [];};
           vobject.buildInputs = resolveBuildSystem {setuptools = [];};
@@ -114,6 +147,16 @@
     };
 
     checks = {
+      deps = pkgs.runCommand "deps" {} ''
+        if [ ${toString (builtins.length heavyDepMismatches)} -ne 0 ]; then
+          echo "Native-heavy dependency version mismatch detected between uv.lock and nixpkgs:"
+          ${lib.concatMapStringsSep "\n" (line: "echo \"  - ${line}\"") heavyDepMismatches}
+          exit 1
+        fi
+
+        touch $out
+      '';
+
       django-check =
         pkgs.runCommand "django-check" {
           nativeBuildInputs = [editableVenv];
