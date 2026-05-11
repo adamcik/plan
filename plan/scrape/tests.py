@@ -140,6 +140,15 @@ class CourseScraperTestCase(BaseTestCase):
             ).count(),
         )
 
+    def test_scraper_uses_timezone_aware_timestamps(self):
+        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+        scraper = CourseScraper(semester)
+
+        self.assertTrue(timezone.is_aware(scraper.import_time))
+
+        prepared = scraper.prepare_save({"code": "TST1001", "version": "1"})
+        self.assertTrue(timezone.is_aware(prepared["defaults"]["last_modified"]))
+
 
 class CoursesInputMergeTestCase(BaseTestCase):
     fixtures = ["test_data.json", "test_user.json"]

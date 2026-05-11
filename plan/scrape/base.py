@@ -11,6 +11,7 @@ from tqdm.contrib.logging import logging_redirect_tqdm
 from django import db
 from django.db import IntegrityError
 from django.db.models import Count
+from django.utils import timezone
 
 from plan.common.models import (
     Course,
@@ -35,7 +36,7 @@ class Scraper:
     def __init__(self, semester, course_prefix=None):
         self.semester = semester
         self.course_prefix = course_prefix
-        self.import_time = datetime.datetime.now()
+        self.import_time = timezone.now()
         self.stats = collections.OrderedDict(
             [
                 ("initial", 0),  # items initialy in db
@@ -170,7 +171,7 @@ class Scraper:
             if field in data:
                 kwargs["defaults"][field] = data[field]
 
-        kwargs["defaults"]["last_modified"] = datetime.datetime.now()
+        kwargs["defaults"]["last_modified"] = timezone.now()
         return kwargs
 
     def save(self, data, kwargs):
@@ -464,7 +465,7 @@ class LectureScraper(Scraper):
 
         self.stats["rooms"] += 1
 
-        room.last_modified = datetime.datetime.now()
+        room.last_modified = timezone.now()
         room.save()
 
         return room
