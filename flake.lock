@@ -66,22 +66,6 @@
         "type": "github"
       }
     },
-    "nixpkgs-legacy": {
-      "locked": {
-        "lastModified": 1775002709,
-        "narHash": "sha256-d3Yx83vSrN+2z/loBh4mJpyRqr9aAJqlke4TkpFmRJA=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "bcd464ccd2a1a7cd09aa2f8d4ffba83b761b1d0e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "nixos-25.11",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "nixpkgs-lib": {
       "locked": {
         "lastModified": 1772328832,
@@ -149,7 +133,6 @@
         "flake-parts": "flake-parts",
         "nix2container": "nix2container",
         "nixpkgs": "nixpkgs",
-        "nixpkgs-legacy": "nixpkgs-legacy",
         "pyproject-build-systems": "pyproject-build-systems",
         "pyproject-nix": "pyproject-nix",
         "systems": "systems",

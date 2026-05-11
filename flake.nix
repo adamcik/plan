@@ -2,7 +2,6 @@
   description = "Plan - Hardened Nix-Python Deployment Stack";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs-legacy.url = "github:NixOS/nixpkgs/nixos-25.11";
 
     flake-parts.url = "github:hercules-ci/flake-parts";
 

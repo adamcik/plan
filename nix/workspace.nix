@@ -2,17 +2,16 @@
   imports = [./modules/uv2nix.nix];
   perSystem = {
     config,
-    inputs',
     lib,
     pkgs,
     ...
   }: let
-    pkgsLegacy = inputs'.nixpkgs-legacy.legacyPackages;
+    basePython = pkgs.python312;
     shrinkPython = false;
     python =
       if shrinkPython
       then
-        pkgsLegacy.python312.override {
+        basePython.override {
           bluezSupport = false;
           stripConfig = true;
           stripIdlelib = true;
@@ -26,7 +25,7 @@
           ncurses = null;
           gdbm = null;
         }
-      else pkgsLegacy.python312;
+      else basePython;
     editableVenv = config.uv2nix.devVenv;
     overrideMetadata = builtins.fromJSON (builtins.readFile inputs.build-overrides);
   in {
