@@ -264,13 +264,13 @@ requires-dist = [
     { name = "django", specifier = "~=5.2.0" },
     { name = "django-compressor", specifier = "~=4.6.0" },
     { name = "lxml", specifier = "~=6.1.0" },
-    { name = "psycopg2", specifier = "~=2.9.11" },
-    { name = "python-memcached", specifier = ">=1.58,<1.60" },
+    { name = "psycopg2", specifier = ">=2.9.11,<3" },
+    { name = "python-memcached", specifier = ">=1.62,<2" },
     { name = "reportlab", specifier = "~=4.4.4" },
     { name = "sentry-sdk", specifier = ">=2.0.0,<3" },
     { name = "testing-postgresql", specifier = "~=1.3.0" },
     { name = "typing-extensions", specifier = ">=4.12.2" },
-    { name = "vobject", specifier = "~=0.9.6.1" },
+    { name = "vobject", specifier = ">=0.9.9,<1" },
 ]
 
 [package.metadata.requires-dev]
@@ -279,9 +279,9 @@ dev = [
     { name = "django-stubs", specifier = "~=5.2.9" },
 ]
 scraper = [
-    { name = "requests", specifier = "~=2.33.0" },
-    { name = "tqdm" },
-    { name = "urllib3", specifier = ">=1.26.0" },
+    { name = "requests", specifier = ">=2.33.0,<3" },
+    { name = "tqdm", specifier = ">=4.67.1,<5" },
+    { name = "urllib3", specifier = ">=2.5.0,<3" },
 ]
 
 [[package]]
@@ -307,14 +307,20 @@ wheels = [
 
 [[package]]
 name = "python-memcached"
-version = "1.59"
+version = "1.62"
 source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "six" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/90/59/5faf6e3cd8a568dd4f737ddae4f2e54204fd8c51f90bf8df99aca6c22318/python-memcached-1.59.tar.gz", hash = "sha256:a2e28637be13ee0bf1a8b6843e7490f9456fd3f2a4cb60471733c7b5d5557e4f", size = 22210, upload-time = "2017-12-15T16:38:31.182Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e8/3c/204e5c6087efc85b52a68edce8678d44eb28718f5f145e036c277beb467c/python-memcached-1.62.tar.gz", hash = "sha256:0285470599b7f593fbf3bec084daa1f483221e68c1db2cf1d846a9f7c2655103", size = 28591, upload-time = "2024-01-14T15:56:03.134Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f5/90/19d3908048f70c120ec66a39e61b92c253e834e6e895cd104ce5e46cbe53/python_memcached-1.59-py2.py3-none-any.whl", hash = "sha256:4dac64916871bd3550263323fc2ce18e1e439080a2d5670c594cf3118d99b594", size = 16200, upload-time = "2017-12-15T16:38:29.848Z" },
+    { url = "https://files.pythonhosted.org/packages/8f/1b/3b15a37831ae34a264d7d5b71f3ae9fe74a81251453a3ec2135e76888ef1/python_memcached-1.62-py2.py3-none-any.whl", hash = "sha256:1bdd8d2393ff53e80cd5e9442d750e658e0b35c3eebb3211af137303e3b729d1", size = 15136, upload-time = "2024-01-14T15:56:01.725Z" },
+]
+
+[[package]]
+name = "pytz"
+version = "2026.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ff/46/dd499ec9038423421951e4fad73051febaa13d2df82b4064f87af8b8c0c3/pytz-2026.2.tar.gz", hash = "sha256:0e60b47b29f21574376f218fe21abc009894a2321ea16c6754f3cad6eb7cdd6a", size = 320861, upload-time = "2026-05-04T01:35:29.667Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ec/dd/96da98f892250475bdf2328112d7468abdd4acc7b902b6af23f4ed958ea0/pytz-2026.2-py2.py3-none-any.whl", hash = "sha256:04156e608bee23d3792fd45c94ae47fae1036688e75032eea2e3bf0323d1f126", size = 510141, upload-time = "2026-05-04T01:35:27.408Z" },
 ]
 
 [[package]]
@@ -488,9 +494,14 @@ wheels = [
 
 [[package]]
 name = "vobject"
-version = "0.9.6.1"
+version = "0.9.9"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "python-dateutil" },
+    { name = "pytz" },
+    { name = "six" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/da/ce/27c48c0e39cc69ffe7f6e3751734f6073539bf18a0cfe564e973a3709a52/vobject-0.9.6.1.tar.gz", hash = "sha256:96512aec74b90abb71f6b53898dd7fe47300cc940104c4f79148f0671f790101", size = 58556, upload-time = "2018-07-18T16:03:43.067Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d0/8a/15c34b3d27c43fc81a467d0f66577afc5542326804c42f30557e31c3259e/vobject-0.9.9.tar.gz", hash = "sha256:ac44e5d7e2079d84c1d52c50a615b9bec4b1ba958608c4c7fe40cbf33247b38e", size = 1208905, upload-time = "2024-12-16T07:29:39.178Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/68/20/6bba813bbd498c28edbbcf8253a6398cf4266ecf7bfa6129835c0a2bfbb1/vobject-0.9.9-py2.py3-none-any.whl", hash = "sha256:0fbdb982065cf4d1843a5d5950c88510041c6de026bda49c3502721de1c6ac3d", size = 47526, upload-time = "2024-12-16T07:31:08.493Z" },
+]
