@@ -11,6 +11,7 @@
     inputs',
     ...
   }: let
+    projectPkgs = import ./packages.nix {inherit pkgs;};
     nix2containerPkgs = inputs'.nix2container.packages.nix2container;
     overrideMetadata = builtins.fromJSON (builtins.readFile inputs.build-overrides);
     fallbackCreated = let
@@ -19,13 +20,6 @@
       if d == "" || builtins.stringLength d < 14
       then "0001-01-01T00:00:00Z"
       else "${builtins.substring 0 4 d}-${builtins.substring 4 2 d}-${builtins.substring 6 2 d}T${builtins.substring 8 2 d}:${builtins.substring 10 2 d}:${builtins.substring 12 2 d}Z";
-    uwsgiPkg = pkgs.uwsgi.override {
-      python3 = config.uv2nix.python;
-      plugins = ["python3"];
-      withPAM = false;
-      withSystemd = false;
-      withCap = false;
-    };
     serveScript = pkgs.writeShellScriptBin "plan-uwsgi" ''
       set -eu
 
@@ -80,7 +74,7 @@
           ;;
       esac
 
-      exec ${pkgs.lib.getExe uwsgiPkg} "''${uwsgi_args[@]}"
+      exec ${pkgs.lib.getExe projectPkgs.uwsgi} "''${uwsgi_args[@]}"
     '';
     manageScript = pkgs.writeShellScriptBin "manage" ''
       export DJANGO_SETTINGS_MODULE="''${DJANGO_SETTINGS_MODULE:?DJANGO_SETTINGS_MODULE is required}"
@@ -181,8 +175,7 @@
       layers = let
         baseLayer = nix2containerPkgs.buildLayer {
           deps = [
-            uwsgiPkg
-            config.uv2nix.python
+            projectPkgs.uwsgi
           ];
         };
         depsLayer = nix2containerPkgs.buildLayer {
