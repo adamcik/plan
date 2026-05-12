@@ -6,7 +6,7 @@ dependencies = [
   "Django~=5.2.0",
   "brotli==1.2.0",
   "django-compressor~=4.6.0",
-  "lxml==6.0.2",
+  "lxml==6.1.0",
   "pillow==12.1.1",
   "psycopg2==2.9.11",
   "python-memcached>=1.62,<2",
