@@ -250,7 +250,24 @@ deploy/migrate.sh --apply --image ghcr.io/adamcik/plan:<tag>
 `deploy/migrate.sh` defaults to `showmigrations --plan` and `migrate --check`.
 Applying migrations now requires explicit `--apply`.
 
-Default behavior uses `/etc/plan/env` and mounts `/var/lib/plan` + `/var/cache/plan`.
+Default behavior (without `--instance`) uses `/etc/plan/env` and mounts
+`/var/lib/plan` + `/var/cache/plan`.
+
+With `--instance <name>`, `deploy/upgrade.sh` defaults to:
+
+- env file: `/etc/plan/<name>.env`
+- container: `plan-<name>`
+- unit: `container-plan-<name>.service`
+- lib/cache/run host paths:
+  - `/var/lib/plan/<name>`
+  - `/var/cache/plan/<name>`
+  - `/run/plan/<name>`
+- static host paths:
+  - `/var/lib/plan/<name>/static/releases`
+  - `/var/lib/plan/<name>/static/current`
+
+All of these can still be overridden with explicit flags (`--container`,
+`--unit`, `--env-file`, `--static-releases`, `--static-current`).
 
 ## Recommended release order
 

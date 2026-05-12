@@ -7,6 +7,7 @@ Usage:
   $0 [options]
 
 Options:
+  --instance <name>    Instance name for host path/default namespacing (e.g. prod, preprod)
   --image <ref>       Image ref to pull (default: ghcr.io/adamcik/plan:latest)
   --unit <name>       systemd unit (default: container-plan-ntnu.service)
   --container <name>  container name (default: plan-ntnu)
@@ -33,6 +34,10 @@ IMAGE_REF="ghcr.io/adamcik/plan:latest"
 UNIT_NAME="container-plan-ntnu.service"
 CONTAINER_NAME="plan-ntnu"
 ENV_FILE="/etc/plan/env"
+INSTANCE_NAME=""
+LIB_DIR=""
+CACHE_DIR=""
+RUN_DIR=""
 EXTRACT_STATIC=1
 STATIC_FROM="/var/lib/plan/static"
 STATIC_RELEASES_DIR="/var/lib/plan/static/releases"
@@ -40,22 +45,61 @@ STATIC_CURRENT_LINK="/var/lib/plan/static/current"
 DO_RECREATE=0
 CHECK_ONLY=0
 
+UNIT_SET=0
+CONTAINER_SET=0
+ENV_FILE_SET=0
+STATIC_RELEASES_SET=0
+STATIC_CURRENT_SET=0
+
+apply_instance_defaults() {
+  if [ -z "$INSTANCE_NAME" ]; then
+    return
+  fi
+
+  LIB_DIR="/var/lib/plan/${INSTANCE_NAME}"
+  CACHE_DIR="/var/cache/plan/${INSTANCE_NAME}"
+  RUN_DIR="/run/plan/${INSTANCE_NAME}"
+
+  if [ "$CONTAINER_SET" -eq 0 ]; then
+    CONTAINER_NAME="plan-${INSTANCE_NAME}"
+  fi
+  if [ "$UNIT_SET" -eq 0 ]; then
+    UNIT_NAME="container-plan-${INSTANCE_NAME}.service"
+  fi
+  if [ "$ENV_FILE_SET" -eq 0 ]; then
+    ENV_FILE="/etc/plan/${INSTANCE_NAME}.env"
+  fi
+  if [ "$STATIC_RELEASES_SET" -eq 0 ]; then
+    STATIC_RELEASES_DIR="${LIB_DIR}/static/releases"
+  fi
+  if [ "$STATIC_CURRENT_SET" -eq 0 ]; then
+    STATIC_CURRENT_LINK="${LIB_DIR}/static/current"
+  fi
+}
+
 while [ "$#" -gt 0 ]; do
   case "$1" in
+    --instance)
+      INSTANCE_NAME="$2"
+      shift 2
+      ;;
     --image)
       IMAGE_REF="$2"
       shift 2
       ;;
     --unit)
       UNIT_NAME="$2"
+      UNIT_SET=1
       shift 2
       ;;
     --container)
       CONTAINER_NAME="$2"
+      CONTAINER_SET=1
       shift 2
       ;;
     --env-file)
       ENV_FILE="$2"
+      ENV_FILE_SET=1
       shift 2
       ;;
     --extract-static)
@@ -72,10 +116,12 @@ while [ "$#" -gt 0 ]; do
       ;;
     --static-releases)
       STATIC_RELEASES_DIR="$2"
+      STATIC_RELEASES_SET=1
       shift 2
       ;;
     --static-current)
       STATIC_CURRENT_LINK="$2"
+      STATIC_CURRENT_SET=1
       shift 2
       ;;
     --recreate)
@@ -97,6 +143,18 @@ while [ "$#" -gt 0 ]; do
       ;;
   esac
 done
+
+apply_instance_defaults
+
+if [ -z "$LIB_DIR" ]; then
+  LIB_DIR="/var/lib/plan"
+fi
+if [ -z "$CACHE_DIR" ]; then
+  CACHE_DIR="/var/cache/plan"
+fi
+if [ -z "$RUN_DIR" ]; then
+  RUN_DIR="/run/plan"
+fi
 
 log() {
   printf '\n==> %s\n' "$*"
@@ -222,12 +280,12 @@ else
   sudo podman rm -f "$CONTAINER_NAME" || true
 
   log "Ensure host runtime/cache paths exist"
-  sudo install -d -o www-data -g www-data -m 0750 /var/lib/plan
-  sudo install -d -o www-data -g www-data -m 0750 /var/lib/plan/static
-  sudo install -d -o www-data -g www-data -m 0750 /var/lib/plan/static/releases
-  sudo install -d -o www-data -g www-data -m 0750 /var/cache/plan
-  sudo install -d -o www-data -g www-data -m 0750 /var/cache/plan/static
-  sudo install -d -o root -g www-data -m 2775 /run/plan
+  sudo install -d -o www-data -g www-data -m 0750 "$LIB_DIR"
+  sudo install -d -o www-data -g www-data -m 0750 "$LIB_DIR/static"
+  sudo install -d -o www-data -g www-data -m 0750 "$STATIC_RELEASES_DIR"
+  sudo install -d -o www-data -g www-data -m 0750 "$CACHE_DIR"
+  sudo install -d -o www-data -g www-data -m 0750 "$CACHE_DIR/static"
+  sudo install -d -o root -g www-data -m 2775 "$RUN_DIR"
 
   sudo podman create \
     --name "$CONTAINER_NAME" \
@@ -238,9 +296,9 @@ else
     --tmpfs /tmp:rw,nosuid,nodev,noexec,size=256m,mode=1777 \
     --cap-drop=ALL \
     --security-opt no-new-privileges \
-    -v /var/lib/plan:/var/lib/plan:rw,nosuid,nodev,noexec \
-    -v /var/cache/plan:/var/cache/plan:rw,nosuid,nodev,noexec \
-    -v /run/plan:/run/uwsgi:rw,nosuid,nodev,noexec \
+    -v "$LIB_DIR":/var/lib/plan:rw,nosuid,nodev,noexec \
+    -v "$CACHE_DIR":/var/cache/plan:rw,nosuid,nodev,noexec \
+    -v "$RUN_DIR":/run/uwsgi:rw,nosuid,nodev,noexec \
     "$IMAGE_REF"
 
   sudo podman generate systemd --name "$CONTAINER_NAME" --files --new
