@@ -20,7 +20,7 @@
     readline = null;
     ncurses = null;
     gdbm = null;
-    withSqlite = false;
+    withSqlite = true;
   };
 
   # Keep uwsgi aligned with the exact Python derivation above and disable

@@ -27,7 +27,11 @@ description = "Timetable generator for educational institutions."
 repository = "https://github.com/adamcik/plan"
 
 [dependency-groups]
-dev = ["django-stubs~=5.2.9", "testing.postgresql~=1.3.0"]
+dev = [
+  "django-stubs~=5.2.9",
+  "ipython>=8.37.0,<9",
+  "testing.postgresql~=1.3.0",
+]
 scraper = ["requests>=2.33.0,<3", "tqdm>=4.67.1,<5", "urllib3>=2.7.0,<3"]
 
 [build-system]
