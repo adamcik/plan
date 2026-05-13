@@ -102,7 +102,7 @@ CACHES = {
 memcached_location = os.environ.get("MEMCACHED_LOCATION")
 if memcached_location:
     CACHES["default"] = {
-        "BACKEND": "django.core.cache.backends.memcached.MemcachedCache",
+        "BACKEND": "django.core.cache.backends.memcached.PyLibMCCache",
         "LOCATION": memcached_location,
         "KEY_PREFIX": os.environ.get("MEMCACHED_KEY_PREFIX", "container"),
     }

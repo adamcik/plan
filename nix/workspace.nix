@@ -45,6 +45,10 @@
           from = pkgs.python312Packages.pillow;
           prev = prev.pillow;
         };
+        pylibmc = hacks.nixpkgsPrebuilt {
+          from = pkgs.python312Packages.pylibmc;
+          prev = prev.pylibmc;
+        };
         psycopg2 = hacks.nixpkgsPrebuilt {
           from = pkgs.python312Packages.psycopg2;
           prev = prev.psycopg2;
