@@ -237,21 +237,21 @@ dependencies = [
     { name = "brotli" },
     { name = "django" },
     { name = "django-compressor" },
+    { name = "django-debug-toolbar" },
     { name = "lxml" },
     { name = "pillow" },
     { name = "psycopg2" },
     { name = "pylibmc" },
     { name = "reportlab" },
     { name = "sentry-sdk" },
-    { name = "testing-postgresql" },
     { name = "typing-extensions" },
     { name = "vobject" },
 ]
 
 [package.dev-dependencies]
 dev = [
-    { name = "django-debug-toolbar" },
     { name = "django-stubs" },
+    { name = "testing-postgresql" },
 ]
 scraper = [
     { name = "requests" },
@@ -264,21 +264,21 @@ requires-dist = [
     { name = "brotli", specifier = "==1.2.0" },
     { name = "django", specifier = "~=5.2.0" },
     { name = "django-compressor", specifier = "~=4.6.0" },
+    { name = "django-debug-toolbar", specifier = "~=5.2.0" },
     { name = "lxml", specifier = "==6.1.0" },
     { name = "pillow", specifier = "==12.2.0" },
     { name = "psycopg2", specifier = "==2.9.11" },
     { name = "pylibmc", specifier = ">=1.6.3,<2" },
     { name = "reportlab", specifier = "==4.4.10" },
     { name = "sentry-sdk", specifier = ">=2.0.0,<3" },
-    { name = "testing-postgresql", specifier = "~=1.3.0" },
     { name = "typing-extensions", specifier = ">=4.12.2" },
     { name = "vobject", specifier = ">=0.9.9,<1" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "django-debug-toolbar", specifier = "~=5.2.0" },
     { name = "django-stubs", specifier = "~=5.2.9" },
+    { name = "testing-postgresql", specifier = "~=1.3.0" },
 ]
 scraper = [
     { name = "requests", specifier = ">=2.33.0,<3" },
