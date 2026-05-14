@@ -89,6 +89,7 @@
 
         cd "$src"
         export DJANGO_SETTINGS_MODULE="plan.settings.container"
+        export DJANGO_DEBUG_TOOLBAR=1
         export PLAN_BASE_DIR="$TMPDIR"
         export PLAN_STATIC_ROOT="$TMPDIR/static"
         export DJANGO_SECRET_KEY="nix-build-static"
