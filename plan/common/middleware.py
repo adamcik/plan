@@ -3,6 +3,7 @@
 import gzip
 import re
 import secrets
+from urllib.parse import quote
 
 import brotli
 
@@ -10,7 +11,6 @@ from django import http, shortcuts, urls
 from django.conf import settings
 from django.http.request import HttpRequest
 from django.utils import cache, translation
-from django.utils import http as http_utils
 from django.utils.deprecation import MiddlewareMixin
 from django.utils.html import escape
 from django.utils.translation import trans_real as trans_internals
@@ -112,7 +112,7 @@ class AppendSlashMiddleware(MiddlewareMixin):
             raise RuntimeError("Can't redirect POST in AppendSlashMiddleware.")
 
         # Redirect rest:
-        url = http_utils.urlquote("%s/" % request.path_info)
+        url = quote("%s/" % request.path_info, safe="/")
         if request.META.get("QUERY_STRING", ""):
             url += "?" + request.META["QUERY_STRING"]
         return http.HttpResponsePermanentRedirect(url)
