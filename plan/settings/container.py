@@ -75,7 +75,7 @@ DATABASES = {
 BASE_DIR = os.environ.get("PLAN_BASE_DIR", "/var/lib/plan")
 CACHE_DIR = os.environ.get("PLAN_CACHE_DIR", "/var/cache/plan")
 
-STATIC_ROOT = os.environ.get("PLAN_STATIC_ROOT", "/static")
+STATIC_ROOT = os.environ.get("PLAN_STATIC_ROOT", os.path.join(BASE_DIR, "static"))
 COMPRESS_ROOT = os.environ.get(
     "PLAN_COMPRESS_ROOT",
     os.path.join(CACHE_DIR, "static"),
