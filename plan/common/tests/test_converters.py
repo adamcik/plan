@@ -48,6 +48,22 @@ class ScheduleConverterTestCase(BaseTestCase):
             cache.get(f"schedule:{semester.year}-{semester.type}-{student.slug}"),
         )
 
+    def test_to_python_cache_hit_does_not_query_db(self):
+        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+        student = Student.objects.get(slug="adamcik")
+
+        cache.clear()
+        converter = ScheduleConverter()
+        path = f"{semester.year}/{semester.slug}/{student.slug}"
+
+        converter.to_python(path)
+
+        with self.assertNumQueries(0):
+            cached = converter.to_python(path)
+
+        self.assertEqual(student.slug, cached.student.slug)
+        self.assertEqual(semester.id, cached.semester.id)
+
     def test_to_python_legacy_fallback_when_versions_uninitialized(self):
         semester = Semester.objects.get(year=2009, type=Semester.SPRING)
         student = Student.objects.get(slug="adamcik")

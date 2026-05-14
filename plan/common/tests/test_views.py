@@ -539,6 +539,68 @@ class ViewTestCase(BaseTestCase):
 
         self.assertNotEqual(first_key, second_key)
 
+    def test_schedule_with_warm_cache_force_reload_makes_no_queries(self):
+        schedule_url = reverse("schedule", args=[self.schedule])
+        cache.clear()
+
+        response = self.client.get(schedule_url)
+        self.assertEqual(response.status_code, 200)
+
+        with self.assertNumQueries(0):
+            response = self.client.get(
+                schedule_url,
+                HTTP_CACHE_CONTROL="no-cache",
+            )
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_schedule_week_with_warm_cache_force_reload_makes_no_queries(self):
+        schedule_week_url = reverse("schedule-week", args=[self.schedule, 1])
+        cache.clear()
+
+        response = self.client.get(schedule_week_url)
+        self.assertEqual(response.status_code, 200)
+
+        with self.assertNumQueries(0):
+            response = self.client.get(
+                schedule_week_url,
+                HTTP_CACHE_CONTROL="no-cache",
+            )
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_schedule_force_reload_week_after_non_week_warm_makes_no_queries(self):
+        schedule_url = reverse("schedule", args=[self.schedule])
+        schedule_week_url = reverse("schedule-week", args=[self.schedule, 1])
+        cache.clear()
+
+        response = self.client.get(schedule_url)
+        self.assertEqual(response.status_code, 200)
+
+        with self.assertNumQueries(0):
+            response = self.client.get(
+                schedule_week_url,
+                HTTP_CACHE_CONTROL="no-cache",
+            )
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_schedule_force_reload_non_week_after_week_warm_makes_no_queries(self):
+        schedule_url = reverse("schedule", args=[self.schedule])
+        schedule_week_url = reverse("schedule-week", args=[self.schedule, 1])
+        cache.clear()
+
+        response = self.client.get(schedule_week_url)
+        self.assertEqual(response.status_code, 200)
+
+        with self.assertNumQueries(0):
+            response = self.client.get(
+                schedule_url,
+                HTTP_CACHE_CONTROL="no-cache",
+            )
+
+        self.assertEqual(response.status_code, 200)
+
     def test_change_course_invalid_course_renders_error(self):
         url = reverse("change-course", args=[self.schedule])
 

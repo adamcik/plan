@@ -67,6 +67,24 @@ class ModelsTestCase(BaseTestCase):
 
         self.assertRegex(value, r"\b\d{4}-\d{2}-\d{2}\b")
 
+    def test_course_str_uses_semester_id_without_fk_query(self):
+        course = Course.objects.get(pk=1)
+
+        with self.assertNumQueries(0):
+            value = str(course)
+
+        self.assertIn("semester_id=1", value)
+        self.assertNotIn("(spring", value.lower())
+
+    def test_course_str_includes_semester_details_when_loaded(self):
+        course = Course.objects.select_related("semester").get(pk=1)
+
+        with self.assertNumQueries(0):
+            value = str(course)
+
+        self.assertIn("semester_id=1", value)
+        self.assertIn("(", value)
+
     # FIXME test unicode
     # FIXME test course.get_url
     # FIXME test get_stats(int)
