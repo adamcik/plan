@@ -24,6 +24,10 @@ class Candidate:
     pre_key: str
 
 
+class _DryRunRollback(Exception):
+    pass
+
+
 class Command(management.BaseCommand):
     help = "Backfill missing schedule rows while preserving freshness keys"
 
@@ -81,64 +85,66 @@ class Command(management.BaseCommand):
             "verified": 0,
         }
 
-        if dry_run:
-            counters["verified"] = len(missing_with_timestamp)
-            return counters
+        try:
+            with transaction.atomic():
+                rows = []
+                for candidate in missing_with_timestamp:
+                    rows.append(
+                        (
+                            semester.id,
+                            candidate.student_id,
+                            datetime.datetime.fromtimestamp(
+                                candidate.fallback_last_modified,
+                                tz=datetime.timezone.utc,
+                            ),
+                        )
+                    )
+                self._insert_rows(rows)
+                counters["created"] = len(rows)
 
-        with transaction.atomic():
-            rows = []
-            for candidate in missing_with_timestamp:
-                rows.append(
-                    (
-                        semester.id,
-                        candidate.student_id,
-                        datetime.datetime.fromtimestamp(
-                            candidate.fallback_last_modified,
-                            tz=datetime.timezone.utc,
+                created_rows = {
+                    row.student_id: row
+                    for row in ScheduleModel.objects.filter(
+                        semester_id=semester.id,
+                        student_id__in=[c.student_id for c in missing_with_timestamp],
+                    )
+                }
+
+                for candidate in missing_with_timestamp:
+                    row = created_rows.get(candidate.student_id)
+                    if not row:
+                        raise management.CommandError(
+                            "Missing created schedule row for "
+                            f"semester_id={semester.id} student_id={candidate.student_id}"
+                        )
+
+                    post_last_modified = (
+                        int(row.last_modified.timestamp()) if row.last_modified else None
+                    )
+                    post_key = Schedule(
+                        semester=semester,
+                        student=Student(
+                            id=candidate.student_id,
+                            slug=candidate.student_slug,
                         ),
-                    )
-                )
-            self._insert_rows(rows)
-            counters["created"] = len(rows)
+                        version=row.version,
+                        last_modified=post_last_modified,
+                        semester_version=semester.version,
+                    ).freshness_key()
 
-            created_rows = {
-                row.student_id: row
-                for row in ScheduleModel.objects.filter(
-                    semester_id=semester.id,
-                    student_id__in=[c.student_id for c in missing_with_timestamp],
-                )
-            }
+                    if candidate.pre_key != post_key:
+                        raise management.CommandError(
+                            "Freshness key mismatch for "
+                            f"semester_id={semester.id} student_id={candidate.student_id}: "
+                            f"before={candidate.pre_key} after={post_key}"
+                        )
 
-            for candidate in missing_with_timestamp:
-                row = created_rows.get(candidate.student_id)
-                if not row:
-                    raise management.CommandError(
-                        "Missing created schedule row for "
-                        f"semester_id={semester.id} student_id={candidate.student_id}"
-                    )
+                counters["verified"] = len(missing_with_timestamp)
 
-                post_last_modified = (
-                    int(row.last_modified.timestamp()) if row.last_modified else None
-                )
-                post_key = Schedule(
-                    semester=semester,
-                    student=Student(
-                        id=candidate.student_id,
-                        slug=candidate.student_slug,
-                    ),
-                    version=row.version,
-                    last_modified=post_last_modified,
-                    semester_version=semester.version,
-                ).freshness_key()
-
-                if candidate.pre_key != post_key:
-                    raise management.CommandError(
-                        "Freshness key mismatch for "
-                        f"semester_id={semester.id} student_id={candidate.student_id}: "
-                        f"before={candidate.pre_key} after={post_key}"
-                    )
-
-            counters["verified"] = len(missing_with_timestamp)
+                if dry_run:
+                    raise _DryRunRollback
+        except _DryRunRollback:
+            pass
 
         return counters
 
