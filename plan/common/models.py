@@ -197,8 +197,12 @@ class Course(models.Model):
         else:
             name = self.code
 
-        if self.semester:
-            return "%-12s - %s" % (name, self.semester)
+        if self.semester_id:
+            value = f"{name:<12} - semester_id={self.semester_id}"
+            semester = self._state.fields_cache.get("semester")
+            if semester is not None:
+                value = f"{value} ({semester})"
+            return value
 
         return name
 
