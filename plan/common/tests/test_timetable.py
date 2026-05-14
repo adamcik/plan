@@ -2,6 +2,8 @@
 
 from copy import copy
 
+from django.utils import translation
+
 from plan.common.models import Lecture, Semester, Student
 from plan.common.tests import BaseTestCase
 from plan.common.timetable import Timetable
@@ -130,3 +132,11 @@ class TimetableTestCase(BaseTestCase):
 
         for i, (t, r) in enumerate(zip(timetable.table, rows)):
             self.assertEqual(t, r)
+
+    def test_insert_times_uses_24_hour_format_in_english_locale(self):
+        timetable = Timetable([])
+
+        with translation.override("en"):
+            timetable.insert_times()
+
+        self.assertEqual(timetable.table[0][0][0]["time"], "08:15 - 09:00")
