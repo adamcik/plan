@@ -36,7 +36,15 @@ def _env_csv(name: str, default: list[str] | None = None) -> list[str]:
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "container-dev-key")
 DEBUG = _env_bool("DJANGO_DEBUG", False)
+DEBUG_TOOLBAR_ENABLED = _env_bool("DJANGO_DEBUG_TOOLBAR", False)
 COMPRESS_ENABLED = True
+
+if DEBUG_TOOLBAR_ENABLED:
+    INSTALLED_APPS = (*INSTALLED_APPS, "debug_toolbar")
+    MIDDLEWARE = ("debug_toolbar.middleware.DebugToolbarMiddleware", *MIDDLEWARE)
+    DEBUG_TOOLBAR_CONFIG = {
+        "SHOW_TOOLBAR_CALLBACK": lambda request: True,
+    }
 
 sentry_dsn = os.environ.get("SENTRY_DSN")
 if sentry_dsn:
