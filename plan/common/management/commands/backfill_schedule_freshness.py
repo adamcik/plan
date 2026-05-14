@@ -57,6 +57,7 @@ class Command(management.BaseCommand):
         self.stdout.write(f"semester={semester.year}/{semester.type}")
         self.stdout.write(f"dry_run={options['dry_run']}")
         self.stdout.write(f"candidates={counters['candidates']}")
+        self.stdout.write(f"already_present={counters['already_present']}")
         self.stdout.write(f"missing_before={counters['missing_before']}")
         self.stdout.write(f"created={counters['created']}")
         self.stdout.write(f"skipped_no_timestamp={counters['skipped_no_timestamp']}")
@@ -71,14 +72,31 @@ class Command(management.BaseCommand):
             ) from e
 
     def _run_for_semester(self, semester: Semester, dry_run: bool) -> dict[str, int]:
+        already_present = (
+            Student.objects.filter(
+                subscription__course__semester_id=semester.id,
+                schedule__semester_id=semester.id,
+            )
+            .values("id")
+            .distinct()
+            .count()
+        )
         candidates = self._build_missing_candidates(semester)
         missing_with_timestamp = [
             c for c in candidates if c.fallback_last_modified is not None
         ]
         skipped_no_timestamp = len(candidates) - len(missing_with_timestamp)
 
+        subscribed_count = (
+            Student.objects.filter(subscription__course__semester_id=semester.id)
+            .values("id")
+            .distinct()
+            .count()
+        )
+
         counters = {
-            "candidates": len(candidates),
+            "candidates": subscribed_count,
+            "already_present": already_present,
             "missing_before": len(candidates),
             "created": 0,
             "skipped_no_timestamp": skipped_no_timestamp,
@@ -119,7 +137,9 @@ class Command(management.BaseCommand):
                         )
 
                     post_last_modified = (
-                        int(row.last_modified.timestamp()) if row.last_modified else None
+                        int(row.last_modified.timestamp())
+                        if row.last_modified
+                        else None
                     )
                     post_key = Schedule(
                         semester=semester,
