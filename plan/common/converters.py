@@ -79,22 +79,12 @@ class ScheduleConverter:
             return result
 
         try:
-            schedule_row = (
-                ScheduleModel.objects.select_related("semester", "student")
-                .only(
-                    "version",
-                    "last_modified",
-                    "semester__year",
-                    "semester__type",
-                    "semester__version",
-                    "semester__last_modified",
-                    "student__slug",
-                )
-                .get(
-                    semester__year=semester.year,
-                    semester__type=semester.type,
-                    student__slug=student_slug,
-                )
+            schedule_row = ScheduleModel.objects.select_related(
+                "semester", "student"
+            ).get(
+                semester__year=semester.year,
+                semester__type=semester.type,
+                student__slug=student_slug,
             )
         except ScheduleModel.DoesNotExist:
             result = self._build_schedule_legacy_fallback(
