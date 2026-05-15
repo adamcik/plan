@@ -79,10 +79,67 @@ class ScheduleConverter:
             return result
 
         try:
-            semester = Semester.objects.get(year=semester.year, type=semester.type)
+            schedule_row = (
+                ScheduleModel.objects.select_related("semester", "student")
+                .only(
+                    "version",
+                    "last_modified",
+                    "semester__year",
+                    "semester__type",
+                    "semester__version",
+                    "semester__last_modified",
+                    "student__slug",
+                )
+                .get(
+                    semester__year=semester.year,
+                    semester__type=semester.type,
+                    student__slug=student_slug,
+                )
+            )
+        except ScheduleModel.DoesNotExist:
+            result = self._build_schedule_legacy_fallback(
+                semester_year=semester.year,
+                semester_type=semester.type,
+                student_slug=student_slug,
+            )
+        else:
+            timestamps = []
+            if schedule_row.semester.last_modified:
+                timestamps.append(int(schedule_row.semester.last_modified.timestamp()))
+            if schedule_row.last_modified:
+                timestamps.append(int(schedule_row.last_modified.timestamp()))
+
+            result = Schedule(
+                semester=schedule_row.semester,
+                student=schedule_row.student,
+                last_modified=max(timestamps) if timestamps else None,
+                version=schedule_row.version,
+                semester_version=schedule_row.semester.version,
+            )
+
+        cache.set(key, result, timeout=60)
+        return result
+
+    def to_url(self, schedule: Schedule) -> str:
+        return "/".join(
+            (
+                self._semester_converter.to_url(schedule.semester),
+                self._student_converter.to_url(schedule.student.slug),
+            )
+        )
+
+    def _build_schedule_legacy_fallback(
+        self,
+        *,
+        semester_year: int,
+        semester_type: str,
+        student_slug: str,
+    ) -> Schedule:
+        try:
+            semester = Semester.objects.get(year=semester_year, type=semester_type)
         except Semester.DoesNotExist:
             raise Http404(
-                f"Could not find semester: year={semester.year} type={semester.type}"
+                f"Could not find semester: year={semester_year} type={semester_type}"
             )
 
         try:
@@ -106,39 +163,18 @@ class ScheduleConverter:
             exams_last_modified=Max("course__exam__last_modified"),
         )
 
-        try:
-            schedule_row = ScheduleModel.objects.get(
-                semester_id=semester.id,
-                student_id=student.id,
-            )
-        except ScheduleModel.DoesNotExist:
-            schedule_row = None
-
         timestamps = [int(agg.timestamp()) for agg in qs.values() if agg]
         if semester.last_modified:
             timestamps.append(int(semester.last_modified.timestamp()))
-        if schedule_row and schedule_row.last_modified:
-            timestamps.append(int(schedule_row.last_modified.timestamp()))
 
         last_modified = max([0] + timestamps)
 
-        result = Schedule(
+        return Schedule(
             semester=semester,
             student=student,
             last_modified=last_modified or None,
-            version=schedule_row.version if schedule_row else 0,
+            version=0,
             semester_version=semester.version,
-        )
-
-        cache.set(key, result, timeout=60)
-        return result
-
-    def to_url(self, schedule: Schedule) -> str:
-        return "/".join(
-            (
-                self._semester_converter.to_url(schedule.semester),
-                self._student_converter.to_url(schedule.student.slug),
-            )
         )
 
 

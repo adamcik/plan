@@ -64,6 +64,42 @@ class ScheduleConverterTestCase(BaseTestCase):
         self.assertEqual(student.slug, cached.student.slug)
         self.assertEqual(semester.id, cached.semester.id)
 
+    def test_to_python_happy_path_uses_single_schedule_lookup(self):
+        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+        student = Student.objects.get(slug="adamcik")
+        Schedule.objects.get_or_create(semester_id=semester.id, student_id=student.id)
+
+        cache.clear()
+
+        with self.assertNumQueries(1):
+            schedule = ScheduleConverter().to_python(
+                f"{semester.year}/{semester.slug}/{student.slug}"
+            )
+
+        self.assertEqual(student.slug, schedule.student.slug)
+        self.assertEqual(semester.id, schedule.semester.id)
+
+    def test_to_python_happy_path_uses_max_of_schedule_and_semester_last_modified(self):
+        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+        student = Student.objects.get(slug="adamcik")
+        schedule_row, _ = Schedule.objects.get_or_create(
+            semester_id=semester.id,
+            student_id=student.id,
+        )
+
+        schedule_ts = timezone.make_aware(datetime.datetime(2009, 1, 1, 11, 0, 0))
+        semester_ts = timezone.make_aware(datetime.datetime(2009, 1, 1, 12, 0, 0))
+        Schedule.objects.filter(id=schedule_row.id).update(last_modified=schedule_ts)
+        Semester.objects.filter(id=semester.id).update(last_modified=semester_ts)
+
+        cache.clear()
+
+        schedule = ScheduleConverter().to_python(
+            f"{semester.year}/{semester.slug}/{student.slug}"
+        )
+
+        self.assertEqual(int(semester_ts.timestamp()), schedule.last_modified)
+
     def test_to_python_legacy_fallback_when_versions_uninitialized(self):
         semester = Semester.objects.get(year=2009, type=Semester.SPRING)
         student = Student.objects.get(slug="adamcik")
@@ -119,3 +155,38 @@ class ScheduleConverterTestCase(BaseTestCase):
         self.assertEqual(0, schedule.semester_version)
         self.assertIsNotNone(schedule.last_modified)
         self.assertGreaterEqual(schedule.last_modified, int(ts.timestamp()))
+
+    def test_to_python_fallback_without_schedule_row_sets_dto_and_cache_key(self):
+        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+        student = Student.objects.get(slug="adamcik")
+
+        semester.version = 3
+        semester.last_modified = timezone.make_aware(
+            datetime.datetime(2009, 1, 1, 9, 0, 0)
+        )
+        semester.save(update_fields=["version", "last_modified"])
+
+        Schedule.objects.filter(semester_id=semester.id, student_id=student.id).delete()
+
+        ts = timezone.make_aware(datetime.datetime(2009, 1, 1, 10, 0, 0))
+        Subscription.objects.filter(
+            student_id=student.id,
+            course__semester_id=semester.id,
+        ).update(last_modified=ts)
+
+        cache.clear()
+        path = f"{semester.year}/{semester.slug}/{student.slug}"
+        schedule = ScheduleConverter().to_python(path)
+
+        self.assertEqual(0, schedule.version)
+        self.assertEqual(3, schedule.semester_version)
+        self.assertIsNotNone(schedule.last_modified)
+        self.assertGreaterEqual(schedule.last_modified, int(ts.timestamp()))
+        self.assertGreaterEqual(
+            schedule.last_modified,
+            int(semester.last_modified.timestamp()),
+        )
+        self.assertEqual(
+            schedule,
+            cache.get(f"schedule:{semester.year}-{semester.type}-{student.slug}"),
+        )
