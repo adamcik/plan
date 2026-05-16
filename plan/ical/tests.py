@@ -8,7 +8,7 @@ from django.core.cache import caches
 from django.http import HttpResponse
 from django.test import RequestFactory
 from django.test import override_settings
-from django.urls import reverse
+from django.urls import reverse as django_reverse
 from django.utils import http as http_utils
 
 from plan.common import tests, utils
@@ -26,22 +26,26 @@ class EmptyViewTestCase(tests.BaseTestCase):
         queue.flush_for_tests()
         caches["default"].clear()
         caches["ical"].clear()
-        self._schedule_args = [self.semester, self.student.slug]
+
+    def reverse(self, view, *extra_args):
+        return django_reverse(
+            view, args=[self.semester, self.student.slug, *extra_args]
+        )
 
     def test_ical(self):
         """This covers the semester not existing."""
 
-        url = reverse("schedule-ical", args=self._schedule_args)
+        url = self.reverse("schedule-ical")
         self.assertEqual(self.client.get(url).status_code, 404)
 
         for arg in ("exams", "lectures"):
-            url = reverse("schedule-ical-type", args=[*self._schedule_args, arg])
+            url = self.reverse("schedule-ical-type", arg)
             no_slash = url.rstrip("/")
             with_slash = f"{no_slash}/"
             self.assertEqual(self.client.get(no_slash).status_code, 404)
             self.assertEqual(self.client.get(with_slash).status_code, 404)
 
-        url = reverse("schedule-ical-type", args=[*self._schedule_args, "foo"])
+        url = self.reverse("schedule-ical-type", "foo")
         self.assertEqual(self.client.get(url).status_code, 404)
 
 
@@ -53,20 +57,24 @@ class ViewTestCase(tests.BaseTestCase):
         queue.flush_for_tests()
         caches["default"].clear()
         caches["ical"].clear()
-        self._schedule_args = [self.semester, self.student.slug]
+
+    def reverse(self, view, *extra_args):
+        return django_reverse(
+            view, args=[self.semester, self.student.slug, *extra_args]
+        )
 
     def test_ical(self):
-        url = reverse("schedule-ical", args=self._schedule_args)
+        url = self.reverse("schedule-ical")
         self.assertEqual(self.client.get(url).status_code, 200)
 
         for arg in ("exams", "lectures"):
-            url = reverse("schedule-ical-type", args=[*self._schedule_args, arg])
+            url = self.reverse("schedule-ical-type", arg)
             no_slash = url.rstrip("/")
             with_slash = f"{no_slash}/"
             self.assertEqual(self.client.get(no_slash).status_code, 200)
             self.assertEqual(self.client.get(with_slash).status_code, 200)
 
-        url = reverse("schedule-ical-type", args=[*self._schedule_args, "foo"])
+        url = self.reverse("schedule-ical-type", "foo")
         no_slash = url.rstrip("/")
         with_slash = f"{no_slash}/"
         self.assertEqual(self.client.get(no_slash).status_code, 400)
@@ -76,7 +84,7 @@ class ViewTestCase(tests.BaseTestCase):
 
     @override_settings(TIMETABLE_ENABLE_IF_MODIFIED_SINCE=True)
     def test_ical_not_modified_returns_304_with_cache_headers(self):
-        url = reverse("schedule-ical", args=self._schedule_args)
+        url = self.reverse("schedule-ical")
         first = self.client.get(url)
 
         self.assertEqual(first.status_code, 200)
@@ -94,7 +102,7 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertIn("Expires", second.headers)
 
     def test_ical_get_includes_etag_and_last_modified(self):
-        url = reverse("schedule-ical", args=self._schedule_args)
+        url = self.reverse("schedule-ical")
 
         response = self.client.get(url)
 
@@ -103,7 +111,7 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertIn("Last-Modified", response.headers)
 
     def test_ical_if_none_match_matching_returns_304_with_no_body(self):
-        url = reverse("schedule-ical", args=self._schedule_args)
+        url = self.reverse("schedule-ical")
         first = self.client.get(url)
 
         second = self.client.get(
@@ -119,7 +127,7 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertNotIn("X-Cache", second.headers)
 
     def test_ical_if_none_match_non_matching_returns_200(self):
-        url = reverse("schedule-ical", args=self._schedule_args)
+        url = self.reverse("schedule-ical")
 
         response = self.client.get(url, HTTP_IF_NONE_MATCH='"not-the-tag"')
 
@@ -127,7 +135,7 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertNotEqual(response.headers["ETag"], '"not-the-tag"')
 
     def test_ical_if_none_match_multiple_values_returns_304_on_match(self):
-        url = reverse("schedule-ical", args=self._schedule_args)
+        url = self.reverse("schedule-ical")
         first = self.client.get(url)
 
         response = self.client.get(
@@ -139,7 +147,7 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertEqual(response.content, b"")
 
     def test_ical_if_none_match_wildcard_returns_304(self):
-        url = reverse("schedule-ical", args=self._schedule_args)
+        url = self.reverse("schedule-ical")
 
         response = self.client.get(url, HTTP_IF_NONE_MATCH="*")
 
@@ -147,7 +155,7 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertEqual(response.content, b"")
 
     def test_if_none_match_takes_precedence_over_if_modified_since(self):
-        url = reverse("schedule-ical", args=self._schedule_args)
+        url = self.reverse("schedule-ical")
         first = self.client.get(url)
 
         response = self.client.get(
@@ -159,7 +167,7 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_ical_head_matches_get_status_and_headers_with_no_body(self):
-        url = reverse("schedule-ical", args=self._schedule_args)
+        url = self.reverse("schedule-ical")
         get_response = self.client.get(url)
 
         head_response = self.client.head(url)
@@ -181,7 +189,7 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertEqual(conditional_head.headers["ETag"], get_response.headers["ETag"])
 
     def test_ical_etag_changes_when_cache_key_changes(self):
-        url = reverse("schedule-ical", args=self._schedule_args)
+        url = self.reverse("schedule-ical")
 
         identity = self.client.get(url, HTTP_ACCEPT_ENCODING="")
         gzip = self.client.get(url, HTTP_ACCEPT_ENCODING="gzip")
@@ -191,7 +199,7 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertNotEqual(identity.headers["ETag"], gzip.headers["ETag"])
 
     def test_ical_etag_is_hashed_not_raw(self):
-        url = reverse("schedule-ical", args=self._schedule_args)
+        url = self.reverse("schedule-ical")
         resolved = ScheduleConverter().to_python(
             f"{self.semester.year}/{self.semester.slug}/{self.student.slug}"
         )
@@ -210,7 +218,7 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertEqual(etag, utils.etag_for_key(key))
 
     def test_ical_uses_last_modified_for_dtstamp(self):
-        url = reverse("schedule-ical", args=self._schedule_args)
+        url = self.reverse("schedule-ical")
 
         response = self.client.get(f"{url}?no-cache=1")
 
@@ -227,7 +235,7 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertIn(f"DTSTAMP:{dtstamp}", body)
 
     def test_ical_exam_event_timestamps_are_stable(self):
-        url = reverse("schedule-ical-type", args=[*self._schedule_args, "exams"])
+        url = self.reverse("schedule-ical-type", "exams")
         response = self.client.get(f"{url}?no-cache=1", HTTP_ACCEPT_ENCODING="")
         self.assertEqual(response.status_code, 200)
 
@@ -253,7 +261,7 @@ class ViewTestCase(tests.BaseTestCase):
         )
 
     def test_ical_cache_uses_encoding_variants(self):
-        url = reverse("schedule-ical", args=self._schedule_args)
+        url = self.reverse("schedule-ical")
 
         br_first = self.client.get(url, HTTP_ACCEPT_ENCODING="br")
         queue.flush_for_tests()
@@ -287,7 +295,7 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertIn(":gzip", gzip_second.headers["X-Cache"])
 
     def test_ical_cache_falls_back_to_other_variant_before_regeneration(self):
-        url = reverse("schedule-ical", args=self._schedule_args)
+        url = self.reverse("schedule-ical")
 
         identity_first = self.client.get(url, HTTP_ACCEPT_ENCODING="")
         queue.flush_for_tests()
@@ -306,7 +314,7 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertIn(":gzip", gzip_after_identity.headers["X-Cache"])
 
     def test_ical_reads_and_migrates_legacy_v2_cache_key(self):
-        url = reverse("schedule-ical", args=self._schedule_args)
+        url = self.reverse("schedule-ical")
         path = url.rstrip("/")
         resolved = ScheduleConverter().to_python(
             f"{self.semester.year}/{self.semester.slug}/{self.student.slug}"
@@ -334,7 +342,7 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertEqual(response.content, b"legacy-v2")
 
     def test_ical_reads_and_migrates_legacy_v1_cache_key(self):
-        url = reverse("schedule-ical", args=self._schedule_args)
+        url = self.reverse("schedule-ical")
         path = url.rstrip("/")
         resolved = ScheduleConverter().to_python(
             f"{self.semester.year}/{self.semester.slug}/{self.student.slug}"
@@ -360,7 +368,7 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertEqual(response.content, b"legacy-v1")
 
     def test_ical_reads_legacy_key_with_trailing_slash_path(self):
-        url = reverse("schedule-ical", args=self._schedule_args)
+        url = self.reverse("schedule-ical")
         resolved = ScheduleConverter().to_python(
             f"{self.semester.year}/{self.semester.slug}/{self.student.slug}"
         )
@@ -389,7 +397,7 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertEqual(response.content, b"legacy-trailing-slash")
 
     def test_ical_type_reads_legacy_key_from_fallback_route_name(self):
-        url = reverse("schedule-ical-type", args=[*self._schedule_args, "lectures"])
+        url = self.reverse("schedule-ical-type", "lectures")
         no_slash = url.rstrip("/")
         resolved = ScheduleConverter().to_python(
             f"{self.semester.year}/{self.semester.slug}/{self.student.slug}"
@@ -427,7 +435,7 @@ class ViewTestCase(tests.BaseTestCase):
             {
                 "name": "base-v1-no-slash-identity",
                 "url_name": "schedule-ical",
-                "url_args": self._schedule_args,
+                "url_args": [self.semester, self.student.slug],
                 "legacy_route": "schedule-ical",
                 "legacy_path_variant": "no-slash",
                 "legacy_kind": "v1",
@@ -437,7 +445,7 @@ class ViewTestCase(tests.BaseTestCase):
             {
                 "name": "base-v2-with-slash-gzip",
                 "url_name": "schedule-ical",
-                "url_args": self._schedule_args,
+                "url_args": [self.semester, self.student.slug],
                 "legacy_route": "schedule-ical",
                 "legacy_path_variant": "with-slash",
                 "legacy_kind": "v2",
@@ -447,7 +455,7 @@ class ViewTestCase(tests.BaseTestCase):
             {
                 "name": "type-v2-fallback-route-identity",
                 "url_name": "schedule-ical-type",
-                "url_args": [*self._schedule_args, "lectures"],
+                "url_args": [self.semester, self.student.slug, "lectures"],
                 "legacy_route": "schedule-ical-type-fallback",
                 "legacy_path_variant": "no-slash",
                 "legacy_kind": "v2",
@@ -457,7 +465,7 @@ class ViewTestCase(tests.BaseTestCase):
             {
                 "name": "type-v2-canonical-route-br",
                 "url_name": "schedule-ical-type",
-                "url_args": [*self._schedule_args, "lectures"],
+                "url_args": [self.semester, self.student.slug, "lectures"],
                 "legacy_route": "schedule-ical-type",
                 "legacy_path_variant": "with-slash",
                 "legacy_kind": "v2",
@@ -469,7 +477,7 @@ class ViewTestCase(tests.BaseTestCase):
         for case in cases:
             queue.flush_for_tests()
             caches["ical"].clear()
-            url = reverse(case["url_name"], args=case["url_args"])
+            url = django_reverse(case["url_name"], args=case["url_args"])
             no_slash = url.rstrip("/")
             with_slash = f"{no_slash}/"
             legacy_path = no_slash
@@ -530,7 +538,7 @@ class ViewTestCase(tests.BaseTestCase):
 
     def test_legacy_v2_does_not_fallback_across_encodings(self):
         caches["ical"].clear()
-        url = reverse("schedule-ical", args=self._schedule_args)
+        url = self.reverse("schedule-ical")
         resolved = ScheduleConverter().to_python(
             f"{self.semester.year}/{self.semester.slug}/{self.student.slug}"
         )
@@ -564,7 +572,7 @@ class ViewTestCase(tests.BaseTestCase):
 
     def test_legacy_upgrade_populates_current_key_for_next_hit(self):
         caches["ical"].clear()
-        url = reverse("schedule-ical", args=self._schedule_args)
+        url = self.reverse("schedule-ical")
         path = url.rstrip("/")
         resolved = ScheduleConverter().to_python(
             f"{self.semester.year}/{self.semester.slug}/{self.student.slug}"
@@ -594,7 +602,7 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertNotIn(f"key={legacy_v1_key}", second.headers["X-Cache"])
 
     def test_ical_cache_key_is_same_for_type_with_and_without_trailing_slash(self):
-        url = reverse("schedule-ical-type", args=[*self._schedule_args, "lectures"])
+        url = self.reverse("schedule-ical-type", "lectures")
         no_slash = url.rstrip("/")
         with_slash = f"{no_slash}/"
 
@@ -616,11 +624,11 @@ class ViewTestCase(tests.BaseTestCase):
         current_year = datetime.date.today().year
         semester = Semester.objects.create(year=current_year, type=Semester.SPRING)
         current_schedule = Schedule(semester=semester, student=self.student)
-        current_url = reverse(
+        current_url = django_reverse(
             "schedule-ical",
             args=[current_schedule.semester, current_schedule.student.slug],
         )
-        stale_url = reverse("schedule-ical", args=self._schedule_args)
+        stale_url = self.reverse("schedule-ical")
 
         current = self.client.get(f"{current_url}?no-cache=1", HTTP_ACCEPT_ENCODING="")
         self.assertEqual(current.status_code, 200)
