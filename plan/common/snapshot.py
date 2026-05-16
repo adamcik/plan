@@ -6,7 +6,6 @@ from typing import Optional
 from django.core.cache import cache
 from django.db.models import F
 from django.db.models.aggregates import Max
-from django.http import Http404
 from django.utils import timezone
 
 from plan.common.models import (
@@ -15,6 +14,10 @@ from plan.common.models import (
     Student,
     Subscription,
 )
+
+
+class ScheduleSnapshotNotFound(Exception):
+    pass
 
 
 @dataclass
@@ -108,7 +111,7 @@ def _build_schedule_snapshot_legacy_fallback(
     try:
         semester = Semester.objects.get(year=semester_year, type=semester_type)
     except Semester.DoesNotExist:
-        raise Http404(
+        raise ScheduleSnapshotNotFound(
             f"Could not find semester: year={semester_year} type={semester_type}"
         )
 

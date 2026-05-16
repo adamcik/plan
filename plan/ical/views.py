@@ -25,7 +25,7 @@ from plan.common.models import (
     Room,
     Week,
 )
-from plan.common.snapshot import get_schedule_snapshot
+from plan.common.snapshot import ScheduleSnapshotNotFound, get_schedule_snapshot
 from plan.ical.queue import enqueue_cache_set
 
 _ = translation.gettext
@@ -209,7 +209,10 @@ def _legacy_upgrade_response(response, encoding: str):
 
 
 def ical(request, semester, slug, ical_type=None):
-    snapshot = get_schedule_snapshot(semester, slug)
+    try:
+        snapshot = get_schedule_snapshot(semester, slug)
+    except ScheduleSnapshotNotFound:
+        return http.HttpResponseNotFound()
 
     resources = [_("lectures"), _("exams")]
     if ical_type and ical_type not in resources:

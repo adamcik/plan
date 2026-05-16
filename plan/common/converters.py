@@ -8,7 +8,11 @@ from django.http import Http404
 from django.utils import translation
 
 from plan.common.models import Semester
-from plan.common.snapshot import ScheduleSnapshot, get_schedule_snapshot
+from plan.common.snapshot import (
+    ScheduleSnapshot,
+    ScheduleSnapshotNotFound,
+    get_schedule_snapshot,
+)
 
 
 class SemesterConverter:
@@ -66,7 +70,10 @@ class ScheduleConverter:
         semester = self._semester_converter.to_python(match.group(1))
         student_slug = self._student_converter.to_python(match.group(2))
 
-        return get_schedule_snapshot(semester, student_slug)
+        try:
+            return get_schedule_snapshot(semester, student_slug)
+        except ScheduleSnapshotNotFound as e:
+            raise Http404(str(e)) from e
 
     def to_url(self, schedule: ScheduleSnapshot) -> str:
         return "/".join(

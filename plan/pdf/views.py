@@ -12,7 +12,11 @@ from django.utils import http as http_utils
 from plan.common import utils
 from plan.common.models import Course, Lecture, Room
 from plan.common.models import Student
-from plan.common.snapshot import ScheduleSnapshot, get_schedule_snapshot
+from plan.common.snapshot import (
+    ScheduleSnapshot,
+    ScheduleSnapshotNotFound,
+    get_schedule_snapshot,
+)
 from plan.common.templatetags.title import render_title
 from plan.common.timetable import Timetable
 from plan.common.utils import ColorMap
@@ -57,7 +61,7 @@ def _tablestyle():
 def pdf(request, semester, slug, size=None, week=None):
     try:
         snapshot = get_schedule_snapshot(semester, slug)
-    except http.Http404:
+    except ScheduleSnapshotNotFound:
         snapshot = ScheduleSnapshot(
             semester=semester,
             student=Student(slug=slug),
