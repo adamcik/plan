@@ -27,6 +27,7 @@ from plan.common.models import (
     Week,
 )
 from plan.common.schedule import Schedule
+from plan.common.snapshot import ScheduleSnapshot, bump_snapshot
 from plan.materialized.models import SubscriptionsCount
 
 # FIXME split into frontpage/semester, course, schedule files
@@ -505,7 +506,7 @@ def select_groups(request, schedule):
                         changed = True
 
             if changed:
-                schedule.bump_last_modified()
+                bump_snapshot(schedule)
 
             utils.clear_cache(schedule)
 
@@ -574,7 +575,7 @@ def select_course(request, schedule, add=False):
     return shortcuts.redirect("schedule-advanced", schedule)
 
 
-def _add_courses(request, schedule):
+def _add_courses(request, snapshot: ScheduleSnapshot):
     lookup = []
 
     for l in request.POST.getlist("course_add"):
@@ -582,19 +583,19 @@ def _add_courses(request, schedule):
 
     subscriptions = set(
         Subscription.objects.get_subscriptions(
-            schedule.semester.year,
-            schedule.semester.type,
-            schedule.student.slug,
+            snapshot.semester.year,
+            snapshot.semester.type,
+            snapshot.student.slug,
         ).values_list("course__code", flat=True)
     )
 
     if not lookup:
-        return shortcuts.redirect("schedule-advanced", schedule)
+        return shortcuts.redirect("schedule-advanced", snapshot)
 
     errors = []
     too_many_subscriptions = False
 
-    student, _ = Student.objects.get_or_create(slug=schedule.student.slug)
+    student, _ = Student.objects.get_or_create(slug=snapshot.student.slug)
 
     changed = False
 
@@ -606,7 +607,7 @@ def _add_courses(request, schedule):
 
             course = Course.objects.get(
                 code__iexact=l.strip(),
-                semester=schedule.semester,
+                semester=snapshot.semester,
             )
 
             _, created = Subscription.objects.get_or_create(
@@ -626,21 +627,21 @@ def _add_courses(request, schedule):
             {
                 "courses": errors,
                 "max": settings.TIMETABLE_MAX_COURSES,
-                "schedule": schedule,
-                "slug": schedule.student.slug,
-                "year": schedule.semester.year,
-                "type": schedule.semester.type,
+                "schedule": snapshot,
+                "slug": snapshot.student.slug,
+                "year": snapshot.semester.year,
+                "type": snapshot.semester.type,
                 "too_many_subscriptions": too_many_subscriptions,
             },
         )
 
     if changed:
-        schedule.bump_last_modified()
+        bump_snapshot(snapshot)
 
-    return shortcuts.redirect("change-groups", schedule)
+    return shortcuts.redirect("change-groups", snapshot)
 
 
-def _remove_courses(request, schedule):
+def _remove_courses(request, snapshot: ScheduleSnapshot):
     with transaction.atomic():
         courses = []
         for c in request.POST.getlist("course_remove"):
@@ -649,29 +650,29 @@ def _remove_courses(request, schedule):
 
         deleted_count, _ = (
             Subscription.objects.get_subscriptions(
-                schedule.semester.year,
-                schedule.semester.type,
-                schedule.student.slug,
+                snapshot.semester.year,
+                snapshot.semester.type,
+                snapshot.student.slug,
             )
             .filter(course__id__in=courses)
             .delete()
         )
 
         if deleted_count > 0:
-            schedule.bump_last_modified()
+            bump_snapshot(snapshot)
 
-        slug = schedule.student.slug
+        slug = snapshot.student.slug
         if Subscription.objects.filter(student__slug=slug).count() == 0:
             Student.objects.filter(slug=slug).delete()
 
     return None
 
 
-def _override_name(request, schedule):
+def _override_name(request, snapshot: ScheduleSnapshot):
     subscriptions = Subscription.objects.get_subscriptions(
-        schedule.semester.year,
-        schedule.semester.type,
-        schedule.student.slug,
+        snapshot.semester.year,
+        snapshot.semester.type,
+        snapshot.student.slug,
     )
 
     changed = False
@@ -692,7 +693,7 @@ def _override_name(request, schedule):
                 changed = True
 
     if changed:
-        schedule.bump_last_modified()
+        bump_snapshot(snapshot)
 
     return None
 
@@ -721,7 +722,7 @@ def select_lectures(request, schedule):
                 subscription.save()  # Trigger last_modified update
 
         utils.clear_cache(schedule)
-        schedule.bump_last_modified()
+        bump_snapshot(schedule)
 
     return shortcuts.redirect("schedule-advanced", schedule)
 

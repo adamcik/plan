@@ -39,27 +39,6 @@ class ScheduleSnapshot:
             f"{self.version}-{self.last_modified or 0}"
         )
 
-    def bump_last_modified(self):
-        if self.student.id is None:
-            self.student = Student.objects.get(slug=self.student.slug)
-
-        row, created = ScheduleModel.objects.get_or_create(
-            semester_id=self.semester.id,
-            student_id=self.student.id,
-        )
-
-        if created:
-            ScheduleModel.objects.filter(id=row.id).update(version=1)
-            self.version = 1
-            return
-
-        ScheduleModel.objects.filter(id=row.id).update(
-            version=F("version") + 1,
-            last_modified=timezone.now(),
-        )
-        row.refresh_from_db(fields=["version"])
-        self.version = row.version
-
 
 def get_schedule_snapshot(semester: Semester, student_slug: str) -> ScheduleSnapshot:
     key = f"schedule:{semester.year}-{semester.type}-{student_slug}"
@@ -96,6 +75,28 @@ def get_schedule_snapshot(semester: Semester, student_slug: str) -> ScheduleSnap
 
     cache.set(key, result, timeout=60)
     return result
+
+
+def bump_snapshot(snapshot: ScheduleSnapshot) -> None:
+    if snapshot.student.id is None:
+        snapshot.student = Student.objects.get(slug=snapshot.student.slug)
+
+    row, created = ScheduleModel.objects.get_or_create(
+        semester_id=snapshot.semester.id,
+        student_id=snapshot.student.id,
+    )
+
+    if created:
+        ScheduleModel.objects.filter(id=row.id).update(version=1)
+        snapshot.version = 1
+        return
+
+    ScheduleModel.objects.filter(id=row.id).update(
+        version=F("version") + 1,
+        last_modified=timezone.now(),
+    )
+    row.refresh_from_db(fields=["version"])
+    snapshot.version = row.version
 
 
 def _build_schedule_snapshot_legacy_fallback(
