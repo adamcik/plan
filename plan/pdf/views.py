@@ -11,6 +11,8 @@ from django.utils import http as http_utils
 
 from plan.common import utils
 from plan.common.models import Course, Lecture, Room
+from plan.common.models import Student
+from plan.common.snapshot import ScheduleSnapshot, get_schedule_snapshot
 from plan.common.templatetags.title import render_title
 from plan.common.timetable import Timetable
 from plan.common.utils import ColorMap
@@ -52,15 +54,23 @@ def _tablestyle():
     return table_style
 
 
-def pdf(request, schedule, size=None, week=None):
+def pdf(request, semester, slug, size=None, week=None):
+    try:
+        snapshot = get_schedule_snapshot(semester, slug)
+    except http.Http404:
+        snapshot = ScheduleSnapshot(
+            semester=semester,
+            student=Student(slug=slug),
+        )
+
     if size is not None and size not in ["A4", "A5", "A6", "A7"]:
         raise http.Http404()
 
-    if schedule.student is None:
+    if snapshot.student is None:
         raise http.Http404
 
     filename = (
-        f"{schedule.semester.year}-{schedule.semester.slug}-{schedule.student.slug}"
+        f"{snapshot.semester.year}-{snapshot.semester.slug}-{snapshot.student.slug}"
     )
 
     if week:
@@ -68,8 +78,8 @@ def pdf(request, schedule, size=None, week=None):
         filename += "-%s" % week
 
     headers = {"X-Robots-Tag": "noindex, nofollow"}
-    if schedule.last_modified is not None:
-        headers["Last-Modified"] = http_utils.http_date(schedule.last_modified)
+    if snapshot.last_modified is not None:
+        headers["Last-Modified"] = http_utils.http_date(snapshot.last_modified)
 
     variant = "pdf"
     route = str(request.resolver_match.url_name)
@@ -77,7 +87,7 @@ def pdf(request, schedule, size=None, week=None):
     size_part = str(size or "")
     key = utils.response_cache_key(
         route,
-        schedule.freshness_key(),
+        snapshot.freshness_key(),
         variant,
         size_part,
         week_part,
@@ -86,7 +96,7 @@ def pdf(request, schedule, size=None, week=None):
 
     response = utils.check_not_modified(
         request,
-        schedule.last_modified,
+        snapshot.last_modified,
         headers,
     )
     if response:
@@ -109,14 +119,14 @@ def pdf(request, schedule, size=None, week=None):
     # NOTE: This could be cached, and shared with schedule, but to be honest I
     # doubt it is worth it for this code path.
     lectures = Lecture.objects.get_lectures(
-        schedule.semester.id,
-        schedule.student.id,
+        snapshot.semester.id,
+        snapshot.student.id,
     )
     rooms = Lecture.get_related(Room, lectures)
     courses = Course.objects.get_courses(
-        schedule.semester.year,
-        schedule.semester.type,
-        schedule.student.slug,
+        snapshot.semester.year,
+        snapshot.semester.type,
+        snapshot.student.slug,
     )
 
     for course in courses:
@@ -128,7 +138,7 @@ def pdf(request, schedule, size=None, week=None):
         timetable.do_expansion()
     timetable.insert_times()
     if week:
-        timetable.set_week(schedule.semester.year, week)
+        timetable.set_week(snapshot.semester.year, week)
 
     paragraph_style = default_styles["Normal"]
     paragraph_style.fontName = "Helvetica-Bold"
@@ -138,8 +148,8 @@ def pdf(request, schedule, size=None, week=None):
     table_style = _tablestyle()
 
     title = render_title(
-        schedule.semester,
-        schedule.student.slug,
+        snapshot.semester,
+        snapshot.student.slug,
         week,
     )
     data = [[platypus.Paragraph(title, paragraph_style)]]

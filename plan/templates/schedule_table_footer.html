@@ -12,15 +12,15 @@
         - <i class="icon-question-sign"></i> <a href="#tips">{% trans "Tips" %}</a>
         - <i class="icon-download-alt"></i>
         {% if week %}
-          <a href="{% url 'schedule-pdf-size-week' schedule 'A4' week %}">A4</a>
-          <a href="{% url 'schedule-pdf-size-week' schedule 'A5' week %}">A5</a>
-          <a href="{% url 'schedule-pdf-size-week' schedule 'A6' week %}">A6</a>
-          <a href="{% url 'schedule-pdf-size-week' schedule 'A7' week %}">A7</a>
+          <a href="{% url 'schedule-pdf-size-week' schedule.semester schedule.student.slug 'A4' week %}">A4</a>
+          <a href="{% url 'schedule-pdf-size-week' schedule.semester schedule.student.slug 'A5' week %}">A5</a>
+          <a href="{% url 'schedule-pdf-size-week' schedule.semester schedule.student.slug 'A6' week %}">A6</a>
+          <a href="{% url 'schedule-pdf-size-week' schedule.semester schedule.student.slug 'A7' week %}">A7</a>
         {% else %}
-          <a href="{% url 'schedule-pdf-size' schedule 'A4' %}">A4</a>
-          <a href="{% url 'schedule-pdf-size' schedule 'A5' %}">A5</a>
-          <a href="{% url 'schedule-pdf-size' schedule 'A6' %}">A6</a>
-          <a href="{% url 'schedule-pdf-size' schedule 'A7' %}">A7</a>
+          <a href="{% url 'schedule-pdf-size' schedule.semester schedule.student.slug 'A4' %}">A4</a>
+          <a href="{% url 'schedule-pdf-size' schedule.semester schedule.student.slug 'A5' %}">A5</a>
+          <a href="{% url 'schedule-pdf-size' schedule.semester schedule.student.slug 'A6' %}">A6</a>
+          <a href="{% url 'schedule-pdf-size' schedule.semester schedule.student.slug 'A7' %}">A7</a>
         {% endif %}
       </p>
     </div>
