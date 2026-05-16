@@ -5,12 +5,14 @@ from django.urls import path
 from plan.ical import views
 
 urlpatterns = [
-    path("<schedule:schedule>/ical/", views.ical, name="schedule-ical"),
+    path("<semester:semester>/<student:slug>/ical/", views.ical, name="schedule-ical"),
     path(
-        "<schedule:schedule>/ical/<ical_type>/", views.ical, name="schedule-ical-type"
+        "<semester:semester>/<student:slug>/ical/<ical_type>/",
+        views.ical,
+        name="schedule-ical-type",
     ),
     path(
-        "<schedule:schedule>/ical/<ical_type>",
+        "<semester:semester>/<student:slug>/ical/<ical_type>",
         views.ical,
         name="schedule-ical-type-fallback",
     ),

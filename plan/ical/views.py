@@ -25,6 +25,7 @@ from plan.common.models import (
     Room,
     Week,
 )
+from plan.common.snapshot import get_schedule_snapshot
 from plan.ical.queue import enqueue_cache_set
 
 _ = translation.gettext
@@ -207,22 +208,24 @@ def _legacy_upgrade_response(response, encoding: str):
     return result
 
 
-def ical(request, schedule, ical_type=None):
+def ical(request, semester, slug, ical_type=None):
+    snapshot = get_schedule_snapshot(semester, slug)
+
     resources = [_("lectures"), _("exams")]
     if ical_type and ical_type not in resources:
         return http.HttpResponse(status=400)
     elif ical_type:
         resources = [ical_type]
 
-    if schedule.student is None:
+    if snapshot.student is None:
         return http.HttpResponseNotFound()
 
     # TODO: Turn last modified into middleware?
     headers = {"X-Robots-Tag": "noindex, nofollow"}
-    if schedule.last_modified is not None:
-        headers["Last-Modified"] = http_utils.http_date(schedule.last_modified)
+    if snapshot.last_modified is not None:
+        headers["Last-Modified"] = http_utils.http_date(snapshot.last_modified)
 
-    if schedule.semester.stale:
+    if snapshot.semester.stale:
         cache_timeout = datetime.timedelta(days=90)
     else:
         cache_timeout = datetime.timedelta(hours=1)
@@ -235,12 +238,12 @@ def ical(request, schedule, ical_type=None):
     headers.update(utils.cache_headers(cache_timeout, jitter=0.1))
 
     encoding = _requested_encoding(request)
-    key = _current_cache_key(request, schedule, encoding)
+    key = _current_cache_key(request, snapshot, encoding)
     headers["ETag"] = utils.etag_for_key(key)
 
     response = utils.check_not_modified(
         request,
-        schedule.last_modified,
+        snapshot.last_modified,
         headers,
     )
     if response:
@@ -252,8 +255,8 @@ def ical(request, schedule, ical_type=None):
     bypass_cache = utils.should_bypass_cache(request)
 
     if not bypass_cache:
-        current_keys = _current_cache_keys(request, schedule, encoding)
-        legacy_keys = _legacy_cache_keys(request, schedule, encoding)
+        current_keys = _current_cache_keys(request, snapshot, encoding)
+        legacy_keys = _legacy_cache_keys(request, snapshot, encoding)
         current_cached = caches["ical"].get_many(current_keys)
         for index, candidate_key in enumerate(current_keys):
             candidate_response = current_cached.get(candidate_key)
@@ -298,16 +301,16 @@ def ical(request, schedule, ical_type=None):
             return response
 
     filename = utils.ical_filename(
-        schedule.semester.year,
-        schedule.semester.type,
-        schedule.student.slug,
+        snapshot.semester.year,
+        snapshot.semester.type,
+        snapshot.student.slug,
         resources,
     )
 
     headers["Filename"] = filename  # IE needs this
     headers["Content-Disposition"] = "attachment; filename=%s" % filename
 
-    title = urls.reverse("schedule", args=[schedule])
+    title = urls.reverse("schedule", args=[snapshot])
     hostname = settings.TIMETABLE_HOSTNAME or request.headers.get(
         "Host", socket.getfqdn()
     )
@@ -316,32 +319,32 @@ def ical(request, schedule, ical_type=None):
     cal.add("method").value = "PUBLISH"  # IE/Outlook needs this
 
     # TODO(adamcik): use same logic as in common.templatetags.title
-    if schedule.student.slug.lower().endswith("s"):
+    if snapshot.student.slug.lower().endswith("s"):
         description = _("%(slug)s' %(semester)s %(year)s schedule for %(resources)s")
     else:
         description = _("%(slug)s's %(semester)s %(year)s schedule for %(resources)s")
 
     cal.add("X-WR-CALNAME").value = title.strip("/")
     cal.add("X-WR-CALDESC").value = description % {
-        "slug": schedule.student.slug,
-        "semester": schedule.semester.get_type_display(),
-        "year": schedule.semester.year,
+        "slug": snapshot.student.slug,
+        "semester": snapshot.semester.get_type_display(),
+        "year": snapshot.semester.year,
         "resources": ", ".join(resources),
     }
 
-    if schedule.last_modified is not None:
-        dtstamp = datetime.datetime.fromtimestamp(schedule.last_modified, tz=UTC)
+    if snapshot.last_modified is not None:
+        dtstamp = datetime.datetime.fromtimestamp(snapshot.last_modified, tz=UTC)
     else:
         dtstamp = datetime.datetime.now(tz=UTC)
 
     if _("lectures") in resources:
         lectures = Lecture.objects.get_lectures(
-            schedule.semester.id,
-            schedule.student.id,
+            snapshot.semester.id,
+            snapshot.student.id,
         )
         add_lectutures(
             lectures,
-            schedule.semester.year,
+            snapshot.semester.year,
             cal,
             request,
             hostname,
@@ -350,9 +353,9 @@ def ical(request, schedule, ical_type=None):
 
     if _("exams") in resources:
         exams = Exam.objects.get_exams(
-            schedule.semester.year,
-            schedule.semester.type,
-            schedule.student.slug,
+            snapshot.semester.year,
+            snapshot.semester.type,
+            snapshot.student.slug,
         )
         add_exams(exams, cal, hostname, dtstamp)
 
