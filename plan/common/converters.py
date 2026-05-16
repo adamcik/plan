@@ -4,18 +4,11 @@
 import re
 
 from django.conf import settings
-from django.core.cache import cache
-from django.db.models.aggregates import Max
 from django.http import Http404
 from django.utils import translation
 
-from plan.common.models import (
-    Schedule as ScheduleModel,
-    Semester,
-    Student,
-    Subscription,
-)
-from plan.common.schedule import Schedule
+from plan.common.models import Semester
+from plan.common.snapshot import ScheduleSnapshot, get_schedule_snapshot
 
 
 class SemesterConverter:
@@ -63,7 +56,7 @@ class ScheduleConverter:
     _semester_converter = SemesterConverter()
     _student_converter = StudentConverter()
 
-    def to_python(self, value: str) -> Schedule:
+    def to_python(self, value: str) -> ScheduleSnapshot:
         match = self._pattern.match(value)
         if not match:
             raise RuntimeError(
@@ -73,98 +66,14 @@ class ScheduleConverter:
         semester = self._semester_converter.to_python(match.group(1))
         student_slug = self._student_converter.to_python(match.group(2))
 
-        key = f"schedule:{semester.year}-{semester.type}-{student_slug}"
-        result = cache.get(key)
-        if result:
-            return result
+        return get_schedule_snapshot(semester, student_slug)
 
-        try:
-            schedule_row = ScheduleModel.objects.select_related(
-                "semester", "student"
-            ).get(
-                semester__year=semester.year,
-                semester__type=semester.type,
-                student__slug=student_slug,
-            )
-        except ScheduleModel.DoesNotExist:
-            result = self._build_schedule_legacy_fallback(
-                semester_year=semester.year,
-                semester_type=semester.type,
-                student_slug=student_slug,
-            )
-        else:
-            timestamps = []
-            if schedule_row.semester.last_modified:
-                timestamps.append(int(schedule_row.semester.last_modified.timestamp()))
-            if schedule_row.last_modified:
-                timestamps.append(int(schedule_row.last_modified.timestamp()))
-
-            result = Schedule(
-                semester=schedule_row.semester,
-                student=schedule_row.student,
-                last_modified=max(timestamps) if timestamps else None,
-                version=schedule_row.version,
-                semester_version=schedule_row.semester.version,
-            )
-
-        cache.set(key, result, timeout=60)
-        return result
-
-    def to_url(self, schedule: Schedule) -> str:
+    def to_url(self, schedule: ScheduleSnapshot) -> str:
         return "/".join(
             (
                 self._semester_converter.to_url(schedule.semester),
                 self._student_converter.to_url(schedule.student.slug),
             )
-        )
-
-    def _build_schedule_legacy_fallback(
-        self,
-        *,
-        semester_year: int,
-        semester_type: str,
-        student_slug: str,
-    ) -> Schedule:
-        try:
-            semester = Semester.objects.get(year=semester_year, type=semester_type)
-        except Semester.DoesNotExist:
-            raise Http404(
-                f"Could not find semester: year={semester_year} type={semester_type}"
-            )
-
-        try:
-            student = Student.objects.get(slug=student_slug)
-        except Student.DoesNotExist:
-            return Schedule(
-                semester=semester,
-                student=Student(slug=student_slug),
-            )
-
-        # NOTE: Knowing the exact student_id makes this query much faster.
-        qs = Subscription.objects.filter(
-            course__semester_id=semester.id,
-            student_id=student.id,
-        ).aggregate(
-            subscription_added=Max("added"),
-            subscription_last_modified=Max("last_modified"),
-            courses_last_modified=Max("course__last_modified"),
-            lectures_last_modified=Max("course__lecture__last_modified"),
-            rooms_last_modified=Max("course__lecture__rooms__last_modified"),
-            exams_last_modified=Max("course__exam__last_modified"),
-        )
-
-        timestamps = [int(agg.timestamp()) for agg in qs.values() if agg]
-        if semester.last_modified:
-            timestamps.append(int(semester.last_modified.timestamp()))
-
-        last_modified = max([0] + timestamps)
-
-        return Schedule(
-            semester=semester,
-            student=student,
-            last_modified=last_modified or None,
-            version=0,
-            semester_version=semester.version,
         )
 
 
