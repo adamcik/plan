@@ -23,6 +23,7 @@ from django.utils import text as text_utils
 from django.utils import translation
 
 from plan.common.schedule import Schedule
+from plan.common.snapshot import ScheduleSnapshot
 
 _ = translation.gettext
 
@@ -148,8 +149,14 @@ def cache_headers(timeout: datetime.timedelta, jitter: float = 0.0) -> dict[str,
     }
 
 
-def ical_filename(year, semester_type, slug, resources):
-    return "%s.ics" % "-".join(str(v) for v in [year, semester_type, slug] + resources)
+def ical_filename(snapshot: ScheduleSnapshot, resources):
+    parts = [
+        snapshot.semester.year,
+        snapshot.semester.type,
+        snapshot.student.slug,
+        *resources,
+    ]
+    return "%s.ics" % "-".join(str(v) for v in parts)
 
 
 Params = typing_extensions.ParamSpec("Params")

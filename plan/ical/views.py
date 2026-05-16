@@ -300,12 +300,7 @@ def ical(request, semester, slug, ical_type=None):
 
             return response
 
-    filename = utils.ical_filename(
-        snapshot.semester.year,
-        snapshot.semester.type,
-        snapshot.student.slug,
-        resources,
-    )
+    filename = utils.ical_filename(snapshot, resources)
 
     headers["Filename"] = filename  # IE needs this
     headers["Content-Disposition"] = "attachment; filename=%s" % filename
