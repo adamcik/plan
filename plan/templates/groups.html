@@ -1,6 +1,6 @@
 {% load i18n %}
 
-<form action="{% url 'change-groups' schedule %}"
+<form action="{% url 'change-groups' schedule.semester schedule.student.slug %}"
       method="post"
       class="noprint">
   {% if advanced %}

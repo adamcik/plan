@@ -5,9 +5,9 @@
     <div class="yui-u first">
       <p>
         {% if advanced %}
-          <i class="icon-wrench"></i> <a href="{% url 'schedule' schedule %}">{% trans "Hide advanced options" %}</a>
+          <i class="icon-wrench"></i> <a href="{% url 'schedule' schedule.semester schedule.student.slug %}">{% trans "Hide advanced options" %}</a>
         {% else %}
-          <i class="icon-wrench"></i> <a href="{% url 'schedule-advanced' schedule %}">{% trans "Advanced options" %}</a>
+          <i class="icon-wrench"></i> <a href="{% url 'schedule-advanced' schedule.semester schedule.student.slug %}">{% trans "Advanced options" %}</a>
         {% endif %}
         - <i class="icon-question-sign"></i> <a href="#tips">{% trans "Tips" %}</a>
         - <i class="icon-download-alt"></i>
@@ -27,13 +27,13 @@
     <div class="yui-u">
       <p class="right">
         <i class="icon-list-alt"></i> {% trans "Weeks:" %}
-        <a href="{% url 'schedule' schedule %}"
+        <a href="{% url 'schedule' schedule.semester schedule.student.slug %}"
            {% if all %}class="current"{% endif %}>{% trans "All" %}</a>
         {% if not week_is_current %}
-          <a href="{% url 'schedule-current' schedule %}">{% trans "Current" %}</a>
+          <a href="{% url 'schedule-current' schedule.semester schedule.student.slug %}">{% trans "Current" %}</a>
         {% endif %}
         {% for w in weeks %}
-          <a href="{% url 'schedule-week' schedule w %}"
+          <a href="{% url 'schedule-week' schedule.semester schedule.student.slug w %}"
              {% if w == week %}class="current"{% endif %}>{{ w }}</a>
         {% endfor %}
       </p>

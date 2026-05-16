@@ -1,7 +1,7 @@
 {% load i18n %}
 
 {% if advanced or not courses %}
-  <form action="{% url 'change-course' schedule %}"
+  <form action="{% url 'change-course' schedule.semester schedule.student.slug %}"
         method="post"
         class="noprint">
     {% if courses %}

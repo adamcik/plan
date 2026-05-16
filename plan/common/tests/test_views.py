@@ -4,7 +4,7 @@ import datetime
 
 from django.core.cache import cache
 from django.test import override_settings
-from django.urls import reverse
+from django.urls import reverse as django_reverse
 from django.utils import timezone
 from django.utils.datastructures import MultiValueDict
 
@@ -44,23 +44,29 @@ class EmptyViewTestCase(BaseTestCase):
 class ViewTestCase(BaseTestCase):
     fixtures = ["test_data.json", "test_user.json"]
 
+    def reverse(self, view_name, *extra_args):
+        return django_reverse(
+            view_name,
+            args=[self.semester, self.student.slug, *extra_args],
+        )
+
     # FIXME check what happens when we do GET against change functions
     # FIXME test adding course that does not exist for a given semester
 
     def test_index(self):
-        response = self.client.get(reverse("frontpage"))
-        url = reverse("semester", args=[self.semester])
+        response = self.client.get(django_reverse("frontpage"))
+        url = django_reverse("semester", args=[self.semester])
         self.assertRedirects(response, url)
 
     def test_shortcut(self):
         response = self.client.get(self.url("shortcut", "adamcik"))
-        url = reverse("schedule-week", args=[self.schedule, 1])
+        url = self.reverse("schedule-week", 1)
         self.assertRedirects(response, url)
 
         # TODO: Check with other times.
 
     def test_redirect_room_missing_returns_404(self):
-        response = self.client.get(reverse("redirect_room", args=[999999]))
+        response = self.client.get(django_reverse("redirect_room", args=[999999]))
 
         self.assertEqual(response.status_code, 404)
         self.assertTemplateUsed(response, "404.html")
@@ -72,23 +78,30 @@ class ViewTestCase(BaseTestCase):
             "redirect_syllabus",
             "redirect_stream",
         ):
-            response = self.client.get(reverse(name, args=[999999]))
+            response = self.client.get(django_reverse(name, args=[999999]))
 
             self.assertEqual(response.status_code, 404)
             self.assertTemplateUsed(response, "404.html")
 
     def test_schedule_current(self):
-        url = reverse("schedule-current", args=[self.schedule])
+        url = self.reverse("schedule-current")
         response = self.client.get(url)
 
-        self.assertRedirects(
-            response, reverse("schedule-week", args=[self.schedule, 1])
-        )
+        self.assertRedirects(response, self.reverse("schedule-week", 1))
 
         response = self.client.get(
-            reverse("schedule-current", args=[self.next_schedule])
+            django_reverse(
+                "schedule-current",
+                args=[self.next_schedule.semester, self.next_schedule.student.slug],
+            )
         )
-        self.assertRedirects(response, reverse("schedule", args=[self.next_schedule]))
+        self.assertRedirects(
+            response,
+            django_reverse(
+                "schedule",
+                args=[self.next_schedule.semester, self.next_schedule.student.slug],
+            ),
+        )
 
     def test_schedule(self):
         # FIXME add group help testing
@@ -97,18 +110,18 @@ class ViewTestCase(BaseTestCase):
         # FIXME test group-help message
 
         for url in [
-            reverse("schedule", args=[self.schedule]),
-            reverse("schedule-advanced", args=[self.schedule]),
-            reverse("schedule-week", args=[self.schedule, 1]),
-            reverse("schedule-week", args=[self.schedule, 2]),
-            reverse("schedule", args=[self.schedule]),
+            self.reverse("schedule"),
+            self.reverse("schedule-advanced"),
+            self.reverse("schedule-week", 1),
+            self.reverse("schedule-week", 2),
+            self.reverse("schedule"),
         ]:
             response = self.client.get(url)
             self.assertEqual(response.status_code, 200)
             self.assertTemplateUsed(response, "schedule.html")
 
     def test_schedule_sets_robots_header(self):
-        response = self.client.get(reverse("schedule", args=[self.schedule]))
+        response = self.client.get(self.reverse("schedule"))
 
         self.assertEqual(
             response.headers["X-Robots-Tag"],
@@ -116,13 +129,13 @@ class ViewTestCase(BaseTestCase):
         )
 
     def test_schedule_sets_etag_header(self):
-        response = self.client.get(reverse("schedule", args=[self.schedule]))
+        response = self.client.get(self.reverse("schedule"))
 
         self.assertEqual(response.status_code, 200)
         self.assertIn("ETag", response.headers)
 
     def test_schedule_if_none_match_returns_304(self):
-        url = reverse("schedule", args=[self.schedule])
+        url = self.reverse("schedule")
         first = self.client.get(url)
 
         second = self.client.get(url, HTTP_IF_NONE_MATCH=first.headers["ETag"])
@@ -131,7 +144,7 @@ class ViewTestCase(BaseTestCase):
         self.assertEqual(second.content, b"")
 
     def test_schedule_if_none_match_takes_precedence_over_if_modified_since(self):
-        url = reverse("schedule", args=[self.schedule])
+        url = self.reverse("schedule")
         first = self.client.get(url)
 
         response = self.client.get(
@@ -150,8 +163,8 @@ class ViewTestCase(BaseTestCase):
         # FIXME test group-help
         # FIXME test error.html
 
-        original_url = reverse("schedule-advanced", args=[self.schedule])
-        url = reverse("change-course", args=[self.schedule])
+        original_url = self.reverse("schedule-advanced")
+        url = self.reverse("change-course")
 
         post_data = [
             {"submit_add": True, "course_add": "COURSE4"},
@@ -186,8 +199,8 @@ class ViewTestCase(BaseTestCase):
 
     @override_settings(TIMETABLE_ENABLE_IF_MODIFIED_SINCE=True)
     def test_change_course_remove_invalidates_schedule_data_cache(self):
-        schedule_url = reverse("schedule-advanced", args=[self.schedule])
-        change_url = reverse("change-course", args=[self.schedule])
+        schedule_url = self.reverse("schedule-advanced")
+        change_url = self.reverse("change-course")
 
         subscriptions = Subscription.objects.filter(
             student__slug="adamcik",
@@ -228,8 +241,11 @@ class ViewTestCase(BaseTestCase):
 
     @override_settings(TIMETABLE_ENABLE_IF_MODIFIED_SINCE=True)
     def test_change_course_in_other_semester_does_not_invalidate_current_schedule(self):
-        spring_schedule_url = reverse("schedule-advanced", args=[self.schedule])
-        fall_change_url = reverse("change-course", args=[self.next_schedule])
+        spring_schedule_url = self.reverse("schedule-advanced")
+        fall_change_url = django_reverse(
+            "change-course",
+            args=[self.next_schedule.semester, self.next_schedule.student.slug],
+        )
 
         response = self.client.get(spring_schedule_url)
         self.assertEqual(response.status_code, 200)
@@ -250,7 +266,7 @@ class ViewTestCase(BaseTestCase):
 
     @override_settings(TIMETABLE_ENABLE_IF_MODIFIED_SINCE=True)
     def test_schedule_works_when_schedule_last_modified_row_is_missing(self):
-        schedule_url = reverse("schedule-advanced", args=[self.schedule])
+        schedule_url = self.reverse("schedule-advanced")
 
         Schedule.objects.filter(
             semester__year=2009,
@@ -281,7 +297,7 @@ class ViewTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 304)
 
     def test_schedule_etag_changes_for_legacy_semester_without_schedule_row(self):
-        schedule_url = reverse("schedule", args=[self.schedule])
+        schedule_url = self.reverse("schedule")
 
         student = Student.objects.get(slug="adamcik")
         semester = Semester.objects.get(year=2009, type="spring")
@@ -320,8 +336,8 @@ class ViewTestCase(BaseTestCase):
         self.assertNotEqual(first.headers["ETag"], second.headers["ETag"])
 
     def test_legacy_schedule_etag_changes_after_post_mutation(self):
-        schedule_url = reverse("schedule", args=[self.schedule])
-        change_url = reverse("change-course", args=[self.schedule])
+        schedule_url = self.reverse("schedule")
+        change_url = self.reverse("change-course")
 
         student = Student.objects.get(slug="adamcik")
         semester = Semester.objects.get(year=2009, type="spring")
@@ -358,8 +374,8 @@ class ViewTestCase(BaseTestCase):
         self.assertNotEqual(first.headers["ETag"], second.headers["ETag"])
 
     def test_change_course_creates_schedule_row_with_version_bump(self):
-        schedule_url = reverse("schedule-advanced", args=[self.schedule])
-        change_url = reverse("change-course", args=[self.schedule])
+        schedule_url = self.reverse("schedule-advanced")
+        change_url = self.reverse("change-course")
 
         Schedule.objects.filter(
             semester__year=2009,
@@ -382,8 +398,8 @@ class ViewTestCase(BaseTestCase):
         self.assertEqual(row.version, 1)
 
     def test_change_course_increments_schedule_version_on_each_mutation(self):
-        schedule_url = reverse("schedule-advanced", args=[self.schedule])
-        change_url = reverse("change-course", args=[self.schedule])
+        schedule_url = self.reverse("schedule-advanced")
+        change_url = self.reverse("change-course")
 
         student = Student.objects.get(slug="adamcik")
         semester = Semester.objects.get(year=2009, type="spring")
@@ -423,8 +439,8 @@ class ViewTestCase(BaseTestCase):
         self.assertEqual(row.version, 2)
 
     def test_change_course_updates_schedule_last_modified_on_existing_row(self):
-        schedule_url = reverse("schedule-advanced", args=[self.schedule])
-        change_url = reverse("change-course", args=[self.schedule])
+        schedule_url = self.reverse("schedule-advanced")
+        change_url = self.reverse("change-course")
 
         student = Student.objects.get(slug="adamcik")
         semester = Semester.objects.get(year=2009, type="spring")
@@ -450,8 +466,8 @@ class ViewTestCase(BaseTestCase):
 
     @override_settings(TIMETABLE_ENABLE_IF_MODIFIED_SINCE=True)
     def test_delete_mutation_does_not_return_stale_304_for_old_ims(self):
-        schedule_url = reverse("schedule-advanced", args=[self.schedule])
-        change_url = reverse("change-course", args=[self.schedule])
+        schedule_url = self.reverse("schedule-advanced")
+        change_url = self.reverse("change-course")
 
         student = Student.objects.get(slug="adamcik")
         semester = Semester.objects.get(year=2009, type="spring")
@@ -498,8 +514,8 @@ class ViewTestCase(BaseTestCase):
 
     @override_settings(TIMETABLE_ENABLE_IF_MODIFIED_SINCE=True)
     def test_schedule_cache_identity_changes_when_schedule_version_changes(self):
-        schedule_url = reverse("schedule-advanced", args=[self.schedule])
-        change_url = reverse("change-course", args=[self.schedule])
+        schedule_url = self.reverse("schedule-advanced")
+        change_url = self.reverse("change-course")
         cache.clear()
 
         student = Student.objects.get(slug="adamcik")
@@ -540,7 +556,7 @@ class ViewTestCase(BaseTestCase):
         self.assertNotEqual(first_key, second_key)
 
     def test_schedule_with_warm_cache_force_reload_makes_no_queries(self):
-        schedule_url = reverse("schedule", args=[self.schedule])
+        schedule_url = self.reverse("schedule")
         cache.clear()
 
         response = self.client.get(schedule_url)
@@ -555,7 +571,7 @@ class ViewTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_schedule_week_with_warm_cache_force_reload_makes_no_queries(self):
-        schedule_week_url = reverse("schedule-week", args=[self.schedule, 1])
+        schedule_week_url = self.reverse("schedule-week", 1)
         cache.clear()
 
         response = self.client.get(schedule_week_url)
@@ -570,8 +586,8 @@ class ViewTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_schedule_force_reload_week_after_non_week_warm_makes_no_queries(self):
-        schedule_url = reverse("schedule", args=[self.schedule])
-        schedule_week_url = reverse("schedule-week", args=[self.schedule, 1])
+        schedule_url = self.reverse("schedule")
+        schedule_week_url = self.reverse("schedule-week", 1)
         cache.clear()
 
         response = self.client.get(schedule_url)
@@ -586,8 +602,8 @@ class ViewTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_schedule_force_reload_non_week_after_week_warm_makes_no_queries(self):
-        schedule_url = reverse("schedule", args=[self.schedule])
-        schedule_week_url = reverse("schedule-week", args=[self.schedule, 1])
+        schedule_url = self.reverse("schedule")
+        schedule_week_url = self.reverse("schedule-week", 1)
         cache.clear()
 
         response = self.client.get(schedule_week_url)
@@ -602,7 +618,7 @@ class ViewTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_change_course_invalid_course_renders_error(self):
-        url = reverse("change-course", args=[self.schedule])
+        url = self.reverse("change-course")
 
         response = self.client.post(
             url,
@@ -615,8 +631,8 @@ class ViewTestCase(BaseTestCase):
     def test_change_groups(self):
         # FIXME test for courses without groups
 
-        original_url = reverse("schedule-advanced", args=[self.schedule])
-        url = reverse("change-groups", args=[self.schedule])
+        original_url = self.reverse("schedule-advanced")
+        url = self.reverse("change-groups")
 
         post_data = [
             {"1-groups": "1", "2-groups": "", "3-groups": "2"},
@@ -650,8 +666,8 @@ class ViewTestCase(BaseTestCase):
     def test_change_lectures(self):
         # FIXME test nulling out excludes
 
-        original_url = reverse("schedule-advanced", args=[self.schedule])
-        url = reverse("change-lectures", args=[self.schedule])
+        original_url = self.reverse("schedule-advanced")
+        url = self.reverse("change-lectures")
 
         post_data = [
             {"exclude": ("2", "3", "8")},
@@ -686,7 +702,7 @@ class ViewTestCase(BaseTestCase):
             lectures = new_lectures
 
     def test_course_query(self):
-        url = reverse("course-query", args=[self.semester])
+        url = django_reverse("course-query", args=[self.semester])
 
         response = self.client.get(url)
 

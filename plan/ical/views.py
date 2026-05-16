@@ -308,7 +308,7 @@ def ical(request, semester, slug, ical_type=None):
     headers["Filename"] = filename  # IE needs this
     headers["Content-Disposition"] = "attachment; filename=%s" % filename
 
-    title = urls.reverse("schedule", args=[snapshot])
+    title = urls.reverse("schedule", args=[snapshot.semester, snapshot.student.slug])
     hostname = settings.TIMETABLE_HOSTNAME or request.headers.get(
         "Host", socket.getfqdn()
     )

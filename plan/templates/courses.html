@@ -3,7 +3,7 @@
 {% load i18n %}
 {% load tabindex %}
 
-<form action="{% url 'change-course' schedule %}"
+<form action="{% url 'change-course' schedule.semester schedule.student.slug %}"
       method="post"
       data-toggle-container
       None="true">
@@ -106,7 +106,7 @@
 
   {% if not courses or not advanced %}
     <p class="noprint">
-      {% url 'schedule-advanced' schedule as advanced_url %}
+      {% url 'schedule-advanced' schedule.semester schedule.student.slug as advanced_url %}
       {% blocktrans %}
         Go to <a href="{{ advanced_url }}#courses">advanced options</a>
         to add and remove courses.

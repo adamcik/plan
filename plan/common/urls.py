@@ -16,20 +16,43 @@ urlpatterns = [
     ),
     path("<semester:semester>/", views.getting_started, name="semester"),
     path("<semester:semester>/+", views.course_query, name="course-query"),
-    path("<schedule:schedule>/", views.schedule, {"all": True}, name="schedule"),
     path(
-        "<schedule:schedule>/+",
+        "<semester:semester>/<student:slug>/",
+        views.schedule,
+        {"all": True},
+        name="schedule",
+    ),
+    path(
+        "<semester:semester>/<student:slug>/+",
         views.schedule,
         {"advanced": True},
         name="schedule-advanced",
     ),
     path(
-        "<schedule:schedule>/current/", views.schedule_current, name="schedule-current"
+        "<semester:semester>/<student:slug>/current/",
+        views.schedule_current,
+        name="schedule-current",
     ),
-    path("<schedule:schedule>/<week:week>/", views.schedule, name="schedule-week"),
-    path("<schedule:schedule>/change/", views.select_course, name="change-course"),
-    path("<schedule:schedule>/groups/", views.select_groups, name="change-groups"),
-    path("<schedule:schedule>/filter/", views.select_lectures, name="change-lectures"),
+    path(
+        "<semester:semester>/<student:slug>/<week:week>/",
+        views.schedule,
+        name="schedule-week",
+    ),
+    path(
+        "<semester:semester>/<student:slug>/change/",
+        views.select_course,
+        name="change-course",
+    ),
+    path(
+        "<semester:semester>/<student:slug>/groups/",
+        views.select_groups,
+        name="change-groups",
+    ),
+    path(
+        "<semester:semester>/<student:slug>/filter/",
+        views.select_lectures,
+        name="change-lectures",
+    ),
     path("c/<base58:id>", views.redirect, {"type": "course"}, name="redirect_course"),
     path(
         "s/<base58:id>", views.redirect, {"type": "syllabus"}, name="redirect_syllabus"

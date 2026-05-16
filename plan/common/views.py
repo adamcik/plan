@@ -27,7 +27,12 @@ from plan.common.models import (
     Week,
 )
 from plan.common.schedule import Schedule
-from plan.common.snapshot import ScheduleSnapshot, bump_snapshot
+from plan.common.snapshot import (
+    ScheduleSnapshot,
+    ScheduleSnapshotNotFound,
+    bump_snapshot,
+    get_schedule_snapshot,
+)
 from plan.materialized.models import SubscriptionsCount
 
 # FIXME split into frontpage/semester, course, schedule files
@@ -74,9 +79,7 @@ def shortcut(request, slug):
         semester = Semester.objects.active()
     except Semester.DoesNotExist:
         raise http.Http404
-    return schedule_current(
-        request, Schedule(semester=semester, student=Student(slug=slug))
-    )
+    return schedule_current(request, semester, slug)
 
 
 @utils.expires_in(datetime.timedelta(hours=1))
@@ -184,19 +187,26 @@ def course_query(request, semester):
     return response
 
 
-def schedule_current(request, schedule: Schedule):
+def schedule_current(request, semester: Semester, slug: str):
+    try:
+        snapshot = get_schedule_snapshot(semester, slug)
+    except ScheduleSnapshotNotFound:
+        raise http.Http404
+
     current_week = get_current_week()
 
     # NOTE: We use the slug to allow for students that don't yet exist.
     weeks = Week.objects.filter(
-        lecture__course__subscription__student__slug=schedule.student.slug,
-        lecture__course__semester=schedule.semester,
+        lecture__course__subscription__student__slug=snapshot.student.slug,
+        lecture__course__semester=snapshot.semester,
     )
     weeks = weeks.distinct().values_list("number", flat=True)
 
-    if current_week in weeks and schedule.semester.year == today().year:
-        return shortcuts.redirect("schedule-week", schedule, current_week)
-    return shortcuts.redirect("schedule", schedule)
+    if current_week in weeks and snapshot.semester.year == today().year:
+        return shortcuts.redirect(
+            "schedule-week", snapshot.semester, snapshot.student.slug, current_week
+        )
+    return shortcuts.redirect("schedule", snapshot.semester, snapshot.student.slug)
 
 
 def _common_data():
@@ -328,8 +338,20 @@ def _store_response_cache(
         response["X-Cache"] = f"miss; key={key}"
 
 
-def schedule(request, schedule: Schedule, advanced=False, week=None, all=False):
+def schedule(
+    request,
+    semester: Semester,
+    slug: str,
+    advanced: bool = False,
+    week: int | None = None,
+    all: bool = False,
+):
     """Page that handles showing schedules"""
+    try:
+        snapshot = get_schedule_snapshot(semester, slug)
+    except ScheduleSnapshotNotFound:
+        raise http.Http404
+
     bypass_cache = utils.should_bypass_cache(request)
 
     current_week = get_current_week()
@@ -338,18 +360,18 @@ def schedule(request, schedule: Schedule, advanced=False, week=None, all=False):
     color_map = utils.ColorMap(hex=True)
 
     headers = {"X-Robots-Tag": "noindex, nofollow, noarchive"}
-    if schedule.last_modified is not None:
-        headers["Last-Modified"] = http_date(schedule.last_modified)
+    if snapshot.last_modified is not None:
+        headers["Last-Modified"] = http_date(snapshot.last_modified)
 
     variant = "html"
     route = str(request.resolver_match.url_name)
     path = request.path_info.rstrip("/") or "/"
-    key = utils.response_cache_key(route, schedule.freshness_key(), variant, path)
+    key = utils.response_cache_key(route, snapshot.freshness_key(), variant, path)
     headers["ETag"] = utils.etag_for_key(key)
 
     response = utils.check_not_modified(
         request,
-        schedule.last_modified,
+        snapshot.last_modified,
         headers,
     )
     if response:
@@ -357,7 +379,7 @@ def schedule(request, schedule: Schedule, advanced=False, week=None, all=False):
 
     key = utils.response_cache_key(
         route,
-        schedule.freshness_key(),
+        snapshot.freshness_key(),
         variant,
         "identity",
         path,
@@ -379,7 +401,7 @@ def schedule(request, schedule: Schedule, advanced=False, week=None, all=False):
         rooms,
         schedule_weeks,
         next_schedule,
-    ) = _schedule_data(schedule, next_semester)
+    ) = _schedule_data(snapshot, next_semester)
 
     # Check prev/next weeks:
     if week and week + 1 in schedule_weeks:
@@ -398,7 +420,7 @@ def schedule(request, schedule: Schedule, advanced=False, week=None, all=False):
     # Create Timetable
     table = timetable.Timetable(lectures)
     if week:
-        table.set_week(schedule.semester.year, week)
+        table.set_week(snapshot.semester.year, week)
     if lectures:
         table.place_lectures(week)
         table.do_expansion()
@@ -416,7 +438,7 @@ def schedule(request, schedule: Schedule, advanced=False, week=None, all=False):
                 "Display %(course)s as:"
             ) % {"course": course.code}
 
-    week_is_current = schedule.semester.year == today().year and week == current_week
+    week_is_current = snapshot.semester.year == today().year and week == current_week
 
     # TODO: Natural sort course code? Why is this needed here?
     lectures.sort(
@@ -438,10 +460,10 @@ def schedule(request, schedule: Schedule, advanced=False, week=None, all=False):
             "current_week": current_week,
             "exams": exams,
             "lectures": lectures,
-            "semester": schedule.semester,
+            "semester": snapshot.semester,
             "week_is_current": week_is_current,
             "next_semester": next_semester,
-            "slug": schedule.student.slug,
+            "slug": snapshot.student.slug,
             "timetable": table,
             "week": week,
             "next_week": next_week,
@@ -451,7 +473,7 @@ def schedule(request, schedule: Schedule, advanced=False, week=None, all=False):
             "lecturers": lecturers,
             "locations": locations,
             "weeks": schedule_weeks,
-            "schedule": schedule,
+            "schedule": snapshot,
             "next_schedule": next_schedule,
         },
     )
@@ -466,16 +488,21 @@ def schedule(request, schedule: Schedule, advanced=False, week=None, all=False):
     return response
 
 
-def select_groups(request, schedule):
+def select_groups(request, semester: Semester, slug: str):
     """Form handler for selecting groups to use in schedule"""
+    try:
+        snapshot = get_schedule_snapshot(semester, slug)
+    except ScheduleSnapshotNotFound:
+        raise http.Http404
+
     courses = Course.objects.get_courses(
-        schedule.semester.year,
-        schedule.semester.type,
-        schedule.student.slug,
+        snapshot.semester.year,
+        snapshot.semester.type,
+        snapshot.student.slug,
     )
     course_groups = Course.get_groups(
-        schedule.semester.year,
-        schedule.semester.type,
+        snapshot.semester.year,
+        snapshot.semester.type,
         [c.id for c in courses],
     )
 
@@ -492,9 +519,9 @@ def select_groups(request, schedule):
 
                 if group_form.is_valid():
                     subscription = Subscription.objects.get_subscriptions(
-                        schedule.semester.year,
-                        schedule.semester.type,
-                        schedule.student.slug,
+                        snapshot.semester.year,
+                        snapshot.semester.type,
+                        snapshot.student.slug,
                     ).get(course=c)
 
                     selected_groups = set(group_form.cleaned_data["groups"])
@@ -506,17 +533,19 @@ def select_groups(request, schedule):
                         changed = True
 
             if changed:
-                bump_snapshot(schedule)
+                bump_snapshot(snapshot)
 
-            utils.clear_cache(schedule)
+            utils.clear_cache(snapshot)
 
-        return shortcuts.redirect("schedule-advanced", schedule)
+        return shortcuts.redirect(
+            "schedule-advanced", snapshot.semester, snapshot.student.slug
+        )
 
     color_map = utils.ColorMap(hex=True)
     subscription_groups = Subscription.get_groups(
-        schedule.semester.year,
-        schedule.semester.type,
-        schedule.student.slug,
+        snapshot.semester.year,
+        snapshot.semester.type,
+        snapshot.student.slug,
     )
     all_subscripted_groups = set()
 
@@ -527,7 +556,7 @@ def select_groups(request, schedule):
     for c in courses:
         color_map[c.id]
         subscription_id = c.subscription_set.get(
-            student__slug=schedule.student.slug,
+            student__slug=snapshot.student.slug,
         ).pk
 
         try:
@@ -547,32 +576,38 @@ def select_groups(request, schedule):
         request,
         "select_groups.html",
         {
-            "semester": schedule.semester,
-            "slug": schedule.student.slug,
+            "semester": snapshot.semester,
+            "slug": snapshot.student.slug,
             "courses": courses,
             "color_map": color_map,
-            "schedule": schedule,
+            "schedule": snapshot,
         },
     )
 
 
-def select_course(request, schedule, add=False):
+def select_course(request, semester: Semester, slug: str, add: bool = False):
     """Handle selecting of courses from course list, change of names and
     removeall of courses"""
+    try:
+        snapshot = get_schedule_snapshot(semester, slug)
+    except ScheduleSnapshotNotFound:
+        raise http.Http404
 
     if "submit_add" in request.POST or add:
-        response = _add_courses(request, schedule)
+        response = _add_courses(request, snapshot)
     elif "submit_remove" in request.POST:
-        response = _remove_courses(request, schedule)
+        response = _remove_courses(request, snapshot)
     elif "submit_name" in request.POST:
-        response = _override_name(request, schedule)
+        response = _override_name(request, snapshot)
     else:
         response = None
 
-    utils.clear_cache(schedule)
+    utils.clear_cache(snapshot)
     if response:
         return response
-    return shortcuts.redirect("schedule-advanced", schedule)
+    return shortcuts.redirect(
+        "schedule-advanced", snapshot.semester, snapshot.student.slug
+    )
 
 
 def _add_courses(request, snapshot: ScheduleSnapshot):
@@ -638,7 +673,7 @@ def _add_courses(request, snapshot: ScheduleSnapshot):
     if changed:
         bump_snapshot(snapshot)
 
-    return shortcuts.redirect("change-groups", snapshot)
+    return shortcuts.redirect("change-groups", snapshot.semester, snapshot.student.slug)
 
 
 def _remove_courses(request, snapshot: ScheduleSnapshot):
@@ -698,17 +733,21 @@ def _override_name(request, snapshot: ScheduleSnapshot):
     return None
 
 
-def select_lectures(request, schedule):
+def select_lectures(request, semester: Semester, slug: str):
     """Handle selection of lectures to hide"""
+    try:
+        snapshot = get_schedule_snapshot(semester, slug)
+    except ScheduleSnapshotNotFound:
+        raise http.Http404
 
     if request.method == "POST":
         with transaction.atomic():
             excludes = request.POST.getlist("exclude")
 
             subscriptions = Subscription.objects.get_subscriptions(
-                schedule.semester.year,
-                schedule.semester.type,
-                schedule.student.slug,
+                snapshot.semester.year,
+                snapshot.semester.type,
+                snapshot.student.slug,
             )
 
             for subscription in subscriptions:
@@ -721,10 +760,12 @@ def select_lectures(request, schedule):
 
                 subscription.save()  # Trigger last_modified update
 
-        utils.clear_cache(schedule)
-        bump_snapshot(schedule)
+        utils.clear_cache(snapshot)
+        bump_snapshot(snapshot)
 
-    return shortcuts.redirect("schedule-advanced", schedule)
+    return shortcuts.redirect(
+        "schedule-advanced", snapshot.semester, snapshot.student.slug
+    )
 
 
 def about(request):

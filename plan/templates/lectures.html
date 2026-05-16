@@ -4,7 +4,7 @@
 
 {% if lectures %}
   <h2>{% trans "Lecture list" %}</h2>
-  <form action="{% url 'change-lectures' schedule %}"
+  <form action="{% url 'change-lectures' schedule.semester schedule.student.slug %}"
         method="post"
         data-toggle-container="true">
     {% if advanced %}
@@ -29,7 +29,7 @@
       </div>
     {% else %}
       <p>
-        {% url 'schedule-advanced' schedule as advanced_url %}
+        {% url 'schedule-advanced' schedule.semester schedule.student.slug as advanced_url %}
         {% blocktrans %}
           Go to <a href="{{ advanced_url }}#lectures">advanced options</a>
           to toggle which lectures to hide.
