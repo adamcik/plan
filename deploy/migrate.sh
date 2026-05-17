@@ -7,9 +7,10 @@ Usage:
   $0 [options]
 
 Options:
+  --instance <name>     Instance name (default: ntnu)
   --image <ref>         Image ref to run (default: runtime image of --container)
-  --container <name>    Existing runtime container name (default: plan-ntnu)
-  --env-file <path>     Env file for migration run (default: /etc/plan/env)
+  --container <name>    Existing runtime container name (default: plan-<instance>)
+  --env-file <path>     Env file for migration run (default: /etc/plan/<instance>.env)
   --no-mount-state      Do not mount /var/lib/plan and /var/cache/plan
   --show-plan           Show migration plan
   --check               Run migrate --check
@@ -24,26 +25,53 @@ Examples:
 EOF
 }
 
+DEFAULT_INSTANCE_NAME="ntnu"
+INSTANCE_NAME="$DEFAULT_INSTANCE_NAME"
 IMAGE_REF=""
-CONTAINER_NAME="plan-ntnu"
-ENV_FILE="/etc/plan/env"
+CONTAINER_NAME=""
+ENV_FILE=""
 MOUNT_STATE=1
 SHOW_PLAN=1
 CHECK_ONLY=1
 APPLY=0
+CHECK_SET=0
+LIB_DIR=""
+CACHE_DIR=""
+
+CONTAINER_SET=0
+ENV_FILE_SET=0
+
+apply_instance_defaults() {
+  if [ -z "$CONTAINER_NAME" ] || [ "$CONTAINER_SET" -eq 0 ]; then
+    CONTAINER_NAME="plan-${INSTANCE_NAME}"
+  fi
+
+  if [ -z "$ENV_FILE" ] || [ "$ENV_FILE_SET" -eq 0 ]; then
+    ENV_FILE="/etc/plan/${INSTANCE_NAME}.env"
+  fi
+
+  LIB_DIR="/var/lib/plan/${INSTANCE_NAME}"
+  CACHE_DIR="/var/cache/plan/${INSTANCE_NAME}"
+}
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
+    --instance)
+      INSTANCE_NAME="$2"
+      shift 2
+      ;;
     --image)
       IMAGE_REF="$2"
       shift 2
       ;;
     --container)
       CONTAINER_NAME="$2"
+      CONTAINER_SET=1
       shift 2
       ;;
     --env-file)
       ENV_FILE="$2"
+      ENV_FILE_SET=1
       shift 2
       ;;
     --no-mount-state)
@@ -56,10 +84,14 @@ while [ "$#" -gt 0 ]; do
       ;;
     --check)
       CHECK_ONLY=1
+      CHECK_SET=1
       shift
       ;;
     --apply)
       APPLY=1
+      if [ "$CHECK_SET" -eq 0 ]; then
+        CHECK_ONLY=0
+      fi
       shift
       ;;
     -h|--help)
@@ -73,6 +105,8 @@ while [ "$#" -gt 0 ]; do
       ;;
   esac
 done
+
+apply_instance_defaults
 
 log() {
   printf '\n==> %s\n' "$*"
@@ -95,6 +129,8 @@ fi
 log "Migration runner image"
 echo "ImageRef: $IMAGE_REF"
 echo "EnvFile:  $ENV_FILE"
+echo "LibDir:   $LIB_DIR"
+echo "CacheDir: $CACHE_DIR"
 
 run_args=(
   --rm
@@ -104,11 +140,11 @@ run_args=(
 )
 
 if [ "$MOUNT_STATE" -eq 1 ]; then
-  sudo install -d -o www-data -g www-data -m 0750 /var/lib/plan
-  sudo install -d -o www-data -g www-data -m 0750 /var/cache/plan
+  sudo install -d -o www-data -g www-data -m 0750 "$LIB_DIR"
+  sudo install -d -o www-data -g www-data -m 0750 "$CACHE_DIR"
   run_args+=(
-    -v /var/lib/plan:/var/lib/plan:rw,nosuid,nodev,noexec
-    -v /var/cache/plan:/var/cache/plan:rw,nosuid,nodev,noexec
+    -v "$LIB_DIR":/var/lib/plan:rw,nosuid,nodev,noexec
+    -v "$CACHE_DIR":/var/cache/plan:rw,nosuid,nodev,noexec
   )
 fi
 

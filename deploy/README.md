@@ -1,290 +1,171 @@
-# Podman + systemd Deployment (Debian 11 / Podman 3)
+# Podman + Quadlet Deployment (Debian trixie)
 
-This deployment flow is for hosts without Quadlet support.
+Canonical setup in this repo is:
 
-- Debian 11 (bullseye)
-- Podman 3.x
-- systemd units generated with `podman generate systemd --new`
-- Socket-based app traffic (no published HTTP port)
-- Host networking on the app container (`--network host`)
+- root-managed Quadlet units in `/etc/containers/systemd/`
+- one instance per unit/container (`plan-<instance>`)
+- instance-scoped host paths (`/var/lib/plan/<instance>`, `/var/cache/plan/<instance>`, `/run/plan/<instance>`)
+- Caddy proxies to per-instance unix socket (`/run/plan/<instance>/uwsgi.sock`)
 
-Scraper jobs are intentionally out of scope here.
+This doc intentionally describes only that model.
 
 ## Files in this directory
 
 - `env.example`
 - `migrate.sh`
+- `upgrade.sh` (optional convenience)
 - `plan-materialized-refresh.service`
 - `plan-materialized-refresh.timer`
 
-## 1) Prepare host paths + env
+## 1) Choose instance
+
+Examples in this doc use `ntnu`. Replace with `prod`/`preprod` as needed.
+
+## 2) Prepare host dirs + env
 
 ```bash
 sudo install -d -m 0750 /etc/plan
-sudo install -d -o www-data -g www-data -m 0750 /var/lib/plan
-sudo install -d -o www-data -g www-data -m 0750 /var/cache/plan
-sudo install -d -o root -g www-data -m 2775 /run/plan
+sudo install -m 0640 deploy/env.example /etc/plan/ntnu.env
+sudo editor /etc/plan/ntnu.env
 
-sudo install -m 0640 deploy/env.example /etc/plan/env
-
-sudo editor /etc/plan/env
+sudo install -d -o www-data -g www-data -m 0750 /var/lib/plan/ntnu
+sudo install -d -o www-data -g www-data -m 0750 /var/cache/plan/ntnu
+sudo install -d -o root -g www-data -m 2775 /run/plan/ntnu
 ```
 
-Required in `/etc/plan/env`:
+Required in `/etc/plan/ntnu.env`:
 
 - `DJANGO_SECRET_KEY`
 - `DJANGO_ALLOWED_HOSTS`
 - `PGDATABASE`, `PGUSER`, `PGPASSWORD`, `PGHOST`, `PGPORT`, `PGCONN_MAX_AGE`
 - `PLAN_UWSGI_LISTENER=socket`
 - `PLAN_UWSGI_SOCKET=/run/uwsgi/uwsgi.sock`
-- `STATIC_URL=/_/static/` (or absolute URL)
-- `COMPRESS_URL=/_/cache/` (or absolute URL)
+- `STATIC_URL`, `COMPRESS_URL`
 
-Recommended root split for container runtime:
+## 3) Install Quadlet file
 
-- `PLAN_STATIC_ROOT=/static` (immutable assets in image)
-- `PLAN_CACHE_DIR=/var/cache/plan` (writable cache root)
-- `PLAN_COMPRESS_ROOT=/var/cache/plan/static` (writable compressor output)
+Create `/etc/containers/systemd/plan-ntnu.container`:
 
-Image defaults already provide `DJANGO_SETTINGS_MODULE=plan.settings.container` and
-`PLAN_BASE_DIR=/var/lib/plan`. This deploy flow still sets socket listener vars in
-`/etc/plan/env` to override image default HTTP mode.
+```ini
+[Unit]
+Description=Plan app container (plan-ntnu)
+Wants=network-online.target
+After=network-online.target
 
-Note:
+[Container]
+ContainerName=plan-ntnu
+Image=ghcr.io/adamcik/plan:latest
+Network=host
+EnvironmentFile=/etc/plan/ntnu.env
+User=33
+Group=33
+ReadOnly=true
+Tmpfs=/tmp:rw,nosuid,nodev,noexec,size=256m,mode=1777
+DropCapability=all
+Volume=/var/lib/plan/ntnu:/var/lib/plan:rw,nosuid,nodev,noexec
+Volume=/var/cache/plan/ntnu:/var/cache/plan:rw,nosuid,nodev,noexec
+Volume=/run/plan/ntnu:/run/uwsgi:rw,nosuid,nodev,noexec
 
-- `/var/lib/plan` stores static release artifacts managed by deploy tooling.
-- `/var/cache/plan` stores writable runtime cache state.
-
-- `default`
-- `ical`
-- `scraper`
-- `static` (compressor output for `/_/cache/*`)
-
-Static files for Caddy are best served from a host-managed immutable release path,
-not from `/var/lib/plan/static`.
-
-## 2) Pull image + create container
-
-If migrating from a running pod-based setup, remove pod + old container first:
-
-```bash
-sudo systemctl stop container-plan-ntnu.service pod-plan.service || true
-sudo systemctl disable pod-plan.service || true
-sudo podman rm -f plan-ntnu || true
-sudo podman pod rm -f plan || true
-```
-
-```bash
-sudo podman pull ghcr.io/adamcik/plan:latest
-
-sudo podman create \
-  --name plan-ntnu \
-  --network host \
-  --user 33:33 \
-  --env-file /etc/plan/env \
-  --read-only \
-  --tmpfs /tmp:rw,nosuid,nodev,noexec,size=256m,mode=1777 \
-  -v /var/lib/plan:/var/lib/plan \
-  -v /var/cache/plan:/var/cache/plan \
-  -v /run/plan:/run/uwsgi \
-  ghcr.io/adamcik/plan:latest
-```
-
-No `-p/--publish` is needed. Traffic is through unix socket only.
-
-## 3) Generate + install systemd units
-
-```bash
-sudo podman generate systemd --name plan-ntnu --files --new
-
-sudo install -D -m 0644 container-plan-ntnu.service /etc/systemd/system/container-plan-ntnu.service
-sudo rm -f /etc/systemd/system/pod-plan.service
-```
-
-## 4) Add service drop-ins (paths + stop behavior)
-
-```bash
-sudo mkdir -p /etc/systemd/system/container-plan-ntnu.service.d
-sudo tee /etc/systemd/system/container-plan-ntnu.service.d/paths.conf >/dev/null <<'EOF'
 [Service]
-
-ExecStartPre=/usr/bin/install -d -o www-data -g www-data -m 0750 /var/lib/plan
-ExecStartPre=/usr/bin/install -d -o www-data -g www-data -m 0750 /var/lib/plan/static
-ExecStartPre=/usr/bin/install -d -o www-data -g www-data -m 0750 /var/lib/plan/static/releases
-ExecStartPre=/usr/bin/install -d -o www-data -g www-data -m 0750 /var/cache/plan
-ExecStartPre=/usr/bin/install -d -o www-data -g www-data -m 0750 /var/cache/plan/static
-
-ExecStartPre=/usr/bin/install -d -o root -g www-data -m 2775 /run/plan
-EOF
-
-sudo tee /etc/systemd/system/container-plan-ntnu.service.d/stop.conf >/dev/null <<'EOF'
-[Service]
-
-ExecStop=
-ExecStop=/usr/bin/podman kill --signal QUIT --cidfile /run/container-plan-ntnu.ctr-id
-ExecStop=-/usr/bin/podman wait --cidfile /run/container-plan-ntnu.ctr-id
-
+Restart=always
+RestartSec=5
 TimeoutStopSec=45
-EOF
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target
 ```
 
-`/run/plan` uses setgid (`2775`) so socket group ownership stays compatible with reverse proxy access.
-`stop.conf` avoids TERM-timeout restarts on older Podman by using QUIT + wait.
+Notes:
 
-## 5) Reload systemd
+- Use `NoNewPrivileges=yes` in `[Service]` (not `SecurityOpt=`), for compatibility with Podman 5.4 Quadlet parsing.
+- If you run as another uid/gid (for example dedicated `plan-prod:www-data`), set `User=`/`Group=` accordingly.
+
+## 4) Reload + start
 
 ```bash
 sudo systemctl daemon-reload
+sudo systemctl enable /etc/containers/systemd/plan-ntnu.container
+sudo systemctl start plan-ntnu.service
 ```
 
-## 6) Install materialized-view refresh timer
+## 5) Verify
 
 ```bash
-sudo install -D -m 0644 deploy/plan-materialized-refresh.service /etc/systemd/system/plan-materialized-refresh.service
-sudo install -D -m 0644 deploy/plan-materialized-refresh.timer /etc/systemd/system/plan-materialized-refresh.timer
-
-sudo systemctl daemon-reload
-sudo systemctl enable --now plan-materialized-refresh.timer
-```
-
-This timer runs:
-
-```bash
-podman exec plan-ntnu /bin/manage refresh_materialized_views
-```
-
-## 7) Enable and start services
-
-```bash
-sudo systemctl enable --now container-plan-ntnu.service
-```
-
-## 8) Verify
-
-```bash
-sudo systemctl status container-plan-ntnu.service --no-pager
-sudo systemctl status plan-materialized-refresh.timer --no-pager
-
+sudo systemctl status plan-ntnu.service --no-pager
 sudo podman ps --filter name=plan-ntnu
-sudo ls -l /run/plan/uwsgi.sock
-
+sudo ls -l /run/plan/ntnu/uwsgi.sock
 sudo podman logs --tail 100 plan-ntnu
-sudo systemctl list-timers --all | grep plan-materialized-refresh
 ```
 
-Run manual maintenance tests:
-
-```bash
-sudo systemctl start plan-materialized-refresh.service
-sudo systemctl status plan-materialized-refresh.service --no-pager
-```
-
-## 9) Reverse proxy (Caddy)
+## 6) Caddy wiring
 
 Use:
 
-- app socket path `/run/plan/uwsgi.sock`
-- static root symlink `/var/lib/plan/static/current` for `/_/static/*`
-- cache root `/var/cache/plan/static` for `/_/cache/*`
-
-```bash
-sudo install -d -o www-data -g www-data -m 0750 /var/lib/plan/static/releases
-sudo install -d -o www-data -g www-data -m 0750 /var/lib/plan/static
-sudo install -d -o www-data -g www-data -m 0750 /var/cache/plan/static
-```
+- app socket: `/run/plan/ntnu/uwsgi.sock`
+- static root: `/var/lib/plan/ntnu/static/current` (`/_/static/*`)
+- cache root: `/var/cache/plan/ntnu/static` (`/_/cache/*`)
 
 ```caddy
 rewrite /timeplan /timeplan/
 handle_path /_/static/* {
-  root * /var/lib/plan/static/current
+  root * /var/lib/plan/ntnu/static/current
   file_server
 }
 handle_path /_/cache/* {
-  root * /var/cache/plan/static
+  root * /var/cache/plan/ntnu/static
   file_server
 }
-reverse_proxy /timeplan/* unix//run/plan/uwsgi.sock {
+reverse_proxy /timeplan/* unix//run/plan/ntnu/uwsgi.sock {
   transport uwsgi
 }
 ```
 
-Then apply:
+Apply:
 
 ```bash
 sudo caddy validate --config /etc/caddy/Caddyfile
 sudo systemctl reload caddy
 ```
 
-## Optional: Podman-managed named volumes instead of host binds
-
-If you prefer internal Podman state over host bind mounts:
-
-```bash
-sudo podman volume create plan-state-lib
-sudo podman volume create plan-state-cache
-```
-
-Then use:
-
-- `-v plan-state-lib:/var/lib/plan`
-- `-v plan-state-cache:/var/cache/plan`
-
-Host bind mount is still recommended when you want straightforward backups and host-level inspection.
-
-## Notes
-
-- Static assets are collected at image build time. `deploy/upgrade.sh` extracts `/var/lib/plan/static` from the pulled image into `/var/lib/plan/static/releases/<image-id>` and atomically switches `/var/lib/plan/static/current`.
-- Keep symlink switching on the host (outside the container) for atomicity and least privilege.
-- Runtime writes are mainly cache/compressor output under `/var/cache/plan`.
-- `DJANGO_SETTINGS_MODULE` defaults to `plan.settings.container` in the image to reduce accidental drift.
-
 ## Migrations
 
-Run schema migrations as an explicit pre-flip step:
-
 ```bash
-deploy/migrate.sh --image ghcr.io/adamcik/plan:<tag>
-deploy/migrate.sh --apply --image ghcr.io/adamcik/plan:<tag>
+deploy/migrate.sh --instance ntnu --image ghcr.io/adamcik/plan:<tag>
+deploy/migrate.sh --instance ntnu --apply --image ghcr.io/adamcik/plan:<tag>
 ```
 
-`deploy/migrate.sh` defaults to `showmigrations --plan` and `migrate --check`.
-Applying migrations now requires explicit `--apply`.
+`deploy/migrate.sh` default behavior is `showmigrations --plan` + `migrate --check`.
+`--apply` is explicit and does not imply `--check` unless `--check` is also passed.
 
-Default behavior (without `--instance`) uses `/etc/plan/env` and mounts
-`/var/lib/plan` + `/var/cache/plan`.
+## Upgrades (optional helper)
 
-With `--instance <name>`, `deploy/upgrade.sh` defaults to:
+`deploy/upgrade.sh` is optional convenience; manual Quadlet flow is valid.
 
-- env file: `/etc/plan/<name>.env`
-- container: `plan-<name>`
-- unit: `container-plan-<name>.service`
-- lib/cache/run host paths:
-  - `/var/lib/plan/<name>`
-  - `/var/cache/plan/<name>`
-  - `/run/plan/<name>`
-- static host paths:
-  - `/var/lib/plan/<name>/static/releases`
-  - `/var/lib/plan/<name>/static/current`
+Default helper flow:
 
-All of these can still be overridden with explicit flags (`--container`,
-`--unit`, `--env-file`, `--static-releases`, `--static-current`).
+1. Pull image
+2. Optionally extract static from image to `/var/lib/plan/<instance>/static/releases/<image-id>`
+3. Atomically flip `/var/lib/plan/<instance>/static/current`
+4. Write Quadlet image override drop-in:
+   - `/etc/containers/systemd/plan-<instance>.container.d/image.conf`
+5. `daemon-reload` + restart `plan-<instance>.service`
 
-## Recommended release order
+Example:
 
 ```bash
-deploy/upgrade.sh --check
-deploy/migrate.sh --apply --image ghcr.io/adamcik/plan:<tag>
-deploy/upgrade.sh --image ghcr.io/adamcik/plan:<tag>
+deploy/upgrade.sh --instance ntnu --check
+deploy/upgrade.sh --instance ntnu --image ghcr.io/adamcik/plan:<tag>
 ```
 
-By default, `deploy/upgrade.sh` now:
+Manual equivalent (without helper):
 
-1. Pulls image
-2. Extracts static from image to host release dir
-3. Atomically flips `/var/lib/plan/static/current`
-4. Restarts/recreates the app container
+1. `sudo podman pull <image>`
+2. Update `/etc/containers/systemd/plan-<instance>.container.d/image.conf`
+3. If needed, handle static extraction/symlink flip
+4. `sudo systemctl daemon-reload && sudo systemctl restart plan-<instance>.service`
 
-Optional flags:
+## Shared refresh timer (current behavior)
 
-- `--no-extract-static` to skip static extraction
-- `--static-from`, `--static-releases`, `--static-current` to override paths
+`plan-materialized-refresh.service` currently targets `plan-ntnu` and is shared.
+This is acceptable while prod/preprod use the same DB.

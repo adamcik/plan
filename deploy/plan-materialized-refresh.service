@@ -1,7 +1,7 @@
 [Unit]
 Description=Refresh Plan materialized views
-After=container-plan-ntnu.service
-Requires=container-plan-ntnu.service
+After=plan-ntnu.service
+Requires=plan-ntnu.service
 
 [Service]
 Type=oneshot
