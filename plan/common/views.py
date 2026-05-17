@@ -625,7 +625,11 @@ def _add_courses(request, snapshot: ScheduleSnapshot):
     )
 
     if not lookup:
-        return shortcuts.redirect("schedule-advanced", snapshot)
+        return shortcuts.redirect(
+            "schedule-advanced",
+            snapshot.semester,
+            snapshot.student.slug,
+        )
 
     errors = []
     too_many_subscriptions = False

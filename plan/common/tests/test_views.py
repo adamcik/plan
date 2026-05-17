@@ -205,6 +205,14 @@ class ViewTestCase(BaseTestCase):
 
             subscriptions = new_subscriptions
 
+    def test_change_course_add_empty_input_redirects_to_schedule_advanced(self):
+        response = self.client.post(
+            self.reverse("change-course"),
+            {"submit_add": True, "course_add": ""},
+        )
+
+        self.assertRedirects(response, self.reverse("schedule-advanced"))
+
     @override_settings(TIMETABLE_ENABLE_IF_MODIFIED_SINCE=True)
     def test_change_course_remove_invalidates_schedule_data_cache(self):
         schedule_url = self.reverse("schedule-advanced")
