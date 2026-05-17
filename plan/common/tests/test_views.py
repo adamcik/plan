@@ -103,6 +103,14 @@ class ViewTestCase(BaseTestCase):
             ),
         )
 
+    def test_getting_started_post_redirects_to_current_schedule(self):
+        response = self.client.post(
+            django_reverse("semester", args=[self.semester]),
+            {"slug": self.student.slug},
+        )
+
+        self.assertRedirects(response, self.reverse("schedule-week", 1))
+
     def test_schedule(self):
         # FIXME add group help testing
         # FIXME courses without lectures

@@ -129,12 +129,12 @@ def getting_started(request, semester):
         schedule_form = forms.ScheduleForm(request.POST)
 
         if schedule_form.is_valid():
-            schedule = Schedule(
-                semester=semester,
-                student=Student(slug=schedule_form.cleaned_data["slug"]),
-            )
             # TODO(adamcik): what should we do if current is empty?
-            return schedule_current(request, schedule)
+            return schedule_current(
+                request,
+                semester,
+                schedule_form.cleaned_data["slug"],
+            )
     else:
         schedule_form = forms.ScheduleForm()
 
