@@ -31,16 +31,14 @@
 
 {% block script %}
   {% if STATIC_DOMAIN %}<link rel="dns-prefetch" href="//{{ STATIC_DOMAIN }}" />{% endif %}
-  {% compress js inline %}
-    {% if ANALYTICS_CODE %}
-      <script type="text/javascript">
-        window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
-        ga('create', '{{ ANALYTICS_CODE }}', 'auto', {'sampleRate': 100});
+  {% if ANALYTICS_CODE %}
+    <script type="text/javascript">
+      window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+      ga('create', '{{ ANALYTICS_CODE }}', 'auto', {'sampleRate': 100});
 	ga('set', 'anonymizeIp', true);
-        ga('send', 'pageview');
-      </script>
-    {% endif %}
-  {% endcompress %}
+      ga('send', 'pageview');
+    </script>
+  {% endif %}
   {% block extrascript %}{% endblock %}
   {% if ANALYTICS_CODE %}<script async src='https://www.google-analytics.com/analytics.js'></script>{% endif %}
 {% endblock %}

@@ -38,20 +38,21 @@
 {% endblock %}
 
 {% block extrastyle %}
+  {{ block.super }}
+  {% compress css %}
+    <link rel="stylesheet" href="{% static 'css/start.css' %}" />
+  {% endcompress %}
   {% nonce style %}
-    {% compress css inline %}
-      {% if stats %}
-        <style type="text/css">
-          {% for count,course_id,code,name in stats %}
-            .course-{{ course_id }} {
-              background-color: {% color course_id %};
-              width: {% widthratio count stats.0.0 95 %}%;
-            }
-          {% endfor %}
-        </style>
-      {% endif %}
-      <link rel="stylesheet" href="{% static 'css/start.css' %}" />
-    {% endcompress %}
+    {% if stats %}
+      <style type="text/css">
+        {% for count,course_id,code,name in stats %}
+          .course-{{ course_id }} {
+            background-color: {% color course_id %};
+            width: {% widthratio count stats.0.0 95 %}%;
+          }
+        {% endfor %}
+      </style>
+    {% endif %}
   {% endnonce %}
 {% endblock %}
 

@@ -7,19 +7,20 @@
 {% load static %}
 
 {% block extrastyle %}
+  {{ block.super }}
+  {% compress css %}
+    <link rel="stylesheet" href="{% static 'css/select_groups.css' %}" />
+  {% endcompress %}
   {% nonce style %}
-    {% compress css inline %}
-      {% if courses %}
-        <style type="text/css">
-          {% for course in courses %}
-          .course-{{ course.id }} {
-            background-color: {% color course.id %};
-          }
-          {% endfor %}
-        </style>
-      {% endif %}
-      <link rel="stylesheet" href="{% static 'css/select_groups.css' %}" />
-    {% endcompress %}
+    {% if courses %}
+      <style type="text/css">
+        {% for course in courses %}
+        .course-{{ course.id }} {
+          background-color: {% color course.id %};
+        }
+        {% endfor %}
+      </style>
+    {% endif %}
   {% endnonce %}
 {% endblock %}
 

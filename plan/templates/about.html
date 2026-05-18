@@ -24,26 +24,34 @@
     <script type="text/javascript" src={% static 'js/calendar.js' %}></script>
   {% endcompress %}
   {% nonce script %}
-    {% compress js inline %}
-      <script type="text/javascript">
-        (function() {
-          const init = () => {
-            drawCalendar(
-              document.querySelector("#graph"),
-              "{{ data|safe }}",
-              "{{ CSP_STYLE_NONCE }}",
-            );
-          };
+    <script type="text/javascript">
+      (function() {
+        const init = () => {
+          const container = document.querySelector("#graph");
+          const dataNode = document.querySelector("#calendar-data");
 
-          if (document.readyState === "loading") {
-            document.addEventListener("DOMContentLoaded", init, false);
-          } else {
-            init();
+          if (!container || !dataNode) {
+            return;
           }
-        })();
-      </script>
-    {% endcompress %}
+
+          drawCalendar(
+            container,
+            dataNode.textContent || "",
+            "{{ CSP_STYLE_NONCE }}",
+          );
+        };
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", init, false);
+        } else {
+          init();
+        }
+      })();
+    </script>
   {% endnonce %}
 {% endblock %}
 
-{% block bd %}<div id="graph"></div>{% endblock %}
+{% block bd %}
+  <script id="calendar-data" type="application/json">{{ data|safe }}</script>
+  <div id="graph"></div>
+{% endblock %}
