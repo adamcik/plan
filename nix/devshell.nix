@@ -37,6 +37,7 @@
       ];
       env = {
         "DJANGO_SETTINGS_MODULE" = "plan.settings.default";
+        "VIRTUAL_ENV" = "${config.uv2nix.devVenv}";
       };
 
       shellHook = ''
