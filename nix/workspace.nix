@@ -106,6 +106,23 @@
           python manage.py test --noinput
           touch $out
         '';
+
+      django-static-assets =
+        pkgs.runCommand "django-static-assets" {
+          nativeBuildInputs = [editableVenv];
+          src = ../.;
+        } ''
+          cd $src
+          export DJANGO_SETTINGS_MODULE="plan.settings.default"
+          export DJANGO_SECRET_KEY="test"
+          export PLAN_BASE_DIR="$TMPDIR/plan"
+          export PLAN_CACHE_DIR="$TMPDIR/cache"
+          export PLAN_STATIC_ROOT="$TMPDIR/static"
+          mkdir -p "$PLAN_BASE_DIR" "$PLAN_CACHE_DIR" "$PLAN_STATIC_ROOT"
+          python manage.py collectstatic --noinput
+          python manage.py compress --force
+          touch $out
+        '';
     };
   };
 }
