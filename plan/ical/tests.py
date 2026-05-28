@@ -57,6 +57,7 @@ class ViewTestCase(tests.BaseTestCase):
         queue.flush_for_tests()
         caches["default"].clear()
         caches["ical"].clear()
+        self.snapshot = get_schedule_snapshot(self.semester, self.student.slug)
 
     def reverse(self, view, *extra_args):
         return django_reverse(
@@ -200,14 +201,12 @@ class ViewTestCase(tests.BaseTestCase):
 
     def test_ical_etag_is_hashed_not_raw(self):
         url = self.reverse("schedule-ical")
-        resolved = get_schedule_snapshot(self.semester, self.student.slug)
-
         response = self.client.get(url, HTTP_ACCEPT_ENCODING="")
 
         etag = response.headers["ETag"]
         key = utils.response_cache_key(
             "schedule-ical",
-            resolved.freshness_key(),
+            self.snapshot.freshness_key(),
             url.rstrip("/"),
             "identity",
         )
@@ -314,14 +313,13 @@ class ViewTestCase(tests.BaseTestCase):
     def test_ical_reads_and_migrates_legacy_v2_cache_key(self):
         url = self.reverse("schedule-ical")
         path = url.rstrip("/")
-        resolved = get_schedule_snapshot(self.semester, self.student.slug)
         legacy_v2_key = ":".join(
             (
                 "resp",
                 "v2",
                 "schedule-ical",
                 path,
-                str(resolved.last_modified),
+                str(self.snapshot.last_modified),
                 "identity",
             )
         )
@@ -340,13 +338,12 @@ class ViewTestCase(tests.BaseTestCase):
     def test_ical_reads_and_migrates_legacy_v1_cache_key(self):
         url = self.reverse("schedule-ical")
         path = url.rstrip("/")
-        resolved = get_schedule_snapshot(self.semester, self.student.slug)
         legacy_v1_key = ":".join(
             (
                 "resp",
                 "schedule-ical",
                 path,
-                str(resolved.last_modified),
+                str(self.snapshot.last_modified),
             )
         )
         caches["ical"].set(
@@ -363,14 +360,13 @@ class ViewTestCase(tests.BaseTestCase):
 
     def test_ical_reads_legacy_key_with_trailing_slash_path(self):
         url = self.reverse("schedule-ical")
-        resolved = get_schedule_snapshot(self.semester, self.student.slug)
         legacy_v2_key = ":".join(
             (
                 "resp",
                 "v2",
                 "schedule-ical",
                 url,
-                str(resolved.last_modified),
+                str(self.snapshot.last_modified),
                 "identity",
             )
         )
@@ -391,14 +387,13 @@ class ViewTestCase(tests.BaseTestCase):
     def test_ical_type_reads_legacy_key_from_fallback_route_name(self):
         url = self.reverse("schedule-ical-type", "lectures")
         no_slash = url.rstrip("/")
-        resolved = get_schedule_snapshot(self.semester, self.student.slug)
         legacy_v2_key = ":".join(
             (
                 "resp",
                 "v2",
                 "schedule-ical-type-fallback",
                 no_slash,
-                str(resolved.last_modified),
+                str(self.snapshot.last_modified),
                 "identity",
             )
         )
@@ -417,8 +412,6 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertEqual(response.content, b"legacy-fallback-route")
 
     def test_ical_legacy_cache_fallback_matrix(self):
-        resolved = get_schedule_snapshot(self.semester, self.student.slug)
-
         cases = [
             {
                 "name": "base-v1-no-slash-identity",
@@ -491,7 +484,7 @@ class ViewTestCase(tests.BaseTestCase):
                         "v2",
                         case["legacy_route"],
                         legacy_path,
-                        str(resolved.last_modified),
+                        str(self.snapshot.last_modified),
                         case["legacy_encoding"],
                     )
                 )
@@ -501,7 +494,7 @@ class ViewTestCase(tests.BaseTestCase):
                         "resp",
                         case["legacy_route"],
                         legacy_path,
-                        str(resolved.last_modified),
+                        str(self.snapshot.last_modified),
                     )
                 )
 
@@ -527,14 +520,13 @@ class ViewTestCase(tests.BaseTestCase):
     def test_legacy_v2_does_not_fallback_across_encodings(self):
         caches["ical"].clear()
         url = self.reverse("schedule-ical")
-        resolved = get_schedule_snapshot(self.semester, self.student.slug)
         legacy_v2_br_key = ":".join(
             (
                 "resp",
                 "v2",
                 "schedule-ical",
                 url,
-                str(resolved.last_modified),
+                str(self.snapshot.last_modified),
                 "br",
             )
         )
@@ -560,13 +552,12 @@ class ViewTestCase(tests.BaseTestCase):
         caches["ical"].clear()
         url = self.reverse("schedule-ical")
         path = url.rstrip("/")
-        resolved = get_schedule_snapshot(self.semester, self.student.slug)
         legacy_v1_key = ":".join(
             (
                 "resp",
                 "schedule-ical",
                 path,
-                str(resolved.last_modified),
+                str(self.snapshot.last_modified),
             )
         )
         caches["ical"].set(
