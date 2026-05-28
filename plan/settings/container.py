@@ -1,43 +1,18 @@
+# This file is part of the plan timetable generator, see LICENSE for details.
+
 import os
 
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
-from plan.settings.base import *
+from . import env
+from plan.settings.base import *  # noqa: F403
 
-
-def _env_bool(name: str, default: bool = False) -> bool:
-    value = os.environ.get(name)
-    if value is None:
-        return default
-    return value.strip().lower() in {"1", "true", "yes", "on"}
-
-
-def _env_int(name: str, default: int) -> int:
-    value = os.environ.get(name)
-    if value is None:
-        return default
-    return int(value)
-
-
-def _env_float(name: str, default: float) -> float:
-    value = os.environ.get(name)
-    if value is None:
-        return default
-    return float(value)
-
-
-def _env_csv(name: str, default: list[str] | None = None) -> list[str]:
-    value = os.environ.get(name)
-    if value is None:
-        return list(default or [])
-    return [item.strip() for item in value.split(",") if item.strip()]
-
-
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "container-dev-key")
-DEBUG = _env_bool("DJANGO_DEBUG", False)
-DEBUG_TOOLBAR_ENABLED = _env_bool("DJANGO_DEBUG_TOOLBAR", False)
+SECRET_KEY = env.get("DJANGO_SECRET_KEY", "container-dev-key")
+DEBUG = env.get_bool("DJANGO_DEBUG", False)
+DEBUG_TOOLBAR_ENABLED = env.get_bool("DJANGO_DEBUG_TOOLBAR", False)
 COMPRESS_ENABLED = True
+COMPRESS_OFFLINE = True
 
 if DEBUG:
     MIDDLEWARE = (*MIDDLEWARE, "plan.common.middleware.text_debug_middleware")
@@ -49,40 +24,36 @@ if DEBUG_TOOLBAR_ENABLED:
         "SHOW_TOOLBAR_CALLBACK": lambda request: True,
     }
 
-sentry_dsn = os.environ.get("SENTRY_DSN")
-if sentry_dsn:
+if (sentry_dsn := env.get("SENTRY_DSN", None)) is not None:
     sentry_sdk.init(
         dsn=sentry_dsn,
-        environment=os.environ.get("SENTRY_ENVIRONMENT", "production"),
+        environment=env.get("SENTRY_ENVIRONMENT", "production"),
         integrations=[
             DjangoIntegration(
                 middleware_spans=True,
                 cache_spans=True,
             )
         ],
-        traces_sample_rate=_env_float("SENTRY_TRACES_SAMPLE_RATE", 0.001),
+        traces_sample_rate=env.get_float("SENTRY_TRACES_SAMPLE_RATE", 0.001),
     )
 
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("PGDATABASE", "plan"),
-        "USER": os.environ.get("PGUSER", "plan"),
-        "PASSWORD": os.environ.get("PGPASSWORD", ""),
-        "HOST": os.environ.get("PGHOST", "127.0.0.1"),
-        "PORT": os.environ.get("PGPORT", "5432"),
-        "CONN_MAX_AGE": _env_int("PGCONN_MAX_AGE", 0),
+        "NAME": env.get("PGDATABASE", "plan"),
+        "USER": env.get("PGUSER", "plan"),
+        "PASSWORD": env.get("PGPASSWORD", ""),
+        "HOST": env.get("PGHOST", "127.0.0.1"),
+        "PORT": env.get("PGPORT", "5432"),
+        "CONN_MAX_AGE": env.get_int("PGCONN_MAX_AGE", 0),
     }
 }
 
-BASE_DIR = os.environ.get("PLAN_BASE_DIR", "/var/lib/plan")
-CACHE_DIR = os.environ.get("PLAN_CACHE_DIR", "/var/cache/plan")
+BASE_DIR = env.get("PLAN_BASE_DIR", "/var/lib/plan")
+CACHE_DIR = env.get("PLAN_CACHE_DIR", "/var/cache/plan")
 
-STATIC_ROOT = os.environ.get("PLAN_STATIC_ROOT", os.path.join(BASE_DIR, "static"))
-COMPRESS_ROOT = os.environ.get(
-    "PLAN_COMPRESS_ROOT",
-    os.path.join(CACHE_DIR, "static"),
-)
+STATIC_ROOT = env.get("PLAN_STATIC_ROOT", os.path.join(BASE_DIR, "static"))
+COMPRESS_ROOT = STATIC_ROOT
 
 CACHES = {
     "default": {
@@ -110,30 +81,28 @@ CACHES = {
     },
 }
 
-memcached_location = os.environ.get("MEMCACHED_LOCATION")
-if memcached_location:
+if (memcached_location := env.get("MEMCACHED_LOCATION", None)) is not None:
     CACHES["default"] = {
         "BACKEND": "django.core.cache.backends.memcached.PyLibMCCache",
         "LOCATION": memcached_location,
-        "KEY_PREFIX": os.environ.get("MEMCACHED_KEY_PREFIX", "container"),
+        "KEY_PREFIX": env.get("MEMCACHED_KEY_PREFIX", "container"),
     }
 
-ALLOWED_HOSTS = _env_csv("DJANGO_ALLOWED_HOSTS", ["127.0.0.1", "localhost"])
-CSRF_TRUSTED_ORIGINS = _env_csv("DJANGO_CSRF_TRUSTED_ORIGINS")
-USE_X_FORWARDED_HOST = _env_bool("DJANGO_USE_X_FORWARDED_HOST", True)
+ALLOWED_HOSTS = env.get_csv("DJANGO_ALLOWED_HOSTS", ["127.0.0.1", "localhost"])
+CSRF_TRUSTED_ORIGINS = env.get_csv("DJANGO_CSRF_TRUSTED_ORIGINS")
+USE_X_FORWARDED_HOST = env.get_bool("DJANGO_USE_X_FORWARDED_HOST", True)
 
-secure_proxy = os.environ.get("DJANGO_SECURE_PROXY_SSL_HEADER")
-if secure_proxy:
+if (secure_proxy := env.get("DJANGO_SECURE_PROXY_SSL_HEADER", None)) is not None:
     header, _, value = secure_proxy.partition(",")
     header = header.strip()
     value = value.strip()
     if header and value:
         SECURE_PROXY_SSL_HEADER = (header, value)
 
-EMAIL_SUBJECT_PREFIX = os.environ.get("EMAIL_SUBJECT_PREFIX", "")
-TIMETABLE_INSTITUTION = os.environ.get("TIMETABLE_INSTITUTION", TIMETABLE_INSTITUTION)
-STATIC_URL = os.environ.get("STATIC_URL", STATIC_URL)
-COMPRESS_URL = os.environ.get("COMPRESS_URL", STATIC_URL)
+EMAIL_SUBJECT_PREFIX = env.get("EMAIL_SUBJECT_PREFIX", "")
+TIMETABLE_INSTITUTION = env.get("TIMETABLE_INSTITUTION", TIMETABLE_INSTITUTION)
+STATIC_URL = env.get("STATIC_URL", STATIC_URL)
+COMPRESS_URL = STATIC_URL
 
 
 LOGGING = {
@@ -153,7 +122,7 @@ LOGGING = {
     "loggers": {
         "django": {
             "handlers": ["console"],
-            "level": os.environ.get("DJANGO_LOG_LEVEL", "INFO"),
+            "level": env.get("DJANGO_LOG_LEVEL", "INFO"),
         },
         "django.request": {
             "handlers": ["console"],

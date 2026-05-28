@@ -4,6 +4,7 @@ import getpass
 import os
 from pathlib import Path
 
+from . import env
 from plan.settings.base import *
 
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -23,9 +24,10 @@ def _load_secret_key() -> str:
     )
 
 
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY") or _load_secret_key()
+SECRET_KEY = env.get("DJANGO_SECRET_KEY", None) or _load_secret_key()
 
 COMPRESS_ENABLED = False
+COMPRESS_OFFLINE = True
 
 CACHES = {
     "default": {
@@ -55,18 +57,20 @@ CACHES = {
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("PGDATABASE", "postgres"),
-        "USER": os.environ.get("PGUSER", getpass.getuser()),
-        "PASSWORD": os.environ.get("PGPASSWORD", ""),
-        "HOST": os.environ.get(
+        "NAME": env.get("PGDATABASE", "postgres"),
+        "USER": env.get("PGUSER", getpass.getuser()),
+        "PASSWORD": env.get("PGPASSWORD", ""),
+        "HOST": env.get(
             "PGHOST",
             str(DATA_DIR / "pgdata"),
         ),
-        "PORT": os.environ.get("PGPORT", ""),
+        "PORT": env.get("PGPORT", ""),
     }
 }
 
 TEST_RUNNER = "plan.testing.runner.PostgresTestRunner"
 
 STATIC_ROOT = str(DATA_DIR / "static")
+STATIC_URL = "/static/"
 COMPRESS_ROOT = STATIC_ROOT
+COMPRESS_URL = STATIC_URL

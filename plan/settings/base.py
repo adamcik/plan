@@ -5,7 +5,6 @@ from importlib.resources import files
 
 from django.utils.safestring import mark_safe
 
-
 PLAN_PACKAGE_ROOT = files("plan")
 
 
