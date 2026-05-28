@@ -6,8 +6,8 @@ from django.core.cache import cache
 from django.core.management import call_command
 from django.utils import timezone
 
-from plan.common.converters import ScheduleConverter
 from plan.common.models import Schedule, Semester, Student, Subscription
+from plan.common.snapshot import get_schedule_snapshot
 from plan.common.tests import BaseTestCase
 
 
@@ -17,12 +17,10 @@ class BackfillScheduleFreshnessCommandTestCase(BaseTestCase):
     def test_backfill_creates_missing_rows_and_preserves_freshness_key(self):
         semester = Semester.objects.get(year=2009, type=Semester.SPRING)
         student = Student.objects.get(slug="adamcik")
-        path = f"{semester.year}/{semester.slug}/{student.slug}"
-
         Schedule.objects.filter(semester_id=semester.id, student_id=student.id).delete()
 
         cache.clear()
-        before = ScheduleConverter().to_python(path)
+        before = get_schedule_snapshot(semester, student.slug)
         before_key = before.freshness_key()
 
         call_command(
@@ -35,7 +33,7 @@ class BackfillScheduleFreshnessCommandTestCase(BaseTestCase):
         self.assertEqual(0, row.version)
 
         cache.clear()
-        after = ScheduleConverter().to_python(path)
+        after = get_schedule_snapshot(semester, student.slug)
         after_key = after.freshness_key()
 
         self.assertEqual(before_key, after_key)

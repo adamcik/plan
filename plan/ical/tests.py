@@ -12,10 +12,10 @@ from django.urls import reverse as django_reverse
 from django.utils import http as http_utils
 
 from plan.common import tests, utils
-from plan.common.converters import ScheduleConverter
 from plan.common.models import Exam
 from plan.common.models import Semester
 from plan.common.schedule import Schedule
+from plan.common.snapshot import get_schedule_snapshot
 from plan.ical import queue
 from plan.ical import views
 
@@ -200,9 +200,7 @@ class ViewTestCase(tests.BaseTestCase):
 
     def test_ical_etag_is_hashed_not_raw(self):
         url = self.reverse("schedule-ical")
-        resolved = ScheduleConverter().to_python(
-            f"{self.semester.year}/{self.semester.slug}/{self.student.slug}"
-        )
+        resolved = get_schedule_snapshot(self.semester, self.student.slug)
 
         response = self.client.get(url, HTTP_ACCEPT_ENCODING="")
 
@@ -316,9 +314,7 @@ class ViewTestCase(tests.BaseTestCase):
     def test_ical_reads_and_migrates_legacy_v2_cache_key(self):
         url = self.reverse("schedule-ical")
         path = url.rstrip("/")
-        resolved = ScheduleConverter().to_python(
-            f"{self.semester.year}/{self.semester.slug}/{self.student.slug}"
-        )
+        resolved = get_schedule_snapshot(self.semester, self.student.slug)
         legacy_v2_key = ":".join(
             (
                 "resp",
@@ -344,9 +340,7 @@ class ViewTestCase(tests.BaseTestCase):
     def test_ical_reads_and_migrates_legacy_v1_cache_key(self):
         url = self.reverse("schedule-ical")
         path = url.rstrip("/")
-        resolved = ScheduleConverter().to_python(
-            f"{self.semester.year}/{self.semester.slug}/{self.student.slug}"
-        )
+        resolved = get_schedule_snapshot(self.semester, self.student.slug)
         legacy_v1_key = ":".join(
             (
                 "resp",
@@ -369,9 +363,7 @@ class ViewTestCase(tests.BaseTestCase):
 
     def test_ical_reads_legacy_key_with_trailing_slash_path(self):
         url = self.reverse("schedule-ical")
-        resolved = ScheduleConverter().to_python(
-            f"{self.semester.year}/{self.semester.slug}/{self.student.slug}"
-        )
+        resolved = get_schedule_snapshot(self.semester, self.student.slug)
         legacy_v2_key = ":".join(
             (
                 "resp",
@@ -399,9 +391,7 @@ class ViewTestCase(tests.BaseTestCase):
     def test_ical_type_reads_legacy_key_from_fallback_route_name(self):
         url = self.reverse("schedule-ical-type", "lectures")
         no_slash = url.rstrip("/")
-        resolved = ScheduleConverter().to_python(
-            f"{self.semester.year}/{self.semester.slug}/{self.student.slug}"
-        )
+        resolved = get_schedule_snapshot(self.semester, self.student.slug)
         legacy_v2_key = ":".join(
             (
                 "resp",
@@ -427,9 +417,7 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertEqual(response.content, b"legacy-fallback-route")
 
     def test_ical_legacy_cache_fallback_matrix(self):
-        resolved = ScheduleConverter().to_python(
-            f"{self.semester.year}/{self.semester.slug}/{self.student.slug}"
-        )
+        resolved = get_schedule_snapshot(self.semester, self.student.slug)
 
         cases = [
             {
@@ -539,9 +527,7 @@ class ViewTestCase(tests.BaseTestCase):
     def test_legacy_v2_does_not_fallback_across_encodings(self):
         caches["ical"].clear()
         url = self.reverse("schedule-ical")
-        resolved = ScheduleConverter().to_python(
-            f"{self.semester.year}/{self.semester.slug}/{self.student.slug}"
-        )
+        resolved = get_schedule_snapshot(self.semester, self.student.slug)
         legacy_v2_br_key = ":".join(
             (
                 "resp",
@@ -574,9 +560,7 @@ class ViewTestCase(tests.BaseTestCase):
         caches["ical"].clear()
         url = self.reverse("schedule-ical")
         path = url.rstrip("/")
-        resolved = ScheduleConverter().to_python(
-            f"{self.semester.year}/{self.semester.slug}/{self.student.slug}"
-        )
+        resolved = get_schedule_snapshot(self.semester, self.student.slug)
         legacy_v1_key = ":".join(
             (
                 "resp",

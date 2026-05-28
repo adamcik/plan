@@ -8,11 +8,6 @@ from django.http import Http404
 from django.utils import translation
 
 from plan.common.models import Semester
-from plan.common.snapshot import (
-    ScheduleSnapshot,
-    ScheduleSnapshotNotFound,
-    get_schedule_snapshot,
-)
 
 
 class SemesterConverter:
@@ -50,38 +45,6 @@ class StudentConverter:
 
     def to_url(self, slug: str) -> str:
         return slug
-
-
-class ScheduleConverter:
-    regex: str = r"(\d{4}/[a-z]+)/([a-zA-Z0-9-_]{1,50})"
-
-    _pattern: re.Pattern[str] = re.compile(regex)
-
-    _semester_converter = SemesterConverter()
-    _student_converter = StudentConverter()
-
-    def to_python(self, value: str) -> ScheduleSnapshot:
-        match = self._pattern.match(value)
-        if not match:
-            raise RuntimeError(
-                f"Matching regexp failed, this should never happen: {value}"
-            )
-
-        semester = self._semester_converter.to_python(match.group(1))
-        student_slug = self._student_converter.to_python(match.group(2))
-
-        try:
-            return get_schedule_snapshot(semester, student_slug)
-        except ScheduleSnapshotNotFound as e:
-            raise Http404(str(e)) from e
-
-    def to_url(self, schedule: ScheduleSnapshot) -> str:
-        return "/".join(
-            (
-                self._semester_converter.to_url(schedule.semester),
-                self._student_converter.to_url(schedule.student.slug),
-            )
-        )
 
 
 class WeekNumberConverter:

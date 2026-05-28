@@ -3,12 +3,12 @@ import datetime
 from django.core.cache import cache
 from django.utils import timezone
 
-from plan.common.converters import ScheduleConverter
 from plan.common.models import Schedule, Semester, Student, Subscription
+from plan.common.snapshot import get_schedule_snapshot
 from plan.common.tests import BaseTestCase
 
 
-class ScheduleConverterTestCase(BaseTestCase):
+class ScheduleSnapshotTestCase(BaseTestCase):
     fixtures = ["test_data.json", "test_user.json"]
 
     def test_to_python_populates_explicit_freshness_fields(self):
@@ -26,9 +26,7 @@ class ScheduleConverterTestCase(BaseTestCase):
 
         cache.clear()
 
-        schedule = ScheduleConverter().to_python(
-            f"{semester.year}/{semester.slug}/{student.slug}"
-        )
+        schedule = get_schedule_snapshot(semester, student.slug)
 
         self.assertEqual(11, schedule.version)
         self.assertEqual(7, schedule.semester_version)
@@ -38,10 +36,7 @@ class ScheduleConverterTestCase(BaseTestCase):
         student = Student.objects.get(slug="adamcik")
 
         cache.clear()
-        converter = ScheduleConverter()
-        path = f"{semester.year}/{semester.slug}/{student.slug}"
-
-        schedule = converter.to_python(path)
+        schedule = get_schedule_snapshot(semester, student.slug)
 
         self.assertEqual(
             schedule,
@@ -53,13 +48,10 @@ class ScheduleConverterTestCase(BaseTestCase):
         student = Student.objects.get(slug="adamcik")
 
         cache.clear()
-        converter = ScheduleConverter()
-        path = f"{semester.year}/{semester.slug}/{student.slug}"
-
-        converter.to_python(path)
+        get_schedule_snapshot(semester, student.slug)
 
         with self.assertNumQueries(0):
-            cached = converter.to_python(path)
+            cached = get_schedule_snapshot(semester, student.slug)
 
         self.assertEqual(student.slug, cached.student.slug)
         self.assertEqual(semester.id, cached.semester.id)
@@ -72,9 +64,7 @@ class ScheduleConverterTestCase(BaseTestCase):
         cache.clear()
 
         with self.assertNumQueries(1):
-            schedule = ScheduleConverter().to_python(
-                f"{semester.year}/{semester.slug}/{student.slug}"
-            )
+            schedule = get_schedule_snapshot(semester, student.slug)
 
         self.assertEqual(student.slug, schedule.student.slug)
         self.assertEqual(semester.id, schedule.semester.id)
@@ -94,9 +84,7 @@ class ScheduleConverterTestCase(BaseTestCase):
 
         cache.clear()
 
-        schedule = ScheduleConverter().to_python(
-            f"{semester.year}/{semester.slug}/{student.slug}"
-        )
+        schedule = get_schedule_snapshot(semester, student.slug)
 
         self.assertEqual(int(semester_ts.timestamp()), schedule.last_modified)
 
@@ -118,9 +106,7 @@ class ScheduleConverterTestCase(BaseTestCase):
 
         cache.clear()
 
-        schedule = ScheduleConverter().to_python(
-            f"{semester.year}/{semester.slug}/{student.slug}"
-        )
+        schedule = get_schedule_snapshot(semester, student.slug)
 
         self.assertEqual(0, schedule.version)
         self.assertEqual(0, schedule.semester_version)
@@ -147,9 +133,7 @@ class ScheduleConverterTestCase(BaseTestCase):
 
         cache.clear()
 
-        schedule = ScheduleConverter().to_python(
-            f"{semester.year}/{semester.slug}/{student.slug}"
-        )
+        schedule = get_schedule_snapshot(semester, student.slug)
 
         self.assertEqual(0, schedule.version)
         self.assertEqual(0, schedule.semester_version)
@@ -175,8 +159,7 @@ class ScheduleConverterTestCase(BaseTestCase):
         ).update(last_modified=ts)
 
         cache.clear()
-        path = f"{semester.year}/{semester.slug}/{student.slug}"
-        schedule = ScheduleConverter().to_python(path)
+        schedule = get_schedule_snapshot(semester, student.slug)
 
         self.assertEqual(0, schedule.version)
         self.assertEqual(3, schedule.semester_version)
