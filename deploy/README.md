@@ -12,6 +12,7 @@ This doc intentionally describes only that model.
 ## Files in this directory
 
 - `env.example`
+- `plan-instance.container.example`
 - `migrate.sh`
 - `upgrade.sh` (optional convenience)
 - `plan-materialized-refresh.service`
@@ -30,7 +31,6 @@ sudo editor /etc/plan/ntnu.env
 
 sudo install -d -o www-data -g www-data -m 0750 /var/lib/plan/ntnu
 sudo install -d -o www-data -g www-data -m 0750 /var/cache/plan/ntnu
-sudo install -d -o root -g www-data -m 2775 /run/plan/ntnu
 ```
 
 Required in `/etc/plan/ntnu.env`:
@@ -40,11 +40,12 @@ Required in `/etc/plan/ntnu.env`:
 - `PGDATABASE`, `PGUSER`, `PGPASSWORD`, `PGHOST`, `PGPORT`, `PGCONN_MAX_AGE`
 - `PLAN_UWSGI_LISTENER=socket`
 - `PLAN_UWSGI_SOCKET=/run/uwsgi/uwsgi.sock`
-- `STATIC_URL`, `COMPRESS_URL`
+- `STATIC_URL`
 
 ## 3) Install Quadlet file
 
-Create `/etc/containers/systemd/plan-ntnu.container`:
+Copy `deploy/plan-instance.container.example` to `/etc/containers/systemd/plan-ntnu.container`
+and replace `<instance>` with your instance name. Result should look like:
 
 ```ini
 [Unit]
@@ -71,6 +72,7 @@ Restart=always
 RestartSec=5
 TimeoutStopSec=45
 NoNewPrivileges=yes
+ExecStartPre=/usr/bin/install -d -o root -g www-data -m 2775 /run/plan/ntnu
 
 [Install]
 WantedBy=multi-user.target
@@ -79,6 +81,7 @@ WantedBy=multi-user.target
 Notes:
 
 - Use `NoNewPrivileges=yes` in `[Service]` (not `SecurityOpt=`), for compatibility with Podman 5.4 Quadlet parsing.
+- Add `ExecStartPre=/usr/bin/install -d ... /run/plan/<instance>` so reboot-cleared `/run` is recreated before each start.
 - If you run as another uid/gid (for example dedicated `plan-prod:www-data`), set `User=`/`Group=` accordingly.
 
 ## 4) Reload + start
@@ -104,16 +107,11 @@ Use:
 
 - app socket: `/run/plan/ntnu/uwsgi.sock`
 - static root: `/var/lib/plan/ntnu/static/current` (`/_/static/*`)
-- cache root: `/var/cache/plan/ntnu/static` (`/_/cache/*`)
 
 ```caddy
 rewrite /timeplan /timeplan/
 handle_path /_/static/* {
   root * /var/lib/plan/ntnu/static/current
-  file_server
-}
-handle_path /_/cache/* {
-  root * /var/cache/plan/ntnu/static
   file_server
 }
 reverse_proxy /timeplan/* unix//run/plan/ntnu/uwsgi.sock {

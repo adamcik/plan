@@ -1,0 +1,34 @@
+[Unit]
+Description=Plan app container (plan-<instance>)
+Wants=network-online.target
+After=network-online.target
+
+[Container]
+ContainerName=plan-<instance>
+Image=ghcr.io/adamcik/plan:latest
+
+Network=host
+EnvironmentFile=/etc/plan/<instance>.env
+
+# Run app in-container as non-root numeric uid:gid from image.
+User=119:33
+
+ReadOnly=true
+DropCapability=all
+Tmpfs=/tmp:rw,nosuid,nodev,noexec,size=256m,mode=1777
+
+Volume=/var/lib/plan/<instance>:/var/lib/plan:rw,nosuid,nodev,noexec
+Volume=/var/cache/plan/<instance>:/var/cache/plan:rw,nosuid,nodev,noexec
+Volume=/run/plan/<instance>:/run/uwsgi:rw,nosuid,nodev,noexec
+
+[Service]
+Restart=always
+RestartSec=5
+TimeoutStopSec=45
+NoNewPrivileges=yes
+
+# /run is tmpfs and is cleared on reboot.
+ExecStartPre=/usr/bin/install -d -o root -g www-data -m 2775 /run/plan/<instance>
+
+[Install]
+WantedBy=multi-user.target
