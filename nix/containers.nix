@@ -36,8 +36,6 @@
       export PLAN_UWSGI_LOG_FORMAT="''${PLAN_UWSGI_LOG_FORMAT:-off}"
       export PLAN_UWSGI_STATIC_URL="''${PLAN_UWSGI_STATIC_URL:-/_/static}"
       export PLAN_UWSGI_STATIC_ROOT="''${PLAN_UWSGI_STATIC_ROOT:-${staticAssets}/static}"
-      export PLAN_UWSGI_CACHE_URL="''${PLAN_UWSGI_CACHE_URL:-/_/cache}"
-      export PLAN_UWSGI_CACHE_ROOT="''${PLAN_UWSGI_CACHE_ROOT:-/var/cache/plan/static}"
 
       uwsgi_args=(
         "--plugin" "python3"
@@ -45,7 +43,6 @@
         "--py-call-uwsgi-fork-hooks"
         "--log-5xx"
         "--log-master"
-        "--static-map" "$PLAN_UWSGI_CACHE_URL=$PLAN_UWSGI_CACHE_ROOT"
         "--static-map" "$PLAN_UWSGI_STATIC_URL=$PLAN_UWSGI_STATIC_ROOT"
         "--module" "plan.wsgi"
         "--virtualenv" "${config.uv2nix.runtimeVenv}"
@@ -100,8 +97,10 @@
         export DJANGO_DEBUG_TOOLBAR=1
         export PLAN_BASE_DIR="$TMPDIR"
         export PLAN_STATIC_ROOT="$TMPDIR/static"
+        export STATIC_URL="/_/static/"
         export DJANGO_SECRET_KEY="nix-build-static"
         python manage.py collectstatic --noinput
+        python manage.py compress --force
 
         mkdir -p "$out/static"
         cp -r "$TMPDIR/static"/. "$out/static"
@@ -115,7 +114,6 @@
         "$out/run/uwsgi" \
         "$out/var/lib/plan" \
         "$out/var/cache/plan" \
-        "$out/var/cache/plan/static" \
         "$out/var/cache/plan/default" \
         "$out/var/cache/plan/ical" \
         "$out/var/cache/plan/scraper"
@@ -149,9 +147,7 @@
           "PLAN_BASE_DIR=/var/lib/plan"
           "PLAN_CACHE_DIR=/var/cache/plan"
           "PLAN_UWSGI_STATIC_ROOT=/var/lib/plan/static"
-          "PLAN_COMPRESS_ROOT=/var/cache/plan/static"
           "STATIC_URL=/_/static/"
-          "COMPRESS_URL=/_/cache/"
           "PLAN_UWSGI_LISTENER=http"
           "PLAN_UWSGI_HTTP=0.0.0.0:8080"
           "PLAN_UWSGI_SOCKET=/run/uwsgi/uwsgi.sock"

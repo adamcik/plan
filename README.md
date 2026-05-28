@@ -68,3 +68,59 @@ responses, language selection, and debug rendering.
 
 - Locale middleware currently interprets the raw query string as the language
   code (for example `?nb`), not key/value pairs like `?lang=nb`.
+
+## Local dev: compression modes
+
+Use local settings for runserver:
+
+- `DJANGO_SETTINGS_MODULE=plan.settings.local`
+- `DJANGO_COMPRESS_ENABLED=1` (default in local settings)
+- `DJANGO_COMPRESS_OFFLINE=0` for live/on-request compression (default)
+- `DJANGO_COMPRESS_OFFLINE=1` for offline-manifest mode
+
+Offline mode prep (once after static/template changes):
+
+```bash
+DJANGO_SETTINGS_MODULE=plan.settings.local ./manage.py collectstatic --noinput
+DJANGO_SETTINGS_MODULE=plan.settings.local DJANGO_COMPRESS_OFFLINE=1 ./manage.py compress --force
+```
+
+Runserver against helper DB:
+
+```bash
+nix develop
+run-db
+```
+
+In another shell:
+
+```bash
+nix develop
+export DJANGO_SETTINGS_MODULE=plan.settings.local
+./manage.py migrate
+./manage.py runserver
+```
+
+## Container smoke test against helper DB
+
+Use the helper in the dev shell. It loads the Nix image, uses host networking,
+runs as your current user, and connects to the `run-db` Unix socket in
+`data/pgdata`. It uses `data/cache` for Django file cache.
+
+```bash
+nix develop
+run-db
+```
+
+In another shell:
+
+```bash
+nix develop
+run-container
+```
+
+Use Podman instead of Docker:
+
+```bash
+run-container --podman
+```

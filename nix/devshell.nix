@@ -11,7 +11,7 @@
       REPO_ROOT=''${REPO_ROOT:-$(jj root 2>/dev/null || git rev-parse --show-toplevel)}
       PGDATA=''${PGDATA:-$REPO_ROOT/data/pgdata}
       PGHOST=''${PGHOST:-$PGDATA}
-      PGDATABASE=''${PGDATABASE:-plan}
+      PGDATABASE=''${PGDATABASE:-postgres}
       PGUSER=''${PGUSER:-$(whoami)}
       PGLOG=''${PGLOG:-$REPO_ROOT/data/postgres.log}
 
@@ -81,6 +81,9 @@
       fi
 
       mkdir -p "$REPO_ROOT/data/cache/default" "$REPO_ROOT/data/cache/ical" "$REPO_ROOT/data/cache/scraper"
+
+      echo "run-container: ENGINE=$ENGINE IMAGE_REF=$IMAGE_REF"
+      echo "run-container: DJANGO_SETTINGS_MODULE=plan.settings.container PGDATABASE=$CONTAINER_PGDATABASE PGUSER=$CONTAINER_PGUSER PGHOST=/pgsocket PGPORT=$CONTAINER_PGPORT"
 
       exec "$ENGINE" run --rm --network host \
         --user "$(id -u):$(id -g)" \
