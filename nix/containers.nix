@@ -33,6 +33,7 @@
       export PLAN_UWSGI_HTTP="''${PLAN_UWSGI_HTTP:?PLAN_UWSGI_HTTP is required}"
       export PLAN_UWSGI_PROCESSES="''${PLAN_UWSGI_PROCESSES:?PLAN_UWSGI_PROCESSES is required}"
       export PLAN_UWSGI_THREADS="''${PLAN_UWSGI_THREADS:?PLAN_UWSGI_THREADS is required}"
+      export PLAN_UWSGI_LOG_FORMAT="''${PLAN_UWSGI_LOG_FORMAT:-off}"
       export PLAN_UWSGI_STATIC_URL="''${PLAN_UWSGI_STATIC_URL:-/_/static}"
       export PLAN_UWSGI_STATIC_ROOT="''${PLAN_UWSGI_STATIC_ROOT:-${staticAssets}/static}"
       export PLAN_UWSGI_CACHE_URL="''${PLAN_UWSGI_CACHE_URL:-/_/cache}"
@@ -40,7 +41,6 @@
 
       uwsgi_args=(
         "--plugin" "python3"
-        "--disable-logging"
         "--enable-threads"
         "--py-call-uwsgi-fork-hooks"
         "--log-5xx"
@@ -55,6 +55,14 @@
         "--show-config"
         "--need-app"
       )
+
+      if [ "$PLAN_UWSGI_LOG_FORMAT" = "off" ]; then
+        uwsgi_args+=("--disable-logging")
+      elif [ "$PLAN_UWSGI_LOG_FORMAT" = "on" ]; then
+        uwsgi_args+=("--log-format" "%(addr) %(method) %(uri) => %(status) %(size)B %(msecs)ms")
+      else
+        uwsgi_args+=("--log-format" "$PLAN_UWSGI_LOG_FORMAT")
+      fi
 
       case "$PLAN_UWSGI_LISTENER" in
         socket)
