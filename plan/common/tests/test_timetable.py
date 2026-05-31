@@ -20,7 +20,7 @@ class TimetableTestCase(BaseTestCase):
 
         semester = Semester.objects.get(year=2009, type=Semester.SPRING)
         student = Student.objects.get(slug="adamcik")
-        lectures = Lecture.objects.get_lectures(semester.id, student.id)
+        lectures = Lecture.objects.get_lectures_data(semester.id, student.id)
 
         timetable = Timetable(lectures)
         timetable.place_lectures(week=None)
@@ -31,7 +31,7 @@ class TimetableTestCase(BaseTestCase):
         last = {"last": True}
         bottomlast = {"bottom": True, "last": True}
 
-        lectures = {l.id: l for l in lectures}
+        lectures = {l.lecture_id: l for l in lectures}
         lecture2 = {
             "lecture": lectures[2],
             "rowspan": 2,

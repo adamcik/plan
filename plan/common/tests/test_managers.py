@@ -2,7 +2,6 @@
 
 from datetime import time
 
-from plan.common.lecture_data import LectureData
 from plan.common.models import (
     Course,
     Exam,
@@ -18,60 +17,7 @@ from plan.common.tests import BaseTestCase
 class ManagerTestCase(BaseTestCase):
     fixtures = ["test_data.json", "test_user.json"]
 
-    def test_get_lectures(self):
-        # Exclude lectures connected to other courses and excluded from userset
-        control = Lecture.objects.exclude(id__in=[6, 7])
-
-        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
-        student = Student.objects.get(slug="adamcik")
-        lectures = Lecture.objects.get_lectures(semester.id, student.id)
-
-        actual = [l for l in lectures if not l.exclude]
-        self.assertEqual(set(actual), set(control))
-
-        # Try showing only lectures in week 1
-        actual = [l for l in lectures if 1 in l.week_numbers and not l.exclude]
-        self.assertEqual(set(actual), set(control.filter(weeks__number=1)))
-
-        # Try showing lectures in week 2
-        actual = [l for l in lectures if 2 in l.week_numbers and not l.exclude]
-        self.assertEqual(set(actual), set(control.filter(weeks__number=2)))
-
-        # Try lectures in week 3, ie none
-        actual = [l for l in lectures if 3 in l.week_numbers and not l.exclude]
-        self.assertEqual(set(actual), set())
-
-    def test_get_lectures_characterization_data_contract(self):
-        # This test intentionally characterizes current get_lectures() data
-        # semantics (ids/alias/exclude/week_numbers, no duplicates, single-query
-        # budget) so we can refactor SQL/ORM shape without changing behavior.
-        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
-        student = Student.objects.get(slug="adamcik")
-
-        with self.assertNumQueries(1):
-            lectures = Lecture.objects.get_lectures(semester.id, student.id)
-
-        self.assertEqual(len(lectures), len({lecture.id for lecture in lectures}))
-
-        expected_ids = set(
-            Lecture.objects.filter(course__semester_id=semester.id)
-            .exclude(id=6)
-            .values_list("id", flat=True)
-        )
-        self.assertEqual({lecture.id for lecture in lectures}, expected_ids)
-
-        self.assertTrue(all(hasattr(lecture, "alias") for lecture in lectures))
-        self.assertTrue(all(hasattr(lecture, "exclude") for lecture in lectures))
-        self.assertTrue(all(hasattr(lecture, "week_numbers") for lecture in lectures))
-        self.assertTrue(any(lecture.exclude for lecture in lectures))
-        self.assertTrue(any(not lecture.exclude for lecture in lectures))
-        for lecture in lectures:
-            self.assertEqual(
-                tuple(sorted(set(lecture.week_numbers))),
-                tuple(lecture.week_numbers),
-            )
-
-    def test_get_lectures_characterization_avoids_duplicates_for_multiple_groups(self):
+    def test_get_lectures_data_avoids_duplicates_for_multiple_groups(self):
         semester = Semester.objects.get(year=2009, type=Semester.SPRING)
         student = Student.objects.get(slug="adamcik")
 
@@ -84,113 +30,18 @@ class ManagerTestCase(BaseTestCase):
         lecture = Lecture.objects.filter(course=subscription.course).first()
         self.assertIsNotNone(lecture)
 
-        baseline = Lecture.objects.get_lectures(semester.id, student.id)
-        baseline_count = sum(1 for item in baseline if item.id == lecture.id)
+        baseline = Lecture.objects.get_lectures_data(semester.id, student.id)
+        baseline_count = sum(1 for item in baseline if item.lecture_id == lecture.id)
 
         extra_group = Group.objects.create(code="CHAR-GROUP", name="Characterization")
         subscription.groups.add(extra_group)
         lecture.groups.add(extra_group)
 
-        updated = Lecture.objects.get_lectures(semester.id, student.id)
-        updated_count = sum(1 for item in updated if item.id == lecture.id)
+        updated = Lecture.objects.get_lectures_data(semester.id, student.id)
+        updated_count = sum(1 for item in updated if item.lecture_id == lecture.id)
 
         self.assertEqual(baseline_count, 1)
         self.assertEqual(updated_count, 1)
-
-    def test_get_lectures_returns_empty_week_numbers_without_week_rows(self):
-        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
-        student = Student.objects.get(slug="adamcik")
-
-        subscription = Subscription.objects.filter(
-            student=student,
-            course__semester=semester,
-        ).first()
-        self.assertIsNotNone(subscription)
-
-        group = subscription.groups.first()
-        self.assertIsNotNone(group)
-
-        lecture = Lecture.objects.create(
-            course=subscription.course,
-            title="No weeks lecture",
-            summary="",
-            stream="",
-            day=0,
-            start=time(8, 0),
-            end=time(9, 0),
-            type=None,
-        )
-        lecture.groups.add(group)
-
-        lectures = Lecture.objects.get_lectures(semester.id, student.id)
-        by_id = {item.id: item for item in lectures}
-        self.assertIn(lecture.id, by_id)
-        self.assertEqual(tuple(by_id[lecture.id].week_numbers), ())
-
-    def test_get_lectures_returns_subscription_alias(self):
-        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
-        student = Student.objects.get(slug="adamcik")
-
-        subscription = Subscription.objects.filter(
-            student=student,
-            course__semester=semester,
-        ).first()
-        self.assertIsNotNone(subscription)
-
-        expected_alias = "Alias Characterization"
-        subscription.alias = expected_alias
-        subscription.save(update_fields=["alias"])
-
-        lectures = Lecture.objects.get_lectures(semester.id, student.id)
-        alias_values = {
-            item.alias
-            for item in lectures
-            if item.course_id == subscription.course_id and hasattr(item, "alias")
-        }
-
-        self.assertIn(expected_alias, alias_values)
-
-    def test_get_lectures_data_matches_legacy_adapter_output(self):
-        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
-        student = Student.objects.get(slug="adamcik")
-
-        legacy = Lecture.objects.get_lectures(semester.id, student.id)
-        dto = Lecture.objects.get_lectures_data(semester.id, student.id)
-
-        adapted = [Lecture.objects._to_lecture_data(item) for item in legacy]
-        self.assertEqual(dto, adapted)
-        self.assertTrue(all(isinstance(item, LectureData) for item in dto))
-
-    def test_get_lectures_data_flat_output_matches_legacy_flat_output(self):
-        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
-        student = Student.objects.get(slug="adamcik")
-
-        legacy = Lecture.objects.get_lectures(semester.id, student.id)
-        dto = Lecture.objects.get_lectures_data(semester.id, student.id)
-
-        def projection(item):
-            return {
-                "lecture_id": item.lecture_id,
-                "course_id": item.course_id,
-                "course_code": item.course_code,
-                "course_name": item.course_name,
-                "type_name": item.type_name,
-                "type_optional": item.type_optional,
-                "day": int(item.day),
-                "start": item.start,
-                "end": item.end,
-                "week_numbers": tuple(item.week_numbers),
-                "alias": item.alias,
-                "exclude": item.exclude,
-                "title": item.title,
-                "summary": item.summary,
-                "stream": item.stream,
-            }
-
-        adapted = [Lecture.objects._to_lecture_data(item) for item in legacy]
-        self.assertEqual(
-            [projection(item) for item in dto], [projection(item) for item in adapted]
-        )
 
     def test_get_lectures_data_characterization_data_contract(self):
         semester = Semester.objects.get(year=2009, type=Semester.SPRING)
@@ -218,6 +69,37 @@ class ManagerTestCase(BaseTestCase):
                 tuple(sorted(set(lecture.week_numbers))),
                 tuple(lecture.week_numbers),
             )
+
+    def test_get_lectures_data_week_filtering_matches_control(self):
+        control = Lecture.objects.exclude(id__in=[6, 7])
+        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+        student = Student.objects.get(slug="adamcik")
+        lectures = Lecture.objects.get_lectures_data(semester.id, student.id)
+
+        self.assertEqual(
+            {
+                lecture.lecture_id
+                for lecture in lectures
+                if 1 in lecture.week_numbers and not lecture.exclude
+            },
+            set(control.filter(weeks__number=1).values_list("id", flat=True)),
+        )
+        self.assertEqual(
+            {
+                lecture.lecture_id
+                for lecture in lectures
+                if 2 in lecture.week_numbers and not lecture.exclude
+            },
+            set(control.filter(weeks__number=2).values_list("id", flat=True)),
+        )
+        self.assertEqual(
+            [
+                lecture
+                for lecture in lectures
+                if 3 in lecture.week_numbers and not lecture.exclude
+            ],
+            [],
+        )
 
     def test_get_lectures_data_returns_empty_week_numbers_without_week_rows(self):
         semester = Semester.objects.get(year=2009, type=Semester.SPRING)
