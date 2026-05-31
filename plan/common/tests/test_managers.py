@@ -234,9 +234,7 @@ class ManagerTestCase(BaseTestCase):
 
         lectures = Lecture.objects.get_lectures_data(semester.id, student.id)
         alias_values = {
-            item.alias
-            for item in lectures
-            if item.course_id == subscription.course_id
+            item.alias for item in lectures if item.course_id == subscription.course_id
         }
 
         self.assertIn(expected_alias, alias_values)

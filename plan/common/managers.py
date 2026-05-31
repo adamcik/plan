@@ -1,6 +1,9 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import datetime
+from collections.abc import Iterator
+from collections.abc import Mapping
+from typing import Any
 
 from django.db import connection, models
 
@@ -9,6 +12,12 @@ from plan.common.lecture_data import LectureData, Weekday
 
 def today():
     return datetime.date.today()
+
+
+def _iter_cursor_dicts(cursor) -> Iterator[Mapping[str, Any]]:
+    column_index = {column[0]: index for index, column in enumerate(cursor.description)}
+    for row in cursor:
+        yield {name: row[index] for name, index in column_index.items()}
 
 
 class LectureManager(models.Manager):
@@ -116,9 +125,93 @@ class LectureManager(models.Manager):
         )
 
     def get_lectures_data(self, semester_id, student_id):
+        cursor = connection.cursor()
+        cursor.execute(
+            """
+            WITH student_subs AS (
+                SELECT s.id, s.course_id, s.alias
+                FROM common_subscription s
+                JOIN common_course c ON c.id = s.course_id
+                WHERE s.student_id = %(student_id)s
+                  AND c.semester_id = %(semester_id)s
+            )
+            SELECT
+                l.id AS lecture_id,
+                l.title,
+                l.summary,
+                l.stream,
+                l.day,
+                l.start,
+                l."end",
+                COALESCE(w.week_numbers, '{}'::integer[]) AS week_numbers,
+                ss.alias,
+                EXISTS (
+                    SELECT 1
+                    FROM common_subscription_exclude se
+                    WHERE se.subscription_id = ss.id
+                      AND se.lecture_id = l.id
+                ) AS exclude,
+                c.id AS course_id,
+                c.code AS course_code,
+                c.name AS course_name,
+                lt.id AS type_id,
+                lt.code AS type_code,
+                lt.name AS type_name,
+                COALESCE(lt.optional, FALSE) AS type_optional
+            FROM student_subs ss
+            JOIN common_course c ON c.id = ss.course_id
+            JOIN common_lecture l ON l.course_id = c.id
+            LEFT JOIN common_lecturetype lt ON lt.id = l.type_id
+            LEFT JOIN LATERAL (
+                SELECT ARRAY_AGG(DISTINCT w.number ORDER BY w.number) AS week_numbers
+                FROM common_week w
+                WHERE w.lecture_id = l.id
+            ) w ON TRUE
+            WHERE EXISTS (
+                SELECT 1
+                FROM common_subscription_groups sg
+                JOIN common_lecture_groups lg ON lg.group_id = sg.group_id
+                WHERE sg.subscription_id = ss.id
+                  AND lg.lecture_id = l.id
+            )
+            ORDER BY
+                c.code ASC,
+                l.day ASC,
+                l.start ASC,
+                lt.name ASC,
+                lt.code ASC,
+                lt.optional ASC,
+                l.course_id ASC,
+                l.type_id ASC,
+                l.id ASC
+            """,
+            {
+                "student_id": student_id,
+                "semester_id": semester_id,
+            },
+        )
+
         return [
-            self._to_lecture_data(lecture)
-            for lecture in self.get_lectures(semester_id, student_id)
+            LectureData(
+                lecture_id=row["lecture_id"],
+                title=row["title"],
+                summary=row["summary"],
+                stream=row["stream"],
+                day=Weekday(row["day"]),
+                start=row["start"],
+                end=row["end"],
+                week_numbers=tuple(sorted(set(row["week_numbers"] or ()))),
+                alias=row["alias"] or None,
+                exclude=row["exclude"],
+                course_id=row["course_id"],
+                course_code=row["course_code"],
+                course_name=row["course_name"],
+                type_id=row["type_id"],
+                type_code=row["type_code"],
+                type_name=row["type_name"],
+                type_optional=row["type_optional"],
+            )
+            for row in _iter_cursor_dicts(cursor)
         ]
 
 
