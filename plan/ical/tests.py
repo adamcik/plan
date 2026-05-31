@@ -13,7 +13,10 @@ from django.utils import http as http_utils
 
 from plan.common import tests, utils
 from plan.common.models import Exam
+from plan.common.models import Lecture
 from plan.common.models import Semester
+from plan.common.models import Subscription
+from plan.common.models import Week
 from plan.common.schedule import Schedule
 from plan.common.snapshot import get_schedule_snapshot
 from plan.ical import queue
@@ -256,6 +259,60 @@ class ViewTestCase(tests.BaseTestCase):
             f"DTSTART:{expected_start.strftime('%Y%m%dT%H%M%SZ')}",
             event,
         )
+
+    def test_ical_lecture_events_include_expected_summary_and_uid(self):
+        semester = self.snapshot.semester
+        student = self.snapshot.student
+
+        subscription = Subscription.objects.filter(
+            student=student,
+            course__semester=semester,
+        ).first()
+        self.assertIsNotNone(subscription)
+
+        group = subscription.groups.first()
+        self.assertIsNotNone(group)
+
+        subscription.alias = "ICAL Test Alias"
+        subscription.save(update_fields=["alias"])
+
+        lecture_obj = Lecture.objects.create(
+            course=subscription.course,
+            title="iCal test lecture",
+            summary="iCal test summary",
+            stream="",
+            day=0,
+            start=datetime.time(10, 15),
+            end=datetime.time(11, 0),
+            type=None,
+        )
+        lecture_obj.groups.add(group)
+        Week.objects.create(lecture=lecture_obj, number=1)
+
+        url = self.reverse("schedule-ical-type", "lectures")
+        response = self.client.get(f"{url}?no-cache=1", HTTP_ACCEPT_ENCODING="")
+        self.assertEqual(response.status_code, 200)
+
+        lectures = Lecture.objects.get_lectures_data(
+            semester.id,
+            student.id,
+        )
+        lecture = next(l for l in lectures if l.lecture_id == lecture_obj.id)
+
+        body = response.content.decode()
+        uid_prefix = f"UID:lecture-{lecture.lecture_id}-"
+        self.assertIn(uid_prefix, body)
+        self.assertIn(f"SUMMARY:{lecture.alias or lecture.course_code}", body)
+        self.assertIn(lecture.course_name, body)
+        if lecture.type_name:
+            self.assertIn(lecture.type_name, body)
+
+        event_start = body.index(uid_prefix)
+        event_end = body.index("END:VEVENT", event_start)
+        event = body[event_start:event_end]
+
+        if lecture.type_optional:
+            self.assertIn("TRANSP:TRANSPARENT", event)
 
     def test_ical_cache_uses_encoding_variants(self):
         url = self.reverse("schedule-ical")

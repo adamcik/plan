@@ -9,7 +9,14 @@ from django.utils import timezone
 from django.utils.datastructures import MultiValueDict
 
 from plan.common import utils
-from plan.common.models import Group, Lecture, Schedule, Semester, Student, Subscription
+from plan.common.models import (
+    Group,
+    Lecture,
+    Schedule,
+    Semester,
+    Student,
+    Subscription,
+)
 from plan.common.tests import BaseTestCase, strict_template_variables
 
 
@@ -127,6 +134,43 @@ class ViewTestCase(BaseTestCase):
             response = self.client.get(url)
             self.assertEqual(response.status_code, 200)
             self.assertTemplateUsed(response, "schedule.html")
+
+    def test_schedule_renders_lecture_and_course_classes_and_room_links(self):
+        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+        student = Student.objects.get(slug="adamcik")
+
+        response = self.client.get(self.reverse("schedule"))
+        self.assertEqual(response.status_code, 200)
+
+        lectures = Lecture.objects.get_lectures_data(semester.id, student.id)
+        lecture = next((l for l in lectures if not l.exclude), None)
+        if lecture is None:
+            subscription = Subscription.objects.filter(
+                student=student,
+                course__semester=semester,
+            ).first()
+            self.assertIsNotNone(subscription)
+
+            group = subscription.groups.first()
+            self.assertIsNotNone(group)
+
+            lecture_obj = Lecture.objects.create(
+                course=subscription.course,
+                title="Schedule test lecture",
+                summary="",
+                stream="",
+                day=0,
+                start=datetime.time(10, 15),
+                end=datetime.time(11, 0),
+                type=None,
+            )
+            lecture_obj.groups.add(group)
+
+            lectures = Lecture.objects.get_lectures_data(semester.id, student.id)
+            lecture = next(l for l in lectures if l.lecture_id == lecture_obj.id)
+
+        self.assertContains(response, f"lecture-{lecture.lecture_id}")
+        self.assertContains(response, f"course-{lecture.course_id}")
 
     @strict_template_variables()
     def test_schedule_renders_without_missing_template_variables(self):

@@ -249,7 +249,7 @@ def _schedule_data(s: Schedule, next_semester: Optional[Semester] = None):
         s.student.id,
     )
 
-    # Most of these could be built into get_lectures with ARRAY_AGG..
+    # Most of these could be built into get_lectures_data with ARRAY_AGG..
     exams = {}
     for exam in (
         Exam.objects.filter(course__in=courses)

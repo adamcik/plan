@@ -34,6 +34,13 @@ class EmptyViewTestCase(BaseTestCase):
 class ViewTestCase(EmptyViewTestCase):
     fixtures = ["test_data.json", "test_user.json"]
 
+    def test_pdf_response_is_pdf_document(self):
+        response = self.client.get(self.reverse("schedule-pdf"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers["Content-Type"], "application/pdf")
+        self.assertTrue(response.content.startswith(b"%PDF-"))
+
     def test_pdf_sets_etag_header(self):
         url = self.reverse("schedule-pdf")
 
