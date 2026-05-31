@@ -250,10 +250,15 @@ TIMETABLE_MAX_COURSES = 20
 # Number of courses to show on frontpage stats.
 TIMETABLE_TOP_COURSE_COUNT = 10
 
-# Hostname to be used in UID of ical events and to identify site, should be a
-# constant service-name as UID changes will trigger email notices for new
-# events in google calendar etc. Default is to use the HTTP_HOST.
+# Hostname used for stable identity (notably iCal UID generation). Keep this
+# constant; changing it makes calendar clients treat existing events as new.
+# Default is to use request host.
 TIMETABLE_HOSTNAME = None
+
+# Hostname used for user-facing links in rendered pages (no scheme). Keep this
+# separate from TIMETABLE_HOSTNAME so identity host and public host can differ.
+# Default is to use request host.
+TIMETABLE_PUBLIC_HOST = None
 
 # Where the software can be downloaded.
 TIMETABLE_SOURCE_URL = "https://github.com/adamcik/plan/"

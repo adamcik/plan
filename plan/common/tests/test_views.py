@@ -10,7 +10,7 @@ from django.utils.datastructures import MultiValueDict
 
 from plan.common import utils
 from plan.common.models import Group, Lecture, Schedule, Semester, Student, Subscription
-from plan.common.tests import BaseTestCase
+from plan.common.tests import BaseTestCase, strict_template_variables
 
 
 class EmptyViewTestCase(BaseTestCase):
@@ -127,6 +127,12 @@ class ViewTestCase(BaseTestCase):
             response = self.client.get(url)
             self.assertEqual(response.status_code, 200)
             self.assertTemplateUsed(response, "schedule.html")
+
+    @strict_template_variables()
+    def test_schedule_renders_without_missing_template_variables(self):
+        response = self.client.get(self.reverse("schedule"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "schedule.html")
 
     def test_schedule_sets_robots_header(self):
         response = self.client.get(self.reverse("schedule"))

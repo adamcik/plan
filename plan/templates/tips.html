@@ -18,7 +18,7 @@
       </dd>
       <dt class="icon-link"></dt>
       <dd>
-        {% blocktrans with request.META.HTTP_HOST as host %}
+        {% blocktrans with PUBLIC_HOST as host %}
           For quick access to your schedule simply go to
           <a href="{{ shortcut_url }}">{{ host }}{{ shortcut_url }}</a>
         {% endblocktrans %}
@@ -64,13 +64,13 @@
         {% trans "Google calendar:" %}
         <a target="_blank"
            rel="noreferrer"
-           href="https://www.google.com/calendar/render?cid=https://{{ request.META.HTTP_HOST }}{{ ical_lectures_url }}">{% trans "lectures" %}</a>,
+           href="https://www.google.com/calendar/render?cid=https://{{ PUBLIC_HOST }}{{ ical_lectures_url }}">{% trans "lectures" %}</a>,
         <a target="_blank"
            rel="noreferrer"
-           href="https://www.google.com/calendar/render?cid=https://{{ request.META.HTTP_HOST }}{{ ical_exams_url }}">{% trans "exams" %}</a> {% trans "or" %}
+           href="https://www.google.com/calendar/render?cid=https://{{ PUBLIC_HOST }}{{ ical_exams_url }}">{% trans "exams" %}</a> {% trans "or" %}
         <a target="_blank"
            rel="noreferrer"
-           href="https://www.google.com/calendar/render?cid=https://{{ request.META.HTTP_HOST }}{{ ical_all_url }}">{% trans "both combined" %}</a>.
+           href="https://www.google.com/calendar/render?cid=https://{{ PUBLIC_HOST }}{{ ical_all_url }}">{% trans "both combined" %}</a>.
         <br />
         {% trans "Simply click the calendar type you want and it will be added to Google calendar." %}
       </dd>

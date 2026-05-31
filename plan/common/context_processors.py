@@ -12,6 +12,7 @@ _ = translation.gettext_lazy
 
 
 def processor(request):
+    public_host = settings.TIMETABLE_PUBLIC_HOST or request.get_host()
     sitename = settings.TIMETABLE_HOSTNAME or request.headers.get(
         "Host", socket.getfqdn()
     )
@@ -38,6 +39,7 @@ def processor(request):
         "ADMINS": settings.ADMINS,
         "SHARE_LINKS": share_links,
         "SOURCE_URL": settings.TIMETABLE_SOURCE_URL,
+        "PUBLIC_HOST": public_host,
         "STATIC_DOMAIN": static_domain,
         "SITENAME": sitename,
         "CSP_SCRIPT_NONCE": getattr(request, "_csp_script_nonce", None),

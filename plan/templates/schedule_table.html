@@ -35,20 +35,20 @@
                 {% if not c.remove %}
                   <td {% if c.colspan > 1 %}colspan="{{ c.colspan }}"{% endif %}
                       {% if c.rowspan > 1 %}rowspan="{{ c.rowspan }}"{% endif %}
-                      {% if c.lecture or c.time or c.bottom or c.last %} class="{% stripspace %} {% if c.lecture %}lecture lecture-{{ c.lecture.id }} course-{{ c.lecture.course_id }}{% endif %}
-                      {% if c.lecture.optional %}optional{% endif %}
+                      {% if c|get:"lecture" or c|get:"time" or c|get:"bottom" or c|get:"last" %} class="{% stripspace %} {% if c|get:"lecture" %}lecture lecture-{{ c.lecture.id }} course-{{ c.lecture.course_id }}{% endif %}
+                      {% if c|get:"lecture" and c.lecture.optional %}optional{% endif %}
                       {% if c.rowspan == 1 %}single{% endif %}
-                      {% if c.last %}last{% endif %}
-                      {% if c.bottom %}bottom{% endif %}
-                      {% if c.time %}time{% endif %}
+                      {% if c|get:"last" %}last{% endif %}
+                      {% if c|get:"bottom" %}bottom{% endif %}
+                      {% if c|get:"time" %}time{% endif %}
                       {% endstripspace %}
                       "
                       {% endif %}
-                      {% if c.lecture %}title="{{ c.lecture.course.name }} {{ c.lecture.start|time:"H:i" }}-{{ c.lecture.end|time:"H:i" }}{% if c.lecture.title %}: {{ c.lecture.title }}{% endif %}
+                      {% if c|get:"lecture" %}title="{{ c.lecture.course.name }} {{ c.lecture.start|time:"H:i" }}-{{ c.lecture.end|time:"H:i" }}{% if c.lecture.title %}: {{ c.lecture.title }}{% endif %}
                       "
                       {% endif %}>
                     <div class="wrapper">
-                      {% if c.lecture %}
+                      {% if c|get:"lecture" %}
                         <div class="course">{{ c.lecture.alias|default:c.lecture.course.code }}</div>
                         <div class="room">
                           {% if c.lecture.stream %}
@@ -73,7 +73,7 @@
                           {% endif %}
                         </div>
                       {% endif %}
-                      {{ c.time|escape|nbsp|default:"" }}
+                      {{ c|get:"time"|escape|nbsp|default:"" }}
                     </div>
                   </td>
                 {% endif %}

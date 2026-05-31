@@ -53,7 +53,9 @@
         </thead>
         <tbody>
           {% for course in courses %}
-            {% blocktrans asvar remove_title  %}Remove {{ course.code }} {{ course.name }}{% endblocktrans %}
+            {% with course_code=course.code|default:"" course_name=course.name|default:"" %}
+              {% blocktrans asvar remove_title %}Remove {{ course_code }} {{ course_name }}{% endblocktrans %}
+            {% endwith %}
             <tr class="course-{{ course.id }}" title="{{ course.name }}">
               {% if advanced %}
                 <td>

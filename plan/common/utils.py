@@ -217,6 +217,8 @@ def server_error(request, template_name="500.html"):
                 "MEDIA_URL": settings.MEDIA_URL,
                 "STATIC_URL": settings.STATIC_URL,
                 "SOURCE_URL": settings.TIMETABLE_SOURCE_URL,
+                "INSTITUTION": settings.TIMETABLE_INSTITUTION,
+                "INSTITUTION_SITE": settings.TIMETABLE_INSTITUTION_SITE,
             }
         )
     )
