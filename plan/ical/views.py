@@ -336,7 +336,7 @@ def ical(request, semester, slug, ical_type=None):
         dtstamp = datetime.datetime.now(tz=UTC)
 
     if _("lectures") in resources:
-        lectures = Lecture.objects.get_lectures(
+        lectures = Lecture.objects.get_lectures_data(
             snapshot.semester.id,
             snapshot.student.id,
         )
@@ -386,7 +386,7 @@ def ical(request, semester, slug, ical_type=None):
 # TODO: Consider adding redirect/url-shortner for rooms?
 DESCRIPTION_TEXT = template.Template(
     """
-{{ lecture.course.name }} ({{ lecture.type|default:"" }})
+{{ lecture.course_name }} ({{ lecture.type_name|default:"" }})
 {% if lecture.stream %}
 Stream: {{ lecture.stream }}
 {% endif %}
@@ -400,17 +400,23 @@ Stream: {{ lecture.stream }}
 def add_lectutures(lectures, year, cal, request, hostname, dtstamp):
     """Adds lectures to cal object for current semester"""
 
-    all_rooms = Lecture.get_related(Room, lectures, fields=["id", "name", "url"])
-    all_weeks = Lecture.get_related(Week, lectures, fields=["number"], use_extra=False)
+    lecture_ids = [lecture.lecture_id for lecture in lectures]
+    all_rooms = Lecture.get_related(Room, lecture_ids, fields=["id", "name", "url"])
+    all_weeks = Lecture.get_related(
+        Week,
+        lecture_ids,
+        fields=["number"],
+        use_extra=False,
+    )
 
     for l in lectures:
         if l.exclude:  # Skip excluded
             continue
 
-        if l.id not in all_weeks:
+        if l.lecture_id not in all_weeks:
             continue
 
-        weeks = all_weeks[l.id]
+        weeks = all_weeks[l.lecture_id]
 
         rrule_kwargs = {
             "byweekno": weeks,
@@ -419,18 +425,20 @@ def add_lectutures(lectures, year, cal, request, hostname, dtstamp):
             "dtstart": datetime.datetime(int(year), 1, 1),
         }
 
-        summary = l.alias or l.course.code
+        summary = l.alias or l.course_code
         if l.title:
             summary += "\n" + l.title
 
         rooms = []
-        for r in all_rooms.get(l.id, []):
+        for r in all_rooms.get(l.lecture_id, []):
             if r["url"]:
                 tmp = reverse("redirect_room", args=(r["id"],))
                 r["url"] = request.build_absolute_uri(tmp)
             rooms.append(r)
 
-        context = template.Context({"lecture": l, "rooms": all_rooms.get(l.id, [])})
+        context = template.Context(
+            {"lecture": l, "rooms": all_rooms.get(l.lecture_id, [])}
+        )
         desc = DESCRIPTION_TEXT.render(context)
 
         for d in rrule.rrule(rrule.WEEKLY, **rrule_kwargs):
@@ -448,12 +456,12 @@ def add_lectutures(lectures, year, cal, request, hostname, dtstamp):
             vevent.add("dtstamp").value = dtstamp
 
             vevent.add("uid").value = "lecture-%d-%s@%s" % (
-                l.id,
+                l.lecture_id,
                 d.strftime("%Y%m%d"),
                 hostname,
             )
 
-            if l.type and l.type.optional:
+            if l.type_optional:
                 vevent.add("transp").value = "TRANSPARENT"
 
 
