@@ -134,6 +134,12 @@ class ViewTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "schedule.html")
 
+    @strict_template_variables()
+    def test_schedule_advanced_renders_without_missing_template_variables(self):
+        response = self.client.get(self.reverse("schedule-advanced"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "schedule.html")
+
     def test_schedule_sets_robots_header(self):
         response = self.client.get(self.reverse("schedule"))
 

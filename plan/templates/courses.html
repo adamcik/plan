@@ -55,8 +55,7 @@
           {% for course in courses %}
             {% with course_code=course.code|default:"" course_name=course.name|default:"" %}
               {% blocktrans asvar remove_title %}Remove {{ course_code }} {{ course_name }}{% endblocktrans %}
-            {% endwith %}
-            <tr class="course-{{ course.id }}" title="{{ course.name }}">
+              <tr class="course-{{ course.id }}" title="{{ course.name }}">
               {% if advanced %}
                 <td>
                   <input type="checkbox"
@@ -99,7 +98,8 @@
                   -
                 {% endfor %}
               </td>
-            </tr>
+              </tr>
+            {% endwith %}
           {% endfor %}
         </tbody>
       </table>
