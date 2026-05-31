@@ -169,6 +169,34 @@
 
           touch $out
         '';
+
+      django-i18n-untranslated =
+        pkgs.runCommand "django-i18n-untranslated" {
+          nativeBuildInputs = [pkgs.gettext pkgs.findutils pkgs.gnugrep];
+          src = ../.;
+        } ''
+          set -euo pipefail
+
+          cd "$src"
+
+          flag_file="$TMPDIR/i18n-untranslated-found"
+          find . -name '*.po' -type f | while IFS= read -r po; do
+            untranslated="$TMPDIR/untranslated-$(basename "$po")"
+            msgattrib --untranslated --no-obsolete --no-fuzzy "$po" > "$untranslated"
+
+            if grep -q '^msgid "' "$untranslated"; then
+              echo "Untranslated strings found in $po"
+              touch "$flag_file"
+            fi
+          done
+
+          if [ -f "$flag_file" ]; then
+            echo "Untranslated translation entries detected."
+            exit 1
+          fi
+
+          touch $out
+        '';
     };
   };
 }
