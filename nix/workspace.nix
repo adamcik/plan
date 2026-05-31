@@ -123,6 +123,52 @@
           python manage.py compress --force
           touch $out
         '';
+
+      django-i18n =
+        pkgs.runCommand "django-i18n" {
+          nativeBuildInputs = [
+            editableVenv
+            pkgs.gettext
+            pkgs.findutils
+            pkgs.coreutils
+            pkgs.diffutils
+          ];
+          src = ../.;
+        } ''
+          set -euo pipefail
+
+          cp -r --no-preserve=mode,ownership "$src" "$TMPDIR/before"
+          cp -r --no-preserve=mode,ownership "$src" "$TMPDIR/after"
+          chmod -R u+w "$TMPDIR/after"
+
+          po_manifest() {
+            find "$1" -name '*.po' -type f -print0 \
+              | sort -z \
+              | xargs -0 sha256sum \
+              | sed "s#$1/##"
+          }
+
+          po_manifest "$TMPDIR/before" > "$TMPDIR/before.po.sha256"
+
+          cd "$TMPDIR/after"
+          export DJANGO_SETTINGS_MODULE="plan.settings.default"
+          export DJANGO_SECRET_KEY="test"
+          export PLAN_BASE_DIR="$TMPDIR/plan"
+          mkdir -p "$PLAN_BASE_DIR"
+
+          python manage.py compilemessages
+          python manage.py makemessages --all --no-location
+
+          cd "$TMPDIR"
+          po_manifest "$TMPDIR/after" > "$TMPDIR/after.po.sha256"
+
+          if ! diff -u "$TMPDIR/before.po.sha256" "$TMPDIR/after.po.sha256"; then
+            echo "Translation files are out of date. Run: python manage.py makemessages --all --no-location"
+            exit 1
+          fi
+
+          touch $out
+        '';
     };
   };
 }
