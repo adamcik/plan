@@ -229,7 +229,7 @@ def _schedule_data(s: Schedule, next_semester: Optional[Semester] = None):
     if s.last_modified is None:
         return [], [], [], [], [], [], [], []
 
-    key = f"db:schedule:{s.freshness_key()}"
+    key = f"data:schedule:{s.freshness_key()}"
     result = cache.get(key)
     if result:
         return result
