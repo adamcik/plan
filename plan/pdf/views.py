@@ -122,11 +122,12 @@ def pdf(request, semester, slug, size=None, week=None):
 
     # NOTE: This could be cached, and shared with schedule, but to be honest I
     # doubt it is worth it for this code path.
-    lectures = Lecture.objects.get_lectures(
+    lectures = Lecture.objects.get_lectures_data(
         snapshot.semester.id,
         snapshot.student.id,
     )
-    rooms = Lecture.get_related(Room, lectures)
+    lecture_ids = [lecture.lecture_id for lecture in lectures]
+    rooms = Lecture.get_related(Room, lecture_ids)
     courses = Course.objects.get_courses(
         snapshot.semester.year,
         snapshot.semester.type,
@@ -183,29 +184,29 @@ def pdf(request, semester, slug, size=None, week=None):
                 lecture = cell.get("lecture", "")
 
                 if lecture:
-                    if lecture.type and lecture.type.optional:
+                    if lecture.type_optional:
                         paragraph_style.fontName = "Helvetica"
 
-                    code = lecture.alias or lecture.course.code
+                    code = lecture.alias or lecture.course_code
                     content = [platypus.Paragraph(html.escape(code), paragraph_style)]
                     paragraph_style.leading = 8
 
-                    if lecture.type:
+                    if lecture.type_name:
                         content += [
                             platypus.Paragraph(
                                 "<font size=6>%s</font>"
-                                % lecture.type.name.replace("/", " / "),
+                                % lecture.type_name.replace("/", " / "),
                                 paragraph_style,
                             )
                         ]
 
-                    content += [
-                        platypus.Paragraph(
-                            "<font size=6>%s</font>"
-                            % ", ".join(rooms.get(lecture.id, [])),
-                            paragraph_style,
-                        )
-                    ]
+                        content += [
+                            platypus.Paragraph(
+                                "<font size=6>%s</font>"
+                                % ", ".join(rooms.get(lecture.lecture_id, [])),
+                                paragraph_style,
+                            )
+                        ]
 
                     paragraph_style.leading = 12
                     paragraph_style.fontName = "Helvetica-Bold"
