@@ -229,7 +229,7 @@ def compact_sequence(sequence):
     if not sequence:
         return []
 
-    sequence.sort()
+    sequence = sorted(sequence)
 
     compact = []
     first = sequence[0]

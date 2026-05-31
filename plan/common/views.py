@@ -244,7 +244,7 @@ def _schedule_data(s: Schedule, next_semester: Optional[Semester] = None):
         .order_by("code")
     )
 
-    lectures = Lecture.objects.get_lectures(
+    lectures = Lecture.objects.get_lectures_data(
         s.semester.id,
         s.student.id,
     )
@@ -260,8 +260,9 @@ def _schedule_data(s: Schedule, next_semester: Optional[Semester] = None):
 
     # Use get_related to cut query counts
     lecturers = []  # Lecture.get_related(Lecturer, lectures)
-    groups = Lecture.get_related(Group, lectures, fields=["code"])
-    rooms = Lecture.get_related(Room, lectures, fields=["id", "name", "url"])
+    lecture_ids = [lecture.lecture_id for lecture in lectures]
+    groups = Lecture.get_related(Group, lecture_ids, fields=["code"])
+    rooms = Lecture.get_related(Room, lecture_ids, fields=["id", "name", "url"])
 
     schedule_weeks = set()
     for l in lectures:
@@ -443,7 +444,7 @@ def schedule(
     # TODO: Natural sort course code? Why is this needed here?
     lectures.sort(
         key=lambda l: (
-            l.course.code,
+            l.course_code,
             min(l.week_numbers) if l.week_numbers else None,
         )
     )

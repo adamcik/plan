@@ -1,6 +1,7 @@
 {% load compact %}
 {% load get %}
 {% load i18n %}
+{% load weekday %}
 
 {% if lectures %}
   <h2>{% trans "Lecture list" %}</h2>
@@ -58,21 +59,21 @@
           {% endcomment %}
           {% for l in lectures %}
             {% blocktrans asvar exclude_title %}Hide {{ l }}{% endblocktrans %}
-            <tr class="course-{{ l.course_id }} lecture-{{ l.id }}{% if l.exclude %} excluded{% endif %}"
-                title="{{ l.course.name }}">
+            <tr class="course-{{ l.course_id }} lecture-{{ l.lecture_id }}{% if l.exclude %} excluded{% endif %}"
+                title="{{ l.course_name }}">
               {% if advanced %}
                 <td>
                   <input type="checkbox"
                          name="exclude"
-                         value="{{ l.id }}"
+                         value="{{ l.lecture_id }}"
                          {% if l.exclude %}checked="checked"{% endif %}
                          class="noprint"
                          title="{{ exclude_title }}"
                          tabindex="{{ tabindex|default:0|add:4 }}" />
                 </td>
               {% endif %}
-              <td>{{ l.alias|default:l.course.code }}</td>
-              <td>{{ l.get_day_display }}</td>
+              <td>{{ l.alias|default:l.course_code }}</td>
+              <td>{{ l.day|weekday }}</td>
               <td class="nowrap">{{ l.start|time:"H:i" }}-{{ l.end|time:"H:i" }}</td>
               <td class="small">
                 {{ l.title|default:"" }}
@@ -81,10 +82,10 @@
               </td>
               <td class="small">
                 {% if l.stream %}
-                  <a href="{% url 'redirect_stream' l.id %}">{% trans "Stream" %}</a>
-                  {% if rooms|get:l.id %},{% endif %}
+                  <a href="{% url 'redirect_stream' l.lecture_id %}">{% trans "Stream" %}</a>
+                  {% if rooms|get:l.lecture_id %},{% endif %}
                 {% endif %}
-                {% for room in rooms|get:l.id %}
+                {% for room in rooms|get:l.lecture_id %}
                   {% if room.url %}
                     <a href="{% url 'redirect_room' room.id %}">{{ room.name }}</a>
                     {% if not forloop.last %},{% endif %}
@@ -93,10 +94,10 @@
                     {% if not forloop.last %},{% endif %}
                   {% endif %}
                 {% endfor %}
-                {% if not rooms|get:l.id %}&nbsp;{% endif %}
+                {% if not rooms|get:l.lecture_id %}&nbsp;{% endif %}
               </td>
-              <td class="small">{{ l.type|default:"" }}</td>
-              <td class="small">{{ groups|get:l.id|join:", " }}</td>
+              <td class="small">{{ l.type_name|default:"" }}</td>
+              <td class="small">{{ groups|get:l.lecture_id|join:", " }}</td>
               <td class="small nowrap">{{ l.week_numbers|compact|join:", " }}</td>
             </tr>
           {% endfor %}

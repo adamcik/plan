@@ -35,8 +35,8 @@
                 {% if not c.remove %}
                   <td {% if c.colspan > 1 %}colspan="{{ c.colspan }}"{% endif %}
                       {% if c.rowspan > 1 %}rowspan="{{ c.rowspan }}"{% endif %}
-                      {% if c|get:"lecture" or c|get:"time" or c|get:"bottom" or c|get:"last" %} class="{% stripspace %} {% if c|get:"lecture" %}lecture lecture-{{ c.lecture.id }} course-{{ c.lecture.course_id }}{% endif %}
-                      {% if c|get:"lecture" and c.lecture.optional %}optional{% endif %}
+                      {% if c|get:"lecture" or c|get:"time" or c|get:"bottom" or c|get:"last" %} class="{% stripspace %} {% if c|get:"lecture" %}lecture lecture-{{ c.lecture.lecture_id }} course-{{ c.lecture.course_id }}{% endif %}
+                      {% if c|get:"lecture" and c.lecture.type_optional %}optional{% endif %}
                       {% if c.rowspan == 1 %}single{% endif %}
                       {% if c|get:"last" %}last{% endif %}
                       {% if c|get:"bottom" %}bottom{% endif %}
@@ -44,18 +44,18 @@
                       {% endstripspace %}
                       "
                       {% endif %}
-                      {% if c|get:"lecture" %}title="{{ c.lecture.course.name }} {{ c.lecture.start|time:"H:i" }}-{{ c.lecture.end|time:"H:i" }}{% if c.lecture.title %}: {{ c.lecture.title }}{% endif %}
+                      {% if c|get:"lecture" %}title="{{ c.lecture.course_name }} {{ c.lecture.start|time:"H:i" }}-{{ c.lecture.end|time:"H:i" }}{% if c.lecture.title %}: {{ c.lecture.title }}{% endif %}
                       "
                       {% endif %}>
                     <div class="wrapper">
                       {% if c|get:"lecture" %}
-                        <div class="course">{{ c.lecture.alias|default:c.lecture.course.code }}</div>
+                        <div class="course">{{ c.lecture.alias|default:c.lecture.course_code }}</div>
                         <div class="room">
                           {% if c.lecture.stream %}
                             <a href="{{ c.lecture.stream }}">{% trans "Stream" %}</a>
-                            {% if rooms|get:c.lecture.id %},{% endif %}
+                            {% if rooms|get:c.lecture.lecture_id %},{% endif %}
                           {% endif %}
-                          {% for room in rooms|get:c.lecture.id|slice:":2" %}
+                          {% for room in rooms|get:c.lecture.lecture_id|slice:":2" %}
                             {% if room.url %}
                               <a href="{{ room.url }}">{{ room.name }}</a>
                               {% if not forloop.last %},{% endif %}
@@ -68,8 +68,8 @@
                         <div class="type">
                           {% if c.lecture.title %}
                             {{ c.lecture.title }}
-                          {% elif c.lecture.type %}
-                            {{ c.lecture.type }}
+                          {% elif c.lecture.type_name %}
+                            {{ c.lecture.type_name }}
                           {% endif %}
                         </div>
                       {% endif %}

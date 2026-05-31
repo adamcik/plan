@@ -56,48 +56,48 @@
             {% with course_code=course.code|default:"" course_name=course.name|default:"" %}
               {% blocktrans asvar remove_title %}Remove {{ course_code }} {{ course_name }}{% endblocktrans %}
               <tr class="course-{{ course.id }}" title="{{ course.name }}">
-              {% if advanced %}
-                <td>
-                  <input type="checkbox"
-                         name="course_remove"
-                         value="{{ course.id }}"
-                         class="noprint"
-                         title="{{ remove_title }}"
-                         tabindex="{{ tabindex|default:0|add:4 }}" />
-                </td>
-              {% endif %}
-              <td>
-                {% if course.url %}
-                  <a href="{% url 'redirect_course' course.id %}">{{ course.code }}</a>
-                {% else %}
-                  {{ course.code }}
+                {% if advanced %}
+                  <td>
+                    <input type="checkbox"
+                           name="course_remove"
+                           value="{{ course.id }}"
+                           class="noprint"
+                           title="{{ remove_title }}"
+                           tabindex="{{ tabindex|default:0|add:4 }}" />
+                  </td>
                 {% endif %}
-              </td>
-              <td>
-                {% if course.alias_form %}
-                  {% with index=tabindex|default:0|add:5 %}{{ course.alias_form.alias|tabindex:index }}{% endwith %}
-                {% else %}
-                  {{ course.alias|default:"-" }}
-                {% endif %}
-              </td>
-              <td>{{ course.name }}</td>
-              {% if SHOW_SYLLABUS %}
                 <td>
-                  {% if course.syllabus %}
-                    <a href="{% url 'redirect_syllabus' course.id %}">{{ course.syllabus|hostname }}</a>
+                  {% if course.url %}
+                    <a href="{% url 'redirect_course' course.id %}">{{ course.code }}</a>
                   {% else %}
-                    -
+                    {{ course.code }}
                   {% endif %}
                 </td>
-              {% endif %}
-              <td class="nowrap">
-                {% for exam in exams|get:course.id %}
-                  {{ exam.exam_date|date:"Y-m-d" }}
-                  {% if not forloop.last %},{% endif %}
-                {% empty %}
-                  -
-                {% endfor %}
-              </td>
+                <td>
+                  {% if course.alias_form %}
+                    {% with index=tabindex|default:0|add:5 %}{{ course.alias_form.alias|tabindex:index }}{% endwith %}
+                  {% else %}
+                    {{ course.alias|default:"-" }}
+                  {% endif %}
+                </td>
+                <td>{{ course.name }}</td>
+                {% if SHOW_SYLLABUS %}
+                  <td>
+                    {% if course.syllabus %}
+                      <a href="{% url 'redirect_syllabus' course.id %}">{{ course.syllabus|hostname }}</a>
+                    {% else %}
+                      -
+                    {% endif %}
+                  </td>
+                {% endif %}
+                <td class="nowrap">
+                  {% for exam in exams|get:course.id %}
+                    {{ exam.exam_date|date:"Y-m-d" }}
+                    {% if not forloop.last %},{% endif %}
+                  {% empty %}
+                    -
+                  {% endfor %}
+                </td>
               </tr>
             {% endwith %}
           {% endfor %}

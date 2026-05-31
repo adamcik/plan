@@ -161,6 +161,37 @@ class ManagerTestCase(BaseTestCase):
         self.assertEqual(dto, adapted)
         self.assertTrue(all(isinstance(item, LectureData) for item in dto))
 
+    def test_get_lectures_data_flat_output_matches_legacy_flat_output(self):
+        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+        student = Student.objects.get(slug="adamcik")
+
+        legacy = Lecture.objects.get_lectures(semester.id, student.id)
+        dto = Lecture.objects.get_lectures_data(semester.id, student.id)
+
+        def projection(item):
+            return {
+                "lecture_id": item.lecture_id,
+                "course_id": item.course_id,
+                "course_code": item.course_code,
+                "course_name": item.course_name,
+                "type_name": item.type_name,
+                "type_optional": item.type_optional,
+                "day": int(item.day),
+                "start": item.start,
+                "end": item.end,
+                "week_numbers": tuple(item.week_numbers),
+                "alias": item.alias,
+                "exclude": item.exclude,
+                "title": item.title,
+                "summary": item.summary,
+                "stream": item.stream,
+            }
+
+        adapted = [Lecture.objects._to_lecture_data(item) for item in legacy]
+        self.assertEqual(
+            [projection(item) for item in dto], [projection(item) for item in adapted]
+        )
+
     def test_get_lectures_data_characterization_data_contract(self):
         semester = Semester.objects.get(year=2009, type=Semester.SPRING)
         student = Student.objects.get(slug="adamcik")
