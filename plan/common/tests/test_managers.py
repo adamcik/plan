@@ -2,6 +2,7 @@
 
 from datetime import time
 
+from plan.common.lecture_data import LectureData
 from plan.common.models import (
     Course,
     Exam,
@@ -145,6 +146,97 @@ class ManagerTestCase(BaseTestCase):
             item.alias
             for item in lectures
             if item.course_id == subscription.course_id and hasattr(item, "alias")
+        }
+
+        self.assertIn(expected_alias, alias_values)
+
+    def test_get_lectures_data_matches_legacy_adapter_output(self):
+        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+        student = Student.objects.get(slug="adamcik")
+
+        legacy = Lecture.objects.get_lectures(semester.id, student.id)
+        dto = Lecture.objects.get_lectures_data(semester.id, student.id)
+
+        adapted = [Lecture.objects._to_lecture_data(item) for item in legacy]
+        self.assertEqual(dto, adapted)
+        self.assertTrue(all(isinstance(item, LectureData) for item in dto))
+
+    def test_get_lectures_data_characterization_data_contract(self):
+        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+        student = Student.objects.get(slug="adamcik")
+
+        with self.assertNumQueries(1):
+            lectures = Lecture.objects.get_lectures_data(semester.id, student.id)
+
+        self.assertEqual(
+            len(lectures),
+            len({lecture.lecture_id for lecture in lectures}),
+        )
+
+        expected_ids = set(
+            Lecture.objects.filter(course__semester_id=semester.id)
+            .exclude(id=6)
+            .values_list("id", flat=True)
+        )
+        self.assertEqual({lecture.lecture_id for lecture in lectures}, expected_ids)
+
+        self.assertTrue(any(lecture.exclude for lecture in lectures))
+        self.assertTrue(any(not lecture.exclude for lecture in lectures))
+        for lecture in lectures:
+            self.assertEqual(
+                tuple(sorted(set(lecture.week_numbers))),
+                tuple(lecture.week_numbers),
+            )
+
+    def test_get_lectures_data_returns_empty_week_numbers_without_week_rows(self):
+        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+        student = Student.objects.get(slug="adamcik")
+
+        subscription = Subscription.objects.filter(
+            student=student,
+            course__semester=semester,
+        ).first()
+        self.assertIsNotNone(subscription)
+
+        group = subscription.groups.first()
+        self.assertIsNotNone(group)
+
+        lecture = Lecture.objects.create(
+            course=subscription.course,
+            title="No weeks lecture DTO",
+            summary="",
+            stream="",
+            day=0,
+            start=time(10, 0),
+            end=time(11, 0),
+            type=None,
+        )
+        lecture.groups.add(group)
+
+        lectures = Lecture.objects.get_lectures_data(semester.id, student.id)
+        by_id = {item.lecture_id: item for item in lectures}
+        self.assertIn(lecture.id, by_id)
+        self.assertEqual(tuple(by_id[lecture.id].week_numbers), ())
+
+    def test_get_lectures_data_returns_subscription_alias(self):
+        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+        student = Student.objects.get(slug="adamcik")
+
+        subscription = Subscription.objects.filter(
+            student=student,
+            course__semester=semester,
+        ).first()
+        self.assertIsNotNone(subscription)
+
+        expected_alias = "Alias Characterization DTO"
+        subscription.alias = expected_alias
+        subscription.save(update_fields=["alias"])
+
+        lectures = Lecture.objects.get_lectures_data(semester.id, student.id)
+        alias_values = {
+            item.alias
+            for item in lectures
+            if item.course_id == subscription.course_id
         }
 
         self.assertIn(expected_alias, alias_values)

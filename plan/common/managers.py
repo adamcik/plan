@@ -4,12 +4,36 @@ import datetime
 
 from django.db import connection, models
 
+from plan.common.lecture_data import LectureData, Weekday
+
 
 def today():
     return datetime.date.today()
 
 
 class LectureManager(models.Manager):
+    @staticmethod
+    def _to_lecture_data(lecture) -> LectureData:
+        return LectureData(
+            lecture_id=lecture.id,
+            title=lecture.title,
+            summary=lecture.summary,
+            stream=lecture.stream,
+            day=Weekday(lecture.day),
+            start=lecture.start,
+            end=lecture.end,
+            week_numbers=tuple(sorted(set(lecture.week_numbers))),
+            alias=lecture.alias or None,
+            exclude=lecture.exclude,
+            course_id=lecture.course_id,
+            course_code=lecture.course.code,
+            course_name=lecture.course.name,
+            type_id=lecture.type_id,
+            type_code=lecture.type.code if lecture.type_id else None,
+            type_name=lecture.type.name if lecture.type_id else None,
+            type_optional=lecture.type.optional if lecture.type_id else False,
+        )
+
     def get_lectures(self, semester_id, student_id):
         """
         Get all lectures for subscription during given period.
@@ -90,6 +114,12 @@ class LectureManager(models.Manager):
             .only(*fields)
             .order_by(*order)
         )
+
+    def get_lectures_data(self, semester_id, student_id):
+        return [
+            self._to_lecture_data(lecture)
+            for lecture in self.get_lectures(semester_id, student_id)
+        ]
 
 
 class ExamManager(models.Manager):
