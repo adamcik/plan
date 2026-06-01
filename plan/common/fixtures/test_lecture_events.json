@@ -1,0 +1,25 @@
+[
+  {
+    "pk": 12,
+    "model": "common.lecture",
+    "fields": {
+      "last_import": "2015-09-10T00:00:00Z",
+      "lecturers": [],
+      "end": "11:00:00",
+      "start": "10:15:00",
+      "course": 1,
+      "groups": [1],
+      "type": null,
+      "day": 0,
+      "rooms": []
+    }
+  },
+  {
+    "pk": 10,
+    "model": "common.week",
+    "fields": {
+      "lecture": 12,
+      "number": 1
+    }
+  }
+]

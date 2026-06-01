@@ -19,6 +19,8 @@ from plan.common.models import (
 )
 from plan.common.tests import BaseTestCase, strict_template_variables
 
+FIXTURE_LECTURE_ID = 12
+
 
 class EmptyViewTestCase(BaseTestCase):
     def test_index(self):
@@ -49,7 +51,7 @@ class EmptyViewTestCase(BaseTestCase):
 
 
 class ViewTestCase(BaseTestCase):
-    fixtures = ["test_data.json", "test_user.json"]
+    fixtures = ["test_data.json", "test_user.json", "test_lecture_events.json"]
 
     def reverse(self, view_name, *extra_args):
         return django_reverse(
@@ -143,31 +145,11 @@ class ViewTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 200)
 
         lectures = Lecture.objects.get_lectures_data(semester.id, student.id)
-        lecture = next((l for l in lectures if not l.exclude), None)
-        if lecture is None:
-            subscription = Subscription.objects.filter(
-                student=student,
-                course__semester=semester,
-            ).first()
-            self.assertIsNotNone(subscription)
-
-            group = subscription.groups.first()
-            self.assertIsNotNone(group)
-
-            lecture_obj = Lecture.objects.create(
-                course=subscription.course,
-                title="Schedule test lecture",
-                summary="",
-                stream="",
-                day=0,
-                start=datetime.time(10, 15),
-                end=datetime.time(11, 0),
-                type=None,
-            )
-            lecture_obj.groups.add(group)
-
-            lectures = Lecture.objects.get_lectures_data(semester.id, student.id)
-            lecture = next(l for l in lectures if l.lecture_id == lecture_obj.id)
+        lecture = next(
+            (l for l in lectures if l.lecture_id == FIXTURE_LECTURE_ID),
+            None,
+        )
+        self.assertIsNotNone(lecture)
 
         self.assertContains(response, f"lecture-{lecture.lecture_id}")
         self.assertContains(response, f"course-{lecture.course_id}")

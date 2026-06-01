@@ -15,12 +15,12 @@ from plan.common import tests, utils
 from plan.common.models import Exam
 from plan.common.models import Lecture
 from plan.common.models import Semester
-from plan.common.models import Subscription
-from plan.common.models import Week
 from plan.common.schedule import Schedule
 from plan.common.snapshot import get_schedule_snapshot
 from plan.ical import queue
 from plan.ical import views
+
+FIXTURE_LECTURE_ID = 12
 
 
 class EmptyViewTestCase(tests.BaseTestCase):
@@ -53,7 +53,7 @@ class EmptyViewTestCase(tests.BaseTestCase):
 
 
 class ViewTestCase(tests.BaseTestCase):
-    fixtures = ["test_data.json", "test_user.json"]
+    fixtures = ["test_data.json", "test_user.json", "test_lecture_events.json"]
 
     def setUp(self):
         super().setUp()
@@ -264,31 +264,6 @@ class ViewTestCase(tests.BaseTestCase):
         semester = self.snapshot.semester
         student = self.snapshot.student
 
-        subscription = Subscription.objects.filter(
-            student=student,
-            course__semester=semester,
-        ).first()
-        self.assertIsNotNone(subscription)
-
-        group = subscription.groups.first()
-        self.assertIsNotNone(group)
-
-        subscription.alias = "ICAL Test Alias"
-        subscription.save(update_fields=["alias"])
-
-        lecture_obj = Lecture.objects.create(
-            course=subscription.course,
-            title="iCal test lecture",
-            summary="iCal test summary",
-            stream="",
-            day=0,
-            start=datetime.time(10, 15),
-            end=datetime.time(11, 0),
-            type=None,
-        )
-        lecture_obj.groups.add(group)
-        Week.objects.create(lecture=lecture_obj, number=1)
-
         url = self.reverse("schedule-ical-type", "lectures")
         response = self.client.get(f"{url}?no-cache=1", HTTP_ACCEPT_ENCODING="")
         self.assertEqual(response.status_code, 200)
@@ -297,7 +272,7 @@ class ViewTestCase(tests.BaseTestCase):
             semester.id,
             student.id,
         )
-        lecture = next(l for l in lectures if l.lecture_id == lecture_obj.id)
+        lecture = next(l for l in lectures if l.lecture_id == FIXTURE_LECTURE_ID)
 
         body = response.content.decode()
         uid_prefix = f"UID:lecture-{lecture.lecture_id}-"
