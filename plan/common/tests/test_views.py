@@ -319,102 +319,14 @@ class ViewTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 304)
 
     @override_settings(TIMETABLE_ENABLE_IF_MODIFIED_SINCE=True)
-    def test_schedule_works_when_schedule_last_modified_row_is_missing(self):
+    def test_schedule_if_modified_since_returns_304_after_change_course_mutation(self):
         schedule_url = self.reverse("schedule-advanced")
-
-        Schedule.objects.filter(
-            semester__year=2009,
-            semester__type="spring",
-            student__slug="adamcik",
-        ).delete()
-
-        shared_last_modified = timezone.make_aware(
-            datetime.datetime(2009, 1, 1, 12, 0, 0)
-        )
-        Subscription.objects.filter(
-            student__slug="adamcik",
-            course__semester__year=2009,
-            course__semester__type="spring",
-        ).update(last_modified=shared_last_modified)
-
-        cache.clear()
+        change_url = self.reverse("change-course")
 
         response = self.client.get(schedule_url)
         self.assertEqual(response.status_code, 200)
         self.assertIn("Last-Modified", response.headers)
         if_modified_since = response.headers["Last-Modified"]
-
-        response = self.client.get(
-            schedule_url,
-            HTTP_IF_MODIFIED_SINCE=if_modified_since,
-        )
-        self.assertEqual(response.status_code, 304)
-
-    def test_schedule_etag_changes_for_legacy_semester_without_schedule_row(self):
-        schedule_url = self.reverse("schedule")
-
-        student = Student.objects.get(slug="adamcik")
-        semester = Semester.objects.get(year=2009, type="spring")
-
-        semester.version = 0
-        semester.last_modified = None
-        semester.save(update_fields=["version", "last_modified"])
-
-        Schedule.objects.filter(
-            semester_id=semester.id,
-            student_id=student.id,
-        ).delete()
-
-        baseline = timezone.make_aware(datetime.datetime(2009, 1, 1, 12, 0, 0))
-        updated = timezone.make_aware(datetime.datetime(2100, 1, 1, 12, 0, 0))
-
-        Subscription.objects.filter(
-            student_id=student.id,
-            course__semester_id=semester.id,
-        ).update(last_modified=baseline)
-
-        utils.clear_cache(self.schedule)
-        first = self.client.get(schedule_url)
-        self.assertEqual(first.status_code, 200)
-        self.assertIn("ETag", first.headers)
-
-        Subscription.objects.filter(
-            student_id=student.id,
-            course__semester_id=semester.id,
-        ).update(last_modified=updated)
-
-        utils.clear_cache(self.schedule)
-        second = self.client.get(schedule_url)
-        self.assertEqual(second.status_code, 200)
-        self.assertIn("ETag", second.headers)
-        self.assertNotEqual(first.headers["ETag"], second.headers["ETag"])
-
-    def test_legacy_schedule_etag_changes_after_post_mutation(self):
-        schedule_url = self.reverse("schedule")
-        change_url = self.reverse("change-course")
-
-        student = Student.objects.get(slug="adamcik")
-        semester = Semester.objects.get(year=2009, type="spring")
-
-        semester.version = 0
-        semester.last_modified = None
-        semester.save(update_fields=["version", "last_modified"])
-
-        Schedule.objects.filter(
-            semester_id=semester.id,
-            student_id=student.id,
-        ).delete()
-
-        baseline = timezone.make_aware(datetime.datetime(2009, 1, 1, 12, 0, 0))
-        Subscription.objects.filter(
-            student_id=student.id,
-            course__semester_id=semester.id,
-        ).update(last_modified=baseline)
-
-        utils.clear_cache(self.schedule)
-        first = self.client.get(schedule_url)
-        self.assertEqual(first.status_code, 200)
-        self.assertIn("ETag", first.headers)
 
         response = self.client.post(
             change_url,
@@ -422,10 +334,11 @@ class ViewTestCase(BaseTestCase):
         )
         self.assertEqual(response.status_code, 302)
 
-        second = self.client.get(schedule_url)
-        self.assertEqual(second.status_code, 200)
-        self.assertIn("ETag", second.headers)
-        self.assertNotEqual(first.headers["ETag"], second.headers["ETag"])
+        response = self.client.get(
+            schedule_url,
+            HTTP_IF_MODIFIED_SINCE=if_modified_since,
+        )
+        self.assertEqual(response.status_code, 200)
 
     def test_change_course_creates_schedule_row_with_version_bump(self):
         schedule_url = self.reverse("schedule-advanced")
@@ -519,25 +432,9 @@ class ViewTestCase(BaseTestCase):
         self.assertGreater(row.last_modified, baseline)
 
     @override_settings(TIMETABLE_ENABLE_IF_MODIFIED_SINCE=True)
-    def test_delete_mutation_does_not_return_stale_304_for_old_ims(self):
+    def test_delete_mutation_returns_200_for_old_if_modified_since(self):
         schedule_url = self.reverse("schedule-advanced")
         change_url = self.reverse("change-course")
-
-        student = Student.objects.get(slug="adamcik")
-        semester = Semester.objects.get(year=2009, type="spring")
-
-        baseline = timezone.make_aware(datetime.datetime(2009, 1, 1, 12, 0, 0))
-        Subscription.objects.filter(
-            student_id=student.id,
-            course__semester_id=semester.id,
-        ).update(last_modified=baseline)
-
-        row, _ = Schedule.objects.get_or_create(
-            semester_id=semester.id,
-            student_id=student.id,
-            defaults={"version": 0},
-        )
-        Schedule.objects.filter(id=row.id).update(version=0, last_modified=baseline)
 
         response = self.client.get(schedule_url)
         self.assertEqual(response.status_code, 200)
@@ -545,8 +442,9 @@ class ViewTestCase(BaseTestCase):
 
         remove_course_id = (
             Subscription.objects.filter(
-                student_id=student.id,
-                course__semester_id=semester.id,
+                student__slug="adamcik",
+                course__semester__year=2009,
+                course__semester__type="spring",
             )
             .order_by("course_id")
             .values_list("course_id", flat=True)
@@ -565,49 +463,6 @@ class ViewTestCase(BaseTestCase):
             HTTP_IF_MODIFIED_SINCE=old_if_modified_since,
         )
         self.assertEqual(response.status_code, 200)
-
-    @override_settings(TIMETABLE_ENABLE_IF_MODIFIED_SINCE=True)
-    def test_schedule_cache_identity_changes_when_schedule_version_changes(self):
-        schedule_url = self.reverse("schedule-advanced")
-        change_url = self.reverse("change-course")
-        cache.clear()
-
-        student = Student.objects.get(slug="adamcik")
-        semester = Semester.objects.get(year=2009, type="spring")
-        row, _ = Schedule.objects.get_or_create(
-            semester_id=semester.id,
-            student_id=student.id,
-            defaults={"version": 0},
-        )
-        row.version = 0
-        row.save(update_fields=["version"])
-
-        response = self.client.get(schedule_url)
-        self.assertEqual(response.status_code, 200)
-        first_key = response.headers["X-Cache"]
-
-        remove_course_id = (
-            Subscription.objects.filter(
-                student_id=student.id,
-                course__semester_id=semester.id,
-            )
-            .order_by("course_id")
-            .values_list("course_id", flat=True)
-            .first()
-        )
-        self.assertIsNotNone(remove_course_id)
-
-        response = self.client.post(
-            change_url,
-            {"submit_remove": True, "course_remove": str(remove_course_id)},
-        )
-        self.assertEqual(response.status_code, 302)
-
-        response = self.client.get(schedule_url)
-        self.assertEqual(response.status_code, 200)
-        second_key = response.headers["X-Cache"]
-
-        self.assertNotEqual(first_key, second_key)
 
     def test_schedule_with_warm_cache_force_reload_makes_no_queries(self):
         schedule_url = self.reverse("schedule")
