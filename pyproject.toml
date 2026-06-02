@@ -10,6 +10,8 @@ dependencies = [
   "lxml==6.1.0",
   "pillow==12.2.0",
   "psycopg2==2.9.11",
+  "pydantic-parsed-env>=0.1.0a1,<1",
+  "pydantic-settings>=2.0.0,<3",
   "pylibmc>=1.6.3,<2",
   "reportlab==4.4.10",
   "sentry-sdk>=2.0.0,<3",
@@ -51,9 +53,6 @@ packages = ["plan"]
 
 [tool.ruff.lint]
 extend-select = ["I"]
-
-[tool.ruff.lint.per-file-ignores]
-"plan/settings/*.py" = ["F405"]
 
 [tool.ruff.lint.isort]
 known-local-folder = ["plan"]
