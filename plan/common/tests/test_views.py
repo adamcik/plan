@@ -120,6 +120,11 @@ class ViewTestCase(BaseTestCase):
 
         self.assertRedirects(response, self.reverse("schedule-week", 1))
 
+    def test_unknown_semester_name_returns_404(self):
+        response = self.client.get("/2009/autum/")
+
+        self.assertEqual(response.status_code, 404)
+
     def test_schedule(self):
         # FIXME add group help testing
         # FIXME courses without lectures

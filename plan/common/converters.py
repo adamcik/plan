@@ -28,9 +28,12 @@ class SemesterConverter:
             raise RuntimeError(
                 f"Matching regexp failed, this should never happen: {value}"
             )
+        semester_type = match.group(2)
+        if semester_type not in self._types:
+            raise ValueError(f"Unknown semester type: {semester_type}")
         return Semester(
             year=int(match.group(1)),
-            type=self._types[match.group(2)],
+            type=self._types[semester_type],
         )
 
     def to_url(self, semester: Semester) -> str:
