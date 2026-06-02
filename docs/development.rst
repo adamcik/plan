@@ -62,11 +62,8 @@ blocks and basic use-cases for the site remain functioning.
     OK
     Destroying test database...
 
-Django's test framework assumes that the database-user has CREATE DATABASE
-rights in order to create a test database that can be completely reset.  If the
-user setup does not have these rights running the test with the following
-command will run the tests with an in-memory SQLite3 database: ``./manage.py
-test --settings=settings.test``
+The default test runner provisions an ephemeral PostgreSQL instance, so local
+database users do not need CREATE DATABASE rights.
 
 .. seealso::
   `<http://docs.djangoproject.com/en/dev/topics/testing/>`_

@@ -69,20 +69,20 @@ responses, language selection, and debug rendering.
 - Locale middleware currently interprets the raw query string as the language
   code (for example `?nb`), not key/value pairs like `?lang=nb`.
 
-## Local dev: compression modes
+## Local dev: runserver
 
-Use local settings for runserver:
+Use unified settings for runserver. `nix develop` sets local data, cache, and Postgres socket paths:
 
-- `DJANGO_SETTINGS_MODULE=plan.settings.local`
-- `DJANGO_COMPRESS_ENABLED=1` (default in local settings)
-- `DJANGO_COMPRESS_OFFLINE=0` for live/on-request compression (default)
-- `DJANGO_COMPRESS_OFFLINE=1` for offline-manifest mode
+- `DJANGO_SETTINGS_MODULE=plan.settings`
+- `DJANGO_DEBUG=true`
+- `DJANGO_DEBUG_TOOLBAR=1` to enable Django Debug Toolbar
+- `PLAN_BASE_DIR=...` to change the default `data/` directory
 
 Offline mode prep (once after static/template changes):
 
 ```bash
-DJANGO_SETTINGS_MODULE=plan.settings.local ./manage.py collectstatic --noinput
-DJANGO_SETTINGS_MODULE=plan.settings.local DJANGO_COMPRESS_OFFLINE=1 ./manage.py compress --force
+./manage.py collectstatic --noinput
+DJANGO_COMPRESS_ENABLED=true DJANGO_COMPRESS_OFFLINE=true ./manage.py compress --force
 ```
 
 Runserver against helper DB:
@@ -96,7 +96,6 @@ In another shell:
 
 ```bash
 nix develop
-export DJANGO_SETTINGS_MODULE=plan.settings.local
 ./manage.py migrate
 ./manage.py runserver
 ```

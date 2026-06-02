@@ -12,12 +12,12 @@ This repo is Nix-first. Use Nix entrypoints for formatting and full validation.
 ## Tests and database behavior
 
 - Quick test runs can use `python manage.py test` or `django-admin test`.
-- `plan.settings.test` uses a custom Django test runner that provisions an ephemeral PostgreSQL instance automatically.
+- `plan.settings` uses a custom Django test runner that provisions an ephemeral PostgreSQL instance automatically.
 - Full test verification should still use `nix flake check`.
 
 ## Django test settings expectations
 
-- Test checks run with `DJANGO_SETTINGS_MODULE=plan.settings.test`.
+- Test checks run with `DJANGO_SETTINGS_MODULE=plan.settings`.
 - Keep changes compatible with ephemeral Postgres-backed test runs.
 
 ## Practical commands
