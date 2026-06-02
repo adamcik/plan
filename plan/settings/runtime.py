@@ -1,9 +1,14 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+import secrets
 from datetime import date, time, timedelta
 from importlib.resources import files
 
+import sentry_sdk
 from django.utils.safestring import mark_safe
+from sentry_sdk.integrations.django import DjangoIntegration
+
+from plan.settings.env import Settings
 
 PLAN_PACKAGE_ROOT = files("plan")
 
@@ -19,7 +24,7 @@ SILENCED_SYSTEM_CHECKS = [
 ]
 
 # -- Debug settings:
-DEBUG = True
+DEBUG = False
 
 # -- Admin settings:
 ADMINS = (
@@ -292,3 +297,148 @@ nye medlemmer! Er ikke data noe for deg? Finn andre verv på
 <a href="https://samfundet.no/opptak?utm_source=timeplan">samfundet.no</a>
 eller <a href="https://apps.uka.no/opptak/?utm_source=timeplan">uka.no</a>.
 """)
+
+
+env = Settings()
+
+DEBUG = env.django_debug
+
+if env.django_secret_key is not None:
+    SECRET_KEY = env.django_secret_key.get_secret_value()
+elif DEBUG:
+    SECRET_KEY = secrets.token_urlsafe(64)
+else:
+    raise RuntimeError("DJANGO_SECRET_KEY is required when DJANGO_DEBUG is false")
+
+COMPRESS_ENABLED = env.django_compress_enabled
+COMPRESS_OFFLINE = env.django_compress_offline
+
+if DEBUG:
+    COMPRESS_DEBUG_TOGGLE = "no-cache"
+    MIDDLEWARE = (*MIDDLEWARE, "plan.common.middleware.text_debug_middleware")
+
+if env.django_debug_toolbar:
+    INSTALLED_APPS = (*INSTALLED_APPS, "debug_toolbar")
+    MIDDLEWARE = ("debug_toolbar.middleware.DebugToolbarMiddleware", *MIDDLEWARE)
+    DEBUG_TOOLBAR_CONFIG = {
+        "SHOW_TOOLBAR_CALLBACK": lambda request: True,
+    }
+
+if env.sentry_dsn is not None:
+    sentry_sdk.init(
+        dsn=env.sentry_dsn.get_secret_value(),
+        environment=env.sentry_environment,
+        integrations=[
+            DjangoIntegration(
+                middleware_spans=True,
+                cache_spans=True,
+            )
+        ],
+        traces_sample_rate=env.sentry_traces_sample_rate,
+    )
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": env.pgdatabase,
+        "USER": env.pguser,
+        "PASSWORD": env.pgpassword.get_secret_value(),
+        "HOST": env.pghost,
+        "PORT": env.pgport,
+        "CONN_MAX_AGE": env.pgconn_max_age,
+    }
+}
+
+TEST_RUNNER = "plan.testing.runner.PostgresTestRunner"
+
+DATA_DIR = env.plan_base_dir
+CACHE_DIR = env.plan_cache_dir
+
+STATIC_ROOT = str(env.plan_static_root or DATA_DIR / "static")
+STATIC_URL = env.static_url
+COMPRESS_ROOT = STATIC_ROOT
+COMPRESS_URL = STATIC_URL
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": str(CACHE_DIR / "default"),
+        "KEY_PREFIX": "plan",
+    },
+    "ical": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": str(CACHE_DIR / "ical"),
+        "TIMEOUT": timedelta(days=90).total_seconds(),
+        "KEY_PREFIX": "plan-ical",
+        "OPTIONS": {
+            "MAX_ENTRIES": 150000,
+        },
+    },
+    "scraper": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": str(CACHE_DIR / "scraper"),
+        "TIMEOUT": timedelta(days=7).total_seconds(),
+        "KEY_PREFIX": "plan-scraper",
+        "OPTIONS": {
+            "MAX_ENTRIES": 500000,
+        },
+    },
+}
+
+if env.memcached_location is not None:
+    CACHES["default"] = {
+        "BACKEND": "django.core.cache.backends.memcached.PyLibMCCache",
+        "LOCATION": env.memcached_location,
+        "KEY_PREFIX": env.memcached_key_prefix,
+    }
+
+ALLOWED_HOSTS = env.django_allowed_hosts
+CSRF_TRUSTED_ORIGINS = env.django_csrf_trusted_origins
+USE_X_FORWARDED_HOST = env.django_use_x_forwarded_host
+
+if env.django_secure_proxy_ssl_header is not None:
+    header, _, value = env.django_secure_proxy_ssl_header.partition(",")
+    header = header.strip()
+    value = value.strip()
+    if header and value:
+        SECURE_PROXY_SSL_HEADER = (header, value)
+
+EMAIL_SUBJECT_PREFIX = env.email_subject_prefix
+
+if env.timetable_institution is not None:
+    TIMETABLE_INSTITUTION = env.timetable_institution
+
+if env.timetable_public_host is not None:
+    TIMETABLE_PUBLIC_HOST = env.timetable_public_host
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "simple": {
+            "format": "%(asctime)s %(levelname)s %(name)s %(message)s",
+        }
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        }
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": env.django_log_level,
+        },
+        "django.request": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "django.server": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}
