@@ -59,11 +59,13 @@
   {% endif %}
   {% if not courses or advanced %}
     {% nonce script %}
-      <script type="text/javascript"
-              src="{% static 'js/lib/auto-complete.min.js' %}"></script>
-      <script type="text/javascript" src="{% static 'js/autocomplete.js' %}"></script>
-      <script type="text/javascript" src="{% static 'js/toggle.js' %}"></script>
-      <script type="text/javascript" src="{% static 'js/advanced.js' %}"></script>
+      {% compress js %}
+        <script type="text/javascript"
+                src="{% static 'js/lib/auto-complete.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/autocomplete.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/toggle.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/advanced.js' %}"></script>
+      {% endcompress %}
     {% endnonce %}
   {% endif %}
 {% endblock %}
