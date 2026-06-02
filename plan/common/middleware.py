@@ -19,6 +19,14 @@ from plan.common.models import Semester
 from plan.common.utils import parse_accepts
 
 RE_WHITESPACE = re.compile(rb"(\s\s+|\n)")
+SEMESTER_ALIASES = {
+    "autum": Semester.FALL,
+    "autmn": Semester.FALL,
+    "autumn": Semester.FALL,
+}
+SEMESTER_ALIAS_PATTERN = re.compile(
+    r"^/(?P<year>\d{4})/(?P<slug>[a-z]+)(?P<suffix>/.*)?$"
+)
 
 
 class HtmlMinifyMiddleware(MiddlewareMixin):
@@ -140,6 +148,19 @@ def _redirect_to_new_language(request, language):
         return shortcuts.redirect(match.url_name, *match.args, **match.kwargs)
 
 
+def _redirect_semester_alias(request):
+    match = SEMESTER_ALIAS_PATTERN.match(request.path_info)
+    if not match or match.group("slug") not in SEMESTER_ALIASES:
+        return None
+
+    semester_type = SEMESTER_ALIASES[match.group("slug")]
+    suffix = match.group("suffix") or ""
+    url = f"/{match.group('year')}/{Semester.localize(semester_type)}{suffix}"
+    if request.META.get("QUERY_STRING", ""):
+        url += "?" + request.META["QUERY_STRING"]
+    return http.HttpResponsePermanentRedirect(url)
+
+
 def locale_middleware(get_response):
     LANGUAGES = {l for l, _ in settings.LANGUAGES}
 
@@ -163,6 +184,9 @@ def locale_middleware(get_response):
             lang = SLUGS[match.group(1)]
 
         with translation.override(lang, deactivate=True):
+            redirect = _redirect_semester_alias(request)
+            if redirect:
+                return redirect
             response = get_response(request)
             response["Content-Language"] = lang
 

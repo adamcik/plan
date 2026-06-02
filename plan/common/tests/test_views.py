@@ -121,9 +121,21 @@ class ViewTestCase(BaseTestCase):
         self.assertRedirects(response, self.reverse("schedule-week", 1))
 
     def test_unknown_semester_name_returns_404(self):
-        response = self.client.get("/2009/autum/")
+        response = self.client.get("/2009/winter/")
 
         self.assertEqual(response.status_code, 404)
+
+    def test_semester_alias_redirects_to_canonical_slug(self):
+        for alias in ("autum", "autmn", "autumn"):
+            with self.subTest(alias=alias):
+                response = self.client.get(f"/2026/{alias}/")
+
+                self.assertRedirects(
+                    response,
+                    "/2026/fall/",
+                    status_code=301,
+                    fetch_redirect_response=False,
+                )
 
     def test_schedule(self):
         # FIXME add group help testing
