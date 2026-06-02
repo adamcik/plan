@@ -60,14 +60,14 @@
 
       REPO_ROOT=''${REPO_ROOT:-$(jj root 2>/dev/null || git rev-parse --show-toplevel)}
       PGHOST_DIR=''${PGHOST:-$REPO_ROOT/data/pgdata}
-      CONTAINER_PGDATABASE=''${CONTAINER_PGDATABASE:-postgres}
-      CONTAINER_PGUSER=''${CONTAINER_PGUSER:-$(whoami)}
-      CONTAINER_PGPASSWORD=''${CONTAINER_PGPASSWORD:-}
-      CONTAINER_PGPORT=''${CONTAINER_PGPORT:-5432}
+      PGDATABASE=''${PGDATABASE:-postgres}
+      PGUSER=''${PGUSER:-$(whoami)}
+      PGPASSWORD=''${PGPASSWORD:-}
+      PGPORT=''${PGPORT:-5432}
       LOG_FORMAT=''${LOG_FORMAT:-on}
 
-      if [ ! -S "$PGHOST_DIR/.s.PGSQL.$CONTAINER_PGPORT" ]; then
-        echo "Postgres socket not found at $PGHOST_DIR/.s.PGSQL.$CONTAINER_PGPORT" >&2
+      if [ ! -S "$PGHOST_DIR/.s.PGSQL.$PGPORT" ]; then
+        echo "Postgres socket not found at $PGHOST_DIR/.s.PGSQL.$PGPORT" >&2
         echo "Start DB first: run-db" >&2
         exit 1
       fi
@@ -83,18 +83,18 @@
       mkdir -p "$REPO_ROOT/data/cache/default" "$REPO_ROOT/data/cache/ical" "$REPO_ROOT/data/cache/scraper"
 
       echo "run-container: ENGINE=$ENGINE IMAGE_REF=$IMAGE_REF"
-      echo "run-container: DJANGO_SETTINGS_MODULE=plan.settings.container PGDATABASE=$CONTAINER_PGDATABASE PGUSER=$CONTAINER_PGUSER PGHOST=/pgsocket PGPORT=$CONTAINER_PGPORT"
+      echo "run-container: DJANGO_SETTINGS_MODULE=plan.settings PGDATABASE=$PGDATABASE PGUSER=$PGUSER PGHOST=/pgsocket PGPORT=$PGPORT"
 
       exec "$ENGINE" run --rm --network host \
         --user "$(id -u):$(id -g)" \
-        -e DJANGO_SETTINGS_MODULE=plan.settings.container \
+        -e DJANGO_SETTINGS_MODULE=plan.settings \
         -e DJANGO_SECRET_KEY=dev \
         -e DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost \
-        -e PGDATABASE="$CONTAINER_PGDATABASE" \
-        -e PGUSER="$CONTAINER_PGUSER" \
-        -e PGPASSWORD="$CONTAINER_PGPASSWORD" \
+        -e PGDATABASE="$PGDATABASE" \
+        -e PGUSER="$PGUSER" \
+        -e PGPASSWORD="$PGPASSWORD" \
         -e PGHOST=/pgsocket \
-        -e PGPORT="$CONTAINER_PGPORT" \
+        -e PGPORT="$PGPORT" \
         -e PLAN_UWSGI_LOG_FORMAT="$LOG_FORMAT" \
         -v "$PGHOST_DIR:/pgsocket" \
         -v "$REPO_ROOT/data/cache:/var/cache/plan" \
@@ -115,7 +115,9 @@
         runContainer
       ];
       env = {
-        "DJANGO_SETTINGS_MODULE" = "plan.settings.default";
+        "DJANGO_SETTINGS_MODULE" = "plan.settings";
+        "DJANGO_DEBUG" = "true";
+        "DJANGO_COMPRESS_ENABLED" = "false";
         "VIRTUAL_ENV" = "${config.uv2nix.devVenv}";
       };
 
@@ -123,6 +125,11 @@
         unset PYTHONPATH
         export REPO_ROOT=$(jj root 2> /dev/null || git rev-parse --show-toplevel)
         export PATH="${config.uv2nix.devVenv}/bin:$PATH"
+        export PLAN_BASE_DIR="''${PLAN_BASE_DIR:-$REPO_ROOT/data}"
+        export PLAN_CACHE_DIR="''${PLAN_CACHE_DIR:-$REPO_ROOT/data/cache}"
+        export PGDATABASE="''${PGDATABASE:-postgres}"
+        export PGUSER="''${PGUSER:-$(whoami)}"
+        export PGHOST="''${PGHOST:-$REPO_ROOT/data/pgdata}"
       '';
 
       # motd = ''

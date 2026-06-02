@@ -85,9 +85,12 @@
           src = ../.;
         } ''
           cd $src
-          export DJANGO_SETTINGS_MODULE="plan.settings.default"
+          export DJANGO_SETTINGS_MODULE="plan.settings"
           export DJANGO_SECRET_KEY="test"
+          export DJANGO_COMPRESS_ENABLED="false"
           export PLAN_BASE_DIR="$TMPDIR/plan"
+          export PLAN_CACHE_DIR="$TMPDIR/cache"
+          export PGHOST="$TMPDIR/pgsocket"
           mkdir -p "$PLAN_BASE_DIR"
           python manage.py check
           touch $out
@@ -99,9 +102,12 @@
           src = ../.;
         } ''
            cd $src
-          export DJANGO_SETTINGS_MODULE="plan.settings.default"
+          export DJANGO_SETTINGS_MODULE="plan.settings"
           export DJANGO_SECRET_KEY="test"
+          export DJANGO_COMPRESS_ENABLED="false"
           export PLAN_BASE_DIR="$TMPDIR/plan"
+          export PLAN_CACHE_DIR="$TMPDIR/cache"
+          export PGHOST="$TMPDIR/pgsocket"
           mkdir -p "$PLAN_BASE_DIR"
           python manage.py test --noinput
           touch $out
@@ -113,8 +119,9 @@
           src = ../.;
         } ''
           cd $src
-          export DJANGO_SETTINGS_MODULE="plan.settings.default"
+          export DJANGO_SETTINGS_MODULE="plan.settings"
           export DJANGO_SECRET_KEY="test"
+          export DJANGO_COMPRESS_ENABLED="false"
           export PLAN_BASE_DIR="$TMPDIR/plan"
           export PLAN_CACHE_DIR="$TMPDIR/cache"
           export PLAN_STATIC_ROOT="$TMPDIR/static"
@@ -151,9 +158,11 @@
           po_manifest "$TMPDIR/before" > "$TMPDIR/before.po.sha256"
 
           cd "$TMPDIR/after"
-          export DJANGO_SETTINGS_MODULE="plan.settings.default"
+          export DJANGO_SETTINGS_MODULE="plan.settings"
           export DJANGO_SECRET_KEY="test"
           export PLAN_BASE_DIR="$TMPDIR/plan"
+          export PLAN_CACHE_DIR="$TMPDIR/cache"
+          export PGHOST="$TMPDIR/pgsocket"
           mkdir -p "$PLAN_BASE_DIR"
 
           python manage.py compilemessages

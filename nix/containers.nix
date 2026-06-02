@@ -93,7 +93,7 @@
         mkdir -p "$TMPDIR/static"
 
         cd "$src"
-        export DJANGO_SETTINGS_MODULE="plan.settings.container"
+        export DJANGO_SETTINGS_MODULE="plan.settings"
         export DJANGO_DEBUG_TOOLBAR=1
         export PLAN_BASE_DIR="$TMPDIR"
         export PLAN_STATIC_ROOT="$TMPDIR/static"
@@ -143,7 +143,7 @@
         Env = [
           "SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
           "PYTHONDONTWRITEBYTECODE=1"
-          "DJANGO_SETTINGS_MODULE=plan.settings.container"
+          "DJANGO_SETTINGS_MODULE=plan.settings"
           "PLAN_BASE_DIR=/var/lib/plan"
           "PLAN_CACHE_DIR=/var/cache/plan"
           "PLAN_UWSGI_STATIC_ROOT=/var/lib/plan/static"
