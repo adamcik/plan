@@ -26,5 +26,4 @@ Contents
 
    screenshots
    data
-   deployment
    development
