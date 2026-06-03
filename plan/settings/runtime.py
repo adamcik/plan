@@ -170,7 +170,7 @@ COMPRESS_FILTERS = {
         "compressor.filters.datauri.CssDataUriFilter",
         "compressor.filters.cssmin.CSSMinFilter",
     ),
-    "js": (),
+    "js": ("compressor.filters.jsmin.JSMinFilter",),
 }
 
 COMPRESS_DATA_URI_MAX_SIZE = 5 << 10
