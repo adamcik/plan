@@ -368,7 +368,7 @@ CACHES = {
         "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
         "LOCATION": str(CACHE_DIR / "ical"),
         "TIMEOUT": timedelta(days=90).total_seconds(),
-        "KEY_PREFIX": "plan-ical",
+        "KEY_PREFIX": env.plan_ical_cache_key_prefix,
         "OPTIONS": {
             "MAX_ENTRIES": 150000,
         },
@@ -377,7 +377,7 @@ CACHES = {
         "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
         "LOCATION": str(CACHE_DIR / "scraper"),
         "TIMEOUT": timedelta(days=7).total_seconds(),
-        "KEY_PREFIX": "plan-scraper",
+        "KEY_PREFIX": env.plan_scraper_cache_key_prefix,
         "OPTIONS": {
             "MAX_ENTRIES": 500000,
         },

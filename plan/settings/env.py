@@ -42,6 +42,12 @@ class Settings(ParsedEnvSettings):
         Path("/var/cache/plan"), validation_alias="PLAN_CACHE_DIR"
     )
     plan_static_root: Path | None = Field(None, validation_alias="PLAN_STATIC_ROOT")
+    plan_ical_cache_key_prefix: str = Field(
+        "plan-ical", validation_alias="PLAN_ICAL_CACHE_KEY_PREFIX"
+    )
+    plan_scraper_cache_key_prefix: str = Field(
+        "plan-scraper", validation_alias="PLAN_SCRAPER_CACHE_KEY_PREFIX"
+    )
 
     pgdatabase: str = Field("plan", validation_alias="PGDATABASE")
     pguser: str = Field("plan", validation_alias="PGUSER")
