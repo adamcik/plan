@@ -99,6 +99,7 @@
         export PLAN_STATIC_ROOT="$TMPDIR/static"
         export STATIC_URL="/_/static/"
         export DJANGO_SECRET_KEY="nix-build-static"
+        export DJANGO_COMPRESS_ENABLED="true"
         python manage.py collectstatic --noinput
         python manage.py compress --force
 

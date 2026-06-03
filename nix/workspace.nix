@@ -125,6 +125,7 @@
           export PLAN_BASE_DIR="$TMPDIR/plan"
           export PLAN_CACHE_DIR="$TMPDIR/cache"
           export PLAN_STATIC_ROOT="$TMPDIR/static"
+          export DJANGO_COMPRESS_ENABLED="true"
           mkdir -p "$PLAN_BASE_DIR" "$PLAN_CACHE_DIR" "$PLAN_STATIC_ROOT"
           python manage.py collectstatic --noinput
           python manage.py compress --force
