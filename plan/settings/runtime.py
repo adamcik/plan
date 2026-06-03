@@ -361,8 +361,7 @@ COMPRESS_URL = STATIC_URL
 
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
-        "LOCATION": str(CACHE_DIR / "default"),
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
         "KEY_PREFIX": "plan",
     },
     "ical": {
