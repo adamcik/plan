@@ -1,5 +1,11 @@
 {
   description = "Plan - Hardened Nix-Python Deployment Stack";
+
+  nixConfig = {
+    extra-substituters = ["https://plan.cachix.org"];
+    extra-trusted-public-keys = ["plan.cachix.org-1:eYz3UrMq99w6E59pVX6NkCFn5xkcDosEXuEIcee1oTE="];
+  };
+
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 

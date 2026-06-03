@@ -109,6 +109,7 @@
         basedpyright
         tombi
         djlint
+        cachix
         config.uv2nix.devVenv
         postgresql_17
         runDb
