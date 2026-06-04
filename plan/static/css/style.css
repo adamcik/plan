@@ -188,12 +188,17 @@ td.error select {
   margin-bottom: 0.5em;
 }
 
+#tips dl {
+  margin-left: 0;
+}
+
 #tips dt {
-  width: 16px;
+  width: 2em;
   float: left;
+  text-align: center;
 }
 #tips dd {
-  margin-left: 20px;
+  margin-left: 2.5em;
   line-height: 16px;
   margin-bottom: 0.8em;
 }

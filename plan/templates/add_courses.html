@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load icons %}
 
 {% if advanced or not courses %}
   <form action="{% url 'change-course' schedule.semester schedule.student.slug %}"
@@ -25,9 +26,7 @@
              tabindex="{{ tabindex|default:0|add:2 }}" />
       <button name="submit_add"
               type="submit"
-              tabindex="{{ tabindex|default:0|add:2 }}">
-        <i class="icon-plus-sign"></i> {% trans "Add course" %}
-      </button>
+              tabindex="{{ tabindex|default:0|add:2 }}">{% icon "add" %} {% trans "Add course" %}</button>
     </p>
   </form>
 {% endif %}

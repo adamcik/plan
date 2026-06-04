@@ -2,6 +2,7 @@
 
 {% load color %}
 {% load compress %}
+{% load icons %}
 {% load i18n %}
 {% load nonce %}
 {% load static %}
@@ -63,7 +64,7 @@
       {% if next_semester %}
         {% url 'semester' next_semester.year next_semester.slug as next_semester_url %}
         <p class="large">
-          <i class="icon-info-sign"></i>
+          {% icon "information" %}
           {% blocktrans with url=next_semester_url %}
             A new semester is available, <a href="{{ url }}">click here</a> to get started.
           {% endblocktrans %}
@@ -82,9 +83,7 @@
           <p class="right">
             {{ schedule_form.semester }}
             {{ schedule_form.slug }}
-            <button type="submit">
-              {% trans "Start" %} <i class="icon-arrow-right"></i>
-            </button>
+            <button type="submit">{% trans "Start" %} {% icon "start" %}</button>
           </p>
         </form>
       </div>

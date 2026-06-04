@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load icons %}
 
 {% get_current_language as LANGUAGE_CODE %}
 {% get_available_languages as LANGUAGES %}
@@ -7,7 +8,7 @@
   {% for code, name in LANGUAGES %}
     {% if LANGUAGE_CODE != code %}
       {% language code %}
-        <i class="icon-globe"></i> <a href="?{{ code }}">{% trans "Switch to English" %}</a>
+        {% icon "language" %} <a href="?{{ code }}">{% trans "Switch to English" %}</a>
       {% endlanguage %}
     {% endif %}
   {% endfor %}

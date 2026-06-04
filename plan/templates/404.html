@@ -1,6 +1,7 @@
 {% extends "base_site.html" %}
 
 {% load i18n %}
+{% load icons %}
 
 {% block title %}
   {{ block.super }} - {% trans "Page not found" %}
@@ -15,7 +16,7 @@
   <div id="help">
     <p class="large">
       {% url 'frontpage' as frontpage_url %}
-      <i class="icon-warning-sign"></i>
+      {% icon "warning" %}
       {% blocktrans with request_path|default:"-" as path %}
         <code>{{ path }}</code> could not be found. Try going back or
         starting over from the <a href="{{ frontpage_url }}">frontpage</a>.

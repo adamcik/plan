@@ -1,5 +1,6 @@
 {% load get %}
 {% load hostname %}
+{% load icons %}
 {% load i18n %}
 {% load tabindex %}
 
@@ -25,13 +26,11 @@
 
         <div class="yui-u">
           <p class="right">
-            <button name="submit_name" type="submit">
-              <i class="icon-pencil" tabindex="{{ tabindex|default:0|add:6 }}"></i> {% trans "Update names" %}
-            </button>
+            <button name="submit_name" type="submit">{% icon "edit" %} {% trans "Update names" %}</button>
             <button name="submit_remove"
                     type="submit"
                     tabindex="{{ tabindex|default:0|add:6 }}">
-              <i class="icon-remove"></i> {% trans "Remove selected" %}
+              {% icon "remove" %} {% trans "Remove selected" %}
             </button>
           </p>
         </div>

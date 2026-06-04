@@ -1,6 +1,7 @@
 {% extends "base_site.html" %}
 
 {% load i18n %}
+{% load icons %}
 
 {% block title %}
   {{ block.super }} - {% trans "Server error" %}
@@ -14,7 +15,7 @@
 {% block bd %}
   <div id="help">
     <p>
-      <i class="icon-flag"></i>
+      {% icon "report-problem" %}
       {% trans "An error has occurred, sorry about the inconvenience." %}
       {% trans "The server administrator has already been notified of this error." %}
     </p>

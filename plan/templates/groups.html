@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load icons %}
 
 <form action="{% url 'change-groups' schedule.semester schedule.student.slug %}"
       method="post"
@@ -40,8 +41,6 @@
     {% endfor %}
   </div>
   <p class="clear">
-    <button type="submit">
-      <i class="icon-save"></i> {% trans "Save groups" %}
-    </button>
+    <button type="submit">{% icon "save" %} {% trans "Save groups" %}</button>
   </p>
 </form>

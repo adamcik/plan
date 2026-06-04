@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load icons %}
 
 {% url 'shortcut' slug as shortcut_url %}
 {% url 'course-list' semester.year semester.slug slug as course_list_url %}
@@ -12,25 +13,25 @@
 <div class="yui-g noprint" id="tips">
   <div class="yui-u first">
     <dl>
-      <dt class="icon-plus-sign"></dt>
+      <dt>{% icon "add" %}</dt>
       <dd>
         {% trans "Multiple courses can be added at once by separating course codes with spaces." %}
       </dd>
-      <dt class="icon-link"></dt>
+      <dt>{% icon "share-link" %}</dt>
       <dd>
         {% blocktrans with PUBLIC_HOST as host %}
           For quick access to your schedule simply go to
           <a href="{{ shortcut_url }}">{{ host }}{{ shortcut_url }}</a>
         {% endblocktrans %}
       </dd>
-      <dt class="icon-ban-circle"></dt>
+      <dt>{% icon "hide" %}</dt>
       <dd>
         {% blocktrans %}
           Did you know that you can choose to hide lectures that you don't want to be shown under
           <a href="{{ adavanced_url }}">advanced options</a>?
         {% endblocktrans %}
       </dd>
-      <dt class="icon-save"></dt>
+      <dt>{% icon "groups" %}</dt>
       <dd>
         {% blocktrans %}
           Did you know that you can select which groups (paralleller) you
@@ -41,14 +42,14 @@
   </div>
   <div class="yui-u">
     <dl>
-      <dt class="icon-pencil"></dt>
+      <dt>{% icon "edit" %}</dt>
       <dd>
         {% blocktrans %}
           Did you know that you can change which names are used for courses under
           <a href="{{ adavanced_url }}">advanced options</a>?
         {% endblocktrans %}
       </dd>
-      <dt class="icon-calendar"></dt>
+      <dt>{% icon "calendar" %}</dt>
       <dd>
         {% blocktrans %}
           Calendar export:
@@ -59,7 +60,7 @@
         <br />
         {% trans "Simply download or copy the link to the calendar you want and add it to any application that supports the Ical format." %}
       </dd>
-      <dt class="icon-external-link"></dt>
+      <dt>{% icon "calendar-import" %}</dt>
       <dd>
         {% trans "Google calendar:" %}
         <a target="_blank"

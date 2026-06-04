@@ -1,16 +1,17 @@
 {% load i18n %}
+{% load icons %}
 
 {% if courses %}
   <div class="yui-g noprint">
     <div class="yui-u first">
       <p>
         {% if advanced %}
-          <i class="icon-wrench"></i> <a href="{% url 'schedule' schedule.semester schedule.student.slug %}">{% trans "Hide advanced options" %}</a>
+          {% icon "advanced-options" %} <a href="{% url 'schedule' schedule.semester schedule.student.slug %}">{% trans "Hide advanced options" %}</a>
         {% else %}
-          <i class="icon-wrench"></i> <a href="{% url 'schedule-advanced' schedule.semester schedule.student.slug %}">{% trans "Advanced options" %}</a>
+          {% icon "advanced-options" %} <a href="{% url 'schedule-advanced' schedule.semester schedule.student.slug %}">{% trans "Advanced options" %}</a>
         {% endif %}
-        - <i class="icon-question-sign"></i> <a href="#tips">{% trans "Tips" %}</a>
-        - <i class="icon-download-alt"></i>
+        - {% icon "help" %} <a href="#tips">{% trans "Tips" %}</a>
+        - {% icon "download-pdf" %}
         {% if week %}
           <a href="{% url 'schedule-pdf-size-week' schedule.semester schedule.student.slug 'A4' week %}">A4</a>
           <a href="{% url 'schedule-pdf-size-week' schedule.semester schedule.student.slug 'A5' week %}">A5</a>
@@ -26,7 +27,7 @@
     </div>
     <div class="yui-u">
       <p class="right">
-        <i class="icon-list-alt"></i> {% trans "Weeks:" %}
+        {% icon "weeks" %} {% trans "Weeks:" %}
         <a href="{% url 'schedule' schedule.semester schedule.student.slug %}"
            {% if all %}class="current"{% endif %}>{% trans "All" %}</a>
         {% if not week_is_current %}

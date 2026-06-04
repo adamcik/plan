@@ -1,6 +1,7 @@
 {% extends "base_site.html" %}
 
 {% load i18n %}
+{% load icons %}
 {% load static %}
 
 {% block hd %}
@@ -12,7 +13,7 @@
   <div id="help">
     {% if too_many_subscriptions %}
       <p class="large">
-        <i class="icon-flag"></i>
+        {% icon "report-problem" %}
         {% blocktrans %}
           Sorry, but the generator has been set up to limit
           timetables to {{ max }} courses.
@@ -21,7 +22,7 @@
     {% endif %}
     {% if courses %}
       <p class="large">
-        <i class="icon-flag"></i>
+        {% icon "report-problem" %}
         {% trans "Adding the following courses failed:" %}
       </p>
       <ul>

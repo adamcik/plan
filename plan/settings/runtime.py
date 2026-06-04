@@ -183,12 +183,12 @@ TIMETABLE_INSTITUTION_SITE = "http://www.ntnu.no/"
 
 TIMETABLE_SHARE_LINKS = (
     (
-        "icon-twitter-sign",
+        "share-twitter",
         "Twitter",
         "https://twitter.com/share?url=%(url)s&hashtags=timeplan",
     ),
     (
-        "icon-facebook-sign",
+        "share-facebook",
         "Facebook",
         "https://www.facebook.com/sharer/sharer.php?u=%(url)s",
     ),
