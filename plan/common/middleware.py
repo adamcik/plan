@@ -161,6 +161,10 @@ def _redirect_semester_alias(request):
     return http.HttpResponsePermanentRedirect(url)
 
 
+def _response_has_body(response):
+    return getattr(response, "streaming", False) or bool(response.content)
+
+
 def locale_middleware(get_response):
     LANGUAGES = {l for l, _ in settings.LANGUAGES}
 
@@ -188,7 +192,8 @@ def locale_middleware(get_response):
             if redirect:
                 return redirect
             response = get_response(request)
-            response["Content-Language"] = lang
+            if _response_has_body(response):
+                response["Content-Language"] = lang
 
         if not match:  # Only set vary header when we had to guess.
             cache.patch_vary_headers(response, ("Accept-Language",))

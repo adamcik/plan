@@ -205,6 +205,7 @@ class ViewTestCase(BaseTestCase):
 
         self.assertEqual(second.status_code, 304)
         self.assertEqual(second.content, b"")
+        self.assertNotIn("Content-Language", second.headers)
 
     def test_schedule_if_none_match_takes_precedence_over_if_modified_since(self):
         url = self.reverse("schedule")
