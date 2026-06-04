@@ -47,7 +47,7 @@ class EmptyViewTestCase(BaseTestCase):
         response = self.client.get("/favicon.ico")
 
         self.assertEqual(response.status_code, 301)
-        self.assertTrue(response["Location"].endswith("/static/gfx/icons/calendar.png"))
+        self.assertTrue(response["Location"].endswith("/static/favicon.png"))
 
 
 class ViewTestCase(BaseTestCase):

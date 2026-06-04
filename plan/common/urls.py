@@ -11,7 +11,7 @@ urlpatterns = [
     path("robots.txt", views.robots_txt, name="robots-txt"),
     path(
         "favicon.ico",
-        RedirectView.as_view(url=static("gfx/icons/calendar.png"), permanent=True),
+        RedirectView.as_view(url=static("favicon.png"), permanent=True),
         name="favicon",
     ),
     path("<semester:semester>/", views.getting_started, name="semester"),
