@@ -214,8 +214,7 @@ msgstr "Tid"
 msgid "Done"
 msgstr "Ferdig"
 
-#, fuzzy, python-format
-#| msgid "Add courses"
+#, python-format
 msgid "Display %(course)s as:"
 msgstr "Vis %(course)s som"
 
@@ -278,7 +277,6 @@ msgstr "Søk etter emnenavn eller kode"
 msgid "in"
 msgstr "i"
 
-#, fuzzy
 msgid "any location"
 msgstr "alle studiesteder"
 
@@ -392,10 +390,9 @@ msgstr "Beskrivelse"
 msgid "Syllabus"
 msgstr "Pensum"
 
-#, fuzzy, python-format
-#| msgid "Remove %(course)s"
+#, python-format
 msgid "Remove %(course_code)s %(course_name)s"
-msgstr "Fjern %(course.code)s %(course.name)s"
+msgstr "Fjern %(course_code)s %(course_name)s"
 
 #, python-format
 msgid ""
@@ -564,7 +561,7 @@ msgid ""
 "\n"
 "              Please enter a short name identifying your personal\n"
 "              timetable, ie. username, nickname etc. If the name\n"
-"              you select is in already taken, choose another\n"
+"              you select is already taken, choose another\n"
 "              one.\n"
 "            "
 msgstr ""
@@ -618,10 +615,11 @@ msgid "Total number of unique courses added"
 msgstr "Antall unike emner lagt til"
 
 msgid ""
-"Multiple courses can be added at once by separating course codes with spaces."
+"Multiple courses can be added at once by separating course codes with spaces "
+"or commas."
 msgstr ""
 "Legg til flere emner samtidig ved å skrive inn emnekoder adskilt med "
-"mellomrom."
+"mellomrom eller komma."
 
 #, python-format
 msgid ""
@@ -651,7 +649,7 @@ msgstr ""
 msgid ""
 "\n"
 "          Did you know that you can select which groups (paralleller) you\n"
-"          want to attend, and than you can select more than one group?\n"
+"          want to attend, and that you can select more than one group?\n"
 "        "
 msgstr ""
 "\n"
