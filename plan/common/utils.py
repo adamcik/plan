@@ -302,6 +302,8 @@ def natural_sort(values, key=None):
             return k
 
     def split(v):
+        if v is None:
+            return [""]
         return re.split(r"(\d+)", v) if isinstance(v, str) else [v]
 
     def convert(v):
