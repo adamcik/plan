@@ -7,7 +7,6 @@ from reportlab.platypus import tables
 
 from django import http
 from django.utils import dateformat, html, translation
-from django.utils import http as http_utils
 
 from plan.common import utils
 from plan.common.models import Course, Lecture, Room
@@ -81,32 +80,20 @@ def pdf(request, semester, slug, size=None, week=None):
         week = int(week)
         filename += "-%s" % week
 
-    headers = {"X-Robots-Tag": "noindex, nofollow"}
-    if snapshot.last_modified is not None:
-        headers["Last-Modified"] = http_utils.http_date(snapshot.last_modified)
-
-    variant = "pdf"
     route = str(request.resolver_match.url_name)
-    week_part = str(week or 0)
-    size_part = str(size or "")
-    key = utils.response_cache_key(
-        route,
-        snapshot.freshness_key(),
-        variant,
-        size_part,
-        week_part,
+    path = request.path_info
+    cache_key = utils.response_cache_key(route, snapshot.freshness_key(), path)
+    headers = utils.build_validator_headers(
+        cache_key=cache_key,
+        last_modified=snapshot.last_modified,
+        extra_headers={"X-Robots-Tag": "noindex, nofollow"},
     )
-    headers["ETag"] = utils.etag_for_key(key)
-
-    response = utils.check_not_modified(
-        request,
-        snapshot.last_modified,
-        headers,
-    )
+    response = utils.check_not_modified(request, snapshot.last_modified, headers)
     if response:
         return response
 
-    response = http.HttpResponse(content_type="application/pdf", headers=headers)
+    response = http.HttpResponse(content_type="application/pdf")
+    utils.apply_response_headers(response, headers)
     response["Content-Disposition"] = "attachment; filename=%s.pdf" % filename
 
     color_map = ColorMap(hex=True)

@@ -303,42 +303,6 @@ def _schedule_data(s: Schedule, next_semester: Optional[Semester] = None):
     return result
 
 
-# TODO: Can we turn this into a middleware? That would allow us to cache
-# post minification and csp...
-def _check_response_cache(
-    key: str,
-    timeout: Optional[datetime.timedelta],
-    bypass_cache: bool = False,
-) -> Optional[http.HttpResponse]:
-    if timeout is None or bypass_cache:
-        return None
-
-    response = cache.get(key)
-    if response:
-        response["X-Cache"] = f"hit; key={key}"
-    return response
-
-
-def _store_response_cache(
-    key: str,
-    response: http.HttpResponse,
-    timeout: Optional[datetime.timedelta] = None,
-    bypass_cache: bool = False,
-):
-    if timeout is None:
-        response["X-Cache"] = f"miss; disabled; key={key}"
-        return
-
-    # TODO: It would be nice to have the HTML minified and then stored
-    # pre-compressed in the cache. Size difference is e.g. 6086 vs 77053.
-    cache.set(key, response, timeout=timeout.total_seconds())
-
-    if bypass_cache:
-        response["X-Cache"] = f"miss; bypass; key={key}"
-    else:
-        response["X-Cache"] = f"miss; key={key}"
-
-
 def schedule(
     request,
     semester: Semester,
@@ -353,40 +317,29 @@ def schedule(
     except ScheduleSnapshotNotFound:
         raise http.Http404
 
-    bypass_cache = utils.should_bypass_cache(request)
-
     current_week = get_current_week()
 
     # Color mapping for the courses
     color_map = utils.ColorMap(hex=True)
 
-    headers = {"X-Robots-Tag": "noindex, nofollow, noarchive"}
-    if snapshot.last_modified is not None:
-        headers["Last-Modified"] = http_date(snapshot.last_modified)
-
-    variant = "html"
+    bypass_cache = utils.should_bypass_cache(request)
     route = str(request.resolver_match.url_name)
-    path = request.path_info.rstrip("/") or "/"
-    key = utils.response_cache_key(route, snapshot.freshness_key(), variant, path)
-    headers["ETag"] = utils.etag_for_key(key)
-
-    response = utils.check_not_modified(
-        request,
-        snapshot.last_modified,
-        headers,
+    path = request.path_info
+    cache_key = utils.response_cache_key(route, snapshot.freshness_key(), path)
+    headers = utils.build_validator_headers(
+        cache_key=cache_key,
+        last_modified=snapshot.last_modified,
+        extra_headers={"X-Robots-Tag": "noindex, nofollow, noarchive"},
     )
+    response = utils.check_not_modified(request, snapshot.last_modified, headers)
     if response:
         return response
 
-    key = utils.response_cache_key(
-        route,
-        snapshot.freshness_key(),
-        variant,
-        "identity",
-        path,
-    )
-    response = _check_response_cache(
-        key, settings.TIMETABLE_SCHEDULE_CACHE_DURATION, bypass_cache
+    response = utils.lookup_cached_response(
+        cache_alias="default",
+        cache_key=cache_key,
+        headers=headers,
+        bypass=bypass_cache,
     )
     if response:
         return response
@@ -479,14 +432,19 @@ def schedule(
         },
     )
 
-    for header, value in headers.items():
-        response.headers[header] = value
+    utils.apply_response_headers(response, headers)
     CspMiddleware.store_nonce_in_header(request, response)
+    timeout = None
+    if settings.TIMETABLE_SCHEDULE_CACHE_DURATION is not None:
+        timeout = settings.TIMETABLE_SCHEDULE_CACHE_DURATION.total_seconds()
 
-    _store_response_cache(
-        key, response, settings.TIMETABLE_SCHEDULE_CACHE_DURATION, bypass_cache
+    return utils.store_cached_response(
+        cache_alias="default",
+        cache_key=cache_key,
+        response=response,
+        timeout=timeout,
+        bypass=bypass_cache,
     )
-    return response
 
 
 def select_groups(request, semester: Semester, slug: str):

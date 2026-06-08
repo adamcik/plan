@@ -9,13 +9,14 @@ import re
 import time
 import typing
 import urllib.parse
+from collections.abc import Mapping
 
 import brotli
 import typing_extensions
 
 from django import http, template
 from django.conf import settings
-from django.core.cache import cache
+from django.core.cache import cache, caches
 from django.db import models
 from django.utils import cache as cache_utils
 from django.utils import http as http_utils
@@ -157,6 +158,68 @@ def ical_filename(snapshot: ScheduleSnapshot, resources):
 
 Params = typing_extensions.ParamSpec("Params")
 ViewDecorator = typing.Callable[Params, http.HttpResponse]
+
+
+def build_validator_headers(
+    *,
+    cache_key: str,
+    last_modified: int | None,
+    extra_headers: Mapping[str, str] | None = None,
+) -> dict[str, str]:
+    headers = dict(extra_headers or {})
+    if last_modified is not None:
+        headers["Last-Modified"] = http_utils.http_date(last_modified)
+    headers["ETag"] = etag_for_key(cache_key)
+    return headers
+
+
+def apply_response_headers(
+    response: http.HttpResponse,
+    headers: Mapping[str, str],
+) -> http.HttpResponse:
+    for name, value in headers.items():
+        response.headers[name] = value
+    return response
+
+
+def lookup_cached_response(
+    *,
+    cache_alias: str,
+    cache_key: str,
+    headers: Mapping[str, str],
+    bypass: bool = False,
+) -> http.HttpResponse | None:
+    if bypass:
+        return None
+
+    response = caches[cache_alias].get(cache_key)
+    if response is None:
+        return None
+
+    apply_response_headers(response, headers)
+    response["X-Cache"] = f"hit; key={cache_key}"
+    return response
+
+
+def store_cached_response(
+    *,
+    cache_alias: str,
+    cache_key: str,
+    response: http.HttpResponse,
+    timeout: float | None,
+    bypass: bool = False,
+) -> http.HttpResponse:
+    if timeout is None:
+        response["X-Cache"] = f"miss; disabled; key={cache_key}"
+        return response
+
+    caches[cache_alias].set(cache_key, response, timeout=timeout)
+
+    if bypass:
+        response["X-Cache"] = f"miss; bypass; key={cache_key}"
+    else:
+        response["X-Cache"] = f"miss; key={cache_key}"
+    return response
 
 
 def expires_in(timeout: datetime.timedelta):
