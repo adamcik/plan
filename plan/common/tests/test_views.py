@@ -2,7 +2,7 @@
 
 import datetime
 
-from django.core.cache import cache
+from django.core.cache import cache, caches
 from django.test import override_settings
 from django.urls import reverse as django_reverse
 from django.utils import timezone
@@ -17,6 +17,7 @@ from plan.common.models import (
     Student,
     Subscription,
 )
+from plan.common.snapshot import schedule_snapshot_cache_key
 from plan.common.tests import BaseTestCase, strict_template_variables
 
 FIXTURE_LECTURE_ID = 12
@@ -475,6 +476,36 @@ class ViewTestCase(BaseTestCase):
             {"submit_remove": True, "course_remove": str(remove_course_id)},
         )
         self.assertEqual(response.status_code, 302)
+
+        response = self.client.get(
+            schedule_url,
+            HTTP_IF_MODIFIED_SINCE=old_if_modified_since,
+        )
+        self.assertEqual(response.status_code, 200)
+
+    @override_settings(
+        TIMETABLE_ENABLE_IF_MODIFIED_SINCE=True,
+        TIMETABLE_SNAPSHOT_CACHE_DISK_TTL=7 * 24 * 60 * 60,
+    )
+    def test_change_course_invalidates_disk_backed_snapshot_metadata(self):
+        schedule_url = self.reverse("schedule-advanced")
+        change_url = self.reverse("change-course")
+        snapshot_key = schedule_snapshot_cache_key(self.semester, self.student.slug)
+
+        response = self.client.get(schedule_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Last-Modified", response.headers)
+        old_if_modified_since = response.headers["Last-Modified"]
+        self.assertIsNotNone(caches["disk"].get(snapshot_key))
+
+        caches["default"].clear()
+
+        response = self.client.post(
+            change_url,
+            {"submit_add": True, "course_add": "COURSE4"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertIsNone(caches["disk"].get(snapshot_key))
 
         response = self.client.get(
             schedule_url,

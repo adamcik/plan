@@ -1,6 +1,7 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 from django.conf import settings
+from django.core.cache import caches
 
 from plan.common.schedule import Schedule
 from plan.common.tests import BaseTestCase
@@ -45,14 +46,14 @@ class UtilTestCase(BaseTestCase):
         db_key = f"db:schedule:{freshness}"
         resp_key = f"resp:schedule:{freshness}:/"
 
-        from django.core.cache import cache
-
-        cache.set(dto_key, "dto", timeout=60)
-        cache.set(db_key, "db", timeout=60)
-        cache.set(resp_key, "resp", timeout=60)
+        caches["default"].set(dto_key, "dto", timeout=60)
+        caches["disk"].set(dto_key, "dto", timeout=60)
+        caches["default"].set(db_key, "db", timeout=60)
+        caches["default"].set(resp_key, "resp", timeout=60)
 
         clear_cache(schedule)
 
-        self.assertIsNone(cache.get(dto_key))
-        self.assertEqual("db", cache.get(db_key))
-        self.assertEqual("resp", cache.get(resp_key))
+        self.assertIsNone(caches["default"].get(dto_key))
+        self.assertIsNone(caches["disk"].get(dto_key))
+        self.assertEqual("db", caches["default"].get(db_key))
+        self.assertEqual("resp", caches["default"].get(resp_key))

@@ -4,6 +4,7 @@ import datetime
 import copy
 
 from django.conf import settings
+from django.core.cache import caches
 from django.test import TestCase
 from django.test import override_settings
 from django.urls import reverse
@@ -15,6 +16,10 @@ from plan.common.schedule import Schedule
 # TODO(adamcik): switch to proper mock lib.
 class BaseTestCase(TestCase):
     def setUp(self):
+        caches["default"].clear()
+        caches["ical"].clear()
+        caches["disk"].clear()
+
         self.set_now_to(2009, 1, 1)
 
         self.semester = Semester(year=2009, type="spring")
