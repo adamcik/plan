@@ -23,7 +23,7 @@ from django.utils import text as text_utils
 from django.utils import translation
 
 from plan.common.schedule import Schedule
-from plan.common.snapshot import ScheduleSnapshot
+from plan.common.snapshot import ScheduleSnapshot, delete_schedule_snapshot_cache
 
 _ = translation.gettext
 
@@ -32,11 +32,7 @@ _ = translation.gettext
 def clear_cache(
     schedule: Schedule,
 ):
-    year = schedule.semester.year
-    semester_type = schedule.semester.type
-    slug = schedule.student.slug
-
-    cache.delete(f"schedule:{year}-{semester_type}-{slug}")
+    delete_schedule_snapshot_cache(schedule.semester, schedule.student.slug)
 
 
 # TODO: Only allow bypass in DEBUG?

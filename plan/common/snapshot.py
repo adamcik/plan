@@ -1,13 +1,16 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from functools import cache
 from dataclasses import dataclass
 from typing import Optional
 
-from django.core.cache import cache
+from django.conf import settings
+from django.core.cache import caches
 from django.db.models import F
 from django.db.models.aggregates import Max
 from django.utils import timezone
 
+from plan.common.cache import MultiCache
 from plan.common.models import (
     Schedule as ScheduleModel,
     Semester,
@@ -43,11 +46,46 @@ class ScheduleSnapshot:
         )
 
 
+def schedule_snapshot_cache_key(semester: Semester, student_slug: str) -> str:
+    return f"schedule:{semester.year}-{semester.type}-{student_slug}"
+
+
+def delete_schedule_snapshot_cache(semester: Semester, student_slug: str) -> None:
+    key = schedule_snapshot_cache_key(semester, student_slug)
+    caches["default"].delete(key)
+    caches["disk"].delete(key)
+
+
+@cache
+def _schedule_snapshot_cache_for_config(
+    default_ttl: int | None,
+    disk_ttl: int | None,
+) -> MultiCache[ScheduleSnapshot]:
+    if default_ttl is None:
+        raise ValueError("TIMETABLE_SNAPSHOT_CACHE_DEFAULT_TTL must not be None")
+
+    if disk_ttl is not None:
+        return MultiCache[ScheduleSnapshot](default=default_ttl, disk=disk_ttl)
+
+    return MultiCache[ScheduleSnapshot](default=default_ttl)
+
+
+def _schedule_snapshot_cache() -> MultiCache[ScheduleSnapshot]:
+    return _schedule_snapshot_cache_for_config(
+        settings.TIMETABLE_SNAPSHOT_CACHE_DEFAULT_TTL,
+        settings.TIMETABLE_SNAPSHOT_CACHE_DISK_TTL,
+    )
+
+
 def get_schedule_snapshot(semester: Semester, student_slug: str) -> ScheduleSnapshot:
-    key = f"schedule:{semester.year}-{semester.type}-{student_slug}"
-    result = cache.get(key)
-    if result:
-        return result
+    key = schedule_snapshot_cache_key(semester, student_slug)
+    result = _schedule_snapshot_cache().get(key)
+    if result.hit:
+        if result.value is None:
+            raise ValueError(
+                f"Cached schedule snapshot unexpectedly None for key {key}"
+            )
+        return result.value
 
     try:
         schedule_row = ScheduleModel.objects.select_related("semester", "student").get(
@@ -76,7 +114,7 @@ def get_schedule_snapshot(semester: Semester, student_slug: str) -> ScheduleSnap
             semester_version=schedule_row.semester.version,
         )
 
-    cache.set(key, result, timeout=60)
+    _schedule_snapshot_cache().set(key, result)
     return result
 
 

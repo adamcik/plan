@@ -48,6 +48,22 @@ class Settings(ParsedEnvSettings):
     plan_scraper_cache_key_prefix: str = Field(
         "plan-scraper", validation_alias="PLAN_SCRAPER_CACHE_KEY_PREFIX"
     )
+    timetable_ical_cache_duration_seconds: int = Field(
+        30 * 24 * 60 * 60,
+        validation_alias="TIMETABLE_ICAL_CACHE_DURATION_SECONDS",
+    )
+    timetable_schedule_cache_duration_seconds: int | None = Field(
+        None,
+        validation_alias="TIMETABLE_SCHEDULE_CACHE_DURATION_SECONDS",
+    )
+    timetable_snapshot_cache_default_ttl: int = Field(
+        15 * 60,
+        validation_alias="TIMETABLE_SNAPSHOT_CACHE_DEFAULT_TTL",
+    )
+    timetable_snapshot_cache_disk_ttl: int | None = Field(
+        None,
+        validation_alias="TIMETABLE_SNAPSHOT_CACHE_DISK_TTL",
+    )
 
     pgdatabase: str = Field("plan", validation_alias="PGDATABASE")
     pguser: str = Field("plan", validation_alias="PGUSER")

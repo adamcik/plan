@@ -5,8 +5,9 @@ from datetime import date, time, timedelta
 from importlib.resources import files
 
 import sentry_sdk
-from django.utils.safestring import mark_safe
 from sentry_sdk.integrations.django import DjangoIntegration
+
+from django.utils.safestring import mark_safe
 
 from plan.settings.env import Settings
 
@@ -129,6 +130,15 @@ CACHES = {
         "LOCATION": "./cache/ical",
         "TIMEOUT": timedelta(days=90).total_seconds(),
         "KEY_PREFIX": "ical",
+        "OPTIONS": {
+            "MAX_ENTRIES": 150000,
+        },
+    },
+    "disk": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": "./cache/disk",
+        "TIMEOUT": timedelta(days=7).total_seconds(),
+        "KEY_PREFIX": "disk",
         "OPTIONS": {
             "MAX_ENTRIES": 150000,
         },
@@ -277,10 +287,21 @@ TIMETABLE_SHOW_SYLLABUS = True
 # The CSP report URI to use.
 TIMETABLE_REPORT_URI = None
 
-# How long to cache ical feeds for in memory (i.e. not HTTP header caching)
-TIMETABLE_ICAL_CACHE_DURATION = timedelta(days=30)
+# How long to cache ical feeds for in caches (i.e. not HTTP header caching)
+TIMETABLE_ICAL_CACHE_DURATION = None
 
+# Optional timeout for rendered schedule HTML responses cached in Django's
+# default cache. This is separate from HTTP cache headers and separate from the
+# schedule snapshot metadata cache below.
 TIMETABLE_SCHEDULE_CACHE_DURATION = None
+
+# L1 timeout for cached schedule snapshot metadata (student + semester +
+# freshness/version fields) stored in the default cache backend.
+TIMETABLE_SNAPSHOT_CACHE_DEFAULT_TTL = None
+
+# Optional L2 timeout for the same schedule snapshot metadata stored in the
+# disk cache backend. Set to None to disable the disk fallback layer.
+TIMETABLE_SNAPSHOT_CACHE_DISK_TTL = None
 
 # NOTE: Temporary mitigation for stale pages after mutations.
 # Disable If-Modified-Since revalidation globally until freshness tokens are
@@ -300,6 +321,18 @@ eller <a href="https://apps.uka.no/opptak/?utm_source=timeplan">uka.no</a>.
 
 
 env = Settings()
+
+TIMETABLE_ICAL_CACHE_DURATION = timedelta(
+    seconds=env.timetable_ical_cache_duration_seconds
+)
+
+if env.timetable_schedule_cache_duration_seconds is not None:
+    TIMETABLE_SCHEDULE_CACHE_DURATION = timedelta(
+        seconds=env.timetable_schedule_cache_duration_seconds
+    )
+
+TIMETABLE_SNAPSHOT_CACHE_DEFAULT_TTL = env.timetable_snapshot_cache_default_ttl
+TIMETABLE_SNAPSHOT_CACHE_DISK_TTL = env.timetable_snapshot_cache_disk_ttl
 
 DEBUG = env.django_debug
 
@@ -369,6 +402,15 @@ CACHES = {
         "LOCATION": str(CACHE_DIR / "ical"),
         "TIMEOUT": timedelta(days=90).total_seconds(),
         "KEY_PREFIX": env.plan_ical_cache_key_prefix,
+        "OPTIONS": {
+            "MAX_ENTRIES": 150000,
+        },
+    },
+    "disk": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": str(CACHE_DIR / "disk"),
+        "TIMEOUT": timedelta(days=7).total_seconds(),
+        "KEY_PREFIX": "disk",
         "OPTIONS": {
             "MAX_ENTRIES": 150000,
         },
