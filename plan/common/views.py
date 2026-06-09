@@ -336,7 +336,7 @@ def schedule(
         return response
 
     response = utils.lookup_cached_response(
-        cache_alias="default",
+        cache_alias="disk",
         cache_key=cache_key,
         headers=headers,
         bypass=bypass_cache,
@@ -439,7 +439,7 @@ def schedule(
         timeout = settings.TIMETABLE_SCHEDULE_CACHE_DURATION.total_seconds()
 
     return utils.store_cached_response(
-        cache_alias="default",
+        cache_alias="disk",
         cache_key=cache_key,
         response=response,
         timeout=timeout,

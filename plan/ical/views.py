@@ -174,7 +174,7 @@ def ical(request, semester, slug, ical_type=None):
         return response
 
     response = utils.lookup_cached_response(
-        cache_alias="ical",
+        cache_alias="disk",
         cache_key=cache_key,
         headers=headers,
         bypass=bypass_cache,
@@ -196,11 +196,14 @@ def ical(request, semester, slug, ical_type=None):
             response["X-Cache"] = upgraded_header
 
             if settings.TIMETABLE_ICAL_CACHE_DURATION is not None:
-                enqueue_cache_set(
-                    cache_key,
-                    response,
+                utils.store_cached_response(
+                    cache_alias="disk",
+                    cache_key=cache_key,
+                    response=response,
                     timeout=internal_cache_timeout,
+                    queued=True,
                 )
+                response["X-Cache"] = upgraded_header
 
             caches["ical"].delete(candidate_key)
 
@@ -266,16 +269,14 @@ def ical(request, semester, slug, ical_type=None):
     response["Content-Disposition"] = "attachment; filename=%s" % filename
 
     # TODO(adamcik): Rate limit remote hosts?
-    if internal_cache_timeout is None:
-        response["X-Cache"] = f"miss; disabled; key={cache_key}"
-        return response
-
-    enqueue_cache_set(cache_key, response, timeout=internal_cache_timeout)
-    if bypass_cache:
-        response["X-Cache"] = f"miss; bypass; key={cache_key}"
-    else:
-        response["X-Cache"] = f"miss; key={cache_key}"
-    return response
+    return utils.store_cached_response(
+        cache_alias="disk",
+        cache_key=cache_key,
+        response=response,
+        timeout=internal_cache_timeout,
+        bypass=bypass_cache,
+        queued=True,
+    )
 
 
 # TODO: Consider adding redirect/url-shortner for rooms?

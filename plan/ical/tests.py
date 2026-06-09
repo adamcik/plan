@@ -470,6 +470,7 @@ class ViewTestCase(tests.BaseTestCase):
         for case in cases:
             queue.flush_for_tests()
             caches["ical"].clear()
+            caches["disk"].clear()
             url = django_reverse(case["url_name"], args=case["url_args"])
             no_slash = url.rstrip("/")
             with_slash = f"{no_slash}/"

@@ -25,6 +25,7 @@ from django.utils import translation
 
 from plan.common.schedule import Schedule
 from plan.common.snapshot import ScheduleSnapshot, delete_schedule_snapshot_cache
+from plan.ical.queue import enqueue_cache_set
 
 _ = translation.gettext
 
@@ -208,12 +209,18 @@ def store_cached_response(
     response: http.HttpResponse,
     timeout: float | None,
     bypass: bool = False,
+    queued: bool = False,
 ) -> http.HttpResponse:
     if timeout is None:
         response["X-Cache"] = f"miss; disabled; key={cache_key}"
         return response
 
-    caches[cache_alias].set(cache_key, response, timeout=timeout)
+    if queued:
+        if cache_alias != "disk":
+            raise ValueError("queued response caching is only supported for disk")
+        enqueue_cache_set(cache_alias, cache_key, response, timeout)
+    else:
+        caches[cache_alias].set(cache_key, response, timeout=timeout)
 
     if bypass:
         response["X-Cache"] = f"miss; bypass; key={cache_key}"
