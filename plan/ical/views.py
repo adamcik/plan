@@ -40,12 +40,6 @@ def _to_utc(dt: datetime.datetime) -> datetime.datetime:
     return dt.astimezone(UTC)
 
 
-def _normalized_path(path: str) -> str:
-    if path == "/":
-        return path
-    return path.rstrip("/")
-
-
 def _cache_route_name(request) -> str:
     # Keep cache key stable across canonical `/ical/<type>/` and legacy
     # `/ical/<type>` fallback routes so both URL shapes share one entry.
@@ -65,7 +59,7 @@ def _legacy_route_names(request) -> list[str]:
 
 def _legacy_paths(request) -> list[str]:
     path = request.path_info
-    normalized = _normalized_path(path)
+    normalized = path.rstrip("/") or "/"
     paths = [normalized]
     if path not in paths:
         paths.append(path)
@@ -102,9 +96,10 @@ def _legacy_v2_cache_key(path: str, route_name: str, schedule, encoding: str) ->
     )
 
 
-def _legacy_cache_keys(request, schedule, encoding: str) -> list[str]:
+def _legacy_cache_keys(request, schedule) -> list[str]:
     keys = []
     seen = set()
+    encodings = ("identity", "gzip", "br")
 
     def _append(key: str):
         if key in seen:
@@ -114,54 +109,14 @@ def _legacy_cache_keys(request, schedule, encoding: str) -> list[str]:
 
     for route_name in _legacy_route_names(request):
         for path in _legacy_paths(request):
-            _append(_legacy_v2_cache_key(path, route_name, schedule, encoding))
+            for encoding in encodings:
+                _append(_legacy_v2_cache_key(path, route_name, schedule, encoding))
             _append(_legacy_cache_key(path, route_name, schedule))
     return keys
 
 
-def _current_cache_key(request, schedule, encoding: str) -> str:
-    return utils.response_cache_key(
-        _cache_route_name(request),
-        schedule.freshness_key(),
-        _normalized_path(request.path_info),
-        encoding,
-    )
-
-
-def _current_cache_keys(request, schedule, encoding: str) -> list[str]:
-    keys = [_current_cache_key(request, schedule, encoding)]
-    for fallback_encoding in _fallback_encodings(encoding):
-        keys.append(_current_cache_key(request, schedule, fallback_encoding))
-    return keys
-
-
-def _requested_encoding(request) -> str:
-    accepts = utils.parse_accepts(request)
-    if "br" in accepts:
-        return "br"
-    elif "gzip" in accepts:
-        return "gzip"
-    else:
-        return "identity"
-
-
-def _fallback_encodings(encoding: str) -> list[str]:
-    if encoding == "br":
-        return ["gzip", "identity"]
-    elif encoding == "gzip":
-        return ["br", "identity"]
-    else:
-        return ["gzip", "br"]
-
-
-def _legacy_upgrade_response(response, encoding: str):
+def _legacy_upgrade_response(response):
     current_encoding = response.headers.get("Content-Encoding")
-    if encoding == "br" and current_encoding == "br":
-        return response
-    if encoding == "gzip" and current_encoding == "gzip":
-        return response
-    if encoding == "identity" and current_encoding is None:
-        return response
 
     if current_encoding == "br":
         content = brotli.decompress(response.content)
@@ -170,32 +125,6 @@ def _legacy_upgrade_response(response, encoding: str):
     else:
         content = response.content
 
-    if encoding == "br":
-        compressed = brotli.compress(content, brotli.MODE_TEXT)
-        if len(compressed) < len(content):
-            result = http.HttpResponse(
-                compressed,
-                status=response.status_code,
-                headers=response.headers,
-            )
-            result["Content-Encoding"] = "br"
-            result["Content-Length"] = str(len(compressed))
-            cache_utils.patch_vary_headers(result, ("Accept-Encoding",))
-            return result
-
-    if encoding == "gzip":
-        compressed = gzip.compress(content, compresslevel=6, mtime=0)
-        if len(compressed) < len(content):
-            result = http.HttpResponse(
-                compressed,
-                status=response.status_code,
-                headers=response.headers,
-            )
-            result["Content-Encoding"] = "gzip"
-            result["Content-Length"] = str(len(compressed))
-            cache_utils.patch_vary_headers(result, ("Accept-Encoding",))
-            return result
-
     result = http.HttpResponse(
         content,
         status=response.status_code,
@@ -203,8 +132,9 @@ def _legacy_upgrade_response(response, encoding: str):
     )
     if "Content-Encoding" in result:
         del result["Content-Encoding"]
+    if "Vary" in result:
+        del result["Vary"]
     result["Content-Length"] = str(len(content))
-    cache_utils.patch_vary_headers(result, ("Accept-Encoding",))
     return result
 
 
@@ -223,78 +153,51 @@ def ical(request, semester, slug, ical_type=None):
     if snapshot.student is None:
         return http.HttpResponseNotFound()
 
-    # TODO: Turn last modified into middleware?
-    headers = {"X-Robots-Tag": "noindex, nofollow"}
-    if snapshot.last_modified is not None:
-        headers["Last-Modified"] = http_utils.http_date(snapshot.last_modified)
-
-    if snapshot.semester.stale:
-        cache_timeout = datetime.timedelta(days=90)
-    else:
-        cache_timeout = datetime.timedelta(hours=1)
-
     if settings.TIMETABLE_ICAL_CACHE_DURATION is not None:
         internal_cache_timeout = settings.TIMETABLE_ICAL_CACHE_DURATION.total_seconds()
     else:
         internal_cache_timeout = None
 
-    headers.update(utils.cache_headers(cache_timeout, jitter=0.1))
-
-    encoding = _requested_encoding(request)
-    key = _current_cache_key(request, snapshot, encoding)
-    headers["ETag"] = utils.etag_for_key(key)
-
-    response = utils.check_not_modified(
-        request,
-        snapshot.last_modified,
-        headers,
+    bypass_cache = utils.should_bypass_cache(request)
+    route = str(request.resolver_match.url_name)
+    path = request.path_info
+    cache_key = utils.response_cache_key(route, snapshot.freshness_key(), path)
+    headers = utils.build_validator_headers(
+        cache_key=cache_key,
+        last_modified=snapshot.last_modified,
+        extra_headers={"X-Robots-Tag": "noindex, nofollow"},
     )
+    response = utils.check_not_modified(request, snapshot.last_modified, headers)
     if response:
         # This may return 304 before internal cache lookup/bypass.
         # `no-cache` requests still permit conditional 304 responses.
         return response
 
-    # TODO: Turn caching into middleware
-    bypass_cache = utils.should_bypass_cache(request)
+    response = utils.lookup_cached_response(
+        cache_alias="ical",
+        cache_key=cache_key,
+        headers=headers,
+        bypass=bypass_cache,
+    )
+    if response:
+        return response
 
     if not bypass_cache:
-        current_keys = _current_cache_keys(request, snapshot, encoding)
-        legacy_keys = _legacy_cache_keys(request, snapshot, encoding)
-        current_cached = caches["ical"].get_many(current_keys)
-        for index, candidate_key in enumerate(current_keys):
-            candidate_response = current_cached.get(candidate_key)
-            if not candidate_response:
-                continue
-
-            response = _legacy_upgrade_response(candidate_response, encoding)
-            response["ETag"] = headers["ETag"]
-            if index == 0:
-                response["X-Cache"] = f"hit; key={key}"
-            else:
-                response["X-Cache"] = f"hit; key={key}; fallback={candidate_key}"
-
-            if settings.TIMETABLE_ICAL_CACHE_DURATION is not None:
-                enqueue_cache_set(
-                    key,
-                    response,
-                    timeout=internal_cache_timeout,
-                )
-
-            return response
-
+        legacy_keys = _legacy_cache_keys(request, snapshot)
         legacy_cached = caches["ical"].get_many(legacy_keys)
         for candidate_key in legacy_keys:
             candidate_response = legacy_cached.get(candidate_key)
-            if not candidate_response:
+            if candidate_response is None:
                 continue
 
-            response = _legacy_upgrade_response(candidate_response, encoding)
-            response["ETag"] = headers["ETag"]
-            response["X-Cache"] = f"hit; key={candidate_key}; upgraded={key}"
+            response = _legacy_upgrade_response(candidate_response)
+            utils.apply_response_headers(response, headers)
+            upgraded_header = f"hit; key={candidate_key}; upgraded={cache_key}"
+            response["X-Cache"] = upgraded_header
 
             if settings.TIMETABLE_ICAL_CACHE_DURATION is not None:
                 enqueue_cache_set(
-                    key,
+                    cache_key,
                     response,
                     timeout=internal_cache_timeout,
                 )
@@ -304,9 +207,6 @@ def ical(request, semester, slug, ical_type=None):
             return response
 
     filename = utils.ical_filename(snapshot, resources)
-
-    headers["Filename"] = filename  # IE needs this
-    headers["Content-Disposition"] = "attachment; filename=%s" % filename
 
     title = urls.reverse("schedule", args=[snapshot.semester, snapshot.student.slug])
     hostname = settings.TIMETABLE_HOSTNAME or request.headers.get(
@@ -360,26 +260,21 @@ def ical(request, semester, slug, ical_type=None):
     response = http.HttpResponse(
         cal.serialize(),
         content_type="text/calendar; charset=utf-8",
-        headers=headers,
     )
-
-    # NOTE: Most consumers will use compressed response, so we make a point of
-    # compressing with the best possible compression that the current client
-    # supports before putting things in the cache. We have compatibility
-    # middleware that will decompress if needed.
-
-    if settings.TIMETABLE_ICAL_CACHE_DURATION is not None:
-        response["X-Cache"] = f"{'miss' if not bypass_cache else 'bypass'}; key={key}"
-        response = utils.compress_response(request, response)
-        enqueue_cache_set(
-            key,
-            response,
-            timeout=internal_cache_timeout,
-        )
-    else:
-        response["X-Cache"] = f"disabled; key={key}"
+    utils.apply_response_headers(response, headers)
+    response["Filename"] = filename  # IE needs this
+    response["Content-Disposition"] = "attachment; filename=%s" % filename
 
     # TODO(adamcik): Rate limit remote hosts?
+    if internal_cache_timeout is None:
+        response["X-Cache"] = f"miss; disabled; key={cache_key}"
+        return response
+
+    enqueue_cache_set(cache_key, response, timeout=internal_cache_timeout)
+    if bypass_cache:
+        response["X-Cache"] = f"miss; bypass; key={cache_key}"
+    else:
+        response["X-Cache"] = f"miss; key={cache_key}"
     return response
 
 

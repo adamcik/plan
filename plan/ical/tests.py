@@ -14,8 +14,6 @@ from django.utils import http as http_utils
 from plan.common import tests, utils
 from plan.common.models import Exam
 from plan.common.models import Lecture
-from plan.common.models import Semester
-from plan.common.schedule import Schedule
 from plan.common.snapshot import get_schedule_snapshot
 from plan.ical import queue
 from plan.ical import views
@@ -25,10 +23,8 @@ FIXTURE_LECTURE_ID = 12
 
 class EmptyViewTestCase(tests.BaseTestCase):
     def setUp(self):
-        super().setUp()
         queue.flush_for_tests()
-        caches["default"].clear()
-        caches["ical"].clear()
+        super().setUp()
 
     def reverse(self, view, *extra_args):
         return django_reverse(
@@ -56,10 +52,8 @@ class ViewTestCase(tests.BaseTestCase):
     fixtures = ["test_data.json", "test_user.json", "test_lecture_events.json"]
 
     def setUp(self):
-        super().setUp()
         queue.flush_for_tests()
-        caches["default"].clear()
-        caches["ical"].clear()
+        super().setUp()
         self.snapshot = get_schedule_snapshot(self.semester, self.student.slug)
 
     def reverse(self, view, *extra_args):
@@ -87,7 +81,7 @@ class ViewTestCase(tests.BaseTestCase):
         # TODO: Test with slug that does not exist?
 
     @override_settings(TIMETABLE_ENABLE_IF_MODIFIED_SINCE=True)
-    def test_ical_not_modified_returns_304_with_cache_headers(self):
+    def test_ical_not_modified_returns_304_with_validator_headers(self):
         url = self.reverse("schedule-ical")
         first = self.client.get(url)
 
@@ -102,8 +96,7 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertEqual(second.status_code, 304)
         self.assertEqual(second.content, b"")
         self.assertIn("Last-Modified", second.headers)
-        self.assertIn("Cache-Control", second.headers)
-        self.assertIn("Expires", second.headers)
+        self.assertIn("ETag", second.headers)
 
     def test_ical_get_includes_etag_and_last_modified(self):
         url = self.reverse("schedule-ical")
@@ -127,7 +120,6 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertEqual(second.content, b"")
         self.assertEqual(second.headers["ETag"], first.headers["ETag"])
         self.assertIn("Last-Modified", second.headers)
-        self.assertIn("Cache-Control", second.headers)
         self.assertNotIn("X-Cache", second.headers)
 
     def test_ical_if_none_match_non_matching_returns_200(self):
@@ -192,7 +184,7 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertEqual(conditional_head.content, b"")
         self.assertEqual(conditional_head.headers["ETag"], get_response.headers["ETag"])
 
-    def test_ical_etag_changes_when_cache_key_changes(self):
+    def test_ical_etag_is_stable_across_accept_encoding(self):
         url = self.reverse("schedule-ical")
 
         identity = self.client.get(url, HTTP_ACCEPT_ENCODING="")
@@ -200,7 +192,7 @@ class ViewTestCase(tests.BaseTestCase):
 
         self.assertEqual(identity.status_code, 200)
         self.assertEqual(gzip.status_code, 200)
-        self.assertNotEqual(identity.headers["ETag"], gzip.headers["ETag"])
+        self.assertEqual(identity.headers["ETag"], gzip.headers["ETag"])
 
     def test_ical_etag_is_hashed_not_raw(self):
         url = self.reverse("schedule-ical")
@@ -210,8 +202,7 @@ class ViewTestCase(tests.BaseTestCase):
         key = utils.response_cache_key(
             "schedule-ical",
             self.snapshot.freshness_key(),
-            url.rstrip("/"),
-            "identity",
+            url,
         )
         self.assertTrue(etag.startswith('"') and etag.endswith('"'))
         self.assertEqual(len(etag), 66)
@@ -289,58 +280,47 @@ class ViewTestCase(tests.BaseTestCase):
         if lecture.type_optional:
             self.assertIn("TRANSP:TRANSPARENT", event)
 
-    def test_ical_cache_uses_encoding_variants(self):
+    def test_ical_cache_ignores_encoding_variants(self):
         url = self.reverse("schedule-ical")
 
         br_first = self.client.get(url, HTTP_ACCEPT_ENCODING="br")
         queue.flush_for_tests()
         identity_first = self.client.get(url, HTTP_ACCEPT_ENCODING="")
-        queue.flush_for_tests()
 
         self.assertEqual(br_first.status_code, 200)
         self.assertEqual(identity_first.status_code, 200)
         self.assertIn("X-Cache", br_first.headers)
         self.assertIn("X-Cache", identity_first.headers)
-        self.assertIn(":br", br_first.headers["X-Cache"])
-        self.assertIn(":identity", identity_first.headers["X-Cache"])
         self.assertIn("miss", br_first.headers["X-Cache"])
         self.assertIn("hit", identity_first.headers["X-Cache"])
+        self.assertEqual(br_first.headers["ETag"], identity_first.headers["ETag"])
 
         br_second = self.client.get(url, HTTP_ACCEPT_ENCODING="br")
         queue.flush_for_tests()
         identity_second = self.client.get(url, HTTP_ACCEPT_ENCODING="")
-        queue.flush_for_tests()
         gzip_first = self.client.get(url, HTTP_ACCEPT_ENCODING="gzip")
-        queue.flush_for_tests()
         gzip_second = self.client.get(url, HTTP_ACCEPT_ENCODING="gzip")
 
         self.assertIn("hit", br_second.headers["X-Cache"])
-        self.assertIn(":br", br_second.headers["X-Cache"])
         self.assertIn("hit", identity_second.headers["X-Cache"])
-        self.assertIn(":identity", identity_second.headers["X-Cache"])
         self.assertIn("hit", gzip_first.headers["X-Cache"])
-        self.assertIn(":gzip", gzip_first.headers["X-Cache"])
         self.assertIn("hit", gzip_second.headers["X-Cache"])
-        self.assertIn(":gzip", gzip_second.headers["X-Cache"])
 
-    def test_ical_cache_falls_back_to_other_variant_before_regeneration(self):
+    def test_ical_cache_reuses_same_entry_across_encodings(self):
         url = self.reverse("schedule-ical")
 
         identity_first = self.client.get(url, HTTP_ACCEPT_ENCODING="")
         queue.flush_for_tests()
         self.assertEqual(identity_first.status_code, 200)
         self.assertIn("miss", identity_first.headers["X-Cache"])
-        self.assertIn(":identity", identity_first.headers["X-Cache"])
 
         br_after_identity = self.client.get(url, HTTP_ACCEPT_ENCODING="br")
         self.assertEqual(br_after_identity.status_code, 200)
         self.assertIn("hit", br_after_identity.headers["X-Cache"])
-        self.assertIn(":br", br_after_identity.headers["X-Cache"])
 
         gzip_after_identity = self.client.get(url, HTTP_ACCEPT_ENCODING="gzip")
         self.assertEqual(gzip_after_identity.status_code, 200)
         self.assertIn("hit", gzip_after_identity.headers["X-Cache"])
-        self.assertIn(":gzip", gzip_after_identity.headers["X-Cache"])
 
     def test_ical_reads_and_migrates_legacy_v2_cache_key(self):
         url = self.reverse("schedule-ical")
@@ -549,7 +529,7 @@ class ViewTestCase(tests.BaseTestCase):
                 response_content = brotli.decompress(response_content)
             self.assertEqual(response_content, expected_content, case["name"])
 
-    def test_legacy_v2_does_not_fallback_across_encodings(self):
+    def test_legacy_v2_upgrades_across_encodings(self):
         caches["ical"].clear()
         url = self.reverse("schedule-ical")
         legacy_v2_br_key = ":".join(
@@ -577,8 +557,8 @@ class ViewTestCase(tests.BaseTestCase):
         response = self.client.get(url, HTTP_ACCEPT_ENCODING="gzip")
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn("miss", response.headers["X-Cache"])
-        self.assertNotIn("upgraded=", response.headers["X-Cache"])
+        self.assertIn("upgraded=", response.headers["X-Cache"])
+        self.assertEqual(response.content, marker)
 
     def test_legacy_upgrade_populates_current_key_for_next_hit(self):
         caches["ical"].clear()
@@ -608,7 +588,7 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertNotIn("upgraded=", second.headers["X-Cache"])
         self.assertNotIn(f"key={legacy_v1_key}", second.headers["X-Cache"])
 
-    def test_ical_cache_key_is_same_for_type_with_and_without_trailing_slash(self):
+    def test_ical_cache_key_differs_for_type_with_and_without_trailing_slash(self):
         url = self.reverse("schedule-ical-type", "lectures")
         no_slash = url.rstrip("/")
         with_slash = f"{no_slash}/"
@@ -620,37 +600,12 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertEqual(first.status_code, 200)
         self.assertEqual(second.status_code, 200)
         self.assertIn("miss", first.headers["X-Cache"])
-        self.assertIn("hit", second.headers["X-Cache"])
+        self.assertIn("miss", second.headers["X-Cache"])
 
         first_key = first.headers["X-Cache"].split("key=", 1)[1]
         second_key = second.headers["X-Cache"].split("key=", 1)[1]
 
-        self.assertEqual(first_key, second_key)
-
-    def test_ical_cache_control_uses_stale_only_for_http_window(self):
-        current_year = datetime.date.today().year
-        semester = Semester.objects.create(year=current_year, type=Semester.SPRING)
-        current_schedule = Schedule(semester=semester, student=self.student)
-        current_url = django_reverse(
-            "schedule-ical",
-            args=[current_schedule.semester, current_schedule.student.slug],
-        )
-        stale_url = self.reverse("schedule-ical")
-
-        current = self.client.get(f"{current_url}?no-cache=1", HTTP_ACCEPT_ENCODING="")
-        self.assertEqual(current.status_code, 200)
-
-        stale = self.client.get(f"{stale_url}?no-cache=1", HTTP_ACCEPT_ENCODING="")
-        self.assertEqual(stale.status_code, 200)
-
-        current_max_age = int(current.headers["Cache-Control"].split("=")[1])
-        stale_max_age = int(stale.headers["Cache-Control"].split("=")[1])
-
-        self.assertGreaterEqual(current_max_age, 3600)
-        self.assertLessEqual(current_max_age, 3960)
-        self.assertGreaterEqual(stale_max_age, 7776000)
-        self.assertLessEqual(stale_max_age, 8553600)
-        self.assertGreater(stale_max_age, current_max_age)
+        self.assertNotEqual(first_key, second_key)
 
 
 class CacheKeyHelpersTestCase(tests.BaseTestCase):
