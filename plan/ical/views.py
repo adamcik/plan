@@ -41,12 +41,7 @@ def _to_utc(dt: datetime.datetime) -> datetime.datetime:
 
 
 def _cache_route_name(request) -> str:
-    # Keep cache key stable across canonical `/ical/<type>/` and legacy
-    # `/ical/<type>` fallback routes so both URL shapes share one entry.
-    name = request.resolver_match.url_name
-    if name == "schedule-ical-type-fallback":
-        return "schedule-ical-type"
-    return str(name)
+    return str(request.resolver_match.url_name)
 
 
 def _legacy_route_names(request) -> list[str]:

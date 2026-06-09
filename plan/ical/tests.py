@@ -40,9 +40,8 @@ class EmptyViewTestCase(tests.BaseTestCase):
         for arg in ("exams", "lectures"):
             url = self.reverse("schedule-ical-type", arg)
             no_slash = url.rstrip("/")
-            with_slash = f"{no_slash}/"
-            self.assertEqual(self.client.get(no_slash).status_code, 404)
-            self.assertEqual(self.client.get(with_slash).status_code, 404)
+            self.assertEqual(self.client.get(no_slash).status_code, 301)
+            self.assertEqual(self.client.get(url).status_code, 404)
 
         url = self.reverse("schedule-ical-type", "foo")
         self.assertEqual(self.client.get(url).status_code, 404)
@@ -68,15 +67,13 @@ class ViewTestCase(tests.BaseTestCase):
         for arg in ("exams", "lectures"):
             url = self.reverse("schedule-ical-type", arg)
             no_slash = url.rstrip("/")
-            with_slash = f"{no_slash}/"
-            self.assertEqual(self.client.get(no_slash).status_code, 200)
-            self.assertEqual(self.client.get(with_slash).status_code, 200)
+            self.assertEqual(self.client.get(no_slash).status_code, 301)
+            self.assertEqual(self.client.get(url).status_code, 200)
 
         url = self.reverse("schedule-ical-type", "foo")
         no_slash = url.rstrip("/")
-        with_slash = f"{no_slash}/"
-        self.assertEqual(self.client.get(no_slash).status_code, 400)
-        self.assertEqual(self.client.get(with_slash).status_code, 400)
+        self.assertEqual(self.client.get(no_slash).status_code, 301)
+        self.assertEqual(self.client.get(url).status_code, 400)
 
         # TODO: Test with slug that does not exist?
 
@@ -396,15 +393,14 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertIn(f"key={legacy_v2_key}", response.headers["X-Cache"])
         self.assertEqual(response.content, b"legacy-trailing-slash")
 
-    def test_ical_type_reads_legacy_key_from_fallback_route_name(self):
+    def test_ical_type_reads_legacy_key_from_legacy_fallback_route_name(self):
         url = self.reverse("schedule-ical-type", "lectures")
-        no_slash = url.rstrip("/")
         legacy_v2_key = ":".join(
             (
                 "resp",
                 "v2",
                 "schedule-ical-type-fallback",
-                no_slash,
+                url.rstrip("/"),
                 str(self.snapshot.last_modified),
                 "identity",
             )
@@ -416,7 +412,7 @@ class ViewTestCase(tests.BaseTestCase):
             ),
         )
 
-        response = self.client.get(no_slash, HTTP_ACCEPT_ENCODING="")
+        response = self.client.get(url, HTTP_ACCEPT_ENCODING="")
 
         self.assertEqual(response.status_code, 200)
         self.assertIn("upgraded=", response.headers["X-Cache"])
@@ -589,24 +585,14 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertNotIn("upgraded=", second.headers["X-Cache"])
         self.assertNotIn(f"key={legacy_v1_key}", second.headers["X-Cache"])
 
-    def test_ical_cache_key_differs_for_type_with_and_without_trailing_slash(self):
+    def test_ical_type_without_trailing_slash_redirects_to_canonical_url(self):
         url = self.reverse("schedule-ical-type", "lectures")
         no_slash = url.rstrip("/")
-        with_slash = f"{no_slash}/"
 
-        first = self.client.get(no_slash, HTTP_ACCEPT_ENCODING="")
-        queue.flush_for_tests()
-        second = self.client.get(with_slash, HTTP_ACCEPT_ENCODING="")
+        response = self.client.get(no_slash, follow=False)
 
-        self.assertEqual(first.status_code, 200)
-        self.assertEqual(second.status_code, 200)
-        self.assertIn("miss", first.headers["X-Cache"])
-        self.assertIn("miss", second.headers["X-Cache"])
-
-        first_key = first.headers["X-Cache"].split("key=", 1)[1]
-        second_key = second.headers["X-Cache"].split("key=", 1)[1]
-
-        self.assertNotEqual(first_key, second_key)
+        self.assertEqual(response.status_code, 301)
+        self.assertEqual(response["Location"], url)
 
 
 class CacheKeyHelpersTestCase(tests.BaseTestCase):

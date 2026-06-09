@@ -11,9 +11,4 @@ urlpatterns = [
         views.ical,
         name="schedule-ical-type",
     ),
-    path(
-        "<semester:semester>/<student:slug>/ical/<ical_type>",
-        views.ical,
-        name="schedule-ical-type-fallback",
-    ),
 ]
