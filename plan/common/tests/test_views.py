@@ -63,6 +63,30 @@ class ViewTestCase(BaseTestCase):
             args=[self.semester, self.student.slug, *extra_args],
         )
 
+    def assert_valid_html5(self, pages):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            for filename, response in pages.items():
+                self.assertEqual(
+                    response.status_code,
+                    200,
+                    msg=f"expected 200 for {filename}, got {response.status_code}",
+                )
+                (root / filename).write_bytes(response.content)
+
+            result = subprocess.run(
+                ["html5validator", "--root", tmpdir, "--match", "*.html"],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=f"html5validator failed:\n{result.stdout}{result.stderr}",
+        )
+
     # FIXME check what happens when we do GET against change functions
     # FIXME test adding course that does not exist for a given semester
 
@@ -203,30 +227,22 @@ class ViewTestCase(BaseTestCase):
 
     def test_rendered_html_is_valid_html5(self):
         pages = {
+            "start.html": self.client.get(
+                django_reverse("semester", args=[self.semester])
+            ),
             "about.html": self.client.get(django_reverse("about")),
             "schedule.html": self.client.get(self.reverse("schedule")),
             "schedule-advanced.html": self.client.get(
                 self.reverse("schedule-advanced")
             ),
+            "select_groups.html": self.client.get(self.reverse("change-groups")),
+            "error.html": self.client.post(
+                self.reverse("change-course"),
+                {"submit_add": True, "course_add": "NOT_A_REAL_COURSE"},
+            ),
         }
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            root = Path(tmpdir)
-            for filename, response in pages.items():
-                (root / filename).write_bytes(response.content)
-
-            result = subprocess.run(
-                ["html5validator", "--root", tmpdir, "--match", "*.html"],
-                check=False,
-                capture_output=True,
-                text=True,
-            )
-
-        self.assertEqual(
-            result.returncode,
-            0,
-            msg=f"html5validator failed:\n{result.stdout}{result.stderr}",
-        )
+        self.assert_valid_html5(pages)
 
     def test_schedule_if_none_match_returns_304(self):
         url = self.reverse("schedule")
