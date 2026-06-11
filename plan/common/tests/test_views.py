@@ -1,6 +1,7 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import datetime
+import re
 import subprocess
 import tempfile
 from pathlib import Path
@@ -573,6 +574,31 @@ class ViewTestCase(BaseTestCase):
             )
 
         self.assertEqual(response.status_code, 200)
+
+    @override_settings(TIMETABLE_SCHEDULE_CACHE_DURATION=datetime.timedelta(seconds=60))
+    def test_schedule_cache_hit_preserves_csp_nonces(self):
+        schedule_url = self.reverse("schedule")
+        cache.clear()
+        caches["disk"].clear()
+
+        first = self.client.get(schedule_url)
+        self.assertEqual(first.status_code, 200)
+        self.assertIn("miss", first.headers["X-Cache"])
+
+        second = self.client.get(schedule_url)
+        self.assertEqual(second.status_code, 200)
+        self.assertIn("hit", second.headers["X-Cache"])
+
+        policy = second.headers["Content-Security-Policy"]
+        script_match = re.search(r"script-src 'self' 'nonce-([^']+)'", policy)
+        style_match = re.search(r"style-src  'self' 'nonce-([^']+)'", policy)
+
+        self.assertIsNotNone(script_match)
+        self.assertIsNotNone(style_match)
+
+        content = second.content.decode()
+        self.assertIn(f'nonce="{script_match.group(1)}"', content)
+        self.assertIn(f'nonce="{style_match.group(1)}"', content)
 
     def test_schedule_week_with_warm_cache_force_reload_makes_no_queries(self):
         schedule_week_url = self.reverse("schedule-week", 1)
