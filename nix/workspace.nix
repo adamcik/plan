@@ -61,7 +61,7 @@
 
       django-test =
         pkgs.runCommand "django-test" {
-          nativeBuildInputs = [editableVenv pkgs.postgresql_17];
+          nativeBuildInputs = [editableVenv pkgs.postgresql_17 pkgs.html5validator];
           src = ../.;
         } ''
            cd $src

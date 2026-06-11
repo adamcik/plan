@@ -6,8 +6,7 @@
 
 <form action="{% url 'change-course' schedule.semester schedule.student.slug %}"
       method="post"
-      data-toggle-container
-      None="true">
+      data-toggle-container="true">
   <h2>{% trans "Courses" %}</h2>
   {% if courses %}
     {% if advanced %}

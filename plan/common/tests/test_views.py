@@ -1,6 +1,9 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import datetime
+import subprocess
+import tempfile
+from pathlib import Path
 
 from django.core.cache import cache, caches
 from django.test import override_settings
@@ -197,6 +200,33 @@ class ViewTestCase(BaseTestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn("ETag", response.headers)
+
+    def test_rendered_html_is_valid_html5(self):
+        pages = {
+            "about.html": self.client.get(django_reverse("about")),
+            "schedule.html": self.client.get(self.reverse("schedule")),
+            "schedule-advanced.html": self.client.get(
+                self.reverse("schedule-advanced")
+            ),
+        }
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            for filename, response in pages.items():
+                (root / filename).write_bytes(response.content)
+
+            result = subprocess.run(
+                ["html5validator", "--root", tmpdir, "--match", "*.html"],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=f"html5validator failed:\n{result.stdout}{result.stderr}",
+        )
 
     def test_schedule_if_none_match_returns_304(self):
         url = self.reverse("schedule")

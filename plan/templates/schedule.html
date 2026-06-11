@@ -46,7 +46,7 @@
   {{ block.super }}
   <meta name="robots" content="noindex, nofollow, noarchive" />
   {% if next_week %}
-    <link ref="next"
+    <link rel="next"
           href="{% url 'schedule-week' schedule.semester schedule.student.slug next_week %}" />
   {% endif %}
 {% endblock %}
