@@ -48,10 +48,10 @@ Colors must remain visually consistent across:
 - lecture tables
 - any other intentionally color-coded course/lecture surfaces
 
-The implementation is fluid. Acceptable approaches include:
+The implementation is fluid. Prefer CSP-safe server-rendered approaches such as nonced `<style>` tags, generated classes/CSS custom properties, generated CSS palette maps, or static classes/data attrs that remain server-safe. Acceptable approaches include:
 
 - current template-injected `.course-{{ id }}` CSS
-- inline styles
+- nonced `<style>` tags
 - CSS custom properties
 - generated CSS palette maps
 - static classes/data attrs, if still server-safe
@@ -340,6 +340,7 @@ Also verify:
 - no-JS baseline for core flows
 - mobile no-JS baseline
 - CSP behavior
+- cached HTML responses preserve CSP nonces on cache hits
 - manifest resolution
 - `collectstatic` includes built assets
 - container/static build includes built assets
