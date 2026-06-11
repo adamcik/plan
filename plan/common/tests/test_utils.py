@@ -1,11 +1,19 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from django.http import HttpResponse
+from django.test import override_settings
+
 from django.conf import settings
 from django.core.cache import caches
 
 from plan.common.schedule import Schedule
 from plan.common.tests import BaseTestCase
-from plan.common.utils import ColorMap, clear_cache, compact_sequence
+from plan.common.utils import (
+    ColorMap,
+    clear_cache,
+    compact_sequence,
+    store_cached_response,
+)
 
 
 class UtilTestCase(BaseTestCase):
@@ -57,3 +65,29 @@ class UtilTestCase(BaseTestCase):
         self.assertIsNone(caches["disk"].get(dto_key))
         self.assertEqual("db", caches["default"].get(db_key))
         self.assertEqual("resp", caches["default"].get(resp_key))
+
+    @override_settings(
+        CACHES={
+            "default": {
+                "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+                "LOCATION": "default-utils",
+            },
+            "disk": {
+                "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+                "LOCATION": "disk-utils",
+            },
+            "ical": {
+                "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+                "LOCATION": "ical-utils",
+            },
+        }
+    )
+    def test_store_cached_response_rejects_unsupported_queued_aliases(self):
+        with self.assertRaisesRegex(ValueError, "queued response caching"):
+            store_cached_response(
+                cache_alias="ical",
+                cache_key="key",
+                response=HttpResponse("ok"),
+                timeout=60,
+                queued=True,
+            )

@@ -28,6 +28,7 @@ from plan.common.snapshot import ScheduleSnapshot, delete_schedule_snapshot_cach
 from plan.ical.queue import enqueue_cache_set
 
 _ = translation.gettext
+QUEUED_CACHE_ALIASES = frozenset({"disk"})
 
 
 # FIXME: This needs to match the converter, or be property of the schedule?
@@ -211,13 +212,19 @@ def store_cached_response(
     bypass: bool = False,
     queued: bool = False,
 ) -> http.HttpResponse:
+    """Store a rendered response in a configured cache backend.
+
+    Queued writes require a cache alias listed in `QUEUED_CACHE_ALIASES`.
+    """
     if timeout is None:
         response["X-Cache"] = f"miss; disabled; key={cache_key}"
         return response
 
     if queued:
-        if cache_alias != "disk":
-            raise ValueError("queued response caching is only supported for disk")
+        if cache_alias not in QUEUED_CACHE_ALIASES:
+            raise ValueError(
+                f"queued response caching is not supported for cache alias {cache_alias!r}"
+            )
         enqueue_cache_set(cache_alias, cache_key, response, timeout)
     else:
         caches[cache_alias].set(cache_key, response, timeout=timeout)

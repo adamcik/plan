@@ -1,6 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-from functools import cache
+import logging
 from dataclasses import dataclass
 from typing import Optional
 
@@ -17,6 +17,8 @@ from plan.common.models import (
     Student,
     Subscription,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class ScheduleSnapshotNotFound(Exception):
@@ -53,10 +55,10 @@ def schedule_snapshot_cache_key(semester: Semester, student_slug: str) -> str:
 def delete_schedule_snapshot_cache(semester: Semester, student_slug: str) -> None:
     key = schedule_snapshot_cache_key(semester, student_slug)
     caches["default"].delete(key)
-    caches["disk"].delete(key)
+    if "disk" in settings.CACHES:
+        caches["disk"].delete(key)
 
 
-@cache
 def _schedule_snapshot_cache_for_config(
     default_ttl: int | None,
     disk_ttl: int | None,
@@ -79,13 +81,17 @@ def _schedule_snapshot_cache() -> MultiCache[ScheduleSnapshot]:
 
 def get_schedule_snapshot(semester: Semester, student_slug: str) -> ScheduleSnapshot:
     key = schedule_snapshot_cache_key(semester, student_slug)
-    result = _schedule_snapshot_cache().get(key)
+    snapshot_cache = _schedule_snapshot_cache()
+    result = snapshot_cache.get(key)
     if result.hit:
         if result.value is None:
-            raise ValueError(
-                f"Cached schedule snapshot unexpectedly None for key {key}"
+            logger.warning(
+                "Cached schedule snapshot unexpectedly None for key %s; invalidating and rebuilding",
+                key,
             )
-        return result.value
+            snapshot_cache.delete(key)
+        else:
+            return result.value
 
     try:
         schedule_row = ScheduleModel.objects.select_related("semester", "student").get(
@@ -114,7 +120,7 @@ def get_schedule_snapshot(semester: Semester, student_slug: str) -> ScheduleSnap
             semester_version=schedule_row.semester.version,
         )
 
-    _schedule_snapshot_cache().set(key, result)
+    snapshot_cache.set(key, result)
     return result
 
 

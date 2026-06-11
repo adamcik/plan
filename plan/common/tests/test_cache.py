@@ -1,3 +1,5 @@
+from unittest import mock
+
 from django.core.cache import caches
 from django.test import TestCase, override_settings
 
@@ -56,3 +58,31 @@ class MultiCacheTestCase(TestCase):
         self.assertEqual(
             CacheResult[str | None](hit=True, value=None), cache.get("key")
         )
+
+    def test_init_requires_configured_cache_names(self):
+        with self.assertRaisesRegex(
+            ValueError, "missing.*Check Django CACHES|could not find"
+        ):
+            MultiCache(l1=60, missing=300)
+
+    def test_get_treats_backend_get_failure_as_miss(self):
+        caches["l2"].set("key", "value", timeout=300)
+        l1_backend = mock.Mock()
+        l1_backend.get.side_effect = RuntimeError("boom")
+        l1_backend.set = mock.Mock()
+
+        self.cache.backends["l1"] = l1_backend
+
+        self.assertEqual(CacheResult(hit=True, value="value"), self.cache.get("key"))
+        self.assertIsNone(caches["l1"].get("key"))
+        l1_backend.set.assert_not_called()
+
+    def test_get_ignores_promotion_set_failure(self):
+        caches["l2"].set("key", "value", timeout=300)
+        l1_backend = mock.Mock()
+        l1_backend.get.side_effect = lambda key, default=None: default
+        l1_backend.set.side_effect = RuntimeError("boom")
+
+        self.cache.backends["l1"] = l1_backend
+
+        self.assertEqual(CacheResult(hit=True, value="value"), self.cache.get("key"))

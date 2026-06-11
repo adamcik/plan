@@ -148,9 +148,8 @@ def ical(request, semester, slug, ical_type=None):
     if snapshot.student is None:
         return http.HttpResponseNotFound()
 
-    if settings.TIMETABLE_ICAL_CACHE_DURATION is not None:
-        internal_cache_timeout = settings.TIMETABLE_ICAL_CACHE_DURATION.total_seconds()
-    else:
+    internal_cache_timeout = settings.TIMETABLE_ICAL_CACHE_DURATION.total_seconds()
+    if internal_cache_timeout <= 0:
         internal_cache_timeout = None
 
     bypass_cache = utils.should_bypass_cache(request)
@@ -190,7 +189,7 @@ def ical(request, semester, slug, ical_type=None):
             upgraded_header = f"hit; key={candidate_key}; upgraded={cache_key}"
             response["X-Cache"] = upgraded_header
 
-            if settings.TIMETABLE_ICAL_CACHE_DURATION is not None:
+            if internal_cache_timeout is not None:
                 utils.store_cached_response(
                     cache_alias="disk",
                     cache_key=cache_key,

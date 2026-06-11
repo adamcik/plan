@@ -1,11 +1,16 @@
 import datetime
 
+from django.conf import settings
 from django.core.cache import caches
 from django.test import override_settings
 from django.utils import timezone
 
 from plan.common.models import Schedule, Semester, Student, Subscription
-from plan.common.snapshot import get_schedule_snapshot, schedule_snapshot_cache_key
+from plan.common.snapshot import (
+    delete_schedule_snapshot_cache,
+    get_schedule_snapshot,
+    schedule_snapshot_cache_key,
+)
 from plan.common.tests import BaseTestCase
 
 
@@ -15,7 +20,8 @@ class ScheduleSnapshotTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
         caches["default"].clear()
-        caches["disk"].clear()
+        if "disk" in settings.CACHES:
+            caches["disk"].clear()
 
     def test_to_python_populates_explicit_freshness_fields(self):
         semester = Semester.objects.get(year=2009, type=Semester.SPRING)
@@ -204,3 +210,37 @@ class ScheduleSnapshotTestCase(BaseTestCase):
 
         self.assertEqual(schedule, caches["default"].get(key))
         self.assertIsNone(caches["disk"].get(key))
+
+    def test_cached_none_is_invalidated_and_rebuilt(self):
+        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+        student = Student.objects.get(slug="adamcik")
+        key = schedule_snapshot_cache_key(semester, student.slug)
+
+        caches["default"].set(key, None, timeout=60)
+
+        with self.assertLogs("plan.common.snapshot", level="WARNING") as logs:
+            schedule = get_schedule_snapshot(semester, student.slug)
+
+        self.assertIn(key, "\n".join(logs.output))
+        self.assertIsNotNone(schedule)
+        self.assertEqual(schedule, caches["default"].get(key))
+
+    @override_settings(
+        CACHES={
+            "default": {
+                "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+                "LOCATION": "snapshot-default-only",
+            }
+        },
+        TIMETABLE_SNAPSHOT_CACHE_DISK_TTL=None,
+    )
+    def test_delete_schedule_snapshot_cache_skips_missing_disk(self):
+        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+        student = Student.objects.get(slug="adamcik")
+        key = schedule_snapshot_cache_key(semester, student.slug)
+
+        caches["default"].set(key, "dto", timeout=60)
+
+        delete_schedule_snapshot_cache(semester, student.slug)
+
+        self.assertIsNone(caches["default"].get(key))
