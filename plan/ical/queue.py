@@ -19,6 +19,7 @@ class QueuedCacheSet:
     value: object
     timeout: float | None
 
+
 _lock = threading.Lock()
 _tasks: queue.Queue[QueuedCacheSet] = queue.Queue(maxsize=_MAX_QUEUE_SIZE)
 _worker_thread: threading.Thread | None = None
