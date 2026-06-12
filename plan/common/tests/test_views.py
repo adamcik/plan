@@ -1,10 +1,11 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import datetime
-import re
 import subprocess
 import tempfile
 from pathlib import Path
+
+from lxml import html
 
 from django.core.cache import cache, caches
 from django.test import override_settings
@@ -577,6 +578,18 @@ class ViewTestCase(BaseTestCase):
 
     @override_settings(TIMETABLE_SCHEDULE_CACHE_DURATION=datetime.timedelta(seconds=60))
     def test_schedule_cache_hit_preserves_csp_nonces(self):
+        def csp_nonce(policy: str, directive: str) -> str | None:
+            for part in policy.split(";"):
+                tokens = part.split()
+                if not tokens or tokens[0] != directive:
+                    continue
+
+                for token in tokens[1:]:
+                    if token.startswith("'nonce-") and token.endswith("'"):
+                        return token[len("'nonce-") : -1]
+
+            return None
+
         schedule_url = self.reverse("schedule")
         cache.clear()
         caches["disk"].clear()
@@ -590,15 +603,18 @@ class ViewTestCase(BaseTestCase):
         self.assertIn("hit", second.headers["X-Cache"])
 
         policy = second.headers["Content-Security-Policy"]
-        script_match = re.search(r"script-src 'self' 'nonce-([^']+)'", policy)
-        style_match = re.search(r"style-src  'self' 'nonce-([^']+)'", policy)
+        script_nonce = csp_nonce(policy, "script-src")
+        style_nonce = csp_nonce(policy, "style-src")
 
-        self.assertIsNotNone(script_match)
-        self.assertIsNotNone(style_match)
+        self.assertIsNotNone(script_nonce)
+        self.assertIsNotNone(style_nonce)
 
-        content = second.content.decode()
-        self.assertIn(f'nonce="{script_match.group(1)}"', content)
-        self.assertIn(f'nonce="{style_match.group(1)}"', content)
+        document = html.fromstring(second.content)
+        script_nonces = set(document.xpath("//script[@nonce]/@nonce"))
+        style_nonces = set(document.xpath("//style[@nonce]/@nonce"))
+
+        self.assertIn(script_nonce, script_nonces)
+        self.assertIn(style_nonce, style_nonces)
 
     def test_schedule_week_with_warm_cache_force_reload_makes_no_queries(self):
         schedule_week_url = self.reverse("schedule-week", 1)
