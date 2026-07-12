@@ -1,11 +1,13 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from http import HTTPStatus
+
 from reportlab import platypus
 from reportlab.lib import colors, pagesizes, styles, units
 from reportlab.pdfgen import canvas
 from reportlab.platypus import tables
 
-from django import http
+from django import http, shortcuts
 from django.utils import dateformat, html, translation
 
 from plan.common import utils
@@ -20,13 +22,16 @@ from plan.common.templatetags.title import render_title
 from plan.common.timetable import Timetable
 from plan.common.utils import ColorMap
 
-_ = translation.gettext
-
 outer_border = colors.HexColor("#666666")
 inner_border = colors.HexColor("#CCCCCC")
 backgrounds = [colors.HexColor("#FFFFFF"), colors.HexColor("#FAFAFA")]
 
 default_styles = styles.getSampleStyleSheet()
+
+CELL_LEFT_PADDING = 2
+CELL_RIGHT_PADDING = 1
+
+_ = translation.gettext
 
 
 def _tablestyle():
@@ -39,8 +44,8 @@ def _tablestyle():
             ("TOPPADDING", (0, 0), (-1, -1), 1),
             ("TOPPADDING", (0, 0), (0, -1), 5),
             ("BOTTOMPADDING", (0, 0), (-1, -1), 1),
-            ("LEFTPADDING", (0, 0), (-1, -1), 2),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 1),
+            ("LEFTPADDING", (0, 0), (-1, -1), CELL_LEFT_PADDING),
+            ("RIGHTPADDING", (0, 0), (-1, -1), CELL_RIGHT_PADDING),
             ("ALIGN", (0, 0), (0, -1), "CENTER"),
             ("VALIGN", (0, 0), (0, -1), "MIDDLE"),
             ("ALIGN", (1, 0), (-1, -1), "LEFT"),
@@ -217,6 +222,24 @@ def pdf(request, semester, slug, size=None, week=None):
         table_style.add("LINEBEFORE", (x, 2), (x, -1), 1, outer_border)
 
         col_widths.extend([float(day_width) / w] * w)
+
+    if any(
+        col_width < CELL_LEFT_PADDING + CELL_RIGHT_PADDING
+        for col_width in col_widths[1:]
+    ):
+        response = shortcuts.render(
+            request,
+            "error.html",
+            {
+                "error_title": _("Unable to export PDF"),
+                "error_message": _(
+                    "This timetable has too many simultaneous activities to export as PDF."
+                ),
+            },
+            status=HTTPStatus.UNPROCESSABLE_ENTITY,
+        )
+        utils.apply_response_headers(response, headers)
+        return response
 
     # Set row heights
     row_heights = [16, 12]

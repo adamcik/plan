@@ -6,40 +6,55 @@
 
 {% block hd %}
   {{ block.super }}
-  <h1>{% trans "Couldn't add one or more courses" %}</h1>
+  <h1>
+    {% if error_title %}
+      {{ error_title }}
+    {% else %}
+      {% trans "Couldn't add one or more courses" %}
+    {% endif %}
+  </h1>
 {% endblock %}
 
 {% block bd %}
   <div id="help">
-    {% if too_many_subscriptions %}
+    {% if error_message %}
       <p class="large">
         {% icon "report-problem" %}
-        {% blocktrans %}
+        {{ error_message }}
+      </p>
+    {% else %}
+      {% if too_many_subscriptions %}
+        <p class="large">
+          {% icon "report-problem" %}
+          {% blocktrans %}
           Sorry, but the generator has been set up to limit
           timetables to {{ max }} courses.
         {% endblocktrans %}
-      </p>
-    {% endif %}
-    {% if courses %}
+        </p>
+      {% endif %}
+      {% if courses %}
+        <p class="large">
+          {% icon "report-problem" %}
+          {% trans "Adding the following courses failed:" %}
+        </p>
+        <ul>
+          {% for c in courses %}<li>{{ c }}</li>{% endfor %}
+        </ul>
+      {% endif %}
       <p class="large">
-        {% icon "report-problem" %}
-        {% trans "Adding the following courses failed:" %}
+        {% url 'schedule-advanced' schedule.semester schedule.student.slug as adavanced_url %}
+        {% blocktrans %}
+          Back to your <a href="{{ adavanced_url }}">schedule</a>.
+        {% endblocktrans %}
       </p>
-      <ul>
-        {% for c in courses %}<li>{{ c }}</li>{% endfor %}
-      </ul>
     {% endif %}
-    <p class="large">
-      {% url 'schedule-advanced' schedule.semester schedule.student.slug as adavanced_url %}
-      {% blocktrans %}
-        Back to your <a href="{{ adavanced_url }}">schedule</a>.
+  </div>
+  {% if not error_message %}
+    <p>
+      {% blocktrans with INSTITUTION_SITE as url %}
+        Please check that the courses that failed can be found at
+        <a href="{{ url }}">{{ url }}</a> for this semster.
       {% endblocktrans %}
     </p>
-  </div>
-  <p>
-    {% blocktrans with INSTITUTION_SITE as url %}
-      Please check that the courses that failed can be found at
-      <a href="{{ url }}">{{ url }}</a> for this semster.
-    {% endblocktrans %}
-  </p>
+  {% endif %}
 {% endblock %}
