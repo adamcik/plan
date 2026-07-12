@@ -2,6 +2,7 @@
 
 import datetime
 import gzip
+from unittest import mock
 
 import brotli
 from django.core.cache import caches
@@ -343,6 +344,87 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertIn("upgraded=", response.headers["X-Cache"])
         self.assertIn(f"key={legacy_v2_key}", response.headers["X-Cache"])
         self.assertEqual(response.content, b"legacy-v2")
+
+    def test_ical_migrates_legacy_cache_keys(self):
+        cases = [
+            ("schedule-ical", [], "schedule-ical", "identity"),
+            (
+                "schedule-ical-type",
+                ["lectures"],
+                "schedule-ical-type",
+                "gzip",
+            ),
+            (
+                "schedule-ical-type",
+                ["lectures"],
+                "schedule-ical-type-fallback",
+                "br",
+            ),
+        ]
+
+        for url_name, url_args, legacy_route, encoding in cases:
+            caches["ical"].clear()
+            caches["disk"].clear()
+            url = self.reverse(url_name, *url_args)
+            normalized_path = url.rstrip("/") or "/"
+            legacy_key = utils.response_cache_key(
+                legacy_route,
+                self.snapshot.freshness_key(),
+                normalized_path,
+                encoding,
+            )
+            marker = f"legacy-{legacy_route}-{encoding}".encode()
+            payload = marker
+            headers = {"Content-Type": "text/calendar; charset=utf-8"}
+            if encoding == "gzip":
+                payload = gzip.compress(marker, compresslevel=6, mtime=0)
+                headers["Content-Encoding"] = "gzip"
+            elif encoding == "br":
+                payload = brotli.compress(marker, brotli.MODE_TEXT)
+                headers["Content-Encoding"] = "br"
+            caches["ical"].set(legacy_key, HttpResponse(payload, headers=headers))
+
+            first = self.client.get(url, HTTP_ACCEPT_ENCODING=encoding)
+            cache_key = utils.response_cache_key(
+                url_name, self.snapshot.freshness_key(), url
+            )
+            second = self.client.get(url, HTTP_ACCEPT_ENCODING=encoding)
+
+            self.assertEqual(first.status_code, 200, legacy_key)
+            self.assertEqual(first.content, marker, legacy_key)
+            self.assertIn(f"key={legacy_key}", first.headers["X-Cache"])
+            self.assertEqual(first.headers["ETag"], utils.etag_for_key(cache_key))
+            self.assertIn("Last-Modified", first.headers)
+            self.assertIsNone(caches["ical"].get(legacy_key), legacy_key)
+            self.assertIsNotNone(caches["disk"].get(cache_key), legacy_key)
+            self.assertIn("hit; key=", second.headers["X-Cache"], legacy_key)
+            self.assertNotIn("upgraded=", second.headers["X-Cache"], legacy_key)
+
+    def test_ical_legacy_cache_migration_deletes_response_on_disk_failure(self):
+        url = self.reverse("schedule-ical")
+        legacy_key = utils.response_cache_key(
+            "schedule-ical",
+            self.snapshot.freshness_key(),
+            url.rstrip("/") or "/",
+            "identity",
+        )
+        caches["ical"].set(
+            legacy_key,
+            HttpResponse(
+                "legacy-identity", content_type="text/calendar; charset=utf-8"
+            ),
+        )
+
+        with (
+            mock.patch.object(caches["disk"], "set", side_effect=OSError("disk down")),
+            self.assertLogs("plan.ical.views", level="ERROR"),
+        ):
+            response = self.client.get(url, HTTP_ACCEPT_ENCODING="")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b"legacy-identity")
+        self.assertIn(f"key={legacy_key}", response.headers["X-Cache"])
+        self.assertIsNone(caches["ical"].get(legacy_key))
 
     def test_ical_reads_and_migrates_legacy_v1_cache_key(self):
         url = self.reverse("schedule-ical")

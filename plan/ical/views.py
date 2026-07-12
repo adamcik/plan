@@ -2,6 +2,7 @@
 
 import datetime
 import gzip
+import logging
 import math
 import socket
 import zoneinfo
@@ -29,6 +30,7 @@ from plan.common.snapshot import ScheduleSnapshotNotFound, get_schedule_snapshot
 from plan.ical.queue import enqueue_cache_set
 
 _ = translation.gettext
+logger = logging.getLogger(__name__)
 
 TZ = zoneinfo.ZoneInfo(settings.TIME_ZONE)
 UTC = zoneinfo.ZoneInfo("UTC")
@@ -91,7 +93,7 @@ def _legacy_v2_cache_key(path: str, route_name: str, schedule, encoding: str) ->
     )
 
 
-def _legacy_cache_keys(request, schedule) -> list[str]:
+def _legacy_cache_keys(request, snapshot) -> list[str]:
     keys = []
     seen = set()
     encodings = ("identity", "gzip", "br")
@@ -105,8 +107,19 @@ def _legacy_cache_keys(request, schedule) -> list[str]:
     for route_name in _legacy_route_names(request):
         for path in _legacy_paths(request):
             for encoding in encodings:
-                _append(_legacy_v2_cache_key(path, route_name, schedule, encoding))
-            _append(_legacy_cache_key(path, route_name, schedule))
+                _append(_legacy_v2_cache_key(path, route_name, snapshot, encoding))
+            _append(_legacy_cache_key(path, route_name, snapshot))
+
+        normalized_path = request.path_info.rstrip("/") or "/"
+        for encoding in encodings:
+            _append(
+                utils.response_cache_key(
+                    route_name,
+                    snapshot.freshness_key(),
+                    normalized_path,
+                    encoding,
+                )
+            )
     return keys
 
 
@@ -190,13 +203,16 @@ def ical(request, semester, slug, ical_type=None):
             response["X-Cache"] = upgraded_header
 
             if internal_cache_timeout is not None:
-                utils.store_cached_response(
-                    cache_alias="disk",
-                    cache_key=cache_key,
-                    response=response,
-                    timeout=internal_cache_timeout,
-                    queued=True,
-                )
+                try:
+                    stored = caches["disk"].set(
+                        cache_key,
+                        response,
+                        timeout=internal_cache_timeout,
+                    )
+                    if stored is False:
+                        raise RuntimeError("disk cache rejected response")
+                except Exception:
+                    logger.exception("Failed to promote iCal legacy cache response")
                 response["X-Cache"] = upgraded_header
 
             caches["ical"].delete(candidate_key)
