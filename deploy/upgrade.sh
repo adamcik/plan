@@ -42,7 +42,6 @@ QUADLET_FILE=""
 IMAGE_OVERRIDE_FILE=""
 
 LIB_DIR=""
-CACHE_DIR=""
 RUN_DIR=""
 
 EXTRACT_STATIC=1
@@ -76,7 +75,6 @@ unit_to_quadlet_path() {
 
 apply_instance_defaults() {
   LIB_DIR="/var/lib/plan/${INSTANCE_NAME}"
-  CACHE_DIR="/var/cache/plan/${INSTANCE_NAME}"
   RUN_DIR="/run/plan/${INSTANCE_NAME}"
 
   if [ "$CONTAINER_SET" -eq 0 ]; then
@@ -181,7 +179,6 @@ echo "QuadletFile: $QUADLET_FILE"
 echo "ImageOvr:    $IMAGE_OVERRIDE_FILE"
 echo "ImageRef:    $IMAGE_REF"
 echo "LibDir:      $LIB_DIR"
-echo "CacheDir:    $CACHE_DIR"
 echo "RunDir:      $RUN_DIR"
 echo "StaticFrom:  $STATIC_FROM"
 echo "StaticRel:   $STATIC_RELEASES_DIR"

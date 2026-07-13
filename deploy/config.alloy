@@ -1,0 +1,115 @@
+// Add to the Alloy configuration that defines loki.write.local.
+// Plan's Django and uWSGI logs are plain text, so preserve them unparsed.
+
+loki.source.journal "plan_prod" {
+  matches = "_SYSTEMD_UNIT=plan-prod.service"
+
+  labels = {
+    job                    = "plan",
+    service_name           = "plan",
+    service_instance_id    = "delta-plan-prod",
+    deployment_environment = "prod",
+  }
+
+  forward_to = [loki.process.plan.receiver]
+}
+
+loki.source.journal "plan_preprod" {
+  matches = "_SYSTEMD_UNIT=plan-preprod.service"
+
+  labels = {
+    job                    = "plan",
+    service_name           = "plan",
+    service_instance_id    = "delta-plan-preprod",
+    deployment_environment = "preprod",
+  }
+
+  forward_to = [loki.process.plan.receiver]
+}
+
+loki.process "plan" {
+  forward_to = [loki.write.local.receiver]
+}
+
+local.file_match "caddy_plan_prod" {
+  path_targets = [
+    {
+      "__path__"              = "/var/log/caddy/ntnu.1024.no",
+      job                     = "caddy",
+      service_name            = "plan",
+      service_instance_id     = "delta-plan-prod",
+      deployment_environment  = "prod",
+    },
+  ]
+}
+
+loki.source.file "caddy_plan_prod" {
+  targets    = local.file_match.caddy_plan_prod.targets
+  forward_to = [loki.process.caddy_plan.receiver]
+}
+
+local.file_match "caddy_plan_preprod" {
+  path_targets = [
+    {
+      "__path__"              = "/var/log/caddy/nth.1024.no",
+      job                     = "caddy",
+      service_name            = "plan",
+      service_instance_id     = "delta-plan-preprod",
+      deployment_environment  = "preprod",
+    },
+  ]
+}
+
+loki.source.file "caddy_plan_preprod" {
+  targets    = local.file_match.caddy_plan_preprod.targets
+  forward_to = [loki.process.caddy_plan.receiver]
+}
+
+loki.process "caddy_plan" {
+  stage.json {
+    expressions = {
+      content_encoding          = "resp_headers.\"Content-Encoding\"[0]",
+      cache_control             = "resp_headers.\"Cache-Control\"[0]",
+      content_language          = "resp_headers.\"Content-Language\"[0]",
+      content_type              = "resp_headers.\"Content-Type\"[0]",
+      duration                  = "duration",
+      etag                      = "resp_headers.\"Etag\"[0]",
+      expires                   = "resp_headers.\"Expires\"[0]",
+      last_modified             = "resp_headers.\"Last-Modified\"[0]",
+      method                    = "request.method",
+      strict_transport_security  = "resp_headers.\"Strict-Transport-Security\"[0]",
+      status                     = "status",
+      user_agent                 = "request.headers.\"User-Agent\"[0]",
+      vary                       = "resp_headers.\"Vary\"[0]",
+      x_cache                    = "resp_headers.\"X-Cache\"[0]",
+      x_robots_tag               = "resp_headers.\"X-Robots-Tag\"[0]",
+    }
+  }
+
+  stage.labels {
+    values = {
+      method = "method",
+      status = "status",
+    }
+  }
+
+  stage.structured_metadata {
+    values = {
+      content_encoding          = "content_encoding",
+      cache_control             = "cache_control",
+      content_language          = "content_language",
+      content_type              = "content_type",
+      duration                  = "duration",
+      etag                      = "etag",
+      expires                   = "expires",
+      last_modified             = "last_modified",
+      strict_transport_security = "strict_transport_security",
+      user_agent                = "user_agent",
+      vary                      = "vary",
+      x_cache                   = "x_cache",
+      x_robots_tag              = "x_robots_tag",
+    }
+  }
+
+  forward_to = [loki.write.local.receiver]
+}

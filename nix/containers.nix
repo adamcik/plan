@@ -113,6 +113,7 @@
         "$out/var/lib/plan" \
         "$out/var/cache/plan" \
         "$out/var/cache/plan/default" \
+        "$out/var/cache/plan/disk" \
         "$out/var/cache/plan/ical" \
         "$out/var/cache/plan/scraper"
       do
