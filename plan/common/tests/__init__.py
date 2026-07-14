@@ -17,7 +17,6 @@ from plan.common.schedule import Schedule
 class BaseTestCase(TestCase):
     def setUp(self):
         caches["default"].clear()
-        caches["ical"].clear()
         caches["disk"].clear()
 
         self.set_now_to(2009, 1, 1)

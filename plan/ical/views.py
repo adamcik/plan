@@ -1,19 +1,15 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import datetime
-import gzip
-import logging
 import math
 import socket
 import zoneinfo
 
-import brotli
 import vobject
 from dateutil import rrule
 
 from django import http, template, urls
 from django.conf import settings
-from django.core.cache import caches
 from django.shortcuts import reverse
 from django.utils import cache as cache_utils
 from django.utils import http as http_utils
@@ -27,10 +23,8 @@ from plan.common.models import (
     Week,
 )
 from plan.common.snapshot import ScheduleSnapshotNotFound, get_schedule_snapshot
-from plan.ical.queue import enqueue_cache_set
 
 _ = translation.gettext
-logger = logging.getLogger(__name__)
 
 TZ = zoneinfo.ZoneInfo(settings.TIME_ZONE)
 UTC = zoneinfo.ZoneInfo("UTC")
@@ -40,110 +34,6 @@ def _to_utc(dt: datetime.datetime) -> datetime.datetime:
     if dt.tzinfo is None:
         return dt.replace(tzinfo=TZ).astimezone(UTC)
     return dt.astimezone(UTC)
-
-
-def _cache_route_name(request) -> str:
-    return str(request.resolver_match.url_name)
-
-
-def _legacy_route_names(request) -> list[str]:
-    route_name = _cache_route_name(request)
-    names = [route_name]
-    if route_name == "schedule-ical-type":
-        names.append("schedule-ical-type-fallback")
-    return names
-
-
-def _legacy_paths(request) -> list[str]:
-    path = request.path_info
-    normalized = path.rstrip("/") or "/"
-    paths = [normalized]
-    if path not in paths:
-        paths.append(path)
-    if normalized != "/":
-        with_slash = f"{normalized}/"
-        if with_slash not in paths:
-            paths.append(with_slash)
-    return paths
-
-
-def _legacy_cache_key(path: str, route_name: str, schedule) -> str:
-    return ":".join(
-        str(p)
-        for p in (
-            "resp",
-            route_name,
-            path,
-            schedule.last_modified,
-        )
-    )
-
-
-def _legacy_v2_cache_key(path: str, route_name: str, schedule, encoding: str) -> str:
-    return ":".join(
-        str(p)
-        for p in (
-            "resp",
-            "v2",
-            route_name,
-            path,
-            schedule.last_modified,
-            encoding,
-        )
-    )
-
-
-def _legacy_cache_keys(request, snapshot) -> list[str]:
-    keys = []
-    seen = set()
-    encodings = ("identity", "gzip", "br")
-
-    def _append(key: str):
-        if key in seen:
-            return
-        seen.add(key)
-        keys.append(key)
-
-    for route_name in _legacy_route_names(request):
-        for path in _legacy_paths(request):
-            for encoding in encodings:
-                _append(_legacy_v2_cache_key(path, route_name, snapshot, encoding))
-            _append(_legacy_cache_key(path, route_name, snapshot))
-
-        normalized_path = request.path_info.rstrip("/") or "/"
-        for encoding in encodings:
-            _append(
-                utils.response_cache_key(
-                    route_name,
-                    snapshot.freshness_key(),
-                    normalized_path,
-                    encoding,
-                )
-            )
-    return keys
-
-
-def _legacy_upgrade_response(response):
-    current_encoding = response.headers.get("Content-Encoding")
-
-    if current_encoding == "br":
-        content = brotli.decompress(response.content)
-    elif current_encoding == "gzip":
-        content = gzip.decompress(response.content)
-    else:
-        content = response.content
-
-    result = http.HttpResponse(
-        content,
-        status=response.status_code,
-        headers=response.headers,
-    )
-    if "Content-Encoding" in result:
-        del result["Content-Encoding"]
-    if "Vary" in result:
-        del result["Vary"]
-    result["Content-Length"] = str(len(content))
-    return result
 
 
 def ical(request, semester, slug, ical_type=None):
@@ -188,36 +78,6 @@ def ical(request, semester, slug, ical_type=None):
     )
     if response:
         return response
-
-    if not bypass_cache:
-        legacy_keys = _legacy_cache_keys(request, snapshot)
-        legacy_cached = caches["ical"].get_many(legacy_keys)
-        for candidate_key in legacy_keys:
-            candidate_response = legacy_cached.get(candidate_key)
-            if candidate_response is None:
-                continue
-
-            response = _legacy_upgrade_response(candidate_response)
-            utils.apply_response_headers(response, headers)
-            upgraded_header = f"hit; key={candidate_key}; upgraded={cache_key}"
-            response["X-Cache"] = upgraded_header
-
-            if internal_cache_timeout is not None:
-                try:
-                    stored = caches["disk"].set(
-                        cache_key,
-                        response,
-                        timeout=internal_cache_timeout,
-                    )
-                    if stored is False:
-                        raise RuntimeError("disk cache rejected response")
-                except Exception:
-                    logger.exception("Failed to promote iCal legacy cache response")
-                response["X-Cache"] = upgraded_header
-
-            caches["ical"].delete(candidate_key)
-
-            return response
 
     filename = utils.ical_filename(snapshot, resources)
 

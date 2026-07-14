@@ -125,15 +125,6 @@ CACHES = {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
         "KEY_PREFIX": "",
     },
-    "ical": {
-        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
-        "LOCATION": "./cache/ical",
-        "TIMEOUT": timedelta(days=90).total_seconds(),
-        "KEY_PREFIX": "ical",
-        "OPTIONS": {
-            "MAX_ENTRIES": 150000,
-        },
-    },
     "disk": {
         "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
         "LOCATION": "./cache/disk",
@@ -409,15 +400,6 @@ CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
         "KEY_PREFIX": "plan",
-    },
-    "ical": {
-        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
-        "LOCATION": str(CACHE_DIR / "ical"),
-        "TIMEOUT": timedelta(days=90).total_seconds(),
-        "KEY_PREFIX": env.plan_ical_cache_key_prefix,
-        "OPTIONS": {
-            "MAX_ENTRIES": 150000,
-        },
     },
     "disk": {
         "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",

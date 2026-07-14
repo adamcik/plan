@@ -114,7 +114,6 @@
         "$out/var/cache/plan" \
         "$out/var/cache/plan/default" \
         "$out/var/cache/plan/disk" \
-        "$out/var/cache/plan/ical" \
         "$out/var/cache/plan/scraper"
       do
         install -d -m 1777 "$path"
@@ -145,7 +144,6 @@
           "DJANGO_SETTINGS_MODULE=plan.settings"
           "PLAN_BASE_DIR=/var/lib/plan"
           "PLAN_CACHE_DIR=/var/cache/plan"
-          "PLAN_ICAL_CACHE_KEY_PREFIX=container-ical"
           "PLAN_SCRAPER_CACHE_KEY_PREFIX=container-scraper"
           "PLAN_UWSGI_STATIC_ROOT=/var/lib/plan/static"
           "STATIC_URL=/_/static/"

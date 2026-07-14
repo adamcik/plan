@@ -80,7 +80,7 @@
         nix run .#packages.x86_64-linux.image.copyToPodman
       fi
 
-      mkdir -p "$REPO_ROOT/data/cache/default" "$REPO_ROOT/data/cache/disk" "$REPO_ROOT/data/cache/ical" "$REPO_ROOT/data/cache/scraper"
+      mkdir -p "$REPO_ROOT/data/cache/default" "$REPO_ROOT/data/cache/disk" "$REPO_ROOT/data/cache/scraper"
 
       echo "run-container: ENGINE=$ENGINE IMAGE_REF=$IMAGE_REF"
       echo "run-container: DJANGO_SETTINGS_MODULE=plan.settings PGDATABASE=$PGDATABASE PGUSER=$PGUSER PGHOST=/pgsocket PGPORT=$PGPORT"
