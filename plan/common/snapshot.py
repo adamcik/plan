@@ -3,8 +3,6 @@
 import logging
 from datetime import timedelta
 from dataclasses import dataclass
-from typing import Optional
-
 from django.conf import settings
 from django.core.cache import caches
 from django.db.models import DateTimeField, ExpressionWrapper, F, Value
@@ -37,7 +35,7 @@ class ScheduleSnapshot:
 
     semester: Semester
     student: Student
-    last_modified: Optional[int] = None
+    last_modified: int | None = None
     version: int = 0
     semester_version: int = 0
 
@@ -49,8 +47,19 @@ class ScheduleSnapshot:
         )
 
 
+@dataclass
+class _ScheduleFreshness:
+    student: Student
+    last_modified: int | None = None
+    version: int = 0
+
+
 def schedule_snapshot_cache_key(semester: Semester, student_slug: str) -> str:
-    return f"schedule:{semester.year}-{semester.type}-{student_slug}"
+    return f"schedule:v2:{semester.year}-{semester.type}-{student_slug}"
+
+
+def semester_freshness_cache_key(semester: Semester) -> str:
+    return f"semester:{semester.year}-{semester.type}"
 
 
 def delete_schedule_snapshot_cache(semester: Semester, student_slug: str) -> None:
@@ -58,6 +67,10 @@ def delete_schedule_snapshot_cache(semester: Semester, student_slug: str) -> Non
     caches["default"].delete(key)
     if "disk" in settings.CACHES:
         caches["disk"].delete(key)
+
+
+def delete_semester_freshness_cache(semester: Semester) -> None:
+    caches["default"].delete(semester_freshness_cache_key(semester))
 
 
 def next_http_last_modified(field: str):
@@ -84,26 +97,61 @@ def _schedule_snapshot_cache_for_config(
     return MultiCache[ScheduleSnapshot](default=default_ttl)
 
 
-def _schedule_snapshot_cache() -> MultiCache[ScheduleSnapshot]:
+def _schedule_snapshot_cache() -> MultiCache[_ScheduleFreshness]:
     return _schedule_snapshot_cache_for_config(
         settings.TIMETABLE_SNAPSHOT_CACHE_DEFAULT_TTL,
         settings.TIMETABLE_SNAPSHOT_CACHE_DISK_TTL,
     )
 
 
+def _semester_freshness_cache() -> MultiCache[Semester]:
+    ttl = settings.TIMETABLE_SEMESTER_FRESHNESS_CACHE_DEFAULT_TTL
+    if ttl is None:
+        raise ValueError(
+            "TIMETABLE_SEMESTER_FRESHNESS_CACHE_DEFAULT_TTL must not be None"
+        )
+    return MultiCache[Semester](default=ttl)
+
+
 def get_schedule_snapshot(semester: Semester, student_slug: str) -> ScheduleSnapshot:
-    key = schedule_snapshot_cache_key(semester, student_slug)
-    snapshot_cache = _schedule_snapshot_cache()
-    result = snapshot_cache.get(key)
-    if result.hit:
-        if result.value is None:
+    def get_cached_value(cache: MultiCache, key: str, cache_name: str):
+        result = cache.get(key)
+        if result.hit and result.value is None:
             logger.warning(
-                "Cached schedule snapshot unexpectedly None for key %s; invalidating and rebuilding",
+                "Cached %s unexpectedly None for key %s; invalidating and rebuilding",
+                cache_name,
                 key,
             )
-            snapshot_cache.delete(key)
-        else:
-            return result.value
+            cache.delete(key)
+            return cache.get(key)
+        return result
+
+    schedule_key = schedule_snapshot_cache_key(semester, student_slug)
+    snapshot_cache = _schedule_snapshot_cache()
+    cached_schedule = get_cached_value(
+        snapshot_cache, schedule_key, "schedule snapshot"
+    )
+
+    semester_key = semester_freshness_cache_key(semester)
+    semester_cache = _semester_freshness_cache()
+    cached_semester = get_cached_value(
+        semester_cache, semester_key, "semester freshness"
+    )
+
+    if (
+        cached_semester.hit
+        and cached_semester.value is not None
+        and cached_schedule.hit
+        and cached_schedule.value is not None
+    ):
+        return _compose_snapshot(cached_semester.value, cached_schedule.value)
+
+    if cached_schedule.hit and cached_schedule.value is not None:
+        cached_semester_value = Semester.objects.get(
+            year=semester.year, type=semester.type
+        )
+        semester_cache.set(semester_key, cached_semester_value)
+        return _compose_snapshot(cached_semester_value, cached_schedule.value)
 
     try:
         schedule_row = ScheduleModel.objects.select_related("semester", "student").get(
@@ -112,28 +160,35 @@ def get_schedule_snapshot(semester: Semester, student_slug: str) -> ScheduleSnap
             student__slug=student_slug,
         )
     except ScheduleModel.DoesNotExist:
-        result = _build_schedule_snapshot_legacy_fallback(
-            semester_year=semester.year,
-            semester_type=semester.type,
+        try:
+            cached_semester_value = Semester.objects.get(
+                year=semester.year, type=semester.type
+            )
+        except Semester.DoesNotExist:
+            raise ScheduleSnapshotNotFound(
+                f"Could not find semester: year={semester.year} type={semester.type}"
+            )
+        cached_schedule_value = _build_schedule_freshness_legacy_fallback(
+            semester=cached_semester_value,
             student_slug=student_slug,
         )
     else:
-        timestamps = []
-        if schedule_row.semester.last_modified:
-            timestamps.append(int(schedule_row.semester.last_modified.timestamp()))
-        if schedule_row.last_modified:
-            timestamps.append(int(schedule_row.last_modified.timestamp()))
-
-        result = ScheduleSnapshot(
-            semester=schedule_row.semester,
+        cached_semester_value = schedule_row.semester
+        cached_schedule_value = _ScheduleFreshness(
             student=schedule_row.student,
-            last_modified=max(timestamps) if timestamps else None,
+            last_modified=(
+                int(schedule_row.last_modified.timestamp())
+                if schedule_row.last_modified
+                else None
+            ),
             version=schedule_row.version,
-            semester_version=schedule_row.semester.version,
         )
 
-    snapshot_cache.set(key, result)
-    return result
+    if not cached_semester.hit:
+        semester_cache.set(semester_key, cached_semester_value)
+    if not cached_schedule.hit:
+        snapshot_cache.set(schedule_key, cached_schedule_value)
+    return _compose_snapshot(cached_semester_value, cached_schedule_value)
 
 
 def bump_snapshot(snapshot: ScheduleSnapshot) -> None:
@@ -153,26 +208,30 @@ def bump_snapshot(snapshot: ScheduleSnapshot) -> None:
     snapshot.version = row.version
 
 
-def _build_schedule_snapshot_legacy_fallback(
-    *,
-    semester_year: int,
-    semester_type: str,
-    student_slug: str,
+def _compose_snapshot(
+    semester: Semester, schedule: _ScheduleFreshness
 ) -> ScheduleSnapshot:
-    try:
-        semester = Semester.objects.get(year=semester_year, type=semester_type)
-    except Semester.DoesNotExist:
-        raise ScheduleSnapshotNotFound(
-            f"Could not find semester: year={semester_year} type={semester_type}"
-        )
+    timestamps = [schedule.last_modified] if schedule.last_modified else []
+    if semester.last_modified:
+        timestamps.append(int(semester.last_modified.timestamp()))
+    return ScheduleSnapshot(
+        semester=semester,
+        student=schedule.student,
+        last_modified=max(timestamps) if timestamps else None,
+        version=schedule.version,
+        semester_version=semester.version,
+    )
 
+
+def _build_schedule_freshness_legacy_fallback(
+    *,
+    semester: Semester,
+    student_slug: str,
+) -> _ScheduleFreshness:
     try:
         student = Student.objects.get(slug=student_slug)
     except Student.DoesNotExist:
-        return ScheduleSnapshot(
-            semester=semester,
-            student=Student(slug=student_slug),
-        )
+        return _ScheduleFreshness(student=Student(slug=student_slug))
 
     qs = Subscription.objects.filter(
         course__semester_id=semester.id,
@@ -187,15 +246,10 @@ def _build_schedule_snapshot_legacy_fallback(
     )
 
     timestamps = [int(agg.timestamp()) for agg in qs.values() if agg]
-    if semester.last_modified:
-        timestamps.append(int(semester.last_modified.timestamp()))
-
     last_modified = max([0] + timestamps)
 
-    return ScheduleSnapshot(
-        semester=semester,
+    return _ScheduleFreshness(
         student=student,
         last_modified=last_modified or None,
         version=0,
-        semester_version=semester.version,
     )

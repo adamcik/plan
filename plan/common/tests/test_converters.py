@@ -9,9 +9,11 @@ from django.utils import timezone
 
 from plan.common.models import Schedule, Semester, Student, Subscription
 from plan.common.snapshot import (
+    delete_semester_freshness_cache,
     delete_schedule_snapshot_cache,
     get_schedule_snapshot,
     next_http_last_modified,
+    semester_freshness_cache_key,
     schedule_snapshot_cache_key,
 )
 from plan.common.tests import BaseTestCase
@@ -65,21 +67,19 @@ class ScheduleSnapshotTestCase(BaseTestCase):
         self.assertGreater(int(semester.last_modified.timestamp()), first)
 
     @override_settings(TIMETABLE_SNAPSHOT_CACHE_DISK_TTL=7 * 24 * 60 * 60)
-    def test_to_python_stores_schedule_dto_under_stable_key(self):
+    def test_to_python_stores_split_freshness_entries_under_stable_keys(self):
         semester = Semester.objects.get(year=2009, type=Semester.SPRING)
         student = Student.objects.get(slug="adamcik")
 
         schedule = get_schedule_snapshot(semester, student.slug)
-        key = schedule_snapshot_cache_key(semester, student.slug)
+        schedule_key = schedule_snapshot_cache_key(semester, student.slug)
+        semester_key = semester_freshness_cache_key(semester)
 
-        self.assertEqual(
-            schedule,
-            caches["default"].get(key),
-        )
-        self.assertEqual(
-            schedule,
-            caches["disk"].get(key),
-        )
+        cached_schedule = caches["default"].get(schedule_key)
+        self.assertEqual(student.slug, cached_schedule.student.slug)
+        self.assertEqual(schedule.version, cached_schedule.version)
+        self.assertEqual(schedule.semester, caches["default"].get(semester_key))
+        self.assertEqual(cached_schedule, caches["disk"].get(schedule_key))
 
     def test_to_python_cache_hit_does_not_query_db(self):
         semester = Semester.objects.get(year=2009, type=Semester.SPRING)
@@ -92,6 +92,24 @@ class ScheduleSnapshotTestCase(BaseTestCase):
 
         self.assertEqual(student.slug, cached.student.slug)
         self.assertEqual(semester.id, cached.semester.id)
+
+    def test_semester_invalidation_refreshes_freshness_without_deleting_user_entry(
+        self,
+    ):
+        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+        student = Student.objects.get(slug="adamcik")
+        schedule_key = schedule_snapshot_cache_key(semester, student.slug)
+
+        before = get_schedule_snapshot(semester, student.slug)
+        cached_schedule = caches["default"].get(schedule_key)
+        Semester.objects.filter(id=semester.id).update(version=semester.version + 1)
+
+        delete_semester_freshness_cache(semester)
+
+        after = get_schedule_snapshot(semester, student.slug)
+
+        self.assertNotEqual(before.freshness_key(), after.freshness_key())
+        self.assertEqual(cached_schedule, caches["default"].get(schedule_key))
 
     def test_to_python_happy_path_uses_single_schedule_lookup(self):
         semester = Semester.objects.get(year=2009, type=Semester.SPRING)
@@ -199,17 +217,11 @@ class ScheduleSnapshotTestCase(BaseTestCase):
             schedule.last_modified,
             int(semester.last_modified.timestamp()),
         )
-        self.assertEqual(
-            schedule,
-            caches["default"].get(key),
-        )
-        self.assertEqual(
-            schedule,
-            caches["disk"].get(key),
-        )
+        self.assertEqual(student.slug, caches["default"].get(key).student.slug)
+        self.assertEqual(student.slug, caches["disk"].get(key).student.slug)
 
     @override_settings(TIMETABLE_SNAPSHOT_CACHE_DISK_TTL=7 * 24 * 60 * 60)
-    def test_to_python_disk_cache_hit_does_not_query_db_and_promotes_to_default(self):
+    def test_to_python_disk_user_cache_hit_promotes_to_default(self):
         semester = Semester.objects.get(year=2009, type=Semester.SPRING)
         student = Student.objects.get(slug="adamcik")
         key = schedule_snapshot_cache_key(semester, student.slug)
@@ -217,11 +229,11 @@ class ScheduleSnapshotTestCase(BaseTestCase):
         cached = get_schedule_snapshot(semester, student.slug)
         caches["default"].clear()
 
-        with self.assertNumQueries(0):
+        with self.assertNumQueries(1):
             result = get_schedule_snapshot(semester, student.slug)
 
         self.assertEqual(cached, result)
-        self.assertEqual(result, caches["default"].get(key))
+        self.assertEqual(result.student.slug, caches["default"].get(key).student.slug)
 
     @override_settings(TIMETABLE_SNAPSHOT_CACHE_DISK_TTL=None)
     def test_to_python_does_not_write_disk_layer_when_disabled(self):
@@ -231,7 +243,7 @@ class ScheduleSnapshotTestCase(BaseTestCase):
 
         schedule = get_schedule_snapshot(semester, student.slug)
 
-        self.assertEqual(schedule, caches["default"].get(key))
+        self.assertEqual(schedule.student.slug, caches["default"].get(key).student.slug)
         self.assertIsNone(caches["disk"].get(key))
 
     def test_cached_none_is_invalidated_and_rebuilt(self):
@@ -246,7 +258,7 @@ class ScheduleSnapshotTestCase(BaseTestCase):
 
         self.assertIn(key, "\n".join(logs.output))
         self.assertIsNotNone(schedule)
-        self.assertEqual(schedule, caches["default"].get(key))
+        self.assertEqual(schedule.student.slug, caches["default"].get(key).student.slug)
 
     @override_settings(
         CACHES={

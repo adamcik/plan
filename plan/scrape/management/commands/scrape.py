@@ -9,7 +9,10 @@ from django.db import transaction
 from django.db.models import F
 
 from plan.common.models import Semester
-from plan.common.snapshot import next_http_last_modified
+from plan.common.snapshot import (
+    delete_semester_freshness_cache,
+    next_http_last_modified,
+)
 from plan.scrape import fetch, utils
 
 DATE_TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
@@ -146,3 +149,4 @@ class Command(management.LabelCommand):
             version=F("version") + 1,
             last_modified=next_http_last_modified("last_modified"),
         )
+        transaction.on_commit(lambda: delete_semester_freshness_cache(semester))

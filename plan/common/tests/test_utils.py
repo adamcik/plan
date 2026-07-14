@@ -7,6 +7,7 @@ from django.conf import settings
 from django.core.cache import caches
 
 from plan.common.schedule import Schedule
+from plan.common.snapshot import semester_freshness_cache_key
 from plan.common.tests import BaseTestCase
 from plan.common.utils import (
     ColorMap,
@@ -44,18 +45,20 @@ class UtilTestCase(BaseTestCase):
         seq = compact_sequence([])
         self.assertEqual(seq, [])
 
-    def test_clear_cache_deletes_only_schedule_dto_key(self):
+    def test_clear_cache_deletes_only_user_schedule_entry(self):
         schedule = Schedule(semester=self.semester, student=self.student)
         freshness = schedule.freshness_key()
 
         dto_key = (
-            f"schedule:{self.semester.year}-{self.semester.type}-{self.student.slug}"
+            f"schedule:v2:{self.semester.year}-{self.semester.type}-{self.student.slug}"
         )
+        semester_key = semester_freshness_cache_key(self.semester)
         db_key = f"db:schedule:{freshness}"
         resp_key = f"resp:schedule:{freshness}:/"
 
         caches["default"].set(dto_key, "dto", timeout=60)
         caches["disk"].set(dto_key, "dto", timeout=60)
+        caches["default"].set(semester_key, "semester", timeout=60)
         caches["default"].set(db_key, "db", timeout=60)
         caches["default"].set(resp_key, "resp", timeout=60)
 
@@ -63,6 +66,7 @@ class UtilTestCase(BaseTestCase):
 
         self.assertIsNone(caches["default"].get(dto_key))
         self.assertIsNone(caches["disk"].get(dto_key))
+        self.assertEqual("semester", caches["default"].get(semester_key))
         self.assertEqual("db", caches["default"].get(db_key))
         self.assertEqual("resp", caches["default"].get(resp_key))
 

@@ -10,6 +10,7 @@ from django.utils import timezone
 
 from plan.common.models import Course
 from plan.common.models import Semester
+from plan.common.snapshot import semester_freshness_cache_key
 from plan.common.tests import BaseTestCase
 from plan.scrape.base import CourseScraper
 from plan.scrape.base import Scraper
@@ -94,6 +95,22 @@ class ManagmentTestCase(BaseTestCase):
         semester.refresh_from_db()
         self.assertEqual(1, semester.version)
         self.assertIsNotNone(semester.last_modified)
+
+    def test_bump_semester_freshness_invalidates_cache_after_commit(self):
+        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+        key = semester_freshness_cache_key(semester)
+        from django.core.cache import caches
+
+        caches["default"].set(key, "stale", timeout=60)
+        command = Command()
+
+        with self.captureOnCommitCallbacks(execute=False) as callbacks:
+            command.bump_semester_freshness(semester)
+            self.assertEqual("stale", caches["default"].get(key))
+
+        self.assertEqual(1, len(callbacks))
+        callbacks[0]()
+        self.assertIsNone(caches["default"].get(key))
 
     def test_delete_only_committed_scrape_bumps_semester_freshness(self):
         semester = Semester.objects.get(year=2009, type=Semester.SPRING)

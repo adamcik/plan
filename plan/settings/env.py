@@ -64,6 +64,10 @@ class Settings(ParsedEnvSettings):
         None,
         validation_alias="TIMETABLE_SNAPSHOT_CACHE_DISK_TTL",
     )
+    timetable_semester_freshness_cache_default_ttl: int = Field(
+        3 * 24 * 60 * 60,
+        validation_alias="TIMETABLE_SEMESTER_FRESHNESS_CACHE_DEFAULT_TTL",
+    )
 
     pgdatabase: str = Field("plan", validation_alias="PGDATABASE")
     pguser: str = Field("plan", validation_alias="PGUSER")
