@@ -3,13 +3,16 @@
 import datetime
 import subprocess
 import tempfile
+from unittest import mock
 from pathlib import Path
 
 from lxml import html
 
 from django.core.cache import cache, caches
+from django.db.models import Value
 from django.test import override_settings
 from django.urls import reverse as django_reverse
+from django.utils import http as http_utils
 from django.utils import timezone
 from django.utils.datastructures import MultiValueDict
 
@@ -471,6 +474,45 @@ class ViewTestCase(BaseTestCase):
 
         row.refresh_from_db()
         self.assertEqual(row.version, 2)
+
+    def test_back_to_back_mutations_advance_last_modified_for_ims(self):
+        schedule_url = self.reverse("schedule-advanced")
+        change_url = self.reverse("change-course")
+        fixed_time = timezone.make_aware(datetime.datetime(2026, 1, 1, 12, 0, 0))
+
+        with mock.patch("plan.common.snapshot.Now", return_value=Value(fixed_time)):
+            response = self.client.post(
+                change_url,
+                {"submit_add": True, "course_add": "COURSE4"},
+            )
+            self.assertEqual(response.status_code, 302)
+
+            first = self.client.get(schedule_url)
+            self.assertEqual(first.status_code, 200)
+
+            course_id = Subscription.objects.get(
+                student__slug="adamcik",
+                course__semester__year=2009,
+                course__semester__type="spring",
+                course__code="COURSE4",
+            ).course_id
+            response = self.client.post(
+                change_url,
+                {"submit_remove": True, "course_remove": str(course_id)},
+            )
+            self.assertEqual(response.status_code, 302)
+
+        second = self.client.get(schedule_url)
+        self.assertGreater(
+            http_utils.parse_http_date(second.headers["Last-Modified"]),
+            http_utils.parse_http_date(first.headers["Last-Modified"]),
+        )
+
+        response = self.client.get(
+            schedule_url,
+            HTTP_IF_MODIFIED_SINCE=first.headers["Last-Modified"],
+        )
+        self.assertEqual(response.status_code, 200)
 
     def test_change_course_updates_schedule_last_modified_on_existing_row(self):
         schedule_url = self.reverse("schedule-advanced")

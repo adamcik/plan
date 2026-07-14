@@ -1,14 +1,15 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import logging
+from datetime import timedelta
 from dataclasses import dataclass
 from typing import Optional
 
 from django.conf import settings
 from django.core.cache import caches
-from django.db.models import F
+from django.db.models import DateTimeField, ExpressionWrapper, F, Value
 from django.db.models.aggregates import Max
-from django.utils import timezone
+from django.db.models.functions import Coalesce, Greatest, Now, TruncSecond
 
 from plan.common.cache import MultiCache
 from plan.common.models import (
@@ -57,6 +58,17 @@ def delete_schedule_snapshot_cache(semester: Semester, student_slug: str) -> Non
     caches["default"].delete(key)
     if "disk" in settings.CACHES:
         caches["disk"].delete(key)
+
+
+def next_http_last_modified(field: str):
+    """Return a timestamp newer than the prior HTTP-date second."""
+    now = Now()
+    previous = Coalesce(F(field), now)
+    next_second = ExpressionWrapper(
+        TruncSecond(previous) + Value(timedelta(seconds=1)),
+        output_field=DateTimeField(),
+    )
+    return Greatest(now, next_second)
 
 
 def _schedule_snapshot_cache_for_config(
@@ -128,19 +140,14 @@ def bump_snapshot(snapshot: ScheduleSnapshot) -> None:
     if snapshot.student.id is None:
         snapshot.student = Student.objects.get(slug=snapshot.student.slug)
 
-    row, created = ScheduleModel.objects.get_or_create(
+    row, _ = ScheduleModel.objects.get_or_create(
         semester_id=snapshot.semester.id,
         student_id=snapshot.student.id,
     )
 
-    if created:
-        ScheduleModel.objects.filter(id=row.id).update(version=1)
-        snapshot.version = 1
-        return
-
     ScheduleModel.objects.filter(id=row.id).update(
         version=F("version") + 1,
-        last_modified=timezone.now(),
+        last_modified=next_http_last_modified("last_modified"),
     )
     row.refresh_from_db(fields=["version"])
     snapshot.version = row.version

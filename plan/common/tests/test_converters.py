@@ -1,7 +1,9 @@
 import datetime
+from unittest import mock
 
 from django.conf import settings
 from django.core.cache import caches
+from django.db.models import Value
 from django.test import override_settings
 from django.utils import timezone
 
@@ -9,6 +11,7 @@ from plan.common.models import Schedule, Semester, Student, Subscription
 from plan.common.snapshot import (
     delete_schedule_snapshot_cache,
     get_schedule_snapshot,
+    next_http_last_modified,
     schedule_snapshot_cache_key,
 )
 from plan.common.tests import BaseTestCase
@@ -40,6 +43,26 @@ class ScheduleSnapshotTestCase(BaseTestCase):
 
         self.assertEqual(11, schedule.version)
         self.assertEqual(7, schedule.semester_version)
+
+    def test_next_http_last_modified_advances_nullable_semester_timestamp(self):
+        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+        semester.last_modified = None
+        semester.save(update_fields=["last_modified"])
+        fixed_time = timezone.make_aware(datetime.datetime(2026, 1, 1, 12, 0, 0))
+
+        with mock.patch("plan.common.snapshot.Now", return_value=Value(fixed_time)):
+            Semester.objects.filter(id=semester.id).update(
+                last_modified=next_http_last_modified("last_modified")
+            )
+            semester.refresh_from_db()
+            first = int(semester.last_modified.timestamp())
+
+            Semester.objects.filter(id=semester.id).update(
+                last_modified=next_http_last_modified("last_modified")
+            )
+            semester.refresh_from_db()
+
+        self.assertGreater(int(semester.last_modified.timestamp()), first)
 
     @override_settings(TIMETABLE_SNAPSHOT_CACHE_DISK_TTL=7 * 24 * 60 * 60)
     def test_to_python_stores_schedule_dto_under_stable_key(self):

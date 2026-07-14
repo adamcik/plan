@@ -7,9 +7,9 @@ from django.conf import settings
 from django.core.management import base as management
 from django.db import transaction
 from django.db.models import F
-from django.utils import timezone
 
 from plan.common.models import Semester
+from plan.common.snapshot import next_http_last_modified
 from plan.scrape import fetch, utils
 
 DATE_TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
@@ -144,5 +144,5 @@ class Command(management.LabelCommand):
     def bump_semester_freshness(self, semester):
         Semester.objects.filter(id=semester.id).update(
             version=F("version") + 1,
-            last_modified=timezone.now(),
+            last_modified=next_http_last_modified("last_modified"),
         )

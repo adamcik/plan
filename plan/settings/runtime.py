@@ -303,10 +303,9 @@ TIMETABLE_SNAPSHOT_CACHE_DEFAULT_TTL = None
 # disk cache backend. Set to None to disable the disk fallback layer.
 TIMETABLE_SNAPSHOT_CACHE_DISK_TTL = None
 
-# NOTE: Temporary mitigation for stale pages after mutations.
-# Disable If-Modified-Since revalidation globally until freshness tokens are
-# made robust for all mutation paths (especially deletes).
-TIMETABLE_ENABLE_IF_MODIFIED_SINCE = False
+# Freshness updates advance at least one whole second, matching HTTP-date
+# precision and keeping If-Modified-Since revalidation safe after mutations.
+TIMETABLE_ENABLE_IF_MODIFIED_SINCE = True
 
 TIMETABLE_NOTICE_CUTOFF = date(2025, 8, 24)
 
