@@ -306,6 +306,11 @@ TIMETABLE_SNAPSHOT_CACHE_DISK_TTL = None
 # Timeout for semester-wide freshness metadata in the default cache.
 TIMETABLE_SEMESTER_FRESHNESS_CACHE_DEFAULT_TTL = None
 
+# Timeouts for other values stored in the default cache backend.
+TIMETABLE_LOCATION_CACHE_TTL = None
+TIMETABLE_SCHEDULE_DATA_CACHE_TTL = None
+TIMETABLE_COURSE_STATS_CACHE_TTL = None
+
 # Freshness updates advance at least one whole second, matching HTTP-date
 # precision and keeping If-Modified-Since revalidation safe after mutations.
 TIMETABLE_ENABLE_IF_MODIFIED_SINCE = True
@@ -338,6 +343,9 @@ TIMETABLE_SNAPSHOT_CACHE_DISK_TTL = env.timetable_snapshot_cache_disk_ttl
 TIMETABLE_SEMESTER_FRESHNESS_CACHE_DEFAULT_TTL = (
     env.timetable_semester_freshness_cache_default_ttl
 )
+TIMETABLE_LOCATION_CACHE_TTL = env.timetable_location_cache_ttl
+TIMETABLE_SCHEDULE_DATA_CACHE_TTL = env.timetable_schedule_data_cache_ttl
+TIMETABLE_COURSE_STATS_CACHE_TTL = env.timetable_course_stats_cache_ttl
 
 DEBUG = env.django_debug
 

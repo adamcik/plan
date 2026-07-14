@@ -81,6 +81,26 @@ class ScheduleSnapshotTestCase(BaseTestCase):
         self.assertEqual(schedule.semester, caches["default"].get(semester_key))
         self.assertEqual(cached_schedule, caches["disk"].get(schedule_key))
 
+    def test_to_python_writes_split_freshness_entries_with_configured_ttls(self):
+        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+        student = Student.objects.get(slug="adamcik")
+        schedule_key = schedule_snapshot_cache_key(semester, student.slug)
+        semester_key = semester_freshness_cache_key(semester)
+
+        with mock.patch.object(caches["default"], "set") as cache_set:
+            get_schedule_snapshot(semester, student.slug)
+
+        cache_set.assert_any_call(
+            schedule_key,
+            mock.ANY,
+            settings.TIMETABLE_SNAPSHOT_CACHE_DEFAULT_TTL,
+        )
+        cache_set.assert_any_call(
+            semester_key,
+            mock.ANY,
+            settings.TIMETABLE_SEMESTER_FRESHNESS_CACHE_DEFAULT_TTL,
+        )
+
     def test_to_python_cache_hit_does_not_query_db(self):
         semester = Semester.objects.get(year=2009, type=Semester.SPRING)
         student = Student.objects.get(slug="adamcik")

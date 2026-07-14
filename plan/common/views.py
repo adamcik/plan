@@ -221,7 +221,7 @@ def _common_data():
     except Semester.DoesNotExist:
         next_semester = None
 
-    cache.set(key, (locations, next_semester), 3600)
+    cache.set(key, (locations, next_semester), settings.TIMETABLE_LOCATION_CACHE_TTL)
     return locations, next_semester
 
 
@@ -299,7 +299,7 @@ def _schedule_data(s: Schedule, next_semester: Optional[Semester] = None):
         schedule_weeks,
         next_schedule,
     )
-    cache.set(key, result, timeout=3600)
+    cache.set(key, result, timeout=settings.TIMETABLE_SCHEDULE_DATA_CACHE_TTL)
     return result
 
 

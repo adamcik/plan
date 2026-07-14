@@ -57,7 +57,7 @@ class Settings(ParsedEnvSettings):
         validation_alias="TIMETABLE_SCHEDULE_CACHE_DURATION_SECONDS",
     )
     timetable_snapshot_cache_default_ttl: int = Field(
-        15 * 60,
+        3 * 24 * 60 * 60,
         validation_alias="TIMETABLE_SNAPSHOT_CACHE_DEFAULT_TTL",
     )
     timetable_snapshot_cache_disk_ttl: int | None = Field(
@@ -67,6 +67,18 @@ class Settings(ParsedEnvSettings):
     timetable_semester_freshness_cache_default_ttl: int = Field(
         3 * 24 * 60 * 60,
         validation_alias="TIMETABLE_SEMESTER_FRESHNESS_CACHE_DEFAULT_TTL",
+    )
+    timetable_location_cache_ttl: int = Field(
+        24 * 60 * 60,
+        validation_alias="TIMETABLE_LOCATION_CACHE_TTL",
+    )
+    timetable_schedule_data_cache_ttl: int = Field(
+        60 * 60,
+        validation_alias="TIMETABLE_SCHEDULE_DATA_CACHE_TTL",
+    )
+    timetable_course_stats_cache_ttl: int = Field(
+        5 * 60,
+        validation_alias="TIMETABLE_COURSE_STATS_CACHE_TTL",
     )
 
     pgdatabase: str = Field("plan", validation_alias="PGDATABASE")

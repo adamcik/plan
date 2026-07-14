@@ -251,7 +251,7 @@ class Course(models.Model):
             "stats": courses,
             "limit": limit,
         }
-        cache.set(key, result, 300)
+        cache.set(key, result, settings.TIMETABLE_COURSE_STATS_CACHE_TTL)
         return result
 
     @staticmethod

@@ -16,8 +16,9 @@ from django.utils import http as http_utils
 from django.utils import timezone
 from django.utils.datastructures import MultiValueDict
 
-from plan.common import utils
+from plan.common import utils, views
 from plan.common.models import (
+    Course,
     Group,
     Lecture,
     Schedule,
@@ -25,7 +26,7 @@ from plan.common.models import (
     Student,
     Subscription,
 )
-from plan.common.snapshot import schedule_snapshot_cache_key
+from plan.common.snapshot import ScheduleSnapshot, schedule_snapshot_cache_key
 from plan.common.tests import BaseTestCase, strict_template_variables
 
 FIXTURE_LECTURE_ID = 12
@@ -186,6 +187,41 @@ class ViewTestCase(BaseTestCase):
             response = self.client.get(url)
             self.assertEqual(response.status_code, 200)
             self.assertTemplateUsed(response, "schedule.html")
+
+    @override_settings(
+        TIMETABLE_LOCATION_CACHE_TTL=123,
+        TIMETABLE_SCHEDULE_DATA_CACHE_TTL=456,
+        TIMETABLE_COURSE_STATS_CACHE_TTL=789,
+    )
+    def test_primary_cache_writes_use_configured_ttls(self):
+        cache.clear()
+        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+        student = Student.objects.get(slug="adamcik")
+        snapshot = ScheduleSnapshot(
+            semester=semester,
+            student=student,
+            last_modified=1,
+        )
+
+        with mock.patch("plan.common.views.cache.set") as view_cache_set:
+            views._common_data()
+            views._schedule_data(snapshot)
+
+        view_cache_set.assert_any_call(
+            "locations-next_semester",
+            mock.ANY,
+            123,
+        )
+        view_cache_set.assert_any_call(
+            f"data:schedule:{snapshot.freshness_key()}",
+            mock.ANY,
+            timeout=456,
+        )
+
+        with mock.patch("plan.common.models.cache.set") as model_cache_set:
+            Course.get_stats(semester)
+
+        model_cache_set.assert_called_once_with(mock.ANY, mock.ANY, 789)
 
     def test_schedule_renders_lecture_and_course_classes_and_room_links(self):
         semester = Semester.objects.get(year=2009, type=Semester.SPRING)
