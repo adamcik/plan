@@ -199,7 +199,7 @@ def lookup_cached_response(
         return None
 
     apply_response_headers(response, headers)
-    response["X-Cache"] = "hit"
+    response["X-Cache"] = f"hit; key={cache_key}"
     return response
 
 
@@ -217,7 +217,7 @@ def store_cached_response(
     Queued writes require a cache alias listed in `QUEUED_CACHE_ALIASES`.
     """
     if timeout is None:
-        response["X-Cache"] = "miss; disabled"
+        response["X-Cache"] = f"miss; disabled; key={cache_key}"
         return response
 
     if queued:
@@ -230,11 +230,11 @@ def store_cached_response(
         caches[cache_alias].set(cache_key, response, timeout=timeout)
 
     if bypass:
-        response["X-Cache"] = "miss; bypass"
+        response["X-Cache"] = f"miss; bypass; key={cache_key}"
     elif queued:
-        response["X-Cache"] = "miss; queued"
+        response["X-Cache"] = f"miss; queued; key={cache_key}"
     else:
-        response["X-Cache"] = "miss"
+        response["X-Cache"] = f"miss; key={cache_key}"
     return response
 
 
