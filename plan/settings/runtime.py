@@ -90,11 +90,12 @@ MIDDLEWARE = (
 
 INSTALLED_APPS = (
     "django.contrib.staticfiles",
-    "plan.common.apps.CommonConfig",
+    "plan.common",
     "plan.scrape",
     "plan.ical",
     "plan.pdf",
     "plan.materialized",
+    "plan.telemetry.apps.TelemetryConfig",
     "compressor",
 )
 
