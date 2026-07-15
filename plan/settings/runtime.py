@@ -10,7 +10,6 @@ from sentry_sdk.integrations.django import DjangoIntegration
 from django.utils.safestring import mark_safe
 
 from plan.settings.env import Settings, TelemetryComponent
-from plan.telemetry import init as init_telemetry
 
 PLAN_PACKAGE_ROOT = files("plan")
 
@@ -91,7 +90,7 @@ MIDDLEWARE = (
 
 INSTALLED_APPS = (
     "django.contrib.staticfiles",
-    "plan.common",
+    "plan.common.apps.CommonConfig",
     "plan.scrape",
     "plan.ical",
     "plan.pdf",
@@ -326,9 +325,6 @@ eller <a href="https://apps.uka.no/opptak/?utm_source=timeplan">uka.no</a>.
 
 
 env = Settings()
-
-# This also covers management commands; WSGI initializes it earlier still.
-init_telemetry()
 
 TIMETABLE_ICAL_CACHE_DURATION = timedelta(
     seconds=env.timetable_ical_cache_duration_seconds

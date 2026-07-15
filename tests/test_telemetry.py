@@ -1,3 +1,6 @@
+import os
+import subprocess
+import sys
 from unittest import mock
 
 from django.core.cache import caches
@@ -18,6 +21,19 @@ from plan.settings.runtime import _sentry_otel_options
 
 
 class TelemetryTestCase(SimpleTestCase):
+    def test_wsgi_bootstraps_after_django_settings_are_complete(self):
+        environment = os.environ | {"PLAN_TELEMETRY_COMPONENTS": "tracing"}
+        script = "from plan.wsgi import application; from django.conf import settings; assert settings.ROOT_URLCONF == 'plan.urls'"
+
+        result = subprocess.run(
+            [sys.executable, "-c", script],
+            env=environment,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(0, result.returncode, result.stderr)
+
     def test_sentry_uses_otel_instrumenter_only_for_otel_tracing(self):
         self.assertEqual({}, _sentry_otel_options(set()))
         self.assertEqual(
