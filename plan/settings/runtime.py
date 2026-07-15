@@ -89,13 +89,13 @@ MIDDLEWARE = (
 )
 
 INSTALLED_APPS = (
+    "plan.telemetry.apps.TelemetryConfig",
     "django.contrib.staticfiles",
     "plan.common",
     "plan.scrape",
     "plan.ical",
     "plan.pdf",
     "plan.materialized",
-    "plan.telemetry.apps.TelemetryConfig",
     "compressor",
 )
 
