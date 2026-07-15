@@ -1,0 +1,21 @@
+name: Cleanup GHCR
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+
+    steps:
+      - name: Delete old untagged GHCR versions, keep 5 newest
+        uses: actions/delete-package-versions@e5bc658cc4c965c472efe991f8beea3981499c55 # v5
+        with:
+          package-name: plan
+          package-type: container
+          delete-only-untagged-versions: true
+          min-versions-to-keep: 5
