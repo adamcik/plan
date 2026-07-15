@@ -14,6 +14,10 @@
     projectPkgs = import ./packages.nix {inherit pkgs;};
     nix2containerPkgs = inputs'.nix2container.packages.nix2container;
     overrideMetadata = builtins.fromJSON (builtins.readFile inputs.build-overrides);
+    buildRevision =
+      if ((overrideMetadata.revision or null) != null)
+      then overrideMetadata.revision
+      else (self.rev or null);
     fallbackCreated = let
       d = self.lastModifiedDate or "";
     in
@@ -154,6 +158,11 @@
             "PLAN_UWSGI_SOCKET=/run/uwsgi/uwsgi.sock"
             "PLAN_UWSGI_PROCESSES=4"
             "PLAN_UWSGI_THREADS=1"
+            "OTEL_VCS_REVISION=${
+              if buildRevision != null
+              then buildRevision
+              else "unknown"
+            }"
           ]
           ++ pkgs.lib.optional ((overrideMetadata.version or null) != null) "SENTRY_RELEASE=plan@${overrideMetadata.version}";
         Labels = let
@@ -168,8 +177,8 @@
             "org.opencontainers.image.source" = "https://github.com/adamcik/plan";
             "org.opencontainers.image.title" = "plan";
           }
-          // pkgs.lib.optionalAttrs ((overrideMetadata.revision or null) != null) {
-            "org.opencontainers.image.revision" = overrideMetadata.revision;
+          // pkgs.lib.optionalAttrs (buildRevision != null) {
+            "org.opencontainers.image.revision" = buildRevision;
           }
           // pkgs.lib.optionalAttrs ((overrideMetadata.version or null) != null) {
             "org.opencontainers.image.version" = overrideMetadata.version;
