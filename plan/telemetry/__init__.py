@@ -73,6 +73,14 @@ def _url_without_query(url: str) -> str:
     return url.partition("?")[0]
 
 
+def _django_response_hook(span, request, response) -> None:
+    if not span or not span.is_recording():
+        return
+    match = request.resolver_match
+    if match and match.view_name:
+        span.set_attribute("django.route.name", match.view_name)
+
+
 def init(settings: TelemetrySettings | None = None) -> None:
     """Configure providers and instrumentation once per process."""
     global _initialized
@@ -128,7 +136,10 @@ def init(settings: TelemetrySettings | None = None) -> None:
 
 def _instrument(settings: TelemetrySettings) -> None:
     excluded_urls = "/static/.*|/__debug__/.*|/metrics"
-    DjangoInstrumentor().instrument(excluded_urls=excluded_urls)
+    DjangoInstrumentor().instrument(
+        excluded_urls=excluded_urls,
+        response_hook=_django_response_hook,
+    )
     RequestsInstrumentor().instrument(url_filter=_url_without_query)
     Psycopg2Instrumentor().instrument(enable_commenter=False)
     LoggingInstrumentor().instrument(set_logging_format=False)

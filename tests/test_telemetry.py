@@ -11,7 +11,7 @@ from opentelemetry.sdk.metrics.export import InMemoryMetricReader
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 
-from plan.telemetry import TelemetrySettings
+from plan.telemetry import TelemetrySettings, _django_response_hook
 from plan.telemetry.cache import instrument_cache
 from plan.telemetry import resources
 from plan.telemetry.resources import resource_attributes
@@ -21,6 +21,16 @@ from plan.settings.runtime import _sentry_otel_options
 
 
 class TelemetryTestCase(SimpleTestCase):
+    def test_django_response_hook_records_route_name(self):
+        span = mock.Mock()
+        span.is_recording.return_value = True
+        request = mock.Mock()
+        request.resolver_match.view_name = "schedule"
+
+        _django_response_hook(span, request, mock.Mock())
+
+        span.set_attribute.assert_called_once_with("django.route.name", "schedule")
+
     def test_wsgi_logs_without_telemetry(self):
         environment = os.environ.copy()
         environment.pop("PLAN_TELEMETRY_COMPONENTS", None)
