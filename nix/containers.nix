@@ -138,21 +138,23 @@
         Cmd = [(pkgs.lib.getExe serveScript)];
         WorkingDir = "/app";
         User = "65532:65532";
-        Env = [
-          "SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-          "PYTHONDONTWRITEBYTECODE=1"
-          "DJANGO_SETTINGS_MODULE=plan.settings"
-          "PLAN_BASE_DIR=/var/lib/plan"
-          "PLAN_CACHE_DIR=/var/cache/plan"
-          "PLAN_SCRAPER_CACHE_KEY_PREFIX=container-scraper"
-          "PLAN_UWSGI_STATIC_ROOT=/var/lib/plan/static"
-          "STATIC_URL=/_/static/"
-          "PLAN_UWSGI_LISTENER=http"
-          "PLAN_UWSGI_HTTP=0.0.0.0:8080"
-          "PLAN_UWSGI_SOCKET=/run/uwsgi/uwsgi.sock"
-          "PLAN_UWSGI_PROCESSES=4"
-          "PLAN_UWSGI_THREADS=1"
-        ];
+        Env =
+          [
+            "SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+            "PYTHONDONTWRITEBYTECODE=1"
+            "DJANGO_SETTINGS_MODULE=plan.settings"
+            "PLAN_BASE_DIR=/var/lib/plan"
+            "PLAN_CACHE_DIR=/var/cache/plan"
+            "PLAN_SCRAPER_CACHE_KEY_PREFIX=container-scraper"
+            "PLAN_UWSGI_STATIC_ROOT=/var/lib/plan/static"
+            "STATIC_URL=/_/static/"
+            "PLAN_UWSGI_LISTENER=http"
+            "PLAN_UWSGI_HTTP=0.0.0.0:8080"
+            "PLAN_UWSGI_SOCKET=/run/uwsgi/uwsgi.sock"
+            "PLAN_UWSGI_PROCESSES=4"
+            "PLAN_UWSGI_THREADS=1"
+          ]
+          ++ pkgs.lib.optional ((overrideMetadata.version or null) != null) "SENTRY_RELEASE=plan@${overrideMetadata.version}";
         Labels = let
           created =
             if ((overrideMetadata.created or null) != null)

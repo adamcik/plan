@@ -40,6 +40,40 @@
       );
     };
 
+    packages.report-sentry-release = pkgs.writeShellApplication {
+      name = "report-sentry-release";
+      runtimeInputs = [pkgs.git pkgs.jq pkgs.sentry-cli];
+      text = ''
+        dry_run=0
+        if [ "''${1:-}" = "--dry-run" ]; then
+          dry_run=1
+          shift
+        fi
+
+        if [ "$#" -ne 1 ]; then
+          echo "Usage: report-sentry-release [--dry-run] <build-overrides.json>" >&2
+          exit 2
+        fi
+
+        release="$(jq -er '.version | strings | "plan@" + .' "$1")"
+        if [ "$dry_run" -eq 1 ]; then
+          echo "sentry-cli releases new $release"
+          echo "sentry-cli releases set-commits $release --auto"
+          echo "sentry-cli releases finalize $release"
+          exit 0
+        fi
+
+        if [ -z "''${SENTRY_AUTH_TOKEN:-}" ] || [ -z "''${SENTRY_ORG:-}" ] || [ -z "''${SENTRY_PROJECT:-}" ]; then
+          echo "Skipping Sentry release: SENTRY_AUTH_TOKEN, SENTRY_ORG, or SENTRY_PROJECT is not configured."
+          exit 0
+        fi
+
+        sentry-cli releases new "$release"
+        sentry-cli releases set-commits "$release" --auto
+        sentry-cli releases finalize "$release"
+      '';
+    };
+
     checks = {
       django-check =
         pkgs.runCommand "django-check" {

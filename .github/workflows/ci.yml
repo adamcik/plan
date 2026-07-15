@@ -79,3 +79,13 @@ jobs:
         env:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: nix run .#image.copyTo --override-input build-overrides "path:${BUILD_OVERRIDES}" -- "docker://ghcr.io/adamcik/plan:${RELEASE_TAG}"
+
+      - name: Report Sentry release
+        if: |
+          (github.event_name == 'push' && github.ref_name == github.event.repository.default_branch) ||
+          github.event_name == 'release'
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
+        run: nix run .#report-sentry-release -- "$BUILD_OVERRIDES"
