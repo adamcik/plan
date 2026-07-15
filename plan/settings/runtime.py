@@ -10,6 +10,7 @@ from sentry_sdk.integrations.django import DjangoIntegration
 from django.utils.safestring import mark_safe
 
 from plan.settings.env import Settings
+from plan.telemetry import init as init_telemetry
 
 PLAN_PACKAGE_ROOT = files("plan")
 
@@ -320,6 +321,9 @@ eller <a href="https://apps.uka.no/opptak/?utm_source=timeplan">uka.no</a>.
 
 env = Settings()
 
+# This also covers management commands; WSGI initializes it earlier still.
+init_telemetry()
+
 TIMETABLE_ICAL_CACHE_DURATION = timedelta(
     seconds=env.timetable_ical_cache_duration_seconds
 )
@@ -373,7 +377,12 @@ if env.sentry_dsn is not None:
                 cache_spans=True,
             )
         ],
-        traces_sample_rate=env.sentry_traces_sample_rate,
+        # OpenTelemetry owns tracing when enabled. Sentry remains error reporting.
+        traces_sample_rate=(
+            0
+            if "tracing" in env.plan_telemetry_components
+            else env.sentry_traces_sample_rate
+        ),
         enable_logs=env.sentry_enable_logs,
     )
 
@@ -456,12 +465,15 @@ LOGGING = {
     "formatters": {
         "simple": {
             "format": "%(asctime)s %(levelname)s %(name)s %(message)s",
-        }
+        },
+        "structured": {
+            "()": "plan.telemetry.logging.StructlogFormatter",
+        },
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
-            "formatter": "simple",
+            "formatter": ("structured" if env.plan_telemetry_components else "simple"),
         }
     },
     "loggers": {

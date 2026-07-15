@@ -4,6 +4,7 @@ import time
 
 from django.core.management.base import BaseCommand, CommandError
 from sentry_sdk.crons import monitor
+from opentelemetry import trace
 
 from plan.materialized.models import SemesterAnalytics, SubscriptionsCount, TopCourses
 
@@ -14,16 +15,18 @@ MONITOR_CONFIG = {
     "checkin_margin": 10,
     "max_runtime": 10,
 }
+tracer = trace.get_tracer("plan.materialized")
 
 
 class Command(BaseCommand):
     help = "Refreshes all specified materialized views."
 
     def handle(self, *args, **options):
-        with monitor(
-            monitor_slug="materialized-views-refresh", monitor_config=MONITOR_CONFIG
-        ):
-            self.refresh_views()
+        with tracer.start_as_current_span("materialized_views.refresh"):
+            with monitor(
+                monitor_slug="materialized-views-refresh", monitor_config=MONITOR_CONFIG
+            ):
+                self.refresh_views()
 
     def refresh_views(self):
         self.stdout.write(f"Starting refresh of {len(MODELS)} materialized view(s).\n")

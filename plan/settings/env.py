@@ -99,6 +99,33 @@ class Settings(ParsedEnvSettings):
         0.001, validation_alias="SENTRY_TRACES_SAMPLE_RATE"
     )
     sentry_enable_logs: bool = Field(False, validation_alias="SENTRY_ENABLE_LOGS")
+    plan_telemetry_components: Parsed[list[str]] = Field(
+        default_factory=list, validation_alias="PLAN_TELEMETRY_COMPONENTS"
+    )
+    otel_exporter_otlp_endpoint: str = Field(
+        "http://127.0.0.1:4318", validation_alias="OTEL_EXPORTER_OTLP_ENDPOINT"
+    )
+    otel_service_name: str = Field("plan", validation_alias="OTEL_SERVICE_NAME")
+    otel_service_version: str = Field(
+        default_factory=lambda: _current_package_version(),
+        validation_alias="OTEL_SERVICE_VERSION",
+    )
+    otel_deployment_environment: str = Field(
+        "production", validation_alias="OTEL_DEPLOYMENT_ENVIRONMENT"
+    )
+    otel_service_instance_id: str | None = Field(
+        None, validation_alias="OTEL_SERVICE_INSTANCE_ID"
+    )
+    otel_vcs_revision: str | None = Field(None, validation_alias="OTEL_VCS_REVISION")
+    otel_trace_sample_rate: float = Field(
+        0.001, validation_alias="OTEL_TRACE_SAMPLE_RATE"
+    )
+    otel_export_timeout_seconds: float = Field(
+        10, validation_alias="OTEL_EXPORT_TIMEOUT_SECONDS"
+    )
+    otel_metric_export_interval_seconds: float = Field(
+        60, validation_alias="OTEL_METRIC_EXPORT_INTERVAL_SECONDS"
+    )
     timetable_report_uri: str | None = Field(
         None, validation_alias="TIMETABLE_REPORT_URI"
     )

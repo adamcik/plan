@@ -12,6 +12,11 @@ this application via the ``WSGI_APPLICATION`` setting.
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "plan.settings")
 
+from plan.telemetry import init as init_telemetry
+
+# Instrument before Django builds its WSGI application and opens connections.
+init_telemetry()
+
 from django.core.wsgi import get_wsgi_application
 
 application = get_wsgi_application()

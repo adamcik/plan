@@ -17,6 +17,7 @@ from requests.packages.urllib3.util.retry import Retry
 from django.core import cache
 from django.core.cache import CacheKeyWarning
 from django.db import connections
+from opentelemetry import trace
 
 warnings.simplefilter("ignore", CacheKeyWarning)
 
@@ -41,6 +42,8 @@ session = requests.Session()
 session.mount("https://", adapter)
 session.mount("http://", adapter)
 
+tracer = trace.get_tracer("plan.scrape")
+
 
 class rate_limit:
     previous = 0
@@ -52,7 +55,9 @@ class rate_limit:
         delay = self.interval - (time.time() - rate_limit.previous)
         if delay > 0:
             logging.debug("Rate limiter applied for %.3f seconds", delay)
-            time.sleep(delay)
+            with tracer.start_as_current_span("scraper.rate_limit.wait") as span:
+                span.set_attribute("scraper.wait.duration", delay)
+                time.sleep(delay)
 
     def __exit__(self, type, value, traceback):
         rate_limit.previous = time.time()
@@ -69,25 +74,29 @@ def sql(db, query, params=None):
 
 # TODO: Store response code and content in cache?
 def _fetch(req, key, msg, cache, verbose):
-    sentinel = object()
-    result = scraper_cache.get(key, default=sentinel)
+    with tracer.start_as_current_span("scraper.fetch") as span:
+        span.set_attribute("http.request.method", req.method)
+        span.set_attribute("scraper.cache.enabled", cache and not disable_cache)
+        sentinel = object()
+        result = scraper_cache.get(key, default=sentinel)
 
-    if result is sentinel or not cache or disable_cache:
-        result = None
-        try:
-            prepped = session.prepare_request(req)
-            with rate_limit(max_per_second):
-                response = session.send(prepped, timeout=30)
-        except MaxRetryError:
-            scraper_cache.set(key, None, timeout=60 * 30)
-        else:
-            result = response.text
-            if response.status_code == 200 and result:
-                scraper_cache.set(key, result)
-            elif response.status_code == 500:
+        if result is sentinel or not cache or disable_cache:
+            result = None
+            try:
+                prepped = session.prepare_request(req)
+                with rate_limit(max_per_second):
+                    response = session.send(prepped, timeout=30)
+            except MaxRetryError:
                 scraper_cache.set(key, None, timeout=60 * 30)
-    else:
-        msg = "Cached hit: %s" % key
+            else:
+                result = response.text
+                if response.status_code == 200 and result:
+                    scraper_cache.set(key, result)
+                elif response.status_code == 500:
+                    scraper_cache.set(key, None, timeout=60 * 30)
+        else:
+            span.set_attribute("scraper.cache.hit", True)
+            msg = "Cached scraper response"
 
     logging.log(logging.INFO if verbose else logging.DEBUG, msg)
     return result
@@ -101,7 +110,7 @@ def get(url, cache=True, verbose=False):
 
 def post(url, data, cache=True, verbose=False):
     key = f"post||{url}||{urllib.parse.urlencode(data)}"
-    msg = f"POST: {url} Data: {data}"
+    msg = "POST scraper request"
     return _fetch(requests.Request("POST", url, data=data), key, msg, cache, verbose)
 
 
