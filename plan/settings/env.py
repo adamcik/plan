@@ -1,6 +1,7 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 from pathlib import Path
+from importlib.metadata import PackageNotFoundError, version
 
 from pydantic import Field, SecretStr
 from pydantic_parsed_env import Parsed, ParsedEnvSettings
@@ -90,6 +91,10 @@ class Settings(ParsedEnvSettings):
 
     sentry_dsn: SecretStr | None = Field(None, validation_alias="SENTRY_DSN")
     sentry_environment: str = Field("production", validation_alias="SENTRY_ENVIRONMENT")
+    sentry_release: str = Field(
+        default_factory=lambda: f"plan@{_current_package_version()}",
+        validation_alias="SENTRY_RELEASE",
+    )
     sentry_traces_sample_rate: float = Field(
         0.001, validation_alias="SENTRY_TRACES_SAMPLE_RATE"
     )
@@ -102,3 +107,10 @@ class Settings(ParsedEnvSettings):
     timetable_public_host: str | None = Field(
         None, validation_alias="TIMETABLE_PUBLIC_HOST"
     )
+
+
+def _current_package_version() -> str:
+    try:
+        return version("plan")
+    except PackageNotFoundError:
+        return "unknown"

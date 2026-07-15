@@ -365,6 +365,7 @@ if env.sentry_dsn is not None:
     sentry_sdk.init(
         dsn=env.sentry_dsn.get_secret_value(),
         environment=env.sentry_environment,
+        release=env.sentry_release,
         integrations=[
             DjangoIntegration(
                 middleware_spans=True,
