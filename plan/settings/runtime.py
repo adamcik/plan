@@ -374,6 +374,7 @@ if env.sentry_dsn is not None:
             )
         ],
         traces_sample_rate=env.sentry_traces_sample_rate,
+        enable_logs=env.sentry_enable_logs,
     )
 
 DATABASES = {

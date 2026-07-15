@@ -98,6 +98,7 @@ class Settings(ParsedEnvSettings):
     sentry_traces_sample_rate: float = Field(
         0.001, validation_alias="SENTRY_TRACES_SAMPLE_RATE"
     )
+    sentry_enable_logs: bool = Field(False, validation_alias="SENTRY_ENABLE_LOGS")
     timetable_report_uri: str | None = Field(
         None, validation_alias="TIMETABLE_REPORT_URI"
     )
