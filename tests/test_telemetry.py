@@ -21,9 +21,10 @@ from plan.settings.runtime import _sentry_otel_options
 
 
 class TelemetryTestCase(SimpleTestCase):
-    def test_wsgi_bootstraps_after_django_settings_are_complete(self):
-        environment = os.environ | {"PLAN_TELEMETRY_COMPONENTS": "tracing"}
-        script = "from plan.wsgi import application; from django.conf import settings; assert settings.ROOT_URLCONF == 'plan.urls'"
+    def test_wsgi_logs_without_telemetry(self):
+        environment = os.environ.copy()
+        environment.pop("PLAN_TELEMETRY_COMPONENTS", None)
+        script = "from plan.wsgi import application; import logging; logging.getLogger('plan.test').info('standard log probe')"
 
         result = subprocess.run(
             [sys.executable, "-c", script],
@@ -33,6 +34,25 @@ class TelemetryTestCase(SimpleTestCase):
         )
 
         self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn("standard log probe", result.stderr)
+
+    def test_wsgi_bootstraps_after_django_settings_are_complete(self):
+        environment = os.environ | {
+            "PLAN_TELEMETRY_COMPONENTS": "tracing",
+            "DJANGO_ALLOWED_HOSTS": "testserver",
+        }
+        script = "from plan.wsgi import application; from django.conf import settings; from django.test import Client; import logging; assert settings.ROOT_URLCONF == 'plan.urls'; logging.getLogger('plan.test').info('telemetry log probe'); assert Client().get('/robots.txt').status_code == 200"
+
+        result = subprocess.run(
+            [sys.executable, "-c", script],
+            env=environment,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn('"event": "telemetry log probe"', result.stderr)
+        self.assertIn('"http.route": "^robots.txt"', result.stderr)
 
     def test_sentry_uses_otel_instrumenter_only_for_otel_tracing(self):
         self.assertEqual({}, _sentry_otel_options(set()))
