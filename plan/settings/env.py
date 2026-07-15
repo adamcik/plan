@@ -98,6 +98,9 @@ class Settings(ParsedEnvSettings):
     sentry_traces_sample_rate: float = Field(
         0.001, validation_alias="SENTRY_TRACES_SAMPLE_RATE"
     )
+    timetable_report_uri: str | None = Field(
+        None, validation_alias="TIMETABLE_REPORT_URI"
+    )
 
     email_subject_prefix: str = Field("", validation_alias="EMAIL_SUBJECT_PREFIX")
     static_url: str = Field("/static/", validation_alias="STATIC_URL")

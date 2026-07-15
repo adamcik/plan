@@ -59,6 +59,21 @@ class EmptyViewTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 301)
         self.assertTrue(response["Location"].endswith("/static/favicon.png"))
 
+    @override_settings(TIMETABLE_REPORT_URI="https://reports.example/csp")
+    def test_csp_reporting_endpoint(self):
+        response = self.client.get("/")
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(
+            response["Reporting-Endpoints"],
+            'endpoint="https://reports.example/csp"',
+        )
+        self.assertIn(
+            "report-uri https://reports.example/csp",
+            response["Content-Security-Policy"],
+        )
+        self.assertIn("report-to endpoint", response["Content-Security-Policy"])
+
 
 class ViewTestCase(BaseTestCase):
     fixtures = ["test_data.json", "test_user.json", "test_lecture_events.json"]

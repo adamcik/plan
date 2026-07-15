@@ -275,7 +275,7 @@ TIMETABLE_UTM_SOURCE = "timeplan"
 # If the syllabus column should be displayed for courses
 TIMETABLE_SHOW_SYLLABUS = True
 
-# The CSP report URI to use.
+# The optional CSP reporting endpoint.
 TIMETABLE_REPORT_URI = None
 
 # How long to cache ical feeds for in caches (i.e. not HTTP header caching)
@@ -339,6 +339,7 @@ TIMETABLE_SCHEDULE_DATA_CACHE_TTL = env.timetable_schedule_data_cache_ttl
 TIMETABLE_COURSE_STATS_CACHE_TTL = env.timetable_course_stats_cache_ttl
 
 DEBUG = env.django_debug
+TIMETABLE_REPORT_URI = env.timetable_report_uri
 
 if env.django_secret_key is not None:
     SECRET_KEY = env.django_secret_key.get_secret_value()
