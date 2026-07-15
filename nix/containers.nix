@@ -44,6 +44,7 @@
         "--module" "plan.wsgi"
         "--virtualenv" "${config.uv2nix.runtimeVenv}"
         "--master"
+        "--die-on-term"
         "--processes" "$PLAN_UWSGI_PROCESSES"
         "--threads" "$PLAN_UWSGI_THREADS"
         "--show-config"
