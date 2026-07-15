@@ -81,6 +81,7 @@ TEST_RUNNER = "django.test.runner.DiscoverRunner"
 
 # -- App and midleware settings:
 MIDDLEWARE = (
+    "plan.telemetry.middleware.AccessLogMiddleware",
     "plan.common.middleware.encoding_compatibility_middleware",
     "plan.common.middleware.CspMiddleware",
     "plan.common.middleware.AppendSlashMiddleware",
@@ -326,8 +327,6 @@ eller <a href="https://apps.uka.no/opptak/?utm_source=timeplan">uka.no</a>.
 
 
 env = Settings()
-
-MIDDLEWARE = ("plan.telemetry.middleware.AccessLogMiddleware", *MIDDLEWARE)
 
 TIMETABLE_ICAL_CACHE_DURATION = timedelta(
     seconds=env.timetable_ical_cache_duration_seconds

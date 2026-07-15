@@ -40,7 +40,7 @@ class MultiCache(Generic[T]):
             except Exception:
                 logger.exception(
                     "MultiCache backend get failed",
-                    extra={"cache_layer": name, "cache_key": key},
+                    extra={"cache_layer": name},
                 )
                 continue
 
@@ -51,10 +51,7 @@ class MultiCache(Generic[T]):
                     except Exception:
                         logger.exception(
                             "MultiCache backend promotion set failed",
-                            extra={
-                                "cache_layer": missed_name,
-                                "cache_key": key,
-                            },
+                            extra={"cache_layer": missed_name},
                         )
 
                 return CacheResult(hit=True, value=value)

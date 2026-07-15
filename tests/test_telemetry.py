@@ -53,6 +53,7 @@ class TelemetryTestCase(SimpleTestCase):
         self.assertEqual(0, result.returncode, result.stderr)
         self.assertIn('"event": "telemetry log probe"', result.stderr)
         self.assertIn('"http.route": "^robots.txt"', result.stderr)
+        self.assertIn("GET ^robots.txt 200", result.stderr)
 
     def test_sentry_uses_otel_instrumenter_only_for_otel_tracing(self):
         self.assertEqual({}, _sentry_otel_options(set()))

@@ -13,6 +13,7 @@ from plan.common.utils import (
     ColorMap,
     clear_cache,
     compact_sequence,
+    lookup_cached_response,
     store_cached_response,
 )
 
@@ -44,6 +45,25 @@ class UtilTestCase(BaseTestCase):
 
         seq = compact_sequence([])
         self.assertEqual(seq, [])
+
+    def test_response_cache_headers_do_not_include_the_cache_key(self):
+        response = store_cached_response(
+            cache_alias="default",
+            cache_key="student-123",
+            response=HttpResponse(),
+            timeout=60,
+        )
+
+        self.assertEqual("miss", response.headers["X-Cache"])
+
+        cached = lookup_cached_response(
+            cache_alias="default",
+            cache_key="student-123",
+            headers={},
+        )
+
+        self.assertIsNotNone(cached)
+        self.assertEqual("hit", cached.headers["X-Cache"])
 
     def test_clear_cache_deletes_only_user_schedule_entry(self):
         schedule = Schedule(semester=self.semester, student=self.student)
