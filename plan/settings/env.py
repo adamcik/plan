@@ -1,6 +1,5 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
-import socket
 from importlib.metadata import PackageNotFoundError, metadata, version
 from pathlib import Path
 from enum import StrEnum
@@ -150,10 +149,6 @@ class Settings(ParsedEnvSettings):
     def default_telemetry_resource_labels(self) -> "Settings":
         if self.otel_vcs_revision is None:
             self.otel_vcs_revision = _current_package_revision()
-        if self.otel_service_instance_id is None:
-            self.otel_service_instance_id = "-".join(
-                [socket.gethostname(), self.otel_deployment_environment]
-            )
         return self
 
 

@@ -1,3 +1,5 @@
+from unittest import mock
+
 from django.core.cache import caches
 from django.test import SimpleTestCase
 from opentelemetry import metrics, trace
@@ -8,6 +10,7 @@ from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 
 from plan.telemetry import TelemetrySettings
 from plan.telemetry.cache import instrument_cache
+from plan.telemetry import resources
 from plan.telemetry.resources import resource_attributes
 from plan.testing.otel import InMemorySpanExporter, reset_otel_once
 from plan.settings.env import TelemetryComponent
@@ -43,6 +46,30 @@ class TelemetryTestCase(SimpleTestCase):
         self.assertEqual("testing", attributes["deployment.environment.name"])
         self.assertEqual("test-1", attributes["service.instance.id"])
         self.assertEqual("abc1234", attributes["vcs.revision"])
+
+    @mock.patch.object(resources.os, "getpid", return_value=2002)
+    @mock.patch.object(resources.socket, "gethostname", return_value="delta")
+    def test_resource_attributes_derives_instance_id_per_worker(
+        self, gethostname, getpid
+    ):
+        settings = TelemetrySettings(
+            components=frozenset(),
+            endpoint="http://collector:4318",
+            service_name="test-plan",
+            service_version="1.2.3",
+            deployment_environment="testing",
+            service_instance_id=None,
+            vcs_revision=None,
+            trace_sample_rate=1,
+            export_timeout_seconds=1,
+            metric_export_interval_seconds=60,
+        )
+
+        attributes = resource_attributes(settings)
+
+        self.assertEqual("delta-testing-2002", attributes["service.instance.id"])
+        gethostname.assert_called_once_with()
+        self.assertEqual(2, getpid.call_count)
 
     def test_cache_span_records_cached_none_as_a_hit_without_key_or_value(self):
         reset_otel_once()

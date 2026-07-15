@@ -1,6 +1,7 @@
 """Stable resource and log attributes shared by telemetry signals."""
 
 import os
+import socket
 from threading import current_thread, get_ident
 from typing import TYPE_CHECKING
 
@@ -15,13 +16,20 @@ def resource_attributes(settings: "TelemetrySettings") -> dict[str, str | int]:
         "service.name": settings.service_name,
         "service.version": settings.service_version,
         "deployment.environment.name": settings.deployment_environment,
+        "service.instance.id": service_instance_id(settings),
         "process.pid": os.getpid(),
     }
-    if settings.service_instance_id:
-        attributes["service.instance.id"] = settings.service_instance_id
     if settings.vcs_revision:
         attributes["vcs.revision"] = settings.vcs_revision
     return attributes
+
+
+def service_instance_id(settings: "TelemetrySettings") -> str:
+    if settings.service_instance_id is not None:
+        return settings.service_instance_id
+    return "-".join(
+        [socket.gethostname(), settings.deployment_environment, str(os.getpid())]
+    )
 
 
 def log_attributes() -> dict[str, str | int | bool]:
