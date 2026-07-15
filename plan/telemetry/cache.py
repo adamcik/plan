@@ -94,7 +94,7 @@ def _record(
         f"cache {operation}", kind=SpanKind.CLIENT, attributes=attributes
     ) as span:
         try:
-            result = function(*args, **kwargs)
+            result, cache_hit = _call_cache_operation(operation, function, args, kwargs)
         except Exception as error:
             attributes["error.type"] = type(error).__name__
             span.record_exception(error)
@@ -102,9 +102,8 @@ def _record(
             raise
         else:
             if operation == "get":
-                default = kwargs.get("default", args[1] if len(args) > 1 else None)
-                attributes["cache.hit"] = result is not default
-                span.set_attribute("cache.hit", result is not default)
+                attributes["cache.hit"] = cache_hit
+                span.set_attribute("cache.hit", cache_hit)
             elif operation == "get_many":
                 attributes["cache.hit_count"] = len(result)
                 attributes["cache.miss_count"] = attributes.get(
@@ -115,3 +114,27 @@ def _record(
             elapsed = time.perf_counter() - start
             _duration.record(elapsed, attributes)
             _operations.add(1, attributes)
+
+
+def _call_cache_operation(
+    operation: str,
+    function: Callable[..., Any],
+    args: tuple[Any, ...],
+    kwargs: dict[str, Any],
+) -> tuple[Any, bool]:
+    if operation != "get":
+        return function(*args, **kwargs), False
+
+    sentinel = object()
+    default = kwargs.get("default", args[1] if len(args) > 1 else None)
+    call_args = list(args)
+    call_kwargs = dict(kwargs)
+    if len(call_args) > 1:
+        call_args[1] = sentinel
+    else:
+        call_kwargs["default"] = sentinel
+
+    result = function(*call_args, **call_kwargs)
+    if result is sentinel:
+        return default, False
+    return result, True

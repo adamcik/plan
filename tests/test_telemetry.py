@@ -10,9 +10,18 @@ from plan.telemetry import TelemetrySettings
 from plan.telemetry.cache import instrument_cache
 from plan.telemetry.resources import resource_attributes
 from plan.testing.otel import InMemorySpanExporter, reset_otel_once
+from plan.settings.env import TelemetryComponent
+from plan.settings.runtime import _sentry_otel_options
 
 
 class TelemetryTestCase(SimpleTestCase):
+    def test_sentry_uses_otel_instrumenter_only_for_otel_tracing(self):
+        self.assertEqual({}, _sentry_otel_options(set()))
+        self.assertEqual(
+            {"instrumenter": "otel"},
+            _sentry_otel_options({TelemetryComponent.TRACING}),
+        )
+
     def test_resource_attributes_include_service_identity(self):
         settings = TelemetrySettings(
             components=frozenset({"tracing", "metrics"}),
@@ -35,7 +44,7 @@ class TelemetryTestCase(SimpleTestCase):
         self.assertEqual("test-1", attributes["service.instance.id"])
         self.assertEqual("abc1234", attributes["vcs.revision"])
 
-    def test_cache_span_omits_cache_key_and_value(self):
+    def test_cache_span_records_cached_none_as_a_hit_without_key_or_value(self):
         reset_otel_once()
         exporter = InMemorySpanExporter()
         provider = TracerProvider()
@@ -48,8 +57,8 @@ class TelemetryTestCase(SimpleTestCase):
 
         cache = caches["default"]
         cache._plan_telemetry_alias = "default"
-        cache.set("student-123", "secret value")
-        self.assertEqual("secret value", cache.get("student-123"))
+        cache.set("student-123", None)
+        self.assertIsNone(cache.get("student-123"))
 
         spans = exporter.get_finished_spans()
         get_span = next(span for span in spans if span.name == "cache get")

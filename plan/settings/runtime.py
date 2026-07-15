@@ -9,10 +9,16 @@ from sentry_sdk.integrations.django import DjangoIntegration
 
 from django.utils.safestring import mark_safe
 
-from plan.settings.env import Settings
+from plan.settings.env import Settings, TelemetryComponent
 from plan.telemetry import init as init_telemetry
 
 PLAN_PACKAGE_ROOT = files("plan")
+
+
+def _sentry_otel_options(components: set[TelemetryComponent]) -> dict[str, str]:
+    if TelemetryComponent.TRACING in components:
+        return {"instrumenter": "otel"}
+    return {}
 
 
 def ugettext(s):
@@ -378,7 +384,7 @@ if env.sentry_dsn is not None:
             )
         ],
         traces_sample_rate=env.sentry_traces_sample_rate,
-        instrumenter="otel",
+        **_sentry_otel_options(env.plan_telemetry_components),
         enable_logs=env.sentry_enable_logs,
     )
 
