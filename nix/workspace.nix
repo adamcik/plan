@@ -34,6 +34,7 @@
             ../pyproject.toml
             ../uv.lock
             ../plan
+            ../tests
             ../README.md
           ];
         }

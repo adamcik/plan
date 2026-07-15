@@ -22,7 +22,7 @@ dependencies = [
   "pydantic-settings>=2.14.2,<3",
   "pylibmc>=1.6.3,<2",
   "reportlab==4.4.10",
-  "sentry-sdk>=2.0.0,<3",
+  "sentry-sdk[opentelemetry]>=2.0.0,<3",
   "structlog==26.1.0",
   "typing-extensions>=4.12.2",
   "vobject>=0.9.9,<1",

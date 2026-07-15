@@ -303,6 +303,20 @@ wheels = [
 ]
 
 [[package]]
+name = "opentelemetry-distro"
+version = "0.64b0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "opentelemetry-api" },
+    { name = "opentelemetry-instrumentation" },
+    { name = "opentelemetry-sdk" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b7/e6/3142ab3b002f317b91d994526e70350629f848abb66d10dec87c1fa639a0/opentelemetry_distro-0.64b0.tar.gz", hash = "sha256:8a19716899854245b4028650ec1cca12d89f9be41571bbffe9e539cd55d2fd96", size = 2333, upload-time = "2026-06-24T15:19:10.381Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a9/54/fdaf5d8a2d3633f11b860d7a328639ad49cddf3ad0f7e509bb488e68d029/opentelemetry_distro-0.64b0-py3-none-any.whl", hash = "sha256:ce97b6cedfcf03dc54035c422485412eda63250e094f4bd63ef57d017d823f3c", size = 2778, upload-time = "2026-06-24T15:18:13.406Z" },
+]
+
+[[package]]
 name = "opentelemetry-exporter-otlp-proto-common"
 version = "1.43.0"
 source = { registry = "https://pypi.org/simple" }
@@ -584,7 +598,7 @@ dependencies = [
     { name = "pydantic-settings" },
     { name = "pylibmc" },
     { name = "reportlab" },
-    { name = "sentry-sdk" },
+    { name = "sentry-sdk", extra = ["opentelemetry"] },
     { name = "structlog" },
     { name = "typing-extensions" },
     { name = "vobject" },
@@ -623,7 +637,7 @@ requires-dist = [
     { name = "pydantic-settings", specifier = ">=2.14.2,<3" },
     { name = "pylibmc", specifier = ">=1.6.3,<2" },
     { name = "reportlab", specifier = "==4.4.10" },
-    { name = "sentry-sdk", specifier = ">=2.0.0,<3" },
+    { name = "sentry-sdk", extras = ["opentelemetry"], specifier = ">=2.0.0,<3" },
     { name = "structlog", specifier = "==26.1.0" },
     { name = "typing-extensions", specifier = ">=4.12.2" },
     { name = "vobject", specifier = ">=0.9.9,<1" },
@@ -907,6 +921,11 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/26/b3/fb8291170d0e844173164709fc0fa0c221ed75a5da740c8746f2a83b4eb1/sentry_sdk-2.58.0.tar.gz", hash = "sha256:c1144d947352d54e5b7daa63596d9f848adf684989c06c4f5a659f0c85a18f6f", size = 438764, upload-time = "2026-04-13T17:23:26.265Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/fa/eb/d875669993b762556ae8b2efd86219943b4c0864d22204d622a9aee3052b/sentry_sdk-2.58.0-py2.py3-none-any.whl", hash = "sha256:688d1c704ddecf382ea3326f21a67453d4caa95592d722b7c780a36a9d23109e", size = 460919, upload-time = "2026-04-13T17:23:24.675Z" },
+]
+
+[package.optional-dependencies]
+opentelemetry = [
+    { name = "opentelemetry-distro" },
 ]
 
 [[package]]

@@ -377,12 +377,8 @@ if env.sentry_dsn is not None:
                 cache_spans=True,
             )
         ],
-        # OpenTelemetry owns tracing when enabled. Sentry remains error reporting.
-        traces_sample_rate=(
-            0
-            if "tracing" in env.plan_telemetry_components
-            else env.sentry_traces_sample_rate
-        ),
+        traces_sample_rate=env.sentry_traces_sample_rate,
+        instrumenter="otel",
         enable_logs=env.sentry_enable_logs,
     )
 

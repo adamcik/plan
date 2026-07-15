@@ -1,6 +1,7 @@
 """Structured logging with active OpenTelemetry trace correlation."""
 
 import logging
+import sys
 from typing import Any
 
 import structlog
@@ -16,6 +17,10 @@ def configure() -> None:
             structlog.stdlib.add_logger_name,
             structlog.stdlib.add_log_level,
             structlog.processors.TimeStamper(fmt="iso", utc=True),
+            structlog.stdlib.PositionalArgumentsFormatter(),
+            structlog.processors.StackInfoRenderer(),
+            structlog.processors.format_exc_info,
+            structlog.stdlib.ExtraAdder(),
             structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
         ],
         logger_factory=structlog.stdlib.LoggerFactory(),
@@ -41,7 +46,14 @@ class StructlogFormatter(structlog.stdlib.ProcessorFormatter):
             processors=[
                 add_otel_context,
                 structlog.stdlib.ProcessorFormatter.remove_processors_meta,
-                structlog.processors.JSONRenderer(),
+                *(
+                    [structlog.dev.ConsoleRenderer(colors=True)]
+                    if sys.stderr.isatty()
+                    else [
+                        structlog.processors.dict_tracebacks,
+                        structlog.processors.JSONRenderer(),
+                    ]
+                ),
             ],
             **kwargs,
         )

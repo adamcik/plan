@@ -1,6 +1,7 @@
 """Application-owned OpenTelemetry setup."""
 
 import importlib.metadata
+import importlib.util
 from dataclasses import dataclass
 from typing import Literal
 
@@ -49,7 +50,9 @@ def settings_from_environment() -> TelemetrySettings:
 
     env = Settings()
     return TelemetrySettings(
-        components=frozenset(env.plan_telemetry_components),
+        components=frozenset(
+            component.value for component in env.plan_telemetry_components
+        ),
         endpoint=env.otel_exporter_otlp_endpoint,
         service_name=env.otel_service_name,
         service_version=env.otel_service_version,
@@ -96,12 +99,16 @@ def init(settings: TelemetrySettings | None = None) -> None:
                 )
             )
         )
+        _add_sentry_processor(provider)
         trace.set_tracer_provider(provider)
-        propagate.set_global_textmap(
-            CompositePropagator(
-                [TraceContextTextMapPropagator(), W3CBaggagePropagator()]
+        propagators = [TraceContextTextMapPropagator(), W3CBaggagePropagator()]
+        if _sentry_otel_available():
+            from sentry_sdk.integrations.opentelemetry.propagator import (
+                SentryPropagator,
             )
-        )
+
+            propagators.append(SentryPropagator())
+        propagate.set_global_textmap(CompositePropagator(propagators))
 
     if "metrics" in settings.components:
         reader = PeriodicExportingMetricReader(
@@ -128,6 +135,18 @@ def _instrument(settings: TelemetrySettings) -> None:
     if "metrics" in settings.components:
         SystemMetricsInstrumentor().instrument()
     instrument_cache()
+
+
+def _sentry_otel_available() -> bool:
+    return importlib.util.find_spec("sentry_sdk.integrations.opentelemetry") is not None
+
+
+def _add_sentry_processor(provider: TracerProvider) -> None:
+    if not _sentry_otel_available():
+        return
+    from sentry_sdk.integrations.opentelemetry.span_processor import SentrySpanProcessor
+
+    provider.add_span_processor(SentrySpanProcessor())
 
 
 def version() -> str:

@@ -1,11 +1,18 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+import socket
+from importlib.metadata import PackageNotFoundError, metadata, version
 from pathlib import Path
-from importlib.metadata import PackageNotFoundError, version
+from enum import StrEnum
 
-from pydantic import Field, SecretStr
+from pydantic import Field, SecretStr, model_validator
 from pydantic_parsed_env import Parsed, ParsedEnvSettings
 from pydantic_settings import SettingsConfigDict
+
+
+class TelemetryComponent(StrEnum):
+    TRACING = "tracing"
+    METRICS = "metrics"
 
 
 class Settings(ParsedEnvSettings):
@@ -99,8 +106,8 @@ class Settings(ParsedEnvSettings):
         0.001, validation_alias="SENTRY_TRACES_SAMPLE_RATE"
     )
     sentry_enable_logs: bool = Field(False, validation_alias="SENTRY_ENABLE_LOGS")
-    plan_telemetry_components: Parsed[list[str]] = Field(
-        default_factory=list, validation_alias="PLAN_TELEMETRY_COMPONENTS"
+    plan_telemetry_components: Parsed[set[TelemetryComponent]] = Field(
+        default_factory=set, validation_alias="PLAN_TELEMETRY_COMPONENTS"
     )
     otel_exporter_otlp_endpoint: str = Field(
         "http://127.0.0.1:4318", validation_alias="OTEL_EXPORTER_OTLP_ENDPOINT"
@@ -139,9 +146,27 @@ class Settings(ParsedEnvSettings):
         None, validation_alias="TIMETABLE_PUBLIC_HOST"
     )
 
+    @model_validator(mode="after")
+    def default_telemetry_resource_labels(self) -> "Settings":
+        if self.otel_vcs_revision is None:
+            self.otel_vcs_revision = _current_package_revision()
+        if self.otel_service_instance_id is None:
+            self.otel_service_instance_id = "-".join(
+                [socket.gethostname(), self.otel_deployment_environment]
+            )
+        return self
+
 
 def _current_package_version() -> str:
     try:
         return version("plan")
     except PackageNotFoundError:
         return "unknown"
+
+
+def _current_package_revision() -> str | None:
+    try:
+        package_metadata = metadata("plan")
+    except PackageNotFoundError:
+        return None
+    return package_metadata.get("Vcs-Revision")

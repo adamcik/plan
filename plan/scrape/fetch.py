@@ -55,9 +55,7 @@ class rate_limit:
         delay = self.interval - (time.time() - rate_limit.previous)
         if delay > 0:
             logging.debug("Rate limiter applied for %.3f seconds", delay)
-            with tracer.start_as_current_span("scraper.rate_limit.wait") as span:
-                span.set_attribute("scraper.wait.duration", delay)
-                time.sleep(delay)
+            time.sleep(delay)
 
     def __exit__(self, type, value, traceback):
         rate_limit.previous = time.time()
