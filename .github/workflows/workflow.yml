@@ -1,0 +1,119 @@
+name: Container image pipeline
+
+on:
+  workflow_call:
+    inputs:
+      mode:
+        description: ci, release, or dev
+        required: true
+        type: string
+      release_tag:
+        description: GitHub Release tag for release mode
+        required: false
+        type: string
+      publish_latest:
+        description: Advance latest after publishing a release image
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  build:
+    name: Build container image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate mode
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          MODE: ${{ inputs.mode }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          case "$MODE" in
+            ci) test -z "$RELEASE_TAG" ;;
+            dev) test "$GITHUB_REF" = "refs/heads/$DEFAULT_BRANCH" ;;
+            release) test -n "$RELEASE_TAG" ;;
+            *) echo "Unknown mode: $MODE" >&2; exit 2 ;;
+          esac
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+
+      - name: Set up Cachix
+        uses: cachix/cachix-action@v16
+        with:
+          name: plan
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - name: Run nix flake check
+        run: nix flake check
+
+      - name: Compute image metadata
+        env:
+          MODE: ${{ inputs.mode }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          BUILD_OVERRIDES="${RUNNER_TEMP}/.build-overrides"
+          VERSION="$(nix develop -c hatchling version)"
+          REVISION="$(git rev-parse HEAD)"
+          CREATED="$(git show -s --format=%cI HEAD)"
+
+          jq -n \
+            --arg version "$VERSION" \
+            --arg revision "$REVISION" \
+            --arg created "$CREATED" \
+            '{version:$version, revision:$revision, created:$created}' \
+            | tee "$BUILD_OVERRIDES"
+
+          case "$MODE" in
+            ci) ;;
+            release)
+              test "$RELEASE_TAG" = "v$VERSION"
+              IMAGE_TAG="$RELEASE_TAG"
+              if [ "${{ inputs.publish_latest }}" = true ]; then
+                CHANNEL_TAG="latest"
+              fi
+              ;;
+            dev)
+              # OCI tags cannot contain '+', unlike Hatch local-version identifiers.
+              IMAGE_TAG="${VERSION//+/-}"
+              CHANNEL_TAG="main"
+              ;;
+          esac
+
+          {
+            echo "BUILD_OVERRIDES=$BUILD_OVERRIDES"
+            echo "IMAGE_TAG=${IMAGE_TAG:-}"
+            echo "CHANNEL_TAG=${CHANNEL_TAG:-}"
+          } >> "$GITHUB_ENV"
+
+      - name: Build image
+        run: nix build .#image --override-input build-overrides "path:${BUILD_OVERRIDES}"
+
+      - name: Login to GHCR
+        if: inputs.mode != 'ci'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_ACTOR: ${{ github.actor }}
+        run: echo "${GH_TOKEN}" | skopeo login ghcr.io -u "${GH_ACTOR}" --password-stdin
+
+      - name: Push immutable image
+        if: inputs.mode != 'ci'
+        run: nix run .#image.copyTo --override-input build-overrides "path:${BUILD_OVERRIDES}" -- "docker://ghcr.io/adamcik/plan:${IMAGE_TAG}"
+
+      - name: Push channel image
+        if: inputs.mode == 'dev' || inputs.publish_latest
+        run: nix run .#image.copyTo --override-input build-overrides "path:${BUILD_OVERRIDES}" -- "docker://ghcr.io/adamcik/plan:${CHANNEL_TAG}"
+
+      - name: Report Sentry release
+        if: inputs.mode == 'release'
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
+        run: nix run .#report-sentry-release -- "$BUILD_OVERRIDES"

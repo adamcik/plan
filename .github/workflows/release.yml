@@ -1,0 +1,18 @@
+name: Release container
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  release:
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/workflow.yml
+    with:
+      mode: release
+      release_tag: ${{ github.event.release.tag_name }}
+      publish_latest: ${{ !github.event.release.prerelease }}
+    secrets: inherit

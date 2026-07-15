@@ -123,3 +123,15 @@ Use Podman instead of Docker:
 ```bash
 run-container --podman
 ```
+
+## Releases
+
+Create all releases in GitHub. For patch releases, use GitHub's generated
+notes; write the notes for minor and major releases by hand. A published stable
+release publishes its version tag and advances `:latest`.
+
+Run the **Publish development container** workflow from `main` to publish the
+current development image and advance `:main`, without changing `:latest`.
+
+Hatch's version is retained in the image metadata. Its `+` separator is changed
+to `-` in the immutable image tag because OCI tags do not permit `+`.

@@ -1,0 +1,19 @@
+name: Publish development container
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: publish-development-container
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Publish development container
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/workflow.yml
+    with:
+      mode: dev
+    secrets: inherit

@@ -140,6 +140,11 @@ deploy/migrate.sh --instance ntnu --apply --image ghcr.io/adamcik/plan:<tag>
 
 `deploy/upgrade.sh` is optional convenience; manual Quadlet flow is valid.
 
+`ghcr.io/adamcik/plan:latest` is updated only by published stable GitHub Releases.
+Use a version tag to deploy a specific release or roll back.
+Development builds from `main` are published as `:main` and an immutable
+development-version tag; use one of those explicitly for preprod.
+
 Default helper flow:
 
 1. Pull image
