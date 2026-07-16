@@ -1,7 +1,9 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 from importlib.metadata import PackageNotFoundError, metadata, version
+import os
 from pathlib import Path
+import socket
 from enum import StrEnum
 
 from pydantic import Field, SecretStr, model_validator
@@ -150,6 +152,26 @@ class Settings(ParsedEnvSettings):
         if self.otel_vcs_revision is None:
             self.otel_vcs_revision = _current_package_revision()
         return self
+
+    @property
+    def otel_resource_attributes(self) -> dict[str, str | int]:
+        attributes: dict[str, str | int] = {
+            "service.name": self.otel_service_name,
+            "service.version": self.otel_service_version,
+            "deployment.environment.name": self.otel_deployment_environment,
+            "service.instance.id": self.otel_service_instance_id
+            or "-".join(
+                [
+                    socket.gethostname(),
+                    self.otel_deployment_environment,
+                    str(os.getpid()),
+                ]
+            ),
+            "process.pid": os.getpid(),
+        }
+        if self.otel_vcs_revision:
+            attributes["vcs.revision"] = self.otel_vcs_revision
+        return attributes
 
 
 def _current_package_version() -> str:

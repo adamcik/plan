@@ -1,14 +1,12 @@
 // Add to the Alloy configuration that defines loki.write.local.
-// Plan's Django and uWSGI logs are plain text, so preserve them unparsed.
+// Plan emits newline-delimited JSON. Parse it once so Grafana can query fields
+// and correlate logs with traces without promoting high-cardinality values to labels.
 
 loki.source.journal "plan_prod" {
   matches = "_SYSTEMD_UNIT=plan-prod.service"
 
   labels = {
-    job                    = "plan",
-    service_name           = "plan",
-    service_instance_id    = "delta-plan-prod",
-    deployment_environment = "prod",
+    job = "plan",
   }
 
   forward_to = [loki.process.plan.receiver]
@@ -18,16 +16,94 @@ loki.source.journal "plan_preprod" {
   matches = "_SYSTEMD_UNIT=plan-preprod.service"
 
   labels = {
-    job                    = "plan",
-    service_name           = "plan",
-    service_instance_id    = "delta-plan-preprod",
-    deployment_environment = "preprod",
+    job = "plan",
   }
 
   forward_to = [loki.process.plan.receiver]
 }
 
 loki.process "plan" {
+  stage.json {
+    expressions = {
+      client_address              = "\"client.address\"",
+      duration                    = "\"http.server.duration\"",
+      event                       = "event",
+      level                       = "level",
+      logger                      = "logger",
+      method                      = "\"http.request.method\"",
+      network_protocol_version    = "\"network.protocol.version\"",
+      process_pid                 = "\"process.pid\"",
+      process_thread_id           = "\"process.thread.id\"",
+      process_thread_name         = "\"process.thread.name\"",
+      response_body_size          = "\"http.response.body.size\"",
+      service_instance_id         = "\"service.instance.id\"",
+      service_name                = "\"service.name\"",
+      service_version             = "\"service.version\"",
+      deployment_environment      = "\"deployment.environment.name\"",
+      status                      = "\"http.response.status_code\"",
+      timestamp                   = "timestamp",
+      trace_id                    = "trace_id",
+      span_id                     = "span_id",
+      trace_sampled               = "trace_sampled",
+      url_path                    = "\"url.path\"",
+      user_agent                  = "\"user_agent.original\"",
+      vcs_revision                = "\"vcs.revision\"",
+    }
+  }
+
+  stage.template {
+    source = "client_family"
+    template = `{{- $ua := default "" .user_agent -}}
+{{- if regexMatch "(?i)prometheus" $ua -}}
+monitoring
+{{- else if regexMatch "(?i)updown(?:\\.io|io)" $ua -}}
+monitoring
+{{- else if regexMatch "(?i)(googlecalendar|calendaragent|calendarsync|ical|davx5|thunderbird)" $ua -}}
+ical
+{{- else -}}
+unknown
+{{- end -}}`
+  }
+
+  stage.timestamp {
+    source = "timestamp"
+    format = "RFC3339"
+  }
+
+  stage.labels {
+    values = {
+      client_family          = "client_family",
+      deployment_environment = "deployment_environment",
+      level                  = "level",
+      logger                 = "logger",
+      method                 = "method",
+      service_instance_id    = "service_instance_id",
+      service_name           = "service_name",
+      status                 = "status",
+    }
+  }
+
+  stage.structured_metadata {
+    values = {
+      client_address           = "client_address",
+      client_family            = "client_family",
+      duration                 = "duration",
+      event                    = "event",
+      network_protocol_version = "network_protocol_version",
+      process_pid              = "process_pid",
+      process_thread_id        = "process_thread_id",
+      process_thread_name      = "process_thread_name",
+      response_body_size       = "response_body_size",
+      service_version          = "service_version",
+      span_id                  = "span_id",
+      trace_id                 = "trace_id",
+      trace_sampled            = "trace_sampled",
+      url_path                 = "url_path",
+      user_agent               = "user_agent",
+      vcs_revision             = "vcs_revision",
+    }
+  }
+
   forward_to = [loki.write.local.receiver]
 }
 

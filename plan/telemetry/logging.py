@@ -2,9 +2,11 @@
 
 import logging
 import sys
+from collections.abc import Mapping
 from typing import Any
 
 import structlog
+from django.conf import settings
 from structlog.types import EventDict
 
 from plan.telemetry.resources import log_attributes
@@ -29,9 +31,13 @@ def configure() -> None:
     )
 
 
-def add_otel_context(_: Any, __: str, event_dict: EventDict) -> EventDict:
-    event_dict.update(log_attributes())
-    return event_dict
+def add_otel_context(resource_attributes: Mapping[str, str | int]):
+    def processor(_: Any, __: str, event_dict: EventDict) -> EventDict:
+        event_dict.update(resource_attributes)
+        event_dict.update(log_attributes())
+        return event_dict
+
+    return processor
 
 
 class StructlogFormatter(structlog.stdlib.ProcessorFormatter):
@@ -44,7 +50,7 @@ class StructlogFormatter(structlog.stdlib.ProcessorFormatter):
                 structlog.processors.TimeStamper(fmt="iso", utc=True),
             ],
             processors=[
-                add_otel_context,
+                add_otel_context(settings.OTEL_RESOURCE_ATTRIBUTES),
                 structlog.stdlib.ProcessorFormatter.remove_processors_meta,
                 *(
                     [structlog.dev.ConsoleRenderer(colors=True)]

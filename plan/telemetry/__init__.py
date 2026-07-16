@@ -5,6 +5,7 @@ import importlib.util
 from dataclasses import dataclass
 from typing import Literal
 
+from django.conf import settings as django_settings
 from opentelemetry import metrics, propagate, trace
 from opentelemetry.baggage.propagation import W3CBaggagePropagator
 from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
@@ -25,7 +26,6 @@ from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapProp
 
 from plan.telemetry.cache import instrument_cache
 from plan.telemetry.logging import configure as configure_logging
-from plan.telemetry.resources import resource_attributes
 from plan.telemetry.templates import instrument_templates
 
 Components = Literal["tracing", "metrics"]
@@ -36,11 +36,6 @@ _initialized = False
 class TelemetrySettings:
     components: frozenset[Components]
     endpoint: str
-    service_name: str
-    service_version: str
-    deployment_environment: str
-    service_instance_id: str | None
-    vcs_revision: str | None
     trace_sample_rate: float
     export_timeout_seconds: float
     metric_export_interval_seconds: float
@@ -55,11 +50,6 @@ def settings_from_environment() -> TelemetrySettings:
             component.value for component in env.plan_telemetry_components
         ),
         endpoint=env.otel_exporter_otlp_endpoint,
-        service_name=env.otel_service_name,
-        service_version=env.otel_service_version,
-        deployment_environment=env.otel_deployment_environment,
-        service_instance_id=env.otel_service_instance_id,
-        vcs_revision=env.otel_vcs_revision,
         trace_sample_rate=env.otel_trace_sample_rate,
         export_timeout_seconds=env.otel_export_timeout_seconds,
         metric_export_interval_seconds=env.otel_metric_export_interval_seconds,
@@ -93,8 +83,8 @@ def init(settings: TelemetrySettings | None = None) -> None:
         _initialized = True
         return
 
+    resource = Resource.create(django_settings.OTEL_RESOURCE_ATTRIBUTES)
     configure_logging()
-    resource = Resource.create(resource_attributes(settings))
     if "tracing" in settings.components:
         provider = TracerProvider(
             resource=resource,

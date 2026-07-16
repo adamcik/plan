@@ -328,6 +328,8 @@ eller <a href="https://apps.uka.no/opptak/?utm_source=timeplan">uka.no</a>.
 
 env = Settings()
 
+OTEL_RESOURCE_ATTRIBUTES = env.otel_resource_attributes
+
 TIMETABLE_ICAL_CACHE_DURATION = timedelta(
     seconds=env.timetable_ical_cache_duration_seconds
 )

@@ -1,4 +1,5 @@
 import os
+import json
 import subprocess
 import sys
 from unittest import mock
@@ -15,8 +16,6 @@ from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from plan.telemetry import TelemetrySettings, _django_response_hook
 from plan.telemetry import cache as telemetry_cache
 from plan.telemetry.cache import instrument_cache
-from plan.telemetry import resources
-from plan.telemetry.resources import resource_attributes
 from plan.telemetry.templates import instrument_templates
 from plan.testing.otel import InMemorySpanExporter, reset_otel_once
 from plan.settings.env import TelemetryComponent
@@ -64,6 +63,9 @@ class TelemetryTestCase(SimpleTestCase):
         environment = os.environ | {
             "PLAN_TELEMETRY_COMPONENTS": "tracing",
             "DJANGO_ALLOWED_HOSTS": "testserver",
+            "OTEL_SERVICE_NAME": "test-plan",
+            "OTEL_SERVICE_INSTANCE_ID": "test-plan-1",
+            "OTEL_DEPLOYMENT_ENVIRONMENT": "testing",
         }
         script = "from plan.wsgi import application; from django.conf import settings; from django.test import Client; import logging; assert settings.ROOT_URLCONF == 'plan.urls'; logging.getLogger('plan.test').info('telemetry log probe'); assert Client().get('/robots.txt?student=secret').status_code == 200"
 
@@ -80,6 +82,14 @@ class TelemetryTestCase(SimpleTestCase):
         self.assertIn('"language": "en"', result.stderr)
         self.assertIn("GET /robots.txt HTTP/1.1", result.stderr)
         self.assertIn("student=secret", result.stderr)
+        telemetry_log = next(
+            json.loads(line)
+            for line in result.stderr.splitlines()
+            if '"event": "telemetry log probe"' in line
+        )
+        self.assertEqual("test-plan", telemetry_log["service.name"])
+        self.assertEqual("test-plan-1", telemetry_log["service.instance.id"])
+        self.assertEqual("testing", telemetry_log["deployment.environment.name"])
 
     def test_sentry_uses_otel_instrumenter_only_for_otel_tracing(self):
         self.assertEqual({}, _sentry_otel_options(set()))
@@ -87,52 +97,6 @@ class TelemetryTestCase(SimpleTestCase):
             {"instrumenter": "otel"},
             _sentry_otel_options({TelemetryComponent.TRACING}),
         )
-
-    def test_resource_attributes_include_service_identity(self):
-        settings = TelemetrySettings(
-            components=frozenset({"tracing", "metrics"}),
-            endpoint="http://collector:4318",
-            service_name="test-plan",
-            service_version="1.2.3",
-            deployment_environment="testing",
-            service_instance_id="test-1",
-            vcs_revision="abc1234",
-            trace_sample_rate=1,
-            export_timeout_seconds=1,
-            metric_export_interval_seconds=60,
-        )
-
-        attributes = resource_attributes(settings)
-
-        self.assertEqual("test-plan", attributes["service.name"])
-        self.assertEqual("1.2.3", attributes["service.version"])
-        self.assertEqual("testing", attributes["deployment.environment.name"])
-        self.assertEqual("test-1", attributes["service.instance.id"])
-        self.assertEqual("abc1234", attributes["vcs.revision"])
-
-    @mock.patch.object(resources.os, "getpid", return_value=2002)
-    @mock.patch.object(resources.socket, "gethostname", return_value="delta")
-    def test_resource_attributes_derives_instance_id_per_worker(
-        self, gethostname, getpid
-    ):
-        settings = TelemetrySettings(
-            components=frozenset(),
-            endpoint="http://collector:4318",
-            service_name="test-plan",
-            service_version="1.2.3",
-            deployment_environment="testing",
-            service_instance_id=None,
-            vcs_revision=None,
-            trace_sample_rate=1,
-            export_timeout_seconds=1,
-            metric_export_interval_seconds=60,
-        )
-
-        attributes = resource_attributes(settings)
-
-        self.assertEqual("delta-testing-2002", attributes["service.instance.id"])
-        gethostname.assert_called_once_with()
-        self.assertEqual(2, getpid.call_count)
 
     def test_cache_span_records_cached_none_as_a_hit_without_key_or_value(self):
         instrument_cache()
