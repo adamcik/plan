@@ -1,5 +1,4 @@
 from django.http import HttpResponse
-from django.test import RequestFactory, SimpleTestCase, override_settings
 from django.urls import path
 
 from plan.common.middleware import AppendSlashMiddleware
@@ -14,14 +13,14 @@ urlpatterns = [
 ]
 
 
-@override_settings(ROOT_URLCONF="plan.common.tests.test_middleware", DEBUG=False)
-class AppendSlashMiddlewareTests(SimpleTestCase):
-    def test_redirects_to_slash_appended_url(self):
-        request = RequestFactory().get("/foo")
+def test_redirects_to_slash_appended_url(settings, rf):
+    settings.ROOT_URLCONF = "plan.common.tests.test_middleware"
+    settings.DEBUG = False
+    request = rf.get("/foo")
 
-        response = AppendSlashMiddleware(
-            lambda req: HttpResponse("ok")
-        ).process_request(request)
+    response = AppendSlashMiddleware(lambda req: HttpResponse("ok")).process_request(
+        request
+    )
 
-        self.assertEqual(response.status_code, 301)
-        self.assertEqual(response["Location"], "/foo/")
+    assert response.status_code == 301
+    assert response["Location"] == "/foo/"
