@@ -3,9 +3,11 @@
 import gzip
 import re
 import secrets
+from functools import wraps
 from urllib.parse import quote
 
 import brotli
+from opentelemetry import trace
 
 from django import http, shortcuts, urls
 from django.conf import settings
@@ -19,6 +21,7 @@ from plan.common.models import Semester
 from plan.common.utils import parse_accepts
 
 RE_WHITESPACE = re.compile(rb"(\s\s+|\n)")
+tracer = trace.get_tracer(__name__)
 SEMESTER_ALIASES = {
     "autum": Semester.FALL,
     "autmn": Semester.FALL,
@@ -29,6 +32,25 @@ SEMESTER_ALIAS_PATTERN = re.compile(
 )
 
 
+def traced_middleware(cls):
+    """Trace only Django middleware hooks, excluding downstream request handling."""
+    for hook_name in ("process_request", "process_response"):
+        hook = cls.__dict__.get(hook_name)
+        if hook is None:
+            continue
+
+        @wraps(hook)
+        def traced_hook(*args, __hook=hook, __hook_name=hook_name, **kwargs):
+            with tracer.start_as_current_span(
+                f"MIDDLEWARE {cls.__name__} {__hook_name}"
+            ):
+                return __hook(*args, **kwargs)
+
+        setattr(cls, hook_name, traced_hook)
+    return cls
+
+
+@traced_middleware
 class HtmlMinifyMiddleware(MiddlewareMixin):
     def should_minify(self, response):
         return (
@@ -44,6 +66,7 @@ class HtmlMinifyMiddleware(MiddlewareMixin):
         return response
 
 
+@traced_middleware
 class CspMiddleware(MiddlewareMixin):
     SCRIPT_NONCE_HEADER = "X-CSP-Script-Nonce"
     STYLE_NONCE_HEADER = "X-CSP-Style-Nonce"
@@ -98,6 +121,7 @@ class CspMiddleware(MiddlewareMixin):
         return response
 
 
+@traced_middleware
 class AppendSlashMiddleware(MiddlewareMixin):
     def process_request(self, request):
         # Bail if we already have trailing slash.

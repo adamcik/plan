@@ -11,6 +11,7 @@ from django.db import transaction
 from django.utils import html, text, translation
 from django.utils.cache import patch_vary_headers
 from django.utils.http import http_date
+from opentelemetry import trace
 
 from plan.common import encoding, forms, timetable, utils
 from plan.common.middleware import CspMiddleware
@@ -42,6 +43,7 @@ from plan.materialized.models import SubscriptionsCount
 # To allow for overriding of the codes idea of now() for tests
 now = datetime.datetime.now
 today = datetime.date.today
+tracer = trace.get_tracer(__name__)
 
 # Setup common alias for translation
 _ = translation.gettext_lazy
@@ -371,15 +373,16 @@ def schedule(
     for c in courses:
         color_map[c.id]
 
-    # Create Timetable
-    table = timetable.Timetable(lectures)
-    if week:
-        table.set_week(snapshot.semester.year, week)
-    if lectures:
-        table.place_lectures(week)
-        table.do_expansion()
-    table.insert_times()
-    table.add_markers()
+    # Keep layout work separate from data loading and template rendering.
+    with tracer.start_as_current_span("TIMETABLE BUILD"):
+        table = timetable.Timetable(lectures)
+        if week:
+            table.set_week(snapshot.semester.year, week)
+        if lectures:
+            table.place_lectures(week)
+            table.do_expansion()
+        table.insert_times()
+        table.add_markers()
 
     if advanced:
         # Set up and course name forms
