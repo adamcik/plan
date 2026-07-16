@@ -113,11 +113,29 @@ jobs:
 
       - name: Push immutable image
         if: inputs.mode == 'release'
-        run: nix run .#image.copyTo --override-input build-overrides "path:${BUILD_OVERRIDES}" -- "docker://ghcr.io/adamcik/plan:${IMAGE_TAG}"
+        run: |
+          IMAGE="ghcr.io/adamcik/plan:${IMAGE_TAG}"
+          nix run .#image.copyTo --override-input build-overrides "path:${BUILD_OVERRIDES}" -- --format v2s2 "docker://${IMAGE}"
+          nix shell nixpkgs#jq nixpkgs#skopeo --command sh -eu -c '
+            manifest=$(skopeo inspect --raw "docker://$1")
+            config=$(skopeo inspect --config "docker://$1")
+            test "$(printf %s "$manifest" | jq ".layers | length")" = "$(printf %s "$config" | jq ".rootfs.diff_ids | length")"
+            printf %s "$manifest" | jq -e ".mediaType == \"application/vnd.docker.distribution.manifest.v2+json\""
+            printf %s "$config" | jq -e ".config.Labels[\"org.opencontainers.image.description\"] == \"Timetable generator for educational institutions.\""
+          ' sh "${IMAGE}"
 
       - name: Push channel image
         if: inputs.publish_main || inputs.publish_latest
-        run: nix run .#image.copyTo --override-input build-overrides "path:${BUILD_OVERRIDES}" -- "docker://ghcr.io/adamcik/plan:${CHANNEL_TAG}"
+        run: |
+          IMAGE="ghcr.io/adamcik/plan:${CHANNEL_TAG}"
+          nix run .#image.copyTo --override-input build-overrides "path:${BUILD_OVERRIDES}" -- --format v2s2 "docker://${IMAGE}"
+          nix shell nixpkgs#jq nixpkgs#skopeo --command sh -eu -c '
+            manifest=$(skopeo inspect --raw "docker://$1")
+            config=$(skopeo inspect --config "docker://$1")
+            test "$(printf %s "$manifest" | jq ".layers | length")" = "$(printf %s "$config" | jq ".rootfs.diff_ids | length")"
+            printf %s "$manifest" | jq -e ".mediaType == \"application/vnd.docker.distribution.manifest.v2+json\""
+            printf %s "$config" | jq -e ".config.Labels[\"org.opencontainers.image.description\"] == \"Timetable generator for educational institutions.\""
+          ' sh "${IMAGE}"
 
       - name: Report Sentry release
         if: inputs.mode == 'release'
