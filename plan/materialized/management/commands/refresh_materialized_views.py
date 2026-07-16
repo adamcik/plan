@@ -22,7 +22,7 @@ class Command(BaseCommand):
     help = "Refreshes all specified materialized views."
 
     def handle(self, *args, **options):
-        with tracer.start_as_current_span("materialized_views.refresh"):
+        with tracer.start_as_current_span("MATERIALIZED VIEWS REFRESH"):
             with monitor(
                 monitor_slug="materialized-views-refresh", monitor_config=MONITOR_CONFIG
             ):

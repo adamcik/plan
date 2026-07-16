@@ -4,6 +4,7 @@ import sys
 from unittest import mock
 
 from django.core.cache import caches
+from django.template import engines
 from django.test import SimpleTestCase
 from opentelemetry import metrics, trace
 from opentelemetry.sdk.metrics import MeterProvider
@@ -15,12 +16,24 @@ from plan.telemetry import TelemetrySettings, _django_response_hook
 from plan.telemetry.cache import instrument_cache
 from plan.telemetry import resources
 from plan.telemetry.resources import resource_attributes
+from plan.telemetry.templates import instrument_templates
 from plan.testing.otel import InMemorySpanExporter, reset_otel_once
 from plan.settings.env import TelemetryComponent
 from plan.settings.runtime import _sentry_otel_options
 
 
 class TelemetryTestCase(SimpleTestCase):
+    def setUp(self):
+        super().setUp()
+        reset_otel_once()
+        self.exporter = InMemorySpanExporter()
+        provider = TracerProvider()
+        provider.add_span_processor(SimpleSpanProcessor(self.exporter))
+        trace.set_tracer_provider(provider)
+        metrics.set_meter_provider(
+            MeterProvider(metric_readers=[InMemoryMetricReader()])
+        )
+
     def test_django_response_hook_records_route_name(self):
         span = mock.Mock()
         span.is_recording.return_value = True
@@ -121,14 +134,6 @@ class TelemetryTestCase(SimpleTestCase):
         self.assertEqual(2, getpid.call_count)
 
     def test_cache_span_records_cached_none_as_a_hit_without_key_or_value(self):
-        reset_otel_once()
-        exporter = InMemorySpanExporter()
-        provider = TracerProvider()
-        provider.add_span_processor(SimpleSpanProcessor(exporter))
-        trace.set_tracer_provider(provider)
-        metrics.set_meter_provider(
-            MeterProvider(metric_readers=[InMemoryMetricReader()])
-        )
         instrument_cache()
 
         cache = caches["default"]
@@ -136,9 +141,21 @@ class TelemetryTestCase(SimpleTestCase):
         cache.set("student-123", None)
         self.assertIsNone(cache.get("student-123"))
 
-        spans = exporter.get_finished_spans()
-        get_span = next(span for span in spans if span.name == "cache get")
+        spans = self.exporter.get_finished_spans()
+        get_span = next(span for span in spans if span.name == "CACHE GET")
         self.assertEqual("default", get_span.attributes["cache.alias"])
         self.assertTrue(get_span.attributes["cache.hit"])
         self.assertNotIn("cache.key", get_span.attributes)
         self.assertNotIn("cache.value", get_span.attributes)
+
+    def test_template_rendering_creates_a_span(self):
+        instrument_templates()
+
+        engines["django"].from_string("Hello {{ name }}").render({"name": "Plan"})
+
+        span = next(
+            span
+            for span in self.exporter.get_finished_spans()
+            if span.name == "TEMPLATE <string>"
+        )
+        self.assertEqual("<string>", span.attributes["django.template.name"])

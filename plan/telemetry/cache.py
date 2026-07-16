@@ -91,7 +91,7 @@ def _record(
     attributes = _attributes(cache, operation, args)
     start = time.perf_counter()
     with _tracer.start_as_current_span(
-        f"cache {operation}", kind=SpanKind.CLIENT, attributes=attributes
+        f"CACHE {operation.upper()}", kind=SpanKind.CLIENT, attributes=attributes
     ) as span:
         try:
             result, cache_hit = _call_cache_operation(operation, function, args, kwargs)

@@ -26,6 +26,7 @@ from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapProp
 from plan.telemetry.cache import instrument_cache
 from plan.telemetry.logging import configure as configure_logging
 from plan.telemetry.resources import resource_attributes
+from plan.telemetry.templates import instrument_templates
 
 Components = Literal["tracing", "metrics"]
 _initialized = False
@@ -143,6 +144,8 @@ def _instrument(settings: TelemetrySettings) -> None:
     RequestsInstrumentor().instrument(url_filter=_url_without_query)
     Psycopg2Instrumentor().instrument(enable_commenter=False)
     LoggingInstrumentor().instrument(set_logging_format=False)
+    if "tracing" in settings.components:
+        instrument_templates()
     if "metrics" in settings.components:
         SystemMetricsInstrumentor().instrument()
     instrument_cache()

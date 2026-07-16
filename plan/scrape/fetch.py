@@ -72,7 +72,7 @@ def sql(db, query, params=None):
 
 # TODO: Store response code and content in cache?
 def _fetch(req, key, msg, cache, verbose):
-    with tracer.start_as_current_span("scraper.fetch") as span:
+    with tracer.start_as_current_span("SCRAPER FETCH") as span:
         span.set_attribute("http.request.method", req.method)
         span.set_attribute("scraper.cache.enabled", cache and not disable_cache)
         sentinel = object()
