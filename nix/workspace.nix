@@ -33,6 +33,7 @@
           fileset = lib.fileset.unions [
             ../pyproject.toml
             ../uv.lock
+            ../conftest.py
             ../plan
             ../tests
             ../README.md
@@ -108,7 +109,7 @@
           export PGHOST="$TMPDIR/pgsocket"
           mkdir -p "$PLAN_BASE_DIR"
 
-          python manage.py test --noinput
+          pytest --basetemp "$TMPDIR/pytest" -o cache_dir="$TMPDIR/pytest-cache"
           touch $out
         '';
 

@@ -147,7 +147,7 @@
       #      basedpyright                - Type check Python code
       #
       #    {bold}To run tests:{reset}
-      #      nix develop --command "./manage.py test"
+      #      nix develop --command pytest
       #
       #    Tests automatically run against an ephemeral PostgreSQL instance.
       # '';

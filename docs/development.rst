@@ -48,7 +48,7 @@ blocks and basic use-cases for the site remain functioning.
 
 ::
 
-    > ./manage.py test
+    > pytest
     Creating test database...
     Creating table django_admin_log
     Creating table auth_permission
