@@ -19,7 +19,7 @@ from plan.telemetry.cache import instrument_cache
 from plan.telemetry.templates import instrument_templates
 from plan.testing.otel import InMemorySpanExporter, reset_otel_once
 from plan.settings.env import TelemetryComponent
-from plan.settings.runtime import _sentry_otel_options
+from plan.settings.runtime import MIDDLEWARE, _sentry_otel_options
 
 
 class TelemetryTestCase(SimpleTestCase):
@@ -45,6 +45,9 @@ class TelemetryTestCase(SimpleTestCase):
 
         span.set_attribute.assert_called_once_with("django.route.name", "schedule")
         span.update_name.assert_called_once_with("GET schedule")
+
+    def test_access_log_middleware_wraps_the_full_django_stack(self):
+        self.assertEqual("plan.telemetry.middleware.AccessLogMiddleware", MIDDLEWARE[0])
 
     def test_wsgi_logs_without_telemetry(self):
         environment = os.environ.copy()

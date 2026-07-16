@@ -81,11 +81,11 @@ TEST_RUNNER = "django.test.runner.DiscoverRunner"
 
 # -- App and midleware settings:
 MIDDLEWARE = (
+    "plan.telemetry.middleware.AccessLogMiddleware",
     "plan.common.middleware.encoding_compatibility_middleware",
     "plan.common.middleware.CspMiddleware",
     "plan.common.middleware.AppendSlashMiddleware",
     "plan.common.middleware.locale_middleware",
-    "plan.telemetry.middleware.AccessLogMiddleware",
     "plan.common.middleware.HtmlMinifyMiddleware",
 )
 
