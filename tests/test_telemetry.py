@@ -5,7 +5,7 @@ import sys
 from unittest import mock
 
 from django.core.cache import caches
-from django.template import engines
+from django.template import Context, Engine, engines
 from django.test import SimpleTestCase
 from opentelemetry import metrics, trace
 from opentelemetry.sdk.metrics import MeterProvider
@@ -126,10 +126,23 @@ class TelemetryTestCase(SimpleTestCase):
         instrument_templates()
 
         engines["django"].from_string("Hello {{ name }}").render({"name": "Plan"})
-
-        span = next(
-            span
-            for span in self.exporter.get_finished_spans()
-            if span.name == "TEMPLATE <string>"
+        engine = Engine(
+            loaders=[
+                (
+                    "django.template.loaders.locmem.Loader",
+                    {
+                        "parent.html": '{% include "child.html" %}',
+                        "child.html": "Hello {{ name }}",
+                    },
+                )
+            ]
         )
+        engine.get_template("parent.html").render(Context({"name": "Plan"}))
+
+        spans = self.exporter.get_finished_spans()
+        span = next(span for span in spans if span.name == "TEMPLATE <string>")
         self.assertEqual("<string>", span.attributes["django.template.name"])
+        self.assertSetEqual(
+            {"TEMPLATE <string>", "TEMPLATE parent.html", "TEMPLATE child.html"},
+            {span.name for span in spans},
+        )

@@ -12,15 +12,15 @@ def instrument_templates() -> None:
     if _instrumented:
         return
 
-    from django.template.backends.django import Template
+    from django.template.base import Template
 
     original_render = Template.render
 
-    def render(self, context=None, request=None):
-        name = self.template.name or "<string>"
+    def render(self, context):
+        name = self.name or "<string>"
         with _tracer.start_as_current_span(f"TEMPLATE {name}") as span:
             span.set_attribute("django.template.name", name)
-            return original_render(self, context, request)
+            return original_render(self, context)
 
     Template.render = render
     _instrumented = True
