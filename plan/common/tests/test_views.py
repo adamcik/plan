@@ -4,13 +4,10 @@ import tempfile
 from pathlib import Path
 from unittest import mock
 
-import pytest
 from lxml import html
 
-from django.conf import settings
 from django.core.cache import cache, caches
 from django.db.models import Value
-from django.test import override_settings
 from django.urls import reverse as django_reverse
 from django.utils import http as http_utils
 from django.utils import timezone
@@ -30,16 +27,15 @@ from plan.common.snapshot import ScheduleSnapshot, schedule_snapshot_cache_key
 from plan.common.tests import strict_template_variables
 
 FIXTURE_LECTURE_ID = 12
-pytestmark = pytest.mark.django_db
 
 
-def test_empty_index(client):
+def test_empty_index(client, db):
     response = client.get(django_reverse("frontpage"))
     assert response.status_code == 404
     assert "404.html" in [template.name for template in response.templates]
 
 
-def test_empty_shortcut(client):
+def test_empty_shortcut(client, db):
     response = client.get(django_reverse("shortcut", args=["adamcik"]))
     assert response.status_code == 404
     assert "404.html" in [template.name for template in response.templates]
@@ -59,8 +55,8 @@ def test_favicon(client):
     assert response["Location"].endswith("/static/favicon.png")
 
 
-@override_settings(TIMETABLE_REPORT_URI="https://reports.example/csp")
-def test_csp_reporting_endpoint(client):
+def test_csp_reporting_endpoint(client, db, settings):
+    settings.TIMETABLE_REPORT_URI = "https://reports.example/csp"
     response = client.get("/")
     assert response.status_code == 404
     assert response["Reporting-Endpoints"] == 'endpoint="https://reports.example/csp"'
@@ -93,7 +89,7 @@ def test_shortcut(
     assert response["Location"] == url
 
 
-def test_redirect_room_missing_returns_404(client):
+def test_redirect_room_missing_returns_404(client, db):
     response = client.get(django_reverse("redirect_room", args=[999999]))
     assert response.status_code == 404
     assert "404.html" in [template.name for template in response.templates]
@@ -185,14 +181,12 @@ def test_schedule(
         assert "schedule.html" in [template.name for template in response.templates]
 
 
-@override_settings(
-    TIMETABLE_LOCATION_CACHE_TTL=123,
-    TIMETABLE_SCHEDULE_DATA_CACHE_TTL=456,
-    TIMETABLE_COURSE_STATS_CACHE_TTL=789,
-)
 def test_primary_cache_writes_use_configured_ttls(
-    client, serialized_schedule_data, cache_isolation, frozen_time
+    client, serialized_schedule_data, cache_isolation, frozen_time, settings
 ):
+    settings.TIMETABLE_LOCATION_CACHE_TTL = 123
+    settings.TIMETABLE_SCHEDULE_DATA_CACHE_TTL = 456
+    settings.TIMETABLE_COURSE_STATS_CACHE_TTL = 789
     cache.clear()
     semester = Semester.objects.get(year=2009, type=Semester.SPRING)
     student = Student.objects.get(slug="adamcik")
@@ -258,10 +252,15 @@ def test_schedule_sets_etag_header(
     assert "ETag" in response.headers
 
 
-@override_settings(INSTALLED_APPS=(*settings.INSTALLED_APPS, "debug_toolbar"))
 def test_schedule_etag_varies_with_debug_toolbar(
-    client, serialized_schedule_data, cache_isolation, frozen_time, schedule_scenario
+    client,
+    serialized_schedule_data,
+    cache_isolation,
+    frozen_time,
+    schedule_scenario,
+    settings,
 ):
+    settings.INSTALLED_APPS += ("debug_toolbar",)
     response = client.get(_schedule_reverse(schedule_scenario, "schedule"))
     assert response.headers["ETag"].endswith('-debug"')
 
@@ -357,14 +356,15 @@ def test_change_course_add_empty_input_redirects_to_schedule_advanced(
     )
 
 
-@override_settings(TIMETABLE_ENABLE_IF_MODIFIED_SINCE=True)
 def test_change_course_remove_invalidates_schedule_data_cache(
     client,
     serialized_schedule_data,
     cache_isolation,
     frozen_time,
     schedule_scenario,
+    settings,
 ):
+    settings.TIMETABLE_ENABLE_IF_MODIFIED_SINCE = True
     schedule_url = _schedule_reverse(schedule_scenario, "schedule-advanced")
     change_url = _schedule_reverse(schedule_scenario, "change-course")
     subscriptions = Subscription.objects.filter(
@@ -392,10 +392,15 @@ def test_change_course_remove_invalidates_schedule_data_cache(
     assert remove_course_code.encode() not in response.content
 
 
-@override_settings(TIMETABLE_ENABLE_IF_MODIFIED_SINCE=True)
 def test_change_course_in_other_semester_does_not_invalidate_current_schedule(
-    client, serialized_schedule_data, cache_isolation, frozen_time, schedule_scenario
+    client,
+    serialized_schedule_data,
+    cache_isolation,
+    frozen_time,
+    schedule_scenario,
+    settings,
 ):
+    settings.TIMETABLE_ENABLE_IF_MODIFIED_SINCE = True
     spring_schedule_url = _schedule_reverse(schedule_scenario, "schedule-advanced")
     fall_change_url = django_reverse(
         "change-course",
@@ -416,14 +421,15 @@ def test_change_course_in_other_semester_does_not_invalidate_current_schedule(
     assert response.status_code == 304
 
 
-@override_settings(TIMETABLE_ENABLE_IF_MODIFIED_SINCE=True)
 def test_schedule_if_modified_since_returns_304_after_change_course_mutation(
     client,
     serialized_schedule_data,
     cache_isolation,
     frozen_time,
     schedule_scenario,
+    settings,
 ):
+    settings.TIMETABLE_ENABLE_IF_MODIFIED_SINCE = True
     schedule_url = _schedule_reverse(schedule_scenario, "schedule-advanced")
     change_url = _schedule_reverse(schedule_scenario, "change-course")
     response = client.get(schedule_url)
@@ -553,14 +559,15 @@ def test_change_course_updates_schedule_last_modified_on_existing_row(
     assert row.last_modified > baseline
 
 
-@override_settings(TIMETABLE_ENABLE_IF_MODIFIED_SINCE=True)
 def test_delete_mutation_returns_200_for_old_if_modified_since(
     client,
     serialized_schedule_data,
     cache_isolation,
     frozen_time,
     schedule_scenario,
+    settings,
 ):
+    settings.TIMETABLE_ENABLE_IF_MODIFIED_SINCE = True
     schedule_url = _schedule_reverse(schedule_scenario, "schedule-advanced")
     change_url = _schedule_reverse(schedule_scenario, "change-course")
     response = client.get(schedule_url)
@@ -585,17 +592,16 @@ def test_delete_mutation_returns_200_for_old_if_modified_since(
     assert response.status_code == 200
 
 
-@override_settings(
-    TIMETABLE_ENABLE_IF_MODIFIED_SINCE=True,
-    TIMETABLE_SNAPSHOT_CACHE_DISK_TTL=7 * 24 * 60 * 60,
-)
 def test_change_course_invalidates_disk_backed_snapshot_metadata(
     client,
     serialized_schedule_data,
     cache_isolation,
     frozen_time,
     schedule_scenario,
+    settings,
 ):
+    settings.TIMETABLE_ENABLE_IF_MODIFIED_SINCE = True
+    settings.TIMETABLE_SNAPSHOT_CACHE_DISK_TTL = 7 * 24 * 60 * 60
     schedule_url = _schedule_reverse(schedule_scenario, "schedule-advanced")
     change_url = _schedule_reverse(schedule_scenario, "change-course")
     snapshot_key = schedule_snapshot_cache_key(
@@ -631,14 +637,15 @@ def test_schedule_with_warm_cache_force_reload_makes_no_queries(
     assert response.status_code == 200
 
 
-@override_settings(TIMETABLE_SCHEDULE_CACHE_DURATION=datetime.timedelta(seconds=60))
 def test_schedule_cache_hit_preserves_csp_nonces(
     client,
     serialized_schedule_data,
     cache_isolation,
     frozen_time,
     schedule_scenario,
+    settings,
 ):
+    settings.TIMETABLE_SCHEDULE_CACHE_DURATION = datetime.timedelta(seconds=60)
 
     def csp_nonce(policy: str, directive: str) -> str | None:
         for part in policy.split(";"):
