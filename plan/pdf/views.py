@@ -6,6 +6,7 @@ from reportlab import platypus
 from reportlab.lib import colors, pagesizes, styles, units
 from reportlab.pdfgen import canvas
 from reportlab.platypus import tables
+from opentelemetry import trace
 
 from django import http, shortcuts
 from django.utils import dateformat, html, translation
@@ -32,6 +33,7 @@ CELL_LEFT_PADDING = 2
 CELL_RIGHT_PADDING = 1
 
 _ = translation.gettext
+tracer = trace.get_tracer(__name__)
 
 
 def _tablestyle():
@@ -112,46 +114,49 @@ def pdf(request, semester, slug, size=None, week=None):
     time_width = 0.06 * width
     day_width = (width - time_width) / 5
 
-    # NOTE: This could be cached, and shared with schedule, but to be honest I
-    # doubt it is worth it for this code path.
-    lectures = Lecture.objects.get_lectures_data(
-        snapshot.semester.id,
-        snapshot.student.id,
-    )
-    lecture_ids = [lecture.lecture_id for lecture in lectures]
-    rooms = Lecture.get_related(Room, lecture_ids)
-    courses = Course.objects.get_courses(
-        snapshot.semester.year,
-        snapshot.semester.type,
-        snapshot.student.slug,
-    )
+    with tracer.start_as_current_span("PDF DATA"):
+        # NOTE: This could be cached, and shared with schedule, but to be honest I
+        # doubt it is worth it for this code path.
+        lectures = Lecture.objects.get_lectures_data(
+            snapshot.semester.id,
+            snapshot.student.id,
+        )
+        lecture_ids = [lecture.lecture_id for lecture in lectures]
+        rooms = Lecture.get_related(Room, lecture_ids)
+        courses = Course.objects.get_courses(
+            snapshot.semester.year,
+            snapshot.semester.type,
+            snapshot.student.slug,
+        )
 
-    for course in courses:
-        color_map[course.id]
+        for course in courses:
+            color_map[course.id]
 
-    timetable = Timetable(lectures)
-    if lectures:
-        timetable.place_lectures(week)
-        timetable.do_expansion()
-    timetable.insert_times()
-    if week:
-        timetable.set_week(snapshot.semester.year, week)
+    with tracer.start_as_current_span("PDF TIMETABLE BUILD"):
+        timetable = Timetable(lectures)
+        if lectures:
+            timetable.place_lectures(week)
+            timetable.do_expansion()
+        timetable.insert_times()
+        if week:
+            timetable.set_week(snapshot.semester.year, week)
 
-    paragraph_style = default_styles["Normal"]
-    paragraph_style.fontName = "Helvetica-Bold"
-    paragraph_style.fontSize = 10
-    paragraph_style.leading = 12
+    with tracer.start_as_current_span("PDF TITLE"):
+        paragraph_style = default_styles["Normal"]
+        paragraph_style.fontName = "Helvetica-Bold"
+        paragraph_style.fontSize = 10
+        paragraph_style.leading = 12
 
-    table_style = _tablestyle()
+        table_style = _tablestyle()
 
-    title = render_title(
-        snapshot.semester,
-        snapshot.student.slug,
-        week,
-    )
-    data = [[platypus.Paragraph(title, paragraph_style)]]
-    data[-1].extend([""] * sum(timetable.span))
-    table_style.add("SPAN", (0, 0), (-1, 0))
+        title = render_title(
+            snapshot.semester,
+            snapshot.student.slug,
+            week,
+        )
+        data = [[platypus.Paragraph(title, paragraph_style)]]
+        data[-1].extend([""] * sum(timetable.span))
+        table_style.add("SPAN", (0, 0), (-1, 0))
 
     # Add days
     data.append([""])
@@ -273,32 +278,33 @@ def pdf(request, semester, slug, size=None, week=None):
             mode="shrink",
         )
 
-    page = canvas.Canvas(response, pagesizes.A4)
-    page.translate(margin, pagesizes.A4[1] - margin)
+    with tracer.start_as_current_span("PDF WRITE"):
+        page = canvas.Canvas(response, pagesizes.A4)
+        page.translate(margin, pagesizes.A4[1] - margin)
 
-    if "A4" == size:
-        page.translate(0.5 * margin, 2.5 * margin - pagesizes.A4[1])
-        page.scale(1.414, 1.414)
-        page.rotate(90)
-    elif "A6" == size:
-        page.scale(0.707, 0.707)
-    elif "A7" == size:
-        page.scale(0.5, 0.5)
+        if "A4" == size:
+            page.translate(0.5 * margin, 2.5 * margin - pagesizes.A4[1])
+            page.scale(1.414, 1.414)
+            page.rotate(90)
+        elif "A6" == size:
+            page.scale(0.707, 0.707)
+        elif "A7" == size:
+            page.scale(0.5, 0.5)
 
-    table = tables.Table(
-        data, colWidths=col_widths, rowHeights=row_heights, style=table_style
-    )
+        table = tables.Table(
+            data, colWidths=col_widths, rowHeights=row_heights, style=table_style
+        )
 
-    table.wrapOn(page, width, height)
-    table.drawOn(page, 0, -height)
+        table.wrapOn(page, width, height)
+        table.drawOn(page, 0, -height)
 
-    note = request.headers.get("Host", "").split(":")[0]
+        note = request.headers.get("Host", "").split(":")[0]
 
-    page.setFont("Helvetica", 10)
-    page.setFillColor(colors.HexColor("#666666"))
-    page.drawString(width - page.stringWidth(note) - 2, -height + 2, note)
+        page.setFont("Helvetica", 10)
+        page.setFillColor(colors.HexColor("#666666"))
+        page.drawString(width - page.stringWidth(note) - 2, -height + 2, note)
 
-    page.showPage()
-    page.save()
+        page.showPage()
+        page.save()
 
     return response

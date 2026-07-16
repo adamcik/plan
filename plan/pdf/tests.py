@@ -1,12 +1,15 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import datetime
+from contextlib import nullcontext
 from http import HTTPStatus
+from unittest import mock
 
 from django.urls import reverse as django_reverse
 
 from plan.common.models import Course, Group, Lecture
 from plan.common.tests import BaseTestCase
+from plan.pdf import views
 
 
 class EmptyViewTestCase(BaseTestCase):
@@ -44,6 +47,20 @@ class ViewTestCase(EmptyViewTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.headers["Content-Type"], "application/pdf")
         self.assertTrue(response.content.startswith(b"%PDF-"))
+
+    def test_pdf_instruments_generation_phases(self):
+        with mock.patch.object(
+            views.tracer,
+            "start_as_current_span",
+            return_value=nullcontext(),
+        ) as start_span:
+            response = self.client.get(self.reverse("schedule-pdf"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [call.args[0] for call in start_span.call_args_list],
+            ["PDF DATA", "PDF TIMETABLE BUILD", "PDF TITLE", "PDF WRITE"],
+        )
 
     def test_pdf_rejects_timetable_too_dense_to_render(self):
         course = Course.objects.get(pk=1)
