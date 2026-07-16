@@ -25,6 +25,7 @@ _OPERATIONS = frozenset(
         "clear",
     }
 )
+_INSTRUMENTED_ATTRIBUTE = "_plan_telemetry_instrumented"
 _instrumented = False
 _original_getattribute: Callable[..., Any] | None = None
 
@@ -37,9 +38,10 @@ _operations = _meter.create_counter("django.cache.operations", unit="{operation}
 def instrument_cache() -> None:
     """Patch BaseCache once so every current and future backend is covered."""
     global _instrumented, _original_getattribute
-    if _instrumented:
+    if _instrumented or getattr(BaseCache, _INSTRUMENTED_ATTRIBUTE, False):
+        _instrumented = True
         return
-    _instrumented = True
+
     _original_getattribute = BaseCache.__getattribute__
 
     @functools.wraps(_original_getattribute)
@@ -55,6 +57,8 @@ def instrument_cache() -> None:
         return instrumented
 
     BaseCache.__getattribute__ = getattribute
+    setattr(BaseCache, _INSTRUMENTED_ATTRIBUTE, True)
+    _instrumented = True
     original_create_connection = caches.create_connection
 
     @functools.wraps(original_create_connection)

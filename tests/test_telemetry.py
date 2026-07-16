@@ -13,6 +13,7 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 
 from plan.telemetry import TelemetrySettings, _django_response_hook
+from plan.telemetry import cache as telemetry_cache
 from plan.telemetry.cache import instrument_cache
 from plan.telemetry import resources
 from plan.telemetry.resources import resource_attributes
@@ -147,6 +148,15 @@ class TelemetryTestCase(SimpleTestCase):
         self.assertTrue(get_span.attributes["cache.hit"])
         self.assertNotIn("cache.key", get_span.attributes)
         self.assertNotIn("cache.value", get_span.attributes)
+
+        telemetry_cache._instrumented = False
+        instrument_cache()
+
+        self.exporter.clear()
+        self.assertIsNone(cache.get("student-123"))
+
+        spans = self.exporter.get_finished_spans()
+        self.assertEqual(1, len([span for span in spans if span.name == "CACHE GET"]))
 
     def test_template_rendering_creates_a_span(self):
         instrument_templates()
