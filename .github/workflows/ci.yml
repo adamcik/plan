@@ -15,7 +15,9 @@ jobs:
     name: CI
     permissions:
       contents: read
+      packages: write
     uses: ./.github/workflows/workflow.yml
     with:
       mode: ci
+      publish_main: ${{ github.event_name == 'push' }}
     secrets: inherit

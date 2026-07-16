@@ -4,9 +4,14 @@ on:
   workflow_call:
     inputs:
       mode:
-        description: ci, release, or dev
+        description: ci or release
         required: true
         type: string
+      publish_main:
+        description: Publish the main channel image
+        required: false
+        default: false
+        type: boolean
       release_tag:
         description: GitHub Release tag for release mode
         required: false
@@ -26,11 +31,16 @@ jobs:
         env:
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
           MODE: ${{ inputs.mode }}
+          PUBLISH_MAIN: ${{ inputs.publish_main }}
           RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
           case "$MODE" in
-            ci) test -z "$RELEASE_TAG" ;;
-            dev) test "$GITHUB_REF" = "refs/heads/$DEFAULT_BRANCH" ;;
+            ci)
+              test -z "$RELEASE_TAG"
+              if [ "$PUBLISH_MAIN" = true ]; then
+                test "$GITHUB_REF" = "refs/heads/$DEFAULT_BRANCH"
+              fi
+              ;;
             release) test -n "$RELEASE_TAG" ;;
             *) echo "Unknown mode: $MODE" >&2; exit 2 ;;
           esac
@@ -79,12 +89,11 @@ jobs:
                 CHANNEL_TAG="latest"
               fi
               ;;
-            dev)
-              # OCI tags cannot contain '+', unlike Hatch local-version identifiers.
-              IMAGE_TAG="${VERSION//+/-}"
-              CHANNEL_TAG="main"
-              ;;
           esac
+
+          if [ "${{ inputs.publish_main }}" = true ]; then
+            CHANNEL_TAG="main"
+          fi
 
           {
             echo "BUILD_OVERRIDES=$BUILD_OVERRIDES"
@@ -96,18 +105,18 @@ jobs:
         run: nix build .#image --override-input build-overrides "path:${BUILD_OVERRIDES}"
 
       - name: Login to GHCR
-        if: inputs.mode != 'ci'
+        if: inputs.mode == 'release' || inputs.publish_main
         env:
           GH_TOKEN: ${{ github.token }}
           GH_ACTOR: ${{ github.actor }}
         run: echo "${GH_TOKEN}" | skopeo login ghcr.io -u "${GH_ACTOR}" --password-stdin
 
       - name: Push immutable image
-        if: inputs.mode != 'ci'
+        if: inputs.mode == 'release'
         run: nix run .#image.copyTo --override-input build-overrides "path:${BUILD_OVERRIDES}" -- "docker://ghcr.io/adamcik/plan:${IMAGE_TAG}"
 
       - name: Push channel image
-        if: inputs.mode == 'dev' || inputs.publish_latest
+        if: inputs.publish_main || inputs.publish_latest
         run: nix run .#image.copyTo --override-input build-overrides "path:${BUILD_OVERRIDES}" -- "docker://ghcr.io/adamcik/plan:${CHANNEL_TAG}"
 
       - name: Report Sentry release
