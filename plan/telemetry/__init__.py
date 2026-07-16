@@ -70,6 +70,7 @@ def _django_response_hook(span, request, response) -> None:
     match = request.resolver_match
     if match and match.view_name:
         span.set_attribute("django.route.name", match.view_name)
+        span.update_name(f"{request.method} {match.view_name}")
 
 
 def init(settings: TelemetrySettings | None = None) -> None:

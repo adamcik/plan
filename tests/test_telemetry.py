@@ -38,11 +38,13 @@ class TelemetryTestCase(SimpleTestCase):
         span = mock.Mock()
         span.is_recording.return_value = True
         request = mock.Mock()
+        request.method = "GET"
         request.resolver_match.view_name = "schedule"
 
         _django_response_hook(span, request, mock.Mock())
 
         span.set_attribute.assert_called_once_with("django.route.name", "schedule")
+        span.update_name.assert_called_once_with("GET schedule")
 
     def test_wsgi_logs_without_telemetry(self):
         environment = os.environ.copy()
