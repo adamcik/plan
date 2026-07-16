@@ -3,10 +3,14 @@ import queue
 import threading
 from dataclasses import dataclass
 
+from opentelemetry import trace
+from opentelemetry.trace import Link, SpanContext
+
 from django.core.cache import caches
 from django.http.response import HttpResponseBase
 
 logger = logging.getLogger(__name__)
+tracer = trace.get_tracer(__name__)
 
 _MAX_QUEUE_SIZE = 32
 _WORKER_GET_TIMEOUT_SECONDS = 0.5
@@ -18,6 +22,7 @@ class QueuedCacheSet:
     key: str
     value: object
     timeout: float | None
+    source_span_context: SpanContext
 
 
 _lock = threading.Lock()
@@ -43,14 +48,25 @@ def _worker() -> None:
             continue
 
         try:
+            _write_task(task)
+        finally:
+            _tasks.task_done()
+
+
+def _write_task(task: QueuedCacheSet) -> None:
+    links = (
+        [Link(task.source_span_context)] if task.source_span_context.is_valid else []
+    )
+    # The writer runs after the request ends, so link its independent trace to the
+    # request span rather than incorrectly extending that request's critical path.
+    with tracer.start_as_current_span("ICAL CACHE WRITE", links=links):
+        try:
             caches[task.cache_alias].set(task.key, task.value, timeout=task.timeout)
         except Exception:
             logger.exception(
                 "failed to persist queued cache entry",
                 extra={"cache_alias": task.cache_alias, "key": task.key},
             )
-        finally:
-            _tasks.task_done()
 
 
 def _ensure_worker_started() -> None:
@@ -82,6 +98,7 @@ def enqueue_cache_set(
         key=key,
         value=_cacheable_value(value),
         timeout=timeout,
+        source_span_context=trace.get_current_span().get_span_context(),
     )
     try:
         _tasks.put_nowait(task)

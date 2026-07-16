@@ -7,6 +7,7 @@ import zoneinfo
 
 import vobject
 from dateutil import rrule
+from opentelemetry import trace
 
 from django import http, template, urls
 from django.conf import settings
@@ -25,6 +26,7 @@ from plan.common.models import (
 from plan.common.snapshot import ScheduleSnapshotNotFound, get_schedule_snapshot
 
 _ = translation.gettext
+tracer = trace.get_tracer(__name__)
 
 TZ = zoneinfo.ZoneInfo(settings.TIME_ZONE)
 UTC = zoneinfo.ZoneInfo("UTC")
@@ -109,31 +111,34 @@ def ical(request, semester, slug, ical_type=None):
         dtstamp = datetime.datetime.now(tz=UTC)
 
     if _("lectures") in resources:
-        lectures = Lecture.objects.get_lectures_data(
-            snapshot.semester.id,
-            snapshot.student.id,
-        )
-        add_lectutures(
-            lectures,
-            snapshot.semester.year,
-            cal,
-            request,
-            hostname,
-            dtstamp,
-        )
+        with tracer.start_as_current_span("ICAL LECTURES"):
+            lectures = Lecture.objects.get_lectures_data(
+                snapshot.semester.id,
+                snapshot.student.id,
+            )
+            add_lectutures(
+                lectures,
+                snapshot.semester.year,
+                cal,
+                request,
+                hostname,
+                dtstamp,
+            )
 
     if _("exams") in resources:
-        exams = Exam.objects.get_exams(
-            snapshot.semester.year,
-            snapshot.semester.type,
-            snapshot.student.slug,
-        )
-        add_exams(exams, cal, hostname, dtstamp)
+        with tracer.start_as_current_span("ICAL EXAMS"):
+            exams = Exam.objects.get_exams(
+                snapshot.semester.year,
+                snapshot.semester.type,
+                snapshot.student.slug,
+            )
+            add_exams(exams, cal, hostname, dtstamp)
 
-    response = http.HttpResponse(
-        cal.serialize(),
-        content_type="text/calendar; charset=utf-8",
-    )
+    with tracer.start_as_current_span("ICAL SERIALIZE"):
+        response = http.HttpResponse(
+            cal.serialize(),
+            content_type="text/calendar; charset=utf-8",
+        )
     utils.apply_response_headers(response, headers)
     response["Filename"] = filename  # IE needs this
     response["Content-Disposition"] = "attachment; filename=%s" % filename

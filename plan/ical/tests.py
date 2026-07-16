@@ -1,10 +1,13 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import datetime
+from contextlib import nullcontext
+from unittest import mock
 
 from django.test import override_settings
 from django.urls import reverse as django_reverse
 from django.utils import http as http_utils
+from opentelemetry.trace import INVALID_SPAN_CONTEXT
 
 from plan.common import tests, utils
 from plan.common.models import Exam
@@ -71,6 +74,47 @@ class ViewTestCase(tests.BaseTestCase):
         self.assertEqual(self.client.get(url).status_code, 400)
 
         # TODO: Test with slug that does not exist?
+
+    def test_ical_instruments_generation_phases(self):
+        with mock.patch.object(
+            views.tracer,
+            "start_as_current_span",
+            return_value=nullcontext(),
+        ) as start_span:
+            response = self.client.get(f"{self.reverse('schedule-ical')}?no-cache=1")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [call.args[0] for call in start_span.call_args_list],
+            [
+                "ICAL LECTURES",
+                "ICAL EXAMS",
+                "ICAL SERIALIZE",
+            ],
+        )
+
+    def test_ical_cache_writer_instruments_background_write(self):
+        cache = mock.Mock()
+        task = queue.QueuedCacheSet(
+            cache_alias="disk",
+            key="test",
+            value="value",
+            timeout=60,
+            source_span_context=INVALID_SPAN_CONTEXT,
+        )
+
+        with (
+            mock.patch.object(queue, "caches", {"disk": cache}),
+            mock.patch.object(
+                queue.tracer,
+                "start_as_current_span",
+                return_value=nullcontext(),
+            ) as start_span,
+        ):
+            queue._write_task(task)
+
+        start_span.assert_called_once_with("ICAL CACHE WRITE", links=[])
+        cache.set.assert_called_once_with("test", "value", timeout=60)
 
     @override_settings(TIMETABLE_ENABLE_IF_MODIFIED_SINCE=True)
     def test_ical_not_modified_returns_304_with_validator_headers(self):
