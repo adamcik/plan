@@ -333,6 +333,8 @@ def schedule(
         last_modified=snapshot.last_modified,
         extra_headers={"X-Robots-Tag": "noindex, nofollow, noarchive"},
     )
+    if "debug_toolbar" in settings.INSTALLED_APPS:
+        headers["ETag"] = f'{headers["ETag"][:-1]}-debug"'
     response = utils.check_not_modified(request, snapshot.last_modified, headers)
     if response:
         return response

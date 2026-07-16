@@ -8,6 +8,7 @@ from pathlib import Path
 
 from lxml import html
 
+from django.conf import settings
 from django.core.cache import cache, caches
 from django.db.models import Value
 from django.test import override_settings
@@ -280,6 +281,12 @@ class ViewTestCase(BaseTestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn("ETag", response.headers)
+
+    @override_settings(INSTALLED_APPS=(*settings.INSTALLED_APPS, "debug_toolbar"))
+    def test_schedule_etag_varies_with_debug_toolbar(self):
+        response = self.client.get(self.reverse("schedule"))
+
+        self.assertTrue(response.headers["ETag"].endswith('-debug"'))
 
     def test_rendered_html_is_valid_html5(self):
         pages = {
