@@ -140,3 +140,39 @@ class TimetableTestCase(BaseTestCase):
             timetable.insert_times()
 
         self.assertEqual(timetable.table[0][0][0]["time"], "08:15 - 09:00")
+
+    def test_prepare_for_rendering_precomputes_cell_presentation(self):
+        semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+        student = Student.objects.get(slug="adamcik")
+        lecture = Lecture.objects.get_lectures_data(semester.id, student.id)[0]
+        timetable = Timetable([])
+        timetable.table = [
+            [
+                [
+                    {
+                        "lecture": lecture,
+                        "rowspan": 1,
+                        "last": True,
+                        "bottom": True,
+                    }
+                ],
+                [{"time": "08:15 - 09:00"}],
+            ]
+        ]
+
+        timetable.prepare_for_rendering()
+
+        lecture_cell = timetable.table[0][0][0]
+        self.assertEqual(
+            lecture_cell["css_class"],
+            f"lecture lecture-{lecture.lecture_id} course-{lecture.course_id} "
+            "single last bottom",
+        )
+        self.assertEqual(
+            lecture_cell["title"],
+            f"{lecture.course_name} {lecture.start:%H:%M}-{lecture.end:%H:%M}"
+            + (f": {lecture.title}" if lecture.title else ""),
+        )
+        time_cell = timetable.table[0][1][0]
+        self.assertEqual(time_cell["css_class"], "time")
+        self.assertEqual(time_cell["display_time"], "08:15 - 09:00")

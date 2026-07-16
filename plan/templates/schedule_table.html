@@ -1,7 +1,6 @@
 {% load get %}
 {% load i18n %}
 {% load nbsp %}
-{% load strip %}
 
 {% if prev_week %}
   <a href="{% url 'schedule-week' schedule.semester schedule.student.slug prev_week %}"
@@ -35,20 +34,10 @@
                 {% if not c.remove %}
                   <td {% if c.colspan > 1 %}colspan="{{ c.colspan }}"{% endif %}
                       {% if c.rowspan > 1 %}rowspan="{{ c.rowspan }}"{% endif %}
-                      {% if c|get:"lecture" or c|get:"time" or c|get:"bottom" or c|get:"last" %} class="{% stripspace %} {% if c|get:"lecture" %}lecture lecture-{{ c.lecture.lecture_id }} course-{{ c.lecture.course_id }}{% endif %}
-                      {% if c|get:"lecture" and c.lecture.type_optional %}optional{% endif %}
-                      {% if c.rowspan == 1 %}single{% endif %}
-                      {% if c|get:"last" %}last{% endif %}
-                      {% if c|get:"bottom" %}bottom{% endif %}
-                      {% if c|get:"time" %}time{% endif %}
-                      {% endstripspace %}
-                      "
-                      {% endif %}
-                      {% if c|get:"lecture" %}title="{{ c.lecture.course_name }} {{ c.lecture.start|time:"H:i" }}-{{ c.lecture.end|time:"H:i" }}{% if c.lecture.title %}: {{ c.lecture.title }}{% endif %}
-                      "
-                      {% endif %}>
+                      {% if c.css_class %}class="{{ c.css_class }}"{% endif %}
+                      {% if c.title %}title="{{ c.title }}"{% endif %}>
                     <div class="wrapper">
-                      {% if c|get:"lecture" %}
+                      {% if c.lecture %}
                         <div class="course">{{ c.lecture.alias|default:c.lecture.course_code }}</div>
                         <div class="room">
                           {% if c.lecture.stream %}
@@ -73,7 +62,7 @@
                           {% endif %}
                         </div>
                       {% endif %}
-                      {{ c|get:"time"|escape|nbsp|default:"" }}
+                      {{ c.display_time|escape|nbsp|default:"" }}
                     </div>
                   </td>
                 {% endif %}
