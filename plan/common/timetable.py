@@ -144,48 +144,6 @@ class Timetable:
                 # only bother with cells that will be shown.
                 cell["bottom"] = not cell.get("remove", False)
 
-    def prepare_for_rendering(self):
-        """Avoid repeated per-cell template work on large, overlapping schedules."""
-        for row in self.table:
-            for day in row:
-                for cell in day:
-                    lecture = cell.get("lecture")
-                    cell["css_class"] = ""
-                    cell["display_time"] = cell.get("time", "")
-                    cell["title"] = ""
-                    classes = []
-                    if lecture:
-                        classes.extend(
-                            [
-                                "lecture",
-                                f"lecture-{lecture.lecture_id}",
-                                f"course-{lecture.course_id}",
-                            ]
-                        )
-                    if lecture and lecture.type_optional:
-                        classes.append("optional")
-                    if cell.get("rowspan") == 1:
-                        classes.append("single")
-                    for marker in ("last", "bottom", "time"):
-                        if cell.get(marker):
-                            classes.append(marker)
-                    if (
-                        lecture
-                        or cell.get("time")
-                        or cell.get("bottom")
-                        or cell.get("last")
-                    ):
-                        cell["css_class"] = " ".join(classes)
-                    if lecture:
-                        title = (
-                            f"{lecture.course_name} "
-                            f"{formats.time_format(lecture.start, 'H:i')}-"
-                            f"{formats.time_format(lecture.end, 'H:i')}"
-                        )
-                        if lecture.title:
-                            title += f": {lecture.title}"
-                        cell["title"] = title
-
     def insert_times(self):
         for i, slot in enumerate(settings.TIMETABLE_SLOTS):
             start = formats.time_format(slot[0], "H:i")

@@ -385,7 +385,6 @@ def schedule(
             table.do_expansion()
         table.insert_times()
         table.add_markers()
-        table.prepare_for_rendering()
 
     if advanced:
         # Set up and course name forms
