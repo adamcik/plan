@@ -41,6 +41,7 @@
       uwsgi_args=(
         "--plugin" "python3"
         "--enable-threads"
+        "--lazy-apps"
         "--py-call-uwsgi-fork-hooks"
         "--log-5xx"
         "--log-master"
