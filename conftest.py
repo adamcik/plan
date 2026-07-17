@@ -59,14 +59,15 @@ def django_db_setup(django_db_blocker):
     connection.close()
     connection.settings_dict = database_settings
 
-    with django_db_blocker.unblock():
-        database_config = setup_databases(verbosity=0, interactive=False)
-
+    database_config = None
     try:
+        with django_db_blocker.unblock():
+            database_config = setup_databases(verbosity=0, interactive=False)
         yield
     finally:
-        with django_db_blocker.unblock():
-            teardown_databases(database_config, verbosity=0)
+        if database_config is not None:
+            with django_db_blocker.unblock():
+                teardown_databases(database_config, verbosity=0)
         postgresql.stop()
 
 

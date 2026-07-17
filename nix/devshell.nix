@@ -109,6 +109,7 @@
         basedpyright
         tombi
         djlint
+        html5validator
         cachix
         config.uv2nix.devVenv
         postgresql_17

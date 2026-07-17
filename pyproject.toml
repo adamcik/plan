@@ -68,6 +68,7 @@ packages = ["plan"]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "plan.settings"
+addopts = "--strict-config --strict-markers"
 
 [tool.ruff.lint]
 extend-select = ["I"]
