@@ -54,6 +54,19 @@ def _schedule_table_context():
     return table, rooms, snapshot
 
 
+def _lectures_context():
+    semester = Semester.objects.get(year=2026, type=Semester.SPRING)
+    snapshot = get_schedule_snapshot(semester, "debug")
+    lectures, _, _, _, groups, rooms, _, _ = views._schedule_data(snapshot)
+    lectures.sort(
+        key=lambda lecture: (
+            lecture.course_code,
+            min(lecture.week_numbers) if lecture.week_numbers else None,
+        )
+    )
+    return lectures, groups, rooms, snapshot
+
+
 @pytest.mark.benchmark
 def test_worst_case_schedule_rendering_baseline(
     benchmark, client, benchmark_schedule_data, cache_isolation
@@ -122,3 +135,24 @@ def test_worst_case_native_schedule_table_baseline(
 
     assert 'id="schedule"' in rendered
     assert "lecture-437341" in rendered
+
+
+@pytest.mark.benchmark
+def test_worst_case_lectures_table_template_baseline(
+    benchmark, benchmark_schedule_data, cache_isolation
+):
+    """Measure the lecture-list include independently before replacing it."""
+    lectures, groups, rooms, snapshot = _lectures_context()
+    template = get_template("lectures.html")
+    context = {
+        "advanced": False,
+        "groups": groups,
+        "lectures": lectures,
+        "rooms": rooms,
+        "schedule": snapshot,
+        "tabindex": 30,
+    }
+
+    rendered = benchmark(template.render, context)
+
+    assert 'id="lectures"' in rendered
