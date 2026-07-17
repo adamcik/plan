@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Timeplan\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 16:58+0200\n"
+"POT-Creation-Date: 2026-07-17 17:17+0200\n"
 "PO-Revision-Date: 2014-11-13 17:15+0100\n"
 "Last-Translator: Torstein Husebø <torstein@huseboe.net>\n"
 "Language-Team:  <timeplan@adamcik.no>\n"
@@ -214,6 +214,41 @@ msgstr "Tid"
 msgid "Done"
 msgstr "Ferdig"
 
+msgid "Lecture list"
+msgstr "Forelesningsliste"
+
+msgid "Filter"
+msgstr "Filter"
+
+msgid "Select"
+msgstr "Velg"
+
+msgid "All"
+msgstr "Alle"
+
+msgid "None"
+msgstr "Ingen"
+
+msgid "Hide selected lectures"
+msgstr "Skjul valgte forelesninger"
+
+#, python-format
+msgid ""
+"\n"
+"          Go to <a href=\"%(advanced_url)s#lectures\">advanced options</a>\n"
+"          to toggle which lectures to hide.\n"
+"        "
+msgstr ""
+"\n"
+"          Gå til <a href=\"%(advanced_url)s#lectures\">avanserte "
+"innstillinger</a>\n"
+"          for å vise eller skjule forelesninger.\n"
+"        "
+
+#, python-format
+msgid "Hide %(l)s"
+msgstr "Skjul %(l)s"
+
 #, python-format
 msgid "Display %(course)s as:"
 msgstr "Vis %(course)s som"
@@ -374,18 +409,6 @@ msgstr ""
 msgid "Built using:"
 msgstr "Bygget ved hjelp av:"
 
-msgid "Filter"
-msgstr "Filter"
-
-msgid "Select"
-msgstr "Velg"
-
-msgid "All"
-msgstr "Alle"
-
-msgid "None"
-msgstr "Ingen"
-
 msgid "Update names"
 msgstr "Oppdater navn"
 
@@ -492,25 +515,6 @@ msgstr ""
 "    for å legge til eller fjerne paralleller.\n"
 "  "
 
-msgid "Lecture list"
-msgstr "Forelesningsliste"
-
-msgid "Hide selected lectures"
-msgstr "Skjul valgte forelesninger"
-
-#, python-format
-msgid ""
-"\n"
-"          Go to <a href=\"%(advanced_url)s#lectures\">advanced options</a>\n"
-"          to toggle which lectures to hide.\n"
-"        "
-msgstr ""
-"\n"
-"          Gå til <a href=\"%(advanced_url)s#lectures\">avanserte "
-"innstillinger</a>\n"
-"          for å vise eller skjule forelesninger.\n"
-"        "
-
 msgid "Day"
 msgstr "Dag"
 
@@ -519,10 +523,6 @@ msgstr "Info"
 
 msgid "Weeks"
 msgstr "Uker"
-
-#, python-format
-msgid "Hide %(l)s"
-msgstr "Skjul %(l)s"
 
 #, python-format
 msgid ""

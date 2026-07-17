@@ -12,7 +12,7 @@ from django.urls import reverse
 from plan.common import timetable, views
 from plan.common.models import Semester
 from plan.common.snapshot import get_schedule_snapshot
-from plan.common.table_render import render_schedule_table
+from plan.common.table_render import render_lectures_table, render_schedule_table
 
 
 def _semantic_tree(element):
@@ -148,6 +148,56 @@ def test_native_schedule_table_escapes_dynamic_values(
     assert hostile not in rendered
     assert "&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;" in rendered
     assert "&quot;&lt;script&gt;" in rendered
+
+
+@pytest.mark.parametrize("advanced", [False, True])
+def test_native_lectures_table_matches_template_semantics(
+    advanced, benchmark_schedule_data, cache_isolation
+):
+    lectures, groups, rooms, snapshot = _lectures_context()
+    context = {
+        "advanced": advanced,
+        "groups": groups,
+        "lectures": lectures,
+        "rooms": rooms,
+        "schedule": snapshot,
+        "tabindex": 30,
+    }
+
+    template_output = get_template("lectures.html").render(context)
+    native_output = render_lectures_table(
+        lectures, groups, rooms, snapshot, advanced, tabindex=30
+    )
+
+    _assert_semantic_equal(
+        _semantic_fragment(native_output), _semantic_fragment(template_output)
+    )
+
+
+def test_native_lectures_table_escapes_dynamic_values(
+    benchmark_schedule_data, cache_isolation
+):
+    lectures, groups, rooms, snapshot = _lectures_context()
+    hostile = '<script>alert("x")</script>'
+    lectures[0] = replace(
+        lectures[0],
+        alias=hostile,
+        course_name=hostile,
+        title=hostile,
+        summary=hostile,
+        type_name=hostile,
+    )
+    rooms[lectures[0].lecture_id] = [
+        {**rooms[lectures[0].lecture_id][0], "name": hostile}
+    ]
+    groups[lectures[0].lecture_id] = [hostile]
+
+    rendered = render_lectures_table(
+        lectures, groups, rooms, snapshot, True, tabindex=30
+    )
+
+    assert hostile not in rendered
+    assert "&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;" in rendered
 
 
 @pytest.mark.benchmark

@@ -105,7 +105,7 @@
     {% endif %}
   {% endif %}
 
-  {% include "lectures.html" with tabindex=30 %}
+  {% native_lectures_table lectures groups rooms schedule advanced 30 %}
   {% if not advanced %}
     {% include "courses.html" %}
   {% endif %}
