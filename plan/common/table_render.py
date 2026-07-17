@@ -19,8 +19,7 @@ def _escape(value: object) -> _SafeHtml:
     return _SafeHtml(escape(str(value), quote=True))
 
 
-# `_` keeps repeated table markup compact within this private renderer.
-def _(
+def _el(
     tag: str,
     content: _SafeHtml = _SafeHtml(""),
     *,
@@ -56,7 +55,7 @@ def render_schedule_table(
             "schedule-week", args=[schedule.semester, schedule.student.slug, prev_week]
         )
         output.append(
-            _(
+            _el(
                 "a",
                 _SafeHtml("&laquo;"),
                 attributes={"id": "previous", "class": "noprint", "href": url},
@@ -67,21 +66,21 @@ def render_schedule_table(
             "schedule-week", args=[schedule.semester, schedule.student.slug, next_week]
         )
         output.append(
-            _(
+            _el(
                 "a",
                 _SafeHtml("&raquo;"),
                 attributes={"id": "next", "class": "noprint", "href": url},
             )
         )
 
-    header_cells = [_("th", attributes={"class": "time"})]
+    header_cells = [_el("th", attributes={"class": "time"})]
     for span, date, day in timetable.header():
-        content = _("span", _escape(day), attributes={"class": "day"})
+        content = _el("span", _escape(day), attributes={"class": "day"})
         if date:
             content = _join(
                 [
                     content,
-                    _(
+                    _el(
                         "span",
                         _escape(formats.date_format(date, "j M.")),
                         attributes={"class": "date"},
@@ -89,7 +88,7 @@ def render_schedule_table(
                 ]
             )
         header_cells.append(
-            _("th", content, attributes={"colspan": span if span else None})
+            _el("th", content, attributes={"colspan": span if span else None})
         )
 
     body_rows = []
@@ -98,9 +97,9 @@ def render_schedule_table(
         for cell_group in timetable_row:
             if not cell_group:
                 cells.append(
-                    _(
+                    _el(
                         "td",
-                        _("div", attributes={"class": "wrapper"}),
+                        _el("div", attributes={"class": "wrapper"}),
                     )
                 )
                 continue
@@ -150,7 +149,7 @@ def render_schedule_table(
                     content = _join(
                         [
                             content,
-                            _(
+                            _el(
                                 "div",
                                 _escape(lecture.alias or lecture.course_code),
                                 attributes={"class": "course"},
@@ -160,7 +159,7 @@ def render_schedule_table(
                     room_links: list[_SafeHtml] = []
                     if lecture.stream:
                         room_links.append(
-                            _(
+                            _el(
                                 "a",
                                 _escape(translation.gettext("Stream")),
                                 attributes={"href": lecture.stream},
@@ -174,7 +173,7 @@ def render_schedule_table(
                         room_url = room_data["url"]
                         if room_url:
                             room_links.append(
-                                _(
+                                _el(
                                     "a",
                                     _escape(room_name),
                                     attributes={"href": room_url},
@@ -187,7 +186,7 @@ def render_schedule_table(
                     content = _join(
                         [
                             content,
-                            _(
+                            _el(
                                 "div",
                                 _join(room_links),
                                 attributes={"class": "room"},
@@ -197,7 +196,7 @@ def render_schedule_table(
                     content = _join(
                         [
                             content,
-                            _(
+                            _el(
                                 "div",
                                 _escape(lecture.title or lecture.type_name or ""),
                                 attributes={"class": "type"},
@@ -214,14 +213,14 @@ def render_schedule_table(
                         ]
                     )
                 cells.append(
-                    _(
+                    _el(
                         "td",
-                        _("div", content, attributes={"class": "wrapper"}),
+                        _el("div", content, attributes={"class": "wrapper"}),
                         attributes=attributes,
                     )
                 )
         body_rows.append(
-            _(
+            _el(
                 "tr",
                 _join(cells),
                 attributes={
@@ -232,14 +231,14 @@ def render_schedule_table(
         )
 
     output.append(
-        _(
+        _el(
             "div",
-            _(
+            _el(
                 "table",
                 _join(
                     [
-                        _("thead", _("tr", _join(header_cells))),
-                        _("tbody", _join(body_rows)),
+                        _el("thead", _el("tr", _join(header_cells))),
+                        _el("tbody", _join(body_rows)),
                     ]
                 ),
                 attributes={"id": "schedule"},
