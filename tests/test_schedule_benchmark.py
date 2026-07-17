@@ -68,6 +68,13 @@ def _lectures_context():
     return lectures, groups, rooms, snapshot
 
 
+def _courses_context():
+    semester = Semester.objects.get(year=2026, type=Semester.SPRING)
+    snapshot = get_schedule_snapshot(semester, "debug")
+    _, courses, exams, _, _, _, _, _ = views._schedule_data(snapshot)
+    return courses, exams, snapshot
+
+
 @pytest.mark.benchmark
 def test_worst_case_schedule_rendering_baseline(
     benchmark, client, benchmark_schedule_data, cache_isolation
@@ -232,6 +239,26 @@ def test_worst_case_lectures_table_template_baseline(
     rendered = benchmark(template.render, context)
 
     assert 'id="lectures"' in rendered
+
+
+@pytest.mark.benchmark
+def test_worst_case_courses_table_template_baseline(
+    benchmark, benchmark_schedule_data, cache_isolation
+):
+    """Measure the course-list include independently before replacing it."""
+    courses, exams, snapshot = _courses_context()
+    template = get_template("courses.html")
+    context = {
+        "advanced": False,
+        "courses": courses,
+        "exams": exams,
+        "schedule": snapshot,
+        "SHOW_SYLLABUS": True,
+    }
+
+    rendered = benchmark(template.render, context)
+
+    assert 'id="courses"' in rendered
 
 
 @pytest.mark.benchmark
