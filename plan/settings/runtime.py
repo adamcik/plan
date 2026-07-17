@@ -75,10 +75,6 @@ LANGUAGE_FALLBACK = {
 
 LOCALE_PATHS = [str(PLAN_PACKAGE_ROOT / "locales")]
 
-# -- Test:
-
-TEST_RUNNER = "django.test.runner.DiscoverRunner"
-
 # -- App and midleware settings:
 MIDDLEWARE = (
     "plan.telemetry.middleware.AccessLogMiddleware",
@@ -399,8 +395,6 @@ DATABASES = {
         "CONN_MAX_AGE": env.pgconn_max_age,
     }
 }
-
-TEST_RUNNER = "plan.testing.runner.PostgresTestRunner"
 
 DATA_DIR = env.plan_base_dir
 CACHE_DIR = env.plan_cache_dir
