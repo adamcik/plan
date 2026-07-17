@@ -8,6 +8,7 @@ This repo is Nix-first. Use Nix entrypoints for formatting and full validation.
 - Run `nix flake check` to validate changes.
 - Prefer `nix develop` when you need an interactive environment.
 - Do not rely on globally installed Python tools.
+- Typing is not currently a required check: `basedpyright` is available in the dev shell, but existing type errors make it unsuitable as a gate. Do not add it to `nix flake check` until the type baseline is repaired.
 
 ## Tests and database behavior
 
