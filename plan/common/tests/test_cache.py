@@ -1,13 +1,14 @@
 import pytest
 
 from django.core.cache import caches
+from django.test import override_settings
 
 from plan.common.cache import CacheResult, MultiCache
 
 
 @pytest.fixture
-def cache_settings(settings):
-    settings.CACHES = {
+def cache_settings():
+    cache_configuration = {
         "l1": {
             "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
             "LOCATION": "test-l1",
@@ -17,11 +18,12 @@ def cache_settings(settings):
             "LOCATION": "test-l2",
         },
     }
-    caches["l1"].clear()
-    caches["l2"].clear()
-    yield
-    caches["l1"].clear()
-    caches["l2"].clear()
+    with override_settings(CACHES=cache_configuration):
+        caches["l1"].clear()
+        caches["l2"].clear()
+        yield
+        caches["l1"].clear()
+        caches["l2"].clear()
 
 
 @pytest.fixture
