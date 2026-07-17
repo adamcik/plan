@@ -12,6 +12,10 @@ from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExp
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.instrumentation.django import DjangoInstrumentor
 from opentelemetry.instrumentation.logging import LoggingInstrumentor
+from opentelemetry.instrumentation.propagators import (
+    TraceResponsePropagator,
+    set_global_response_propagator,
+)
 from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
@@ -109,6 +113,7 @@ def init(settings: TelemetrySettings | None = None) -> None:
 
             propagators.append(SentryPropagator())
         propagate.set_global_textmap(CompositePropagator(propagators))
+        set_global_response_propagator(TraceResponsePropagator())
 
     if "metrics" in settings.components:
         reader = PeriodicExportingMetricReader(

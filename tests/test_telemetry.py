@@ -69,12 +69,13 @@ def test_wsgi_logs_without_telemetry():
 def test_wsgi_bootstraps_after_django_settings_are_complete():
     environment = os.environ | {
         "PLAN_TELEMETRY_COMPONENTS": "tracing",
+        "OTEL_TRACE_SAMPLE_RATE": "1",
         "DJANGO_ALLOWED_HOSTS": "testserver",
         "OTEL_SERVICE_NAME": "test-plan",
         "OTEL_SERVICE_INSTANCE_ID": "test-plan-1",
         "OTEL_DEPLOYMENT_ENVIRONMENT": "testing",
     }
-    script = "from plan.wsgi import application; from django.conf import settings; from django.test import Client; import logging; assert settings.ROOT_URLCONF == 'plan.urls'; logging.getLogger('plan.test').info('telemetry log probe'); assert Client().get('/robots.txt?student=secret').status_code == 200"
+    script = "from plan.wsgi import application; from django.conf import settings; from django.test import Client; import logging; assert settings.ROOT_URLCONF == 'plan.urls'; logging.getLogger('plan.test').info('telemetry log probe'); response = Client().get('/robots.txt?student=secret', headers={'traceparent': '00-0123456789abcdef0123456789abcdef-0123456789abcdef-01'}); assert response.status_code == 200; assert response['traceresponse'].split('-')[1] == '0123456789abcdef0123456789abcdef'"
 
     result = subprocess.run(
         [sys.executable, "-c", script],
