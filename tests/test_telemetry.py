@@ -106,7 +106,9 @@ def test_sentry_uses_otel_instrumenter_only_for_otel_tracing():
     }
 
 
-def test_cache_span_records_cached_none_as_a_hit_without_key_or_value(exporter):
+def test_cache_span_records_cached_none_as_a_hit_without_key_or_value(
+    exporter, cache_isolation
+):
     instrument_cache()
 
     cache = caches["default"]
