@@ -96,7 +96,7 @@ def test_wsgi_bootstraps_after_django_settings_are_complete():
     )
     assert telemetry_log["service.name"] == "test-plan"
     assert telemetry_log["service.instance.id"] == "test-plan-1"
-    assert telemetry_log["deployment.environment.name"] == "testing"
+    assert telemetry_log["deployment.environment"] == "testing"
 
 
 def test_sentry_uses_otel_instrumenter_only_for_otel_tracing():
