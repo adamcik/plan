@@ -1,6 +1,7 @@
 """Repeatable response-cache-miss baselines for schedule rendering."""
 
 import re
+from dataclasses import replace
 
 from lxml import html
 import pytest
@@ -122,6 +123,31 @@ def test_native_schedule_table_matches_template_semantics(
     _assert_semantic_equal(
         _semantic_fragment(native_output), _semantic_fragment(template_output)
     )
+
+
+def test_native_schedule_table_escapes_dynamic_values(
+    benchmark_schedule_data, cache_isolation
+):
+    table, rooms, snapshot = _schedule_table_context()
+    hostile = '<script>alert("x")</script>'
+    for timetable_row in table.table:
+        for cell_group in timetable_row:
+            for timetable_cell in cell_group:
+                lecture = timetable_cell.get("lecture")
+                if lecture:
+                    timetable_cell["lecture"] = replace(
+                        lecture,
+                        alias=hostile,
+                        course_name=hostile,
+                        title=hostile,
+                        stream='https://example.test/?q="<script>',
+                    )
+
+    rendered = render_schedule_table(table, rooms, snapshot, None, None)
+
+    assert hostile not in rendered
+    assert "&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;" in rendered
+    assert "&quot;&lt;script&gt;" in rendered
 
 
 @pytest.mark.benchmark

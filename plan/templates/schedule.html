@@ -82,6 +82,7 @@
 {% endblock %}
 
 {% block bd %}
+  {% load table_render %}
   {% url 'schedule-advanced' schedule.semester schedule.student.slug as advanced_url %}
 
   {% include "notice.html" %}
@@ -91,7 +92,7 @@
   {% endif %}
 
   {% include "schedule_message.html" %}
-  {% include "schedule_table.html" %}
+  {% native_schedule_table timetable rooms schedule prev_week next_week %}
   {% include "schedule_table_footer.html" %}
 
   {% if courses %}
