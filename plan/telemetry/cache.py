@@ -1,4 +1,4 @@
-"""Django cache spans and metrics without recording cache keys or values."""
+"""Django cache spans and metrics without recording cache values."""
 
 import functools
 import time
@@ -80,6 +80,8 @@ def _attributes(
     }
     if operation in {"get_many", "set_many", "delete_many"} and args:
         attributes["cache.batch.size"] = len(args[0])
+    elif operation != "clear" and args:
+        attributes["cache.key"] = str(args[0])
     if type(cache).__name__ == "PyLibMCCache":
         attributes["db.system"] = "memcached"
     return attributes

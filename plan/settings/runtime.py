@@ -376,7 +376,7 @@ if env.sentry_dsn is not None:
         integrations=[
             DjangoIntegration(
                 middleware_spans=True,
-                cache_spans=True,
+                cache_spans=False,
             )
         ],
         traces_sample_rate=env.sentry_traces_sample_rate,

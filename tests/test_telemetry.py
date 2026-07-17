@@ -106,7 +106,7 @@ def test_sentry_uses_otel_instrumenter_only_for_otel_tracing():
     }
 
 
-def test_cache_span_records_cached_none_as_a_hit_without_key_or_value(
+def test_cache_span_records_cached_none_as_a_hit_with_key_without_value(
     exporter, cache_isolation
 ):
     instrument_cache()
@@ -120,7 +120,7 @@ def test_cache_span_records_cached_none_as_a_hit_without_key_or_value(
     get_span = next(span for span in spans if span.name == "CACHE GET")
     assert get_span.attributes["cache.alias"] == "default"
     assert get_span.attributes["cache.hit"]
-    assert "cache.key" not in get_span.attributes
+    assert get_span.attributes["cache.key"] == "student-123"
     assert "cache.value" not in get_span.attributes
 
     telemetry_cache._instrumented = False
