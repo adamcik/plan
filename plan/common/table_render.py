@@ -60,6 +60,11 @@ def _join(parts: Iterable[_SafeHtml]) -> _SafeHtml:
     return _SafeHtml("".join(parts))
 
 
+def _time(value) -> str:
+    """Render the fixed ``H:i`` format used by the template oracles."""
+    return f"{value.hour:02d}:{value.minute:02d}"
+
+
 def render_schedule_table(
     timetable, rooms, schedule, prev_week, next_week
 ) -> SafeString:
@@ -155,8 +160,7 @@ def render_schedule_table(
                 if lecture:
                     title = (
                         f"{lecture.course_name} "
-                        f"{formats.time_format(lecture.start, 'H:i')}-"
-                        f"{formats.time_format(lecture.end, 'H:i')}"
+                        f"{_time(lecture.start)}-{_time(lecture.end)}"
                     )
                     if lecture.title:
                         title += f": {lecture.title}"
@@ -441,10 +445,7 @@ def render_lectures_table(
                 _el("td", _escape(day)),
                 _el(
                     "td",
-                    _escape(
-                        f"{formats.time_format(lecture.start, 'H:i')}-"
-                        f"{formats.time_format(lecture.end, 'H:i')}"
-                    ),
+                    _SafeHtml(f"{_time(lecture.start)}-{_time(lecture.end)}"),
                     attributes={"class": "nowrap"},
                 ),
                 _el(
