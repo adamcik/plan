@@ -288,7 +288,7 @@ Remove the Yahoo! UI Library attribution once YUI is gone.
 
 ### 6. Timetable Preservation Stage
 
-- Keep `schedule_table.html` mostly unchanged.
+- Keep the non-template timetable renderer output stable.
 - Keep custom timetable mechanics in `schedule.css` scoped under `#schedule`.
 - Bundle `schedule.css` into `app.css`.
 - Preserve current color identity.
