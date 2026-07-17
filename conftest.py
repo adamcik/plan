@@ -129,3 +129,11 @@ def serialized_schedule_data(db) -> dict[str, str]:
     }
     call_command("loaddata", *fixture_names.values(), verbosity=0)
     return fixture_names
+
+
+@pytest.fixture
+def benchmark_schedule_data(db) -> dict[str, str]:
+    """Load the production-derived worst-case schedule rendering fixture."""
+    fixture_names = {"schedule": "benchmark_course_129330.json"}
+    call_command("loaddata", *fixture_names.values(), verbosity=0)
+    return fixture_names

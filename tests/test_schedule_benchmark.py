@@ -232,3 +232,17 @@ def test_worst_case_lectures_table_template_baseline(
     rendered = benchmark(template.render, context)
 
     assert 'id="lectures"' in rendered
+
+
+@pytest.mark.benchmark
+def test_worst_case_native_lectures_table_baseline(
+    benchmark, benchmark_schedule_data, cache_isolation
+):
+    """Measure native lecture-list rendering against the template baseline."""
+    lectures, groups, rooms, snapshot = _lectures_context()
+
+    rendered = benchmark(
+        render_lectures_table, lectures, groups, rooms, snapshot, False, 30
+    )
+
+    assert 'id="lectures"' in rendered
