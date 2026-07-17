@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
+from contextlib import contextmanager
+from contextvars import ContextVar
+from functools import wraps
 from html import escape
-from typing import NewType
+from typing import Callable, Generator, NewType, TypeVar, cast
 
 from django.urls import reverse
 from django.templatetags.static import static
@@ -15,11 +18,62 @@ from plan.common.utils import compact_sequence
 
 
 _SafeHtml = NewType("_SafeHtml", str)
+_Key = TypeVar("_Key")
+_Value = TypeVar("_Value")
+
+
+class _RenderCache:
+    """Caches reusable renderer values for the duration of one table render."""
+
+    def __init__(self) -> None:
+        self._values: ContextVar[dict[object, object] | None] = ContextVar(
+            "_render_cache", default=None
+        )
+
+    @contextmanager
+    def scope(self) -> Generator[None]:
+        token = self._values.set({})
+        try:
+            yield
+        finally:
+            self._values.reset(token)
+
+    def get_or_create(self, key: _Key, factory: Callable[[], _Value]) -> _Value:
+        values = self._values.get()
+        if values is None:
+            return factory()
+        try:
+            return cast(_Value, values[key])
+        except KeyError:
+            value = factory()
+            values[key] = value
+            return value
+
+    def __call__(self, render):
+        """Provide a call-scoped cache without retaining request data."""
+
+        @wraps(render)
+        def wrapper(*args, **kwargs):
+            if self._values.get() is not None:
+                return render(*args, **kwargs)
+            with self.scope():
+                return render(*args, **kwargs)
+
+        return wrapper
+
+
+_cache = _RenderCache()
 
 
 def _escape(value: object) -> _SafeHtml:
     """Escape dynamic content for insertion into HTML text or attributes."""
-    return _SafeHtml(escape(str(value), quote=True))
+    text = str(value)
+    return _cache.get_or_create(text, lambda: _SafeHtml(escape(text, quote=True)))
+
+
+def _reverse(viewname: str, args: tuple[object, ...]) -> str:
+    """Reverse a renderer URL once for each distinct view and argument tuple."""
+    return _cache.get_or_create((viewname, args), lambda: reverse(viewname, args=args))
 
 
 def _el(
@@ -65,14 +119,15 @@ def _time(value) -> str:
     return f"{value.hour:02d}:{value.minute:02d}"
 
 
+@_cache
 def render_schedule_table(
     timetable, rooms, schedule, prev_week, next_week
 ) -> SafeString:
     """Render the current schedule-table template without template-node overhead."""
     output: list[_SafeHtml] = []
     if prev_week:
-        url = reverse(
-            "schedule-week", args=[schedule.semester, schedule.student.slug, prev_week]
+        url = _reverse(
+            "schedule-week", (schedule.semester, schedule.student.slug, prev_week)
         )
         output.append(
             _el(
@@ -82,8 +137,8 @@ def render_schedule_table(
             )
         )
     if next_week:
-        url = reverse(
-            "schedule-week", args=[schedule.semester, schedule.student.slug, next_week]
+        url = _reverse(
+            "schedule-week", (schedule.semester, schedule.student.slug, next_week)
         )
         output.append(
             _el(
@@ -268,6 +323,7 @@ def render_schedule_table(
     return mark_safe(_join(output))
 
 
+@_cache
 def render_lectures_table(
     lectures, groups, rooms, schedule, advanced: bool, tabindex: int | None = None
 ) -> SafeString:
@@ -277,9 +333,7 @@ def render_lectures_table(
 
     base_tabindex = tabindex or 0
     output: list[_SafeHtml] = [_el("h2", _escape(translation.gettext("Lecture list")))]
-    form_url = reverse(
-        "change-lectures", args=[schedule.semester, schedule.student.slug]
-    )
+    form_url = _reverse("change-lectures", (schedule.semester, schedule.student.slug))
     form_content: list[_SafeHtml] = []
     if advanced:
         controls = _el(
@@ -352,8 +406,8 @@ def render_lectures_table(
             )
         )
     else:
-        advanced_url = reverse(
-            "schedule-advanced", args=[schedule.semester, schedule.student.slug]
+        advanced_url = _reverse(
+            "schedule-advanced", (schedule.semester, schedule.student.slug)
         )
         message = translation.gettext(
             '\n          Go to <a href="%(advanced_url)s#lectures">advanced options</a>\n'
@@ -416,7 +470,7 @@ def render_lectures_table(
                     "a",
                     _escape(translation.gettext("Stream")),
                     attributes={
-                        "href": reverse("redirect_stream", args=[lecture.lecture_id])
+                        "href": _reverse("redirect_stream", (lecture.lecture_id,))
                     },
                 )
             )
@@ -428,9 +482,7 @@ def render_lectures_table(
                     _el(
                         "a",
                         _escape(room["name"]),
-                        attributes={
-                            "href": reverse("redirect_room", args=[room["id"]])
-                        },
+                        attributes={"href": _reverse("redirect_room", (room["id"],))},
                     )
                 )
             else:
