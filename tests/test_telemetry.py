@@ -19,7 +19,7 @@ from plan.settings.env import TelemetryComponent
 from plan.settings.runtime import MIDDLEWARE, _sentry_otel_options
 from plan.telemetry import PathBasedSampler, _django_response_hook
 from plan.telemetry import cache as telemetry_cache
-from plan.telemetry.cache import instrument_cache
+from plan.telemetry.cache import CacheOperation, _metric_attributes, instrument_cache
 from plan.telemetry.templates import instrument_templates
 from plan.testing.otel import InMemorySpanExporter, reset_otel_once
 
@@ -176,6 +176,17 @@ def test_cache_span_records_cached_none_as_a_hit_with_key_without_value(
 
     spans = exporter.get_finished_spans()
     assert len([span for span in spans if span.name == "CACHE GET"]) == 1
+
+
+def test_cache_metric_attributes_exclude_cache_key():
+    cache = mock.Mock()
+    cache._plan_telemetry_alias = "default"
+
+    assert _metric_attributes(cache, CacheOperation.GET) == {
+        "cache.alias": "default",
+        "cache.backend": "other",
+        "cache.operation": "get",
+    }
 
 
 def test_template_rendering_creates_a_span(exporter):
