@@ -2,6 +2,7 @@
 
 import importlib.metadata
 import importlib.util
+import re
 from dataclasses import dataclass
 from typing import Literal
 
@@ -25,7 +26,8 @@ from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.sdk.trace.sampling import TraceIdRatioBased
+from opentelemetry.sdk.trace.sampling import ParentBased, Sampler, TraceIdRatioBased
+from opentelemetry.trace import SpanKind
 from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
 
 from plan.telemetry.cache import instrument_cache
@@ -41,6 +43,7 @@ class TelemetrySettings:
     components: frozenset[Components]
     endpoint: str
     trace_sample_rate: float
+    path_trace_sample_rates: dict[str, float]
     export_timeout_seconds: float
     metric_export_interval_seconds: float
 
@@ -55,6 +58,7 @@ def settings_from_environment() -> TelemetrySettings:
         ),
         endpoint=env.otel_exporter_otlp_endpoint,
         trace_sample_rate=env.otel_trace_sample_rate,
+        path_trace_sample_rates=env.otel_path_trace_sample_rates,
         export_timeout_seconds=env.otel_export_timeout_seconds,
         metric_export_interval_seconds=env.otel_metric_export_interval_seconds,
     )
@@ -66,6 +70,52 @@ def _otlp_endpoint(endpoint: str, signal: str) -> str:
 
 def _url_without_query(url: str) -> str:
     return url.partition("?")[0]
+
+
+class PathBasedSampler(Sampler):
+    """Apply per-path head-sampling rates to Django server spans."""
+
+    def __init__(self, default_rate: float, path_rates: dict[str, float]):
+        self._default_sampler = TraceIdRatioBased(default_rate)
+        self._path_samplers = {
+            re.compile(pattern): TraceIdRatioBased(rate)
+            for pattern, rate in path_rates.items()
+        }
+        self._child_sampler = ParentBased(root=self._default_sampler)
+
+    def should_sample(
+        self,
+        parent_context,
+        trace_id,
+        name,
+        kind=None,
+        attributes=None,
+        links=None,
+        trace_state=None,
+    ):
+        if kind is not SpanKind.SERVER:
+            return self._child_sampler.should_sample(
+                parent_context, trace_id, name, kind, attributes, links, trace_state
+            )
+
+        path = (
+            (attributes or {}).get("url.path")
+            or (attributes or {}).get("http.target", "")
+        ).partition("?")[0]
+        sampler = next(
+            (
+                sampler
+                for pattern, sampler in self._path_samplers.items()
+                if pattern.search(path)
+            ),
+            self._default_sampler,
+        )
+        return sampler.should_sample(
+            parent_context, trace_id, name, kind, attributes, links, trace_state
+        )
+
+    def get_description(self) -> str:
+        return f"PathBasedSampler{{default={self._default_sampler.get_description()}}}"
 
 
 def _django_response_hook(span, request, response) -> None:
@@ -93,7 +143,9 @@ def init(settings: TelemetrySettings | None = None) -> None:
     if "tracing" in settings.components:
         provider = TracerProvider(
             resource=resource,
-            sampler=TraceIdRatioBased(settings.trace_sample_rate),
+            sampler=PathBasedSampler(
+                settings.trace_sample_rate, settings.path_trace_sample_rates
+            ),
         )
         provider.add_span_processor(
             BatchSpanProcessor(

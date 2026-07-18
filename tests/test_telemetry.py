@@ -12,10 +12,12 @@ from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.sdk.metrics.export import InMemoryMetricReader
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+from opentelemetry.sdk.trace.sampling import Decision
+from opentelemetry.trace import SpanKind
 
 from plan.settings.env import TelemetryComponent
 from plan.settings.runtime import MIDDLEWARE, _sentry_otel_options
-from plan.telemetry import _django_response_hook
+from plan.telemetry import PathBasedSampler, _django_response_hook
 from plan.telemetry import cache as telemetry_cache
 from plan.telemetry.cache import instrument_cache
 from plan.telemetry.templates import instrument_templates
@@ -44,6 +46,48 @@ def test_django_response_hook_records_route_name():
 
     span.set_attribute.assert_called_once_with("django.route.name", "schedule")
     span.update_name.assert_called_once_with("GET schedule")
+
+
+def test_path_based_sampler_uses_override_for_ical_requests():
+    sampler = PathBasedSampler(
+        default_rate=1,
+        path_rates={r"^/[^/]+/[^/]+/ical(/|$)": 0},
+    )
+
+    ical = sampler.should_sample(
+        None,
+        trace_id=1,
+        name="GET",
+        kind=SpanKind.SERVER,
+        attributes={"url.path": "/2026-spring/student/ical/"},
+    )
+    timetable = sampler.should_sample(
+        None,
+        trace_id=1,
+        name="GET",
+        kind=SpanKind.SERVER,
+        attributes={"url.path": "/2026-spring/student/"},
+    )
+
+    assert ical.decision is Decision.DROP
+    assert timetable.decision is Decision.RECORD_AND_SAMPLE
+
+
+def test_path_based_sampler_does_not_match_student_named_ical():
+    sampler = PathBasedSampler(
+        default_rate=1,
+        path_rates={r"^/[^/]+/[^/]+/ical(/|$)": 0},
+    )
+
+    schedule = sampler.should_sample(
+        None,
+        trace_id=1,
+        name="GET",
+        kind=SpanKind.SERVER,
+        attributes={"url.path": "/2026-spring/ical/"},
+    )
+
+    assert schedule.decision is Decision.RECORD_AND_SAMPLE
 
 
 def test_access_log_middleware_wraps_the_full_django_stack():

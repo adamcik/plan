@@ -126,7 +126,13 @@ class Settings(ParsedEnvSettings):
     )
     otel_vcs_revision: str | None = Field(None, validation_alias="OTEL_VCS_REVISION")
     otel_trace_sample_rate: float = Field(
-        0.001, validation_alias="OTEL_TRACE_SAMPLE_RATE"
+        0.1, validation_alias="OTEL_TRACE_SAMPLE_RATE"
+    )
+    otel_path_trace_sample_rates: dict[str, float] = Field(
+        default_factory=lambda: {
+            r"^/[^/]+/[^/]+/ical(/|$)": 0.01,
+        },
+        validation_alias="OTEL_PATH_TRACE_SAMPLE_RATES",
     )
     otel_export_timeout_seconds: float = Field(
         10, validation_alias="OTEL_EXPORT_TIMEOUT_SECONDS"
