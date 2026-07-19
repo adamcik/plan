@@ -1,6 +1,8 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 from copy import copy
+from dataclasses import replace
+from datetime import time
 
 import pytest
 from django.utils import translation
@@ -139,3 +141,22 @@ def test_insert_times_uses_24_hour_format_in_english_locale(
         timetable.insert_times()
 
     assert timetable.table[0][0][0]["time"] == "08:15 - 09:00"
+
+
+def test_timetable_warns_about_unmappable_lectures(
+    serialized_schedule_data, cache_isolation, frozen_time, caplog
+):
+    semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+    student = Student.objects.get(slug="adamcik")
+    lecture = Lecture.objects.get_lectures_data(semester.id, student.id)[0]
+    unmappable = replace(lecture, start=time(23, 45), end=time(23, 59, 59))
+
+    timetable = Timetable([unmappable])
+
+    with caplog.at_level("WARNING", logger="plan.common.timetable"):
+        timetable.place_lectures(week=None)
+
+    assert timetable.lectures == []
+    assert caplog.messages == [
+        f"Skipping lecture {unmappable.lecture_id} outside timetable slots"
+    ]

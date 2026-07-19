@@ -43,7 +43,9 @@ class Timetable:
 
             start, end = self.map_to_slot(lecture)
             if start is None or end is None:
-                logger.error("Couldn't map slot for %s, skipping", lecture)
+                logger.warning(
+                    "Skipping lecture %s outside timetable slots", lecture.lecture_id
+                )
                 continue
 
             rowspan = end - start + 1
