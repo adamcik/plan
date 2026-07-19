@@ -15,6 +15,7 @@ from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.sdk.trace.sampling import Decision
 from opentelemetry.trace import SpanKind
 
+from plan.common.cache import MultiCache
 from plan.settings.env import TelemetryComponent
 from plan.settings.runtime import MIDDLEWARE, _sentry_otel_options
 from plan.telemetry import PathBasedSampler, _django_response_hook
@@ -186,6 +187,47 @@ def test_cache_metric_attributes_exclude_cache_key():
         "cache.alias": "default",
         "cache.backend": "other",
         "cache.operation": "get",
+    }
+
+
+def test_multi_cache_get_contains_layer_operations(
+    exporter, cache_isolation, monkeypatch
+):
+    # The cache tracer may have been bound to a prior test's provider.
+    monkeypatch.setattr(
+        telemetry_cache, "_tracer", trace.get_tracer("plan.telemetry.cache")
+    )
+    instrument_cache()
+    caches["default"]._plan_telemetry_alias = "default"
+    caches["disk"]._plan_telemetry_alias = "disk"
+    caches["disk"].set("student-123", "snapshot")
+    exporter.clear()
+
+    cache = MultiCache[str](default=60, disk=300)
+    assert cache.get("student-123").value == "snapshot"
+
+    spans = exporter.get_finished_spans()
+    multi_cache_span = next(span for span in spans if span.name == "MULTI CACHE GET")
+    child_spans = [span for span in spans if span.name.startswith("CACHE ")]
+
+    assert multi_cache_span.attributes == {
+        "cache.layers": ("default", "disk"),
+        "cache.key": "student-123",
+        "cache.hit": True,
+        "cache.hit.layer": "disk",
+        "cache.miss.count": 1,
+        "cache.promoted": True,
+    }
+    assert {
+        (span.name, span.attributes["cache.alias"], span.attributes.get("cache.hit"))
+        for span in child_spans
+    } == {
+        ("CACHE GET", "default", False),
+        ("CACHE GET", "disk", True),
+        ("CACHE SET", "default", None),
+    }
+    assert {span.parent.span_id for span in child_spans} == {
+        multi_cache_span.context.span_id
     }
 
 
