@@ -164,7 +164,7 @@ class Settings(ParsedEnvSettings):
         attributes: dict[str, str | int] = {
             "service.name": self.otel_service_name,
             "service.version": self.otel_service_version,
-            "deployment.environment": self.otel_deployment_environment,
+            "deployment.environment.name": self.otel_deployment_environment,
             "service.instance.id": self.otel_service_instance_id
             or "-".join(
                 [
