@@ -1,7 +1,9 @@
+import importlib
 import json
 import os
 import subprocess
 import sys
+from types import SimpleNamespace
 from unittest import mock
 
 import pytest
@@ -16,13 +18,17 @@ from opentelemetry.sdk.trace.sampling import Decision
 from opentelemetry.trace import SpanKind
 
 from plan.common.cache import MultiCache
-from plan.settings.env import TelemetryComponent
+from plan.settings.env import TelemetryComponent, _default_service_instance_id
 from plan.settings.runtime import MIDDLEWARE, _sentry_otel_options
 from plan.telemetry import PathBasedSampler, _django_response_hook
 from plan.telemetry import cache as telemetry_cache
 from plan.telemetry.cache import CacheOperation, _metric_attributes, instrument_cache
+from plan.telemetry import resources as telemetry_resources
 from plan.telemetry.templates import instrument_templates
 from plan.testing.otel import InMemorySpanExporter, reset_otel_once
+
+
+settings_env = importlib.import_module("plan.settings.env")
 
 
 @pytest.fixture
@@ -93,6 +99,42 @@ def test_path_based_sampler_does_not_match_student_named_ical():
 
 def test_access_log_middleware_wraps_the_full_django_stack():
     assert MIDDLEWARE[0] == "plan.telemetry.middleware.AccessLogMiddleware"
+
+
+def test_default_service_instance_id_without_uwsgi(monkeypatch):
+    monkeypatch.setattr(
+        telemetry_resources.importlib,
+        "import_module",
+        mock.Mock(side_effect=ImportError),
+    )
+    monkeypatch.setattr(settings_env.socket, "gethostname", lambda: "test-host")
+
+    assert _default_service_instance_id("testing") == "test-host-testing"
+
+
+@pytest.mark.parametrize(
+    "uwsgi",
+    [SimpleNamespace(), SimpleNamespace(worker_id=lambda: "not-a-number")],
+)
+def test_uwsgi_worker_id_ignores_missing_or_non_numeric_values(monkeypatch, uwsgi):
+    monkeypatch.setattr(
+        telemetry_resources.importlib,
+        "import_module",
+        mock.Mock(return_value=uwsgi),
+    )
+
+    assert telemetry_resources._uwsgi_worker_id() is None
+
+
+def test_default_service_instance_id_includes_uwsgi_worker(monkeypatch):
+    monkeypatch.setattr(
+        telemetry_resources.importlib,
+        "import_module",
+        mock.Mock(return_value=SimpleNamespace(worker_id=lambda: 2)),
+    )
+    monkeypatch.setattr(settings_env.socket, "gethostname", lambda: "test-host")
+
+    assert _default_service_instance_id("testing") == "test-host-testing-2"
 
 
 def test_wsgi_logs_without_telemetry():

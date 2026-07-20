@@ -10,6 +10,8 @@ from pydantic import Field, SecretStr, model_validator
 from pydantic_parsed_env import Parsed, ParsedEnvSettings
 from pydantic_settings import SettingsConfigDict
 
+from plan.telemetry.resources import _uwsgi_worker_id
+
 
 class TelemetryComponent(StrEnum):
     TRACING = "tracing"
@@ -166,18 +168,19 @@ class Settings(ParsedEnvSettings):
             "service.version": self.otel_service_version,
             "deployment.environment.name": self.otel_deployment_environment,
             "service.instance.id": self.otel_service_instance_id
-            or "-".join(
-                [
-                    socket.gethostname(),
-                    self.otel_deployment_environment,
-                    str(os.getpid()),
-                ]
-            ),
+            or _default_service_instance_id(self.otel_deployment_environment),
             "process.pid": os.getpid(),
         }
         if self.otel_vcs_revision:
             attributes["vcs.revision"] = self.otel_vcs_revision
         return attributes
+
+
+def _default_service_instance_id(deployment_environment: str) -> str:
+    parts = [socket.gethostname(), deployment_environment]
+    if (worker_id := _uwsgi_worker_id()) is not None:
+        parts.append(str(worker_id))
+    return "-".join(parts)
 
 
 def _current_package_version() -> str:
