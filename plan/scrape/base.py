@@ -500,7 +500,7 @@ class LectureScraper(Scraper):
             if url and url != r.url:
                 changes["url"] = url
 
-            return self.update_room(room, changes)
+            return self.update_room(r, changes)
 
         self.stats["rooms"] += 1
         if not code:

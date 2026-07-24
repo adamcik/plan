@@ -8,9 +8,9 @@ import pytest
 from django.core.cache import caches
 from django.utils import timezone
 
-from plan.common.models import Course, Semester
+from plan.common.models import Course, Room, Semester
 from plan.common.snapshot import semester_freshness_cache_key
-from plan.scrape.base import CourseScraper, Scraper
+from plan.scrape.base import CourseScraper, LectureScraper, Scraper
 from plan.scrape.management.commands.scrape import Command
 from plan.scrape.ntnu.web import Courses, Lectures
 
@@ -184,6 +184,19 @@ def test_scraper_uses_timezone_aware_timestamps(serialized_schedule_data):
     assert timezone.is_aware(scraper.import_time)
     prepared = scraper.prepare_save({"code": "TST1001", "version": "1"})
     assert timezone.is_aware(prepared["defaults"]["last_modified"])
+
+
+def test_room_upgrades_uncoded_room_with_matching_name(serialized_schedule_data):
+    semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+    legacy_room = Room.objects.create(name="Legacy room")
+
+    room = LectureScraper(semester).room(
+        code="A-101", name="Legacy room", url="https://example.invalid/rooms/A-101"
+    )
+
+    assert room.pk == legacy_room.pk
+    assert room.code == "A-101"
+    assert room.url == "https://example.invalid/rooms/A-101"
 
 
 def test_scrape_merges_duplicate_code_and_version_locations(
