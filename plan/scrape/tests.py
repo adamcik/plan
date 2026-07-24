@@ -186,6 +186,33 @@ def test_scraper_uses_timezone_aware_timestamps(serialized_schedule_data):
     assert timezone.is_aware(prepared["defaults"]["last_modified"])
 
 
+def test_scraper_logs_source_data_when_processing_fails(
+    serialized_schedule_data, caplog
+):
+    semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+    source = {"course": "TST1001", "activities": [{"rooms": [{"id": "A-101"}]}]}
+
+    class FailingScraper(Scraper):
+        def queryset(self):
+            return Course.objects.none()
+
+        def scrape(self):
+            yield {"_source": source}
+
+        def prepare_data(self, data):
+            raise ValueError("invalid source data")
+
+    with pytest.raises(ValueError, match="invalid source data"):
+        FailingScraper(semester).run()
+
+    record = next(
+        record
+        for record in caplog.records
+        if record.message == "Failed to process scraped data"
+    )
+    assert record.scrape_source == source
+
+
 def test_room_upgrades_uncoded_room_with_matching_name(serialized_schedule_data):
     semester = Semester.objects.get(year=2009, type=Semester.SPRING)
     legacy_room = Room.objects.create(name="Legacy room")

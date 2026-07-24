@@ -144,6 +144,16 @@ class Scraper:
                         continue
 
                     self.log_unaltered(obj)
+                except Exception:
+                    source = data.get("_source")
+                    if source is not None:
+                        logging.exception(
+                            "Failed to process scraped data",
+                            extra={"scrape_source": source},
+                        )
+                    else:
+                        logging.exception("Failed to process scraped data")
+                    raise
                 finally:
                     db.reset_queries()
                     progress.update(1)

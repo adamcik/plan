@@ -160,10 +160,14 @@ class Lectures(base.LectureScraper):
                         tuple(sorted(rooms)),
                         tuple(sorted(staff)),
                     )
-                    groupings.setdefault(key, set()).add(activity["week"])
+                    grouping = groupings.setdefault(
+                        key, {"weeks": set(), "activities": []}
+                    )
+                    grouping["weeks"].add(activity["week"])
+                    grouping["activities"].append(activity)
 
                 # TODO: see if we can move the grouping to the base scraper?
-                for key, weeks in sorted(groupings.items()):
+                for key, grouping in sorted(groupings.items()):
                     (
                         day,
                         start,
@@ -183,7 +187,7 @@ class Lectures(base.LectureScraper):
                         "day": day,
                         "start": start,
                         "end": end,
-                        "weeks": weeks,
+                        "weeks": grouping["weeks"],
                         "rooms": rooms,
                         "groups": groups,
                         # FIXME: Why is staff dropped?
@@ -193,6 +197,10 @@ class Lectures(base.LectureScraper):
                         "title": title,
                         "summary": summary or None,
                         "stream": stream or None,
+                        "_source": {
+                            "course": c.code,
+                            "activities": grouping["activities"],
+                        },
                     }
 
 
