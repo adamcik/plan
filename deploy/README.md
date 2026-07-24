@@ -159,7 +159,13 @@ Example:
 ```bash
 deploy/upgrade.sh --instance ntnu --check
 deploy/upgrade.sh --instance ntnu --image ghcr.io/adamcik/plan:<tag>
+deploy/gc-static.sh --instance ntnu --dry-run
+deploy/gc-static.sh --instance ntnu
 ```
+
+`deploy/gc-static.sh` removes inactive, image-ID-named static releases while
+preserving the release referenced by `static/current`. It refuses to run if the
+active symlink is missing or resolves outside the releases directory.
 
 Manual equivalent (without helper):
 
