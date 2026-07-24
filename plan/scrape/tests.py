@@ -1,6 +1,7 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
 import datetime
+import json
 import time
 import zoneinfo
 
@@ -186,7 +187,7 @@ def test_scraper_uses_timezone_aware_timestamps(serialized_schedule_data):
     assert timezone.is_aware(prepared["defaults"]["last_modified"])
 
 
-def test_scraper_logs_source_data_when_processing_fails(
+def test_scraper_logs_source_data_when_generator_fails(
     serialized_schedule_data, caplog
 ):
     semester = Semester.objects.get(year=2009, type=Semester.SPRING)
@@ -197,20 +198,46 @@ def test_scraper_logs_source_data_when_processing_fails(
             return Course.objects.none()
 
         def scrape(self):
-            yield {"_source": source}
-
-        def prepare_data(self, data):
+            self.source_data = source
             raise ValueError("invalid source data")
+            yield
 
-    with pytest.raises(ValueError, match="invalid source data"):
+    with pytest.raises(ValueError, match="invalid source data") as error:
         FailingScraper(semester).run()
 
+    assert error.value.__notes__ == [f"scrape_source={json.dumps(source)}"]
     record = next(
         record
         for record in caplog.records
         if record.message == "Failed to process scraped data"
     )
     assert record.scrape_source == source
+
+
+def test_lecture_logs_active_activity_when_source_processing_fails(
+    serialized_schedule_data, monkeypatch, caplog
+):
+    semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+    course = Course.objects.filter(semester=semester).order_by("id").first()
+    assert course is not None
+    payload = {"schedules": [{"artermin": "2009_VÅR"}]}
+    monkeypatch.setattr(Lectures, "course_queryset", lambda self: [course])
+    monkeypatch.setattr(
+        "plan.scrape.ntnu.web.fetch_course_lectures", lambda semester, course: payload
+    )
+
+    with pytest.raises(KeyError, match="from"):
+        Lectures(semester).run()
+
+    record = next(
+        record
+        for record in caplog.records
+        if record.message == "Failed to process scraped data"
+    )
+    assert record.scrape_source == {
+        "course": course.code,
+        "activity": payload["schedules"][0],
+    }
 
 
 def test_room_upgrades_uncoded_room_with_matching_name(serialized_schedule_data):

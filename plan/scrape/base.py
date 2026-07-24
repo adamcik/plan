@@ -3,6 +3,7 @@
 import collections
 import datetime
 import html
+import json
 import logging
 
 
@@ -36,6 +37,7 @@ class Scraper:
         self.semester = semester
         self.course_prefix = course_prefix
         self.import_time = timezone.now()
+        self.source_data = None
         self.stats = collections.OrderedDict(
             [
                 ("initial", 0),  # items initialy in db
@@ -115,8 +117,18 @@ class Scraper:
             # TODO: Always scrape in terms of courses? This would allow us
             # to base an outer progress bar on the number of courses, but
             # have an inner one without a known total for e.g. lectures.
-            for data in self.scrape():
+            scraped_data = iter(self.scrape())
+            while True:
                 try:
+                    data = next(scraped_data)
+                except StopIteration:
+                    break
+                except Exception as error:
+                    self.log_failure(error)
+                    raise
+
+                try:
+                    self.source_data = data.get("_source", self.source_data)
                     self.log_scraped(data)
 
                     data = self.prepare_data(data)
@@ -144,15 +156,8 @@ class Scraper:
                         continue
 
                     self.log_unaltered(obj)
-                except Exception:
-                    source = data.get("_source")
-                    if source is not None:
-                        logging.exception(
-                            "Failed to process scraped data",
-                            extra={"scrape_source": source},
-                        )
-                    else:
-                        logging.exception("Failed to process scraped data")
+                except Exception as error:
+                    self.log_failure(error)
                     raise
                 finally:
                     db.reset_queries()
@@ -162,6 +167,19 @@ class Scraper:
             self.log_stats()
 
             return self.needs_commit()
+
+    def log_failure(self, error):
+        if self.source_data is not None:
+            error.add_note(
+                "scrape_source="
+                + json.dumps(self.source_data, ensure_ascii=False, default=str)
+            )
+            logging.exception(
+                "Failed to process scraped data",
+                extra={"scrape_source": self.source_data},
+            )
+        else:
+            logging.exception("Failed to process scraped data")
 
     def prepare_data(self, data):
         """Clean and/or validate data from scrape method.

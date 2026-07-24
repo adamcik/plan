@@ -95,6 +95,7 @@ class Lectures(base.LectureScraper):
                 course = fetch_course_lectures(self.semester, c)
                 groupings = {}
                 for activity in course.get("schedules", []):
+                    self.source_data = {"course": c.code, "activity": activity}
                     if activity["artermin"] != ntnu_semeter:
                         continue
 
