@@ -16,7 +16,6 @@ dependencies = [
   "opentelemetry-instrumentation-requests==0.64b0",
   "opentelemetry-instrumentation-system-metrics==0.64b0",
   "opentelemetry-sdk==1.43.0",
-  "pillow==12.2.0",
   "psycopg2==2.9.11",
   "pydantic-parsed-env~=0.1.0",
   "pydantic-settings>=2.14.2,<3",
