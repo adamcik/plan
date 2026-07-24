@@ -305,3 +305,48 @@ def test_lecture_timestamps_are_parsed_in_configured_timezone(
     assert emitted[0]["day"] == 0
     assert emitted[0]["start"] == start_local.time()
     assert emitted[0]["end"] == end_local.time()
+
+
+def test_lecture_ignores_digital_rooms_without_stream_urls(
+    serialized_schedule_data, monkeypatch
+):
+    semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+    course = Course.objects.filter(semester=semester).order_by("id").first()
+    assert course is not None
+    payload = {
+        "schedules": [
+            {
+                "artermin": "2009_VÅR",
+                "from": 1233562500000,
+                "to": 1233565200000,
+                "name": "Formidling",
+                "acronym": "FORM",
+                "title": "Forelesning digital undervisning",
+                "summary": "Forelesning digital undervisning",
+                "studyProgramKeys": ["FTTRADBYGG", "ITBAINFO"],
+                "disiplin": [],
+                "rooms": [
+                    {
+                        "id": "194_VR_ptak",
+                        "room": "Opptak",
+                        "building": "Digital undervisning",
+                    },
+                    {
+                        "id": "194_VR_GUND",
+                        "room": "Digital undervisning",
+                        "building": "Digital undervisning",
+                    },
+                ],
+                "staff": [],
+                "week": 6,
+            }
+        ]
+    }
+    monkeypatch.setattr(Lectures, "course_queryset", lambda self: [course])
+    monkeypatch.setattr(
+        "plan.scrape.ntnu.web.fetch_course_lectures", lambda semester, course: payload
+    )
+
+    emitted = list(Lectures(semester).scrape())
+
+    assert emitted[0]["stream"] is None

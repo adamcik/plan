@@ -133,9 +133,15 @@ class Lectures(base.LectureScraper):
                         room_url = r.get("url", "")
 
                         if r["building"] == "Digital undervisning":
-                            # Try to store stream links on the lectures:
-                            assert stream is None
-                            stream = room_url
+                            stream_url = utils.clean_string(room_url)
+                            if utils.valid_url(stream_url) and stream is None:
+                                stream = stream_url
+                            elif utils.valid_url(stream_url) and stream_url != stream:
+                                logging.warning(
+                                    "Multiple stream links for %s; using %s",
+                                    c.code,
+                                    stream,
+                                )
                             continue
                         elif not room_url:
                             # Fallback to searching if not known:
