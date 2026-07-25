@@ -2,17 +2,20 @@
 
 import datetime
 import json
+from dataclasses import dataclass
 
 from django import http, shortcuts
 from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
+from django.db.models import QuerySet
 from django.utils import html, text, translation
 from django.utils.cache import patch_vary_headers
 from django.utils.http import http_date
 from opentelemetry import trace
 
 from plan.common import encoding, forms, timetable, utils
+from plan.common.lecture_data import LectureData
 from plan.common.middleware import CspMiddleware
 from plan.common.models import (
     Course,
@@ -46,6 +49,23 @@ tracer = trace.get_tracer(__name__)
 
 # Setup common alias for translation
 _ = translation.gettext_lazy
+
+
+@dataclass
+class CommonData:
+    locations: QuerySet[Location]
+    next_semester: Semester | None
+
+
+@dataclass
+class ScheduleData:
+    lectures: list[LectureData]
+    courses: list[Course]
+    exams: dict[int, list[Exam]]
+    lecturers: list[object]
+    groups: dict[int, list[str]]
+    rooms: dict[int, list[dict[str, int | str | None]]]
+    weeks: list[int]
 
 
 def robots_txt(request):
@@ -118,7 +138,7 @@ def getting_started(request, semester):
     except Semester.DoesNotExist:
         raise http.Http404
 
-    _, next_semester = _common_data()
+    next_semester = _common_data().next_semester
 
     if next_semester and next_semester == semester:
         next_semester = None
@@ -208,7 +228,7 @@ def schedule_current(request, semester: Semester, slug: str):
     return shortcuts.redirect("schedule", snapshot.semester, snapshot.student.slug)
 
 
-def _common_data():
+def _common_data() -> CommonData:
     key = "locations-next_semester"
     result = cache.get(key)
     if result:
@@ -219,16 +239,16 @@ def _common_data():
         next_semester = next(Semester.objects)
     except Semester.DoesNotExist:
         next_semester = None
-    result = locations, next_semester
+    result = CommonData(locations=locations, next_semester=next_semester)
     cache.set(key, result, settings.TIMETABLE_LOCATION_CACHE_TTL)
     return result
 
 
-def _schedule_data(s: Schedule):
+def _schedule_data(s: Schedule) -> ScheduleData:
     if s.last_modified is None:
-        return [], [], [], [], [], [], []
+        return ScheduleData([], [], {}, [], {}, {}, [])
 
-    key = f"data:schedule:v2:{s.freshness_key()}"
+    key = f"data:schedule:v3:{s.freshness_key()}"
     result = cache.get(key)
     if result:
         return result
@@ -275,14 +295,14 @@ def _schedule_data(s: Schedule):
     # TODO: get_related duplicates data, perhaps the exams dict should just
     # be {lecture_id: exam_id} and then there is a {exam_id: exam} mapping?
 
-    result = (
-        lectures,
-        courses,
-        exams,
-        lecturers,
-        groups,
-        rooms,
-        schedule_weeks,
+    result = ScheduleData(
+        lectures=lectures,
+        courses=courses,
+        exams=exams,
+        lecturers=lecturers,
+        groups=groups,
+        rooms=rooms,
+        weeks=schedule_weeks,
     )
     cache.set(key, result, timeout=settings.TIMETABLE_SCHEDULE_DATA_CACHE_TTL)
     return result
@@ -310,7 +330,9 @@ def schedule(
     bypass_cache = utils.should_bypass_cache(request)
     route = str(request.resolver_match.url_name)
     path = request.path_info
-    locations, next_semester = _common_data()
+    common_data = _common_data()
+    locations = common_data.locations
+    next_semester = common_data.next_semester
     if next_semester == snapshot.semester:
         next_semester = None
     cache_key = utils.response_cache_key(
@@ -338,6 +360,7 @@ def schedule(
     if response:
         return response
 
+    schedule_data = _schedule_data(snapshot)
     (
         lectures,
         courses,
@@ -346,7 +369,15 @@ def schedule(
         groups,
         rooms,
         schedule_weeks,
-    ) = _schedule_data(snapshot)
+    ) = (
+        schedule_data.lectures,
+        schedule_data.courses,
+        schedule_data.exams,
+        schedule_data.lecturers,
+        schedule_data.groups,
+        schedule_data.rooms,
+        schedule_data.weeks,
+    )
 
     # Check prev/next weeks:
     if week and week + 1 in schedule_weeks:

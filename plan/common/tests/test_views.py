@@ -207,7 +207,7 @@ def test_primary_cache_writes_use_configured_ttls(
         views._schedule_data(snapshot)
     view_cache_set.assert_any_call("locations-next_semester", mock.ANY, 123)
     view_cache_set.assert_any_call(
-        f"data:schedule:v2:{snapshot.freshness_key()}", mock.ANY, timeout=456
+        f"data:schedule:v3:{snapshot.freshness_key()}", mock.ANY, timeout=456
     )
     with mock.patch("plan.common.models.cache.set") as model_cache_set:
         Course.get_stats(semester)
