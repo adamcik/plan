@@ -23,7 +23,10 @@ from plan.common.models import (
     Student,
     Subscription,
 )
-from plan.common.snapshot import ScheduleSnapshot, schedule_snapshot_cache_key
+from plan.common.snapshot import (
+    ScheduleSnapshot,
+    schedule_snapshot_cache_key,
+)
 from plan.common.tests import strict_template_variables
 
 FIXTURE_LECTURE_ID = 12
@@ -150,6 +153,14 @@ def test_getting_started_post_redirects_to_current_schedule(
     )
 
 
+def test_getting_started_links_to_the_next_semester(
+    client, serialized_schedule_data, cache_isolation, frozen_time, schedule_scenario
+):
+    response = client.get(django_reverse("semester", args=[schedule_scenario.semester]))
+    assert response.status_code == 200
+    assert b'href="/2009/fall/"' in response.content
+
+
 def test_unknown_semester_name_returns_404(
     client, serialized_schedule_data, cache_isolation, frozen_time
 ):
@@ -196,7 +207,7 @@ def test_primary_cache_writes_use_configured_ttls(
         views._schedule_data(snapshot)
     view_cache_set.assert_any_call("locations-next_semester", mock.ANY, 123)
     view_cache_set.assert_any_call(
-        f"data:schedule:{snapshot.freshness_key()}", mock.ANY, timeout=456
+        f"data:schedule:v2:{snapshot.freshness_key()}", mock.ANY, timeout=456
     )
     with mock.patch("plan.common.models.cache.set") as model_cache_set:
         Course.get_stats(semester)
@@ -297,6 +308,54 @@ def test_schedule_if_none_match_returns_304(
     assert second.status_code == 304
     assert second.content == b""
     assert "Content-Language" not in second.headers
+
+
+def test_schedule_selection_changes_html_cache_but_not_ical_cache(
+    client,
+    serialized_schedule_data,
+    cache_isolation,
+    frozen_time,
+    schedule_scenario,
+    settings,
+):
+    settings.TIMETABLE_SCHEDULE_CACHE_DURATION = datetime.timedelta(seconds=60)
+    schedule_url = _schedule_reverse(schedule_scenario, "schedule")
+    ical_url = django_reverse(
+        "schedule-ical",
+        args=[schedule_scenario.semester, schedule_scenario.student.slug],
+    )
+    first_schedule = client.get(schedule_url)
+    first_ical = client.get(ical_url, HTTP_ACCEPT_ENCODING="")
+    assert first_schedule.status_code == 200
+    assert first_ical.status_code == 200
+    assert "miss" in first_schedule.headers["X-Cache"]
+    warm_schedule = client.get(schedule_url)
+    assert warm_schedule.headers["ETag"] == first_schedule.headers["ETag"]
+    assert "hit" in warm_schedule.headers["X-Cache"]
+
+    fall = Semester.objects.get(year=2009, type=Semester.FALL)
+    fall.active = datetime.date(2008, 12, 31)
+    fall.save(update_fields=["active"])
+    Semester.objects.create(
+        year=2011, type=Semester.SPRING, active=datetime.date(2009, 1, 2)
+    )
+
+    cache.delete("locations-next_semester")
+
+    second_schedule = client.get(schedule_url)
+    second_ical = client.get(ical_url, HTTP_ACCEPT_ENCODING="")
+    assert second_schedule.status_code == 200
+    assert second_schedule.headers["ETag"] != first_schedule.headers["ETag"]
+    assert "miss" in second_schedule.headers["X-Cache"]
+    assert b"/2011/spring/adamcik/" in second_schedule.content
+    stale_schedule = client.get(
+        schedule_url,
+        HTTP_IF_NONE_MATCH=first_schedule.headers["ETag"],
+    )
+    assert stale_schedule.status_code == 200
+    assert "hit" in stale_schedule.headers["X-Cache"]
+    assert second_ical.headers["ETag"] == first_ical.headers["ETag"]
+    assert "hit" in second_ical.headers["X-Cache"]
 
 
 def test_schedule_if_none_match_takes_precedence_over_if_modified_since(

@@ -2,7 +2,6 @@
 
 import datetime
 import json
-from typing import Optional
 
 from django import http, shortcuts
 from django.conf import settings
@@ -71,6 +70,7 @@ def frontpage(request):
         semester = Semester.objects.active()
     except Semester.DoesNotExist:
         raise http.Http404
+    # TODO: Add a validator when frontpage gains a server-side response cache.
     return shortcuts.redirect("semester", semester)
 
 
@@ -118,10 +118,7 @@ def getting_started(request, semester):
     except Semester.DoesNotExist:
         raise http.Http404
 
-    try:
-        next_semester = next(Semester.objects)
-    except Semester.DoesNotExist:
-        next_semester = None
+    _, next_semester = _common_data()
 
     if next_semester and next_semester == semester:
         next_semester = None
@@ -222,16 +219,16 @@ def _common_data():
         next_semester = next(Semester.objects)
     except Semester.DoesNotExist:
         next_semester = None
+    result = locations, next_semester
+    cache.set(key, result, settings.TIMETABLE_LOCATION_CACHE_TTL)
+    return result
 
-    cache.set(key, (locations, next_semester), settings.TIMETABLE_LOCATION_CACHE_TTL)
-    return locations, next_semester
 
-
-def _schedule_data(s: Schedule, next_semester: Optional[Semester] = None):
+def _schedule_data(s: Schedule):
     if s.last_modified is None:
-        return [], [], [], [], [], [], [], []
+        return [], [], [], [], [], [], []
 
-    key = f"data:schedule:{s.freshness_key()}"
+    key = f"data:schedule:v2:{s.freshness_key()}"
     result = cache.get(key)
     if result:
         return result
@@ -272,19 +269,6 @@ def _schedule_data(s: Schedule, next_semester: Optional[Semester] = None):
     if schedule_weeks:
         schedule_weeks = list(range(min(schedule_weeks), max(schedule_weeks) + 1))
 
-    if (
-        next_semester
-        and not Subscription.objects.get_subscriptions(
-            next_semester.year, next_semester.type, s.student.slug
-        ).exists()
-    ):
-        next_schedule = Schedule(
-            semester=next_semester,
-            student=s.student,
-        )
-    else:
-        next_schedule = None
-
     # NOTE: This data can be used across pages, so cache it.
 
     # TODO: Should we consider a get_related for courses as well?
@@ -299,7 +283,6 @@ def _schedule_data(s: Schedule, next_semester: Optional[Semester] = None):
         groups,
         rooms,
         schedule_weeks,
-        next_schedule,
     )
     cache.set(key, result, timeout=settings.TIMETABLE_SCHEDULE_DATA_CACHE_TTL)
     return result
@@ -327,7 +310,14 @@ def schedule(
     bypass_cache = utils.should_bypass_cache(request)
     route = str(request.resolver_match.url_name)
     path = request.path_info
-    cache_key = utils.response_cache_key(route, snapshot.freshness_key(), path)
+    locations, next_semester = _common_data()
+    if next_semester == snapshot.semester:
+        next_semester = None
+    cache_key = utils.response_cache_key(
+        route,
+        snapshot.freshness_key(next_semester),
+        path,
+    )
     headers = utils.build_validator_headers(
         cache_key=cache_key,
         last_modified=snapshot.last_modified,
@@ -348,8 +338,6 @@ def schedule(
     if response:
         return response
 
-    locations, next_semester = _common_data()
-
     (
         lectures,
         courses,
@@ -358,8 +346,7 @@ def schedule(
         groups,
         rooms,
         schedule_weeks,
-        next_schedule,
-    ) = _schedule_data(snapshot, next_semester)
+    ) = _schedule_data(snapshot)
 
     # Check prev/next weeks:
     if week and week + 1 in schedule_weeks:
@@ -433,7 +420,7 @@ def schedule(
             "locations": locations,
             "weeks": schedule_weeks,
             "schedule": snapshot,
-            "next_schedule": next_schedule,
+            "next_semester": next_semester,
         },
     )
 

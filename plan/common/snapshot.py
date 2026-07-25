@@ -39,12 +39,15 @@ class ScheduleSnapshot:
     version: int = 0
     semester_version: int = 0
 
-    def freshness_key(self) -> str:
-        return (
+    def freshness_key(self, next_semester: Semester | None = None) -> str:
+        key = (
             f"{self.semester.year}-{self.semester.type}:"
             f"{self.semester_version}-{self.student.slug}:"
             f"{self.version}-{self.last_modified or 0}"
         )
+        if next_semester is None or next_semester.active is None:
+            return key
+        return f"{key}:{next_semester.active.isoformat()}"
 
 
 @dataclass

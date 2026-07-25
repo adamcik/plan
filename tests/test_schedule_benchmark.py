@@ -15,7 +15,7 @@ from plan.common.table_render import render_lectures_table, render_schedule_tabl
 def _schedule_table_context():
     semester = Semester.objects.get(year=2026, type=Semester.SPRING)
     snapshot = get_schedule_snapshot(semester, "debug")
-    lectures, _, _, _, _, rooms, _, _ = views._schedule_data(snapshot)
+    lectures, _, _, _, _, rooms, _ = views._schedule_data(snapshot)
     table = timetable.Timetable(lectures)
     table.place_lectures(None)
     table.do_expansion()
@@ -27,7 +27,7 @@ def _schedule_table_context():
 def _lectures_context():
     semester = Semester.objects.get(year=2026, type=Semester.SPRING)
     snapshot = get_schedule_snapshot(semester, "debug")
-    lectures, _, _, _, groups, rooms, _, _ = views._schedule_data(snapshot)
+    lectures, _, _, _, groups, rooms, _ = views._schedule_data(snapshot)
     lectures.sort(
         key=lambda lecture: (
             lecture.course_code,
