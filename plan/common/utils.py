@@ -3,6 +3,7 @@
 import datetime
 import gzip
 import hashlib
+import logging
 import operator
 import random
 import re
@@ -29,6 +30,8 @@ from plan.ical.queue import enqueue_cache_set
 
 _ = translation.gettext
 QUEUED_CACHE_ALIASES = frozenset({"disk"})
+MAX_FUTURE_LAST_MODIFIED_SECONDS = 60
+logger = logging.getLogger(__name__)
 
 
 # FIXME: This needs to match the converter, or be property of the schedule?
@@ -170,6 +173,17 @@ def build_validator_headers(
 ) -> dict[str, str]:
     headers = dict(extra_headers or {})
     if last_modified is not None:
+        now = int(time.time())
+        if last_modified > now + MAX_FUTURE_LAST_MODIFIED_SECONDS:
+            logger.warning(
+                "Last-Modified is materially in the future",
+                extra={
+                    "cache_key": cache_key,
+                    "last_modified": last_modified,
+                    "now": now,
+                    "skew_seconds": last_modified - now,
+                },
+            )
         headers["Last-Modified"] = http_utils.http_date(last_modified)
     headers["ETag"] = etag_for_key(cache_key)
     return headers

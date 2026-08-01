@@ -9,6 +9,7 @@ import pytest
 from plan.common.snapshot import semester_freshness_cache_key
 from plan.common.utils import (
     ColorMap,
+    build_validator_headers,
     clear_cache,
     compact_sequence,
     lookup_cached_response,
@@ -17,6 +18,19 @@ from plan.common.utils import (
 
 
 pytestmark = pytest.mark.django_db
+
+
+def test_validator_headers_warn_about_materially_future_last_modified(
+    monkeypatch, caplog
+):
+    monkeypatch.setattr("plan.common.utils.time.time", lambda: 100)
+
+    with caplog.at_level("WARNING", logger="plan.common.utils"):
+        build_validator_headers(cache_key="test", last_modified=161)
+
+    assert caplog.messages == ["Last-Modified is materially in the future"]
+    assert caplog.records[0].cache_key == "test"
+    assert caplog.records[0].skew_seconds == 61
 
 
 def test_colormap(serialized_schedule_data, cache_isolation, frozen_time):
