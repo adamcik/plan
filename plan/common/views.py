@@ -343,7 +343,10 @@ def schedule(
     headers = utils.build_validator_headers(
         cache_key=cache_key,
         last_modified=snapshot.last_modified,
-        extra_headers={"X-Robots-Tag": "noindex, nofollow, noarchive"},
+        extra_headers={
+            "Cache-Control": "no-cache",
+            "X-Robots-Tag": "noindex, nofollow, noarchive",
+        },
     )
     if "debug_toolbar" in settings.INSTALLED_APPS:
         headers["ETag"] = f'{headers["ETag"][:-1]}-debug"'
@@ -554,7 +557,7 @@ def select_groups(request, semester: Semester, slug: str):
             groups, prefix=c.id, initial={"groups": initial_groups}
         )
 
-    return shortcuts.render(
+    response = shortcuts.render(
         request,
         "select_groups.html",
         {
@@ -565,6 +568,8 @@ def select_groups(request, semester: Semester, slug: str):
             "schedule": snapshot,
         },
     )
+    response["Cache-Control"] = "no-cache"
+    return response
 
 
 def select_course(request, semester: Semester, slug: str, add: bool = False):

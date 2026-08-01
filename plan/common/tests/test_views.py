@@ -263,6 +263,13 @@ def test_schedule_sets_etag_header(
     assert "ETag" in response.headers
 
 
+def test_schedule_requires_browser_revalidation(
+    client, serialized_schedule_data, cache_isolation, frozen_time, schedule_scenario
+):
+    response = client.get(_schedule_reverse(schedule_scenario, "schedule"))
+    assert response.headers["Cache-Control"] == "no-cache"
+
+
 def test_schedule_etag_varies_with_debug_toolbar(
     client,
     serialized_schedule_data,
@@ -826,6 +833,13 @@ def test_change_groups(
         )
         assert groups != new_groups
         groups = new_groups
+
+
+def test_change_groups_requires_browser_revalidation(
+    client, serialized_schedule_data, cache_isolation, frozen_time, schedule_scenario
+):
+    response = client.get(_schedule_reverse(schedule_scenario, "change-groups"))
+    assert response.headers["Cache-Control"] == "no-cache"
 
 
 def test_change_lectures(

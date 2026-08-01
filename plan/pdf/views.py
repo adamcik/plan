@@ -93,7 +93,10 @@ def pdf(request, semester, slug, size=None, week=None):
     headers = utils.build_validator_headers(
         cache_key=cache_key,
         last_modified=snapshot.last_modified,
-        extra_headers={"X-Robots-Tag": "noindex, nofollow"},
+        extra_headers={
+            "Cache-Control": "no-cache",
+            "X-Robots-Tag": "noindex, nofollow",
+        },
     )
     response = utils.check_not_modified(request, snapshot.last_modified, headers)
     if response:

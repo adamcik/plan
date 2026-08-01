@@ -108,6 +108,13 @@ def test_pdf_sets_etag_header(
     assert "ETag" in response.headers
 
 
+def test_pdf_requires_client_revalidation(
+    client, serialized_schedule_data, cache_isolation, frozen_time, pdf_url
+):
+    response = client.get(pdf_url("schedule-pdf"))
+    assert response.headers["Cache-Control"] == "no-cache"
+
+
 def test_pdf_if_none_match_returns_304(
     client, serialized_schedule_data, cache_isolation, frozen_time, pdf_url
 ):
