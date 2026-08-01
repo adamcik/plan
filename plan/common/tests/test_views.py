@@ -205,7 +205,7 @@ def test_primary_cache_writes_use_configured_ttls(
     with mock.patch("plan.common.views.cache.set") as view_cache_set:
         views._common_data()
         views._schedule_data(snapshot)
-    view_cache_set.assert_any_call("locations-next_semester", mock.ANY, 123)
+    view_cache_set.assert_any_call("locations-next_semester:v2", mock.ANY, 123)
     view_cache_set.assert_any_call(
         f"data:schedule:v3:{snapshot.freshness_key()}", mock.ANY, timeout=456
     )
@@ -340,7 +340,7 @@ def test_schedule_selection_changes_html_cache_but_not_ical_cache(
         year=2011, type=Semester.SPRING, active=datetime.date(2009, 1, 2)
     )
 
-    cache.delete("locations-next_semester")
+    cache.delete("locations-next_semester:v2")
 
     second_schedule = client.get(schedule_url)
     second_ical = client.get(ical_url, HTTP_ACCEPT_ENCODING="")

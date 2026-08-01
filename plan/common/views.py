@@ -229,7 +229,7 @@ def schedule_current(request, semester: Semester, slug: str):
 
 
 def _common_data() -> CommonData:
-    key = "locations-next_semester"
+    key = "locations-next_semester:v2"
     result = cache.get(key)
     if result:
         return result
