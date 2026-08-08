@@ -2,6 +2,7 @@
 
 from importlib.metadata import PackageNotFoundError, metadata, version
 import os
+from datetime import date
 from pathlib import Path
 import socket
 from enum import StrEnum
@@ -153,6 +154,12 @@ class Settings(ParsedEnvSettings):
     )
     timetable_public_host: str | None = Field(
         None, validation_alias="TIMETABLE_PUBLIC_HOST"
+    )
+    timetable_notice_cutoff: date = Field(
+        date(2025, 8, 24), validation_alias="TIMETABLE_NOTICE_CUTOFF"
+    )
+    timetable_notice_html_file: Path | None = Field(
+        None, validation_alias="TIMETABLE_NOTICE_HTML_FILE"
     )
 
     @model_validator(mode="after")

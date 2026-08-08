@@ -84,6 +84,28 @@ Notes:
 - Add `ExecStartPre=/usr/bin/install -d ... /run/plan/<instance>` so reboot-cleared `/run` is recreated before each start.
 - If you run as another uid/gid (for example dedicated `plan-prod:www-data`), set `User=`/`Group=` accordingly.
 
+### Optional front-page notice
+
+Keep the cutoff in the instance environment file and the trusted multiline HTML
+in a host-managed file. Create the file before adding its bind mount; a missing
+file bind-mount source can be created as a directory by Podman.
+
+```dotenv
+TIMETABLE_NOTICE_CUTOFF=2026-08-24
+TIMETABLE_NOTICE_HTML_FILE=/etc/plan/notice.html
+```
+
+Create an instance-specific Quadlet drop-in only when the notice file exists:
+
+```ini
+# /etc/containers/systemd/plan-ntnu.container.d/notice.conf
+[Container]
+Volume=/etc/plan/ntnu-notice.html:/etc/plan/notice.html:ro,nosuid,nodev,noexec
+```
+
+The application reads the file once while starting. Run `systemctl daemon-reload`
+and restart the instance after changing either setting or the file.
+
 ## 4) Reload + start
 
 ```bash

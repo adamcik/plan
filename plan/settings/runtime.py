@@ -3,11 +3,12 @@
 import secrets
 from datetime import date, time, timedelta
 from importlib.resources import files
+from pathlib import Path
 
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
-from django.utils.safestring import mark_safe
+from django.utils.safestring import SafeString, mark_safe
 
 from plan.settings.env import Settings, TelemetryComponent
 
@@ -322,6 +323,12 @@ eller <a href="https://apps.uka.no/opptak/?utm_source=timeplan">uka.no</a>.
 """)
 
 
+def _notice_html(file: Path | None, *, default: SafeString) -> SafeString:
+    if file is None:
+        return default
+    return mark_safe(file.read_text(encoding="utf-8"))
+
+
 env = Settings()
 
 OTEL_RESOURCE_ATTRIBUTES = env.otel_resource_attributes
@@ -346,6 +353,11 @@ TIMETABLE_COURSE_STATS_CACHE_TTL = env.timetable_course_stats_cache_ttl
 
 DEBUG = env.django_debug
 TIMETABLE_REPORT_URI = env.timetable_report_uri
+TIMETABLE_NOTICE_CUTOFF = env.timetable_notice_cutoff
+
+TIMETABLE_NOTICE_HTML = _notice_html(
+    env.timetable_notice_html_file, default=TIMETABLE_NOTICE_HTML
+)
 
 if env.django_secret_key is not None:
     SECRET_KEY = env.django_secret_key.get_secret_value()
