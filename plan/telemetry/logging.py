@@ -48,6 +48,7 @@ class StructlogFormatter(structlog.stdlib.ProcessorFormatter):
                 structlog.stdlib.add_logger_name,
                 structlog.stdlib.add_log_level,
                 structlog.processors.TimeStamper(fmt="iso", utc=True),
+                structlog.stdlib.ExtraAdder(),
             ],
             processors=[
                 add_otel_context(settings.OTEL_RESOURCE_ATTRIBUTES),
