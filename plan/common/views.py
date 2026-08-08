@@ -14,7 +14,7 @@ from django.utils.cache import patch_vary_headers
 from django.utils.http import http_date
 from opentelemetry import trace
 
-from plan.common import encoding, forms, timetable, utils
+from plan.common import context_processors, encoding, forms, timetable, utils
 from plan.common.lecture_data import LectureData
 from plan.common.middleware import CspMiddleware
 from plan.common.models import (
@@ -335,10 +335,11 @@ def schedule(
     next_semester = common_data.next_semester
     if next_semester == snapshot.semester:
         next_semester = None
+    cache_key_parts = [path]
+    if notice_cache_key := context_processors.active_notice_cache_key():
+        cache_key_parts.append(notice_cache_key)
     cache_key = utils.response_cache_key(
-        route,
-        snapshot.freshness_key(next_semester),
-        path,
+        route, snapshot.freshness_key(next_semester), *cache_key_parts
     )
     headers = utils.build_validator_headers(
         cache_key=cache_key,

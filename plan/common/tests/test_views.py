@@ -10,6 +10,7 @@ from django.core.cache import cache, caches
 from django.db.models import Value
 from django.urls import reverse as django_reverse
 from django.utils import http as http_utils
+from django.utils.safestring import mark_safe
 from django.utils import timezone
 from django.utils.datastructures import MultiValueDict
 
@@ -315,6 +316,51 @@ def test_schedule_if_none_match_returns_304(
     assert second.status_code == 304
     assert second.content == b""
     assert "Content-Language" not in second.headers
+
+
+def test_schedule_cache_varies_with_active_notice(
+    client,
+    serialized_schedule_data,
+    cache_isolation,
+    frozen_time,
+    schedule_scenario,
+    settings,
+):
+    settings.TIMETABLE_SCHEDULE_CACHE_DURATION = datetime.timedelta(seconds=60)
+    settings.TIMETABLE_NOTICE_CUTOFF = datetime.date.max
+    settings.TIMETABLE_NOTICE_HTML = mark_safe("<p>First notice</p>")
+    url = _schedule_reverse(schedule_scenario, "schedule")
+
+    first = client.get(url)
+    settings.TIMETABLE_NOTICE_HTML = mark_safe("<p>Second notice</p>")
+    second = client.get(url, HTTP_IF_NONE_MATCH=first.headers["ETag"])
+
+    assert first.headers["X-Cache"].startswith("miss")
+    assert second.status_code == 200
+    assert second.headers["X-Cache"].startswith("miss")
+    assert second.headers["ETag"] != first.headers["ETag"]
+    assert b"Second notice" in second.content
+
+
+def test_schedule_cache_ignores_inactive_notice(
+    client,
+    serialized_schedule_data,
+    cache_isolation,
+    frozen_time,
+    schedule_scenario,
+    settings,
+):
+    settings.TIMETABLE_SCHEDULE_CACHE_DURATION = datetime.timedelta(seconds=60)
+    settings.TIMETABLE_NOTICE_CUTOFF = datetime.date.min
+    settings.TIMETABLE_NOTICE_HTML = mark_safe("<p>First notice</p>")
+    url = _schedule_reverse(schedule_scenario, "schedule")
+
+    first = client.get(url)
+    settings.TIMETABLE_NOTICE_HTML = mark_safe("<p>Second notice</p>")
+    second = client.get(url, HTTP_IF_NONE_MATCH=first.headers["ETag"])
+
+    assert first.headers["X-Cache"].startswith("miss")
+    assert second.status_code == 304
 
 
 def test_schedule_selection_changes_html_cache_but_not_ical_cache(

@@ -1,5 +1,6 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+import hashlib
 import socket
 import urllib.parse
 from datetime import date
@@ -9,6 +10,18 @@ from django.conf import settings
 from django.utils import translation
 
 _ = translation.gettext_lazy
+
+
+def active_notice():
+    if date.today() <= settings.TIMETABLE_NOTICE_CUTOFF:
+        return settings.TIMETABLE_NOTICE_HTML
+    return None
+
+
+def active_notice_cache_key() -> str | None:
+    if (notice := active_notice()) is None:
+        return None
+    return hashlib.sha256(str(notice).encode()).hexdigest()
 
 
 def processor(request):
@@ -27,10 +40,6 @@ def processor(request):
     if static_domain == sitename:
         static_domain = None
 
-    notice = None
-    if date.today() <= settings.TIMETABLE_NOTICE_CUTOFF:
-        notice = settings.TIMETABLE_NOTICE_HTML
-
     return {
         "ANALYTICS_CODE": settings.TIMETABLE_ANALYTICS_CODE,
         "INSTITUTION": settings.TIMETABLE_INSTITUTION,
@@ -44,5 +53,5 @@ def processor(request):
         "SITENAME": sitename,
         "CSP_SCRIPT_NONCE": getattr(request, "_csp_script_nonce", None),
         "CSP_STYLE_NONCE": getattr(request, "_csp_style_nonce", None),
-        "NOTICE": notice,
+        "NOTICE": active_notice(),
     }
