@@ -14,6 +14,7 @@ from collections.abc import Mapping
 
 import brotli
 import typing_extensions
+from opentelemetry import trace
 
 from django import http, template
 from django.conf import settings
@@ -185,7 +186,18 @@ def build_validator_headers(
                 },
             )
         headers["Last-Modified"] = http_utils.http_date(last_modified)
-    headers["ETag"] = etag_for_key(cache_key)
+    etag = etag_for_key(cache_key)
+    headers["ETag"] = etag
+    validator_attributes: dict[str, str | int] = {
+        "http.response.header.etag": etag,
+        "http.response.etag.input": cache_key,
+    }
+    if last_modified is not None:
+        validator_attributes["http.response.header.last_modified"] = headers[
+            "Last-Modified"
+        ]
+        validator_attributes["http.response.last_modified.unix"] = last_modified
+    trace.get_current_span().set_attributes(validator_attributes)
     return headers
 
 

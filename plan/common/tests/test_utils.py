@@ -1,5 +1,7 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+from unittest import mock
+
 from django.http import HttpResponse
 
 from django.conf import settings
@@ -31,6 +33,24 @@ def test_validator_headers_warn_about_materially_future_last_modified(
     assert caplog.messages == ["Last-Modified is materially in the future"]
     assert caplog.records[0].cache_key == "test"
     assert caplog.records[0].skew_seconds == 61
+
+
+def test_validator_headers_trace_etag_input(monkeypatch):
+    span = mock.Mock()
+    monkeypatch.setattr("plan.common.utils.trace.get_current_span", lambda *_args: span)
+
+    headers = build_validator_headers(
+        cache_key="resp:schedule:version:/", last_modified=123
+    )
+
+    span.set_attributes.assert_called_once_with(
+        {
+            "http.response.header.etag": headers["ETag"],
+            "http.response.etag.input": "resp:schedule:version:/",
+            "http.response.header.last_modified": headers["Last-Modified"],
+            "http.response.last_modified.unix": 123,
+        }
+    )
 
 
 def test_colormap(serialized_schedule_data, cache_isolation, frozen_time):
