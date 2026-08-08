@@ -4,6 +4,7 @@ import datetime
 
 import pytest
 from django.core.cache import cache
+from django.core.cache import caches
 from django.core.management import call_command
 from django.utils import timezone
 
@@ -85,3 +86,51 @@ def test_backfill_includes_subscription_added_in_fallback_timestamp(
 
     row = Schedule.objects.get(semester_id=semester.id, student_id=student.id)
     assert int(row.last_modified.timestamp()) == int(newer.timestamp())
+
+
+def test_repair_future_schedule_freshness_dry_run_does_not_write(
+    serialized_schedule_data, cache_isolation, frozen_time
+):
+    semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+    student = Student.objects.get(slug="adamcik")
+    row, _ = Schedule.objects.get_or_create(
+        semester_id=semester.id,
+        student_id=student.id,
+    )
+    future = timezone.now() + datetime.timedelta(minutes=2)
+    Schedule.objects.filter(id=row.id).update(last_modified=future, version=3)
+
+    call_command(
+        "repair_future_schedule_freshness",
+    )
+
+    row.refresh_from_db()
+    assert row.last_modified == future
+    assert row.version == 3
+
+
+def test_repair_future_schedule_freshness_applies_and_clears_snapshot_cache(
+    serialized_schedule_data, cache_isolation, frozen_time
+):
+    semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+    student = Student.objects.get(slug="adamcik")
+    row, _ = Schedule.objects.get_or_create(
+        semester_id=semester.id,
+        student_id=student.id,
+    )
+    future = timezone.now() + datetime.timedelta(minutes=2)
+    Schedule.objects.filter(id=row.id).update(last_modified=future, version=3)
+    key = f"schedule:v2:{semester.year}-{semester.type}-{student.slug}"
+    caches["default"].set(key, "stale", timeout=60)
+    caches["disk"].set(key, "stale", timeout=60)
+
+    call_command(
+        "repair_future_schedule_freshness",
+        apply=True,
+    )
+
+    row.refresh_from_db()
+    assert row.last_modified <= timezone.now()
+    assert row.version == 4
+    assert caches["default"].get(key) is None
+    assert caches["disk"].get(key) is None
