@@ -176,7 +176,7 @@ def build_validator_headers(
     if last_modified is not None:
         now = int(time.time())
         if last_modified > now + MAX_FUTURE_LAST_MODIFIED_SECONDS:
-            logger.warning(
+            logger.error(
                 "Last-Modified is materially in the future",
                 extra={
                     "cache_key": cache_key,

@@ -22,12 +22,12 @@ from plan.common.utils import (
 pytestmark = pytest.mark.django_db
 
 
-def test_validator_headers_warn_about_materially_future_last_modified(
+def test_validator_headers_error_about_materially_future_last_modified(
     monkeypatch, caplog
 ):
     monkeypatch.setattr("plan.common.utils.time.time", lambda: 100)
 
-    with caplog.at_level("WARNING", logger="plan.common.utils"):
+    with caplog.at_level("ERROR", logger="plan.common.utils"):
         build_validator_headers(cache_key="test", last_modified=161)
 
     assert caplog.messages == ["Last-Modified is materially in the future"]
