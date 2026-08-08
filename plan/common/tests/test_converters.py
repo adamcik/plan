@@ -46,7 +46,7 @@ def test_next_http_last_modified_advances_nullable_semester_timestamp(
     semester = Semester.objects.get(year=2009, type=Semester.SPRING)
     semester.last_modified = None
     semester.save(update_fields=["last_modified"])
-    fixed_time = timezone.make_aware(datetime.datetime(2026, 1, 1, 12, 0, 0))
+    fixed_time = datetime.datetime(2026, 8, 1, 12, 0, 0, tzinfo=datetime.UTC)
 
     with mock.patch("plan.common.snapshot.Now", return_value=Value(fixed_time)):
         Semester.objects.filter(id=semester.id).update(
@@ -61,6 +61,7 @@ def test_next_http_last_modified_advances_nullable_semester_timestamp(
         semester.refresh_from_db()
 
     assert int(semester.last_modified.timestamp()) > first
+    assert semester.last_modified == fixed_time + datetime.timedelta(seconds=2)
 
 
 def test_bump_snapshot_warns_before_preserving_future_last_modified(

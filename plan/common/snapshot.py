@@ -7,7 +7,7 @@ from django.conf import settings
 from django.core.cache import caches
 from django.db.models import DateTimeField, ExpressionWrapper, F, Value
 from django.db.models.aggregates import Max
-from django.db.models.functions import Coalesce, Greatest, Now, TruncSecond
+from django.db.models.functions import Coalesce, Greatest, Now
 from django.utils import timezone
 
 from plan.common.cache import MultiCache
@@ -83,7 +83,7 @@ def next_http_last_modified(field: str):
     now = Now()
     previous = Coalesce(F(field), now)
     next_second = ExpressionWrapper(
-        TruncSecond(previous) + Value(timedelta(seconds=1)),
+        previous + Value(timedelta(seconds=1)),
         output_field=DateTimeField(),
     )
     return Greatest(now, next_second)
