@@ -8,6 +8,8 @@ from django.utils import timezone
 
 from plan.common.models import Schedule, Semester, Student, Subscription
 from plan.common.snapshot import (
+    ScheduleSnapshot,
+    bump_snapshot,
     delete_semester_freshness_cache,
     delete_schedule_snapshot_cache,
     get_schedule_snapshot,
@@ -59,6 +61,32 @@ def test_next_http_last_modified_advances_nullable_semester_timestamp(
         semester.refresh_from_db()
 
     assert int(semester.last_modified.timestamp()) > first
+
+
+def test_bump_snapshot_warns_before_preserving_future_last_modified(
+    serialized_schedule_data, cache_isolation, caplog
+):
+    semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+    student = Student.objects.get(slug="adamcik")
+    row, _ = Schedule.objects.get_or_create(
+        semester_id=semester.id,
+        student_id=student.id,
+    )
+    now = timezone.now()
+    future = now + datetime.timedelta(minutes=2)
+    Schedule.objects.filter(id=row.id).update(last_modified=future)
+
+    with caplog.at_level("WARNING", logger="plan.common.snapshot"):
+        bump_snapshot(ScheduleSnapshot(semester=semester, student=student))
+
+    assert caplog.messages == [
+        "Schedule freshness is materially in the future before update"
+    ]
+    record = caplog.records[0]
+    assert record.schedule_id == row.id
+    assert record.student_slug == student.slug
+    assert record.schedule_created is False
+    assert record.skew_seconds >= 119
 
 
 def test_to_python_stores_split_freshness_entries_under_stable_keys(

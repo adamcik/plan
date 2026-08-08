@@ -8,6 +8,7 @@ from django.core.cache import caches
 from django.db.models import DateTimeField, ExpressionWrapper, F, Value
 from django.db.models.aggregates import Max
 from django.db.models.functions import Coalesce, Greatest, Now, TruncSecond
+from django.utils import timezone
 
 from plan.common.cache import MultiCache
 from plan.common.models import (
@@ -18,6 +19,7 @@ from plan.common.models import (
 )
 
 logger = logging.getLogger(__name__)
+MAX_FUTURE_SCHEDULE_LAST_MODIFIED = timedelta(minutes=1)
 
 
 class ScheduleSnapshotNotFound(Exception):
@@ -198,10 +200,29 @@ def bump_snapshot(snapshot: ScheduleSnapshot) -> None:
     if snapshot.student.id is None:
         snapshot.student = Student.objects.get(slug=snapshot.student.slug)
 
-    row, _ = ScheduleModel.objects.get_or_create(
+    row, created = ScheduleModel.objects.get_or_create(
         semester_id=snapshot.semester.id,
         student_id=snapshot.student.id,
     )
+    now = timezone.now()
+    if (
+        row.last_modified
+        and row.last_modified > now + MAX_FUTURE_SCHEDULE_LAST_MODIFIED
+    ):
+        logger.warning(
+            "Schedule freshness is materially in the future before update",
+            extra={
+                "schedule_id": row.id,
+                "semester_id": row.semester_id,
+                "student_id": row.student_id,
+                "student_slug": snapshot.student.slug,
+                "schedule_created": created,
+                "version": row.version,
+                "last_modified": int(row.last_modified.timestamp()),
+                "now": int(now.timestamp()),
+                "skew_seconds": int((row.last_modified - now).total_seconds()),
+            },
+        )
 
     ScheduleModel.objects.filter(id=row.id).update(
         version=F("version") + 1,
