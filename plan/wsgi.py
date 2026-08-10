@@ -14,4 +14,17 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "plan.settings")
 
 from django.core.wsgi import get_wsgi_application
 
-application = get_wsgi_application()
+
+_django_application = get_wsgi_application()
+
+
+def application(environ, start_response):
+    """Reject paths that violate WSGI's ISO-8859-1 encoding requirement."""
+    try:
+        for key in ("PATH_INFO", "SCRIPT_NAME"):
+            environ.get(key, "").encode("iso-8859-1")
+    except UnicodeEncodeError:
+        start_response("400 Bad Request", [("Content-Length", "0")])
+        return []
+
+    return _django_application(environ, start_response)

@@ -5,6 +5,7 @@ import subprocess
 import sys
 from types import SimpleNamespace
 from unittest import mock
+from wsgiref.util import setup_testing_defaults
 
 import pytest
 from django.core.cache import caches
@@ -151,6 +152,23 @@ def test_wsgi_logs_without_telemetry():
 
     assert result.returncode == 0, result.stderr
     assert "standard log probe" in result.stderr
+
+
+@pytest.mark.parametrize("key", ["PATH_INFO", "SCRIPT_NAME"])
+def test_wsgi_rejects_paths_outside_latin_1(key):
+    from plan.wsgi import application
+
+    environ = {}
+    setup_testing_defaults(environ)
+    environ[key] = "/\ufffd\ufffd/public/.env"
+    response = []
+
+    body = application(
+        environ, lambda status, headers: response.append((status, headers))
+    )
+
+    assert response == [("400 Bad Request", [("Content-Length", "0")])]
+    assert body == []
 
 
 def test_wsgi_bootstraps_after_django_settings_are_complete():
