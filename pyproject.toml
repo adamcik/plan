@@ -67,8 +67,8 @@ source = "vcs"
 packages = ["plan"]
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "plan.settings"
 addopts = "--strict-config --strict-markers -m 'not benchmark'"
+DJANGO_SETTINGS_MODULE = "plan.settings"
 
 [tool.ruff.lint]
 extend-select = ["I"]

@@ -1,0 +1,68 @@
+{
+  "schedules": [
+    {
+      "acronym": "FORM-P",
+      "activityCode": "194_EXPH0300_1_V\u00c5R_2026_1_1_1",
+      "artermin": "2026_V\u00c5R",
+      "name": "Formidling",
+      "title": "Forelesningsparallell 1 Trondheim",
+      "disiplin": [],
+      "from": 1771924500000,
+      "staff": [],
+      "rooms": [
+        {
+          "id": "194_360_CU1-101",
+          "building": "Realfagbygget",
+          "room": "R1",
+          "url": "http://use.mazemap.com/?v=1&campuses=ntnu&sharepoitype=identifier&sharepoi=360-CU1-101"
+        }
+      ],
+      "studyProgramKeys": [
+        "MTNANO",
+        "BFY",
+        "MBIOT5",
+        "MTMART",
+        "EX.PHIL \u00c5LESUND",
+        "MTKOM",
+        "MTFYMA",
+        "MTENERG",
+        "MTMASKIN"
+      ],
+      "summary": "",
+      "to": 1771930800000,
+      "week": 9
+    },
+    {
+      "acronym": "FORM-P",
+      "activityCode": "194_EXPH0300_1_V\u00c5R_2026_1_1_1",
+      "artermin": "2026_V\u00c5R",
+      "name": "Formidling",
+      "title": "Forelesningsparallell 1 Trondheim",
+      "disiplin": [],
+      "from": 1772529300000,
+      "staff": [],
+      "rooms": [
+        {
+          "id": "194_360_CU1-101",
+          "building": "Realfagbygget",
+          "room": "R1",
+          "url": "http://use.mazemap.com/?v=1&campuses=ntnu&sharepoitype=identifier&sharepoi=360-CU1-101"
+        }
+      ],
+      "studyProgramKeys": [
+        "MTNANO",
+        "BFY",
+        "MBIOT5",
+        "MTMART",
+        "EX.PHIL \u00c5LESUND",
+        "MTKOM",
+        "MTFYMA",
+        "MTENERG",
+        "MTMASKIN"
+      ],
+      "summary": "",
+      "to": 1772535600000,
+      "week": 10
+    }
+  ]
+}
