@@ -1,8 +1,10 @@
 # This file is part of the plan timetable generator, see LICENSE for details.
 
+import json
 from copy import copy
 from dataclasses import replace
 from datetime import time
+from pathlib import Path
 
 import pytest
 from django.utils import translation
@@ -12,6 +14,8 @@ from plan.common.timetable import Timetable
 
 
 pytestmark = pytest.mark.django_db
+
+NTNU_FIXTURE_DIR = Path(__file__).parents[2] / "scrape" / "ntnu" / "fixtures"
 
 
 def test_timetable(serialized_schedule_data, cache_isolation, frozen_time):
@@ -160,3 +164,54 @@ def test_timetable_warns_about_unmappable_lectures(
     assert caplog.messages == [
         f"Skipping lecture {unmappable.lecture_id} outside timetable slots"
     ]
+
+
+def test_timetable_skips_production_deadline_outside_slots(
+    serialized_schedule_data, cache_isolation, frozen_time, caplog
+):
+    with (NTNU_FIXTURE_DIR / "bev1012_fall_2025_deadline.json").open(
+        encoding="utf-8"
+    ) as fixture_file:
+        fixture = json.load(fixture_file)
+
+    semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+    student = Student.objects.get(slug="adamcik")
+    template = Lecture.objects.get_lectures_data(semester.id, student.id)[0]
+    lectures = [
+        replace(
+            template,
+            lecture_id=row["lecture_id"],
+            day=row["day"],
+            start=time.fromisoformat(row["start"]),
+            end=time.fromisoformat(row["end"]),
+            title=row["title"],
+            summary=row["summary"],
+        )
+        for row in fixture["lectures"]
+    ]
+
+    timetable = Timetable(lectures)
+    with caplog.at_level("WARNING", logger="plan.common.timetable"):
+        timetable.place_lectures(week=None)
+
+    assert timetable.lectures == []
+    assert caplog.messages == [
+        "Skipping lecture 417547 outside timetable slots",
+        "Skipping lecture 417548 outside timetable slots",
+    ]
+
+
+def test_timetable_maps_lectures_that_overlap_slot_boundaries(
+    serialized_schedule_data, cache_isolation, frozen_time
+):
+    semester = Semester.objects.get(year=2009, type=Semester.SPRING)
+    student = Student.objects.get(slug="adamcik")
+    lecture = Lecture.objects.get_lectures_data(semester.id, student.id)[0]
+    timetable = Timetable([])
+
+    assert timetable.map_to_slot(
+        replace(lecture, start=time(7, 30), end=time(8, 30))
+    ) == (0, 0)
+    assert timetable.map_to_slot(
+        replace(lecture, start=time(19, 30), end=time(20, 30))
+    ) == (11, 11)

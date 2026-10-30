@@ -1,0 +1,48 @@
+{
+  "schedules": [
+    {
+      "acronym": "FORM",
+      "activityCode": "194_TMA4125_1_V\u00c5R_2026_1_2",
+      "artermin": "2026_V\u00c5R",
+      "name": "Formidling",
+      "title": "Forelesning",
+      "disiplin": [],
+      "from": 1768994100000,
+      "staff": [],
+      "rooms": [
+        {
+          "id": "194_321_113",
+          "building": "Sentralbygg 1",
+          "room": "S3",
+          "url": "https://use.mazemap.com/#v=1&zlevel=1&center=10.404406,63.417372&zoom=18&campusid=1&sharepoitype=poi&sharepoi=1001610446"
+        }
+      ],
+      "studyProgramKeys": ["MTINGGEO", "MTGEORT", "MTMT"],
+      "summary": "Forelesning",
+      "to": 1769000400000,
+      "week": 4
+    },
+    {
+      "acronym": "FORM",
+      "activityCode": "194_TMA4125_1_V\u00c5R_2026_1_2",
+      "artermin": "2026_V\u00c5R",
+      "name": "Formidling",
+      "title": "Forelesning",
+      "disiplin": [],
+      "from": 1769598900000,
+      "staff": [],
+      "rooms": [
+        {
+          "id": "194_321_113",
+          "building": "Sentralbygg 1",
+          "room": "S3",
+          "url": "https://use.mazemap.com/#v=1&zlevel=1&center=10.404406,63.417372&zoom=18&campusid=1&sharepoitype=poi&sharepoi=1001610446"
+        }
+      ],
+      "studyProgramKeys": ["MTINGGEO", "MTGEORT", "MTMT"],
+      "summary": "Forelesning",
+      "to": 1769605200000,
+      "week": 5
+    }
+  ]
+}

@@ -153,6 +153,13 @@ class Timetable:
             self.table[i].insert(0, [{"time": f"{start} - {end}"}])
 
     def map_to_slot(self, lecture):
+        if not settings.TIMETABLE_SLOTS:
+            return (None, None)
+
+        first_slot_start = settings.TIMETABLE_SLOTS[0][0]
+        if lecture.end <= first_slot_start or lecture.start >= SLOT_END_TIMES[-1]:
+            return (None, None)
+
         start, end = None, None
 
         for i, time in enumerate(SLOT_END_TIMES):

@@ -1,0 +1,72 @@
+{
+  "schedules": [
+    {
+      "acronym": "FORM",
+      "activityCode": "194_TDT4100_1_V\u00c5R_2026_1_1",
+      "artermin": "2026_V\u00c5R",
+      "name": "Formidling",
+      "title": "Forelesning 1",
+      "disiplin": [],
+      "from": 1774358100000,
+      "staff": [],
+      "rooms": [
+        {
+          "id": "194_360_CU1-101",
+          "building": "Realfagbygget",
+          "room": "R1",
+          "url": "http://use.mazemap.com/?v=1&campuses=ntnu&sharepoitype=identifier&sharepoi=360-CU1-101"
+        }
+      ],
+      "studyProgramKeys": [
+        "BKJ",
+        "MTDT",
+        "MBIOT5",
+        "MTKOM",
+        "MLREAL",
+        "MTI\u00d8T",
+        "BDIGSEC",
+        "BS\u00d8K",
+        "BIT",
+        "MSIV\u00d8K5",
+        "MTING"
+      ],
+      "summary": "Forelesning 1",
+      "to": 1774364400000,
+      "week": 13
+    },
+    {
+      "acronym": "FORM",
+      "activityCode": "194_TDT4100_1_V\u00c5R_2026_1_1",
+      "artermin": "2026_V\u00c5R",
+      "name": "Formidling",
+      "title": "Forelesning 1",
+      "disiplin": [],
+      "from": 1773753300000,
+      "staff": [],
+      "rooms": [
+        {
+          "id": "194_360_CU1-101",
+          "building": "Realfagbygget",
+          "room": "R1",
+          "url": "http://use.mazemap.com/?v=1&campuses=ntnu&sharepoitype=identifier&sharepoi=360-CU1-101"
+        }
+      ],
+      "studyProgramKeys": [
+        "BKJ",
+        "MTDT",
+        "MBIOT5",
+        "MTKOM",
+        "MLREAL",
+        "MTI\u00d8T",
+        "BDIGSEC",
+        "BS\u00d8K",
+        "BIT",
+        "MSIV\u00d8K5",
+        "MTING"
+      ],
+      "summary": "Forelesning 1",
+      "to": 1773759600000,
+      "week": 12
+    }
+  ]
+}

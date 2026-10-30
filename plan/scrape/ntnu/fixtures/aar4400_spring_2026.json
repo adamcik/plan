@@ -1,0 +1,92 @@
+{
+  "schedules": [
+    {
+      "acronym": "FORM",
+      "activityCode": "194_AAR4400_1_V\u00c5R_2026_2_1",
+      "artermin": "2026_V\u00c5R",
+      "name": "Formidling",
+      "title": "Formidling",
+      "disiplin": [],
+      "from": 1773137700000,
+      "staff": [],
+      "rooms": [
+        {
+          "id": "194_321_111",
+          "building": "Sentralbygg 1",
+          "room": "S4",
+          "url": "http://use.mazemap.com/?v=1&campuses=ntnu&sharepoitype=identifier&sharepoi=321-111"
+        }
+      ],
+      "studyProgramKeys": ["MAAR"],
+      "summary": "Lectures",
+      "to": 1773144000000,
+      "week": 11
+    },
+    {
+      "acronym": "FORM",
+      "activityCode": "194_AAR4400_1_V\u00c5R_2026_2_1",
+      "artermin": "2026_V\u00c5R",
+      "name": "Formidling",
+      "title": "Formidling",
+      "disiplin": [],
+      "from": 1772532900000,
+      "staff": [],
+      "rooms": [
+        {
+          "id": "194_321_111",
+          "building": "Sentralbygg 1",
+          "room": "S4",
+          "url": "http://use.mazemap.com/?v=1&campuses=ntnu&sharepoitype=identifier&sharepoi=321-111"
+        }
+      ],
+      "studyProgramKeys": ["MAAR"],
+      "summary": "Lectures",
+      "to": 1772539200000,
+      "week": 10
+    },
+    {
+      "acronym": "FORM",
+      "activityCode": "194_AAR4400_1_V\u00c5R_2026_2_1",
+      "artermin": "2026_V\u00c5R",
+      "name": "Formidling",
+      "title": "Formidling",
+      "disiplin": [],
+      "from": 1773044100000,
+      "staff": [],
+      "rooms": [
+        {
+          "id": "194_321_111",
+          "building": "Sentralbygg 1",
+          "room": "S4",
+          "url": "http://use.mazemap.com/?v=1&campuses=ntnu&sharepoitype=identifier&sharepoi=321-111"
+        }
+      ],
+      "studyProgramKeys": ["MAAR"],
+      "summary": "Lectures ",
+      "to": 1773050400000,
+      "week": 11
+    },
+    {
+      "acronym": "FORM",
+      "activityCode": "194_AAR4400_1_V\u00c5R_2026_2_1",
+      "artermin": "2026_V\u00c5R",
+      "name": "Formidling",
+      "title": "Formidling",
+      "disiplin": [],
+      "from": 1772439300000,
+      "staff": [],
+      "rooms": [
+        {
+          "id": "194_321_111",
+          "building": "Sentralbygg 1",
+          "room": "S4",
+          "url": "http://use.mazemap.com/?v=1&campuses=ntnu&sharepoitype=identifier&sharepoi=321-111"
+        }
+      ],
+      "studyProgramKeys": ["MAAR"],
+      "summary": "Lectures ",
+      "to": 1772445600000,
+      "week": 10
+    }
+  ]
+}
