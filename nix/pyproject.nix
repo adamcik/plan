@@ -4,15 +4,9 @@
 # This file centralizes build/shrink overrides for heavy C-extension packages
 # (and Django pruning) so workspace.nix can stay focused on wiring.
 #
-# We intentionally do not use `hacks.nixpkgsPrebuilt` here. The runtime Python
-# is a custom slim derivation, so prebuilt nixpkgs Python packages frequently
-# end up with a different interpreter derivation and trigger ABI mismatch
-# warnings/errors for extension modules.
-#
-# For the same reason, we avoid wheels for these packages and build from sdist
-# (configured in uv2nix module with `no-binary-package`). Building locally keeps
-# extensions linked against the exact Python/runtime dependency set used in the
-# final image and allows feature trimming via build inputs.
+# C extensions are built from sdist (configured with `no-binary-package` in
+# the uv2nix module) to use the system libraries selected below. These build
+# fixes remain independent of whether the runtime is deployed in a container.
 #
 # The local project package override (`plan`) is intentionally not defined here,
 # because it carries repository-specific version metadata injection.
