@@ -100,6 +100,22 @@ nix develop
 ./manage.py runserver
 ```
 
+## Nix runtime packages
+
+The container and native deployments share these outputs:
+
+- `nix build .#plan-web`: `bin/plan-uwsgi`, the web launcher.
+- `nix build .#plan-manage`: `bin/manage`, Django commands with scraper dependencies.
+- `nix build .#plan-static`: collected and compressed assets under `static/`.
+
+Launchers consume environment settings; they do not create users, provision a
+database, or apply migrations. See `deploy/env.example` for application settings.
+The web launcher requires `DJANGO_SETTINGS_MODULE`, `PLAN_BASE_DIR`, and the
+`PLAN_UWSGI_LISTENER`, `PLAN_UWSGI_SOCKET`, `PLAN_UWSGI_HTTP`,
+`PLAN_UWSGI_PROCESSES`, and `PLAN_UWSGI_THREADS` settings.
+Prebuilt compressed assets use `STATIC_URL=/_/static/`; use that URL when serving
+them. Serve the matching static output alongside each application revision.
+
 ## Container smoke test against helper DB
 
 Use the helper in the dev shell. It loads the Nix image, uses host networking,
