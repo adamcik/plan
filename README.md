@@ -102,6 +102,8 @@ nix develop
 
 ## Nix runtime packages
 
+For native host configuration, see [NixOS deployment](deploy/nixos.md).
+
 The container and native deployments share these outputs:
 
 - `nix build .#plan-web`: `bin/plan-uwsgi`, the web launcher.

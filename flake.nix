@@ -59,6 +59,7 @@
       imports = [
         ./nix/workspace.nix
         ./nix/runtime.nix
+        ./nix/nixos.nix
         ./nix/containers.nix
         ./nix/formatting.nix
         ./nix/devshell.nix
