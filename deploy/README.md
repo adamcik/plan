@@ -1,5 +1,8 @@
 # Podman + Quadlet Deployment (Debian trixie)
 
+For a NixOS host, see [native NixOS deployment](nixos.md). This document covers
+the existing container deployment, which remains supported.
+
 Canonical setup in this repo is:
 
 - root-managed Quadlet units in `/etc/containers/systemd/`
