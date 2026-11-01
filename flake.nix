@@ -58,6 +58,7 @@
       systems = ["x86_64-linux"];
       imports = [
         ./nix/workspace.nix
+        ./nix/runtime.nix
         ./nix/containers.nix
         ./nix/formatting.nix
         ./nix/devshell.nix
