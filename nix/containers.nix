@@ -46,6 +46,8 @@
         "--log-5xx"
         "--log-master"
         "--static-map" "$PLAN_UWSGI_STATIC_URL=$PLAN_UWSGI_STATIC_ROOT"
+        # The minimal image has no /etc/mime.types; keep this database in its closure.
+        "--mime-file" "${pkgs.mailcap}/etc/mime.types"
         "--module" "plan.wsgi"
         "--virtualenv" "${config.uv2nix.runtimeVenv}"
         "--master"
