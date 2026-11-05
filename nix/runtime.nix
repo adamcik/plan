@@ -84,6 +84,10 @@
           ;;
       esac
 
+      if [ -n "''${PLAN_UWSGI_SOCKET_OWNER:-}" ]; then
+        uwsgi_args+=("--chown-socket" "$PLAN_UWSGI_SOCKET_OWNER")
+      fi
+
       exec ${lib.getExe projectPkgs.uwsgi} "''${uwsgi_args[@]}"
     '';
     manageScript = pkgs.writeShellScriptBin "manage" ''
