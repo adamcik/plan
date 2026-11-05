@@ -78,7 +78,6 @@
   });
   environment = name: instance:
     instance.settings
-    // lib.mapAttrs' (credential: _: lib.nameValuePair "${credential}_FILE" "%d/${credential}") instance.credentials
     // {
       DJANGO_SETTINGS_MODULE = "plan.settings";
       PLAN_BASE_DIR = "/var/lib/plan-${name}";
