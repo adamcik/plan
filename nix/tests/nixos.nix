@@ -22,7 +22,7 @@
       alpha = {
         enable = true;
         processes = 1;
-        environmentFile = "/run/plan-alpha.env";
+        credentials.DJANGO_SECRET_KEY = "/run/plan-alpha.key";
         settings = {
           DJANGO_ALLOWED_HOSTS = "alpha.localhost";
           PGHOST = "/run/postgresql";
@@ -53,7 +53,7 @@
           serviceConfig.Type = "oneshot";
           script = ''
             umask 077
-            echo DJANGO_SECRET_KEY=alpha-test-secret > /run/plan-alpha.env
+            echo alpha-test-secret > /run/plan-alpha.key
             echo DJANGO_SECRET_KEY=beta-test-secret > /run/plan-beta.env
           '';
         };
@@ -130,7 +130,19 @@
         machine.fail("sudo -u nginx cat /var/cache/plan-alpha/marker")
         machine.fail("sudo -u plan-beta test -w /run/plan-alpha/uwsgi.sock")
         machine.fail("sudo -u nobody test -w /run/plan-alpha/uwsgi.sock")
-        machine.succeed("test $(stat -c %a /run/plan-alpha.env) = 600")
+        machine.succeed("test $(stat -c %a /run/plan-alpha.key) = 600")
+        machine.fail("sudo -u plan-alpha cat /run/plan-alpha.key")
+
+    with subtest("systemd credentials are private files, not secret environment values"):
+        machine.succeed("test -f /run/credentials/plan-alpha.service/DJANGO_SECRET_KEY")
+        machine.fail("sudo -u plan-beta cat /run/credentials/plan-alpha.service/DJANGO_SECRET_KEY")
+        machine.fail("sudo -u nginx cat /run/credentials/plan-alpha.service/DJANGO_SECRET_KEY")
+        machine.succeed(
+            "pid=$(systemctl show -p MainPID --value plan-alpha.service); "
+            "tr '\\0' '\\n' < /proc/$pid/environ > /tmp/alpha-environment; "
+            "grep -q '^DJANGO_SECRET_KEY_FILE=/run/credentials/' /tmp/alpha-environment"
+        )
+        machine.fail("grep -E '^DJANGO_SECRET_KEY=|alpha-test-secret' /tmp/alpha-environment")
 
     with subtest("the proxy serves matching static assets without the app"):
         machine.succeed("systemctl stop plan-alpha.service")
