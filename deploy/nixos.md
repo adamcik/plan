@@ -18,7 +18,10 @@ For a host flake with this repository available as the `plan` input:
 
   services.plan.instances.ntnu = {
     enable = true;
-    environmentFile = "/run/secrets/plan-ntnu.env";
+    credentials = {
+      DJANGO_SECRET_KEY = "/run/secrets/plan-ntnu-key";
+      PGPASSWORD = "/run/secrets/plan-ntnu-db-password";
+    };
     settings = {
       DJANGO_ALLOWED_HOSTS = "plan.example.org";
       DJANGO_CSRF_TRUSTED_ORIGINS = "https://plan.example.org";
@@ -88,24 +91,39 @@ group. A hardened systemd unit runs the web process without container tooling.
 
 ## Secrets and environment
 
-Use your host's secret manager to create a root-readable systemd environment file
-before starting the instance, for example with mode `0600`:
+Put non-secret configuration in `settings`. Use your host's secret manager to
+provision root-readable files (for example, mode `0600`) before starting units.
+Each credential file contains only its secret value, not `NAME=value` syntax.
+The supported credential names are `DJANGO_SECRET_KEY`, `PGPASSWORD`, and
+`SENTRY_DSN`. Omit `PGPASSWORD` when using PostgreSQL peer authentication.
 
-```dotenv
-DJANGO_SECRET_KEY=replace-with-a-secret
-PGPASSWORD=replace-with-the-database-password
-```
+The module uses systemd `LoadCredential=` for the web, migration, check, and refresh
+units. systemd gives each unit private credential files; Plan reads them directly
+using the corresponding `*_FILE` setting. Secret values are not exported into the
+process environment. The instance user need not read the original source files.
 
-Do not put secrets in `settings` or use a Nix path literal for `environmentFile`;
-that would expose them through the Nix store. The secret file is loaded by systemd,
-so the application user does not need permission to read it. Arrange ordering on
-your secret-management unit if necessary. Missing files cause startup to fail.
+Do not put secrets in `settings` or use Nix path literals for credential sources:
+that copies secrets into the Nix store. Supply absolute runtime path strings, as
+in the example. Arrange ordering on your secret-management unit if necessary.
+Missing credentials fail startup; unreadable, empty, or non-UTF-8 secret files fail
+application initialization. Only trailing CR/LF characters are removed.
 
-Values in the file override `settings`. Do not copy the container environment file
-unchanged: omit `PLAN_BASE_DIR`, `PLAN_CACHE_DIR`, `PLAN_STATIC_ROOT`,
-`PLAN_UWSGI_*`, `DJANGO_SETTINGS_MODULE`, and `STATIC_URL`. The module manages these
-for the native deployment. Precompressed assets require `STATIC_URL=/_/static/`.
-Other application settings are documented in `env.example`.
+Restart the web unit after rotating credentials. Management units load current
+credentials on each invocation. `LoadCredential=` handles delivery to processes,
+not provisioning, encryption at rest, or automatic rotation.
+
+### Environment-file compatibility
+
+An optional `environmentFile = "/run/secrets/plan-ntnu.env"` retains the existing
+environment-based configuration. Values in that file override `settings`. Do not
+set both a direct secret and its `*_FILE` setting: Plan rejects ambiguous sources.
+Prefer credentials for new native deployments; never export credential contents
+through a launcher.
+
+Do not copy the container environment file unchanged: omit `PLAN_BASE_DIR`,
+`PLAN_CACHE_DIR`, `PLAN_STATIC_ROOT`, `PLAN_UWSGI_*`, `DJANGO_SETTINGS_MODULE`, and
+`STATIC_URL`. The module manages these for the native deployment. Precompressed
+assets require `STATIC_URL=/_/static/`. Other settings are documented in `env.example`.
 
 ## Database operations
 
@@ -162,6 +180,7 @@ nix build .#image --no-link
 It verifies explicit migrations, database-backed requests through Unix sockets,
 socket permissions, absence of application TCP listeners, private state/cache
 directories (including isolation from the proxy), refresh-job opt-in, restart
-persistence, and proxy-served static assets while the application is stopped.
+persistence, credential delivery without secret environment values, legacy
+environment-file compatibility, and proxy-served static assets while the application is stopped.
 The VM test needs a Linux builder with KVM.
 No production infrastructure or external application endpoints are involved.
