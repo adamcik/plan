@@ -20,15 +20,10 @@ class TelemetryComponent(StrEnum):
 
 
 class Settings(ParsedEnvSettings):
-    model_config = SettingsConfigDict(
-        env_prefix="", extra="ignore", hide_input_in_errors=True
-    )
+    model_config = SettingsConfigDict(env_prefix="", extra="ignore")
 
     django_secret_key: SecretStr | None = Field(
         None, validation_alias="DJANGO_SECRET_KEY"
-    )
-    django_secret_key_file: Path | None = Field(
-        None, validation_alias="DJANGO_SECRET_KEY_FILE"
     )
     django_debug: bool = Field(False, validation_alias="DJANGO_DEBUG")
     django_debug_toolbar: bool = Field(False, validation_alias="DJANGO_DEBUG_TOOLBAR")
@@ -98,7 +93,6 @@ class Settings(ParsedEnvSettings):
     pgdatabase: str = Field("plan", validation_alias="PGDATABASE")
     pguser: str = Field("plan", validation_alias="PGUSER")
     pgpassword: SecretStr = Field(SecretStr(""), validation_alias="PGPASSWORD")
-    pgpassword_file: Path | None = Field(None, validation_alias="PGPASSWORD_FILE")
     pghost: str = Field("127.0.0.1", validation_alias="PGHOST")
     pgport: str = Field("5432", validation_alias="PGPORT")
     pgconn_max_age: int = Field(0, validation_alias="PGCONN_MAX_AGE")
@@ -107,7 +101,6 @@ class Settings(ParsedEnvSettings):
     memcached_key_prefix: str = Field("plan", validation_alias="MEMCACHED_KEY_PREFIX")
 
     sentry_dsn: SecretStr | None = Field(None, validation_alias="SENTRY_DSN")
-    sentry_dsn_file: Path | None = Field(None, validation_alias="SENTRY_DSN_FILE")
     sentry_environment: str = Field("production", validation_alias="SENTRY_ENVIRONMENT")
     sentry_release: str = Field(
         default_factory=lambda: f"plan@{_current_package_version()}",
@@ -168,26 +161,6 @@ class Settings(ParsedEnvSettings):
     timetable_notice_html_file: Path | None = Field(
         None, validation_alias="TIMETABLE_NOTICE_HTML_FILE"
     )
-
-    @model_validator(mode="after")
-    def load_secret_files(self) -> "Settings":
-        """Read credentials once at startup without exporting them to child processes."""
-        for field in ("django_secret_key", "pgpassword", "sentry_dsn"):
-            path = getattr(self, f"{field}_file")
-            if path is None:
-                continue
-            if field in self.model_fields_set:
-                raise ValueError(
-                    f"Set either {field.upper()} or {field.upper()}_FILE, not both"
-                )
-            try:
-                value = path.read_text(encoding="utf-8").rstrip("\r\n")
-            except (OSError, UnicodeError):
-                raise ValueError(f"Cannot read {field.upper()}_FILE as UTF-8") from None
-            if not value:
-                raise ValueError(f"{field.upper()}_FILE must not be empty")
-            setattr(self, field, SecretStr(value))
-        return self
 
     @model_validator(mode="after")
     def default_telemetry_resource_labels(self) -> "Settings":
