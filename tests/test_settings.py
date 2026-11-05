@@ -2,7 +2,7 @@ from datetime import date
 import os
 
 from django.utils.safestring import mark_safe
-from pydantic import ValidationError
+from pydantic_settings import SettingsError
 import pytest
 
 from plan.settings.env import Settings
@@ -13,13 +13,13 @@ from plan.settings.runtime import _notice_html
 def test_secret_file_is_read_without_exporting_value(field, monkeypatch, tmp_path):
     variable = field.upper()
     monkeypatch.delenv(variable, raising=False)
-    secret_file = tmp_path / "credential"
+    secret_file = tmp_path / variable
     secret_file.write_bytes(b" secret-with-spaces \r\n")
-    monkeypatch.setenv(f"{variable}_FILE", str(secret_file))
+    monkeypatch.setenv("CREDENTIALS_DIRECTORY", str(tmp_path))
 
     settings = Settings()
 
-    assert getattr(settings, field).get_secret_value() == " secret-with-spaces "
+    assert getattr(settings, field).get_secret_value() == "secret-with-spaces"
     assert variable not in os.environ
     assert "secret-with-spaces" not in repr(settings)
 
@@ -27,38 +27,58 @@ def test_secret_file_is_read_without_exporting_value(field, monkeypatch, tmp_pat
 @pytest.mark.parametrize("field", ["django_secret_key", "pgpassword", "sentry_dsn"])
 def test_direct_secret_remains_supported(field, monkeypatch):
     variable = field.upper()
-    monkeypatch.delenv(f"{variable}_FILE", raising=False)
+    monkeypatch.delenv("CREDENTIALS_DIRECTORY", raising=False)
     monkeypatch.setenv(variable, "direct-secret")
 
     assert getattr(Settings(), field).get_secret_value() == "direct-secret"
 
 
 @pytest.mark.parametrize("field", ["django_secret_key", "pgpassword", "sentry_dsn"])
-def test_secret_file_and_direct_value_are_mutually_exclusive(
+def test_environment_value_takes_precedence_over_credential(
     field, monkeypatch, tmp_path
 ):
     variable = field.upper()
-    monkeypatch.setenv(variable, "never-print-this-secret")
-    monkeypatch.setenv(f"{variable}_FILE", str(tmp_path / "unused"))
+    (tmp_path / variable).write_text("credential-secret", encoding="utf-8")
+    monkeypatch.setenv(variable, "environment-secret")
+    monkeypatch.setenv("CREDENTIALS_DIRECTORY", str(tmp_path))
 
-    with pytest.raises(ValidationError, match="not both") as error:
-        Settings()
-
-    assert "never-print-this-secret" not in str(error.value)
+    assert getattr(Settings(), field).get_secret_value() == "environment-secret"
 
 
-@pytest.mark.parametrize("contents", [None, b"", b"\n", b"\xffprivate-content"])
-def test_invalid_secret_file_fails_closed(contents, monkeypatch, tmp_path):
+def test_invalid_credential_fails_without_exposing_contents(monkeypatch, tmp_path):
     monkeypatch.delenv("DJANGO_SECRET_KEY", raising=False)
-    secret_file = tmp_path / "credential"
-    if contents is not None:
-        secret_file.write_bytes(contents)
-    monkeypatch.setenv("DJANGO_SECRET_KEY_FILE", str(secret_file))
+    (tmp_path / "DJANGO_SECRET_KEY").write_bytes(b"\xffprivate-content")
+    monkeypatch.setenv("CREDENTIALS_DIRECTORY", str(tmp_path))
 
-    with pytest.raises(ValidationError, match="DJANGO_SECRET_KEY_FILE") as error:
+    with pytest.raises(SettingsError) as error:
         Settings()
 
     assert "private-content" not in str(error.value)
+
+
+def test_credentials_preserve_parsed_environment_settings(monkeypatch, tmp_path):
+    monkeypatch.delenv("DJANGO_SECRET_KEY", raising=False)
+    (tmp_path / "DJANGO_SECRET_KEY").write_text("credential-secret", encoding="utf-8")
+    monkeypatch.setenv("CREDENTIALS_DIRECTORY", str(tmp_path))
+    monkeypatch.setenv("DJANGO_ALLOWED_HOSTS", "alpha.example,beta.example")
+
+    settings = Settings()
+
+    assert settings.django_secret_key.get_secret_value() == "credential-secret"
+    assert settings.django_allowed_hosts == ["alpha.example", "beta.example"]
+
+
+def test_explicit_secrets_directory_remains_supported_without_systemd(
+    monkeypatch, tmp_path
+):
+    monkeypatch.delenv("CREDENTIALS_DIRECTORY", raising=False)
+    monkeypatch.delenv("DJANGO_SECRET_KEY", raising=False)
+    (tmp_path / "DJANGO_SECRET_KEY").write_text("credential-secret", encoding="utf-8")
+
+    assert (
+        Settings(_secrets_dir=tmp_path).django_secret_key.get_secret_value()
+        == "credential-secret"
+    )
 
 
 def test_notice_settings_parse_environment_overrides(monkeypatch, tmp_path):

@@ -140,9 +140,9 @@
         machine.succeed(
             "pid=$(systemctl show -p MainPID --value plan-alpha.service); "
             "tr '\\0' '\\n' < /proc/$pid/environ > /tmp/alpha-environment; "
-            "grep -q '^DJANGO_SECRET_KEY_FILE=/run/credentials/' /tmp/alpha-environment"
+            "grep -q '^CREDENTIALS_DIRECTORY=/run/credentials/' /tmp/alpha-environment"
         )
-        machine.fail("grep -E '^DJANGO_SECRET_KEY=|alpha-test-secret' /tmp/alpha-environment")
+        machine.fail("grep -E '^DJANGO_SECRET_KEY(_FILE)?=|alpha-test-secret' /tmp/alpha-environment")
 
     with subtest("the proxy serves matching static assets without the app"):
         machine.succeed("systemctl stop plan-alpha.service")

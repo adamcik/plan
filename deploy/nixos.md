@@ -98,15 +98,21 @@ The supported credential names are `DJANGO_SECRET_KEY`, `PGPASSWORD`, and
 `SENTRY_DSN`. Omit `PGPASSWORD` when using PostgreSQL peer authentication.
 
 The module uses systemd `LoadCredential=` for the web, migration, check, and refresh
-units. systemd gives each unit private credential files; Plan reads them directly
-using the corresponding `*_FILE` setting. Secret values are not exported into the
+units. systemd gives each unit private credential files and sets
+`CREDENTIALS_DIRECTORY`. Plan points Pydantic's native secrets source at that
+directory; credential names match the existing settings aliases. No `*_FILE`
+variables or launcher exports are needed. Secret values are not exported into the
 process environment. The instance user need not read the original source files.
 
 Do not put secrets in `settings` or use Nix path literals for credential sources:
 that copies secrets into the Nix store. Supply absolute runtime path strings, as
 in the example. Arrange ordering on your secret-management unit if necessary.
-Missing credentials fail startup; unreadable, empty, or non-UTF-8 secret files fail
-application initialization. Only trailing CR/LF characters are removed.
+Missing configured credential sources fail systemd startup. Pydantic strips leading
+and trailing whitespace from secret files and reports read/decoding errors during
+settings initialization. It retains ordinary source precedence: explicit constructor
+values, environment, dotenv, secret files, then defaults. Do not set a secret in the
+environment if you intend its credential file to be authoritative. Credential files
+must contain non-empty values suitable for the corresponding setting.
 
 Restart the web unit after rotating credentials. Management units load current
 credentials on each invocation. `LoadCredential=` handles delivery to processes,
@@ -115,10 +121,9 @@ not provisioning, encryption at rest, or automatic rotation.
 ### Environment-file compatibility
 
 An optional `environmentFile = "/run/secrets/plan-ntnu.env"` retains the existing
-environment-based configuration. Values in that file override `settings`. Do not
-set both a direct secret and its `*_FILE` setting: Plan rejects ambiguous sources.
-Prefer credentials for new native deployments; never export credential contents
-through a launcher.
+environment-based configuration. Values in that file override `settings` and
+credential files, following Pydantic's standard precedence. Prefer credentials for
+new native deployments; never export credential contents through a launcher.
 
 Do not copy the container environment file unchanged: omit `PLAN_BASE_DIR`,
 `PLAN_CACHE_DIR`, `PLAN_STATIC_ROOT`, `PLAN_UWSGI_*`, `DJANGO_SETTINGS_MODULE`, and
