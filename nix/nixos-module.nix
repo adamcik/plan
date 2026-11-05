@@ -28,22 +28,11 @@
         description = "Group granting proxy access to the socket, without access to private instance state.";
       };
       environmentFile = mkOption {
-        type = types.nullOr types.str;
-        default = null;
+        type = types.str;
         description = ''
-          Optional legacy systemd environment file. Prefer credentials for secrets
-          and settings for non-secret values. Use a runtime path, not a Nix path literal.
-        '';
-      };
-      credentials = mkOption {
-        type = types.attrsOf types.str;
-        default = {};
-        example = {DJANGO_SECRET_KEY = "/run/secrets/plan-secret-key";};
-        description = ''
-          Runtime secret-file paths keyed by DJANGO_SECRET_KEY, PGPASSWORD, or
-          SENTRY_DSN. systemd loads private copies for every web and management
-          unit; Plan reads them directly without exporting secret values.
-          Provision files through the host's secret manager, outside the Nix store.
+          Absolute path to a systemd environment file containing runtime secrets,
+          including DJANGO_SECRET_KEY. The file must exist before starting units;
+          use a runtime path, not a Nix path literal that copies secrets to the store.
         '';
       };
       settings = mkOption {
@@ -78,7 +67,6 @@
   });
   environment = name: instance:
     instance.settings
-    // lib.mapAttrs' (credential: _: lib.nameValuePair "${credential}_FILE" "%d/${credential}") instance.credentials
     // {
       DJANGO_SETTINGS_MODULE = "plan.settings";
       PLAN_BASE_DIR = "/var/lib/plan-${name}";
@@ -98,8 +86,7 @@
   serviceConfig = name: instance: {
     User = "plan-${name}";
     Group = "plan-${name}";
-    EnvironmentFile = lib.optional (instance.environmentFile != null) instance.environmentFile;
-    LoadCredential = lib.mapAttrsToList (credential: path: "${credential}:${path}") instance.credentials;
+    EnvironmentFile = instance.environmentFile;
     WorkingDirectory = "/var/lib/plan-${name}";
     StateDirectory = "plan-${name}";
     CacheDirectory = "plan-${name}";
@@ -166,16 +153,8 @@ in {
         assertion =
           builtins.match "[a-z][a-z0-9-]{0,20}" name
           != null
-          && (instance.environmentFile == null || lib.hasPrefix "/" instance.environmentFile);
-        message = "Plan instance names must match [a-z][a-z0-9-]{0,20} so user and proxy-group names fit within 32 characters, and environmentFile must be absolute when set.";
-      })
-      instances
-      ++ lib.mapAttrsToList (_: instance: {
-        assertion = lib.all (credential:
-          lib.elem credential ["DJANGO_SECRET_KEY" "PGPASSWORD" "SENTRY_DSN"]
-          && lib.hasPrefix "/" instance.credentials.${credential}
-          && !(lib.hasPrefix builtins.storeDir instance.credentials.${credential})) (lib.attrNames instance.credentials);
-        message = "Plan credentials must be DJANGO_SECRET_KEY, PGPASSWORD, or SENTRY_DSN with absolute runtime paths outside the Nix store.";
+          && lib.hasPrefix "/" instance.environmentFile;
+        message = "Plan instance names must match [a-z][a-z0-9-]{0,20} so user and proxy-group names fit within 32 characters, and environmentFile must be absolute.";
       })
       instances;
 
