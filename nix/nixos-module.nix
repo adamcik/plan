@@ -12,12 +12,20 @@
     ["plan-${name}" "plan-${name}-migrate" "plan-${name}-check"]
     ++ lib.optional (instance.refreshCalendar != null) "plan-${name}-refresh")
   instances);
-  instanceType = types.submodule {
+  instanceType = types.submodule ({name, ...}: {
     options = {
       enable = lib.mkEnableOption "this Plan instance";
-      port = mkOption {
-        type = types.port;
-        description = "Loopback HTTP port; each enabled instance needs a distinct port.";
+      socketPath = mkOption {
+        type = types.str;
+        readOnly = true;
+        default = "/run/plan-${name}/uwsgi.sock";
+        description = "Unix socket speaking the uWSGI protocol, not HTTP.";
+      };
+      socketGroup = mkOption {
+        type = types.str;
+        readOnly = true;
+        default = "plan-${name}-proxy";
+        description = "Group granting proxy access to the socket, without access to private instance state.";
       };
       environmentFile = mkOption {
         type = types.str;
@@ -56,7 +64,7 @@
         '';
       };
     };
-  };
+  });
   environment = name: instance:
     instance.settings
     // {
@@ -66,9 +74,10 @@
       PLAN_STATIC_ROOT = cfg.staticRoot;
       STATIC_URL = "/_/static/";
       PLAN_UWSGI_STATIC_ROOT = cfg.staticRoot;
-      PLAN_UWSGI_LISTENER = "http";
-      PLAN_UWSGI_HTTP = "127.0.0.1:${toString instance.port}";
-      PLAN_UWSGI_SOCKET = "/run/plan-${name}/uwsgi.sock";
+      PLAN_UWSGI_LISTENER = "socket";
+      PLAN_UWSGI_HTTP = "unused";
+      PLAN_UWSGI_SOCKET = instance.socketPath;
+      PLAN_UWSGI_SOCKET_OWNER = "plan-${name}:${instance.socketGroup}";
       PLAN_UWSGI_PROCESSES = toString instance.processes;
       PLAN_UWSGI_THREADS = toString instance.threads;
       SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
@@ -129,23 +138,23 @@ in {
     assertions =
       [
         {
-          assertion = let
-            ports = map (instance: instance.port) (lib.attrValues instances);
-          in
-            lib.length ports == lib.length (lib.unique ports);
-          message = "Enabled Plan instances must use distinct HTTP ports.";
-        }
-        {
           assertion = lib.length unitNames == lib.length (lib.unique unitNames);
           message = "Plan instance names must not collide with another instance's migrate, check, or refresh units.";
+        }
+        {
+          assertion = let
+            groups = lib.concatLists (lib.mapAttrsToList (name: instance: ["plan-${name}" instance.socketGroup]) instances);
+          in
+            lib.length groups == lib.length (lib.unique groups);
+          message = "Plan instance names must not collide with another instance's proxy group.";
         }
       ]
       ++ lib.mapAttrsToList (name: instance: {
         assertion =
-          builtins.match "[a-z][a-z0-9-]{0,25}" name
+          builtins.match "[a-z][a-z0-9-]{0,20}" name
           != null
           && lib.hasPrefix "/" instance.environmentFile;
-        message = "Plan instance names must match [a-z][a-z0-9-]{0,25} and environmentFile must be absolute.";
+        message = "Plan instance names must match [a-z][a-z0-9-]{0,20} so user and proxy-group names fit within 32 characters, and environmentFile must be absolute.";
       })
       instances;
 
@@ -155,7 +164,11 @@ in {
         group = "plan-${name}";
       })
     instances;
-    users.groups = lib.mapAttrs' (name: _: lib.nameValuePair "plan-${name}" {}) instances;
+    users.groups = lib.mkMerge (lib.mapAttrsToList (name: instance: {
+        "plan-${name}" = {};
+        "${instance.socketGroup}" = {};
+      })
+      instances);
 
     systemd.services = lib.mkMerge (lib.mapAttrsToList (name: instance:
       {
@@ -169,6 +182,9 @@ in {
             serviceConfig name instance
             // {
               ExecStart = "${packages.plan-web}/bin/plan-uwsgi";
+              RuntimeDirectory = "plan-${name}";
+              RuntimeDirectoryMode = "0755";
+              SupplementaryGroups = [instance.socketGroup];
               Restart = "on-failure";
               RestartSec = 5;
               TimeoutStopSec = 45;

@@ -13,12 +13,11 @@ The container deployment remains supported during migration.
 For a host flake with this repository available as the `plan` input:
 
 ```nix
-{config, inputs, ...}: {
+{config, inputs, pkgs, ...}: {
   imports = [inputs.plan.nixosModules.default];
 
   services.plan.instances.ntnu = {
     enable = true;
-    port = 8081;
     environmentFile = "/run/secrets/plan-ntnu.env";
     settings = {
       DJANGO_ALLOWED_HOSTS = "plan.example.org";
@@ -36,16 +35,52 @@ For a host flake with this repository available as the `plan` input:
     virtualHosts."plan.example.org" = {
       # Configure TLS here using your host's existing certificate policy.
       locations."/_/static/".alias = "${config.services.plan.staticRoot}/";
-      locations."/".proxyPass = "http://127.0.0.1:8081";
+      locations."/".extraConfig = ''
+        include ${pkgs.nginx}/conf/uwsgi_params;
+        uwsgi_pass unix:${config.services.plan.instances.ntnu.socketPath};
+      '';
     };
   };
+  users.users.nginx.extraGroups = [config.services.plan.instances.ntnu.socketGroup];
 }
 ```
 
-Every enabled instance needs a distinct loopback HTTP port. The proxy uses ordinary
-HTTP; no uWSGI proxy plugin or access to application-owned directories is needed.
+Each instance listens on `/run/plan-<name>/uwsgi.sock`, using the **uWSGI protocol,
+not HTTP**. No application TCP port is opened. Add the proxy user to that instance's
+`socketGroup` and restart the proxy after changing group membership. The socket is
+mode `0660`; its dedicated proxy group does not grant access to private state or
+cache directories. systemd recreates the runtime directory after reboot.
 Configure forwarded HTTPS headers to match your proxy and Django settings before
 exposing the instance publicly. The example deliberately does not configure TLS.
+
+### Caddy alternative
+
+For an existing Caddy setup, grant the same per-instance socket access:
+
+```nix
+users.users.caddy.extraGroups = [config.services.plan.instances.ntnu.socketGroup];
+```
+
+Use the module's `staticRoot` and instance `socketPath` in the virtual host:
+
+```nix
+services.caddy.virtualHosts."plan.example.org".extraConfig = ''
+  handle_path /_/static/* {
+    root * ${config.services.plan.staticRoot}
+    file_server
+  }
+  handle {
+    reverse_proxy unix/${config.services.plan.instances.ntnu.socketPath} {
+      transport uwsgi
+    }
+  }
+'';
+```
+
+The `uwsgi` transport requires a Caddy build with that plugin; stock Caddy does not
+include it. This uses the same protocol as the existing container deployment.
+
+### Instance isolation
 
 The instance creates the `plan-ntnu` user and group, `/var/lib/plan-ntnu`, and
 `/var/cache/plan-ntnu`. Both directories are private to that instance's user and
@@ -124,7 +159,9 @@ nix build .#image --no-link
 ```
 
 `checks.x86_64-linux.nixos-service` boots a VM with PostgreSQL and two instances.
-It verifies explicit migrations, database-backed HTTP requests, private state/cache
-directories, refresh-job opt-in, restart persistence, and proxy-served static assets
-while the application is stopped. The VM test needs a Linux builder with KVM.
+It verifies explicit migrations, database-backed requests through Unix sockets,
+socket permissions, absence of application TCP listeners, private state/cache
+directories (including isolation from the proxy), refresh-job opt-in, restart
+persistence, and proxy-served static assets while the application is stopped.
+The VM test needs a Linux builder with KVM.
 No production infrastructure or external application endpoints are involved.
