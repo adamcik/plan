@@ -179,7 +179,11 @@ class Settings(ParsedEnvSettings):
         file_secret_settings: PydanticBaseSettingsSource,
     ) -> tuple[PydanticBaseSettingsSource, ...]:
         """Use systemd credentials with normal Pydantic source precedence and aliases."""
-        if directory := os.environ.get("CREDENTIALS_DIRECTORY"):
+        if (
+            isinstance(file_secret_settings, SecretsSettingsSource)
+            and file_secret_settings.secrets_dir is None
+            and (directory := os.environ.get("CREDENTIALS_DIRECTORY"))
+        ):
             file_secret_settings = SecretsSettingsSource(
                 settings_cls, secrets_dir=directory
             )

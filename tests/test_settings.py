@@ -81,6 +81,35 @@ def test_explicit_secrets_directory_remains_supported_without_systemd(
     )
 
 
+def test_explicit_secrets_directory_overrides_systemd(monkeypatch, tmp_path):
+    monkeypatch.delenv("DJANGO_SECRET_KEY", raising=False)
+    systemd = tmp_path / "systemd"
+    explicit = tmp_path / "explicit"
+    systemd.mkdir()
+    explicit.mkdir()
+    (systemd / "DJANGO_SECRET_KEY").write_text("systemd-secret", encoding="utf-8")
+    (explicit / "DJANGO_SECRET_KEY").write_text("explicit-secret", encoding="utf-8")
+    monkeypatch.setenv("CREDENTIALS_DIRECTORY", str(systemd))
+
+    assert (
+        Settings(_secrets_dir=explicit).django_secret_key.get_secret_value()
+        == "explicit-secret"
+    )
+
+
+def test_configured_secrets_directory_overrides_systemd(monkeypatch, tmp_path):
+    monkeypatch.delenv("DJANGO_SECRET_KEY", raising=False)
+    (tmp_path / "DJANGO_SECRET_KEY").write_text("configured-secret", encoding="utf-8")
+    monkeypatch.setenv("CREDENTIALS_DIRECTORY", str(tmp_path / "unused"))
+
+    class ConfiguredSettings(Settings):
+        model_config = {**Settings.model_config, "secrets_dir": tmp_path}
+
+    assert (
+        ConfiguredSettings().django_secret_key.get_secret_value() == "configured-secret"
+    )
+
+
 def test_notice_settings_parse_environment_overrides(monkeypatch, tmp_path):
     notice_file = tmp_path / "notice.html"
     notice_file.write_text("<p>Notice</p>", encoding="utf-8")

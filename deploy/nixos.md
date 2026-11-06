@@ -103,6 +103,9 @@ units. systemd gives each unit private credential files and sets
 directory; credential names match the existing settings aliases. No `*_FILE`
 variables or launcher exports are needed. Secret values are not exported into the
 process environment. The instance user need not read the original source files.
+An explicit Pydantic `_secrets_dir` or configured `secrets_dir` takes precedence
+over automatic systemd discovery, so tests and other deployment environments can
+select a different directory.
 
 Do not put secrets in `settings` or use Nix path literals for credential sources:
 that copies secrets into the Nix store. Supply absolute runtime path strings, as
