@@ -11,6 +11,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  actions-lock:
+    name: Actions dependency lockfile
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify Actions dependency lockfile
+        uses: adamcik/nix-tooling/actions/verify-actions-lock@a73c6c63e01f95b7f7e88e95fc5a20a8339c66d4
+
   ci:
     name: CI
     permissions:
