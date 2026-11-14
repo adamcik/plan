@@ -102,6 +102,17 @@ nix develop
 
 ## Nix runtime packages
 
+The runtime, container, and development environments use Determinate Systems'
+[weekly nixpkgs feed](https://determinate.systems/blog/nixpkgs-cooldown/), with a
+seven-day cooldown. Weekly publication can delay security fixes further. This policy
+does not constrain Python dependencies or other flake inputs.
+
+For an urgent fix, temporarily point `inputs.nixpkgs.url` at a reviewed upstream
+revision or `github:NixOS/nixpkgs/nixos-unstable`, run `nix flake update nixpkgs`, and
+validate through a PR. Restore the weekly feed once it includes the fix. Keep
+consumers on Plan's own package set for cache compatibility; publish the refreshed
+runtime and container outputs before updating their Plan pin.
+
 For native host configuration, see [NixOS deployment](deploy/nixos.md).
 
 The container and native deployments share these outputs:
