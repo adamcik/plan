@@ -8,7 +8,7 @@ dependencies = [
   "django-compressor~=4.6.0",
   "django-debug-toolbar~=5.2.0",
   "lxml==6.1.0",
-  "opentelemetry-api==1.45.1",
+  "opentelemetry-api==1.45.2",
   "opentelemetry-exporter-otlp-proto-http==1.45.1",
   "opentelemetry-instrumentation-django==0.66b1",
   "opentelemetry-instrumentation-logging==0.66b1",
