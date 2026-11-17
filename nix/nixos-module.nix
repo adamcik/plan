@@ -80,7 +80,7 @@
         description = ''
           Opt-in recurring full-semester captures, keyed by a short job name.
           Artifacts remain in the instance's private state directory under
-          snapshots/JOB. No import or retention deletion is performed. Remove
+          snapshots/JOB. Import requires automaticImport; no retention deletion is performed. Remove
           jobs for past semesters; enabling a job activates its timer.
         '';
         type = types.attrsOf (types.submodule {
@@ -107,6 +107,16 @@
               type = types.listOf types.str;
               default = [];
               description = "Source-owned jobs to capture; empty uses the adapter's default plan, including its discovery dependencies.";
+            };
+            automaticImport = mkOption {
+              type = types.bool;
+              default = false;
+              description = "Decode and import only this job's complete capture. Creates a missing semester; apply database migrations explicitly before enabling.";
+            };
+            maxDeletePercent = mkOption {
+              type = types.ints.between 0 100;
+              default = 10;
+              description = "Maximum automatic deletion percentage per entity type; exceeding it rolls back the entire import.";
             };
           };
         });
@@ -274,7 +284,8 @@ in {
           (commandUnit name instance "Archive Plan semester ${job} for ${name}"
             ("run_semester_snapshot --year ${toString snapshot.year} --type ${snapshot.type}"
               + " --directory /var/lib/plan-${name}/snapshots/${job} --capture ${snapshot.capture}"
-              + lib.concatMapStrings (selected: " --job ${selected}") snapshot.jobs))
+              + lib.concatMapStrings (selected: " --job ${selected}") snapshot.jobs
+              + lib.optionalString snapshot.automaticImport " --import-snapshot --create --max-delete-percent ${toString snapshot.maxDeletePercent}"))
           {serviceConfig.TimeoutStartSec = "6h";}))
       instance.snapshots)
     instances);
