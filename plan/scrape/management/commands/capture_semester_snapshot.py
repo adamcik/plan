@@ -13,7 +13,7 @@ class Command(BaseCommand):
     help = "Archive opaque source responses without importing or normalizing them."
 
     def add_arguments(self, parser):
-        parser.add_argument("capture")
+        parser.add_argument("capture", nargs="?", default="ntnu")
         parser.add_argument("--year", required=True, type=int)
         parser.add_argument("--type", required=True, choices=("spring", "fall"))
         parser.add_argument(

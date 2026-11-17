@@ -249,6 +249,10 @@ TIMETABLE_SCRAPERS_PREFETCH = [
     "plan.scrape.ntnu.akademika.Syllabus",
 ]
 
+# Capture adapters own discovery and job dependencies. Payload interpretation
+# belongs to independently registered offline decoders, not the archive runner.
+TIMETABLE_CAPTURES = {"ntnu": "plan.scrape.ntnu.capture.Capture"}
+
 # Google analytics code to use.
 TIMETABLE_ANALYTICS_CODE = None
 
