@@ -26,6 +26,15 @@ class Command(BaseCommand):
         )
         parser.add_argument("--job", action="append", dest="jobs")
         parser.add_argument("--max-per-second", type=float, default=5)
+        parser.add_argument(
+            "--import-snapshot",
+            action="store_true",
+            help="Normalize and import only this run's complete source snapshot.",
+        )
+        parser.add_argument(
+            "--create", action="store_true", help="Allow import to create the semester."
+        )
+        parser.add_argument("--max-delete-percent", type=float, default=10)
 
     def handle(self, *args, **options):
         try:
@@ -57,3 +66,13 @@ class Command(BaseCommand):
             stderr=self.stderr,
         )
         self.stdout.write(f"Archived snapshot: {run / capture.MANIFEST_NAME}")
+
+        if options["import_snapshot"]:
+            call_command(
+                "import_semester_snapshot",
+                run,
+                create=options["create"],
+                max_delete_percent=options["max_delete_percent"],
+                stdout=self.stdout,
+                stderr=self.stderr,
+            )

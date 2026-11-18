@@ -15,6 +15,16 @@
             jobs = ["courses"];
           };
         };
+        services.plan.instances.beta = {
+          enable = true;
+          snapshots.fall = {
+            year = 2030;
+            type = "fall";
+            automaticImport = true;
+            maxDeletePercent = 5;
+            calendar = "daily";
+          };
+        };
         system.stateVersion = "26.05";
       }
     ];
@@ -30,6 +40,9 @@ in
   assert pkgs.lib.hasInfix "/var/lib/plan-alpha/snapshots/spring" unit.serviceConfig.ExecStart;
   assert timer.timerConfig.OnCalendar == "weekly";
   assert timer.timerConfig.Persistent;
+  assert !(pkgs.lib.hasInfix "--import-snapshot" unit.serviceConfig.ExecStart);
+  assert pkgs.lib.hasInfix "--import-snapshot --create --max-delete-percent 5" cfg.systemd.services.plan-beta-snapshot-fall.serviceConfig.ExecStart;
+  assert cfg.systemd.timers.plan-beta-snapshot-fall.timerConfig.OnCalendar == "daily";
   assert pkgs.lib.hasInfix "--capture ntnu --job courses" unit.serviceConfig.ExecStart;
   assert !(builtins.hasAttr "plan-alpha-refresh" cfg.systemd.timers);
     pkgs.runCommand "plan-snapshot-units" {} ''touch "$out"''

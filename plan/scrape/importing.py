@@ -12,11 +12,13 @@ import math
 
 from django.conf import settings
 from django.db import transaction
+from django.utils import timezone
 from django.utils.module_loading import import_string
 
 from plan.common.models import Course, Semester
 from plan.scrape import base, records, snapshot, utils
 from plan.scrape.management.commands.scrape import Command as ScrapeCommand
+from plan.scrape.models import SnapshotImportRun
 
 
 class SnapshotImportError(ValueError):
@@ -25,6 +27,43 @@ class SnapshotImportError(ValueError):
 
 def import_snapshot(
     artifact: snapshot.Snapshot, *, create=False, dry_run=False, max_delete_percent=10
+):
+    manifest = artifact.manifest
+    content_hash = artifact.content_digest
+    run = None
+    if not dry_run:
+        run = SnapshotImportRun.objects.create(
+            snapshot_id=manifest.snapshot_id,
+            content_sha256=content_hash,
+            source_name=manifest.source.name,
+            source_format_version=manifest.source.format_version,
+            year=manifest.semester.year,
+            type=manifest.semester.type,
+            schema_version=manifest.schema_version,
+            captured_at=manifest.started_at,
+            status="running",
+        )
+
+    try:
+        return _import_snapshot(
+            artifact,
+            create=create,
+            dry_run=dry_run,
+            max_delete_percent=max_delete_percent,
+            run=run,
+            content_hash=content_hash,
+        )
+    except Exception as error:
+        if run is not None:
+            SnapshotImportRun.objects.filter(pk=run.pk).update(
+                status="failed", error=str(error), finished_at=timezone.now()
+            )
+
+        raise
+
+
+def _import_snapshot(
+    artifact, *, create, dry_run, max_delete_percent, run, content_hash
 ):
     if not math.isfinite(max_delete_percent) or not 0 <= max_delete_percent <= 100:
         raise SnapshotImportError("max-delete-percent must be between 0 and 100")
@@ -47,6 +86,24 @@ def import_snapshot(
             raise SnapshotImportError(
                 "semester does not exist; pass --create"
             ) from error
+
+        previous = SnapshotImportRun.objects.filter(**semester_data, status="succeeded")
+        latest = previous.order_by("-captured_at").first()
+        if latest is not None and artifact.manifest.started_at < latest.captured_at:
+            raise SnapshotImportError(
+                "snapshot is older than the latest successful import"
+            )
+
+        if (
+            SnapshotImportRun.objects.filter(
+                snapshot_id=artifact.manifest.snapshot_id, status="succeeded"
+            )
+            .exclude(content_sha256=content_hash)
+            .exists()
+        ):
+            raise SnapshotImportError(
+                "snapshot ID was already imported with different content"
+            )
 
         importers = [_Courses(semester, sections["courses"], max_delete_percent)]
         changed = importers[0].run()
@@ -76,10 +133,17 @@ def import_snapshot(
         if dry_run:
             transaction.set_rollback(True)
 
-        return {
+        stats = {
             type(importer).__name__.lstrip("_").lower(): dict(importer.stats)
             for importer in importers
         }
+
+        if run is not None:
+            SnapshotImportRun.objects.filter(pk=run.pk).update(
+                status="succeeded", diff=stats, finished_at=timezone.now()
+            )
+
+        return stats
 
 
 def _decode_snapshot(artifact: snapshot.Snapshot) -> records.SemesterRecords:

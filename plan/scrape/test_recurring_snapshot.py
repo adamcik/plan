@@ -1,6 +1,7 @@
 import fcntl
 
 import pytest
+
 from django.core.management import CommandError, call_command
 
 from plan.scrape import capture
