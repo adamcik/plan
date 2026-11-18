@@ -26,7 +26,14 @@ def source_schedule():
     )
 
 
-def install_source(monkeypatch, *, malformed=False, fail_schedule=False):
+def install_source(
+    monkeypatch,
+    *,
+    malformed=False,
+    fail_schedule=False,
+    course_rows=None,
+    schedule=None,
+):
     calls = []
 
     def send(request, **kwargs):
@@ -36,12 +43,16 @@ def install_source(monkeypatch, *, malformed=False, fail_schedule=False):
         response.headers["Content-Type"] = "application/json"
         if "emnesok" in request.url:
             body = parse_qs(request.body)
-            data = {"courses": [source_course()] if body["pageNo"] == ["1"] else []}
+            data = {
+                "courses": ([source_course()] if course_rows is None else course_rows)
+                if body["pageNo"] == ["1"]
+                else []
+            }
         else:
             data = (
                 {"unparsed": [True, None, {"future": "field"}]}
                 if malformed
-                else source_schedule()
+                else (source_schedule() if schedule is None else schedule)
             )
             if fail_schedule:
                 response.status_code = 503

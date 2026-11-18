@@ -18,9 +18,12 @@ TZ = zoneinfo.ZoneInfo(settings.TIME_ZONE)
 
 
 class Courses(base.CourseScraper):
+    def source_courses(self):
+        return fetch_courses(self.semester)
+
     def scrape(self):
         merged = {}
-        for course in fetch_courses(self.semester):
+        for course in self.source_courses():
             code = course["courseCode"]
             version = course["courseVersion"]
             key = (code, version)
@@ -84,6 +87,9 @@ class Exams(base.ExamScraper):
 
 
 class Lectures(base.LectureScraper):
+    def fetch_course(self, course):
+        return fetch_course_lectures(self.semester, course)
+
     def scrape(self):
         if self.semester.type == Semester.FALL:
             ntnu_semeter = "%d_HØST" % self.semester.year
@@ -92,7 +98,7 @@ class Lectures(base.LectureScraper):
 
         with progress(self.course_queryset(), unit="courses") as courses:
             for c in courses:
-                course = fetch_course_lectures(self.semester, c)
+                course = self.fetch_course(c)
                 groupings = {}
                 for activity in course.get("schedules", []):
                     self.source_data = {"course": c.code, "activity": activity}
