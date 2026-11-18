@@ -10,7 +10,8 @@
   instances = lib.filterAttrs (_: instance: instance.enable) cfg.instances;
   unitNames = lib.concatLists (lib.mapAttrsToList (name: instance:
     ["plan-${name}" "plan-${name}-migrate" "plan-${name}-check"]
-    ++ lib.optional (instance.refreshCalendar != null) "plan-${name}-refresh")
+    ++ lib.optional (instance.refreshCalendar != null) "plan-${name}-refresh"
+    ++ lib.mapAttrsToList (snapshot: _: "plan-${name}-snapshot-${snapshot}") instance.snapshots)
   instances);
   instanceType = types.submodule ({name, ...}: {
     options = {
@@ -73,6 +74,42 @@
           Optional systemd calendar for refreshing materialized views. Enable on
           only one instance per database, including when prod and preprod share it.
         '';
+      };
+      snapshots = mkOption {
+        default = {};
+        description = ''
+          Opt-in recurring full-semester captures, keyed by a short job name.
+          Artifacts remain in the instance's private state directory under
+          snapshots/JOB. No import or retention deletion is performed. Remove
+          jobs for past semesters; enabling a job activates its timer.
+        '';
+        type = types.attrsOf (types.submodule {
+          options = {
+            year = mkOption {
+              type = types.ints.between 1900 9999;
+              description = "Academic semester year.";
+            };
+            type = mkOption {
+              type = types.enum ["spring" "fall"];
+              description = "Academic semester type.";
+            };
+            calendar = mkOption {
+              type = types.str;
+              default = "weekly";
+              description = "systemd OnCalendar expression; cadence is independent of acquisition.";
+            };
+            capture = mkOption {
+              type = types.str;
+              default = "ntnu";
+              description = "Source adapter registered in TIMETABLE_CAPTURES.";
+            };
+            jobs = mkOption {
+              type = types.listOf types.str;
+              default = [];
+              description = "Source-owned jobs to capture; empty uses the adapter's default plan, including its discovery dependencies.";
+            };
+          };
+        });
       };
     };
   });
@@ -176,7 +213,17 @@ in {
           && !(lib.hasPrefix builtins.storeDir instance.credentials.${credential})) (lib.attrNames instance.credentials);
         message = "Plan credentials must be DJANGO_SECRET_KEY, PGPASSWORD, or SENTRY_DSN with absolute runtime paths outside the Nix store.";
       })
-      instances;
+      instances
+      ++ lib.concatLists (lib.mapAttrsToList (_: instance:
+        lib.mapAttrsToList (job: snapshot: {
+          assertion =
+            builtins.match "[a-z][a-z0-9-]{0,30}" job
+            != null
+            && lib.all (value: builtins.match "[a-zA-Z0-9_.-]+" value != null) ([snapshot.capture] ++ snapshot.jobs);
+          message = "Plan snapshot names must match [a-z][a-z0-9-]{0,30}; capture and job labels must contain only letters, digits, _, ., or -.";
+        })
+        instance.snapshots)
+      instances);
 
     users.users = lib.mapAttrs' (name: _:
       lib.nameValuePair "plan-${name}" {
@@ -221,17 +268,39 @@ in {
         "plan-${name}-refresh" =
           commandUnit name instance
           "Refresh Plan materialized views for ${name}" "refresh_materialized_views";
-      })
+      }
+      // lib.mapAttrs' (job: snapshot:
+        lib.nameValuePair "plan-${name}-snapshot-${job}" (lib.recursiveUpdate
+          (commandUnit name instance "Archive Plan semester ${job} for ${name}"
+            ("run_semester_snapshot --year ${toString snapshot.year} --type ${snapshot.type}"
+              + " --directory /var/lib/plan-${name}/snapshots/${job} --capture ${snapshot.capture}"
+              + lib.concatMapStrings (selected: " --job ${selected}") snapshot.jobs))
+          {serviceConfig.TimeoutStartSec = "6h";}))
+      instance.snapshots)
     instances);
 
-    systemd.timers = lib.mapAttrs' (name: instance:
-      lib.nameValuePair "plan-${name}-refresh" {
-        wantedBy = ["timers.target"];
-        timerConfig = {
-          OnCalendar = instance.refreshCalendar;
-          Persistent = true;
-          RandomizedDelaySec = "3m";
-        };
-      }) (lib.filterAttrs (_: instance: instance.refreshCalendar != null) instances);
+    systemd.timers =
+      (lib.mapAttrs' (name: instance:
+        lib.nameValuePair "plan-${name}-refresh" {
+          wantedBy = ["timers.target"];
+          timerConfig = {
+            OnCalendar = instance.refreshCalendar;
+            Persistent = true;
+            RandomizedDelaySec = "3m";
+          };
+        }) (lib.filterAttrs (_: instance: instance.refreshCalendar != null) instances))
+      // lib.foldlAttrs (timers: name: instance:
+        timers
+        // lib.mapAttrs' (job: snapshot:
+          lib.nameValuePair "plan-${name}-snapshot-${job}" {
+            wantedBy = ["timers.target"];
+            timerConfig = {
+              OnCalendar = snapshot.calendar;
+              Persistent = true;
+              RandomizedDelaySec = "15m";
+            };
+          })
+        instance.snapshots) {}
+      instances;
   };
 }
